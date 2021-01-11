@@ -114,17 +114,7 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
     }
 
     plane->clear();
-
-    ClipperLib::Clipper cl_plane;
-    ClipperLib::Path poly_path; // path from polygon contour
     auto poly = plane->polygon->remove_arcs();
-    poly_path.reserve(poly.vertices.size());
-    for (const auto &pt : poly.vertices) {
-        poly_path.emplace_back(ClipperLib::IntPoint(pt.position.x, pt.position.y));
-    }
-
-    auto poly_bb = get_path_bb(poly_path);
-
     ClipperLib::JoinType jt = ClipperLib::jtRound;
     switch (plane->settings.style) {
     case PlaneSettings::Style::ROUND:
@@ -139,140 +129,135 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
         jt = ClipperLib::jtMiter;
         break;
     }
+    const double twiddle = .005_mm;
+    ClipperLib::Paths out; // the plane before expanding by min_width
+
 
     {
-        ClipperLib::ClipperOffset ofs_poly; // shrink polygon contour by min_width/2
-        ofs_poly.ArcTolerance = 2e3;
-        ofs_poly.AddPath(poly_path, jt, ClipperLib::etClosedPolygon);
-        ClipperLib::Paths poly_shrink;
-        ofs_poly.Execute(poly_shrink, -((double)plane->settings.min_width) / 2);
-        cl_plane.AddPaths(poly_shrink, ClipperLib::ptSubject, true);
-    }
+        ClipperLib::Clipper cl_plane;
+        ClipperLib::Path poly_path; // path from polygon contour
 
-    double twiddle = .005_mm;
+        poly_path.reserve(poly.vertices.size());
+        for (const auto &pt : poly.vertices) {
+            poly_path.emplace_back(ClipperLib::IntPoint(pt.position.x, pt.position.y));
+        }
 
-    for (const auto &patch : ca->get_patches()) { // add cutouts
-        if ((patch.first.layer == poly.layer && patch.first.net != plane->net->uuid && patch.second.size()
-             && patch.first.type != PatchType::OTHER && patch.first.type != PatchType::TEXT)
-            || ((patch.first.layer == 10000)
-                && ((patch.first.type == PatchType::HOLE_NPTH)
-                    || ((patch.first.type == PatchType::HOLE_PTH) && (patch.first.net != plane->net->uuid))))) {
+        auto poly_bb = get_path_bb(poly_path);
 
-            int64_t clearance = 0;
-            if (patch.first.type != PatchType::HOLE_NPTH) { // copper
-                auto patch_net = patch.first.net ? &block->nets.at(patch.first.net) : nullptr;
-                auto rule_clearance = rules.get_clearance_copper(plane->net, patch_net, poly.layer);
-                if (rule_clearance) {
-                    clearance = rule_clearance->get_clearance(patch.first.type, PatchType::PLANE);
+
+        {
+            ClipperLib::ClipperOffset ofs_poly; // shrink polygon contour by min_width/2
+            ofs_poly.ArcTolerance = 2e3;
+            ofs_poly.AddPath(poly_path, jt, ClipperLib::etClosedPolygon);
+            ClipperLib::Paths poly_shrink;
+            ofs_poly.Execute(poly_shrink, -((double)plane->settings.min_width) / 2);
+            cl_plane.AddPaths(poly_shrink, ClipperLib::ptSubject, true);
+        }
+
+
+        for (const auto &patch : ca->get_patches()) { // add cutouts
+            if ((patch.first.layer == poly.layer && patch.first.net != plane->net->uuid && patch.second.size()
+                 && patch.first.type != PatchType::OTHER && patch.first.type != PatchType::TEXT)
+                || ((patch.first.layer == 10000)
+                    && ((patch.first.type == PatchType::HOLE_NPTH)
+                        || ((patch.first.type == PatchType::HOLE_PTH) && (patch.first.net != plane->net->uuid))))) {
+
+                int64_t clearance = 0;
+                if (patch.first.type != PatchType::HOLE_NPTH) { // copper
+                    auto patch_net = patch.first.net ? &block->nets.at(patch.first.net) : nullptr;
+                    auto rule_clearance = rules.get_clearance_copper(plane->net, patch_net, poly.layer);
+                    if (rule_clearance) {
+                        clearance = rule_clearance->get_clearance(patch.first.type, PatchType::PLANE);
+                    }
+                }
+                else { // npth
+                    clearance = rules.get_clearance_copper_other(plane->net, poly.layer)
+                                        ->get_clearance(PatchType::PLANE, PatchType::HOLE_NPTH);
+                }
+
+                auto patch_bb = get_paths_bb(patch.second);
+                patch_bb.first.X -= 2 * clearance;
+                patch_bb.first.Y -= 2 * clearance;
+                patch_bb.second.X += 2 * clearance;
+                patch_bb.second.Y += 2 * clearance;
+
+                if (bb_isect(poly_bb, patch_bb)) {
+                    ClipperLib::ClipperOffset ofs; // expand patch for cutout
+                    ofs.ArcTolerance = 2e3;
+                    ofs.AddPaths(patch.second, jt, ClipperLib::etClosedPolygon);
+                    ClipperLib::Paths patch_exp;
+
+                    double expand = clearance + plane->settings.min_width / 2 + twiddle;
+
+                    ofs.Execute(patch_exp, expand);
+                    cl_plane.AddPaths(patch_exp, ClipperLib::ptClip, true);
                 }
             }
-            else { // npth
-                clearance = rules.get_clearance_copper_other(plane->net, poly.layer)
-                                    ->get_clearance(PatchType::PLANE, PatchType::HOLE_NPTH);
-            }
+        }
 
-            auto patch_bb = get_paths_bb(patch.second);
-            patch_bb.first.X -= 2 * clearance;
-            patch_bb.first.Y -= 2 * clearance;
-            patch_bb.second.X += 2 * clearance;
-            patch_bb.second.Y += 2 * clearance;
+        auto text_clearance = rules.get_clearance_copper_other(plane->net, poly.layer)
+                                      ->get_clearance(PatchType::PLANE, PatchType::TEXT);
 
-            if (bb_isect(poly_bb, patch_bb)) {
-                ClipperLib::ClipperOffset ofs; // expand patch for cutout
-                ofs.ArcTolerance = 2e3;
-                ofs.AddPaths(patch.second, jt, ClipperLib::etClosedPolygon);
-                ClipperLib::Paths patch_exp;
+        // add text cutouts
+        if (plane->settings.text_style == PlaneSettings::TextStyle::EXPAND) {
+            for (const auto &patch : ca->get_patches()) { // add cutouts
+                if (patch.first.layer == poly.layer && patch.first.type == PatchType::TEXT) {
+                    ClipperLib::ClipperOffset ofs; // expand patch for cutout
+                    ofs.ArcTolerance = 2e3;
+                    ofs.AddPaths(patch.second, jt, ClipperLib::etClosedPolygon);
+                    ClipperLib::Paths patch_exp;
 
-                double expand = clearance + plane->settings.min_width / 2 + twiddle;
+                    double expand = text_clearance + plane->settings.min_width / 2 + twiddle;
 
-                ofs.Execute(patch_exp, expand);
-                cl_plane.AddPaths(patch_exp, ClipperLib::ptClip, true);
+                    ofs.Execute(patch_exp, expand);
+                    cl_plane.AddPaths(patch_exp, ClipperLib::ptClip, true);
+                }
             }
         }
-    }
+        else {
+            for (const auto &ext : ca->get_text_extents()) { // add cutouts
+                Coordi a, b;
+                int text_layer;
+                std::tie(text_layer, a, b) = ext;
+                if (text_layer == poly.layer) {
+                    ClipperLib::Path p = {{a.x, a.y}, {b.x, a.y}, {b.x, b.y}, {a.x, b.y}};
 
-    auto text_clearance =
-            rules.get_clearance_copper_other(plane->net, poly.layer)->get_clearance(PatchType::PLANE, PatchType::TEXT);
+                    ClipperLib::ClipperOffset ofs; // expand patch for cutout
+                    ofs.ArcTolerance = 2e3;
+                    ofs.AddPath(p, jt, ClipperLib::etClosedPolygon);
+                    ClipperLib::Paths patch_exp;
 
-    // add text cutouts
-    if (plane->settings.text_style == PlaneSettings::TextStyle::EXPAND) {
-        for (const auto &patch : ca->get_patches()) { // add cutouts
-            if (patch.first.layer == poly.layer && patch.first.type == PatchType::TEXT) {
-                ClipperLib::ClipperOffset ofs; // expand patch for cutout
-                ofs.ArcTolerance = 2e3;
-                ofs.AddPaths(patch.second, jt, ClipperLib::etClosedPolygon);
-                ClipperLib::Paths patch_exp;
+                    double expand = text_clearance + plane->settings.min_width / 2 + twiddle;
 
-                double expand = text_clearance + plane->settings.min_width / 2 + twiddle;
-
-                ofs.Execute(patch_exp, expand);
-                cl_plane.AddPaths(patch_exp, ClipperLib::ptClip, true);
+                    ofs.Execute(patch_exp, expand);
+                    cl_plane.AddPaths(patch_exp, ClipperLib::ptClip, true);
+                }
             }
         }
-    }
-    else {
-        for (const auto &ext : ca->get_text_extents()) { // add cutouts
-            Coordi a, b;
-            int text_layer;
-            std::tie(text_layer, a, b) = ext;
-            if (text_layer == poly.layer) {
-                ClipperLib::Path p = {{a.x, a.y}, {b.x, a.y}, {b.x, b.y}, {a.x, b.y}};
 
-                ClipperLib::ClipperOffset ofs; // expand patch for cutout
-                ofs.ArcTolerance = 2e3;
-                ofs.AddPath(p, jt, ClipperLib::etClosedPolygon);
-                ClipperLib::Paths patch_exp;
+        // add keepouts
+        {
+            auto keepout_rules = rules.get_rules_sorted<RuleClearanceCopperKeepout>(RuleID::CLEARANCE_COPPER_KEEPOUT);
+            auto keepout_contours = get_keepout_contours();
+            for (const auto &it_keepout : keepout_contours) {
+                const auto keepout = it_keepout.keepout;
+                if ((plane->polygon->layer == keepout->polygon->layer || keepout->all_cu_layers)
+                    && keepout->patch_types_cu.count(PatchType::PLANE)) {
+                    auto clearance = rules.get_clearance_copper_keepout(plane->net, &it_keepout)
+                                             ->get_clearance(PatchType::PLANE);
 
-                double expand = text_clearance + plane->settings.min_width / 2 + twiddle;
-
-                ofs.Execute(patch_exp, expand);
-                cl_plane.AddPaths(patch_exp, ClipperLib::ptClip, true);
+                    ClipperLib::Paths keepout_contour_expanded;
+                    ClipperLib::ClipperOffset ofs;
+                    ofs.ArcTolerance = 10e3;
+                    ofs.AddPath(it_keepout.contour, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
+                    ofs.Execute(keepout_contour_expanded, clearance + plane->settings.min_width / 2 + .05_mm);
+                    cl_plane.AddPaths(keepout_contour_expanded, ClipperLib::ptClip, true);
+                }
             }
         }
+
+        cl_plane.Execute(ClipperLib::ctDifference, out, ClipperLib::pftNonZero); // do cutouts
     }
-
-    // add keepouts
-    {
-        auto keepout_rules = rules.get_rules_sorted<RuleClearanceCopperKeepout>(RuleID::CLEARANCE_COPPER_KEEPOUT);
-        auto keepout_contours = get_keepout_contours();
-        for (const auto &it_keepout : keepout_contours) {
-            const auto keepout = it_keepout.keepout;
-            if ((plane->polygon->layer == keepout->polygon->layer || keepout->all_cu_layers)
-                && keepout->patch_types_cu.count(PatchType::PLANE)) {
-                auto clearance =
-                        rules.get_clearance_copper_keepout(plane->net, &it_keepout)->get_clearance(PatchType::PLANE);
-
-                ClipperLib::Paths keepout_contour_expanded;
-                ClipperLib::ClipperOffset ofs;
-                ofs.ArcTolerance = 10e3;
-                ofs.AddPath(it_keepout.contour, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
-                ofs.Execute(keepout_contour_expanded, clearance + plane->settings.min_width / 2 + .05_mm);
-                cl_plane.AddPaths(keepout_contour_expanded, ClipperLib::ptClip, true);
-            }
-        }
-    }
-
-    // add thermal coutouts
-    if (plane->settings.connect_style == PlaneSettings::ConnectStyle::THERMAL) {
-        for (const auto &patch : ca->get_patches()) {
-            if ((patch.first.layer == poly.layer && patch.first.net == plane->net->uuid
-                 && (patch.first.type == PatchType::PAD || patch.first.type == PatchType::PAD_TH))) {
-                ClipperLib::ClipperOffset ofs; // expand patch for cutout
-                ofs.ArcTolerance = 2e3;
-                ClipperLib::Paths pad;
-                ClipperLib::SimplifyPolygons(patch.second, pad, ClipperLib::pftNonZero);
-
-                ofs.AddPaths(pad, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
-                ClipperLib::Paths patch_exp;
-
-                double expand = plane->settings.thermal_gap_width + plane->settings.min_width / 2;
-                ofs.Execute(patch_exp, expand);
-                cl_plane.AddPaths(patch_exp, ClipperLib::ptClip, true);
-            }
-        }
-    }
-    ClipperLib::Paths out;                                                   // the plane before expanding by min_width
-    cl_plane.Execute(ClipperLib::ctDifference, out, ClipperLib::pftNonZero); // do cutouts
 
     // do board outline clearance
     CanvasPatch::PatchKey outline_key;
@@ -313,35 +298,81 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
 
     ClipperLib::Paths final;
     ClipperLib::PolyTree tree;
-    ClipperLib::ClipperOffset ofs;
-    ofs.ArcTolerance = 2e3;
-    ofs.AddPaths(out, jt, ClipperLib::etClosedPolygon);
+
 
     if (plane->settings.connect_style == PlaneSettings::ConnectStyle::THERMAL) {
-        ClipperLib::Paths expanded;
-        ofs.Execute(expanded, plane->settings.min_width / 2);
+        ClipperLib::Paths plane_with_thermal_cutouts;
+        {
+            ClipperLib::Clipper cl_plane;
+            cl_plane.AddPaths(out, ClipperLib::ptSubject, true);
 
-        ClipperLib::Clipper cl_add_spokes;
-        cl_add_spokes.AddPaths(expanded, ClipperLib::ptSubject, true);
-        auto thermals = get_thermals(plane, ca_pads);
-        for (const auto &spoke : thermals) {
-            ClipperLib::Paths test_result;
-            ClipperLib::Clipper cl_test;
-            cl_test.AddPaths(expanded, ClipperLib::ptSubject, true);
-            cl_test.AddPath(spoke, ClipperLib::ptClip, true);
-            cl_test.Execute(ClipperLib::ctIntersection, test_result, ClipperLib::pftNonZero);
+            // add thermal coutouts
+            for (const auto &patch : ca->get_patches()) {
+                if ((patch.first.layer == poly.layer && patch.first.net == plane->net->uuid
+                     && (patch.first.type == PatchType::PAD || patch.first.type == PatchType::PAD_TH))) {
+                    ClipperLib::ClipperOffset ofs; // expand patch for cutout
+                    ofs.ArcTolerance = 2e3;
+                    ClipperLib::Paths pad;
+                    ClipperLib::SimplifyPolygons(patch.second, pad, ClipperLib::pftNonZero);
 
-            if (test_result.size())
-                cl_add_spokes.AddPath(spoke, ClipperLib::ptClip, true);
+                    ofs.AddPaths(pad, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
+                    ClipperLib::Paths patch_exp;
+
+                    double expand = plane->settings.thermal_gap_width + plane->settings.min_width / 2;
+                    ofs.Execute(patch_exp, expand);
+
+
+                    cl_plane.AddPaths(patch_exp, ClipperLib::ptClip, true);
+                }
+            }
+
+            cl_plane.Execute(ClipperLib::ctDifference, plane_with_thermal_cutouts, ClipperLib::pftNonZero);
         }
-        if (plane->settings.fill_style == PlaneSettings::FillStyle::SOLID) {
-            cl_add_spokes.Execute(ClipperLib::ctUnion, tree, ClipperLib::pftNonZero);
+
+        ClipperLib::Paths before_expand;
+        {
+            ClipperLib::Clipper cl_add_spokes;
+            cl_add_spokes.AddPaths(plane_with_thermal_cutouts, ClipperLib::ptSubject, true);
+            auto thermals = get_thermals(plane, ca_pads);
+            for (const auto &spoke : thermals) {
+                ClipperLib::Paths test_result;
+                ClipperLib::Clipper cl_test;
+                cl_test.AddPaths(plane_with_thermal_cutouts, ClipperLib::ptSubject, true);
+                cl_test.AddPath(spoke, ClipperLib::ptClip, true);
+                cl_test.Execute(ClipperLib::ctIntersection, test_result, ClipperLib::pftNonZero);
+
+                if (test_result.size())
+                    cl_add_spokes.AddPath(spoke, ClipperLib::ptClip, true);
+            }
+
+            cl_add_spokes.Execute(ClipperLib::ctUnion, before_expand, ClipperLib::pftNonZero);
         }
-        else {
-            cl_add_spokes.Execute(ClipperLib::ctUnion, final, ClipperLib::pftNonZero);
+
+        ClipperLib::Paths clipped_to_orig;
+        {
+            ClipperLib::Clipper cl_clip_to_orig;
+            cl_clip_to_orig.AddPaths(before_expand, ClipperLib::ptSubject, true);
+            cl_clip_to_orig.AddPaths(out, ClipperLib::ptClip, true);
+            cl_clip_to_orig.Execute(ClipperLib::ctIntersection, clipped_to_orig, ClipperLib::pftNonZero);
+        }
+
+
+        {
+            ClipperLib::ClipperOffset ofs;
+            ofs.ArcTolerance = 2e3;
+            ofs.AddPaths(clipped_to_orig, jt, ClipperLib::etClosedPolygon);
+            if (plane->settings.fill_style == PlaneSettings::FillStyle::SOLID) {
+                ofs.Execute(tree, plane->settings.min_width / 2);
+            }
+            else {
+                ofs.Execute(final, plane->settings.min_width / 2);
+            }
         }
     }
     else {
+        ClipperLib::ClipperOffset ofs;
+        ofs.ArcTolerance = 2e3;
+        ofs.AddPaths(out, jt, ClipperLib::etClosedPolygon);
         if (plane->settings.fill_style == PlaneSettings::FillStyle::SOLID) {
             ofs.Execute(tree, plane->settings.min_width / 2);
         }
@@ -544,7 +575,7 @@ ClipperLib::Paths Board::get_thermals(Plane *plane, const CanvasPads *cp) const
         ofs.AddPaths(uni, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
         ClipperLib::Paths pad_exp; // pad expanded by gap width
 
-        double expand = plane->settings.thermal_gap_width + .01_mm;
+        double expand = plane->settings.thermal_gap_width + .01_mm + plane->settings.min_width / 2;
         ofs.Execute(pad_exp, expand);
 
         auto p0 = pad_exp.front().front();
@@ -561,12 +592,13 @@ ClipperLib::Paths Board::get_thermals(Plane *plane, const CanvasPads *cp) const
         auto h = bb.second.y - bb.first.y;
         auto l = std::max(w, h);
 
-        int64_t spoke_width = plane->settings.thermal_spoke_width;
+        int64_t spoke_width =
+                std::max(.01_mm, (int64_t)plane->settings.thermal_spoke_width - (int64_t)plane->settings.min_width);
         ClipperLib::Path spoke;
         spoke.emplace_back(-spoke_width / 2, -spoke_width / 2);
         spoke.emplace_back(-spoke_width / 2, spoke_width / 2);
-        spoke.emplace_back(l, spoke_width / 2);
-        spoke.emplace_back(l, -spoke_width / 2);
+        spoke.emplace_back(l + plane->settings.min_width, spoke_width / 2);
+        spoke.emplace_back(l + plane->settings.min_width, -spoke_width / 2);
 
         ClipperLib::Paths antipad;
         {
