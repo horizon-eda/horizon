@@ -82,6 +82,7 @@
 #include "tools/tool_place_decal.hpp"
 #include "tools/tool_draw_plane.hpp"
 #include "tools/tool_drag_polygon_edge.hpp"
+#include "tools/tool_measure.hpp"
 
 namespace horizon {
 
@@ -392,6 +393,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::DRAG_POLYGON_EDGE:
         return std::make_unique<ToolDragPolygonEdge>(this, tool_id);
+
+    case ToolID::MEASURE:
+        return std::make_unique<ToolMeasure>(this, tool_id);
 
     default:
         return nullptr;
