@@ -5,8 +5,28 @@
 #include <algorithm>
 #include "document/idocument.hpp"
 #include <sstream>
+#include "nlohmann/json.hpp"
+#include "dialogs/enter_datum_window.hpp"
 
 namespace horizon {
+
+void ToolDrawDimension::Settings::load_from_json(const json &j)
+{
+    label_size = j.value("label_size", 1.25_mm);
+}
+
+json ToolDrawDimension::Settings::serialize() const
+{
+    json j;
+    j["label_size"] = label_size;
+    return j;
+}
+
+void ToolDrawDimension::apply_settings()
+{
+    if (temp)
+        temp->label_size = settings.label_size;
+}
 
 bool ToolDrawDimension::can_begin()
 {
@@ -16,6 +36,8 @@ bool ToolDrawDimension::can_begin()
 ToolResponse ToolDrawDimension::begin(const ToolArgs &args)
 {
     temp = doc.r->insert_dimension(UUID::random());
+    apply_settings();
+    temp->label_distance = 0;
     imp->set_snap_filter({{ObjectType::DIMENSION, temp->uuid}});
     temp->p0 = args.coords;
     temp->p1 = args.coords;
@@ -51,6 +73,7 @@ void ToolDrawDimension::update_tip()
                 actions.emplace_back(InToolActionID::ENTER_DATUM, "enter distance");
             }
         }
+        actions.emplace_back(InToolActionID::ENTER_SIZE);
 
         switch (temp->mode) {
         case Dimension::Mode::DISTANCE:
@@ -75,6 +98,8 @@ void ToolDrawDimension::update_tip()
 ToolResponse ToolDrawDimension::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {
+        if (imp->dialogs.get_nonmodal())
+            return ToolResponse();
         switch (state) {
         case State::P0:
             temp->p0 = args.coords;
@@ -168,7 +193,28 @@ ToolResponse ToolDrawDimension::update(const ToolArgs &args)
             }
             break;
 
+
+        case InToolActionID::ENTER_SIZE:
+            if (state == State::P1 || state == State::LABEL) {
+                auto win = imp->dialogs.show_enter_datum_window("Enter label size", temp->label_size);
+                win->set_use_ok(false);
+                win->set_range(0, 1000_mm);
+            }
+            break;
         default:;
+        }
+    }
+    else if (args.type == ToolEventType::DATA) {
+        if (auto data = dynamic_cast<const ToolDataWindow *>(args.data.get())) {
+            if (data->event == ToolDataWindow::Event::UPDATE) {
+                if (auto d = dynamic_cast<const ToolDataEnterDatumWindow *>(args.data.get())) {
+                    settings.label_size = d->value;
+                    apply_settings();
+                }
+            }
+            else if (data->event == ToolDataWindow::Event::OK) {
+                imp->dialogs.close_nonmodal();
+            }
         }
     }
     return ToolResponse();

@@ -13,8 +13,28 @@ public:
     {
         using I = InToolActionID;
         return {
-                I::LMB, I::CANCEL, I::RMB, I::RESTRICT, I::DIMENSION_MODE, I::ENTER_DATUM,
+                I::LMB, I::CANCEL, I::RMB, I::RESTRICT, I::DIMENSION_MODE, I::ENTER_DATUM, I::ENTER_SIZE,
         };
+    }
+
+    class Settings : public ToolSettings {
+    public:
+        json serialize() const override;
+        void load_from_json(const json &j) override;
+        uint64_t label_size = 1.5_mm;
+    };
+
+    const ToolSettings *get_settings_const() const override
+    {
+        return &settings;
+    }
+
+    void apply_settings() override;
+
+protected:
+    ToolSettings *get_settings() override
+    {
+        return &settings;
     }
 
 private:
@@ -23,5 +43,6 @@ private:
 
     enum class State { P0, P1, LABEL };
     State state = State::P0;
+    Settings settings;
 };
 } // namespace horizon
