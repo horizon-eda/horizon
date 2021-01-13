@@ -22,7 +22,6 @@ private:
 
     GLuint view_loc;
     GLuint proj_loc;
-    GLuint layer_thickness_loc;
     GLuint layer_offset_loc;
     GLuint layer_color_loc;
     GLuint cam_normal_loc;

@@ -146,7 +146,6 @@
 
     <file>canvas3d/shaders/cover-vertex.glsl</file>
     <file>canvas3d/shaders/cover-fragment.glsl</file>
-    <file>canvas3d/shaders/cover-geometry.glsl</file>
 
     <file>canvas3d/shaders/wall-vertex.glsl</file>
     <file>canvas3d/shaders/wall-fragment.glsl</file>

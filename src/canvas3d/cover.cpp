@@ -53,14 +53,12 @@ void CoverRenderer::realize()
     program = gl_create_program_from_resource("/org/horizon-eda/horizon/canvas3d/shaders/cover-vertex.glsl",
                                               "/org/horizon-eda/horizon/canvas3d/shaders/"
                                               "cover-fragment.glsl",
-                                              "/org/horizon-eda/horizon/canvas3d/shaders/"
-                                              "cover-geometry.glsl");
+                                              nullptr);
     vao = create_vao(program, vbo);
 
     GET_LOC(this, view);
     GET_LOC(this, proj);
     GET_LOC(this, layer_offset);
-    GET_LOC(this, layer_thickness);
     GET_LOC(this, layer_color);
     GET_LOC(this, cam_normal);
 }
@@ -87,13 +85,17 @@ void CoverRenderer::push()
 
 void CoverRenderer::render(int layer)
 {
-    if (ca.ca.get_layer(layer).alpha != 1)
+    const bool is_opaque = ca.ca.get_layer(layer).alpha == 1;
+    if (!is_opaque)
         glEnable(GL_BLEND);
     auto co = ca.get_layer_color(layer);
     gl_color_to_uniform_4f(layer_color_loc, co, ca.ca.get_layer(layer).alpha);
     glUniform1f(layer_offset_loc, ca.get_layer_offset(layer));
-    glUniform1f(layer_thickness_loc, ca.get_layer_thickness(layer));
     glDrawArrays(GL_TRIANGLES, layer_offsets[layer], ca.ca.get_layer(layer).tris.size());
+    if (is_opaque) {
+        glUniform1f(layer_offset_loc, ca.get_layer_offset(layer) + ca.get_layer_thickness(layer));
+        glDrawArrays(GL_TRIANGLES, layer_offsets[layer], ca.ca.get_layer(layer).tris.size());
+    }
     glDisable(GL_BLEND);
 }
 

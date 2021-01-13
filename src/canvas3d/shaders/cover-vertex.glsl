@@ -1,11 +1,10 @@
 #version 330
 
 in vec2 position;
-out vec2 position_to_geom;
-
+uniform float layer_offset;
+uniform mat4 view;
+uniform mat4 proj;
 
 void main() {
-  //gl_Position = proj*view*vec4(position, 1, 1);
-  //color_to_fragment = vec3(1,0,0);
-  position_to_geom = position/1e6;
+  gl_Position = proj*view*vec4(position/1e6, layer_offset, 1);
 }
