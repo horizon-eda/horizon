@@ -2,7 +2,7 @@
 #include "preview_box.hpp"
 
 namespace horizon {
-SymbolPreviewWindow::SymbolPreviewWindow(Gtk::Window *parent) : Gtk::Window()
+SymbolPreviewWindow::SymbolPreviewWindow(Gtk::Window *parent) : Gtk::Window(), state_store(this, "imp-symbol-preview")
 {
     set_transient_for(*parent);
     set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
@@ -18,7 +18,9 @@ SymbolPreviewWindow::SymbolPreviewWindow(Gtk::Window *parent) : Gtk::Window()
     });
     hb->pack_start(*fit_button);
 
-    set_default_size(800, 300);
+    if (!state_store.get_default_set())
+        set_default_size(800, 300);
+
     set_titlebar(*hb);
     hb->show_all();
 

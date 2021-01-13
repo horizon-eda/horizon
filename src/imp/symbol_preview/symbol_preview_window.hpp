@@ -2,6 +2,7 @@
 #include "util/placement.hpp"
 #include "util/uuid.hpp"
 #include "util/changeable.hpp"
+#include "util/window_state_store.hpp"
 #include <gtkmm.h>
 
 namespace horizon {
@@ -23,5 +24,7 @@ public:
 private:
     std::map<std::pair<int, bool>, class SymbolPreviewBox *> previews;
     type_signal_load s_signal_load;
+
+    WindowStateStore state_store;
 };
 } // namespace horizon
