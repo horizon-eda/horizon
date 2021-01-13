@@ -162,11 +162,26 @@ void CanvasGL::resize_buffers()
     glBindRenderbuffer(GL_RENDERBUFFER, rb);
 }
 
+//#define GL_DEBUG
+
+#ifdef GL_DEBUG
+void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+                                const GLchar *message, const void *userParam)
+{
+    fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+            (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, message);
+}
+#endif
+
 void CanvasGL::on_realize()
 {
     Gtk::GLArea::on_realize();
     make_current();
     update_viewmat();
+#ifdef GL_DEBUG
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(MessageCallback, 0);
+#endif
     GL_CHECK_ERROR
     grid.realize();
     GL_CHECK_ERROR
