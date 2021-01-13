@@ -166,6 +166,7 @@ void CanvasGL::on_realize()
 {
     Gtk::GLArea::on_realize();
     make_current();
+    update_viewmat();
     GL_CHECK_ERROR
     grid.realize();
     GL_CHECK_ERROR
