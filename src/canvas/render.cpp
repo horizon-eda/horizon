@@ -84,7 +84,7 @@ void Canvas::render(const SchematicJunction &junc)
     else {
         draw_cross(junc.position, 0.25_mm, c);
     }
-
+    object_ref_pop();
 
     selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, junc.layer);
     targets.emplace_back(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position), 0, junc.layer);
