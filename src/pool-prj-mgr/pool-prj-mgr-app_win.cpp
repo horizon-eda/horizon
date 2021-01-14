@@ -1184,6 +1184,10 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
                 info_bar_show(info_bar);
             }
         });
+
+        if (proc.proc)
+            info_bar_hide(info_bar);
+
         proc.signal_output().connect([uu, this](std::string line, bool err) {
             trim(line);
             if (line.size()) {
