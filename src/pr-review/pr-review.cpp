@@ -122,6 +122,50 @@ static void print_rules_check_result(std::ostream &ofs, const RulesCheckResult &
     ofs << "\n";
 }
 
+static void accumulate_level(RulesCheckErrorLevel &r, RulesCheckErrorLevel l)
+{
+    r = static_cast<RulesCheckErrorLevel>(std::max(static_cast<int>(r), static_cast<int>(l)));
+}
+
+static RulesCheckResult check_item(Pool &pool, ObjectType type, const UUID &uu)
+{
+    switch (type) {
+    case ObjectType::UNIT:
+        return check_unit(*pool.get_unit(uu));
+
+    case ObjectType::ENTITY:
+        return check_entity(*pool.get_entity(uu));
+
+    case ObjectType::PART:
+        return check_part(*pool.get_part(uu));
+
+    case ObjectType::SYMBOL: {
+        const auto &sym = *pool.get_symbol(uu);
+        return sym.rules.check(RuleID::SYMBOL_CHECKS, sym);
+    }
+
+    case ObjectType::PACKAGE: {
+        auto pkg = *pool.get_package(uu);
+        pkg.expand();
+        pkg.apply_parameter_set({});
+        RulesCheckResult result;
+
+        accumulate_level(result.level, pkg.rules.check(RuleID::PACKAGE_CHECKS, pkg).level);
+
+        auto &rule_cl = dynamic_cast<RuleClearancePackage &>(*pkg.rules.get_rule_nc(RuleID::CLEARANCE_PACKAGE));
+        rule_cl.clearance_silkscreen_cu = 0.2_mm;
+        rule_cl.clearance_silkscreen_pkg = 0.2_mm;
+        const auto r = pkg.rules.check(RuleID::CLEARANCE_PACKAGE, pkg);
+        accumulate_level(result.level, r.level);
+
+        return result;
+    }
+
+    default:
+        return {};
+    }
+}
+
 int main(int c_argc, char *c_argv[])
 {
     Gio::init();
@@ -259,8 +303,8 @@ int main(int c_argc, char *c_argv[])
 
     {
         ofs << "# Items in this PR\n";
-        ofs << "| State | Type | Name | Filename |\n";
-        ofs << "| --- | --- | --- | --- |\n";
+        ofs << "| State | Type | Name | Checks | Filename |\n";
+        ofs << "| --- | --- | --- | --- | --- |\n";
         SQLite::Query q(pool.db, "SELECT type, uuid, name, filename, status FROM git_files_view");
         while (q.step()) {
             auto type = object_type_lut.lookup(q.get<std::string>(0));
@@ -269,6 +313,21 @@ int main(int c_argc, char *c_argv[])
                 << object_descriptions.at(type).name << " | " << name;
             if (needs_trim(name))
                 ofs << " " << whitespace_warning;
+            ofs << " | ";
+            const auto r = check_item(pool, type, UUID(q.get<std::string>(1)));
+            switch (r.level) {
+            case RulesCheckErrorLevel::WARN:
+                ofs << ":warning: ";
+                break;
+            case RulesCheckErrorLevel::FAIL:
+                ofs << ":x: ";
+                break;
+            case RulesCheckErrorLevel::PASS:
+                ofs << ":heavy_check_mark: ";
+                break;
+            default:;
+            }
+            ofs << rules_check_error_level_to_string(r.level);
 
             ofs << " | " << q.get<std::string>(3) << "\n";
         }
