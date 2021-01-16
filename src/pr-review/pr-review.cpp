@@ -633,7 +633,8 @@ int main(int c_argc, char *c_argv[])
                 q_symbol.bind(1, unit.uuid);
                 while (q_symbol.step()) {
                     has_sym = true;
-                    Symbol sym = *pool.get_symbol(q_symbol.get<std::string>(0));
+                    const auto &pool_sym = *pool.get_symbol(q_symbol.get<std::string>(0));
+                    Symbol sym = pool_sym;
                     sym.expand();
                     sym.apply_placement(Placement());
                     ofs << "#### Symbol: " << sym.name << "\n";
@@ -679,6 +680,17 @@ int main(int c_argc, char *c_argv[])
                             }
                             ofs << "\n";
                         }
+                    }
+                    sym.apply_placement(Placement());
+                    if (sym.can_expand) {
+                        ofs << "<details>\n<summary>Expanded by 5</summary>\n";
+                        sym.apply_expand(pool_sym, 5);
+                        CanvasCairo2 ca;
+                        ca.load(sym);
+                        const std::string img_filename = "sym_" + static_cast<std::string>(sym.uuid) + "_expanded.png";
+                        ca.get_image_surface(1, 1.25_mm)->write_to_png(Glib::build_filename(images_dir, img_filename));
+                        ofs << "![Symbol](" << images_prefix << img_filename << ")\n";
+                        ofs << "</details>\n";
                     }
                 }
 
