@@ -696,6 +696,7 @@ SRC_PR_REVIEW = \
 	src/canvas/selectables.cpp\
 	src/canvas/fragment_cache.cpp\
 	src/canvas/canvas_patch.cpp\
+	src/util/polygon_arc_removal_proxy.cpp\
 	src/util/text_data.cpp \
 	3rd_party/polypartition/polypartition.cpp\
 	3rd_party/poly2tri/common/shapes.cpp\

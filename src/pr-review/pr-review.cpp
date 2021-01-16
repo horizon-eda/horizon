@@ -712,8 +712,8 @@ int main(int c_argc, char *c_argv[])
             }
             ofs << "\n";
 
-            if (auto r = pkg.apply_parameter_set({}); r.first) {
-                ofs << ":x: Error applying parameter set: " << r.second << "\n\n";
+            if (auto r = pkg.apply_parameter_set({})) {
+                ofs << ":x: Error applying parameter set: " << *r << "\n\n";
             }
             {
                 auto r = pkg.rules.check(RuleID::PACKAGE_CHECKS, pkg);
