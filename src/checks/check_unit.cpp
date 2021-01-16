@@ -36,6 +36,11 @@ RulesCheckResult check_unit(const Unit &unit)
                                       "Alt. name \"" + name + "\" of pin \"" + pin.primary_name + "\" not unique");
             }
             names.insert(name);
+            if (name.find(",") != std::string::npos || name.find(";") != std::string::npos) {
+                r.errors.emplace_back(RulesCheckErrorLevel::FAIL,
+                                      "Alt. name \"" + name + "\" of pin \"" + pin.primary_name
+                                              + "\"  contains comma or semicolon. Use spaces as separators.");
+            }
         }
         if (names.count(pin.primary_name)) {
             r.errors.emplace_back(RulesCheckErrorLevel::FAIL,
