@@ -95,36 +95,7 @@ void SchematicSymbol::apply_expand()
 {
     if (!pool_symbol->can_expand)
         return;
-    int64_t ex = expand * 1.25_mm;
-    int64_t x_left = 0, x_right = 0;
-    for (const auto &it : pool_symbol->junctions) {
-        x_left = std::min(it.second.position.x, x_left);
-        x_right = std::max(it.second.position.x, x_right);
-        if (it.second.position.x > 0) {
-            symbol.junctions.at(it.first).position.x = it.second.position.x + ex;
-        }
-        else if (it.second.position.x < 0) {
-            symbol.junctions.at(it.first).position.x = it.second.position.x - ex;
-        }
-    }
-    for (const auto &it : pool_symbol->pins) {
-        if (it.second.orientation == Orientation::LEFT || it.second.orientation == Orientation::RIGHT) {
-            if (it.second.position.x > 0) {
-                symbol.pins.at(it.first).position.x = it.second.position.x + ex;
-            }
-            else if (it.second.position.x < 0) {
-                symbol.pins.at(it.first).position.x = it.second.position.x - ex;
-            }
-        }
-    }
-    for (const auto &it : pool_symbol->texts) {
-        if (it.second.placement.shift.x == x_left) {
-            symbol.texts.at(it.first).placement.shift.x = it.second.placement.shift.x - ex;
-        }
-        else if (it.second.placement.shift.x == x_right) {
-            symbol.texts.at(it.first).placement.shift.x = it.second.placement.shift.x + ex;
-        }
-    }
+    symbol.apply_expand(*pool_symbol, expand);
 }
 
 

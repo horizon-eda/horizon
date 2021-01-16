@@ -87,6 +87,8 @@ public:
     Symbol(const Symbol &sym);
     void operator=(Symbol const &sym);
 
+    void apply_expand(const Symbol &ref, unsigned int ex);
+
     UUID uuid;
     uuid_ptr<const Unit> unit;
     std::string name;

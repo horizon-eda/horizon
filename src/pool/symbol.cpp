@@ -319,6 +319,43 @@ void Symbol::apply_placement(const Placement &p)
     }
 }
 
+static void apply_shift(int64_t &x, int64_t x_orig, int64_t ex)
+{
+    if (x_orig > 0)
+        x = x_orig + ex;
+    else
+        x = x_orig - ex;
+}
+
+void Symbol::apply_expand(const Symbol &ref, unsigned int n_expand)
+{
+    if (ref.uuid != uuid)
+        throw std::logic_error("wrong ref symbol");
+    if (!can_expand)
+        throw std::logic_error("can't expand");
+
+    int64_t ex = n_expand * 1.25_mm;
+    int64_t x_left = 0, x_right = 0;
+    for (const auto &[uu, it] : ref.junctions) {
+        x_left = std::min(it.position.x, x_left);
+        x_right = std::max(it.position.x, x_right);
+        apply_shift(junctions.at(uu).position.x, it.position.x, ex);
+    }
+    for (const auto &[uu, it] : ref.pins) {
+        if (it.orientation == Orientation::LEFT || it.orientation == Orientation::RIGHT) {
+            apply_shift(pins.at(uu).position.x, it.position.x, ex);
+        }
+    }
+    for (const auto &[uu, it] : ref.texts) {
+        if (it.placement.shift.x == x_left) {
+            texts.at(uu).placement.shift.x = it.placement.shift.x - ex;
+        }
+        else if (it.placement.shift.x == x_right) {
+            texts.at(uu).placement.shift.x = it.placement.shift.x + ex;
+        }
+    }
+}
+
 json Symbol::serialize() const
 {
     json j;
