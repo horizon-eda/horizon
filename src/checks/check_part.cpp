@@ -6,7 +6,7 @@
 namespace horizon {
 
 static const std::vector<std::string> discouraged_datasheet_domains = {
-        "rs-online.com", "digikey.com", "mouser.com", "farnell.com", "octopart.com",
+        "rs-online.com", "digikey.com", "mouser.com", "farnell.com", "octopart.com", "google.com",
 };
 
 
