@@ -209,9 +209,6 @@ protected:
     virtual void img_patch_type(PatchType type)
     {
     }
-    virtual void img_text(const Text &txt, std::pair<Coordf, Coordf> &extents)
-    {
-    }
     virtual void img_draw_text(const Coordf &p, float size, const std::string &rtext, int angle, bool flip,
                                TextOrigin origin, int layer = 10000, uint64_t width = 0,
                                TextData::Font font = TextData::Font::SIMPLEX, bool center = false, bool mirror = false)
