@@ -131,7 +131,16 @@ void ImpLayer::add_view_angle_actions()
     view_angle_label = Gtk::manage(new Gtk::Label);
     view_angle_button->add(*view_angle_label);
     label_set_tnum(view_angle_label);
-    view_angle_button->set_tooltip_text("Reset rotation");
+    view_angle_button->set_tooltip_text("Reset rotation\nRight click to enter angle");
+    view_angle_button->signal_button_press_event().connect(
+            [this](GdkEventButton *ev) {
+                if (gdk_event_triggers_context_menu((GdkEvent *)ev)) {
+                    trigger_action(ActionID::ROTATE_VIEW);
+                    return true;
+                }
+                return false;
+            },
+            false);
     box->pack_start(*view_angle_button, true, true, 0);
 
     auto right_button = Gtk::manage(new Gtk::Button);
@@ -197,7 +206,6 @@ void ImpLayer::set_view_angle(int angle)
     }
     canvas->set_view_angle(angle * M_PI / 32768);
     view_angle_label->set_text(view_angle_to_string(view_angle));
-    view_angle_button->set_sensitive(view_angle != 0);
     view_angle_window_conn.block();
     view_angle_window->get_spinbutton().set_value(view_angle);
     view_angle_window_conn.unblock();
