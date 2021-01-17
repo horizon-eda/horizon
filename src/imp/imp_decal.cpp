@@ -13,6 +13,7 @@ ImpDecal::ImpDecal(const std::string &decal_filename, const std::string &pool_pa
 {
     core = &core_decal;
     core_decal.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_tool_change));
+    view_angle = 0;
 }
 
 void ImpDecal::canvas_update()

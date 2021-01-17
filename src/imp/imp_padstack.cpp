@@ -14,6 +14,7 @@ ImpPadstack::ImpPadstack(const std::string &padstack_filename, const std::string
 {
     core = &core_padstack;
     core_padstack.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_tool_change));
+    view_angle = 0;
 }
 
 void ImpPadstack::canvas_update()
