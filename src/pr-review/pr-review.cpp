@@ -742,14 +742,14 @@ int main(int c_argc, char *c_argv[])
                     }
                     sym.apply_placement(Placement());
                     if (sym.can_expand) {
-                        ofs << "<details>\n<summary>Expanded by 5</summary>\n";
+                        ofs << "<details>\n<summary>Expanded by 5</summary>\n\n";
                         sym.apply_expand(pool_sym, 5);
                         CanvasCairo2 ca;
                         ca.load(sym);
                         const std::string img_filename = "sym_" + static_cast<std::string>(sym.uuid) + "_expanded.png";
                         ca.get_image_surface(1, 1.25_mm)->write_to_png(Glib::build_filename(images_dir, img_filename));
                         ofs << "![Symbol](" << images_prefix << img_filename << ")\n";
-                        ofs << "</details>\n";
+                        ofs << "</details>\n\n";
                     }
                 }
 
