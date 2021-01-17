@@ -13,7 +13,7 @@ RulesCheckResult SymbolRules::check_symbol(const Symbol &sym) const
     if (sym.name.size() == 0) {
         r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
         auto &x = r.errors.back();
-        x.comment = "Package has no name";
+        x.comment = "Symbol has no name";
         x.has_location = false;
     }
     {
