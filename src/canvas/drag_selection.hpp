@@ -83,6 +83,7 @@ private:
         };
 
         std::vector<Vertex> vertices;
+        size_t n_vertices = 0;
         ClipperLib::Path path;
 
         void update();
