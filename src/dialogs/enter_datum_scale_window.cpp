@@ -33,7 +33,7 @@ EnterDatumScaleWindow::EnterDatumScaleWindow(Gtk::Window *parent, class ImpInter
     add(*box);
 }
 
-double_t EnterDatumScaleWindow::get_value()
+double EnterDatumScaleWindow::get_value()
 {
     return sp->get_value();
 }
