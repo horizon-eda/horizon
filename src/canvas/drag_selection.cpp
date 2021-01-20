@@ -125,6 +125,8 @@ void DragSelection::Box::render()
 
 void DragSelection::Line::render()
 {
+    if (n_vertices < 2)
+        return;
     glUseProgram(program);
     glBindVertexArray(vao);
     glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(ca.screenmat));
@@ -134,7 +136,7 @@ void DragSelection::Line::render()
     gl_color_to_uniform_3f(color_loc, co);
 
 
-    glDrawArrays(GL_LINE_STRIP, 0, vertices.size());
+    glDrawArrays(GL_LINE_STRIP, 0, n_vertices);
 
     glBindVertexArray(0);
     glUseProgram(0);
@@ -142,17 +144,21 @@ void DragSelection::Line::render()
 
 void DragSelection::Line::push()
 {
-    if (!vertices.size())
+    if (vertices.size() < 2) {
+        n_vertices = 0; // prevent rendering stale data
         return;
+    }
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    auto n_vertices = vertices.size();
+    n_vertices = vertices.size();
     if (ca.selection_tool == CanvasGL::SelectionTool::PAINT) {
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * n_vertices, vertices.data(), GL_STREAM_DRAW);
     }
     else {
         n_vertices += 1;
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * n_vertices, nullptr, GL_STREAM_DRAW);
+        // buffer last vertex first to close lasso
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex), vertices.data() + (vertices.size() - 1));
+        // buffer all vertices
         glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vertex), vertices.size() * sizeof(Vertex), vertices.data());
     }
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -205,6 +211,7 @@ void DragSelection::drag_begin(GdkEventButton *button_event)
             line.vertices.emplace_back(c.x, c.y);
             line.path.clear();
             line.path.emplace_back(c.x, c.y);
+            line.update();
         }
         ca.queue_draw();
     }
@@ -243,8 +250,6 @@ void DragSelection::drag_move(GdkEventMotion *motion_event)
             line.vertices.emplace_back(c.x, c.y);
             line.path.emplace_back(c.x, c.y);
             line.update();
-            ca.request_push(CanvasGL::PF_DRAG_SELECTION);
-            ca.request_push(CanvasGL::PF_SELECTABLES);
         }
         ca.queue_draw();
     }
