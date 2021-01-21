@@ -6,6 +6,8 @@
 #include "widgets/unplaced_box.hpp"
 #include "core/tool_id.hpp"
 #include "widgets/action_button.hpp"
+#include "widgets/help_button.hpp"
+#include "help_texts.hpp"
 
 namespace horizon {
 ImpSymbol::ImpSymbol(const std::string &symbol_filename, const std::string &pool_path)
@@ -106,12 +108,21 @@ void ImpSymbol::construct()
         header_button->add_widget("Unit", box);
     }
 
-    can_expand_switch = Gtk::manage(new Gtk::Switch);
-    can_expand_switch->set_active(symbol.can_expand);
-    can_expand_switch->set_halign(Gtk::ALIGN_START);
-    can_expand_switch->property_active().signal_changed().connect([this] { core_symbol.set_needs_save(); });
+    {
+        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 10));
 
-    header_button->add_widget("Can expand", can_expand_switch);
+        can_expand_switch = Gtk::manage(new Gtk::Switch);
+        can_expand_switch->set_active(symbol.can_expand);
+        can_expand_switch->set_halign(Gtk::ALIGN_START);
+        can_expand_switch->property_active().signal_changed().connect([this] { core_symbol.set_needs_save(); });
+        can_expand_switch->show();
+        box->pack_start(*can_expand_switch, false, false, 0);
+        auto help_button = Gtk::manage(new HelpButton(HelpTexts::SYMBOL_CAN_EXPAND));
+        help_button->show();
+        box->pack_start(*help_button, false, false, 0);
+
+        header_button->add_widget("Can expand", box);
+    }
 
     {
         auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));

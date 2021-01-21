@@ -26,3 +26,6 @@ For example: Pin name: PB0, alternate names: I2C0_SDA ADC2_IN.
 <tt>%.</tt>&lt;precision&gt;&lt;unit&gt;
 precision: number of decimal places 0...9
 unit: <tt>m</tt>: millimeter, <tt>i</tt>: inch, <tt>t</tt>: thou/mil, <tt>u</tt>: micrometer
+
+#SYMBOL_CAN_EXPAND
+Set this for box-style symbols if there are alternate pin names or the user is expected to add custom pin names. In this case, size the symbol such that it fits the primary pin names.
