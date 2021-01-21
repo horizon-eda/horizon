@@ -136,10 +136,18 @@ private:
     glm::vec3 cam_normal;
 
     float package_height_max = 0;
-    std::vector<FaceVertex> face_vertex_buffer;              // vertices of all models, sequentially
-    std::vector<unsigned int> face_index_buffer;             // indexes face_vertex_buffer to form triangles
-    std::map<std::string, std::pair<size_t, size_t>> models; // key: filename value: first: offset in face_index_buffer
-                                                             // second: no of indexes
+    std::vector<FaceVertex> face_vertex_buffer;  // vertices of all models, sequentially
+    std::vector<unsigned int> face_index_buffer; // indexes face_vertex_buffer to form triangles
+
+    class ModelInfo {
+    public:
+        ModelInfo(size_t o, size_t n) : face_index_offset(o), count(n)
+        {
+        }
+        const size_t face_index_offset; // offset in face_index_buffer
+        const size_t count;             // number of items in face_index_buffer
+    };
+    std::map<std::string, ModelInfo> models; // key: filename
 
     std::vector<ModelTransform> package_transforms; // position and rotation of
                                                     // all board packages,

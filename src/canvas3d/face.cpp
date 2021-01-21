@@ -146,18 +146,20 @@ void FaceRenderer::render()
                                           + (ca.ca.get_layer(BoardLayers::BOTTOM_COPPER).explode_mul - 4) * ca.explode);
         glUniform1f(highlight_intensity_loc, ca.highlight_intensity);
 
-        for (const auto &it : ca.models) {
-            std::pair<std::string, bool> populate = {it.first, false};
-            std::pair<std::string, bool> nopopulate = {it.first, true};
+        for (const auto &[filename, it] : ca.models) {
+            std::pair<std::string, bool> populate = {filename, false};
+            std::pair<std::string, bool> nopopulate = {filename, true};
             if (ca.package_transform_idxs.count(populate)) {
                 auto idxs = ca.package_transform_idxs.at(populate);
-                glDrawElementsInstancedBaseInstance(GL_TRIANGLES, it.second.second, GL_UNSIGNED_INT,
-                                                    (void *)(it.second.first * sizeof(int)), idxs.second, idxs.first);
+                glDrawElementsInstancedBaseInstance(GL_TRIANGLES, it.count, GL_UNSIGNED_INT,
+                                                    (void *)(it.face_index_offset * sizeof(int)), idxs.second,
+                                                    idxs.first);
             }
             if (ca.show_dnp_models && ca.package_transform_idxs.count(nopopulate)) {
                 auto idxs = ca.package_transform_idxs.at(nopopulate);
-                glDrawElementsInstancedBaseInstance(GL_TRIANGLES, it.second.second, GL_UNSIGNED_INT,
-                                                    (void *)(it.second.first * sizeof(int)), idxs.second, idxs.first);
+                glDrawElementsInstancedBaseInstance(GL_TRIANGLES, it.count, GL_UNSIGNED_INT,
+                                                    (void *)(it.face_index_offset * sizeof(int)), idxs.second,
+                                                    idxs.first);
             }
         }
         ca.models_loading_mutex.unlock();
