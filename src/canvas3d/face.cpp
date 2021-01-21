@@ -123,6 +123,9 @@ void FaceRenderer::push()
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * n_idx, ca.face_index_buffer.data(),
                      GL_STATIC_DRAW);
+        for (auto &[fn, it] : ca.models) {
+            it.pushed = true;
+        }
         ca.models_loading_mutex.unlock();
     }
 
@@ -147,19 +150,21 @@ void FaceRenderer::render()
         glUniform1f(highlight_intensity_loc, ca.highlight_intensity);
 
         for (const auto &[filename, it] : ca.models) {
-            std::pair<std::string, bool> populate = {filename, false};
-            std::pair<std::string, bool> nopopulate = {filename, true};
-            if (ca.package_transform_idxs.count(populate)) {
-                auto idxs = ca.package_transform_idxs.at(populate);
-                glDrawElementsInstancedBaseInstance(GL_TRIANGLES, it.count, GL_UNSIGNED_INT,
-                                                    (void *)(it.face_index_offset * sizeof(int)), idxs.second,
-                                                    idxs.first);
-            }
-            if (ca.show_dnp_models && ca.package_transform_idxs.count(nopopulate)) {
-                auto idxs = ca.package_transform_idxs.at(nopopulate);
-                glDrawElementsInstancedBaseInstance(GL_TRIANGLES, it.count, GL_UNSIGNED_INT,
-                                                    (void *)(it.face_index_offset * sizeof(int)), idxs.second,
-                                                    idxs.first);
+            if (it.pushed) {
+                std::pair<std::string, bool> populate = {filename, false};
+                std::pair<std::string, bool> nopopulate = {filename, true};
+                if (ca.package_transform_idxs.count(populate)) {
+                    auto idxs = ca.package_transform_idxs.at(populate);
+                    glDrawElementsInstancedBaseInstance(GL_TRIANGLES, it.count, GL_UNSIGNED_INT,
+                                                        (void *)(it.face_index_offset * sizeof(int)), idxs.second,
+                                                        idxs.first);
+                }
+                if (ca.show_dnp_models && ca.package_transform_idxs.count(nopopulate)) {
+                    auto idxs = ca.package_transform_idxs.at(nopopulate);
+                    glDrawElementsInstancedBaseInstance(GL_TRIANGLES, it.count, GL_UNSIGNED_INT,
+                                                        (void *)(it.face_index_offset * sizeof(int)), idxs.second,
+                                                        idxs.first);
+                }
             }
         }
         ca.models_loading_mutex.unlock();

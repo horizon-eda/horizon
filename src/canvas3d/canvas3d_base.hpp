@@ -146,6 +146,7 @@ private:
         }
         const size_t face_index_offset; // offset in face_index_buffer
         const size_t count;             // number of items in face_index_buffer
+        bool pushed = false;
     };
     std::map<std::string, ModelInfo> models; // key: filename
 
