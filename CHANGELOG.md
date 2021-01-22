@@ -41,6 +41,10 @@
 
  - Edit pad tool uses non modal dialog ([e2bf3b2](https://github.com/horizon-eda/horizon/commit/e2bf3b2dcce2c3e276be9f0924dc67b82a303ba1))
 
+### Symbol editor
+
+ - Symbol preview window remembers window size ([f483d2c](https://github.com/horizon-eda/horizon/commit/f483d2cf55d87c5d617059742148ec4632a535a5))
+
 ### 3D preview
 
  - Render gamma-correct background gradient ([67e0c4b](https://github.com/horizon-eda/horizon/commit/67e0c4b642dfd286aa88de03bf652c553c13af45))
@@ -79,6 +83,7 @@
  - Multiline text edit dialog: insert newline at cursor ([5780aff](https://github.com/horizon-eda/horizon/commit/5780affd9a3fed4e89c7ca58691459752755e98a))
  - Load select polygon action keybindings on startup ([88d0bbc](https://github.com/horizon-eda/horizon/commit/88d0bbc10942708369586147a5ac9a460fafa65b))
  - Don't show action button menu if clicked the wrong way ([47654f3](https://github.com/horizon-eda/horizon/commit/47654f33852957b3870d48ee5ab0343775d7ceb6))
+ - Avoid rendering empty buffers potentially leading to crashes ([69ac4b5](https://github.com/horizon-eda/horizon/commit/69ac4b50678daf822636c4cffc11d2114a7409f0), [438e65c](https://github.com/horizon-eda/horizon/commit/438e65c3f064f09cee358a50c09f321009f705aa))
 
 ### Pool manager
 
