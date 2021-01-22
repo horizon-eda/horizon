@@ -147,7 +147,8 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
 
         {{ActionID::RULES_RUN_CHECKS, ToolID::NONE},
          {"Run checks", ActionGroup::RULES,
-          ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD | ActionCatalogItem::AVAILABLE_IN_PACKAGE,
+          ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD | ActionCatalogItem::AVAILABLE_IN_PACKAGE
+                  | ActionCatalogItem::AVAILABLE_IN_SYMBOL,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::SHOW_IN_BROWSER, ToolID::NONE},
