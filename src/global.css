@@ -122,3 +122,11 @@
 .rule-import-header {
   border-bottom: 1px solid rgba(0,0,0,.05);
 }
+
+.imp-symbol-expanded-preview {
+  border-color: @borders;
+  border-radius: 0 0 3px 0px;
+  border-width: 0 1px 1px 0px;
+  border-style: solid;
+  padding: 10px;
+}

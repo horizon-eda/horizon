@@ -3,6 +3,7 @@
 #include "header_button.hpp"
 #include "pool/part.hpp"
 #include "symbol_preview/symbol_preview_window.hpp"
+#include "symbol_preview/symbol_preview_expand_window.hpp"
 #include "widgets/unplaced_box.hpp"
 #include "core/tool_id.hpp"
 #include "widgets/action_button.hpp"
@@ -32,6 +33,7 @@ void ImpSymbol::update_monitor()
 void ImpSymbol::apply_preferences()
 {
     symbol_preview_window->set_canvas_appearance(preferences.canvas_non_layer.appearance);
+    symbol_preview_expand_window->set_canvas_appearance(preferences.canvas_non_layer.appearance);
     ImpBase::apply_preferences();
 }
 
@@ -60,6 +62,9 @@ void ImpSymbol::construct()
         canvas_update();
         canvas->set_selection(sel);
     });
+
+    symbol_preview_expand_window = new SymbolPreviewExpandWindow(main_window, core_symbol.get_symbol());
+    core->signal_rebuilt().connect([this] { symbol_preview_expand_window->update(); });
 
     {
         auto button = Gtk::manage(new Gtk::Button("Preview…"));
@@ -114,12 +119,28 @@ void ImpSymbol::construct()
         can_expand_switch = Gtk::manage(new Gtk::Switch);
         can_expand_switch->set_active(symbol.can_expand);
         can_expand_switch->set_halign(Gtk::ALIGN_START);
-        can_expand_switch->property_active().signal_changed().connect([this] { core_symbol.set_needs_save(); });
+        can_expand_switch->set_valign(Gtk::ALIGN_CENTER);
+        can_expand_switch->property_active().signal_changed().connect([this] {
+            core_symbol.set_needs_save();
+            const bool a = can_expand_switch->get_active();
+            expand_preview_button->set_sensitive(a);
+            if (!a)
+                symbol_preview_expand_window->hide();
+        });
         can_expand_switch->show();
         box->pack_start(*can_expand_switch, false, false, 0);
         auto help_button = Gtk::manage(new HelpButton(HelpTexts::SYMBOL_CAN_EXPAND));
         help_button->show();
         box->pack_start(*help_button, false, false, 0);
+
+        expand_preview_button = Gtk::manage(new Gtk::Button("Preview"));
+        expand_preview_button->signal_clicked().connect([this] {
+            symbol_preview_expand_window->present();
+            symbol_preview_expand_window->zoom_to_fit();
+        });
+        expand_preview_button->show();
+        expand_preview_button->set_sensitive(symbol.can_expand);
+        box->pack_end(*expand_preview_button, false, false, 0);
 
         header_button->add_widget("Can expand", box);
     }

@@ -421,6 +421,7 @@ SRC_IMP = \
 	src/symbol/symbol_rules_check.cpp\
 	src/board/plane_update.cpp\
 	src/imp/symbol_preview/symbol_preview_window.cpp\
+	src/imp/symbol_preview/symbol_preview_expand_window.cpp\
 	src/imp/symbol_preview/preview_box.cpp\
 	src/util/gtk_util.cpp\
 	src/imp/fab_output_window.cpp\
