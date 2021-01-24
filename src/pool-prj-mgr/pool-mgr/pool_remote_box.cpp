@@ -772,6 +772,16 @@ void PoolRemoteBox::update_items_merge()
         row[list_columns.type] = ObjectType::MODEL_3D;
         row[list_columns.filename] = it;
     }
+
+    if (notebook->page_num(*this) != -1) {
+        const auto n = items_merge.size() + models_merge.size();
+        if (n > 0) {
+            notebook->set_tab_label_text(*this, "Remote (" + std::to_string(n) + ")");
+        }
+        else {
+            notebook->set_tab_label_text(*this, "Remote");
+        }
+    }
 }
 
 void PoolRemoteBox::update_body_placeholder_label()
