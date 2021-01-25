@@ -22,6 +22,7 @@
 #include "checks/check_part.hpp"
 #include "checks/check_unit.hpp"
 #include "checks/check_util.hpp"
+#include "checks/check_item.hpp"
 
 using namespace horizon;
 
@@ -120,50 +121,6 @@ static void print_rules_check_result(std::ostream &ofs, const RulesCheckResult &
         }
     }
     ofs << "\n";
-}
-
-static void accumulate_level(RulesCheckErrorLevel &r, RulesCheckErrorLevel l)
-{
-    r = static_cast<RulesCheckErrorLevel>(std::max(static_cast<int>(r), static_cast<int>(l)));
-}
-
-static RulesCheckResult check_item(Pool &pool, ObjectType type, const UUID &uu)
-{
-    switch (type) {
-    case ObjectType::UNIT:
-        return check_unit(*pool.get_unit(uu));
-
-    case ObjectType::ENTITY:
-        return check_entity(*pool.get_entity(uu));
-
-    case ObjectType::PART:
-        return check_part(*pool.get_part(uu));
-
-    case ObjectType::SYMBOL: {
-        const auto &sym = *pool.get_symbol(uu);
-        return sym.rules.check(RuleID::SYMBOL_CHECKS, sym);
-    }
-
-    case ObjectType::PACKAGE: {
-        auto pkg = *pool.get_package(uu);
-        pkg.expand();
-        pkg.apply_parameter_set({});
-        RulesCheckResult result;
-
-        accumulate_level(result.level, pkg.rules.check(RuleID::PACKAGE_CHECKS, pkg).level);
-
-        auto &rule_cl = dynamic_cast<RuleClearancePackage &>(*pkg.rules.get_rule_nc(RuleID::CLEARANCE_PACKAGE));
-        rule_cl.clearance_silkscreen_cu = 0.2_mm;
-        rule_cl.clearance_silkscreen_pkg = 0.2_mm;
-        const auto r = pkg.rules.check(RuleID::CLEARANCE_PACKAGE, pkg);
-        accumulate_level(result.level, r.level);
-
-        return result;
-    }
-
-    default:
-        return {};
-    }
 }
 
 int main(int c_argc, char *c_argv[])
