@@ -10,6 +10,7 @@
 #include "util/item_set.hpp"
 #include <atomic>
 #include "util/autofree_ptr.hpp"
+#include "rules/rules.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -37,11 +38,13 @@ private:
             Gtk::TreeModelColumnRecord::add(type);
             Gtk::TreeModelColumnRecord::add(uuid);
             Gtk::TreeModelColumnRecord::add(filename);
+            Gtk::TreeModelColumnRecord::add(check_result);
         }
         Gtk::TreeModelColumn<Glib::ustring> name;
         Gtk::TreeModelColumn<ObjectType> type;
         Gtk::TreeModelColumn<UUID> uuid;
         Gtk::TreeModelColumn<std::string> filename;
+        Gtk::TreeModelColumn<RulesCheckResult> check_result;
     };
     ListColumns list_columns;
 
@@ -59,6 +62,7 @@ private:
     Gtk::Label *gh_signed_in_label = nullptr;
     Gtk::Button *merge_items_clear_button = nullptr;
     Gtk::Button *merge_items_remove_button = nullptr;
+    Gtk::Button *merge_items_run_checks_button = nullptr;
     Gtk::Entry *pr_title_entry = nullptr;
     Gtk::TextView *pr_body_textview = nullptr;
     Gtk::ListBox *pull_requests_listbox = nullptr;

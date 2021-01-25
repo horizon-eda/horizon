@@ -671,6 +671,11 @@ SRC_POOL_PRJ_MGR = \
 	src/checks/check_entity.cpp\
 	src/checks/check_unit.cpp\
 	src/checks/check_part.cpp\
+	src/checks/check_item.cpp\
+	src/symbol/symbol_rules_check.cpp\
+	src/package/package_rules_check.cpp\
+	src/canvas/canvas_patch.cpp\
+	src/util/clipper_util.cpp\
 	src/pool-prj-mgr/pool-mgr/github_login_window.cpp\
 	src/widgets/log_view.cpp\
 	src/widgets/log_window.cpp\
