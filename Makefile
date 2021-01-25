@@ -676,6 +676,7 @@ SRC_POOL_PRJ_MGR = \
 	src/package/package_rules_check.cpp\
 	src/canvas/canvas_patch.cpp\
 	src/util/clipper_util.cpp\
+	src/pool-prj-mgr/pool-mgr/check_column.cpp\
 	src/pool-prj-mgr/pool-mgr/github_login_window.cpp\
 	src/widgets/log_view.cpp\
 	src/widgets/log_window.cpp\
