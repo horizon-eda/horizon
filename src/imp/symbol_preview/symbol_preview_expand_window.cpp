@@ -41,8 +41,9 @@ SymbolPreviewExpandWindow::SymbolPreviewExpandWindow(Gtk::Window *parent, const 
         sp_expand = Gtk::manage(new Gtk::SpinButton);
         box2->pack_start(*sp_expand, false, false, 0);
         sp_expand->set_range(0, 10);
-        sp_expand->signal_value_changed().connect(sigc::mem_fun(*this, &SymbolPreviewExpandWindow::update));
+        sp_expand->set_value(3);
         sp_expand->set_increments(1, 1);
+        sp_expand->signal_value_changed().connect(sigc::mem_fun(*this, &SymbolPreviewExpandWindow::update));
     }
 
 
@@ -52,14 +53,12 @@ SymbolPreviewExpandWindow::SymbolPreviewExpandWindow(Gtk::Window *parent, const 
 
     add(*overlay);
     overlay->show_all();
-
-    sp_expand->set_value(3);
-    update();
 }
 
 void SymbolPreviewExpandWindow::update()
 {
     Symbol sym_expanded = sym;
+    sym_expanded.can_expand = true;
     sym_expanded.apply_expand(sym, sp_expand->get_value_as_int());
     sym_expanded.expand(Symbol::PinDisplayMode::PRIMARY);
     canvas->update(sym_expanded, Placement(), false);

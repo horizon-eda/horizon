@@ -136,6 +136,7 @@ void ImpSymbol::construct()
         expand_preview_button = Gtk::manage(new Gtk::Button("Preview"));
         expand_preview_button->signal_clicked().connect([this] {
             symbol_preview_expand_window->present();
+            symbol_preview_expand_window->update();
             symbol_preview_expand_window->zoom_to_fit();
         });
         expand_preview_button->show();
