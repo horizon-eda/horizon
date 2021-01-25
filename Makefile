@@ -713,6 +713,7 @@ SRC_PR_REVIEW = \
 	src/checks/check_entity.cpp\
 	src/checks/check_unit.cpp\
 	src/checks/check_part.cpp\
+	src/checks/check_item.cpp\
 
 SRC_OCE = \
 	src/util/step_importer.cpp\
