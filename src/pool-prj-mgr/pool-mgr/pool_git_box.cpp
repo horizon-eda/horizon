@@ -10,6 +10,8 @@
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "preferences/preferences_provider.hpp"
 #include "preferences/preferences.hpp"
+#include "check_column.hpp"
+#include "checks/check_item.hpp"
 #include <iomanip>
 
 namespace horizon {
@@ -34,7 +36,12 @@ void PoolGitBox::make_treeview(Gtk::TreeView *treeview)
         tvc->set_min_width(200);
         tvc->set_resizable(true);
     }
-    tree_view_append_column_ellipsis(treeview, "Path", list_columns.path, Pango::ELLIPSIZE_START);
+    {
+        auto tvc = tree_view_append_column_ellipsis(treeview, "Path", list_columns.path, Pango::ELLIPSIZE_START);
+        tvc->set_min_width(200);
+        tvc->set_resizable(true);
+        tvc->set_expand(true);
+    }
 
     treeview->signal_row_activated().connect([this, treeview](const Gtk::TreeModel::Path &path,
                                                               Gtk::TreeViewColumn *column) {
@@ -149,6 +156,8 @@ PoolGitBox::PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     sort_controller_status->add_column(1, "type");
     sort_controller_status->set_sort(0, SortController::Sort::ASC);
     sort_controller_status->signal_changed().connect(sigc::mem_fun(*this, &PoolGitBox::update_status));
+
+    add_check_column(*status_treeview, list_columns.check_result);
 
 
     x->get_widget("button_git_pr", pr_button);
@@ -312,6 +321,10 @@ void PoolGitBox::store_from_db(View view, const std::string &extra_q)
             row[list_columns.type] = type;
             row[list_columns.uuid] = uu;
             row[list_columns.name] = name;
+            if (view == View::STATUS) {
+                auto result = check_item(notebook->pool, type, uu);
+                row[list_columns.check_result] = result;
+            }
         }
         else {
             row[list_columns.type] = ObjectType::INVALID;
@@ -348,10 +361,17 @@ void PoolGitBox::update_diff()
 
 void PoolGitBox::update_status()
 {
+    clock_t begin = clock();
+
     status_treeview->unset_model();
     status_store->clear();
     store_from_db(View::STATUS);
     status_treeview->set_model(status_store);
+
+
+    clock_t end = clock();
+    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    std::cout << "update took " << elapsed_secs << std::endl;
 }
 
 void PoolGitBox::handle_add_with_deps()
