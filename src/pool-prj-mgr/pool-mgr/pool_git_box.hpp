@@ -8,6 +8,7 @@
 #include "util/sqlite.hpp"
 #include <git2.h>
 #include "util/sort_controller.hpp"
+#include "rules/rules.hpp"
 
 class git_repository;
 
@@ -51,6 +52,7 @@ private:
 
             Gtk::TreeModelColumnRecord::add(status);
             Gtk::TreeModelColumnRecord::add(path);
+            Gtk::TreeModelColumnRecord::add(check_result);
         }
         Gtk::TreeModelColumn<Glib::ustring> name;
         Gtk::TreeModelColumn<ObjectType> type;
@@ -58,6 +60,7 @@ private:
 
         Gtk::TreeModelColumn<unsigned int> status;
         Gtk::TreeModelColumn<std::string> path;
+        Gtk::TreeModelColumn<RulesCheckResult> check_result;
     };
     TreeColumns list_columns;
 
