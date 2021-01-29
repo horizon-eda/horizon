@@ -39,6 +39,18 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+    <release version="1.4.0" date="2021-01-29">
+      <url>https://github.com/horizon-eda/horizon/releases/tag/v1.4.0</url>
+      <description>
+        <p>New features</p>
+        <ul>
+          <li>Arbitrary board rotation</li>
+          <li>Rule export/import</li>
+          <li>Improved board editor performance</li>
+          <li>Prettier 3D preview</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.3.0" date="2020-10-29">
       <url>https://github.com/horizon-eda/horizon/releases/tag/v1.3.0</url>
       <description>
