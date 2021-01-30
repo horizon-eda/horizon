@@ -6,7 +6,7 @@
 #include "export_pdf/export_pdf_board.hpp"
 #include "export_pnp/export_pnp.hpp"
 #include "export_step/export_step.hpp"
-#include "export_3d_image/export_3d_image.hpp"
+#include "image_3d_exporter_wrapper.hpp"
 #include "document/document_board.hpp"
 #include "rules/cache.hpp"
 #include <podofo/podofo.h>
@@ -355,9 +355,9 @@ static PyObject *PyBoard_export_3d(PyObject *pself, PyObject *args)
     unsigned int w, h;
     if (!PyArg_ParseTuple(args, "II", &w, &h))
         return NULL;
-    class horizon::Image3DExporter *exporter = nullptr;
+    class horizon::Image3DExporterWrapper *exporter = nullptr;
     try {
-        exporter = new horizon::Image3DExporter(self->board->board, self->board->pool, w, h);
+        exporter = new horizon::Image3DExporterWrapper(self->board->board, self->board->pool, w, h);
     }
     catch (const std::exception &e) {
         PyErr_SetString(PyExc_IOError, e.what());

@@ -13,13 +13,22 @@ public:
     void load_3d_models();
     Cairo::RefPtr<Cairo::Surface> render_to_surface();
     virtual ~Image3DExporter();
-    bool render_background = false;
+
+    const bool &get_render_background() const
+    {
+        return render_background;
+    }
+    void set_render_background(const bool &v)
+    {
+        render_background = v;
+    }
 
 private:
     class IPool &pool;
     void *ctx = nullptr; // to get around including osmesa here
     std::vector<unsigned char> buffer;
     void check_ctx();
+    bool render_background = false;
 };
 
 } // namespace horizon

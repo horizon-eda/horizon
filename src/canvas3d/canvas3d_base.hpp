@@ -19,32 +19,58 @@ public:
     friend class WallRenderer;
     friend class FaceRenderer;
     friend class BackgroundRenderer;
-    CanvasMesh ca;
-    Color background_top_color;
-    Color background_bottom_color;
     Color get_layer_color(int layer) const;
 
-    bool show_solder_mask = true;
-    bool show_silkscreen = true;
-    bool show_substrate = true;
-    bool show_models = true;
-    bool show_dnp_models = false;
-    bool show_solder_paste = true;
-    bool use_layer_colors = false;
-    Color solder_mask_color = {0, .5, 0};
-    Color substrate_color = {.2, .15, 0};
-    float explode = 0;
-    float highlight_intensity = .5;
-
-    float cam_azimuth = 90;
-    float cam_elevation = 45;
-    float cam_distance = 20;
-    float cam_fov = 45;
-    glm::vec2 center;
-
-
     enum class Projection { PERSP, ORTHO };
-    Projection projection = Projection::PERSP;
+
+#define GET_SET_X(x_, t_, f_)                                                                                          \
+    const auto &get_##x_() const                                                                                       \
+    {                                                                                                                  \
+        return x_;                                                                                                     \
+    }                                                                                                                  \
+    void set_##x_(const t_ &c)                                                                                         \
+    {                                                                                                                  \
+        x_ = c;                                                                                                        \
+        redraw();                                                                                                      \
+        f_                                                                                                             \
+    }
+
+#define GET_SET(x_, t_) GET_SET_X(x_, t_, )
+#define GET_SET_PICK(x_, t_) GET_SET_X(x_, t_, invalidate_pick();)
+
+    GET_SET(background_top_color, Color)
+    GET_SET(background_bottom_color, Color)
+    GET_SET(show_solder_mask, bool)
+    GET_SET(show_silkscreen, bool)
+    GET_SET_PICK(show_substrate, bool)
+    GET_SET_PICK(show_models, bool)
+    GET_SET_PICK(show_dnp_models, bool)
+    GET_SET(show_solder_paste, bool)
+    GET_SET(use_layer_colors, bool)
+    GET_SET(solder_mask_color, Color)
+    GET_SET(substrate_color, Color)
+    GET_SET_PICK(explode, float)
+    GET_SET_PICK(cam_distance, float)
+    GET_SET_PICK(cam_fov, float)
+    GET_SET_PICK(center, glm::vec2)
+    GET_SET_PICK(projection, Projection)
+
+#undef GET_SET
+#undef GET_SET_X
+#undef GET_SET_PICK
+
+    const float &get_cam_elevation() const
+    {
+        return cam_elevation;
+    }
+    void set_cam_elevation(const float &ele);
+
+    const float &get_cam_azimuth() const
+    {
+        return cam_azimuth;
+    }
+    void set_cam_azimuth(const float &az);
+
 
     class FaceVertex {
     public:
@@ -87,7 +113,32 @@ public:
     void clear_3d_models();
 
 protected:
+    CanvasMesh ca;
+
     Appearance appearance;
+
+    Color background_top_color;
+    Color background_bottom_color;
+    bool show_solder_mask = true;
+    bool show_silkscreen = true;
+    bool show_substrate = true;
+    bool show_models = true;
+    bool show_dnp_models = false;
+    bool show_solder_paste = true;
+    bool use_layer_colors = false;
+    Color solder_mask_color = {0, .5, 0};
+    Color substrate_color = {.2, .15, 0};
+    float explode = 0;
+    float highlight_intensity = .5;
+
+    float cam_azimuth = 90;
+    float cam_elevation = 45;
+    float cam_distance = 20;
+    float cam_fov = 45;
+    glm::vec2 center;
+
+    Projection projection = Projection::PERSP;
+
 
     int width = 100;
     int height = 100;
@@ -103,6 +154,12 @@ protected:
     enum class RenderBackground { YES, NO };
     void render(RenderBackground mode = RenderBackground::YES);
     virtual int a_get_scale_factor() const;
+    virtual void redraw()
+    {
+    }
+    void invalidate_pick()
+    {
+    }
     void prepare();
     void prepare_packages();
 

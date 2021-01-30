@@ -162,6 +162,35 @@ float Canvas3DBase::get_magic_number() const
     return tan(0.5 * glm::radians(cam_fov));
 }
 
+static float fix_cam_elevation(float cam_elevation)
+{
+    while (cam_elevation >= 360)
+        cam_elevation -= 360;
+    while (cam_elevation < 0)
+        cam_elevation += 360;
+    if (cam_elevation > 180)
+        cam_elevation -= 360;
+    return cam_elevation;
+}
+
+void Canvas3DBase::set_cam_elevation(const float &ele)
+{
+    cam_elevation = fix_cam_elevation(ele);
+    redraw();
+    invalidate_pick();
+}
+
+void Canvas3DBase::set_cam_azimuth(const float &az)
+{
+    cam_azimuth = az;
+    while (cam_azimuth < 0)
+        cam_azimuth += 360;
+
+    while (cam_azimuth > 360)
+        cam_azimuth -= 360;
+    redraw();
+    invalidate_pick();
+}
 
 void Canvas3DBase::render(RenderBackground mode)
 {
@@ -261,12 +290,12 @@ void Canvas3DBase::view_all()
     if (board_height < 1 || board_width < 1)
         return;
 
-    center = {(xmin + xmax) / 2e6, (ymin + ymax) / 2e6};
+    set_center({(xmin + xmax) / 2e6, (ymin + ymax) / 2e6});
 
 
-    cam_distance = std::max(board_width / width, board_height / height) / (2 * get_magic_number() / height) * 1.1;
-    cam_azimuth = 270;
-    cam_elevation = 89.99;
+    set_cam_distance(std::max(board_width / width, board_height / height) / (2 * get_magic_number() / height) * 1.1);
+    set_cam_azimuth(270);
+    set_cam_elevation(89.99);
 }
 
 void Canvas3DBase::prepare()

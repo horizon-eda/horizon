@@ -54,6 +54,7 @@ private:
     bool needs_push = false;
     bool needs_view_all = false;
     int a_get_scale_factor() const override;
+    void redraw() override;
 
     void on_size_allocate(Gtk::Allocation &alloc) override;
     void on_realize() override;
@@ -80,7 +81,6 @@ private:
     glm::vec2 gesture_rotate_pos_orig;
     void rotate_gesture_begin_cb(GdkEventSequence *seq);
     void rotate_gesture_update_cb(GdkEventSequence *seq);
-    void fix_cam_elevation();
 
     glm::vec2 pointer_pos_orig;
     float cam_azimuth_orig;

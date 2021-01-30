@@ -15,13 +15,16 @@ View3DWindow *View3DWindow::create(const class Board &b, class IPool &p, Mode m)
     return w;
 }
 
-static void bind_color_button(Gtk::ColorButton *color_button, Color &color, std::function<void(void)> extra_fn)
+void View3DWindow::bind_color_button(Gtk::ColorButton *color_button, FnSetColor fn_set,
+                                     std::function<void(void)> extra_fn)
 {
-    color_button->property_color().signal_changed().connect([color_button, &color, extra_fn] {
+    color_button->property_color().signal_changed().connect([this, color_button, fn_set, extra_fn] {
         auto co = color_button->get_color();
+        Color color;
         color.r = co.get_red_p();
         color.g = co.get_green_p();
         color.b = co.get_blue_p();
+        std::invoke(fn_set, canvas, color);
         extra_fn();
     });
 }
@@ -74,9 +77,8 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
             float az = it.azimuth;
             float el = it.elevation;
             b->signal_clicked().connect([this, az, el] {
-                canvas->cam_azimuth = az;
-                canvas->cam_elevation = el;
-                canvas->queue_draw();
+                canvas->set_cam_azimuth(az);
+                canvas->set_cam_elevation(el);
             });
             view_buttons_box->pack_start(*b, false, false, 0);
         }
@@ -94,29 +96,21 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     view_all_button->signal_clicked().connect([this] { canvas->view_all(); });
 
     auto explode_adj = Glib::RefPtr<Gtk::Adjustment>::cast_dynamic(x->get_object("explode_adj"));
-    explode_adj->signal_value_changed().connect([explode_adj, this] {
-        canvas->explode = explode_adj->get_value();
-        canvas->queue_draw();
-    });
+    explode_adj->signal_value_changed().connect([explode_adj, this] { canvas->set_explode(explode_adj->get_value()); });
 
     GET_WIDGET(solder_mask_color_button);
-    bind_color_button(solder_mask_color_button, canvas->solder_mask_color, [this] {
-        canvas->queue_draw();
-        s_signal_changed.emit();
-    });
+    bind_color_button(solder_mask_color_button, &Canvas3D::set_solder_mask_color, [this] { s_signal_changed.emit(); });
     solder_mask_color_button->set_color(Gdk::Color("#008000"));
 
     GET_WIDGET(background_top_color_button);
-    bind_color_button(background_top_color_button, canvas->background_top_color, [this] {
-        canvas->queue_draw();
+    bind_color_button(background_top_color_button, &Canvas3D::set_background_top_color, [this] {
         if (!setting_background_color_from_preset && background_color_preset_combo)
             background_color_preset_combo->set_active(-1);
     });
     background_top_color_button->set_color(Gdk::Color("#333365"));
 
     GET_WIDGET(background_bottom_color_button);
-    bind_color_button(background_bottom_color_button, canvas->background_bottom_color, [this] {
-        canvas->queue_draw();
+    bind_color_button(background_bottom_color_button, &Canvas3D::set_background_bottom_color, [this] {
         if (!setting_background_color_from_preset && background_color_preset_combo)
             background_color_preset_combo->set_active(-1);
     });
@@ -124,56 +118,41 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
 
     Gtk::Switch *solder_mask_switch;
     GET_WIDGET(solder_mask_switch);
-    solder_mask_switch->property_active().signal_changed().connect([this, solder_mask_switch] {
-        canvas->show_solder_mask = solder_mask_switch->get_active();
-        canvas->queue_draw();
-    });
+    solder_mask_switch->property_active().signal_changed().connect(
+            [this, solder_mask_switch] { canvas->set_show_solder_mask(solder_mask_switch->get_active()); });
 
     Gtk::Switch *silkscreen_switch;
     GET_WIDGET(silkscreen_switch);
-    silkscreen_switch->property_active().signal_changed().connect([this, silkscreen_switch] {
-        canvas->show_silkscreen = silkscreen_switch->get_active();
-        canvas->queue_draw();
-    });
+    silkscreen_switch->property_active().signal_changed().connect(
+            [this, silkscreen_switch] { canvas->set_show_silkscreen(silkscreen_switch->get_active()); });
 
     Gtk::Switch *substrate_switch;
     GET_WIDGET(substrate_switch);
-    substrate_switch->property_active().signal_changed().connect([this, substrate_switch] {
-        canvas->show_substrate = substrate_switch->get_active();
-        canvas->queue_draw();
-    });
+    substrate_switch->property_active().signal_changed().connect(
+            [this, substrate_switch] { canvas->set_show_substrate(substrate_switch->get_active()); });
 
     GET_WIDGET(substrate_color_button);
-    bind_color_button(substrate_color_button, canvas->substrate_color, [this] {
-        canvas->queue_draw();
-        s_signal_changed.emit();
-    });
+    bind_color_button(substrate_color_button, &Canvas3D::set_substrate_color, [this] { s_signal_changed.emit(); });
     substrate_color_button->set_color(Gdk::Color("#332600"));
 
     Gtk::Switch *paste_switch;
     GET_WIDGET(paste_switch);
-    paste_switch->property_active().signal_changed().connect([this, paste_switch] {
-        canvas->show_solder_paste = paste_switch->get_active();
-        canvas->queue_draw();
-    });
+    paste_switch->property_active().signal_changed().connect(
+            [this, paste_switch] { canvas->set_show_solder_paste(paste_switch->get_active()); });
 
     {
         Gtk::RadioButton *models_none_rb;
         GET_WIDGET(models_none_rb);
-        models_none_rb->property_active().signal_changed().connect([this, models_none_rb] {
-            canvas->show_models = !models_none_rb->get_active();
-            canvas->queue_draw();
-        });
+        models_none_rb->property_active().signal_changed().connect(
+                [this, models_none_rb] { canvas->set_show_models(!models_none_rb->get_active()); });
     }
 
     {
         Gtk::RadioButton *models_placed_rb;
         GET_WIDGET(models_placed_rb);
         if (mode == Mode::BOARD) {
-            models_placed_rb->property_active().signal_changed().connect([this, models_placed_rb] {
-                canvas->show_dnp_models = !models_placed_rb->get_active();
-                canvas->queue_draw();
-            });
+            models_placed_rb->property_active().signal_changed().connect(
+                    [this, models_placed_rb] { canvas->set_show_dnp_models(!models_placed_rb->get_active()); });
         }
         else {
             models_placed_rb->hide();
@@ -189,16 +168,13 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
 
     Gtk::Switch *layer_colors_switch;
     GET_WIDGET(layer_colors_switch);
-    layer_colors_switch->property_active().signal_changed().connect([this, layer_colors_switch] {
-        canvas->use_layer_colors = layer_colors_switch->get_active();
-        canvas->queue_draw();
-    });
+    layer_colors_switch->property_active().signal_changed().connect(
+            [this, layer_colors_switch] { canvas->set_use_layer_colors(layer_colors_switch->get_active()); });
 
     Gtk::RadioButton *proj_persp_rb;
     GET_WIDGET(proj_persp_rb);
     proj_persp_rb->signal_toggled().connect([this, proj_persp_rb] {
-        canvas->projection = proj_persp_rb->get_active() ? Canvas3D::Projection::PERSP : Canvas3D::Projection::ORTHO;
-        canvas->queue_draw();
+        canvas->set_projection(proj_persp_rb->get_active() ? Canvas3D::Projection::PERSP : Canvas3D::Projection::ORTHO);
     });
 
     GET_WIDGET(background_color_preset_combo);

@@ -45,6 +45,9 @@ private:
     Gtk::ComboBoxText *background_color_preset_combo = nullptr;
     bool setting_background_color_from_preset = false;
 
+    using FnSetColor = void (Canvas3D::*)(const Color &color);
+    void bind_color_button(Gtk::ColorButton *color_button, FnSetColor fn_set, std::function<void(void)> extra_fn);
+
     WindowStateStore state_store;
 
     type_signal_request_update s_signal_request_update;

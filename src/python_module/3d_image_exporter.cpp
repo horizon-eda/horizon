@@ -1,5 +1,5 @@
 #include "3d_image_exporter.hpp"
-#include "export_3d_image/export_3d_image.hpp"
+#include "image_3d_exporter_wrapper.hpp"
 #include "nlohmann/json.hpp"
 #include "util.hpp"
 #define PYCAIRO_NO_IMPORT
@@ -88,55 +88,79 @@ static PyMethodDef PyImage3DExporter_methods[] = {
         {NULL} /* Sentinel */
 };
 
-enum class BoolAttr : intptr_t {
-    RENDER_BACKGROUND,
-    SHOW_SILKSCREEN,
-    SHOW_MODELS,
-    SHOW_DNP_MODELS,
-    SHOW_SOLDER_MASK,
-    SHOW_SOLDER_PASTE,
-    SHOW_SUBSTRATE,
-    USE_LAYER_COLORS
-};
+using Color = horizon::Color;
 
-static bool &get_bool_attr(PyObject *pself, void *pa)
+static PyObject *ortho_get(PyObject *pself, void *pa)
 {
     auto self = reinterpret_cast<PyImage3DExporter *>(pself);
-    auto ex = self->exporter;
-    auto a = static_cast<BoolAttr>(reinterpret_cast<intptr_t>(pa));
-    switch (a) {
-    case BoolAttr::RENDER_BACKGROUND:
-        return ex->render_background;
-
-    case BoolAttr::SHOW_SILKSCREEN:
-        return ex->show_silkscreen;
-
-    case BoolAttr::SHOW_MODELS:
-        return ex->show_models;
-
-    case BoolAttr::SHOW_DNP_MODELS:
-        return ex->show_dnp_models;
-
-    case BoolAttr::SHOW_SOLDER_MASK:
-        return ex->show_solder_mask;
-
-    case BoolAttr::SHOW_SOLDER_PASTE:
-        return ex->show_solder_paste;
-
-    case BoolAttr::SHOW_SUBSTRATE:
-        return ex->show_substrate;
-
-    case BoolAttr::USE_LAYER_COLORS:
-        return ex->use_layer_colors;
-
-    default:
-        throw std::runtime_error("invalid attr");
-    }
+    return PyBool_FromLong(self->exporter->get_projection() == horizon::Canvas3DBase::Projection::ORTHO);
 }
+
+static int ortho_set(PyObject *pself, PyObject *pval, void *pa)
+{
+    if (!pval) {
+        PyErr_SetString(PyExc_AttributeError, "can't delete attr");
+        return -1;
+    }
+    if (!PyBool_Check(pval)) {
+        PyErr_SetString(PyExc_TypeError, "must be bool");
+        return -1;
+    }
+    auto self = reinterpret_cast<PyImage3DExporter *>(pself);
+    if (pval == Py_True) {
+        self->exporter->set_projection(horizon::Canvas3DBase::Projection::ORTHO);
+    }
+    else {
+        self->exporter->set_projection(horizon::Canvas3DBase::Projection::PERSP);
+    }
+    return 0;
+}
+
+
+template <typename T> struct FnGetSet {
+    using Set = void (horizon::Image3DExporterWrapper::*)(const T &v);
+    using Get = const T &(horizon::Image3DExporterWrapper::*)() const;
+    Get get;
+    Set set;
+};
+
+#define GET_SET(t_, x_)                                                                                                \
+    static FnGetSet<t_> get_set_##x_{                                                                                  \
+            &horizon::Image3DExporterWrapper::get_##x_,                                                                \
+            &horizon::Image3DExporterWrapper::set_##x_,                                                                \
+    };
+
+
+#define ATTRS                                                                                                          \
+    X(bool, render_background)                                                                                         \
+    X(bool, show_models)                                                                                               \
+    X(bool, show_dnp_models)                                                                                           \
+    X(bool, show_silkscreen)                                                                                           \
+    X(bool, show_solder_mask)                                                                                          \
+    X(bool, show_solder_paste)                                                                                         \
+    X(bool, show_substrate)                                                                                            \
+    X(bool, use_layer_colors)                                                                                          \
+    X(float, cam_azimuth)                                                                                              \
+    X(float, cam_elevation)                                                                                            \
+    X(float, cam_distance)                                                                                             \
+    X(float, cam_fov)                                                                                                  \
+    X(float, center_x)                                                                                                 \
+    X(float, center_y)                                                                                                 \
+    X(Color, background_top_color)                                                                                     \
+    X(Color, background_bottom_color)                                                                                  \
+    X(Color, solder_mask_color)                                                                                        \
+    X(Color, substrate_color)
+
+
+#define X GET_SET
+ATTRS
+#undef X
 
 static PyObject *bool_attr_get(PyObject *pself, void *pa)
 {
-    return PyBool_FromLong(get_bool_attr(pself, pa));
+    auto self = reinterpret_cast<PyImage3DExporter *>(pself);
+    auto getset = static_cast<FnGetSet<bool> *>(pa);
+    return PyBool_FromLong(std::invoke(getset->get, self->exporter));
 }
 
 static int bool_attr_set(PyObject *pself, PyObject *pval, void *pa)
@@ -149,51 +173,17 @@ static int bool_attr_set(PyObject *pself, PyObject *pval, void *pa)
         PyErr_SetString(PyExc_TypeError, "must be bool");
         return -1;
     }
-    get_bool_attr(pself, pa) = (pval == Py_True);
-    return 0;
-}
-
-enum class FloatAttr : intptr_t {
-    CAM_AZIMUTH,
-    CAM_ELEVATION,
-    CAM_DISTANCE,
-    CAM_FOV,
-    CENTER_X,
-    CENTER_Y,
-};
-
-static float &get_float_attr(PyObject *pself, void *pa)
-{
     auto self = reinterpret_cast<PyImage3DExporter *>(pself);
-    auto ex = self->exporter;
-    auto a = static_cast<FloatAttr>(reinterpret_cast<intptr_t>(pa));
-    switch (a) {
-    case FloatAttr::CAM_AZIMUTH:
-        return ex->cam_azimuth;
-
-    case FloatAttr::CAM_ELEVATION:
-        return ex->cam_elevation;
-
-    case FloatAttr::CAM_DISTANCE:
-        return ex->cam_distance;
-
-    case FloatAttr::CAM_FOV:
-        return ex->cam_fov;
-
-    case FloatAttr::CENTER_X:
-        return ex->center.x;
-
-    case FloatAttr::CENTER_Y:
-        return ex->center.y;
-
-    default:
-        throw std::runtime_error("invalid attr");
-    }
+    auto getset = static_cast<FnGetSet<bool> *>(pa);
+    std::invoke(getset->set, self->exporter, pval == Py_True);
+    return 0;
 }
 
 static PyObject *float_attr_get(PyObject *pself, void *pa)
 {
-    return PyFloat_FromDouble(get_float_attr(pself, pa));
+    auto self = reinterpret_cast<PyImage3DExporter *>(pself);
+    auto getset = static_cast<FnGetSet<float> *>(pa);
+    return PyFloat_FromDouble(std::invoke(getset->get, self->exporter));
 }
 
 static int float_attr_set(PyObject *pself, PyObject *pval, void *pa)
@@ -209,43 +199,23 @@ static int float_attr_set(PyObject *pself, PyObject *pval, void *pa)
     auto pfloat = PyNumber_Float(pval);
     if (!pfloat)
         return -1;
-    get_float_attr(pself, pa) = PyFloat_AsDouble(pfloat);
+    auto self = reinterpret_cast<PyImage3DExporter *>(pself);
+    auto getset = static_cast<FnGetSet<float> *>(pa);
+    std::invoke(getset->set, self->exporter, PyFloat_AsDouble(pfloat));
     Py_DecRef(pfloat);
     return 0;
 }
 
-enum class ColorAttr : intptr_t { BACKGROUND_TOP, BACKGROUND_BOTTOM, SOLDER_MASK, SUBSTRATE };
 
-static horizon::Color &get_color_attr(PyObject *pself, void *pa)
+static PyObject *Color_attr_get(PyObject *pself, void *pa)
 {
     auto self = reinterpret_cast<PyImage3DExporter *>(pself);
-    auto ex = self->exporter;
-    auto a = static_cast<ColorAttr>(reinterpret_cast<intptr_t>(pa));
-    switch (a) {
-    case ColorAttr::BACKGROUND_TOP:
-        return ex->background_top_color;
-
-    case ColorAttr::BACKGROUND_BOTTOM:
-        return ex->background_bottom_color;
-
-    case ColorAttr::SOLDER_MASK:
-        return ex->solder_mask_color;
-
-    case ColorAttr::SUBSTRATE:
-        return ex->substrate_color;
-
-    default:
-        throw std::runtime_error("invalid attr");
-    }
-}
-
-static PyObject *color_attr_get(PyObject *pself, void *pa)
-{
-    const auto &c = get_color_attr(pself, pa);
+    auto getset = static_cast<FnGetSet<Color> *>(pa);
+    auto c = std::invoke(getset->get, self->exporter);
     return Py_BuildValue("(fff)", c.r, c.g, c.b);
 }
 
-static int color_attr_set(PyObject *pself, PyObject *pval, void *pa)
+static int Color_attr_set(PyObject *pself, PyObject *pval, void *pa)
 {
     if (!pval) {
         PyErr_SetString(PyExc_AttributeError, "can't delete attr");
@@ -259,7 +229,7 @@ static int color_attr_set(PyObject *pself, PyObject *pval, void *pa)
         PyErr_SetString(PyExc_TypeError, "must be sequence of length 3");
         return -1;
     }
-    auto &c = get_color_attr(pself, pa);
+    Color c;
     for (size_t idx = 0; idx < 3; idx++) {
         auto elem = PySequence_GetItem(pval, idx);
         if (!elem)
@@ -293,79 +263,17 @@ static int color_attr_set(PyObject *pself, PyObject *pval, void *pa)
         Py_DecRef(pfloat);
         Py_DecRef(elem);
     }
-    return 0;
-}
-
-static PyObject *ortho_get(PyObject *pself, void *pa)
-{
     auto self = reinterpret_cast<PyImage3DExporter *>(pself);
-    return PyBool_FromLong(self->exporter->projection == horizon::Canvas3DBase::Projection::ORTHO);
-}
-
-static int ortho_set(PyObject *pself, PyObject *pval, void *pa)
-{
-    if (!pval) {
-        PyErr_SetString(PyExc_AttributeError, "can't delete attr");
-        return -1;
-    }
-    if (!PyBool_Check(pval)) {
-        PyErr_SetString(PyExc_TypeError, "must be bool");
-        return -1;
-    }
-    auto self = reinterpret_cast<PyImage3DExporter *>(pself);
-    if (pval == Py_True) {
-        self->exporter->projection = horizon::Canvas3DBase::Projection::ORTHO;
-    }
-    else {
-        self->exporter->projection = horizon::Canvas3DBase::Projection::PERSP;
-    }
+    auto getset = static_cast<FnGetSet<Color> *>(pa);
+    std::invoke(getset->set, self->exporter, c);
     return 0;
 }
 
 static PyGetSetDef PyImage3DExporter_getset[] = {
-        {"render_background", &bool_attr_get, &bool_attr_set, NULL,
-         reinterpret_cast<void *>(BoolAttr::RENDER_BACKGROUND)},
-
-        {"show_models", &bool_attr_get, &bool_attr_set, NULL, reinterpret_cast<void *>(BoolAttr::SHOW_MODELS)},
-
-        {"show_dnp_models", &bool_attr_get, &bool_attr_set, NULL, reinterpret_cast<void *>(BoolAttr::SHOW_DNP_MODELS)},
-
-        {"show_silkscreen", &bool_attr_get, &bool_attr_set, NULL, reinterpret_cast<void *>(BoolAttr::SHOW_SILKSCREEN)},
-
-        {"show_solder_mask", &bool_attr_get, &bool_attr_set, NULL,
-         reinterpret_cast<void *>(BoolAttr::SHOW_SOLDER_MASK)},
-
-        {"show_solder_paste", &bool_attr_get, &bool_attr_set, NULL,
-         reinterpret_cast<void *>(BoolAttr::SHOW_SOLDER_PASTE)},
-
-        {"show_substrate", &bool_attr_get, &bool_attr_set, NULL, reinterpret_cast<void *>(BoolAttr::SHOW_SUBSTRATE)},
-
-        {"use_layer_colors", &bool_attr_get, &bool_attr_set, NULL,
-         reinterpret_cast<void *>(BoolAttr::USE_LAYER_COLORS)},
-
-        {"cam_azimuth", &float_attr_get, &float_attr_set, NULL, reinterpret_cast<void *>(FloatAttr::CAM_AZIMUTH)},
-
-        {"cam_elevation", &float_attr_get, &float_attr_set, NULL, reinterpret_cast<void *>(FloatAttr::CAM_ELEVATION)},
-
-        {"cam_distance", &float_attr_get, &float_attr_set, NULL, reinterpret_cast<void *>(FloatAttr::CAM_DISTANCE)},
-
-        {"cam_fov", &float_attr_get, &float_attr_set, NULL, reinterpret_cast<void *>(FloatAttr::CAM_FOV)},
-
-        {"center_x", &float_attr_get, &float_attr_set, NULL, reinterpret_cast<void *>(FloatAttr::CENTER_X)},
-        {"center_y", &float_attr_get, &float_attr_set, NULL, reinterpret_cast<void *>(FloatAttr::CENTER_Y)},
-
-        {"background_top_color", &color_attr_get, &color_attr_set, NULL,
-         reinterpret_cast<void *>(ColorAttr::BACKGROUND_TOP)},
-
-        {"background_bottom_color", &color_attr_get, &color_attr_set, NULL,
-         reinterpret_cast<void *>(ColorAttr::BACKGROUND_BOTTOM)},
-
-        {"solder_mask_color", &color_attr_get, &color_attr_set, NULL, reinterpret_cast<void *>(ColorAttr::SOLDER_MASK)},
-
-        {"substrate_color", &color_attr_get, &color_attr_set, NULL, reinterpret_cast<void *>(ColorAttr::SUBSTRATE)},
-
+#define X(t_, x_) {#x_, &t_##_attr_get, &t_##_attr_set, NULL, static_cast<void *>(&get_set_##x_)},
+        ATTRS
+#undef X
         {"ortho", &ortho_get, &ortho_set, NULL, NULL},
-
         {NULL},
         /* Sentinel */};
 
