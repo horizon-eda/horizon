@@ -41,7 +41,7 @@ See the [the docs](https://docs.horizon-eda.org/en/latest/installation.html)
 | poly2tri                 | poly2tri               | d949f3cd6f85b20728af0bdc454b090226068c73 | https://github.com/jhasse/poly2tri                              | 3-Clause BSD |
 | dxflib                   | dxflib                 | 3.17.0                                   | https://qcad.org/en/90-dxflib                                   | GPLv2        |
 | alphanum                 | The Alphanum Algorithm | 1.3                                      | http://www.davekoelle.com/alphanum.html                         | MIT          |
-| delaunator               | Delaunator C++         | TBD                                      | https://github.com/abellgithub/delaunator-cpp                   | MIT          |
+| delaunator               | Delaunator C++         | 6f2879967bc96a9bcdbacf418e560e9f2e170ace | https://github.com/abellgithub/delaunator-cpp                   | MIT          |
 | footag                   | footag                 | 99116328abe8f53e71831b446d35e93ee7128ef3 | https://github.com/endofexclusive/footag                        | GPLv3        |
 | libzippp                 | libzip++               | TBD                                      | https://github.com/leezu/libzippp                               | ISC          |
 | router                   | KiCad router           | 5.1.6                                    | https://gitlab.com/kicad/code/kicad/-/tree/master/pcbnew/router | GPLv3        |
