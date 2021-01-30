@@ -1,6 +1,6 @@
 /*
- * Poly2Tri Copyright (c) 2009-2010, Poly2Tri Contributors
- * http://code.google.com/p/poly2tri/
+ * Poly2Tri Copyright (c) 2009-2018, Poly2Tri Contributors
+ * https://github.com/jhasse/poly2tri
  *
  * All rights reserved.
  *
@@ -33,7 +33,7 @@
  * Zalik, B.(2008)'Sweep-line algorithm for constrained Delaunay triangulation',
  * International Journal of Geographical Information Science
  *
- * "FlipScan" Constrained Edge Algorithm invented by Thomas ?hl?n, thahlen@gmail.com
+ * "FlipScan" Constrained Edge Algorithm invented by Thomas Åhlén, thahlen@gmail.com
  */
 
 #ifndef SWEEP_H

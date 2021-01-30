@@ -1,6 +1,6 @@
 /*
- * Poly2Tri Copyright (c) 2009-2010, Poly2Tri Contributors
- * http://code.google.com/p/poly2tri/
+ * Poly2Tri Copyright (c) 2009-2018, Poly2Tri Contributors
+ * https://github.com/jhasse/poly2tri
  *
  * All rights reserved.
  *
@@ -35,12 +35,12 @@
 namespace p2t {
 
 SweepContext::SweepContext(const std::vector<Point*>& polyline) : points_(polyline),
-  front_(0),
-  head_(0),
-  tail_(0),
-  af_head_(0),
-  af_middle_(0),
-  af_tail_(0)
+  front_(nullptr),
+  head_(nullptr),
+  tail_(nullptr),
+  af_head_(nullptr),
+  af_middle_(nullptr),
+  af_tail_(nullptr)
 {
   InitEdges(points_);
 }
@@ -87,8 +87,8 @@ void SweepContext::InitTriangulation()
 
   double dx = kAlpha * (xmax - xmin);
   double dy = kAlpha * (ymax - ymin);
-  head_ = new Point(xmax + dx, ymin - dy);
-  tail_ = new Point(xmin - dx, ymin - dy);
+  head_ = new Point(xmin - dx, ymin - dy);
+  tail_ = new Point(xmax + dx, ymin - dy);
 
   // Sort points along y-axis
   std::sort(points_.begin(), points_.end(), cmp);
@@ -120,12 +120,11 @@ Node& SweepContext::LocateNode(const Point& point)
   return *front_->LocateNode(point.x);
 }
 
-void SweepContext::CreateAdvancingFront(const std::vector<Node*>& nodes)
+void SweepContext::CreateAdvancingFront()
 {
 
-  (void) nodes;
   // Initial triangle
-  Triangle* triangle = new Triangle(*points_[0], *tail_, *head_);
+  Triangle* triangle = new Triangle(*points_[0], *head_, *tail_);
 
   map_.push_back(triangle);
 
@@ -172,7 +171,7 @@ void SweepContext::MeshClean(Triangle& triangle)
 	Triangle *t = triangles.back();
 	triangles.pop_back();
 
-    if (t != NULL && !t->IsInterior()) {
+    if (t != nullptr && !t->IsInterior()) {
       t->IsInterior(true);
       triangles_.push_back(t);
       for (int i = 0; i < 3; i++) {
@@ -208,4 +207,4 @@ SweepContext::~SweepContext()
 
 }
 
-}
+} // namespace p2t
