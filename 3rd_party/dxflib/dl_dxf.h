@@ -57,11 +57,11 @@ class DL_CreationInterface;
 class DL_WriterA;
 
 
-#define DL_VERSION "3.12.2.0"
+#define DL_VERSION "3.17.0.0"
 
 #define DL_VERSION_MAJOR    3
-#define DL_VERSION_MINOR    12
-#define DL_VERSION_REV      2
+#define DL_VERSION_MINOR    17
+#define DL_VERSION_REV      0
 #define DL_VERSION_BUILD    0
 
 #define DL_UNKNOWN               0
@@ -96,7 +96,8 @@ class DL_WriterA;
 #define DL_ENTITY_3DFACE       122
 #define DL_ENTITY_XLINE        123
 #define DL_ENTITY_RAY          124
-#define DL_ENTITY_SEQEND       125
+#define DL_ENTITY_ARCALIGNEDTEXT 125
+#define DL_ENTITY_SEQEND       126
 #define DL_XRECORD             200
 #define DL_DICTIONARY          210
 
@@ -169,6 +170,7 @@ public:
 
     void addMText(DL_CreationInterface* creationInterface);
     void addText(DL_CreationInterface* creationInterface);
+    void addArcAlignedText(DL_CreationInterface* creationInterface);
 
     void addAttribute(DL_CreationInterface* creationInterface);
 
@@ -418,6 +420,18 @@ public:
         return strtol(str.c_str(), &p, 10);
     }
 
+    int getInt16Value(int code, int def) {
+        if (!hasValue(code)) {
+            return def;
+        }
+        return toInt16(values[code]);
+    }
+
+    int toInt16(const std::string& str) {
+        char* p;
+        return strtol(str.c_str(), &p, 16);
+    }
+
     bool toBool(const std::string& str) {
         char* p;
         return (bool)strtol(str.c_str(), &p, 10);
@@ -444,7 +458,7 @@ public:
         std::replace(str2.begin(), str2.end(), ',', '.');
         // make sure c++ expects '.' not ',':
         std::istringstream istr(str2);
-        istr.imbue(std::locale("C"));
+        //istr.imbue(std::locale("C"));
         istr >> ret;
         return ret;
     }
