@@ -46,6 +46,12 @@ public:
         return s_signal_models_loading;
     }
 
+    typedef sigc::signal<void, UUID> type_signal_package_select;
+    type_signal_package_select signal_package_select()
+    {
+        return s_signal_package_select;
+    }
+
     int _animate_step(GdkFrameClock *frame_clock);
 
     ~Canvas3D();
@@ -110,5 +116,8 @@ private:
 
     std::thread model_load_thread;
     std::atomic<bool> stop_model_load_thread;
+
+    type_signal_package_select s_signal_package_select;
+    int pick_x, pick_y;
 };
 } // namespace horizon

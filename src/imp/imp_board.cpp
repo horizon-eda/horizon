@@ -591,6 +591,14 @@ void ImpBoard::construct()
         }
         return false;
     });
+    view_3d_window->signal_package_select().connect([this](const auto &uu) {
+        if (!core->tool_is_active() && canvas->get_selection_mode() == CanvasGL::SelectionMode::NORMAL) {
+            if (uu)
+                canvas->set_selection({{uu, ObjectType::BOARD_PACKAGE}});
+            else
+                canvas->set_selection({});
+        }
+    });
 
     step_export_window = StepExportWindow::create(main_window, core_board, project_dir);
     step_export_window->signal_changed().connect([this] { core_board.set_needs_save(); });

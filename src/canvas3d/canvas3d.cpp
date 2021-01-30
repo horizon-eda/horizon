@@ -27,6 +27,7 @@ Canvas3D::Canvas3D() : i_model_loading(0), stop_model_load_thread(false)
     models_loading_dispatcher.connect([this] {
         update_max_package_height();
         request_push();
+        invalidate_pick();
         s_signal_models_loading.emit(i_model_loading, n_models_loading);
         if ((i_model_loading >= n_models_loading) && model_load_thread.joinable()) {
             model_load_thread.join();
@@ -48,6 +49,8 @@ Canvas3D::Canvas3D() : i_model_loading(0), stop_model_load_thread(false)
     gesture_rotate->signal_begin().connect(sigc::mem_fun(*this, &Canvas3D::rotate_gesture_begin_cb));
     gesture_rotate->signal_update().connect(sigc::mem_fun(*this, &Canvas3D::rotate_gesture_update_cb));
     gesture_rotate->set_propagation_phase(Gtk::PHASE_CAPTURE);
+
+    signal_pick_ready().connect([this] { s_signal_package_select.emit(pick_package(pick_x, pick_y)); });
 }
 
 glm::vec2 Canvas3D::get_center_shift(const glm::vec2 &shift) const
@@ -108,6 +111,13 @@ bool Canvas3D::on_motion_notify_event(GdkEventMotion *motion_event)
 
 bool Canvas3D::on_button_release_event(GdkEventButton *button_event)
 {
+    if (pan_mode == PanMode::ROTATE) {
+        if (glm::length((glm::vec2(button_event->x, button_event->y) - pointer_pos_orig)) < 50) {
+            pick_x = button_event->x;
+            pick_y = button_event->y;
+            queue_pick();
+        }
+    }
     pan_mode = PanMode::NONE;
     return Gtk::GLArea::on_button_release_event(button_event);
 }
@@ -360,6 +370,7 @@ bool Canvas3D::on_render(const Glib::RefPtr<Gdk::GLContext> &context)
     }
     if (needs_resize) {
         resize_buffers();
+        invalidate_pick();
         needs_resize = false;
     }
 

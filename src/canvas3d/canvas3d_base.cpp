@@ -3,6 +3,7 @@
 #include "board/board_layers.hpp"
 #include "board/board.hpp"
 #include "canvas/gl_util.hpp"
+#include "util/util.hpp"
 #include "util/min_max_accumulator.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -11,6 +12,7 @@
 #include <glibmm/miscutils.h>
 #include "pool/pool_manager.hpp"
 #include "pool/ipool.hpp"
+#include "logger/log_util.hpp"
 
 namespace horizon {
 
@@ -110,8 +112,24 @@ void Canvas3DBase::a_realize()
 
     glGenRenderbuffers(1, &renderbuffer);
     glGenRenderbuffers(1, &depthrenderbuffer);
+    glGenRenderbuffers(1, &pickrenderbuffer);
+    glGenRenderbuffers(1, &pickrenderbuffer_downsampled);
 
     resize_buffers();
+
+    GL_CHECK_ERROR
+
+    glGenFramebuffers(1, &fbo_downsampled);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo_downsampled);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, pickrenderbuffer_downsampled);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        // Gtk::MessageDialog md("Error setting up framebuffer, will now exit", false /* use_markup */,
+        // Gtk::MESSAGE_ERROR,
+        //                      Gtk::BUTTONS_OK);
+        // md.run();
+        abort();
+    }
 
     GL_CHECK_ERROR
 
@@ -119,6 +137,7 @@ void Canvas3DBase::a_realize()
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_RENDERBUFFER, pickrenderbuffer);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
 
     GL_CHECK_ERROR
@@ -147,6 +166,13 @@ void Canvas3DBase::resize_buffers()
     glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
     glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH_COMPONENT, width * a_get_scale_factor(),
                                      height * a_get_scale_factor());
+    glBindRenderbuffer(GL_RENDERBUFFER, pickrenderbuffer);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_R16UI, width * a_get_scale_factor(),
+                                     height * a_get_scale_factor());
+
+    glBindRenderbuffer(GL_RENDERBUFFER, pickrenderbuffer_downsampled);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_R16UI, width * a_get_scale_factor(), height * a_get_scale_factor());
+
     glBindRenderbuffer(GL_RENDERBUFFER, rb);
 }
 
@@ -204,6 +230,10 @@ void Canvas3DBase::render(RenderBackground mode)
     glClearDepth(10);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     GL_CHECK_ERROR
+    {
+        const std::array<GLenum, 2> bufs = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+        glDrawBuffers(bufs.size(), bufs.data());
+    }
 
     if (mode == RenderBackground::YES) {
         glDisable(GL_DEPTH_TEST);
@@ -256,8 +286,32 @@ void Canvas3DBase::render(RenderBackground mode)
 
     GL_CHECK_ERROR
 
+    if (pick_state == PickState::QUEUED) {
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo_downsampled);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+        glDrawBuffer(GL_COLOR_ATTACHMENT0);
+        glReadBuffer(GL_COLOR_ATTACHMENT1);
+        glBlitFramebuffer(0, 0, width * a_get_scale_factor(), height * a_get_scale_factor(), 0, 0,
+                          width * a_get_scale_factor(), height * a_get_scale_factor(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo_downsampled);
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+        pick_buf.resize(width * a_get_scale_factor() * height * a_get_scale_factor());
+        GL_CHECK_ERROR
+
+        glPixelStorei(GL_PACK_ALIGNMENT, 2);
+        glReadPixels(0, 0, width * a_get_scale_factor(), height * a_get_scale_factor(), GL_RED_INTEGER,
+                     GL_UNSIGNED_SHORT, pick_buf.data());
+
+        GL_CHECK_ERROR
+        pick_state = PickState::CURRENT;
+        s_signal_pick_ready.emit();
+    }
+
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
     glBlitFramebuffer(0, 0, width * a_get_scale_factor(), height * a_get_scale_factor(), 0, 0,
                       width * a_get_scale_factor(), height * a_get_scale_factor(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
@@ -322,7 +376,7 @@ void Canvas3DBase::prepare_packages()
 {
     if (!brd)
         return;
-    package_transform_idxs.clear();
+    package_infos.clear();
     package_transforms.clear();
     std::map<std::pair<std::string, bool>, std::set<const BoardPackage *>> pkg_map;
     for (const auto &it : brd->packages) {
@@ -332,9 +386,12 @@ void Canvas3DBase::prepare_packages()
                     &it.second);
     }
 
+    unsigned int pick_base = 2; // 0: background, 1: PCB, 2+: models
     for (const auto &it_pkg : pkg_map) {
         size_t size_before = package_transforms.size();
+        std::vector<UUID> pkgs;
         for (const auto &it_brd_pkg : it_pkg.second) {
+            pkgs.push_back(it_brd_pkg->uuid);
             const auto &pl = it_brd_pkg->placement;
             const auto &pkg = it_brd_pkg->package;
             package_transforms.emplace_back(pl.shift.x / 1e6, pl.shift.y / 1e6, pl.get_angle(), it_brd_pkg->flip,
@@ -351,7 +408,8 @@ void Canvas3DBase::prepare_packages()
             }
         }
         size_t size_after = package_transforms.size();
-        package_transform_idxs[it_pkg.first] = {size_before, size_after - size_before};
+        package_infos[it_pkg.first] = {size_before, size_after - size_before, pick_base, pkgs};
+        pick_base += pkgs.size();
     }
 }
 
@@ -447,6 +505,40 @@ void Canvas3DBase::update_max_package_height()
     for (const auto &it : face_vertex_buffer) {
         package_height_max = std::max(it.z, package_height_max);
     }
+}
+
+void Canvas3DBase::invalidate_pick()
+{
+    pick_state = PickState::INVALID;
+}
+
+void Canvas3DBase::queue_pick()
+{
+    if (pick_state == PickState::INVALID) {
+        pick_state = PickState::QUEUED;
+        redraw();
+    }
+    else if (pick_state == PickState::CURRENT) {
+        s_signal_pick_ready.emit();
+    }
+}
+
+UUID Canvas3DBase::pick_package(unsigned int x, unsigned int y) const
+{
+    if (pick_state != PickState::CURRENT) {
+        Logger::log_warning("can't with non-current pick state");
+        return UUID();
+    }
+    x *= a_get_scale_factor();
+    y *= a_get_scale_factor();
+    const int idx = ((height * a_get_scale_factor()) - y - 1) * width * a_get_scale_factor() + x;
+    const auto pick = pick_buf.at(idx);
+    for (const auto &[k, v] : package_infos) {
+        if (pick >= v.pick_base && pick < (v.pick_base + v.n_packages)) {
+            return v.pkg.at(pick - v.pick_base);
+        }
+    }
+    return UUID();
 }
 
 } // namespace horizon

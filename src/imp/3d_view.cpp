@@ -2,6 +2,9 @@
 #include "canvas3d/canvas3d.hpp"
 #include "util/step_importer.hpp"
 #include "util/gtk_util.hpp"
+#include "board/board.hpp"
+#include "pool/part.hpp"
+#include "util/str_util.hpp"
 
 namespace horizon {
 
@@ -233,6 +236,19 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     });
     msaa_combo->set_active_id("4");
 
+    GET_WIDGET(hud_label);
+    GET_WIDGET(hud_revealer);
+    revealer->signal_size_allocate().connect(
+            [this](Gtk::Allocation &alloc) { hud_revealer->set_margin_start(alloc.get_width() + 50); });
+
+    canvas->signal_package_select().connect([this](const auto &uu) {
+        hud_set_package(uu);
+        if (uu)
+            canvas->set_highlights({uu});
+        else
+            canvas->set_highlights({});
+    });
+
     GET_WIDGET(main_box);
 }
 
@@ -258,6 +274,12 @@ void View3DWindow::update(bool clear)
 void View3DWindow::set_highlights(const std::set<UUID> &pkgs)
 {
     canvas->set_highlights(pkgs);
+    if (pkgs.size() == 1) {
+        hud_set_package(*pkgs.begin());
+    }
+    else {
+        hud_set_package(UUID());
+    }
 }
 
 void View3DWindow::set_solder_mask_color(const Gdk::RGBA &c)
@@ -283,6 +305,38 @@ Gdk::RGBA View3DWindow::get_substrate_color()
 void View3DWindow::set_appearance(const class Appearance &a)
 {
     canvas->set_appearance(a);
+}
+
+View3DWindow::type_signal_package_select View3DWindow::signal_package_select()
+{
+    return canvas->signal_package_select();
+}
+
+void View3DWindow::hud_set_package(const UUID &uu)
+{
+    if (!uu || board.packages.count(uu) == 0) {
+        hud_revealer->set_reveal_child(false);
+        return;
+    }
+    const auto &pkg = board.packages.at(uu);
+    if (pkg.component) {
+        hud_revealer->set_reveal_child(true);
+        auto part = pkg.component->part;
+        std::string s = "<b>" + pkg.component->refdes + ":</b> ";
+        s += Glib::Markup::escape_text(part->get_value()) + "\n";
+        if (part->get_value() != part->get_MPN()) {
+            s += "MPN: " + Glib::Markup::escape_text(part->get_MPN()) + "\n";
+        }
+        s += "Manufacturer: " + Glib::Markup::escape_text(part->get_manufacturer()) + "\n";
+        s += "Package: " + Glib::Markup::escape_text(part->package->name) + "\n";
+        if (part->get_description().size())
+            s += Glib::Markup::escape_text(part->get_description()) + "\n";
+        if (part->get_datasheet().size())
+            s += "<a href=\"" + Glib::Markup::escape_text(part->get_datasheet()) + "\" title=\""
+                 + Glib::Markup::escape_text(Glib::Markup::escape_text(part->get_datasheet())) + "\">Datasheet</a>\n";
+        trim(s);
+        hud_label->set_markup(s);
+    }
 }
 
 

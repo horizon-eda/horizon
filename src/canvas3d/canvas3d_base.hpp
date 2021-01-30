@@ -9,6 +9,7 @@
 #include "face.hpp"
 #include "wall.hpp"
 #include "background.hpp"
+#include <sigc++/sigc++.h>
 
 namespace horizon {
 
@@ -157,9 +158,7 @@ protected:
     virtual void redraw()
     {
     }
-    void invalidate_pick()
-    {
-    }
+    void invalidate_pick();
     void prepare();
     void prepare_packages();
 
@@ -177,6 +176,14 @@ protected:
 
     void update_max_package_height();
 
+    void queue_pick();
+    typedef sigc::signal<void> type_signal_pick_ready;
+    type_signal_pick_ready signal_pick_ready()
+    {
+        return s_signal_pick_ready;
+    }
+    UUID pick_package(unsigned int x, unsigned int y) const;
+
 private:
     float get_layer_offset(int layer) const;
     float get_layer_thickness(int layer) const;
@@ -187,6 +194,13 @@ private:
     GLuint renderbuffer;
     GLuint fbo;
     GLuint depthrenderbuffer;
+    GLuint pickrenderbuffer;
+
+    GLuint fbo_downsampled;
+    GLuint pickrenderbuffer_downsampled;
+
+    enum class PickState { QUEUED, CURRENT, INVALID };
+    PickState pick_state = PickState::INVALID;
 
     glm::mat4 viewmat;
     glm::mat4 projmat;
@@ -210,11 +224,20 @@ private:
     std::vector<ModelTransform> package_transforms; // position and rotation of
                                                     // all board packages,
                                                     // grouped by package
-    std::map<std::pair<std::string, bool>, std::pair<size_t, size_t>>
-            package_transform_idxs; // key: first: model filename second: nopopulate
-                                    // value: first: offset in package_transforms second: no of items
+
+    struct PackageInfo {
+        size_t offset; // in package_transforms
+        size_t n_packages;
+        unsigned int pick_base;
+        std::vector<UUID> pkg;
+    };
+
+    std::map<std::pair<std::string, bool>, PackageInfo> package_infos; // key: first: model filename second: nopopulate
+    std::vector<uint16_t> pick_buf;
 
     float get_magic_number() const;
+
+    type_signal_pick_ready s_signal_pick_ready;
 };
 
 } // namespace horizon

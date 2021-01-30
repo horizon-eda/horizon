@@ -28,6 +28,9 @@ public:
         return s_signal_request_update;
     }
 
+    typedef sigc::signal<void, UUID> type_signal_package_select;
+    type_signal_package_select signal_package_select();
+
 private:
     class Canvas3D *canvas = nullptr;
     const class Board &board;
@@ -44,6 +47,10 @@ private:
     Gtk::ColorButton *substrate_color_button = nullptr;
     Gtk::ComboBoxText *background_color_preset_combo = nullptr;
     bool setting_background_color_from_preset = false;
+
+    Gtk::Revealer *hud_revealer = nullptr;
+    Gtk::Label *hud_label = nullptr;
+    void hud_set_package(const UUID &uu);
 
     using FnSetColor = void (Canvas3D::*)(const Color &color);
     void bind_color_button(Gtk::ColorButton *color_button, FnSetColor fn_set, std::function<void(void)> extra_fn);

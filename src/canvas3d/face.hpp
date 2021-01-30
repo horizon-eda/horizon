@@ -25,5 +25,6 @@ private:
     GLuint z_top_loc;
     GLuint z_bottom_loc;
     GLuint highlight_intensity_loc;
+    GLuint pick_base_loc;
 };
 } // namespace horizon

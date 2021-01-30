@@ -108,6 +108,7 @@ void FaceRenderer::realize()
     GET_LOC(this, z_top);
     GET_LOC(this, z_bottom);
     GET_LOC(this, highlight_intensity);
+    GET_LOC(this, pick_base);
 }
 
 void FaceRenderer::push()
@@ -153,17 +154,19 @@ void FaceRenderer::render()
             if (it.pushed) {
                 std::pair<std::string, bool> populate = {filename, false};
                 std::pair<std::string, bool> nopopulate = {filename, true};
-                if (ca.package_transform_idxs.count(populate)) {
-                    auto idxs = ca.package_transform_idxs.at(populate);
+                if (ca.package_infos.count(populate)) {
+                    auto idxs = ca.package_infos.at(populate);
+                    glUniform1ui(pick_base_loc, idxs.pick_base);
                     glDrawElementsInstancedBaseInstance(GL_TRIANGLES, it.count, GL_UNSIGNED_INT,
-                                                        (void *)(it.face_index_offset * sizeof(int)), idxs.second,
-                                                        idxs.first);
+                                                        (void *)(it.face_index_offset * sizeof(int)), idxs.n_packages,
+                                                        idxs.offset);
                 }
-                if (ca.show_dnp_models && ca.package_transform_idxs.count(nopopulate)) {
-                    auto idxs = ca.package_transform_idxs.at(nopopulate);
+                if (ca.show_dnp_models && ca.package_infos.count(nopopulate)) {
+                    auto idxs = ca.package_infos.at(nopopulate);
+                    glUniform1ui(pick_base_loc, idxs.pick_base);
                     glDrawElementsInstancedBaseInstance(GL_TRIANGLES, it.count, GL_UNSIGNED_INT,
-                                                        (void *)(it.face_index_offset * sizeof(int)), idxs.second,
-                                                        idxs.first);
+                                                        (void *)(it.face_index_offset * sizeof(int)), idxs.n_packages,
+                                                        idxs.offset);
                 }
             }
         }
