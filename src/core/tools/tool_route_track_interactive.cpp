@@ -514,7 +514,13 @@ bool ToolWrapper::prepareInteractive()
     sizes.SetTrackWidth(track_width);
     if (tool->tool_id == ToolID::ROUTE_DIFFPAIR_INTERACTIVE && m_startItem) {
         auto netcode = m_startItem->Net();
-        auto net = tool->iface->get_net_for_code(netcode);
+        auto *net = tool->iface->get_net_for_code(netcode);
+
+        if (!net) {
+            tool->imp->tool_bar_flash("No net");
+            return false;
+        }
+
         auto rules_dp =
                 tool->rules->get_diffpair(net->net_class, PNS::PNS_HORIZON_IFACE::layer_from_router(routingLayer));
         sizes.SetDiffPairGap(rules_dp->track_gap);
