@@ -37,7 +37,7 @@ See the [the docs](https://docs.horizon-eda.org/en/latest/installation.html)
 |--------------------------|------------------------|------------------------------------------|-----------------------------------------------------------------|--------------|
 | nlohmann                 | JSON for Modern C++    | 3.9.1                                    | https://github.com/nlohmann/json/                               | MIT          |
 | clipper                  | Clipper                | 6.4.2                                    | http://www.angusj.com/delphi/clipper.php                        | Boost        |
-| polypartition            | polypartition          | TBD                                      | https://github.com/ivanfratric/polypartition/                   | MIT          |
+| polypartition            | polypartition          | 7bdffb428b2b19ad1c43aa44c714dcc104177e84 | https://github.com/ivanfratric/polypartition/                   | MIT          |
 | poly2tri                 | poly2tri               | TBD                                      | https://github.com/jhasse/poly2tri                              | 3-Clause BSD |
 | dxflib                   | dxflib                 | TBD                                      | https://qcad.org/en/90-dxflib                                   | GPLv2        |
 | alphanum                 | The Alphanum Algorithm | 1.3                                      | http://www.davekoelle.com/alphanum.html                         | MIT          |

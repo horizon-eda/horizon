@@ -850,7 +850,7 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
             }
             std::list<TPPLPoly> outpolys;
             TPPLPartition part;
-            po.SetOrientation(TPPL_CCW);
+            po.SetOrientation(TPPL_ORIENTATION_CCW);
             part.Triangulate_EC(&po, &outpolys);
             for (auto &tri : outpolys) {
                 assert(tri.GetNumPoints() == 3);
