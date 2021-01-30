@@ -1,10 +1,10 @@
 /*******************************************************************************
 *                                                                              *
 * Author    :  Angus Johnson                                                   *
-* Version   :  6.4.0                                                           *
-* Date      :  2 July 2015                                                     *
+* Version   :  6.4.2                                                           *
+* Date      :  27 February 2017                                                *
 * Website   :  http://www.angusj.com                                           *
-* Copyright :  Angus Johnson 2010-2015                                         *
+* Copyright :  Angus Johnson 2010-2017                                         *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -34,7 +34,7 @@
 #ifndef clipper_hpp
 #define clipper_hpp
 
-#define CLIPPER_VERSION "6.2.6"
+#define CLIPPER_VERSION "6.4.2"
 
 //use_int32: When enabled 32bit ints are used instead of 64bit ints. This
 //improve performance but coordinate values are limited to the range +/- 46340
@@ -146,6 +146,7 @@ public:
     bool IsOpen() const;
     int ChildCount() const;
 private:
+    //PolyNode& operator =(PolyNode& other); 
     unsigned Index; //node index in Parent.Childs
     bool m_IsOpen;
     JoinType m_jointype;
@@ -159,12 +160,13 @@ private:
 class PolyTree: public PolyNode
 { 
 public:
-    ~PolyTree(){Clear();};
+    ~PolyTree(){ Clear(); };
     PolyNode* GetFirst() const;
     void Clear();
     int Total() const;
 private:
-    PolyNodes AllNodes;
+  //PolyTree& operator =(PolyTree& other);
+  PolyNodes AllNodes;
     friend class Clipper; //to access AllNodes
 };
 
