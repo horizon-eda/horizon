@@ -35,7 +35,7 @@ See the [the docs](https://docs.horizon-eda.org/en/latest/installation.html)
 
 | Directory in `3rd_party` | Project                | Version                                  | URL                                                             | License      |
 |--------------------------|------------------------|------------------------------------------|-----------------------------------------------------------------|--------------|
-| nlohmann                 | JSON for Modern C++    | 3.7.3                                    | https://github.com/nlohmann/json/                               | MIT          |
+| nlohmann                 | JSON for Modern C++    | 3.9.1                                    | https://github.com/nlohmann/json/                               | MIT          |
 | clipper                  | Clipper                | 6.4.0                                    | http://www.angusj.com/delphi/clipper.php                        | Boost        |
 | polypartition            | polypartition          | TBD                                      | https://github.com/ivanfratric/polypartition/                   | MIT          |
 | poly2tri                 | poly2tri               | TBD                                      | https://github.com/jhasse/poly2tri                              | 3-Clause BSD |
