@@ -77,8 +77,8 @@ void Canvas::render(const SchematicJunction &junc)
         draw_line(junc.position, junc.position + Coordi(0, 1000), c, 0, true, 0.75_mm);
         img_line(junc.position, junc.position + Coordi(0, 1000), 0.75_mm, 0, true);
     }
-    else if (junc.connected_bus_labels.size() || junc.connected_bus_rippers.size()
-             || junc.connected_net_labels.size()) {
+    else if (junc.connected_bus_labels.size() || junc.connected_bus_rippers.size() || junc.connected_net_labels.size()
+             || junc.connected_lines.size() || junc.connected_arcs.size()) {
         // nop
     }
     else {
