@@ -1006,11 +1006,13 @@ void Schematic::swap_gates(const UUID &comp_uu, const UUID &g1_uu, const UUID &g
     auto entity = block->components.at(comp_uu).entity;
     for (auto &it_sheet : sheets) {
         for (auto &it_sym : it_sheet.second.symbols) {
-            if (it_sym.second.gate->uuid == g1_uu) {
-                it_sym.second.gate = &entity->gates.at(g2_uu);
-            }
-            else if (it_sym.second.gate->uuid == g2_uu) {
-                it_sym.second.gate = &entity->gates.at(g1_uu);
+            if (it_sym.second.component->uuid == comp_uu) {
+                if (it_sym.second.gate->uuid == g1_uu) {
+                    it_sym.second.gate = &entity->gates.at(g2_uu);
+                }
+                else if (it_sym.second.gate->uuid == g2_uu) {
+                    it_sym.second.gate = &entity->gates.at(g1_uu);
+                }
             }
         }
     }
