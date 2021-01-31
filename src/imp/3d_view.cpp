@@ -242,11 +242,13 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
             [this](Gtk::Allocation &alloc) { hud_revealer->set_margin_start(alloc.get_width() + 50); });
 
     canvas->signal_package_select().connect([this](const auto &uu) {
-        hud_set_package(uu);
-        if (uu)
-            canvas->set_highlights({uu});
-        else
-            canvas->set_highlights({});
+        if (mode == Mode::BOARD) {
+            hud_set_package(uu);
+            if (uu)
+                canvas->set_highlights({uu});
+            else
+                canvas->set_highlights({});
+        }
     });
 
     GET_WIDGET(main_box);
