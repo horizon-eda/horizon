@@ -824,8 +824,8 @@ int main(int c_argc, char *c_argv[])
 
                 Image3DExporter ex(fake_board, pool, 1024, 1024);
                 ex.view_all();
-                ex.show_models = false;
-                ex.projection = Canvas3DBase::Projection::ORTHO;
+                ex.set_show_models(false);
+                ex.set_projection(Canvas3DBase::Projection::ORTHO);
 
                 ofs << "#### Without model \n";
                 ofs << "| Top | Bottom |\n";
@@ -840,14 +840,14 @@ int main(int c_argc, char *c_argv[])
                 {
                     const std::string img_filename =
                             "pkg_" + static_cast<std::string>(pkg.uuid) + "_3d_bottom_no_model.png";
-                    ex.cam_elevation = -89.99;
-                    ex.cam_azimuth = 90;
+                    ex.set_cam_elevation(-89.99);
+                    ex.set_cam_azimuth(90);
                     ex.render_to_surface()->write_to_png(Glib::build_filename(images_dir, img_filename));
                     ofs << "| ![3D](" << images_prefix << img_filename << ") ";
                 }
 
                 ofs << "\n\n";
-                ex.show_models = true;
+                ex.set_show_models(true);
                 ex.view_all();
                 for (const auto &[model_uu, model] : pkg.models) {
                     fake_package.model = model_uu;
@@ -866,8 +866,8 @@ int main(int c_argc, char *c_argv[])
                     {
                         const std::string img_filename = "pkg_" + static_cast<std::string>(pkg.uuid) + "_3d_bottom_"
                                                          + static_cast<std::string>(model_uu) + ".png";
-                        ex.cam_elevation = -89.99;
-                        ex.cam_azimuth = 90;
+                        ex.set_cam_elevation(-89.99);
+                        ex.set_cam_azimuth(90);
                         ex.render_to_surface()->write_to_png(Glib::build_filename(images_dir, img_filename));
                         ofs << "| ![3D](" << images_prefix << img_filename << ") ";
                     }
@@ -877,10 +877,10 @@ int main(int c_argc, char *c_argv[])
                     ofs << "| South  | East | North | West |\n";
                     ofs << "| --- | --- | --- | --- |\n";
                     ex.view_all();
-                    ex.cam_elevation = 45;
-                    ex.projection = Canvas3DBase::Projection::PERSP;
+                    ex.set_cam_elevation(45);
+                    ex.set_projection(Canvas3DBase::Projection::PERSP);
                     for (const int az : {270, 0, 90, 180}) {
-                        ex.cam_azimuth = az;
+                        ex.set_cam_azimuth(az);
                         const std::string img_filename = "pkg_" + static_cast<std::string>(pkg.uuid) + "_3d_"
                                                          + std::to_string(az) + "_" + static_cast<std::string>(model_uu)
                                                          + ".png";
