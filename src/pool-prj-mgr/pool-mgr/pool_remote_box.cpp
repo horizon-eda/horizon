@@ -364,6 +364,7 @@ void PoolRemoteBox::set_pr_update_mode(unsigned int pr, const std::string branch
         pr_update_cancel_button->set_visible(false);
         create_pr_button->set_visible(true);
         pr_update_nr = 0;
+        update_prs();
         return;
     }
 
@@ -402,6 +403,8 @@ void PoolRemoteBox::set_pr_update_mode(unsigned int pr, const std::string branch
     pr_update_cancel_button->set_visible(true);
     create_pr_button->set_visible(false);
     pr_update_button->set_label("Update PR #" + std::to_string(pr));
+    pr_update_nr = pr;
+    pr_update_branch = branch_name;
     update_prs();
 
     autofree_ptr<git_commit> latest_commit(git_commit_free);
