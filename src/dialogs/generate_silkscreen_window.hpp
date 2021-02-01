@@ -19,7 +19,6 @@ private:
 
     ToolGenerateSilkscreen::Settings &settings;
 
-    Gtk::Entry *entry_prefix = nullptr;
     SpinButtonDim *sp_silk = nullptr;
     SpinButtonDim *sp_pad = nullptr;
 };

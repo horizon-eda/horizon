@@ -130,7 +130,7 @@ void ClipboardSchematic::serialize(json &j)
             auto comp = bl.components.at(it.uuid);
             comp.refdes = comp.entity->prefix + "?";
             map_erase_if(comp.connections, [&nets](auto &x) { return nets.count(x.second.net.uuid) == 0; });
-            map_erase_if(comp.connections, [this, &comp, &net_lines, &symbols](auto &x) {
+            map_erase_if(comp.connections, [&comp, &net_lines, &symbols](auto &x) {
                 for (const auto &[uu_line, line] : net_lines) {
                     if (line->net == x.second.net) {
                         for (auto &it_ft : {line->from, line->to}) {

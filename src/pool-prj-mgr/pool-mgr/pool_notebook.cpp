@@ -119,7 +119,7 @@ void PoolNotebook::add_preview_stack_switcher(Gtk::Box *obox, Gtk::Stack *stack)
     rb_text->set_mode(false);
     rb_text->join_group(*rb_graphical);
     rb_graphical->set_active(true);
-    rb_graphical->signal_toggled().connect([this, rb_graphical, stack] {
+    rb_graphical->signal_toggled().connect([rb_graphical, stack] {
         if (rb_graphical->get_active()) {
             stack->set_visible_child("preview");
         }
@@ -309,7 +309,7 @@ void PoolNotebook::add_context_menu(PoolBrowser *br)
     br->add_context_menu_item("Delete", [this, ty](const UUID &uu) { handle_delete(ty, uu); });
     br->add_context_menu_item("Move/rename", [this, ty](const UUID &uu) { handle_move_rename(ty, uu); });
     br->add_context_menu_item("Copy path", [this, ty](const UUID &uu) { handle_copy_path(ty, uu); });
-    br->add_context_menu_item("Copy UUID", [this, ty](const UUID &uu) {
+    br->add_context_menu_item("Copy UUID", [](const UUID &uu) {
         auto clip = Gtk::Clipboard::get();
         clip->set_text((std::string)uu);
     });

@@ -41,7 +41,5 @@ private:
     void update_poly(double r);
     void update_cursor(const Coordi &c);
     void update_tip();
-
-    bool orientation = false;
 };
 } // namespace horizon

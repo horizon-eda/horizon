@@ -10,9 +10,6 @@
 #include "util/sort_controller.hpp"
 #include "rules/rules.hpp"
 
-class git_repository;
-
-
 namespace horizon {
 using json = nlohmann::json;
 

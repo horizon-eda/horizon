@@ -45,13 +45,12 @@ public:
 
 private:
     Preferences &preferences;
-    bool &value;
     Gtk::Switch *sw = nullptr;
 };
 
 PreferencesRowBool::PreferencesRowBool(const std::string &title, const std::string &subtitle, Preferences &prefs,
                                        bool &v)
-    : PreferencesRow(title, subtitle), preferences(prefs), value(v)
+    : PreferencesRow(title, subtitle), preferences(prefs)
 {
     sw = Gtk::manage(new Gtk::Switch);
     sw->set_valign(Gtk::ALIGN_CENTER);
@@ -132,7 +131,7 @@ PreferencesGroup::PreferencesGroup(const std::string &title) : Gtk::Box(Gtk::ORI
     sc->add(*listbox);
     sc->show_all();
     sc->set_min_content_width(500);
-    listbox->signal_row_activated().connect([this](Gtk::ListBoxRow *lrow) {
+    listbox->signal_row_activated().connect([](Gtk::ListBoxRow *lrow) {
         if (auto row = dynamic_cast<PreferencesRow *>(lrow->get_child())) {
             row->activate();
         }

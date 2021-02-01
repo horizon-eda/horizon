@@ -50,7 +50,7 @@ void ImpPadstack::construct()
 
     auto well_known_name_entry = header_button->add_entry("Well-known name");
     well_known_name_entry->set_text(padstack.well_known_name);
-    well_known_name_entry->signal_changed().connect([this, well_known_name_entry] { core_padstack.set_needs_save(); });
+    well_known_name_entry->signal_changed().connect([this] { core_padstack.set_needs_save(); });
 
     auto type_combo = Gtk::manage(new Gtk::ComboBoxText());
     type_combo->append("top", "Top");

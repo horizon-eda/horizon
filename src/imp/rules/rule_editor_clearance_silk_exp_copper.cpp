@@ -48,7 +48,7 @@ void RuleEditorClearanceSilkscreenExposedCopper::populate()
             s_signal_updated.emit();
         });
     }
-    else if (auto rule2 = dynamic_cast<RuleParameters *>(&rule)) {
+    if (auto rule2 = dynamic_cast<RuleParameters *>(&rule)) {
         auto sp_solder = create_sp_dim("Solder mask expansion");
         auto sp_paste = create_sp_dim("Paste mask contraction");
         auto sp_courtyard = create_sp_dim("Courtyard expansion");
@@ -91,7 +91,7 @@ void RuleEditorClearanceSilkscreenExposedCopper::populate()
             s_signal_updated.emit();
         });
     }
-    else if (auto rule2 = dynamic_cast<RuleClearancePackage *>(&rule)) {
+    if (auto rule2 = dynamic_cast<RuleClearancePackage *>(&rule)) {
         auto sp_silk_cu = create_sp_dim("Silkscreen to copper clearance");
         auto sp_silk_pkg = create_sp_dim("Silkscreen to package clearance");
 

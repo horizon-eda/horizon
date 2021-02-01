@@ -14,7 +14,6 @@ private:
     Preferences &preferences;
     PartInfoPreferences &partinfo_preferences;
     Gtk::Switch *partinfo_enable_switch = nullptr;
-    Gtk::Grid *partinfo_grid = nullptr;
     Gtk::Entry *partinfo_base_url_entry = nullptr;
     Gtk::ComboBoxText *partinfo_preferred_distributor_combo = nullptr;
     Gtk::CheckButton *partinfo_ignore_moq_1_cb = nullptr;

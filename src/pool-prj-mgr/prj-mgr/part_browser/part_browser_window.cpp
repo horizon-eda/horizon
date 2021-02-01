@@ -96,7 +96,7 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
         add_search_parametric(it.first);
     }
     notebook->set_current_page(notebook->page_num(*ch_search));
-    signal_show().connect(sigc::track_obj([this, ch_search] { ch_search->search_once(); }, *ch_search));
+    signal_show().connect(sigc::track_obj([ch_search] { ch_search->search_once(); }, *ch_search));
 }
 
 void PartBrowserWindow::handle_favorites_selected(Gtk::ListBoxRow *row)
@@ -348,7 +348,7 @@ PoolBrowserPart *PartBrowserWindow::add_search(const UUID &part)
     auto close_button = Gtk::manage(new Gtk::Button());
     close_button->set_relief(Gtk::RELIEF_NONE);
     close_button->set_image_from_icon_name("window-close-symbolic");
-    close_button->signal_clicked().connect([this, ch] { delete ch; });
+    close_button->signal_clicked().connect([ch] { delete ch; });
     tab_label->pack_start(*close_button, false, false, 0);
     tab_label->pack_start(*la, true, true, 0);
     ch->show_all();
@@ -379,7 +379,7 @@ PoolBrowserParametric *PartBrowserWindow::add_search_parametric(const std::strin
     auto close_button = Gtk::manage(new Gtk::Button());
     close_button->set_relief(Gtk::RELIEF_NONE);
     close_button->set_image_from_icon_name("window-close-symbolic");
-    close_button->signal_clicked().connect([this, ch] { delete ch; });
+    close_button->signal_clicked().connect([ch] { delete ch; });
     tab_label->pack_start(*close_button, false, false, 0);
     tab_label->pack_start(*la, true, true, 0);
     ch->show_all();

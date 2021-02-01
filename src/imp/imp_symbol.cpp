@@ -181,7 +181,7 @@ void ImpSymbol::construct()
             }
         });
         core_symbol.signal_tool_changed().connect(
-                [this, box](ToolID tool_id) { box->set_sensitive(tool_id == ToolID::NONE); });
+                [box](ToolID tool_id) { box->set_sensitive(tool_id == ToolID::NONE); });
     }
 
     core->signal_rebuilt().connect([this] { unit_label->set_text(symbol.unit->name); });

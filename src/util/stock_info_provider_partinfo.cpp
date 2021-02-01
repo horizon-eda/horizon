@@ -542,7 +542,7 @@ void StockInfoProviderPartinfo::add_columns(Gtk::TreeView *treeview,
 
     popover.set_relative_to(*treeview);
     popover.set_position(Gtk::POS_BOTTOM);
-    treeview->signal_button_press_event().connect_notify([this, treeview, tvc, cr, column](GdkEventButton *ev) {
+    treeview->signal_button_press_event().connect_notify([this, treeview, tvc, column](GdkEventButton *ev) {
         if (ev->button == 1) {
             Gdk::Rectangle rect;
             Gtk::TreeModel::Path path;
@@ -717,9 +717,8 @@ void StockInfoProviderPartinfo::add_columns(Gtk::TreeView *treeview,
                                 i_part++;
                             }
                             if (combobox) {
-                                combobox->signal_changed().connect([this, combobox, stack] {
-                                    stack->set_visible_child(combobox->get_active_id());
-                                });
+                                combobox->signal_changed().connect(
+                                        [combobox, stack] { stack->set_visible_child(combobox->get_active_id()); });
                                 if (i_part)
                                     combobox->set_active_id("0");
                             }

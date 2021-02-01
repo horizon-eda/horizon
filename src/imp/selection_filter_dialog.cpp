@@ -46,7 +46,7 @@ SelectionFilterDialog::SelectionFilterDialog(Gtk::Window *parent, SelectionFilte
             auto cb = Gtk::manage(new Gtk::CheckButton(object_descriptions.at(it.first).name_pl));
             cb->set_active(true);
             if (it.second.layers.size() == 0) {
-                cb->signal_toggled().connect([this, ot, cb] {
+                cb->signal_toggled().connect([this] {
                     update_filter();
                     update();
                 });
@@ -120,7 +120,7 @@ SelectionFilterDialog::SelectionFilterDialog(Gtk::Window *parent, SelectionFilte
             cbl->show();
             cbl->get_parent()->set_visible(false);
             connect_doubleclick(cbl);
-            cbl->signal_toggled().connect([this, ot, cbl] {
+            cbl->signal_toggled().connect([this, ot] {
                 update_filter();
                 if (!checkbuttons[ot].blocked)
                     update();
@@ -356,7 +356,7 @@ Gtk::CheckButton *SelectionFilterDialog::add_layer_button(ObjectType type, int l
     cbl->get_parent()->set_visible(false);
     cbl->set_active(active);
     connect_doubleclick(cbl);
-    cbl->signal_toggled().connect([this, type, layer, cbl] {
+    cbl->signal_toggled().connect([this, type] {
         update_filter();
         if (!checkbuttons[type].blocked)
             update();

@@ -97,7 +97,6 @@ private:
 
     Gtk::TreeView *cols_available_tv = nullptr;
     Gtk::TreeView *cols_included_tv = nullptr;
-    Gtk::TreeView *preview_tv = nullptr;
 
     Gtk::Button *col_inc_button = nullptr;
     Gtk::Button *col_excl_button = nullptr;

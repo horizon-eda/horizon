@@ -13,7 +13,7 @@ static Gtk::TreeViewColumn *create_tvc(const PoolParametric::Column &col,
         auto tvc = Gtk::manage(new Gtk::TreeViewColumn(col.display_name));
         auto cr_val = Gtk::manage(new Gtk::CellRendererText());
         auto cr_unit = Gtk::manage(new Gtk::CellRendererText());
-        tvc->set_cell_data_func(*cr_val, [&col, &tree_col](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
+        tvc->set_cell_data_func(*cr_val, [&tree_col](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
             Gtk::TreeModel::Row row = *it;
             auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
             std::string v = row[tree_col];
@@ -23,17 +23,16 @@ static Gtk::TreeViewColumn *create_tvc(const PoolParametric::Column &col,
             else
                 mcr->property_text() = v.substr(0, pos);
         });
-        tvc->set_cell_data_func(*cr_unit,
-                                [&col, &tree_col](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
-                                    Gtk::TreeModel::Row row = *it;
-                                    auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
-                                    std::string v = row[tree_col];
-                                    auto pos = v.find(' ');
-                                    if (pos == std::string::npos)
-                                        mcr->property_text() = "";
-                                    else
-                                        mcr->property_text() = v.substr(pos + 1);
-                                });
+        tvc->set_cell_data_func(*cr_unit, [&tree_col](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
+            Gtk::TreeModel::Row row = *it;
+            auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
+            std::string v = row[tree_col];
+            auto pos = v.find(' ');
+            if (pos == std::string::npos)
+                mcr->property_text() = "";
+            else
+                mcr->property_text() = v.substr(pos + 1);
+        });
         cr_val->property_xalign() = 1;
         cr_unit->property_xalign() = 1;
         auto attributes_list = pango_attr_list_new();

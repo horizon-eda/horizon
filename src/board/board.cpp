@@ -612,7 +612,7 @@ void Board::propagate_nets()
 
 void Board::vacuum_junctions()
 {
-    map_erase_if(junctions, [this](auto &x) {
+    map_erase_if(junctions, [](auto &x) {
         const BoardJunction &ju = x.second;
         return (ju.connected_lines.size() == 0) && (ju.connected_arcs.size() == 0) && (ju.connected_tracks.size() == 0)
                && (ju.connected_vias.size() == 0);
@@ -881,7 +881,7 @@ void Board::smash_package_silkscreen_graphics(BoardPackage *pkg)
     auto tr = pkg->placement;
     if (pkg->flip)
         tr.invert_angle();
-    auto get_junction = [&junction_xlat, this, pkg, tr](Junction *ju) -> Junction * {
+    auto get_junction = [&junction_xlat, this, tr](Junction *ju) -> Junction * {
         if (junction_xlat.count(ju)) {
             return junction_xlat.at(ju);
         }
