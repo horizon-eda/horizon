@@ -13,7 +13,7 @@ public:
         uint64_t width = 0;
     };
 
-    const ToolSettings *get_settings_const() const override
+    ToolSettings *get_settings() override
     {
         return &settings;
     }
@@ -21,10 +21,6 @@ public:
     ToolID get_tool_id_for_settings() const override;
 
 protected:
-    ToolSettings *get_settings() override
-    {
-        return &settings;
-    }
     void ask_line_width();
 
     Settings settings;

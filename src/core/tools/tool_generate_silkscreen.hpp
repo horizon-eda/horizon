@@ -25,7 +25,7 @@ public:
         int64_t line_width = .15_mm;
     };
 
-    const ToolSettings *get_settings_const() const override
+    ToolSettings *get_settings() override
     {
         return &settings;
     }
@@ -37,12 +37,6 @@ public:
                 I::LMB,
                 I::CANCEL,
         };
-    }
-
-protected:
-    ToolSettings *get_settings() override
-    {
-        return &settings;
     }
 
 private:

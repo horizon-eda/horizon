@@ -32,7 +32,7 @@ public:
         std::map<int, LayerSettings> layers;
     };
 
-    const ToolSettings *get_settings_const() const override
+    ToolSettings *get_settings() override
     {
         return &settings;
     }
@@ -45,12 +45,6 @@ public:
         return {
                 I::LMB, I::CANCEL, I::RMB, I::EDIT, I::ROTATE, I::MIRROR, I::ENTER_SIZE, I::ENTER_WIDTH,
         };
-    }
-
-protected:
-    ToolSettings *get_settings() override
-    {
-        return &settings;
     }
 
 private:

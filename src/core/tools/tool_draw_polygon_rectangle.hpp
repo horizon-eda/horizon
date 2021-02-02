@@ -18,7 +18,7 @@ public:
         Mode mode = Mode::CENTER;
     };
 
-    const ToolSettings *get_settings_const() const override
+    ToolSettings *get_settings() override
     {
         return &settings;
     }
@@ -38,12 +38,6 @@ public:
                 I::POLYGON_DECORATION_SIZE,
                 I::POLYGON_DECORATION_STYLE,
         };
-    }
-
-protected:
-    ToolSettings *get_settings() override
-    {
-        return &settings;
     }
 
 private:

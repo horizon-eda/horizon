@@ -24,18 +24,12 @@ public:
         uint64_t label_size = 1.5_mm;
     };
 
-    const ToolSettings *get_settings_const() const override
+    ToolSettings *get_settings() override
     {
         return &settings;
     }
 
     void apply_settings() override;
-
-protected:
-    ToolSettings *get_settings() override
-    {
-        return &settings;
-    }
 
 private:
     class Dimension *temp = nullptr;

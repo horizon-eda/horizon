@@ -23,12 +23,12 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
     try {
         tool = create_tool(tool_id);
         {
-            auto sp = tool->get_settings_proxy();
-            if (sp != nullptr) {
+            if (auto settings = tool->get_settings()) {
                 auto tid = tool->get_tool_id_for_settings();
                 auto j = s_signal_load_tool_settings.emit(tid);
                 if (j != nullptr)
-                    sp->load_from_json(j);
+                    settings->load_from_json(j);
+                tool->apply_settings();
             }
         }
         tool->set_imp_interface(imp);
@@ -75,7 +75,7 @@ void Core::maybe_end_tool(const ToolResponse &r)
 {
     if (r.result != ToolResponse::Result::NOP) { // end tool
         auto tid = tool->get_tool_id_for_settings();
-        auto settings = tool->get_settings_const();
+        auto settings = tool->get_settings();
         if (settings)
             s_signal_save_tool_settings.emit(tid, settings->serialize());
         tool_selection = tool->selection;

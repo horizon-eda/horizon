@@ -19,11 +19,6 @@ void ToolBase::set_transient()
     is_transient = true;
 }
 
-ToolSettingsProxy::~ToolSettingsProxy()
-{
-    tool->apply_settings();
-}
-
 ToolResponse::ToolResponse() : next_tool(ToolID::NONE)
 {
 }

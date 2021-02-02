@@ -38,7 +38,7 @@ public:
         bool drc = true;
     };
 
-    const ToolSettings *get_settings_const() const override
+    ToolSettings *get_settings() override
     {
         return &settings;
     }
@@ -66,12 +66,6 @@ public:
                 I::CLEARANCE_OFFSET,
                 I::CLEARANCE_OFFSET_DEFAULT,
         };
-    }
-
-protected:
-    ToolSettings *get_settings() override
-    {
-        return &settings;
     }
 
 private:

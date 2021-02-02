@@ -90,31 +90,6 @@ public:
     }
 };
 
-class ToolSettingsProxy {
-public:
-    ToolSettingsProxy(class ToolBase *t, ToolSettings *s) : tool(t), settings(s)
-    {
-    }
-    ToolSettings &operator*()
-    {
-        return *settings;
-    }
-    operator ToolSettings *()
-    {
-        return settings;
-    }
-    ToolSettings *operator->()
-    {
-        return settings;
-    }
-    ~ToolSettingsProxy();
-
-private:
-    ToolBase *tool;
-    ToolSettings *settings;
-};
-
-
 /**
  * Common interface for all Tools
  */
@@ -127,13 +102,9 @@ public:
     {
         return tool_id;
     }
-    virtual const ToolSettings *get_settings_const() const
+    virtual ToolSettings *get_settings()
     {
         return nullptr;
-    }
-    ToolSettingsProxy get_settings_proxy()
-    {
-        return ToolSettingsProxy(this, get_settings());
     }
     virtual void apply_settings()
     {
@@ -184,9 +155,5 @@ protected:
     class ImpInterface *imp = nullptr;
     ToolID tool_id;
     bool is_transient = false;
-    virtual ToolSettings *get_settings()
-    {
-        return nullptr;
-    }
 };
 } // namespace horizon

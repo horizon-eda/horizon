@@ -13,7 +13,7 @@ public:
         uint64_t net_label_size = 1.5_mm;
     };
 
-    const ToolSettings *get_settings_const() const override
+    ToolSettings *get_settings() override
     {
         return &settings;
     }
@@ -21,10 +21,6 @@ public:
     ToolID get_tool_id_for_settings() const override;
 
 protected:
-    ToolSettings *get_settings() override
-    {
-        return &settings;
-    }
     void step_net_label_size(bool up);
     void ask_net_label_size();
 
