@@ -71,6 +71,7 @@ ToolResponse ToolMapSymbol::begin(const ToolArgs &args)
             {InToolActionID::RMB},
             {InToolActionID::ROTATE},
             {InToolActionID::MIRROR},
+            {InToolActionID::EDIT, "change symbol"},
     });
 
     return ToolResponse();
@@ -141,6 +142,10 @@ ToolResponse ToolMapSymbol::update(const ToolArgs &args)
         case InToolActionID::ROTATE:
         case InToolActionID::MIRROR:
             move_mirror_or_rotate(sym_current->placement.shift, args.action == InToolActionID::ROTATE);
+            break;
+
+        case InToolActionID::EDIT:
+            change_symbol(sym_current);
             break;
 
         default:;

@@ -94,6 +94,7 @@ void ToolAddPart::update_tip()
             {InToolActionID::RMB, "cancel"},
             {InToolActionID::ROTATE},
             {InToolActionID::MIRROR},
+            {InToolActionID::EDIT, "change symbol"},
     });
 
     std::stringstream ss;
@@ -169,6 +170,10 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
         case InToolActionID::MIRROR:
         case InToolActionID::ROTATE:
             move_mirror_or_rotate(sym_current->placement.shift, args.action == InToolActionID::ROTATE);
+            break;
+
+        case InToolActionID::EDIT:
+            change_symbol(sym_current);
             break;
 
         default:;

@@ -36,6 +36,7 @@ const Symbol *ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool
     else if (n == 0) {
         return nullptr;
     }
+    selected_symbols[unit_uu] = selected_symbol;
 
     return doc.c->get_pool().get_symbol(selected_symbol);
 }
@@ -43,7 +44,11 @@ const Symbol *ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool
 
 SchematicSymbol *ToolHelperMapSymbol::map_symbol(Component *comp, const Gate *gate)
 {
-    const Symbol *sym = get_symbol_for_unit(gate->unit->uuid);
+    const Symbol *sym = nullptr;
+    if (selected_symbols.count(gate->unit->uuid))
+        sym = doc.c->get_pool().get_symbol(selected_symbols.at(gate->unit->uuid));
+    if (!sym)
+        sym = get_symbol_for_unit(gate->unit->uuid);
     if (!sym)
         return nullptr;
     SchematicSymbol *schsym = doc.c->insert_schematic_symbol(UUID::random(), sym);
@@ -57,4 +62,22 @@ SchematicSymbol *ToolHelperMapSymbol::map_symbol(Component *comp, const Gate *ga
 
     return schsym;
 }
+
+void ToolHelperMapSymbol::change_symbol(SchematicSymbol *schsym)
+{
+    bool auto_selected = false;
+    auto gate = schsym->gate;
+    auto new_sym = get_symbol_for_unit(gate->unit->uuid, &auto_selected);
+    if (new_sym) {
+        if (auto_selected) {
+            imp->tool_bar_flash("There's only one symbol for this unit");
+        }
+        else {
+            selected_symbols[gate->unit->uuid] = new_sym->uuid;
+            schsym->pool_symbol = new_sym;
+            doc.c->get_sheet()->expand_symbol(schsym->uuid, *doc.c->get_schematic());
+        }
+    }
+}
+
 } // namespace horizon
