@@ -22,7 +22,7 @@ public:
     std::optional<UUID> map_pin(const std::vector<std::pair<const class Pin *, bool>> &pins);
     std::optional<UUIDPath<2>> map_symbol(const std::map<UUIDPath<2>, std::string> &gates);
     std::optional<UUID> map_package(const std::vector<std::pair<class Component *, bool>> &components);
-    std::optional<UUID> select_symbol(class IPool &p, const UUID &unit_uuid);
+    std::optional<UUID> select_symbol(class IPool &p, const UUID &unit_uuid, const UUID &sym_default = UUID());
     std::optional<UUID> select_part(class IPool &p, const UUID &entity_uuid, const UUID &part_uuid,
                                     bool show_none = false);
     std::optional<UUID> select_entity(class IPool &pool);

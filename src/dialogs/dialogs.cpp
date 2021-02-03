@@ -76,11 +76,13 @@ std::optional<UUIDPath<2>> Dialogs::map_symbol(const std::map<UUIDPath<2>, std::
     }
 }
 
-std::optional<UUID> Dialogs::select_symbol(IPool &pool, const UUID &unit_uuid)
+std::optional<UUID> Dialogs::select_symbol(IPool &pool, const UUID &unit_uuid, const UUID &sym_default)
 {
     PoolBrowserDialog dia(parent, ObjectType::SYMBOL, pool);
     auto &br = dynamic_cast<PoolBrowserSymbol &>(dia.get_browser());
     br.set_unit_uuid(unit_uuid);
+    if (sym_default)
+        br.go_to(sym_default);
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK) {
         return br.get_selected();

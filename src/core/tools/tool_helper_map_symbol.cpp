@@ -9,7 +9,8 @@
 #include "nlohmann/json.hpp"
 
 namespace horizon {
-const Symbol *ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool *auto_selected)
+const Symbol *ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool *auto_selected,
+                                                       const UUID &sym_default)
 {
     UUID selected_symbol;
 
@@ -24,7 +25,7 @@ const Symbol *ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool
     if (auto_selected)
         *auto_selected = false;
     if (n != 1) {
-        if (auto r = imp->dialogs.select_symbol(doc.r->get_pool(), unit_uu)) {
+        if (auto r = imp->dialogs.select_symbol(doc.r->get_pool(), unit_uu, sym_default)) {
             selected_symbol = *r;
         }
         else {
@@ -44,13 +45,13 @@ const Symbol *ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool
 }
 
 
-SchematicSymbol *ToolHelperMapSymbol::map_symbol(Component *comp, const Gate *gate)
+SchematicSymbol *ToolHelperMapSymbol::map_symbol(Component *comp, const Gate *gate, const UUID &sym_default)
 {
     const Symbol *sym = nullptr;
     if (settings.selected_symbols.count(gate->unit->uuid))
         sym = doc.c->get_pool().get_symbol(settings.selected_symbols.at(gate->unit->uuid));
     if (!sym)
-        sym = get_symbol_for_unit(gate->unit->uuid);
+        sym = get_symbol_for_unit(gate->unit->uuid, nullptr, sym_default);
     if (!sym)
         return nullptr;
     SchematicSymbol *schsym = doc.c->insert_schematic_symbol(UUID::random(), sym);
@@ -69,7 +70,7 @@ void ToolHelperMapSymbol::change_symbol(SchematicSymbol *schsym)
 {
     bool auto_selected = false;
     auto gate = schsym->gate;
-    auto new_sym = get_symbol_for_unit(gate->unit->uuid, &auto_selected);
+    auto new_sym = get_symbol_for_unit(gate->unit->uuid, &auto_selected, schsym->symbol.uuid);
     if (new_sym) {
         if (auto_selected) {
             imp->tool_bar_flash("There's only one symbol for this unit");

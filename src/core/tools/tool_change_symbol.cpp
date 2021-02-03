@@ -25,7 +25,7 @@ ToolResponse ToolChangeSymbol::begin(const ToolArgs &args)
         return ToolResponse::end();
     }
     bool auto_selected = false;
-    auto new_sym = get_symbol_for_unit(sym->gate->unit->uuid, &auto_selected);
+    auto new_sym = get_symbol_for_unit(sym->gate->unit->uuid, &auto_selected, sym->symbol.uuid);
     if (auto_selected == true) {
         imp->tool_bar_flash("No alternate symbols available");
         return ToolResponse::end();
