@@ -130,3 +130,7 @@
   border-style: solid;
   padding: 10px;
 }
+
+.imp-property-all-button {
+  min-height: 0px;
+}

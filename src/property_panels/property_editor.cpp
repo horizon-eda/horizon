@@ -44,6 +44,7 @@ PropertyEditor::PropertyEditor(ObjectType t, ObjectProperty::ID prop, class Prop
 
     apply_all_button = Gtk::manage(new Gtk::ToggleButton());
     apply_all_button->set_label("All");
+    apply_all_button->get_style_context()->add_class("imp-property-all-button");
     apply_all_button->signal_toggled().connect([this] { s_signal_apply_all.emit(); });
     hbox->pack_start(*apply_all_button, false, false, 0);
 
