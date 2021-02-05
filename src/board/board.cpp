@@ -1033,6 +1033,10 @@ std::pair<Coordi, Coordi> Board::get_bbox() const
             acc.accumulate(it.second.get_bbox());
         }
     }
+    for (const auto &[_, package] : packages) {
+        acc.accumulate(package.get_bbox());
+    }
+
     return acc.get_or({{-10_mm, -10_mm}, {10_mm, 10_mm}});
 }
 

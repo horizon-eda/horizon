@@ -32,6 +32,8 @@ public:
     std::set<UUID> get_nets() const;
 
     Placement placement;
+    std::pair<Coordi, Coordi> get_bbox() const;
+
     bool flip = false;
     bool smashed = false;
     bool omit_silkscreen = false;
