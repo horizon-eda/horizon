@@ -59,6 +59,7 @@ public:
     std::optional<int> ask_datum_angle(const std::string &label, int def = 0);
     bool edit_shapes(std::set<class Shape *> shapes);
     bool edit_via(std::set<class Via *> &vias, class ViaPadstackProvider &vpp);
+    bool edit_custom_value(class SchematicSymbol &sym);
     std::optional<std::string> ask_dxf_filename();
     std::optional<std::string> ask_kicad_package_filename();
     std::optional<std::string> ask_picture_filename();

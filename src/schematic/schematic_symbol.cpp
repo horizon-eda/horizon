@@ -18,7 +18,7 @@ SchematicSymbol::SchematicSymbol(const UUID &uu, const json &j, IPool &pool, Blo
     : uuid(uu), pool_symbol(pool.get_symbol(j.at("symbol").get<std::string>())), symbol(*pool_symbol),
       placement(j.at("placement")), smashed(j.value("smashed", false)),
       display_directions(j.value("display_directions", false)), display_all_pads(j.value("display_all_pads", true)),
-      expand(j.value("expand", 0))
+      expand(j.value("expand", 0)), custom_value(j.value("custom_value", ""))
 {
     if (j.count("pin_display_mode"))
         pin_display_mode = pdm_lut.lookup(j.at("pin_display_mode"));
@@ -59,6 +59,8 @@ json SchematicSymbol::serialize() const
     for (const auto &it : texts) {
         j["texts"].push_back((std::string)it->uuid);
     }
+    if (custom_value.size())
+        j["custom_value"] = custom_value;
 
     return j;
 }
@@ -66,6 +68,147 @@ json SchematicSymbol::serialize() const
 UUID SchematicSymbol::get_uuid() const
 {
     return uuid;
+}
+
+static bool isvar(char c)
+{
+    return std::isalnum(c) || c == '_' || c == ':';
+}
+
+static std::string interpolate(const std::string &str,
+                               std::function<std::optional<std::string>(const std::string &s)> interpolator)
+{
+
+    enum class State { NORMAL, DOLLAR, VAR, VAR_BRACED };
+    State state = State::NORMAL;
+    std::string out;
+    std::string var_current;
+    size_t i = 0;
+    while (true) {
+        const char c = str.c_str()[i++];
+        switch (state) {
+        case State::NORMAL:
+            if (c == '$') {
+                state = State::DOLLAR;
+            }
+            else if (c) {
+                out.append(1, c);
+            }
+            break;
+
+        case State::DOLLAR:
+            if (isvar(c)) {
+                var_current.clear();
+                var_current.append(1, c);
+                state = State::VAR;
+            }
+            else if (c == '{') {
+                var_current.clear();
+                state = State::VAR_BRACED;
+            }
+            else {
+                out.append("$");
+                if (c)
+                    out.append(1, c);
+                state = State::NORMAL;
+            }
+            break;
+
+        case State::VAR:
+            if (isvar(c)) {
+                var_current.append(1, c);
+            }
+            else {
+                if (auto subst = interpolator(var_current)) {
+                    out.append(*subst);
+                }
+                else {
+                    out.append("$" + var_current);
+                }
+
+                if (c == '$') {
+                    state = State::DOLLAR;
+                }
+                else if (c) {
+                    out.append(1, c);
+                    state = State::NORMAL;
+                }
+            }
+            break;
+
+        case State::VAR_BRACED:
+            if (c == '}') {
+                if (auto subst = interpolator(var_current)) {
+                    out.append(*subst);
+                }
+                else {
+                    out.append("${" + var_current + "}");
+                }
+                state = State::NORMAL;
+            }
+            else {
+                var_current.append(1, c);
+            }
+            break;
+        }
+
+        if (!c)
+            break;
+    }
+
+    return out;
+}
+
+std::string SchematicSymbol::get_custom_value() const
+{
+    return interpolate(custom_value, [this](const auto &var) -> std::optional<std::string> {
+        std::string var_lower = var;
+        std::transform(var_lower.begin(), var_lower.end(), var_lower.begin(),
+                       [](unsigned char c) { return std::tolower(c); });
+        if (var_lower == "value") {
+            if (component->part)
+                return component->part->get_value();
+            else
+                return component->value;
+        }
+        else if (var_lower == "pkg") {
+            if (component->part)
+                return component->part->package->name;
+            else
+                return "None";
+        }
+        else if (var_lower == "mpn") {
+            if (component->part)
+                return component->part->get_MPN();
+            else
+                return "None";
+        }
+        else if (var_lower == "mfr") {
+            if (component->part)
+                return component->part->get_manufacturer();
+            else
+                return "None";
+        }
+        else if (var_lower == "desc") {
+            if (component->part)
+                return component->part->get_description();
+            else
+                return "None";
+        }
+        else if (var_lower.find("p:") == 0) {
+            if (component->part) {
+                const auto col = var_lower.substr(2);
+                if (component->part->parametric_formatted.count(col))
+                    return component->part->parametric_formatted.at(col).value;
+                else
+                    return {};
+            }
+            else {
+                return "None";
+            }
+        }
+        return {};
+    });
 }
 
 std::string SchematicSymbol::replace_text(const std::string &t, bool *replaced, const Schematic &sch) const
@@ -78,6 +221,11 @@ std::string SchematicSymbol::replace_text(const std::string &t, bool *replaced, 
         if (replaced)
             *replaced = true;
         r = component->refdes + gate->suffix;
+    }
+    else if (is_value && custom_value.size()) {
+        if (replaced)
+            *replaced = true;
+        r = get_custom_value();
     }
     else {
         r = component->replace_text(t, replaced);

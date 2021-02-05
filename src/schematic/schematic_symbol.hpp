@@ -35,6 +35,9 @@ public:
     void apply_pin_names();
 
     std::string replace_text(const std::string &t, bool *replaced, const class Schematic &sch) const;
+    std::string get_custom_value() const;
+
+    std::string custom_value;
 
     UUID get_uuid() const;
     json serialize() const;

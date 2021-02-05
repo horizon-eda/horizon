@@ -33,8 +33,6 @@ public:
     std::string cache_path;
 };
 
-std::unique_ptr<Pool> make_pool(const PoolParams &params);
-
 class ImpBase {
     friend class ImpInterface;
 

@@ -151,5 +151,6 @@ enum class ToolID {
     DRAW_KEEPOUT,
     DRAG_POLYGON_EDGE,
     MEASURE,
+    EDIT_CUSTOM_VALUE,
 };
 } // namespace horizon

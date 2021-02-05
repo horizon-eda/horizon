@@ -288,6 +288,7 @@ SRC_IMP = \
 	src/core/tools/tool_place_decal.cpp\
 	src/core/tools/tool_drag_polygon_edge.cpp\
 	src/core/tools/tool_measure.cpp\
+	src/core/tools/tool_edit_custom_value.cpp\
 	src/document/documents.cpp\
 	src/core/clipboard/clipboard.cpp\
 	src/core/clipboard/clipboard_padstack.cpp\
@@ -329,6 +330,7 @@ SRC_IMP = \
 	src/dialogs/enter_datum_angle_window.cpp\
 	src/dialogs/enter_datum_scale_window.cpp\
 	src/dialogs/router_settings_window.cpp\
+	src/dialogs/edit_custom_value.cpp\
 	src/util/sort_controller.cpp\
 	src/core/core_symbol.cpp\
 	src/core/core_schematic.cpp\

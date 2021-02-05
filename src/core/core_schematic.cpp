@@ -7,6 +7,7 @@
 #include <giomm/file.h>
 #include <glibmm/fileutils.h>
 #include "pool/ipool.hpp"
+#include "util/str_util.hpp"
 
 namespace horizon {
 CoreSchematic::CoreSchematic(const std::string &schematic_filename, const std::string &block_filename,
@@ -348,6 +349,10 @@ bool CoreSchematic::get_property(ObjectType type, const UUID &uu, ObjectProperty
             dynamic_cast<PropertyValueString &>(value).value = sym->component->refdes + sym->gate->suffix;
             return true;
 
+        case ObjectProperty::ID::VALUE:
+            dynamic_cast<PropertyValueString &>(value).value = sym->custom_value;
+            return true;
+
         default:
             return false;
         }
@@ -428,6 +433,11 @@ bool CoreSchematic::set_property(ObjectType type, const UUID &uu, ObjectProperty
         case ObjectProperty::ID::EXPAND:
             sym->expand = dynamic_cast<const PropertyValueInt &>(value).value;
             sym->apply_expand();
+            break;
+
+        case ObjectProperty::ID::VALUE:
+            sym->custom_value = dynamic_cast<const PropertyValueString &>(value).value;
+            trim(sym->custom_value);
             break;
 
         default:

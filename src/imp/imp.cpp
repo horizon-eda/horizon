@@ -31,6 +31,7 @@
 #include "widgets/action_button.hpp"
 #include "in_tool_action_catalog.hpp"
 #include "util/zmq_helper.hpp"
+#include "pool/pool_parametric.hpp"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>
@@ -39,10 +40,25 @@
 
 namespace horizon {
 
-std::unique_ptr<Pool> make_pool(const PoolParams &p)
+class PoolWithParametric : public PoolCached {
+public:
+    PoolWithParametric(const std::string &bp, const std::string &cp) : PoolCached(bp, cp), parametric(bp)
+    {
+    }
+
+    PoolParametric *get_parametric() override
+    {
+        return &parametric;
+    }
+
+private:
+    PoolParametric parametric;
+};
+
+static std::unique_ptr<Pool> make_pool(const PoolParams &p)
 {
     if (p.cache_path.size() && Glib::file_test(p.cache_path, Glib::FILE_TEST_IS_DIR)) {
-        return std::make_unique<PoolCached>(p.base_path, p.cache_path);
+        return std::make_unique<PoolWithParametric>(p.base_path, p.cache_path);
     }
     else {
         return std::make_unique<Pool>(p.base_path);

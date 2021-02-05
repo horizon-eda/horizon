@@ -38,6 +38,7 @@
 #include "enter_datum_angle_window.hpp"
 #include "enter_datum_scale_window.hpp"
 #include "router_settings_window.hpp"
+#include "edit_custom_value.hpp"
 #include <glibmm.h>
 #include "pool/ipool.hpp"
 #include "widgets/net_selector.hpp"
@@ -216,6 +217,12 @@ bool Dialogs::edit_shapes(std::set<Shape *> shapes)
 bool Dialogs::edit_via(std::set<class Via *> &vias, class ViaPadstackProvider &vpp)
 {
     EditViaDialog dia(parent, vias, vpp);
+    return dia.run() == Gtk::RESPONSE_OK;
+}
+
+bool Dialogs::edit_custom_value(class SchematicSymbol &sym)
+{
+    EditCustomValueDialog dia(parent, sym);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 

@@ -83,6 +83,7 @@
 #include "tools/tool_draw_plane.hpp"
 #include "tools/tool_drag_polygon_edge.hpp"
 #include "tools/tool_measure.hpp"
+#include "tools/tool_edit_custom_value.hpp"
 
 namespace horizon {
 
@@ -396,6 +397,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::MEASURE:
         return std::make_unique<ToolMeasure>(this, tool_id);
+
+    case ToolID::EDIT_CUSTOM_VALUE:
+        return std::make_unique<ToolEditCustomValue>(this, tool_id);
 
     default:
         return nullptr;
