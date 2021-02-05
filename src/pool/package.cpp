@@ -318,7 +318,8 @@ std::pair<Coordi, Coordi> Package::get_bbox() const
         acc.accumulate(bb_pad);
     }
     for (const auto &it : polygons) {
-        if (it.second.layer == BoardLayers::TOP_PACKAGE || it.second.layer == BoardLayers::BOTTOM_PACKAGE) {
+        if (it.second.layer == BoardLayers::TOP_PACKAGE || it.second.layer == BoardLayers::BOTTOM_PACKAGE
+            || it.second.layer == BoardLayers::L_OUTLINE) {
             acc.accumulate(it.second.get_bbox());
         }
     }

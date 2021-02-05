@@ -236,4 +236,10 @@ std::set<UUID> BoardPackage::get_nets() const
     return nets;
 }
 
+
+std::pair<Coordi, Coordi> BoardPackage::get_bbox() const
+{
+    return placement.transform_bb(package.get_bbox());
+}
+
 } // namespace horizon
