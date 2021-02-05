@@ -5,6 +5,7 @@
 #include "common/lut.hpp"
 #include "nlohmann/json.hpp"
 #include "util/util.hpp"
+#include "pool/pool_parametric.hpp"
 
 namespace horizon {
 
@@ -84,6 +85,23 @@ Part::Part(const UUID &uu, const json &j, IPool &pool)
         const json &o = j["parametric"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             parametric.emplace(it.key(), it->get<std::string>());
+        }
+
+        if (auto pool_parametric = pool.get_parametric()) {
+            if (parametric.count("table")) {
+                const auto &table_name = parametric.at("table");
+                const auto &tables = pool_parametric->get_tables();
+                if (tables.count(table_name)) {
+                    const auto &table = tables.at(table_name);
+                    for (const auto &col : table.columns) {
+                        if (parametric.count(col.name)) {
+                            parametric_formatted.emplace(
+                                    std::piecewise_construct, std::forward_as_tuple(col.name),
+                                    std::forward_as_tuple(col.display_name, col.format(parametric.at(col.name))));
+                        }
+                    }
+                }
+            }
         }
     }
     if (j.count("orderable_MPNs")) {

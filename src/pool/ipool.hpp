@@ -28,6 +28,8 @@ public:
 
     virtual void clear() = 0;
 
+    virtual class PoolParametric *get_parametric() = 0;
+
     virtual ~IPool()
     {
     }

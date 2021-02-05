@@ -48,6 +48,11 @@ public:
         return db;
     }
 
+    class PoolParametric *get_parametric() override
+    {
+        return nullptr;
+    }
+
     /**
      * The database connection.
      * You may use it to perform more advanced queries on the pool.
