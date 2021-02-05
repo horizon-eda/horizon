@@ -45,11 +45,40 @@ ToolResponse ToolDrawConnectionLine::update(const ToolArgs &args)
         return ToolResponse();
     }
     else if (args.type == ToolEventType::ACTION) {
+        const ObjectType target_type = args.target.type;
         switch (args.action) {
         case InToolActionID::LMB:
-            if (args.target.type == ObjectType::PAD) {
+            if (target_type == ObjectType::PAD || target_type == ObjectType::BOARD_PACKAGE) {
                 auto pkg = &brd->packages.at(args.target.path.at(0));
-                auto pad = &pkg->package.pads.at(args.target.path.at(1));
+
+                Pad *pad = nullptr;
+                bool multiple_pads = false;
+                if (target_type == ObjectType::BOARD_PACKAGE) {
+                    // If the selected package has a pin on the origin, it's possible for us to
+                    // select the package instead of the pad.
+                    for (auto &[pad_uuid, pkg_pad] : pkg->package.pads) {
+                        if (pkg_pad.placement.shift.x == 0 && pkg_pad.placement.shift.y == 0) {
+                            if (pad) {
+                                multiple_pads = true;
+                                break;
+                            }
+                            pad = &pkg_pad;
+                        }
+                    }
+                }
+                else {
+                    pad = &pkg->package.pads.at(args.target.path.at(1));
+                }
+
+                if (multiple_pads) {
+                    imp->tool_bar_flash("multiple pads on package origin");
+                    break;
+                }
+                else if (!pad) {
+                    imp->tool_bar_flash("only connects to pads or junctions");
+                    break;
+                }
+
                 if (temp_line) {
                     if (temp_net == nullptr || pad->net == nullptr) {
                         temp_line->to.connect(pkg, pad);
@@ -71,7 +100,7 @@ ToolResponse ToolDrawConnectionLine::update(const ToolArgs &args)
                     temp_net = pad->net;
                 }
             }
-            else if (args.target.type == ObjectType::JUNCTION) {
+            else if (target_type == ObjectType::JUNCTION) {
                 auto &ju = brd->junctions.at(args.target.path.at(0));
                 if (ju.net) {
                     if (temp_line) {
