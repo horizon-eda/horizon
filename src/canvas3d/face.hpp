@@ -12,6 +12,7 @@ public:
 
 private:
     Canvas3DBase &ca;
+    void create_vao();
 
     GLuint program;
     GLuint vao;

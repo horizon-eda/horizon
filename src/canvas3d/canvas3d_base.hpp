@@ -73,43 +73,6 @@ public:
     void set_cam_azimuth(const float &az);
 
 
-    class FaceVertex {
-    public:
-        FaceVertex(float ix, float iy, float iz, float inx, float iny, float inz, uint8_t ir, uint8_t ig, uint8_t ib)
-            : x(ix), y(iy), z(iz), nx(inx), ny(iny), nz(inz), r(ir), g(ig), b(ib), _pad(0)
-        {
-        }
-        float x;
-        float y;
-        float z;
-        float nx;
-        float ny;
-        float nz;
-
-        uint8_t r;
-        uint8_t g;
-        uint8_t b;
-        uint8_t _pad;
-    } __attribute__((packed));
-
-    class ModelTransform {
-    public:
-        ModelTransform(float ix, float iy, float a, bool flip, bool highlight)
-            : x(ix), y(iy), angle(a), flags(flip | (highlight << 1))
-        {
-        }
-        float x;
-        float y;
-        uint16_t angle;
-        uint16_t flags;
-
-        float model_x = 0;
-        float model_y = 0;
-        float model_z = 0;
-        uint16_t model_roll = 0;
-        uint16_t model_pitch = 0;
-        uint16_t model_yaw = 0;
-    } __attribute__((packed));
     void view_all();
     void clear_3d_models();
 
@@ -184,7 +147,46 @@ protected:
     }
     UUID pick_package(unsigned int x, unsigned int y) const;
 
+
 private:
+    class FaceVertex {
+    public:
+        FaceVertex(float ix, float iy, float iz, float inx, float iny, float inz, uint8_t ir, uint8_t ig, uint8_t ib)
+            : x(ix), y(iy), z(iz), nx(inx), ny(iny), nz(inz), r(ir), g(ig), b(ib), _pad(0)
+        {
+        }
+        float x;
+        float y;
+        float z;
+        float nx;
+        float ny;
+        float nz;
+
+        uint8_t r;
+        uint8_t g;
+        uint8_t b;
+        uint8_t _pad;
+    } __attribute__((packed));
+
+    class ModelTransform {
+    public:
+        ModelTransform(float ix, float iy, float a, bool flip, bool highlight)
+            : x(ix), y(iy), angle(a), flags(flip | (highlight << 1))
+        {
+        }
+        float x;
+        float y;
+        uint16_t angle;
+        uint16_t flags;
+
+        float model_x = 0;
+        float model_y = 0;
+        float model_z = 0;
+        uint16_t model_roll = 0;
+        uint16_t model_pitch = 0;
+        uint16_t model_yaw = 0;
+    } __attribute__((packed));
+
     float get_layer_offset(int layer) const;
     float get_layer_thickness(int layer) const;
     bool layer_is_visible(int layer) const;
