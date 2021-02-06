@@ -2,6 +2,8 @@
 #include "board/plane.hpp"
 #include "util/gtk_util.hpp"
 #include "spin_button_dim.hpp"
+#include "widgets/help_button.hpp"
+#include "help_texts.hpp"
 
 namespace horizon {
 PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), settings(sets)
@@ -16,7 +18,11 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
         sp->set_increments(1, 1);
         bind_widget(sp, *priority);
         sp->signal_changed().connect([this] { s_signal_changed.emit(); });
-        grid_attach_label_and_widget(this, "Priority", sp, top);
+        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5));
+        box->pack_start(*sp, true, true, 0);
+        sp->show();
+        HelpButton::pack_into(*box, HelpTexts::PLANE_PRIORITY);
+        grid_attach_label_and_widget(this, "Priority", box, top);
     }
 
 

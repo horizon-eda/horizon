@@ -29,3 +29,6 @@ unit: <tt>m</tt>: millimeter, <tt>i</tt>: inch, <tt>t</tt>: thou/mil, <tt>u</tt>
 
 #SYMBOL_CAN_EXPAND
 Set this for box-style symbols if there are alternate pin names or the user is expected to add custom pin names. In this case, size the symbol such that it fits the primary pin names.
+
+#PLANE_PRIORITY
+Planes with lower priority will get filled first. Make sure to assign distinct priorities to overlapping planes.
