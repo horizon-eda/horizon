@@ -44,6 +44,7 @@ private:
 
     Block fake_block;
     Board fake_board;
+    void update_fake_board();
 
     class FootprintGeneratorWindow *footprint_generator_window = nullptr;
     class View3DWindow *view_3d_window = nullptr;

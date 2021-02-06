@@ -4,6 +4,7 @@
 #include "3d_view.hpp"
 #include "widgets/spin_button_angle.hpp"
 #include "board/board_layers.hpp"
+#include "canvas3d/canvas3d.hpp"
 
 namespace horizon {
 
@@ -259,7 +260,8 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
     }
     for (auto sp : placement_spin_buttons) {
         sp->signal_value_changed().connect([this] {
-            imp.view_3d_window->update();
+            imp.update_fake_board();
+            imp.view_3d_window->get_canvas().update_packages();
             s_signal_changed.emit();
         });
     }
@@ -334,6 +336,35 @@ std::string ImpPackage::ask_3d_model_filename(const std::string &current_filenam
     return "";
 }
 
+void ImpPackage::update_fake_board()
+{
+    fake_board.polygons.clear();
+    {
+        auto uu = UUID::random();
+        auto &poly = fake_board.polygons.emplace(uu, uu).first->second;
+        poly.layer = BoardLayers::L_OUTLINE;
+
+        auto bb = package.get_bbox();
+        bb.first -= Coordi(5_mm, 5_mm);
+        bb.second += Coordi(5_mm, 5_mm);
+
+        poly.vertices.emplace_back(bb.first);
+        poly.vertices.emplace_back(Coordi(bb.first.x, bb.second.y));
+        poly.vertices.emplace_back(bb.second);
+        poly.vertices.emplace_back(Coordi(bb.second.x, bb.first.y));
+    }
+
+    fake_board.packages.clear();
+    {
+        auto uu = UUID::random();
+        auto &fake_package = fake_board.packages.emplace(uu, uu).first->second;
+        fake_package.package = package;
+        fake_package.package.models = core_package.models;
+        fake_package.pool_package = &package;
+        fake_package.model = current_model;
+    }
+}
+
 void ImpPackage::construct_3d()
 {
     auto view_3d_button = Gtk::manage(new Gtk::Button("3D"));
@@ -345,33 +376,7 @@ void ImpPackage::construct_3d()
     fake_board.stackup.at(0).substrate_thickness = 1.6_mm;
 
     view_3d_window = View3DWindow::create(fake_board, *pool.get(), View3DWindow::Mode::PACKAGE);
-    view_3d_window->signal_request_update().connect([this] {
-        fake_board.polygons.clear();
-        {
-            auto uu = UUID::random();
-            auto &poly = fake_board.polygons.emplace(uu, uu).first->second;
-            poly.layer = BoardLayers::L_OUTLINE;
-
-            auto bb = package.get_bbox();
-            bb.first -= Coordi(5_mm, 5_mm);
-            bb.second += Coordi(5_mm, 5_mm);
-
-            poly.vertices.emplace_back(bb.first);
-            poly.vertices.emplace_back(Coordi(bb.first.x, bb.second.y));
-            poly.vertices.emplace_back(bb.second);
-            poly.vertices.emplace_back(Coordi(bb.second.x, bb.first.y));
-        }
-
-        fake_board.packages.clear();
-        {
-            auto uu = UUID::random();
-            auto &fake_package = fake_board.packages.emplace(uu, uu).first->second;
-            fake_package.package = package;
-            fake_package.package.models = core_package.models;
-            fake_package.pool_package = &package;
-            fake_package.model = current_model;
-        }
-    });
+    view_3d_window->signal_request_update().connect(sigc::mem_fun(*this, &ImpPackage::update_fake_board));
     view_3d_window->signal_key_press_event().connect([this](GdkEventKey *ev) {
         if (ev->keyval == GDK_KEY_Escape) {
             main_window->present();

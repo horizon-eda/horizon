@@ -21,6 +21,10 @@ public:
     void set_substrate_color(const Gdk::RGBA &c);
     Gdk::RGBA get_substrate_color();
     void set_appearance(const class Appearance &a);
+    class Canvas3D &get_canvas()
+    {
+        return *canvas;
+    }
 
     typedef sigc::signal<void> type_signal_request_update;
     type_signal_request_update signal_request_update()
