@@ -76,6 +76,12 @@ public:
     void view_all();
     void clear_3d_models();
 
+    struct BBox {
+        float xl, yl, zl, xh, yh, zh;
+    };
+
+    BBox get_model_bbox(const std::string &filename) const;
+
 protected:
     CanvasMesh ca;
 

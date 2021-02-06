@@ -18,7 +18,9 @@ public:
 
 private:
     ImpPackage &imp;
+    Package::Model &model;
     Gtk::CheckButton *default_cb = nullptr;
+    Gtk::CheckButton *origin_cb = nullptr;
     Gtk::Label *current_label = nullptr;
 
     SpinButtonDim *sp_x = nullptr;
@@ -28,6 +30,8 @@ private:
     class SpinButtonAngle *sp_roll = nullptr;
     class SpinButtonAngle *sp_pitch = nullptr;
     class SpinButtonAngle *sp_yaw = nullptr;
+
+    std::vector<sigc::connection> sp_connections;
 };
 
 static Gtk::Label *make_label(const std::string &text)
@@ -93,9 +97,24 @@ PlaceAtPadDialog::PlaceAtPadDialog(const Package &p)
     get_content_area()->pack_start(*sc, true, true, 0);
 }
 
-ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 5), uu(iuu), imp(iimp)
+static double angle_to_rad(int16_t a)
 {
-    auto &model = imp.core_package.models.at(uu);
+    return a / 32768. * M_PI;
+}
+
+static glm::dmat4 mat_from_model(const Package::Model &model, double scale = 1)
+{
+    glm::dmat4 mat = glm::dmat4(1);
+    mat = glm::translate(mat, glm::dvec3(model.x, model.y, model.z) * scale);
+    mat = glm::rotate(mat, angle_to_rad(model.roll), glm::dvec3(-1, 0, 0));
+    mat = glm::rotate(mat, angle_to_rad(model.pitch), glm::dvec3(0, -1, 0));
+    mat = glm::rotate(mat, angle_to_rad(model.yaw), glm::dvec3(0, 0, -1));
+    return mat;
+}
+
+ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu)
+    : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 5), uu(iuu), imp(iimp), model(imp.core_package.models.at(uu))
+{
     property_margin() = 10;
     auto entry = Gtk::manage(new Gtk::Entry);
     pack_start(*entry, false, false, 0);
@@ -170,28 +189,62 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
 
     {
         auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5));
-        auto reset_button = Gtk::manage(new Gtk::Button("Reset placement"));
-        reset_button->signal_clicked().connect([this] {
-            sp_x->set_value(0);
-            sp_y->set_value(0);
-            sp_z->set_value(0);
-            sp_roll->set_value(0);
-            sp_pitch->set_value(0);
-            sp_yaw->set_value(0);
-        });
-        box->pack_start(*reset_button, false, false, 0);
 
-        auto place_at_pad_button = Gtk::manage(new Gtk::Button("Place at pad"));
-        place_at_pad_button->signal_clicked().connect([this] {
-            PlaceAtPadDialog dia(imp.package);
-            dia.set_transient_for(*imp.view_3d_window);
-            if (dia.run() == Gtk::RESPONSE_OK) {
-                auto &pad = imp.package.pads.at(dia.selected_pad);
-                sp_x->set_value(pad.placement.shift.x);
-                sp_y->set_value(pad.placement.shift.y);
+        {
+            auto place_button = Gtk::manage(new Gtk::MenuButton());
+            place_button->set_label("Place…");
+            auto place_menu = Gtk::manage(new Gtk::Menu);
+            place_button->set_menu(*place_menu);
+            {
+                auto it = Gtk::manage(new Gtk::MenuItem("Reset"));
+                it->show();
+                place_menu->append(*it);
+                it->signal_activate().connect([this] {
+                    origin_cb->set_active(false);
+                    sp_x->set_value(0);
+                    sp_y->set_value(0);
+                    sp_z->set_value(0);
+                    sp_roll->set_value(0);
+                    sp_pitch->set_value(0);
+                    sp_yaw->set_value(0);
+                });
             }
-        });
-        box->pack_start(*place_at_pad_button, false, false, 0);
+            {
+                auto it = Gtk::manage(new Gtk::MenuItem("At pad"));
+                it->show();
+                place_menu->append(*it);
+                it->signal_activate().connect([this] {
+                    PlaceAtPadDialog dia(imp.package);
+                    dia.set_transient_for(*imp.view_3d_window);
+                    if (dia.run() == Gtk::RESPONSE_OK) {
+                        auto &pad = imp.package.pads.at(dia.selected_pad);
+                        sp_x->set_value(pad.placement.shift.x);
+                        sp_y->set_value(pad.placement.shift.y);
+                    }
+                });
+            }
+            {
+                auto it = Gtk::manage(new Gtk::MenuItem("Center"));
+                it->show();
+                place_menu->append(*it);
+                it->signal_activate().connect([this] {
+                    const auto &filename = model.filename;
+                    auto bb = imp.view_3d_window->get_canvas().get_model_bbox(filename);
+                    origin_cb->set_active(false);
+                    sp_roll->set_value(0);
+                    sp_pitch->set_value(0);
+                    sp_yaw->set_value(0);
+                    sp_x->set_value((bb.xh + bb.xl) / -2 * 1e6);
+                    sp_y->set_value((bb.yh + bb.yl) / -2 * 1e6);
+                    sp_z->set_value((bb.zh + bb.zl) / -2 * 1e6);
+                    origin_cb->set_active(true);
+                });
+            }
+            box->pack_start(*place_button, false, false, 0);
+        }
+
+        origin_cb = Gtk::manage(new Gtk::CheckButton("Rotate around package origin"));
+        box->pack_start(*origin_cb, false, false, 0);
 
         box->show_all();
         pack_start(*box, false, false, 0);
@@ -209,7 +262,7 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
         auto sp = Gtk::manage(new SpinButtonDim);
         sp->set_range(-1000_mm, 1000_mm);
         placement_grid->attach(*sp, 1, 0, 1, 1);
-        bind_widget(sp, model.x);
+        sp->set_value(model.x);
         placement_spin_buttons.insert(sp);
         sp_x = sp;
     }
@@ -217,7 +270,7 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
         auto sp = Gtk::manage(new SpinButtonDim);
         sp->set_range(-1000_mm, 1000_mm);
         placement_grid->attach(*sp, 1, 1, 1, 1);
-        bind_widget(sp, model.y);
+        sp->set_value(model.y);
         placement_spin_buttons.insert(sp);
         sp_y = sp;
     }
@@ -225,7 +278,7 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
         auto sp = Gtk::manage(new SpinButtonDim);
         sp->set_range(-1000_mm, 1000_mm);
         placement_grid->attach(*sp, 1, 2, 1, 1);
-        bind_widget(sp, model.z);
+        sp->set_value(model.z);
         placement_spin_buttons.insert(sp);
         sp_z = sp;
     }
@@ -240,30 +293,63 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
     {
         auto sp = Gtk::manage(new SpinButtonAngle);
         placement_grid->attach(*sp, 3, 0, 1, 1);
-        bind_widget(sp, model.roll);
+        sp->set_value(model.roll);
         placement_spin_buttons.insert(sp);
         sp_roll = sp;
     }
     {
         auto sp = Gtk::manage(new SpinButtonAngle);
         placement_grid->attach(*sp, 3, 1, 1, 1);
-        bind_widget(sp, model.pitch);
+        sp->set_value(model.pitch);
         placement_spin_buttons.insert(sp);
         sp_pitch = sp;
     }
     {
         auto sp = Gtk::manage(new SpinButtonAngle);
         placement_grid->attach(*sp, 3, 2, 1, 1);
-        bind_widget(sp, model.yaw);
+        sp->set_value(model.yaw);
         placement_spin_buttons.insert(sp);
         sp_yaw = sp;
     }
     for (auto sp : placement_spin_buttons) {
-        sp->signal_value_changed().connect([this] {
+        auto conn = sp->signal_value_changed().connect([this, sp] {
+            if (sp == sp_x || sp == sp_y || sp == sp_z) {
+                model.x = sp_x->get_value_as_int();
+                model.y = sp_y->get_value_as_int();
+                model.z = sp_z->get_value_as_int();
+            }
+            else {
+                const auto oldmat = mat_from_model(model);
+                const auto p = glm::inverse(oldmat) * glm::dvec4(0, 0, 0, 1);
+
+                model.roll = sp_roll->get_value_as_int();
+                model.pitch = sp_pitch->get_value_as_int();
+                model.yaw = sp_yaw->get_value_as_int();
+
+                if (origin_cb->get_active()) {
+                    const auto newmat = mat_from_model(model);
+                    const auto delta = newmat * p;
+
+                    for (auto &cn : sp_connections) {
+                        cn.block();
+                    }
+                    sp_x->set_value(model.x - delta.x);
+                    sp_y->set_value(model.y - delta.y);
+                    sp_z->set_value(model.z - delta.z);
+                    model.x = sp_x->get_value_as_int();
+                    model.y = sp_y->get_value_as_int();
+                    model.z = sp_z->get_value_as_int();
+                    for (auto &cn : sp_connections) {
+                        cn.unblock();
+                    }
+                }
+            }
+
             imp.update_fake_board();
             imp.view_3d_window->get_canvas().update_packages();
             s_signal_changed.emit();
         });
+        sp_connections.push_back(conn);
     }
 
     placement_grid->show_all();

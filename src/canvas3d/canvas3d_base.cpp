@@ -541,4 +541,41 @@ UUID Canvas3DBase::pick_package(unsigned int x, unsigned int y) const
     return UUID();
 }
 
+static void acc(float &l, float &h, float v)
+{
+    l = std::min(l, v);
+    h = std::max(h, v);
+}
+
+Canvas3DBase::BBox Canvas3DBase::get_model_bbox(const std::string &filename) const
+{
+    Canvas3DBase::BBox bb;
+    bool first = true;
+    if (models.count(filename)) {
+        const auto &m = models.at(filename);
+        for (size_t i = m.face_index_offset; i < m.face_index_offset + m.count; i++) {
+            const auto idx = face_index_buffer.at(i);
+            const auto &v = face_vertex_buffer.at(idx);
+            if (first) {
+                bb.xh = v.x;
+                bb.xl = v.x;
+                bb.yh = v.y;
+                bb.yl = v.y;
+                bb.zh = v.z;
+                bb.zl = v.z;
+            }
+            else {
+                acc(bb.xl, bb.xh, v.x);
+                acc(bb.yl, bb.yh, v.y);
+                acc(bb.zl, bb.zh, v.z);
+            }
+            first = false;
+        }
+    }
+    else {
+        bb = {0};
+    }
+    return bb;
+}
+
 } // namespace horizon
