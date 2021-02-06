@@ -1,5 +1,6 @@
 #include "forced_pool_update_dialog.hpp"
 #include "pool-update/pool-update.hpp"
+#include "logger/logger.hpp"
 #include <thread>
 
 namespace horizon {
@@ -54,6 +55,9 @@ ForcedPoolUpdateDialog::ForcedPoolUpdateDialog(const std::string &bp, Gtk::Windo
                 else if (last_status == PoolUpdateStatus::INFO) {
                     pool_update_last_info = last_msg;
                 }
+                else if (last_status == PoolUpdateStatus::FILE_ERROR) {
+                    Logger::log_warning(last_msg, Logger::Domain::POOL_UPDATE, last_filename);
+                }
             }
             if (pool_update_last_info != last_info)
                 filename_label->set_text(pool_update_last_info);
@@ -63,15 +67,35 @@ ForcedPoolUpdateDialog::ForcedPoolUpdateDialog(const std::string &bp, Gtk::Windo
 
 void ForcedPoolUpdateDialog::pool_update_thread()
 {
-    pool_update(
-            base_path,
-            [this](PoolUpdateStatus st, std::string filename, std::string msg) {
-                {
-                    std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
-                    pool_update_status_queue.emplace_back(st, filename, msg);
-                }
-                dispatcher.emit();
-            },
-            true);
+    try {
+        pool_update(
+                base_path,
+                [this](PoolUpdateStatus st, std::string filename, std::string msg) {
+                    {
+                        std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
+                        pool_update_status_queue.emplace_back(st, filename, msg);
+                    }
+                    dispatcher.emit();
+                },
+                true);
+        return;
+    }
+    catch (const std::exception &e) {
+        Logger::log_critical("caught exception", Logger::Domain::POOL_UPDATE, e.what());
+    }
+    catch (const Glib::FileError &e) {
+        Logger::log_critical("caught file exception", Logger::Domain::POOL_UPDATE, e.what());
+    }
+    catch (const Glib::Error &e) {
+        Logger::log_critical("caught GLib exception", Logger::Domain::POOL_UPDATE, e.what());
+    }
+    catch (...) {
+        Logger::log_critical("caught unknown exception", Logger::Domain::POOL_UPDATE);
+    }
+    {
+        std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
+        pool_update_status_queue.emplace_back(PoolUpdateStatus::DONE, "", "Error");
+    }
+    dispatcher.emit();
 }
 } // namespace horizon

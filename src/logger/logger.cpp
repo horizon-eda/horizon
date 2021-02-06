@@ -73,6 +73,8 @@ std::string Logger::domain_to_string(Logger::Domain dom)
         return "Import";
     case Logger::Domain::VERSION:
         return "Version";
+    case Logger::Domain::POOL_UPDATE:
+        return "Pool update";
     default:
         return "Unspecified";
     }
