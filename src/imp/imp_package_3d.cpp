@@ -11,7 +11,9 @@ class ModelEditor : public Gtk::Box, public Changeable {
 public:
     ModelEditor(ImpPackage &iimp, const UUID &iuu);
     const UUID uu;
-    void update_all();
+
+    void set_is_current(const UUID &iuu);
+    void set_is_default(const UUID &iuu);
 
 private:
     ImpPackage &imp;
@@ -101,7 +103,7 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
     entry->signal_focus_in_event().connect([this](GdkEventFocus *ev) {
         imp.current_model = uu;
         imp.view_3d_window->update();
-        update_all();
+        imp.update_model_editors();
         return false;
     });
     bind_widget(entry, model.filename);
@@ -122,7 +124,7 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
                 }
             }
             s_signal_changed.emit();
-            update_all();
+            imp.update_model_editors();
             delete this->get_parent();
         });
         box->pack_end(*delete_button, false, false, 0);
@@ -152,7 +154,7 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
             }
             imp.view_3d_window->update();
             s_signal_changed.emit();
-            update_all();
+            imp.update_model_editors();
         });
         box->pack_start(*default_cb, false, false, 0);
 
@@ -265,20 +267,30 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
     placement_grid->show_all();
     pack_start(*placement_grid, false, false, 0);
 
-    update_all();
+    imp.update_model_editors();
+}
+
+void ModelEditor::set_is_current(const UUID &iuu)
+{
+    current_label->set_visible(iuu == uu);
 }
 
 
-void ModelEditor::update_all()
+void ModelEditor::set_is_default(const UUID &iuu)
 {
-    if (imp.core_package.models.count(imp.current_model) == 0) {
-        imp.current_model = imp.core_package.default_model;
+    default_cb->set_active(iuu == uu);
+}
+
+void ImpPackage::update_model_editors()
+{
+    if (core_package.models.count(current_model) == 0) {
+        current_model = core_package.default_model;
     }
-    auto children = imp.models_listbox->get_children();
+    auto children = models_listbox->get_children();
     for (auto ch : children) {
         auto ed = dynamic_cast<ModelEditor *>(dynamic_cast<Gtk::ListBoxRow *>(ch)->get_child());
-        ed->default_cb->set_active(imp.core_package.default_model == ed->uu);
-        ed->current_label->set_visible(imp.current_model == ed->uu);
+        ed->set_is_default(core_package.default_model);
+        ed->set_is_current(current_model);
     }
 }
 
@@ -397,7 +409,7 @@ void ImpPackage::construct_3d()
                 ed->show();
                 current_model = uu;
                 view_3d_window->update();
-                ed->update_all();
+                update_model_editors();
                 core_package.set_needs_save();
             }
         });
@@ -421,7 +433,7 @@ void ImpPackage::construct_3d()
             auto ed = dynamic_cast<ModelEditor *>(row->get_child());
             current_model = ed->uu;
             view_3d_window->update();
-            ed->update_all();
+            update_model_editors();
         });
         sc->add(*models_listbox);
 
