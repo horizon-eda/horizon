@@ -162,9 +162,7 @@ void ImpPackage::construct_3d()
         models_listbox->set_activate_on_single_click(true);
         models_listbox->signal_row_activated().connect([this](Gtk::ListBoxRow *row) {
             auto ed = dynamic_cast<ModelEditor *>(row->get_child());
-            current_model = ed->uu;
-            view_3d_window->update();
-            update_model_editors();
+            ed->make_current();
         });
         sc->add(*models_listbox);
 
@@ -178,6 +176,7 @@ void ImpPackage::construct_3d()
 
         models_box->pack_start(*sc, true, true, 0);
     }
+    update_model_editors();
 
     models_box->show_all();
     view_3d_window->add_widget(models_box);

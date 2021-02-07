@@ -41,6 +41,81 @@ json Package::Model::serialize() const
     return j;
 }
 
+void Package::Model::set_shift(unsigned int ax, int64_t value)
+{
+    switch (ax) {
+    case 0:
+        x = value;
+        break;
+
+    case 1:
+        y = value;
+        break;
+
+    case 2:
+        z = value;
+        break;
+
+    default:
+        throw std::domain_error("axis out of range");
+    }
+}
+
+int64_t Package::Model::get_shift(unsigned int ax) const
+{
+    switch (ax) {
+    case 0:
+        return x;
+
+    case 1:
+        return y;
+
+    case 2:
+        return z;
+
+    default:
+        throw std::domain_error("axis out of range");
+    }
+}
+
+
+void Package::Model::set_rotation(unsigned int ax, int angle)
+{
+    switch (ax) {
+    case 0:
+        roll = angle;
+        break;
+
+    case 1:
+        pitch = angle;
+        break;
+
+    case 2:
+        yaw = angle;
+        break;
+
+    default:
+        throw std::domain_error("axis out of range");
+    }
+}
+
+int Package::Model::get_rotation(unsigned int ax) const
+{
+    switch (ax) {
+    case 0:
+        return roll;
+
+    case 1:
+        return pitch;
+
+    case 2:
+        return yaw;
+
+    default:
+        throw std::domain_error("axis out of range");
+    }
+}
+
 static const unsigned int app_version = 0;
 
 unsigned int Package::get_app_version()

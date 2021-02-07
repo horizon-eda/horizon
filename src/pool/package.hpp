@@ -53,9 +53,15 @@ public:
         int64_t y = 0;
         int64_t z = 0;
 
+        void set_shift(unsigned int ax, int64_t value);
+        int64_t get_shift(unsigned int ax) const;
+
         int roll = 0;
         int pitch = 0;
         int yaw = 0;
+
+        void set_rotation(unsigned int ax, int angle);
+        int get_rotation(unsigned int ax) const;
 
         json serialize() const;
     };

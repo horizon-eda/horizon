@@ -3,6 +3,7 @@
 #include "pool/package.hpp"
 #include <glm/glm.hpp>
 #include "util/changeable.hpp"
+#include "util/xyz_container.hpp"
 
 namespace horizon {
 
@@ -15,6 +16,7 @@ public:
 
     void set_is_current(const UUID &iuu);
     void set_is_default(const UUID &iuu);
+    void make_current();
 
 private:
     ImpPackage &imp;
@@ -23,13 +25,8 @@ private:
     Gtk::CheckButton *origin_cb = nullptr;
     Gtk::Label *current_label = nullptr;
 
-    class SpinButtonDim *sp_x = nullptr;
-    class SpinButtonDim *sp_y = nullptr;
-    class SpinButtonDim *sp_z = nullptr;
-
-    class SpinButtonAngle *sp_roll = nullptr;
-    class SpinButtonAngle *sp_pitch = nullptr;
-    class SpinButtonAngle *sp_yaw = nullptr;
+    XYZContainer<class SpinButtonDim *> sp_shift;
+    XYZContainer<class SpinButtonAngle *> sp_angle;
 
     std::vector<sigc::connection> sp_connections;
 };
