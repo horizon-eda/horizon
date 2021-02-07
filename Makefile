@@ -180,6 +180,7 @@ SRC_IMP = \
 	src/imp/imp_padstack.cpp\
 	src/imp/imp_package.cpp\
 	src/imp/imp_package_3d.cpp\
+	src/imp/model_editor.cpp\
 	src/imp/imp_board.cpp\
 	src/imp/imp_frame.cpp\
 	src/imp/imp_decal.cpp\
