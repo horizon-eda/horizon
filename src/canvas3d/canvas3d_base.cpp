@@ -69,7 +69,7 @@ float Canvas3DBase::get_layer_thickness(int layer) const
 bool Canvas3DBase::layer_is_visible(int layer) const
 {
     if (layer == 20000) // pth holes
-        return true;
+        return show_copper;
 
     if (layer == BoardLayers::TOP_MASK || layer == BoardLayers::BOTTOM_MASK)
         return show_solder_mask;
@@ -92,8 +92,12 @@ bool Canvas3DBase::layer_is_visible(int layer) const
             return false;
         }
     }
+
     if (layer < BoardLayers::TOP_COPPER && layer > BoardLayers::BOTTOM_COPPER)
-        return show_substrate == false || explode > 0;
+        return (show_substrate == false || explode > 0) && show_copper;
+
+    if (BoardLayers::is_copper(layer))
+        return show_copper;
 
     return true;
 }

@@ -169,10 +169,35 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
         }
     }
 
-    Gtk::Switch *layer_colors_switch;
-    GET_WIDGET(layer_colors_switch);
-    layer_colors_switch->property_active().signal_changed().connect(
-            [this, layer_colors_switch] { canvas->set_use_layer_colors(layer_colors_switch->get_active()); });
+    {
+        Gtk::RadioButton *copper_on_rb;
+        GET_WIDGET(copper_on_rb);
+        copper_on_rb->property_active().signal_changed().connect([this, copper_on_rb] {
+            if (copper_on_rb->get_active()) {
+                canvas->set_show_copper(true);
+                canvas->set_use_layer_colors(false);
+            }
+        });
+    }
+    {
+        Gtk::RadioButton *copper_layer_colors_rb;
+        GET_WIDGET(copper_layer_colors_rb);
+        copper_layer_colors_rb->property_active().signal_changed().connect([this, copper_layer_colors_rb] {
+            if (copper_layer_colors_rb->get_active()) {
+                canvas->set_show_copper(true);
+                canvas->set_use_layer_colors(true);
+            }
+        });
+    }
+    {
+        Gtk::RadioButton *copper_off_rb;
+        GET_WIDGET(copper_off_rb);
+        copper_off_rb->property_active().signal_changed().connect([this, copper_off_rb] {
+            if (copper_off_rb->get_active()) {
+                canvas->set_show_copper(false);
+            }
+        });
+    }
 
     Gtk::RadioButton *proj_persp_rb;
     GET_WIDGET(proj_persp_rb);

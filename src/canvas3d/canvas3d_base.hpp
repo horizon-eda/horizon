@@ -47,6 +47,7 @@ public:
     GET_SET_PICK(show_models, bool)
     GET_SET_PICK(show_dnp_models, bool)
     GET_SET_PICK(show_solder_paste, bool)
+    GET_SET_PICK(show_copper, bool)
     GET_SET(use_layer_colors, bool)
     GET_SET(solder_mask_color, Color)
     GET_SET(substrate_color, Color)
@@ -96,6 +97,7 @@ protected:
     bool show_dnp_models = false;
     bool show_solder_paste = true;
     bool use_layer_colors = false;
+    bool show_copper = true;
     Color solder_mask_color = {0, .5, 0};
     Color substrate_color = {.2, .15, 0};
     float explode = 0;

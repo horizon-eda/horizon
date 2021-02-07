@@ -140,6 +140,7 @@ template <typename T> struct FnGetSet {
     X(bool, show_solder_paste)                                                                                         \
     X(bool, show_substrate)                                                                                            \
     X(bool, use_layer_colors)                                                                                          \
+    X(bool, show_copper)                                                                                               \
     X(float, cam_azimuth)                                                                                              \
     X(float, cam_elevation)                                                                                            \
     X(float, cam_distance)                                                                                             \
