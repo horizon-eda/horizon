@@ -6,6 +6,7 @@
 #include "board/board_layers.hpp"
 #include "canvas3d/canvas3d.hpp"
 #include "model_editor.hpp"
+#include "place_model_box.hpp"
 
 namespace horizon {
 
@@ -19,6 +20,18 @@ void ImpPackage::update_model_editors()
         auto ed = dynamic_cast<ModelEditor *>(dynamic_cast<Gtk::ListBoxRow *>(ch)->get_child());
         ed->set_is_default(core_package.default_model);
         ed->set_is_current(current_model);
+    }
+}
+
+void ImpPackage::update_points()
+{
+    if (core_package.models.count(current_model)) {
+        auto &model = core_package.models.at(current_model);
+        auto &ca = view_3d_window->get_canvas();
+        ca.set_point_model(model.filename);
+        auto mat = mat_from_model(model, 1e-6);
+        view_3d_window->get_canvas().set_point_transform(mat);
+        view_3d_window->get_canvas().request_push();
     }
 }
 
@@ -91,6 +104,17 @@ void ImpPackage::update_fake_board()
     }
 }
 
+void ImpPackage::reload_model_editor()
+{
+    auto children = models_listbox->get_children();
+    for (auto ch : children) {
+        auto ed = dynamic_cast<ModelEditor *>(dynamic_cast<Gtk::ListBoxRow *>(ch)->get_child());
+        if (ed->uu == current_model) {
+            ed->reload();
+        }
+    }
+}
+
 void ImpPackage::construct_3d()
 {
     auto view_3d_button = Gtk::manage(new Gtk::Button("3D"));
@@ -117,6 +141,7 @@ void ImpPackage::construct_3d()
         box->property_margin() = 10;
         auto la = Gtk::manage(new Gtk::Label);
         la->set_markup("<b>3D Models</b>");
+        la->get_style_context()->add_class("dim-label");
         la->set_xalign(0);
         box->pack_start(*la, false, false, 0);
 
@@ -179,7 +204,18 @@ void ImpPackage::construct_3d()
     update_model_editors();
 
     models_box->show_all();
-    view_3d_window->add_widget(models_box);
+
+    view_3d_stack = Gtk::manage(new Gtk::Stack);
+    view_3d_stack->add(*models_box, "models");
+    view_3d_stack->show();
+
+    place_model_box = Gtk::manage(new PlaceModelBox(*this));
+    view_3d_window->get_canvas().signal_point_select().connect(
+            [this](glm::dvec3 p) { place_model_box->handle_pick(p); });
+    view_3d_stack->add(*place_model_box, "place");
+    place_model_box->show();
+
+    view_3d_window->add_widget(view_3d_stack);
     {
         auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
         sep->show();

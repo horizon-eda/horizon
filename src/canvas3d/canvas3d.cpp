@@ -50,7 +50,15 @@ Canvas3D::Canvas3D() : i_model_loading(0), stop_model_load_thread(false)
     gesture_rotate->signal_update().connect(sigc::mem_fun(*this, &Canvas3D::rotate_gesture_update_cb));
     gesture_rotate->set_propagation_phase(Gtk::PHASE_CAPTURE);
 
-    signal_pick_ready().connect([this] { s_signal_package_select.emit(pick_package(pick_x, pick_y)); });
+    signal_pick_ready().connect([this] {
+        const auto pick_result = pick_package_or_point(pick_x, pick_y);
+        if (auto uu = std::get_if<UUID>(&pick_result)) {
+            s_signal_package_select.emit(*uu);
+        }
+        else if (auto pt = std::get_if<glm::dvec3>(&pick_result)) {
+            s_signal_point_select.emit(*pt);
+        }
+    });
 }
 
 glm::vec2 Canvas3D::get_center_shift(const glm::vec2 &shift) const

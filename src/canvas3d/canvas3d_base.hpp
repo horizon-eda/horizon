@@ -9,7 +9,9 @@
 #include "face.hpp"
 #include "wall.hpp"
 #include "background.hpp"
+#include "point.hpp"
 #include <sigc++/sigc++.h>
+#include <variant>
 
 namespace horizon {
 
@@ -20,6 +22,7 @@ public:
     friend class WallRenderer;
     friend class FaceRenderer;
     friend class BackgroundRenderer;
+    friend class PointRenderer;
     Color get_layer_color(int layer) const;
 
     enum class Projection { PERSP, ORTHO };
@@ -76,6 +79,8 @@ public:
 
     void view_all();
     void clear_3d_models();
+    void set_point_transform(const glm::dmat4 &mat);
+    void set_point_model(const std::string &filename);
 
     struct BBox {
         float xl, yl, zl, xh, yh, zh;
@@ -119,6 +124,7 @@ protected:
     WallRenderer wall_renderer;
     FaceRenderer face_renderer;
     BackgroundRenderer background_renderer;
+    PointRenderer point_renderer;
 
     void a_realize();
     void resize_buffers();
@@ -153,7 +159,7 @@ protected:
     {
         return s_signal_pick_ready;
     }
-    UUID pick_package(unsigned int x, unsigned int y) const;
+    std::variant<UUID, glm::dvec3> pick_package_or_point(unsigned int x, unsigned int y) const;
 
 
 private:
@@ -244,6 +250,22 @@ private:
 
     std::map<std::pair<std::string, bool>, PackageInfo> package_infos; // key: first: model filename second: nopopulate
     std::vector<uint16_t> pick_buf;
+
+    class Point {
+    public:
+        Point(double ax, double ay, double az) : x(ax), y(ay), z(az)
+        {
+        }
+        double x;
+        double y;
+        double z;
+    };
+
+    uint16_t point_pick_base = 0;
+    std::map<std::string, std::vector<Point>> model_points;
+    std::string point_model_current;
+    glm::dmat4 point_mat;
+    size_t n_points = 0;
 
     float get_magic_number() const;
 

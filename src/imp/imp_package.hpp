@@ -8,6 +8,7 @@
 namespace horizon {
 class ImpPackage : public ImpLayer {
     friend class ModelEditor;
+    friend class PlaceModelBox;
 
 public:
     ImpPackage(const std::string &package_filename, const std::string &pool_path);
@@ -45,16 +46,20 @@ private:
     Block fake_block;
     Board fake_board;
     void update_fake_board();
+    void update_points();
 
     class FootprintGeneratorWindow *footprint_generator_window = nullptr;
     class View3DWindow *view_3d_window = nullptr;
     std::string ask_3d_model_filename(const std::string &current_filename = "");
     void construct_3d();
     void update_model_editors();
+    void reload_model_editor();
 
     Gtk::ListBox *models_listbox = nullptr;
     class LayerHelpBox *layer_help_box = nullptr;
     UUID current_model;
+    class PlaceModelBox *place_model_box = nullptr;
+    Gtk::Stack *view_3d_stack = nullptr;
 
     class HeaderButton *header_button = nullptr;
     Gtk::Entry *entry_name = nullptr;

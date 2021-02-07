@@ -154,6 +154,9 @@
     <file>canvas3d/shaders/face-vertex.glsl</file>
     <file>canvas3d/shaders/face-fragment.glsl</file>
 
+    <file>canvas3d/shaders/point-vertex.glsl</file>
+    <file>canvas3d/shaders/point-fragment.glsl</file>
+
     <file>canvas3d/shaders/background-vertex.glsl</file>
     <file>canvas3d/shaders/background-fragment.glsl</file>
 

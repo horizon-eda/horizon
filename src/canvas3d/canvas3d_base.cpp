@@ -17,7 +17,8 @@
 namespace horizon {
 
 Canvas3DBase::Canvas3DBase()
-    : center(0), cover_renderer(*this), wall_renderer(*this), face_renderer(*this), background_renderer(*this)
+    : center(0), cover_renderer(*this), wall_renderer(*this), face_renderer(*this), background_renderer(*this),
+      point_renderer(*this)
 {
 }
 
@@ -108,6 +109,7 @@ void Canvas3DBase::a_realize()
     wall_renderer.realize();
     face_renderer.realize();
     background_renderer.realize();
+    point_renderer.realize();
     glEnable(GL_DEPTH_TEST);
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_DST_ALPHA);
 
@@ -185,6 +187,7 @@ void Canvas3DBase::push()
     cover_renderer.push();
     wall_renderer.push();
     face_renderer.push();
+    point_renderer.push();
 }
 
 float Canvas3DBase::get_magic_number() const
@@ -285,6 +288,8 @@ void Canvas3DBase::render(RenderBackground mode)
 
     if (show_models)
         face_renderer.render();
+
+    point_renderer.render();
 
     cover_renderer.render();
 
@@ -415,6 +420,7 @@ void Canvas3DBase::prepare_packages()
         package_infos[it_pkg.first] = {size_before, size_after - size_before, pick_base, pkgs};
         pick_base += pkgs.size();
     }
+    point_pick_base = pick_base;
 }
 
 
@@ -423,13 +429,13 @@ void Canvas3DBase::load_3d_model(const std::string &filename, const std::string 
     if (models.count(filename))
         return;
 
-    auto faces = STEPImporter::import(filename_abs);
+    const auto result = STEPImporter::import(filename_abs);
     {
         std::lock_guard<std::mutex> lock(models_loading_mutex);
         // canvas->face_vertex_buffer.reserve(faces.size());
         size_t vertex_offset = face_vertex_buffer.size();
         size_t first_index = face_index_buffer.size();
-        for (const auto &face : faces) {
+        for (const auto &face : result.faces) {
             for (size_t i = 0; i < face.vertices.size(); i++) {
                 const auto &v = face.vertices.at(i);
                 const auto &n = face.normals.at(i);
@@ -449,9 +455,26 @@ void Canvas3DBase::load_3d_model(const std::string &filename, const std::string 
         size_t last_index = face_index_buffer.size();
         models.emplace(std::piecewise_construct, std::forward_as_tuple(filename),
                        std::forward_as_tuple(first_index, last_index - first_index));
+
+        auto &pts = model_points[filename];
+        pts.reserve(result.points.size());
+        for (const auto &pt : result.points) {
+            pts.emplace_back(pt.x, pt.y, pt.z);
+        }
     }
 }
 
+void Canvas3DBase::set_point_transform(const glm::dmat4 &mat)
+{
+    point_mat = mat;
+    invalidate_pick();
+    redraw();
+}
+
+void Canvas3DBase::set_point_model(const std::string &filename)
+{
+    point_model_current = filename;
+}
 
 std::map<std::string, std::string> Canvas3DBase::get_model_filenames(IPool &pool)
 {
@@ -527,22 +550,27 @@ void Canvas3DBase::queue_pick()
     }
 }
 
-UUID Canvas3DBase::pick_package(unsigned int x, unsigned int y) const
+std::variant<UUID, glm::dvec3> Canvas3DBase::pick_package_or_point(unsigned int x, unsigned int y) const
 {
     if (pick_state != PickState::CURRENT) {
         Logger::log_warning("can't with non-current pick state");
-        return UUID();
+        return {};
     }
     x *= a_get_scale_factor();
     y *= a_get_scale_factor();
     const int idx = ((height * a_get_scale_factor()) - y - 1) * width * a_get_scale_factor() + x;
     const auto pick = pick_buf.at(idx);
+    if (pick >= point_pick_base) {
+        const auto &pt = model_points.at(point_model_current).at(pick - point_pick_base);
+        const auto p4 = point_mat * glm::dvec4(pt.x, pt.y, pt.z, 1);
+        return glm::dvec3(p4.x, p4.y, p4.z);
+    }
     for (const auto &[k, v] : package_infos) {
         if (pick >= v.pick_base && pick < (v.pick_base + v.n_packages)) {
             return v.pkg.at(pick - v.pick_base);
         }
     }
-    return UUID();
+    return {};
 }
 
 static void acc(float &l, float &h, float v)

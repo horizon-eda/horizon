@@ -52,6 +52,12 @@ public:
         return s_signal_package_select;
     }
 
+    typedef sigc::signal<void, glm::dvec3> type_signal_point_select;
+    type_signal_point_select signal_point_select()
+    {
+        return s_signal_point_select;
+    }
+
     int _animate_step(GdkFrameClock *frame_clock);
 
     ~Canvas3D();
@@ -118,6 +124,7 @@ private:
     std::atomic<bool> stop_model_load_thread;
 
     type_signal_package_select s_signal_package_select;
+    type_signal_point_select s_signal_point_select;
     int pick_x, pick_y;
 };
 } // namespace horizon

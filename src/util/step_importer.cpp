@@ -32,10 +32,14 @@
 #include <TShort_Array1OfShortReal.hxx>
 #include <Precision.hxx>
 #include <Quantity_Color.hxx>
+#include <BRepTools_WireExplorer.hxx>
+#include <ShapeAnalysis_Edge.hxx>
+#include <BRepAdaptor_Curve.hxx>
 
 #include <TDF_ChildIterator.hxx>
 #include <TDF_LabelSequence.hxx>
 #include <Poly.hxx>
+#include <gp_Circ.hxx>
 
 #define USER_PREC (0.14)
 #define USER_ANGLE (0.52359878)
@@ -63,7 +67,7 @@ struct DATA {
     Handle(XCAFDoc_ShapeTool) m_assy;
     bool hasSolid;
 
-    std::deque<Face> *faces;
+    Result *result;
 };
 
 static bool readSTEP(Handle(TDocStd_Document) & m_doc, const char *fname)
@@ -119,11 +123,50 @@ static bool getColor(DATA &data, TDF_Label label, Quantity_Color &color)
     return false;
 }
 
+void processWire(const TopoDS_Wire &wire, DATA &data, const glm::dmat4 &mat)
+{
+    for (BRepTools_WireExplorer expl(wire); expl.More(); expl.Next()) {
+        const auto &edge = expl.Current();
+        ShapeAnalysis_Edge sh_an;
+        auto first = sh_an.FirstVertex(edge);
+        {
+            gp_Pnt pnt = BRep_Tool::Pnt(first);
+            glm::dvec4 gpnt(pnt.X(), pnt.Y(), pnt.Z(), 1);
+            auto pt = mat * gpnt;
+            data.result->points.emplace_back(pt.x, pt.y, pt.z);
+        }
+
+        auto curve = BRepAdaptor_Curve(edge);
+        const auto curvetype = curve.GetType();
+        if (curvetype == GeomAbs_Circle) {
+            gp_Circ c = curve.Circle();
+            auto pnt = c.Location();
+            {
+                glm::dvec4 gpnt(pnt.X(), pnt.Y(), pnt.Z(), 1);
+                auto pt = mat * gpnt;
+                data.result->points.emplace_back(pt.x, pt.y, pt.z);
+            }
+        }
+    }
+}
+
 static bool processFace(const TopoDS_Face &face, DATA &data, Quantity_Color *color,
                         const glm::dmat4 &mat = glm::dmat4(1))
 {
     if (Standard_True == face.IsNull())
         return false;
+
+    {
+        TopoDS_Iterator it;
+        for (it.Initialize(face, false, false); it.More(); it.Next()) {
+            const TopoDS_Shape &subShape = it.Value();
+            TopAbs_ShapeEnum stype = subShape.ShapeType();
+            if (stype == TopAbs_WIRE) {
+                const TopoDS_Wire &wire = TopoDS::Wire(it.Value());
+                processWire(wire, data, mat);
+            }
+        }
+    }
 
     // bool reverse = ( face.Orientation() == TopAbs_REVERSED );
 
@@ -164,8 +207,8 @@ static bool processFace(const TopoDS_Face &face, DATA &data, Quantity_Color *col
     const Poly_Array1OfTriangle &arrTriangles = triangulation->Triangles();
     const TShort_Array1OfShortReal &arrNormals = triangulation->Normals();
 
-    data.faces->emplace_back();
-    auto &face_out = data.faces->back();
+    data.result->faces.emplace_back();
+    auto &face_out = data.result->faces.back();
     if (color) {
         face_out.color.r = color->Red();
         face_out.color.g = color->Green();
@@ -371,17 +414,17 @@ static bool processNode(const TopoDS_Shape &shape, DATA &data)
     return ret;
 }
 
-std::deque<Face> import(const std::string &filename)
+Result import(const std::string &filename)
 {
-    std::deque<Face> faces;
+    Result result;
     DATA data;
-    data.faces = &faces;
+    data.result = &result;
     Handle(XCAFApp_Application) m_app = XCAFApp_Application::GetApplication();
 
     m_app->NewDocument("MDTV-XCAF", data.m_doc);
     if (!readSTEP(data.m_doc, filename.c_str())) {
         std::cout << "error loading " << filename << std::endl;
-        return faces;
+        return result;
     }
     std::cout << "loaded" << std::endl;
 
@@ -400,6 +443,6 @@ std::deque<Face> import(const std::string &filename)
         ++id;
     }
 
-    return faces;
+    return result;
 }
 } // namespace horizon::STEPImporter

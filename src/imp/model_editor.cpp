@@ -5,8 +5,9 @@
 #include "widgets/spin_button_dim.hpp"
 #include "3d_view.hpp"
 #include "canvas3d/canvas3d.hpp"
-#include "util/util.hpp"
+#include "place_model_box.hpp"
 #include "util/gtk_util.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 
@@ -32,61 +33,6 @@ static Gtk::Label *make_label(const std::string &text)
     la->get_style_context()->add_class("dim-label");
     la->set_halign(Gtk::ALIGN_END);
     return la;
-}
-
-
-class PlaceAtPadDialog : public Gtk::Dialog {
-public:
-    PlaceAtPadDialog(const Package &pkg);
-    UUID selected_pad;
-
-private:
-    const Package &pkg;
-};
-
-class MyLabel : public Gtk::Label {
-public:
-    MyLabel(const std::string &txt, const UUID &uu) : Gtk::Label(txt), uuid(uu)
-    {
-        set_xalign(0);
-        property_margin() = 5;
-    }
-
-    const UUID uuid;
-};
-
-PlaceAtPadDialog::PlaceAtPadDialog(const Package &p)
-    : Gtk::Dialog("Place at pad", Gtk::DIALOG_MODAL | Gtk::DIALOG_USE_HEADER_BAR), pkg(p)
-{
-    set_default_size(200, 400);
-    auto sc = Gtk::manage(new Gtk::ScrolledWindow);
-    sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-
-    auto lb = Gtk::manage(new Gtk::ListBox);
-    lb->set_selection_mode(Gtk::SELECTION_NONE);
-    lb->set_activate_on_single_click(true);
-    lb->set_header_func(sigc::ptr_fun(header_func_separator));
-    sc->add(*lb);
-
-    std::vector<const Pad *> pads;
-    for (const auto &it : pkg.pads) {
-        pads.push_back(&it.second);
-    }
-    std::sort(pads.begin(), pads.end(), [](auto a, auto b) { return strcmp_natural(a->name, b->name) < 0; });
-
-    for (const auto it : pads) {
-        auto la = Gtk::manage(new MyLabel(it->name, it->uuid));
-        lb->append(*la);
-    }
-    lb->signal_row_activated().connect([this](Gtk::ListBoxRow *row) {
-        auto la = dynamic_cast<MyLabel *>(row->get_child());
-        selected_pad = la->uuid;
-        response(Gtk::RESPONSE_OK);
-    });
-
-    sc->show_all();
-    get_content_area()->set_border_width(0);
-    get_content_area()->pack_start(*sc, true, true, 0);
 }
 
 void ModelEditor::make_current()
@@ -178,39 +124,13 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu)
 
     {
         auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5));
-
         {
             auto place_button = Gtk::manage(new Gtk::MenuButton());
             place_button->set_label("Place…");
             place_button->signal_clicked().connect(sigc::mem_fun(*this, &ModelEditor::make_current));
             auto place_menu = Gtk::manage(new Gtk::Menu);
             place_button->set_menu(*place_menu);
-            {
-                auto it = Gtk::manage(new Gtk::MenuItem("Reset"));
-                it->show();
-                place_menu->append(*it);
-                it->signal_activate().connect([this] {
-                    origin_cb->set_active(false);
-                    for (unsigned int ax = 0; ax < 3; ax++) {
-                        sp_shift.get(ax)->set_value(0);
-                        sp_angle.get(ax)->set_value(0);
-                    }
-                });
-            }
-            {
-                auto it = Gtk::manage(new Gtk::MenuItem("At pad"));
-                it->show();
-                place_menu->append(*it);
-                it->signal_activate().connect([this] {
-                    PlaceAtPadDialog dia(imp.package);
-                    dia.set_transient_for(*imp.view_3d_window);
-                    if (dia.run() == Gtk::RESPONSE_OK) {
-                        auto &pad = imp.package.pads.at(dia.selected_pad);
-                        sp_shift.x->set_value(pad.placement.shift.x);
-                        sp_shift.y->set_value(pad.placement.shift.y);
-                    }
-                });
-            }
+
             {
                 auto it = Gtk::manage(new Gtk::MenuItem("Center"));
                 it->show();
@@ -228,11 +148,46 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu)
                     origin_cb->set_active(true);
                 });
             }
+
+            {
+                auto it = Gtk::manage(new Gtk::MenuItem("Align…"));
+                it->show();
+                place_menu->append(*it);
+                it->signal_activate().connect([this] {
+                    imp.view_3d_stack->set_visible_child("place");
+                    imp.place_model_box->init(model);
+                });
+            }
+
+            {
+                auto it = Gtk::manage(new Gtk::MenuItem("Round to 1 µm"));
+                it->show();
+                place_menu->append(*it);
+                it->signal_activate().connect([this] {
+                    for (unsigned int ax = 0; ax < 3; ax++) {
+                        sp_shift.get(ax)->set_value(round_multiple(sp_shift.get(ax)->get_value_as_int(), 1000));
+                    }
+                });
+            }
+
+            {
+                auto it = Gtk::manage(new Gtk::MenuItem("Reset"));
+                it->show();
+                place_menu->append(*it);
+                it->signal_activate().connect([this] {
+                    origin_cb->set_active(false);
+                    for (unsigned int ax = 0; ax < 3; ax++) {
+                        sp_shift.get(ax)->set_value(0);
+                        sp_angle.get(ax)->set_value(0);
+                    }
+                });
+            }
+
             box->pack_start(*place_button, false, false, 0);
         }
 
         origin_cb = Gtk::manage(new Gtk::CheckButton("Rotate around package origin"));
-        box->pack_start(*origin_cb, false, false, 0);
+        box->pack_end(*origin_cb, false, false, 0);
 
         box->show_all();
         pack_start(*box, false, false, 0);
@@ -325,4 +280,18 @@ void ModelEditor::set_is_default(const UUID &iuu)
 {
     default_cb->set_active(iuu == uu);
 }
+
+void ModelEditor::reload()
+{
+    for (auto &cn : sp_connections) {
+        cn.block();
+    }
+    for (unsigned int ax = 0; ax < 3; ax++) {
+        sp_shift.get(ax)->set_value(model.get_shift(ax));
+    }
+    for (auto &cn : sp_connections) {
+        cn.unblock();
+    }
+}
+
 } // namespace horizon

@@ -17,6 +17,7 @@ public:
     void set_is_current(const UUID &iuu);
     void set_is_default(const UUID &iuu);
     void make_current();
+    void reload();
 
 private:
     ImpPackage &imp;
