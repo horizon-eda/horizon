@@ -1,5 +1,5 @@
 #include "imp_board.hpp"
-#include "3d_view.hpp"
+#include "3d/3d_view.hpp"
 #include "canvas/canvas_gl.hpp"
 #include "canvas/canvas_pads.hpp"
 #include "fab_output_window.hpp"

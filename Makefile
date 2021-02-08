@@ -179,9 +179,9 @@ SRC_IMP = \
 	src/imp/imp_schematic.cpp\
 	src/imp/imp_padstack.cpp\
 	src/imp/imp_package.cpp\
-	src/imp/imp_package_3d.cpp\
-	src/imp/model_editor.cpp\
-	src/imp/place_model_box.cpp\
+	src/imp/3d/imp_package_3d.cpp\
+	src/imp/3d/model_editor.cpp\
+	src/imp/3d/place_model_box.cpp\
 	src/imp/imp_board.cpp\
 	src/imp/imp_frame.cpp\
 	src/imp/imp_decal.cpp\
@@ -431,7 +431,7 @@ SRC_IMP = \
 	src/imp/fab_output_window.cpp\
 	src/imp/bom_export_window.cpp\
 	src/imp/pdf_export_window.cpp\
-	src/imp/3d_view.cpp\
+	src/imp/3d/3d_view.cpp\
 	src/imp/step_export_window.cpp\
 	src/imp/tuning_window.cpp\
 	src/canvas3d/canvas_mesh.cpp\

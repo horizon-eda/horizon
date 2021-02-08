@@ -1,5 +1,5 @@
 #include "place_model_box.hpp"
-#include "imp_package.hpp"
+#include "../imp_package.hpp"
 #include "3d_view.hpp"
 #include "canvas3d/canvas3d.hpp"
 #include "util/util.hpp"

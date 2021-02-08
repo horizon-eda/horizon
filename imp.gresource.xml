@@ -95,7 +95,7 @@
     <file>imp/fab_output.ui</file>
     <file>imp/bom_export.ui</file>
     <file>imp/pdf_export.ui</file>
-    <file>imp/3d_view.ui</file>
+    <file>imp/3d/3d_view.ui</file>
     <file>imp/step_export.ui</file>
     <file>imp/pnp_export.ui</file>
     <file>imp/airwire_filter.ui</file>

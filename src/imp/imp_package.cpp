@@ -1,5 +1,5 @@
 #include "imp_package.hpp"
-#include "3d_view.hpp"
+#include "3d/3d_view.hpp"
 #include "board/board_layers.hpp"
 #include "canvas/canvas_gl.hpp"
 #include "footprint_generator/footprint_generator_window.hpp"

@@ -1,4 +1,4 @@
-#include "imp_package.hpp"
+#include "../imp_package.hpp"
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
 #include "3d_view.hpp"

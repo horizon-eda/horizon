@@ -12,7 +12,7 @@ View3DWindow *View3DWindow::create(const class Board &b, class IPool &p, Mode m)
 {
     View3DWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/org/horizon-eda/horizon/imp/3d_view.ui");
+    x->add_from_resource("/org/horizon-eda/horizon/imp/3d/3d_view.ui");
     x->get_widget_derived("window", w, b, p, m);
 
     return w;
