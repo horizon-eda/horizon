@@ -5,6 +5,7 @@
 #include "board/board.hpp"
 #include "pool/part.hpp"
 #include "util/str_util.hpp"
+#include "axes_lollipop.hpp"
 
 namespace horizon {
 
@@ -275,6 +276,21 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
                 canvas->set_highlights({});
         }
     });
+
+    {
+        Gtk::Box *lollipop_box;
+        GET_WIDGET(lollipop_box);
+        auto axes_lollipop = Gtk::manage(new AxesLollipop());
+        axes_lollipop->show();
+        lollipop_box->pack_start(*axes_lollipop, true, true, 0);
+        canvas->signal_view_changed().connect(sigc::track_obj(
+                [this, axes_lollipop] {
+                    const float alpha = -glm::radians(canvas->get_cam_azimuth() + 90);
+                    const float beta = glm::radians(canvas->get_cam_elevation() - 90);
+                    axes_lollipop->set_angles(alpha, beta);
+                },
+                *axes_lollipop));
+    }
 
     GET_WIDGET(main_box);
 }

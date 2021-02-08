@@ -211,6 +211,7 @@ void Canvas3DBase::set_cam_elevation(const float &ele)
     cam_elevation = fix_cam_elevation(ele);
     redraw();
     invalidate_pick();
+    s_signal_view_changed.emit();
 }
 
 void Canvas3DBase::set_cam_azimuth(const float &az)
@@ -223,6 +224,7 @@ void Canvas3DBase::set_cam_azimuth(const float &az)
         cam_azimuth -= 360;
     redraw();
     invalidate_pick();
+    s_signal_view_changed.emit();
 }
 
 void Canvas3DBase::render(RenderBackground mode)

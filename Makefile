@@ -432,6 +432,7 @@ SRC_IMP = \
 	src/imp/bom_export_window.cpp\
 	src/imp/pdf_export_window.cpp\
 	src/imp/3d/3d_view.cpp\
+	src/imp/3d/axes_lollipop.cpp\
 	src/imp/step_export_window.cpp\
 	src/imp/tuning_window.cpp\
 	src/canvas3d/canvas_mesh.cpp\

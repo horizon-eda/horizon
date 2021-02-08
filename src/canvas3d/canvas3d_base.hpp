@@ -88,6 +88,12 @@ public:
 
     BBox get_model_bbox(const std::string &filename) const;
 
+    typedef sigc::signal<void> type_signal_view_changed;
+    type_signal_view_changed signal_view_changed()
+    {
+        return s_signal_view_changed;
+    }
+
 protected:
     CanvasMesh ca;
 
@@ -270,6 +276,7 @@ private:
     float get_magic_number() const;
 
     type_signal_pick_ready s_signal_pick_ready;
+    type_signal_view_changed s_signal_view_changed;
 };
 
 } // namespace horizon
