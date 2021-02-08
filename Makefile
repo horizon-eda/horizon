@@ -947,7 +947,7 @@ $(BUILDDIR)/horizon-gen-pkg: $(OBJ_COMMON) $(OBJ_GEN_PKG)
 
 $(BUILDDIR)/horizon-pr-review: $(OBJ_COMMON) $(OBJ_PR_REVIEW) $(OBJ_SHARED_3D)
 	$(ECHO) " $@"
-	$(QUIET)$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4 cairomm-1.0 libgit2) -lOSMesa $(OCE_LIBDIRS) -lTKernel -lTKXCAF -lTKXSBase -lTKBRep -lTKCDF -lTKXDESTEP -lTKLCAF -lTKMath -lTKMesh -o $@
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4 cairomm-1.0 libgit2) -lOSMesa $(LDFLAGS_OCE) -o $@
 
 $(BUILDDIR)/horizon.so: $(OBJ_PYTHON) $(OBJ_SHARED) $(OBJ_SHARED_OCE)
 	$(ECHO) " $@"
