@@ -214,7 +214,7 @@ PlaceModelBox::PlaceModelBox(ImpPackage &aimp) : Gtk::Box(Gtk::ORIENTATION_VERTI
     }
 
     {
-        move_button = Gtk::manage(new Gtk::Button("Move along selected axis"));
+        move_button = Gtk::manage(new Gtk::Button("Move along selected axes"));
         move_button->get_style_context()->add_class("suggested-action");
         move_button->signal_clicked().connect(sigc::mem_fun(*this, &PlaceModelBox::do_move));
         move_button->show();
