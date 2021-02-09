@@ -1210,18 +1210,12 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed, bool omi
             object_ref_pop();
         }
     }
-    else if (interactive) {
+    else {
         for (const auto &it : pkg.pads) {
             object_ref_push(ObjectType::PAD, it.second.uuid);
             render_pad_overlay(it.second);
             render(it.second);
             object_ref_pop();
-        }
-    }
-    else {
-        for (const auto &it : pkg.pads) {
-            render_pad_overlay(it.second);
-            render(it.second);
         }
     }
     for (const auto &it : pkg.polygons) {

@@ -12,7 +12,10 @@ public:
     PadEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const class Pad *p, class PartWizard *pa);
     static PadEditor *create(const class Pad *p, PartWizard *pa);
     std::string get_gate_name();
-
+    const std::set<const Pad *> get_pads() const
+    {
+        return pads;
+    }
 
 private:
     class PartWizard *parent;

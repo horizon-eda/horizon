@@ -13,6 +13,7 @@
 #include "widgets/tag_entry.hpp"
 #include "widgets/pool_browser_package.hpp"
 #include "widgets/preview_canvas.hpp"
+#include "canvas/canvas_gl.hpp"
 
 namespace horizon {
 LocationEntry *PartWizard::pack_location_entry(const Glib::RefPtr<Gtk::Builder> &x, const std::string &w,
@@ -76,6 +77,39 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     }
     x->get_widget("part_autofill", part_autofill_button);
     x->get_widget("steps_grid", steps_grid);
+
+    {
+        Gtk::Box *canvas_box;
+        GET_WIDGET(canvas_box);
+        canvas = Gtk::manage(new PreviewCanvas(pool, true));
+        canvas->show();
+        canvas->signal_size_allocate().connect([this](const auto &alloc) {
+            if (!(alloc == canvas_alloc)) {
+                float pad = 1_mm;
+                auto bb = pad_bbox(canvas->get_canvas().get_bbox(true), pad);
+                canvas->get_canvas().zoom_to_bbox(bb);
+                canvas_alloc = alloc;
+            }
+        });
+        canvas_box->pack_start(*canvas, true, true, 0);
+    }
+
+    pads_lb->signal_selected_rows_changed().connect([this] {
+        std::set<UUID> pads_selected;
+        for (auto row : pads_lb->get_selected_rows()) {
+            auto ed = dynamic_cast<PadEditor *>(row->get_child());
+            for (auto pad : ed->get_pads()) {
+                pads_selected.insert(pad->uuid);
+            }
+        }
+        auto &ca = canvas->get_canvas();
+        ca.set_flags_all(0, TriangleInfo::FLAG_HIGHLIGHT);
+        ca.set_highlight_enabled(pads_selected.size());
+        for (const auto &it : pads_selected) {
+            ObjectRef ref(ObjectType::PAD, it);
+            ca.set_flags(ref, TriangleInfo::FLAG_HIGHLIGHT, 0);
+        }
+    });
 
     entry_add_sanitizer(entity_name_entry);
     entry_add_sanitizer(entity_prefix_entry);
@@ -229,7 +263,7 @@ void PartWizard::set_mode(PartWizard::Mode mo)
 
     if (mo == Mode::ASSIGN) {
         stack->set_visible_child("assign");
-        header->set_subtitle("Assign pins");
+        header->set_subtitle("Assign pins to package " + pkg->name);
     }
     else if (mo == Mode::EDIT) {
         prepare_edit();
@@ -271,6 +305,7 @@ void PartWizard::handle_select()
     if (p) {
         set_pkg(pool.get_package(p));
         set_mode(Mode::ASSIGN);
+        canvas->load(ObjectType::PACKAGE, pkg->uuid);
     }
 }
 

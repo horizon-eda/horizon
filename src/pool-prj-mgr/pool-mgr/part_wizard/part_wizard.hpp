@@ -40,6 +40,8 @@ private:
     Gtk::Button *button_select = nullptr;
     Gtk::Stack *stack = nullptr;
     class PoolBrowserPackage *browser_package = nullptr;
+    class PreviewCanvas *canvas = nullptr;
+    Gtk::Allocation canvas_alloc;
 
     Gtk::ListBox *pads_lb = nullptr;
     Gtk::ToolButton *button_link_pads = nullptr;
