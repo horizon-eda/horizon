@@ -7,8 +7,26 @@
 #include "board/board_layers.hpp"
 #include "pool/ipool.hpp"
 #include "logger/logger.hpp"
+#include <sstream>
+#include <iterator>
 
 namespace horizon {
+
+static void log_logger(const std::string &msg, const std::string &detail)
+{
+    Logger::get().log_warning(msg, Logger::Domain::IMPORT, detail);
+}
+
+KiCadModuleParser::KiCadModuleParser()
+{
+    log_cb = &log_logger;
+}
+
+void KiCadModuleParser::set_log_cb(LogCb cb)
+{
+    log_cb = cb;
+}
+
 
 KiCadPackageParser::KiCadPackageParser(Package &p, IPool &po) : package(p), pool(po)
 {
@@ -208,15 +226,13 @@ void KiCadPackageParser::parse_pad(const SEXPR::SEXPR *data)
         pad_type = PadType::TH_CIRC;
     }
     else {
-        Logger::get().log_warning("Pad '" + name + "' is unsupported", Logger::Domain::TOOL,
-                                  "type=" + type + " shape=" + shape);
+        log_cb("Pad '" + name + "' is unsupported", "type=" + type + " shape=" + shape);
     }
     const Padstack *padstack = nullptr;
     if (padstack_name.size()) {
         padstack = pool.get_well_known_padstack(padstack_name);
         if (!padstack) {
-            Logger::get().log_warning("Well-kown padstack '" + padstack_name + "' not found in pool",
-                                      Logger::Domain::TOOL);
+            log_cb("Well-kown padstack '" + padstack_name + "' not found in pool", "");
         }
     }
 
@@ -310,9 +326,17 @@ void KiCadModuleParser::parse_poly(const SEXPR::SEXPR *data)
     }
 }
 
-
-void KiCadPackageParser::parse(const SEXPR::SEXPR *data)
+static auto get_string_or_symbol(const SEXPR::SEXPR *d)
 {
+    if (d->IsString())
+        return d->GetString();
+    else
+        return d->GetSymbol();
+}
+
+KiCadPackageParser::Meta KiCadPackageParser::parse(const SEXPR::SEXPR *data)
+{
+    KiCadPackageParser::Meta ret;
     if (!data->IsList())
         throw std::runtime_error("data must be list");
     {
@@ -321,6 +345,7 @@ void KiCadPackageParser::parse(const SEXPR::SEXPR *data)
             throw std::runtime_error("not a module");
         }
     }
+    ret.name = get_string_or_symbol(data->GetChild(1));
     auto nc = data->GetNumberOfChildren();
     for (size_t i_ch = 0; i_ch < nc; i_ch++) {
         auto ch = data->GetChild(i_ch);
@@ -339,8 +364,22 @@ void KiCadPackageParser::parse(const SEXPR::SEXPR *data)
             else if (type == "pad") {
                 parse_pad(ch);
             }
+            else if (type == "descr") {
+                ret.descr = get_string_or_symbol(ch->GetChild(1));
+            }
+            else if (type == "tags") {
+                auto tags_str = get_string_or_symbol(ch->GetChild(1));
+                std::transform(tags_str.begin(), tags_str.end(), tags_str.begin(),
+                               [](unsigned char c) { return std::tolower(c); });
+                std::stringstream ss(tags_str);
+                std::istream_iterator<std::string> begin(ss);
+                std::istream_iterator<std::string> end;
+                std::set<std::string> tags(begin, end);
+                ret.tags = tags;
+            }
         }
     }
+    return ret;
 }
 
 Junction &KiCadPackageParser::create_junction()

@@ -12,7 +12,7 @@ LogView::LogView() : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0)
     bbox->set_margin_end(8);
 
     auto clear_button = Gtk::manage(new Gtk::Button("Clear"));
-    clear_button->signal_clicked().connect([this] { store->clear(); });
+    clear_button->signal_clicked().connect(sigc::mem_fun(*this, &LogView::clear));
     bbox->pack_start(*clear_button, false, false, 0);
 
     {
@@ -159,6 +159,11 @@ void LogView::copy_to_clipboard()
     }
 
     Gtk::Clipboard::get()->set_text(oss.str());
+}
+
+void LogView::clear()
+{
+    store->clear();
 }
 
 } // namespace horizon

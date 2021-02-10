@@ -477,7 +477,8 @@ void PoolNotebook::show_duplicate_window(ObjectType ty, const UUID &uu)
 
 bool PoolNotebook::get_close_prohibited() const
 {
-    return part_wizard || pool_updating || duplicate_window || kicad_symbol_import_wizard;
+    return part_wizard || pool_updating || duplicate_window || kicad_symbol_import_wizard
+           || import_kicad_package_window;
 }
 
 void PoolNotebook::prepare_close()

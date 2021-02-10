@@ -1,5 +1,7 @@
 #pragma once
 #include "common/common.hpp"
+#include <set>
+#include <functional>
 
 namespace SEXPR {
 class SEXPR;
@@ -7,7 +9,12 @@ class SEXPR;
 
 namespace horizon {
 class KiCadModuleParser {
+public:
+    using LogCb = std::function<void(const std::string &, const std::string &)>;
+    void set_log_cb(LogCb cb);
+
 protected:
+    KiCadModuleParser();
     class Line *parse_line(const SEXPR::SEXPR *data);
     void parse_poly(const SEXPR::SEXPR *data);
     static int get_layer(const std::string &l);
@@ -15,6 +22,7 @@ protected:
     static Coordi get_size(const SEXPR::SEXPR *data, size_t offset = 1);
     std::map<Coordi, class Junction *> junctions;
     Junction *get_or_create_junction(const Coordi &c);
+    LogCb log_cb;
 
     virtual class Junction &create_junction() = 0;
     virtual class Polygon &create_polygon() = 0;
@@ -29,7 +37,15 @@ public:
 class KiCadPackageParser : public KiCadModuleParser {
 public:
     KiCadPackageParser(class Package &p, class IPool &po);
-    void parse(const SEXPR::SEXPR *data);
+
+    class Meta {
+    public:
+        std::string name;
+        std::string descr;
+        std::set<std::string> tags;
+    };
+
+    Meta parse(const SEXPR::SEXPR *data);
 
 private:
     void parse_pad(const SEXPR::SEXPR *data);

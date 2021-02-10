@@ -21,6 +21,7 @@
     <file>pool-prj-mgr/pool-mgr/kicad_symbol_import_wizard/kicad_symbol_import_wizard.ui</file>
     <file>pool-prj-mgr/pool-mgr/github_login_window.ui</file>
     <file>pool-prj-mgr/pool-mgr/pool_merge.ui</file>
+    <file>pool-prj-mgr/pool-mgr/import_kicad_package_window.ui</file>
     <file>pool-prj-mgr/prj-mgr/part_browser/part_browser.ui</file>
     <file>pool-prj-mgr/prj-mgr/pool_cache_window.ui</file>
     <file>pool-prj-mgr/prj-mgr/prefs.ui</file>

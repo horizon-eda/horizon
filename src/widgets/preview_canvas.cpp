@@ -263,7 +263,7 @@ void PreviewCanvas::load(Package &pkg, bool fit)
     if (!fit) {
         return;
     }
-    float pad = .1_mm;
+    float pad = 1_mm;
     auto bb = pad_bbox(canvas->get_bbox(true), pad);
     canvas->zoom_to_bbox(bb);
     update_scale_deferred();

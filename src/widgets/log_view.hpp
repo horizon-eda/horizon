@@ -8,7 +8,7 @@ class LogView : public Gtk::Box {
 public:
     LogView();
     void push_log(const Logger::Item &it);
-    void append_widget(Gtk::Widget *w);
+    void clear();
 
     typedef sigc::signal<void, const Logger::Item &> type_signal_logged;
     type_signal_logged signal_logged()

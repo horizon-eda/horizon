@@ -43,6 +43,7 @@ private:
     class PartWizard *part_wizard = nullptr;
     class KiCadSymbolImportWizard *kicad_symbol_import_wizard = nullptr;
     class DuplicateWindow *duplicate_window = nullptr;
+    class ImportKiCadPackageWindow *import_kicad_package_window = nullptr;
     bool closing = false;
 
     Glib::Dispatcher pool_update_dispatcher;
@@ -91,6 +92,8 @@ private:
     void handle_create_package();
     void handle_create_padstack_for_package(const UUID &uu);
     void handle_duplicate_package(const UUID &uu);
+    void handle_import_kicad_package();
+
     void handle_part_wizard();
     void handle_kicad_symbol_import_wizard();
 

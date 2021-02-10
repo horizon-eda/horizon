@@ -10,6 +10,7 @@
 #include "widgets/package_info_box.hpp"
 #include "util/win32_undef.hpp"
 #include "widgets/preview_canvas.hpp"
+#include "import_kicad_package_window.hpp"
 
 namespace horizon {
 void PoolNotebook::handle_edit_package(const UUID &uu)
@@ -135,6 +136,27 @@ void PoolNotebook::handle_duplicate_package(const UUID &uu)
     }
 }
 
+void PoolNotebook::handle_import_kicad_package()
+{
+    if (!import_kicad_package_window) {
+
+        import_kicad_package_window = ImportKiCadPackageWindow::create(*appwin);
+        import_kicad_package_window->present();
+        import_kicad_package_window->signal_hide().connect([this] {
+            const auto files_saved = import_kicad_package_window->get_files_saved();
+            if (files_saved.size()) {
+                pool_update(nullptr, files_saved);
+            }
+            delete import_kicad_package_window;
+            import_kicad_package_window = nullptr;
+        });
+    }
+
+    else {
+        import_kicad_package_window->present();
+    }
+}
+
 void PoolNotebook::construct_packages()
 {
     auto br = Gtk::manage(new PoolBrowserPackage(pool));
@@ -159,6 +181,9 @@ void PoolNotebook::construct_packages()
     add_action_button("Duplicate", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_duplicate_package));
     add_action_button("Create Padstack", bbox, br,
                       sigc::mem_fun(*this, &PoolNotebook::handle_create_padstack_for_package));
+    add_action_button("Import KiCad package", bbox, sigc::mem_fun(*this, &PoolNotebook::handle_import_kicad_package))
+            ->get_style_context()
+            ->add_class("suggested-action");
     if (remote_repo.size()) {
         add_action_button("Merge", bbox, br,
                           [this](const UUID &uu) { remote_box->merge_item(ObjectType::PACKAGE, uu); });

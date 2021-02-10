@@ -688,6 +688,10 @@ SRC_POOL_PRJ_MGR = \
 	src/widgets/log_window.cpp\
 	src/logger/log_dispatcher.cpp\
 	src/util/zmq_helper.cpp\
+	src/pool-prj-mgr/pool-mgr/import_kicad_package_window.cpp\
+	3rd_party/sexpr/sexpr_parser.cpp\
+	3rd_party/sexpr/sexpr.cpp\
+	src/util/kicad_package_parser.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp
