@@ -73,7 +73,6 @@ public:
 
     // virtual ~MainWindow();
 private:
-    Gtk::Box *gl_container = nullptr;
     Gtk::Revealer *tool_bar = nullptr;
     Gtk::Label *tool_bar_name_label = nullptr;
     Gtk::Label *tool_bar_tip_label = nullptr;

@@ -8,8 +8,6 @@ namespace horizon {
 MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x)
     : Gtk::ApplicationWindow(cobject), builder(x)
 {
-
-    GET_WIDGET(gl_container);
     GET_WIDGET(tool_hint_label);
     GET_WIDGET(left_panel);
     GET_WIDGET(grid_box_square);
@@ -104,9 +102,13 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         pango_attr_list_insert(attributes_list, attribute_font_features);
     }
 
-    canvas = Gtk::manage(new CanvasGL());
-    gl_container->pack_start(*canvas, true, true, 0);
-    canvas->show();
+    {
+        Gtk::EventBox *gl_container = nullptr;
+        GET_WIDGET(gl_container);
+        canvas = Gtk::manage(new CanvasGL());
+        gl_container->add(*canvas);
+        canvas->show();
+    }
     tool_bar_set_visible(false);
     hud->set_reveal_child(false);
     set_use_action_bar(false);
