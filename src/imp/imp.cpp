@@ -32,6 +32,7 @@
 #include "in_tool_action_catalog.hpp"
 #include "util/zmq_helper.hpp"
 #include "pool/pool_parametric.hpp"
+#include "action_icon.hpp"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>
@@ -1422,6 +1423,7 @@ void ImpBase::handle_tool_change(ToolID id)
     main_window->tool_bar_set_visible(id != ToolID::NONE);
     tool_bar_clear_actions();
     main_window->action_bar_revealer->set_reveal_child(preferences.action_bar.show_in_tool || id == ToolID::NONE);
+    update_cursor(id);
 }
 
 void ImpBase::handle_warning_selected(const Coordi &pos)
@@ -1641,4 +1643,68 @@ void ImpBase::view_options_menu_append_action(const std::string &label, const st
     bu->show();
 }
 
+static const char *get_cursor_icon(ToolID id)
+{
+    switch (id) {
+    case ToolID::PLACE_TEXT:
+    case ToolID::PLACE_REFDES_AND_VALUE:
+    case ToolID::PLACE_SHAPE:
+    case ToolID::PLACE_SHAPE_OBROUND:
+    case ToolID::PLACE_SHAPE_RECTANGLE:
+    case ToolID::PLACE_HOLE:
+    case ToolID::PLACE_HOLE_SLOT:
+    case ToolID::PLACE_BOARD_HOLE:
+    case ToolID::PLACE_PAD:
+    case ToolID::PLACE_POWER_SYMBOL:
+    case ToolID::PLACE_NET_LABEL:
+    case ToolID::PLACE_BUS_LABEL:
+    case ToolID::PLACE_BUS_RIPPER:
+    case ToolID::PLACE_VIA:
+        return nullptr;
+
+    default:
+        return get_action_icon(make_action(id));
+    }
+}
+
+void ImpBase::update_cursor(ToolID tool_id)
+{
+    auto win = canvas->get_window();
+    if (tool_id == ToolID::NONE) {
+        win->set_cursor();
+        return;
+    }
+    static const int icon_size = 16;
+    static const int border_width = 1;
+    auto surf = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, icon_size + border_width * 2,
+                                            icon_size + border_width * 2);
+    auto cr = Cairo::Context::create(surf);
+    auto theme = Gtk::IconTheme::get_default();
+    const auto icon_name = get_cursor_icon(tool_id);
+    if (!icon_name) {
+        win->set_cursor();
+        return;
+    }
+    auto icon_info = theme->lookup_icon(icon_name, icon_size);
+    if (!icon_info) {
+        win->set_cursor();
+        return;
+    }
+    bool was_symbolic = false;
+    auto pb_black = icon_info.load_symbolic(Gdk::RGBA("#000000"), Gdk::RGBA(), Gdk::RGBA(), Gdk::RGBA(), was_symbolic);
+    Gdk::Cairo::set_source_pixbuf(cr, pb_black, border_width, border_width);
+    auto pat = cr->get_source();
+    for (int x : {-1, 1, 0}) {
+        for (int y : {-1, 1, 0}) {
+            cr->save();
+            cr->translate(x * border_width, y * border_width);
+            cr->set_source_rgb(1, 1, 1);
+            cr->mask(pat);
+            cr->restore();
+        }
+    }
+    Gdk::Cairo::set_source_pixbuf(cr, pb_black, border_width, border_width);
+    cr->paint();
+    win->set_cursor(Gdk::Cursor::create(win->get_display(), surf, 0, 0));
+}
 } // namespace horizon
