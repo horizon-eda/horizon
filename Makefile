@@ -438,11 +438,11 @@ SRC_IMP = \
 	src/canvas3d/canvas_mesh.cpp\
 	src/canvas3d/canvas3d.cpp\
 	src/canvas3d/canvas3d_base.cpp\
-	src/canvas3d/cover.cpp\
-	src/canvas3d/wall.cpp\
-	src/canvas3d/face.cpp\
-	src/canvas3d/point.cpp\
-	src/canvas3d/background.cpp\
+	src/canvas3d/cover_renderer.cpp\
+	src/canvas3d/wall_renderer.cpp\
+	src/canvas3d/face_renderer.cpp\
+	src/canvas3d/point_renderer.cpp\
+	src/canvas3d/background_renderer.cpp\
 	src/imp/header_button.cpp\
 	src/preferences/preferences.cpp\
 	src/pool/pool_cached.cpp\
@@ -799,11 +799,11 @@ SRC_SHARED_3D = \
 	src/export_3d_image/export_3d_image.cpp\
 	src/canvas3d/canvas3d_base.cpp\
 	src/canvas3d/canvas_mesh.cpp\
-	src/canvas3d/background.cpp\
-	src/canvas3d/wall.cpp\
-	src/canvas3d/cover.cpp\
-	src/canvas3d/face.cpp\
-	src/canvas3d/point.cpp\
+	src/canvas3d/background_renderer.cpp\
+	src/canvas3d/wall_renderer.cpp\
+	src/canvas3d/cover_renderer.cpp\
+	src/canvas3d/face_renderer.cpp\
+	src/canvas3d/point_renderer.cpp\
 	src/canvas/gl_util.cpp\
 
 SRC_SHARED = $(SRC_COMMON) \

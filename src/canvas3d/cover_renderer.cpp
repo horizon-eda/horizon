@@ -1,4 +1,5 @@
-#include "wall.hpp"
+#include "cover_renderer.hpp"
+#include "board/board_layers.hpp"
 #include "canvas/gl_util.hpp"
 #include "canvas3d_base.hpp"
 #include <cmath>
@@ -7,7 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 namespace horizon {
-WallRenderer::WallRenderer(Canvas3DBase &c) : ca(c)
+CoverRenderer::CoverRenderer(Canvas3DBase &c) : ca(c)
 {
 }
 
@@ -47,28 +48,27 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out)
     return vao;
 }
 
-void WallRenderer::realize()
+void CoverRenderer::realize()
 {
-    program = gl_create_program_from_resource("/org/horizon-eda/horizon/canvas3d/shaders/wall-vertex.glsl",
-                                              "/org/horizon-eda/horizon/canvas3d/shaders/wall-fragment.glsl",
+    program = gl_create_program_from_resource("/org/horizon-eda/horizon/canvas3d/shaders/cover-vertex.glsl",
                                               "/org/horizon-eda/horizon/canvas3d/shaders/"
-                                              "wall-geometry.glsl");
+                                              "cover-fragment.glsl",
+                                              nullptr);
     vao = create_vao(program, vbo);
 
     GET_LOC(this, view);
     GET_LOC(this, proj);
     GET_LOC(this, layer_offset);
-    GET_LOC(this, layer_thickness);
     GET_LOC(this, layer_color);
     GET_LOC(this, cam_normal);
 }
 
-void WallRenderer::push()
+void CoverRenderer::push()
 {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     n_vertices = 0;
     for (const auto &it : ca.ca.get_layers()) {
-        n_vertices += it.second.walls.size();
+        n_vertices += it.second.tris.size();
     }
     glBufferData(GL_ARRAY_BUFFER, sizeof(CanvasMesh::Layer3D::Vertex) * n_vertices, nullptr, GL_STREAM_DRAW);
     GL_CHECK_ERROR
@@ -76,25 +76,30 @@ void WallRenderer::push()
     layer_offsets.clear();
     for (const auto &it : ca.ca.get_layers()) {
         glBufferSubData(GL_ARRAY_BUFFER, ofs * sizeof(CanvasMesh::Layer3D::Vertex),
-                        it.second.walls.size() * sizeof(CanvasMesh::Layer3D::Vertex), it.second.walls.data());
+                        it.second.tris.size() * sizeof(CanvasMesh::Layer3D::Vertex), it.second.tris.data());
         layer_offsets[it.first] = ofs;
-        ofs += it.second.walls.size();
+        ofs += it.second.tris.size();
     }
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void WallRenderer::render(int layer)
+void CoverRenderer::render(int layer)
 {
-    if (ca.ca.get_layer(layer).alpha != 1)
-        return;
+    const bool is_opaque = ca.ca.get_layer(layer).alpha == 1;
+    if (!is_opaque)
+        glEnable(GL_BLEND);
     auto co = ca.get_layer_color(layer);
-    glUniform4f(layer_color_loc, co.r, co.g, co.b, ca.ca.get_layer(layer).alpha);
+    gl_color_to_uniform_4f(layer_color_loc, co, ca.ca.get_layer(layer).alpha);
     glUniform1f(layer_offset_loc, ca.get_layer_offset(layer));
-    glUniform1f(layer_thickness_loc, ca.get_layer_thickness(layer));
-    glDrawArrays(GL_LINE_STRIP_ADJACENCY, layer_offsets[layer], ca.ca.get_layer(layer).walls.size());
+    glDrawArrays(GL_TRIANGLES, layer_offsets[layer], ca.ca.get_layer(layer).tris.size());
+    if (is_opaque) {
+        glUniform1f(layer_offset_loc, ca.get_layer_offset(layer) + ca.get_layer_thickness(layer));
+        glDrawArrays(GL_TRIANGLES, layer_offsets[layer], ca.ca.get_layer(layer).tris.size());
+    }
+    glDisable(GL_BLEND);
 }
 
-void WallRenderer::render()
+void CoverRenderer::render()
 {
     glUseProgram(program);
     glBindVertexArray(vao);
@@ -104,7 +109,11 @@ void WallRenderer::render()
     glUniform3fv(cam_normal_loc, 1, glm::value_ptr(ca.cam_normal));
 
     for (const auto &it : layer_offsets) {
-        if (ca.layer_is_visible(it.first))
+        if (ca.ca.get_layer(it.first).alpha == 1 && ca.layer_is_visible(it.first))
+            render(it.first);
+    }
+    for (const auto &it : layer_offsets) {
+        if (ca.ca.get_layer(it.first).alpha != 1 && ca.layer_is_visible(it.first))
             render(it.first);
     }
 }

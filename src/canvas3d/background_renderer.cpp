@@ -1,4 +1,4 @@
-#include "background.hpp"
+#include "background_renderer.hpp"
 #include "canvas/gl_util.hpp"
 #include "canvas3d_base.hpp"
 #include <cmath>

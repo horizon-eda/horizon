@@ -1,4 +1,4 @@
-#include "point.hpp"
+#include "point_renderer.hpp"
 #include "board/board_layers.hpp"
 #include "canvas/gl_util.hpp"
 #include "canvas3d_base.hpp"

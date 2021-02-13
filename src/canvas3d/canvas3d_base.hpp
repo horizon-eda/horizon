@@ -5,11 +5,11 @@
 #include "canvas/appearance.hpp"
 #include "util/uuid.hpp"
 #include <mutex>
-#include "cover.hpp"
-#include "face.hpp"
-#include "wall.hpp"
-#include "background.hpp"
-#include "point.hpp"
+#include "cover_renderer.hpp"
+#include "face_renderer.hpp"
+#include "wall_renderer.hpp"
+#include "background_renderer.hpp"
+#include "point_renderer.hpp"
 #include <sigc++/sigc++.h>
 #include <variant>
 
