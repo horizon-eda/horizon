@@ -10,6 +10,8 @@
 #include "wall_renderer.hpp"
 #include "background_renderer.hpp"
 #include "point_renderer.hpp"
+#include "import_step/import.hpp"
+#include "point.hpp"
 #include <sigc++/sigc++.h>
 #include <variant>
 
@@ -51,6 +53,7 @@ public:
     GET_SET_PICK(show_dnp_models, bool)
     GET_SET_PICK(show_solder_paste, bool)
     GET_SET_PICK(show_copper, bool)
+    GET_SET_PICK(show_points, bool)
     GET_SET(use_layer_colors, bool)
     GET_SET(solder_mask_color, Color)
     GET_SET(substrate_color, Color)
@@ -80,7 +83,7 @@ public:
     void view_all();
     void clear_3d_models();
     void set_point_transform(const glm::dmat4 &mat);
-    void set_point_model(const std::string &filename);
+    void set_points(const std::vector<Point3D> &points);
 
     struct BBox {
         float xl, yl, zl, xh, yh, zh;
@@ -109,6 +112,7 @@ protected:
     bool show_solder_paste = true;
     bool use_layer_colors = false;
     bool show_copper = true;
+    bool show_points = false;
     Color solder_mask_color = {0, .5, 0};
     Color substrate_color = {.2, .15, 0};
     float explode = 0;
@@ -167,6 +171,7 @@ protected:
     }
     std::variant<UUID, glm::dvec3> pick_package_or_point(unsigned int x, unsigned int y) const;
 
+    virtual STEPImporter::Faces import_step(const std::string &filename_rel, const std::string &filename_abs);
 
 private:
     class FaceVertex {
@@ -257,19 +262,8 @@ private:
     std::map<std::pair<std::string, bool>, PackageInfo> package_infos; // key: first: model filename second: nopopulate
     std::vector<uint16_t> pick_buf;
 
-    class Point {
-    public:
-        Point(double ax, double ay, double az) : x(ax), y(ay), z(az)
-        {
-        }
-        double x;
-        double y;
-        double z;
-    };
-
     uint16_t point_pick_base = 0;
-    std::map<std::string, std::vector<Point>> model_points;
-    std::string point_model_current;
+    std::vector<Point3D> points;
     glm::dmat4 point_mat;
     size_t n_points = 0;
 

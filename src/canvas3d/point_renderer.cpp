@@ -25,15 +25,15 @@ GLuint PointRenderer::create_vao(GLuint program, GLuint &vbo_out)
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
 
-    Canvas3DBase::Point vertices[] = {//   Position
-                                      {0, 0, 0},
-                                      {0, 0, 10},
-                                      {10, 10, 10}};
+    Point3D vertices[] = {//   Position
+                          {0, 0, 0},
+                          {0, 0, 10},
+                          {10, 10, 10}};
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     /* enable and set the position attribute */
     glEnableVertexAttribArray(position_index);
-    glVertexAttribPointer(position_index, 3, GL_DOUBLE, GL_FALSE, sizeof(Canvas3DBase::Point), 0);
+    glVertexAttribPointer(position_index, 3, GL_DOUBLE, GL_FALSE, sizeof(Point3D), 0);
 
     /* enable and set the color attribute */
     /* reset the state; we will re-enable the VAO when needed */
@@ -64,15 +64,10 @@ void PointRenderer::realize()
 void PointRenderer::push()
 {
     if (ca.models_loading_mutex.try_lock()) {
-        if (ca.model_points.count(ca.point_model_current)) {
-            auto &pts = ca.model_points.at(ca.point_model_current);
-            ca.n_points = pts.size();
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(Canvas3DBase::Point) * ca.n_points, pts.data(), GL_STATIC_DRAW);
-        }
-        else {
-            ca.n_points = 0;
-        }
+        ca.n_points = ca.points.size();
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Point3D) * ca.n_points, ca.points.data(), GL_STATIC_DRAW);
+
         ca.models_loading_mutex.unlock();
     }
 }

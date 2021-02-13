@@ -28,7 +28,11 @@ void ImpPackage::update_points()
     if (core_package.models.count(current_model)) {
         auto &model = core_package.models.at(current_model);
         auto &ca = view_3d_window->get_canvas();
-        ca.set_point_model(model.filename);
+        {
+            std::lock_guard<std::mutex> lock(model_points_mutex);
+            if (model_points.count(model.filename))
+                ca.set_points(model_points.at(model.filename));
+        }
         auto mat = mat_from_model(model, 1e-6);
         view_3d_window->get_canvas().set_point_transform(mat);
         view_3d_window->get_canvas().request_push();
@@ -115,6 +119,31 @@ void ImpPackage::reload_model_editor()
     }
 }
 
+class ImportCanvas3D : public Canvas3D {
+public:
+    ImportCanvas3D(ImpPackage &aimp) : imp(aimp)
+    {
+    }
+
+protected:
+    STEPImporter::Faces import_step(const std::string &filename_rel, const std::string &filename_abs) override
+    {
+        auto result = STEPImporter::import(filename_abs);
+        {
+            std::lock_guard<std::mutex> lock(imp.model_points_mutex);
+            auto &pts = imp.model_points[filename_rel];
+            pts.reserve(result.points.size());
+            for (const auto &it : result.points) {
+                pts.emplace_back(it.x, it.y, it.z);
+            }
+        }
+        return result.faces;
+    }
+
+private:
+    ImpPackage &imp;
+};
+
 void ImpPackage::construct_3d()
 {
     auto view_3d_button = Gtk::manage(new Gtk::Button("3D"));
@@ -125,7 +154,8 @@ void ImpPackage::construct_3d()
     fake_board.set_n_inner_layers(0);
     fake_board.stackup.at(0).substrate_thickness = 1.6_mm;
 
-    view_3d_window = View3DWindow::create(fake_board, *pool.get(), View3DWindow::Mode::PACKAGE);
+    canvas_3d = Gtk::manage(new ImportCanvas3D(*this));
+    view_3d_window = View3DWindow::create(fake_board, *pool.get(), View3DWindow::Mode::PACKAGE, canvas_3d);
     view_3d_window->signal_request_update().connect(sigc::mem_fun(*this, &ImpPackage::update_fake_board));
     view_3d_window->signal_key_press_event().connect([this](GdkEventKey *ev) {
         if (ev->keyval == GDK_KEY_Escape) {

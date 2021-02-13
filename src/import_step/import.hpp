@@ -70,10 +70,11 @@ public:
 };
 
 using Point = TVertex<double>;
+using Faces = std::deque<Face>;
 
 class Result {
 public:
-    std::deque<Face> faces;
+    Faces faces;
     std::deque<Point> points;
 };
 

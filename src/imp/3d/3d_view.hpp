@@ -10,8 +10,8 @@ class View3DWindow : public Gtk::Window, public Changeable {
 public:
     enum class Mode { BOARD, PACKAGE };
     View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const class Board &b, class IPool &p,
-                 Mode mode);
-    static View3DWindow *create(const class Board &b, class IPool &p, Mode mode);
+                 Mode mode, class Canvas3D *ca_custom);
+    static View3DWindow *create(const class Board &b, class IPool &p, Mode mode, class Canvas3D *ca_custom = nullptr);
     void update(bool clear = false);
     void set_highlights(const std::set<UUID> &pkgs);
     void add_widget(Gtk::Widget *w);

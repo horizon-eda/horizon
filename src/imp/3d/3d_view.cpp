@@ -9,12 +9,12 @@
 
 namespace horizon {
 
-View3DWindow *View3DWindow::create(const class Board &b, class IPool &p, Mode m)
+View3DWindow *View3DWindow::create(const class Board &b, class IPool &p, Mode m, Canvas3D *ca_custom)
 {
     View3DWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/org/horizon-eda/horizon/imp/3d/3d_view.ui");
-    x->get_widget_derived("window", w, b, p, m);
+    x->get_widget_derived("window", w, b, p, m, ca_custom);
 
     return w;
 }
@@ -46,13 +46,16 @@ public:
 };
 
 View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const class Board &bo,
-                           class IPool &p, Mode md)
+                           class IPool &p, Mode md, Canvas3D *ca_custom)
     : Gtk::Window(cobject), board(bo), pool(p), mode(md), state_store(this, "imp-board-3d")
 {
     Gtk::Box *gl_box;
     GET_WIDGET(gl_box);
 
-    canvas = Gtk::manage(new Canvas3D);
+    if (ca_custom)
+        canvas = ca_custom;
+    else
+        canvas = Gtk::manage(new Canvas3D);
     gl_box->pack_start(*canvas, true, true, 0);
     canvas->show();
 

@@ -261,13 +261,13 @@ void PlaceModelBox::start_pick(PickState which)
 {
     switch (which) {
     case PickState::IDLE:
-        imp.view_3d_window->get_canvas().set_point_model("");
-        imp.view_3d_window->get_canvas().request_push();
+        imp.view_3d_window->get_canvas().set_show_points(false);
         break;
 
     case PickState::PICK_1:
     case PickState::PICK_2_1:
         imp.update_points();
+        imp.view_3d_window->get_canvas().set_show_points(true);
         break;
 
     default:;

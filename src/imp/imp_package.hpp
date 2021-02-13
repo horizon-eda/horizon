@@ -4,11 +4,14 @@
 #include "board/board.hpp"
 #include "imp_layer.hpp"
 #include "search/searcher_package.hpp"
+#include "canvas3d/point.hpp"
+#include <mutex>
 
 namespace horizon {
 class ImpPackage : public ImpLayer {
     friend class ModelEditor;
     friend class PlaceModelBox;
+    friend class ImportCanvas3D;
 
 public:
     ImpPackage(const std::string &package_filename, const std::string &pool_path);
@@ -50,6 +53,10 @@ private:
 
     class FootprintGeneratorWindow *footprint_generator_window = nullptr;
     class View3DWindow *view_3d_window = nullptr;
+    class ImportCanvas3D *canvas_3d = nullptr;
+    std::map<std::string, std::vector<Point3D>> model_points;
+    std::mutex model_points_mutex;
+
     std::string ask_3d_model_filename(const std::string &current_filename = "");
     void construct_3d();
     void update_model_editors();
