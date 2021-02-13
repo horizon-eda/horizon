@@ -7,7 +7,6 @@ environment:
       MSYS2_ARCH: x86_64
       MSYS2_DIR: msys64
       MSYSTEM: MINGW64
-      GTK_VERSION: "3.24.24-2"
 
 before_build:
     - set PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;C:\Program Files (x86)\WiX Toolset v3.11\bin;%PATH%
@@ -23,9 +22,6 @@ before_build:
     - bash -c "pacman -Syu --noconfirm --ignore=pacman-mirrors"
     - taskkill /f /fi "MODULES eq msys-2.0.dll"
     - bash -c "pacman -Syu --noconfirm --ignore=pacman-mirrors"
-    - bash -c "curl -LO https://dl.bintray.com/carrotindustries/gtk3-horizon/mingw-w64-x86_64-gtk3-horizon-%GTK_VERSION%-any.pkg.tar.zst"
-    - bash -c "curl -LO https://dl.bintray.com/carrotindustries/gtk3-horizon/mingw-w64-x86_64-gtk-update-icon-cache-horizon-%GTK_VERSION%-any.pkg.tar.zst"
-    - bash -c "pacman -U --noconfirm mingw-w64-x86_64-gtk3-horizon-%GTK_VERSION%-any.pkg.tar.zst mingw-w64-x86_64-gtk-update-icon-cache-horizon-%GTK_VERSION%-any.pkg.tar.zst"
     - bash -c "pacman -S --noconfirm --needed mingw-w64-%MSYS2_ARCH%-{gcc,gtkmm3,boost,sqlite3,toolchain,zeromq,glm,libgit2,oce,podofo,libzip} zip make"
 
 build_script:

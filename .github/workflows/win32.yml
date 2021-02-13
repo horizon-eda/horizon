@@ -7,9 +7,6 @@ on:
   pull_request:
     branches: [ master ]
 
-env:
-  GTK_VERSION: "3.24.24-2"
-
 jobs:
   build-win32:
     runs-on: windows-latest
@@ -37,14 +34,6 @@ jobs:
           make
           git
           dos2unix
-    - name: Download patched gtk
-      shell: msys2 {0}
-      run: |
-        curl -LO https://dl.bintray.com/carrotindustries/gtk3-horizon/mingw-w64-x86_64-gtk3-horizon-${{ env.GTK_VERSION }}-any.pkg.tar.zst
-        curl -LO https://dl.bintray.com/carrotindustries/gtk3-horizon/mingw-w64-x86_64-gtk-update-icon-cache-horizon-${{ env.GTK_VERSION }}-any.pkg.tar.zst
-    - name: Install patched gtk
-      shell: msys2 {0}
-      run: pacman -U --noconfirm mingw-w64-x86_64-gtk3-horizon-${{ env.GTK_VERSION }}-any.pkg.tar.zst mingw-w64-x86_64-gtk-update-icon-cache-horizon-${{ env.GTK_VERSION }}-any.pkg.tar.zst
     - name: Build
       shell: msys2 {0}
       run: make -j2
