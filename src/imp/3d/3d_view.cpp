@@ -1,6 +1,6 @@
 #include "3d_view.hpp"
 #include "canvas3d/canvas3d.hpp"
-#include "util/step_importer.hpp"
+#include "import_step/import.hpp"
 #include "util/gtk_util.hpp"
 #include "board/board.hpp"
 #include "pool/part.hpp"

@@ -724,7 +724,7 @@ SRC_PR_REVIEW = \
 	3rd_party/poly2tri/sweep/advancing_front.cpp\
 	src/package/package_rules_check.cpp\
 	src/symbol/symbol_rules_check.cpp\
-	src/util/step_importer.cpp\
+	src/import_step/step_importer.cpp\
 	src/util/clipper_util.cpp\
 	src/checks/check_util.cpp\
 	src/checks/check_entity.cpp\
@@ -733,7 +733,7 @@ SRC_PR_REVIEW = \
 	src/checks/check_item.cpp\
 
 SRC_OCE = \
-	src/util/step_importer.cpp\
+	src/import_step/step_importer.cpp\
 	src/export_step/export_step.cpp\
 
 SRC_PYTHON = \
@@ -749,7 +749,7 @@ SRC_PYTHON = \
 
 SRC_OCE_EXPORT = \
 	src/export_step/export_step.cpp\
-	src/util/step_importer.cpp\
+	src/import_step/step_importer.cpp\
 
 SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_PGM_TEST) $(SRC_POOL_PRJ_MGR) $(SRC_GEN_PKG) $(SRC_PR_REVIEW))
 

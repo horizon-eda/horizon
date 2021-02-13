@@ -55,22 +55,9 @@ namespace horizon::STEPImporter {
 
 // adapted from
 // https://github.com/KiCad/kicad-source-mirror/blob/master/plugins/3d/oce/loadmodel.cpp
-struct DATA;
 
-static bool processNode(const TopoDS_Shape &shape, DATA &data);
 
-static bool processComp(const TopoDS_Shape &shape, DATA &data, const glm::dmat4 &mat_in = glm::dmat4(1));
-
-struct DATA {
-    Handle(TDocStd_Document) m_doc;
-    Handle(XCAFDoc_ColorTool) m_color;
-    Handle(XCAFDoc_ShapeTool) m_assy;
-    bool hasSolid;
-
-    Result *result;
-};
-
-static bool readSTEP(Handle(TDocStd_Document) & m_doc, const char *fname)
+bool STEPImporter::readSTEP(const char *fname)
 {
     STEPCAFControl_Reader reader;
     IFSelect_ReturnStatus stat = reader.ReadFile(fname);
@@ -104,26 +91,25 @@ static bool readSTEP(Handle(TDocStd_Document) & m_doc, const char *fname)
     return true;
 }
 
-static bool getColor(DATA &data, TDF_Label label, Quantity_Color &color)
+
+STEPImporter::STEPImporter(const std::string &filename)
 {
-    while (true) {
-        if (data.m_color->GetColor(label, XCAFDoc_ColorGen, color))
-            return true;
-        else if (data.m_color->GetColor(label, XCAFDoc_ColorSurf, color))
-            return true;
-        else if (data.m_color->GetColor(label, XCAFDoc_ColorCurv, color))
-            return true;
+    m_app = XCAFApp_Application::GetApplication();
 
-        label = label.Father();
+    m_app->NewDocument("MDTV-XCAF", m_doc);
+    if (!readSTEP(filename.c_str())) {
+        std::cout << "error loading " << filename << std::endl;
+        loaded = false;
+        return;
+    }
+    std::cout << "loaded" << std::endl;
+    loaded = true;
 
-        if (label.IsNull())
-            break;
-    };
-
-    return false;
+    m_assy = XCAFDoc_DocumentTool::ShapeTool(m_doc->Main());
+    m_color = XCAFDoc_DocumentTool::ColorTool(m_doc->Main());
 }
 
-void processWire(const TopoDS_Wire &wire, DATA &data, const glm::dmat4 &mat)
+void STEPImporter::processWire(const TopoDS_Wire &wire, const glm::dmat4 &mat)
 {
     for (BRepTools_WireExplorer expl(wire); expl.More(); expl.Next()) {
         const auto &edge = expl.Current();
@@ -133,7 +119,7 @@ void processWire(const TopoDS_Wire &wire, DATA &data, const glm::dmat4 &mat)
             gp_Pnt pnt = BRep_Tool::Pnt(first);
             glm::dvec4 gpnt(pnt.X(), pnt.Y(), pnt.Z(), 1);
             auto pt = mat * gpnt;
-            data.result->points.emplace_back(pt.x, pt.y, pt.z);
+            result->points.emplace_back(pt.x, pt.y, pt.z);
         }
 
         auto curve = BRepAdaptor_Curve(edge);
@@ -144,14 +130,13 @@ void processWire(const TopoDS_Wire &wire, DATA &data, const glm::dmat4 &mat)
             {
                 glm::dvec4 gpnt(pnt.X(), pnt.Y(), pnt.Z(), 1);
                 auto pt = mat * gpnt;
-                data.result->points.emplace_back(pt.x, pt.y, pt.z);
+                result->points.emplace_back(pt.x, pt.y, pt.z);
             }
         }
     }
 }
 
-static bool processFace(const TopoDS_Face &face, DATA &data, Quantity_Color *color,
-                        const glm::dmat4 &mat = glm::dmat4(1))
+bool STEPImporter::processFace(const TopoDS_Face &face, Quantity_Color *color, const glm::dmat4 &mat)
 {
     if (Standard_True == face.IsNull())
         return false;
@@ -163,7 +148,7 @@ static bool processFace(const TopoDS_Face &face, DATA &data, Quantity_Color *col
             TopAbs_ShapeEnum stype = subShape.ShapeType();
             if (stype == TopAbs_WIRE) {
                 const TopoDS_Wire &wire = TopoDS::Wire(it.Value());
-                processWire(wire, data, mat);
+                processWire(wire, mat);
             }
         }
     }
@@ -193,10 +178,9 @@ static bool processFace(const TopoDS_Face &face, DATA &data, Quantity_Color *col
     do {
         TDF_Label L;
 
-        if (data.m_color->ShapeTool()->Search(face, L)) {
-            if (data.m_color->GetColor(L, XCAFDoc_ColorGen, lcolor)
-                || data.m_color->GetColor(L, XCAFDoc_ColorCurv, lcolor)
-                || data.m_color->GetColor(L, XCAFDoc_ColorSurf, lcolor))
+        if (m_color->ShapeTool()->Search(face, L)) {
+            if (m_color->GetColor(L, XCAFDoc_ColorGen, lcolor) || m_color->GetColor(L, XCAFDoc_ColorCurv, lcolor)
+                || m_color->GetColor(L, XCAFDoc_ColorSurf, lcolor))
                 color = &lcolor;
         }
     } while (0);
@@ -207,8 +191,8 @@ static bool processFace(const TopoDS_Face &face, DATA &data, Quantity_Color *col
     const Poly_Array1OfTriangle &arrTriangles = triangulation->Triangles();
     const TShort_Array1OfShortReal &arrNormals = triangulation->Normals();
 
-    data.result->faces.emplace_back();
-    auto &face_out = data.result->faces.back();
+    result->faces.emplace_back();
+    auto &face_out = result->faces.back();
     if (color) {
         face_out.color.r = color->Red();
         face_out.color.g = color->Green();
@@ -265,8 +249,7 @@ static bool processFace(const TopoDS_Face &face, DATA &data, Quantity_Color *col
     return true;
 }
 
-static bool processShell(const TopoDS_Shape &shape, DATA &data, Quantity_Color *color,
-                         const glm::dmat4 &mat = glm::dmat4(1))
+bool STEPImporter::processShell(const TopoDS_Shape &shape, Quantity_Color *color, const glm::dmat4 &mat)
 {
     TopoDS_Iterator it;
     bool ret = false;
@@ -274,19 +257,38 @@ static bool processShell(const TopoDS_Shape &shape, DATA &data, Quantity_Color *
     for (it.Initialize(shape, false, false); it.More(); it.Next()) {
         const TopoDS_Face &face = TopoDS::Face(it.Value());
 
-        if (processFace(face, data, color, mat))
+        if (processFace(face, color, mat))
             ret = true;
     }
 
     return ret;
 }
 
-static bool processSolid(const TopoDS_Shape &shape, DATA &data, const glm::dmat4 &mat_in = glm::dmat4(1))
+bool STEPImporter::getColor(TDF_Label label, Quantity_Color &color)
 {
-    TDF_Label label = data.m_assy->FindShape(shape, Standard_False);
+    while (true) {
+        if (m_color->GetColor(label, XCAFDoc_ColorGen, color))
+            return true;
+        else if (m_color->GetColor(label, XCAFDoc_ColorSurf, color))
+            return true;
+        else if (m_color->GetColor(label, XCAFDoc_ColorCurv, color))
+            return true;
+
+        label = label.Father();
+
+        if (label.IsNull())
+            break;
+    };
+
+    return false;
+}
+
+bool STEPImporter::processSolid(const TopoDS_Shape &shape, const glm::dmat4 &mat_in)
+{
+    TDF_Label label = m_assy->FindShape(shape, Standard_False);
     bool ret = false;
 
-    data.hasSolid = true;
+    hasSolid = true;
 
     Quantity_Color col;
     Quantity_Color *lcolor = NULL;
@@ -294,8 +296,7 @@ static bool processSolid(const TopoDS_Shape &shape, DATA &data, const glm::dmat4
     if (label.IsNull()) {
     }
     else {
-
-        if (getColor(data, label, col))
+        if (getColor(label, col))
             lcolor = &col;
     }
 
@@ -318,14 +319,15 @@ static bool processSolid(const TopoDS_Shape &shape, DATA &data, const glm::dmat4
     for (it.Initialize(shape, false, false); it.More(); it.Next()) {
         const TopoDS_Shape &subShape = it.Value();
 
-        if (processShell(subShape, data, lcolor, mat))
+        if (processShell(subShape, lcolor, mat))
             ret = true;
     }
 
     return ret;
 }
 
-static bool processComp(const TopoDS_Shape &shape, DATA &data, const glm::dmat4 &mat_in)
+
+bool STEPImporter::processComp(const TopoDS_Shape &shape, const glm::dmat4 &mat_in)
 {
     TopoDS_Iterator it;
     TopLoc_Location loc = shape.Location();
@@ -349,27 +351,27 @@ static bool processComp(const TopoDS_Shape &shape, DATA &data, const glm::dmat4 
         const TopoDS_Shape &subShape = it.Value();
         TopAbs_ShapeEnum stype = subShape.ShapeType();
 
-        data.hasSolid = false;
+        hasSolid = false;
 
         switch (stype) {
         case TopAbs_COMPOUND:
         case TopAbs_COMPSOLID:
-            if (processComp(subShape, data, mat))
+            if (processComp(subShape, mat))
                 ret = true;
             break;
 
         case TopAbs_SOLID:
-            if (processSolid(subShape, data, mat))
+            if (processSolid(subShape, mat))
                 ret = true;
             break;
 
         case TopAbs_SHELL:
-            if (processShell(subShape, data, NULL))
+            if (processShell(subShape, NULL))
                 ret = true;
             break;
 
         case TopAbs_FACE:
-            if (processFace(TopoDS::Face(subShape), data, NULL))
+            if (processFace(TopoDS::Face(subShape), NULL))
                 ret = true;
             break;
 
@@ -381,29 +383,29 @@ static bool processComp(const TopoDS_Shape &shape, DATA &data, const glm::dmat4 
     return ret;
 }
 
-static bool processNode(const TopoDS_Shape &shape, DATA &data)
+bool STEPImporter::processNode(const TopoDS_Shape &shape)
 {
     TopAbs_ShapeEnum stype = shape.ShapeType();
     bool ret = true;
     switch (stype) {
     case TopAbs_COMPOUND:
     case TopAbs_COMPSOLID:
-        if (processComp(shape, data))
+        if (processComp(shape))
             ret = true;
         break;
 
     case TopAbs_SOLID:
-        if (processSolid(shape, data))
+        if (processSolid(shape))
             ret = true;
         break;
 
     case TopAbs_SHELL:
-        if (processShell(shape, data, NULL))
+        if (processShell(shape, NULL))
             ret = true;
         break;
 
     case TopAbs_FACE:
-        if (processFace(TopoDS::Face(shape), data, NULL))
+        if (processFace(TopoDS::Face(shape), NULL))
             ret = true;
         break;
 
@@ -414,35 +416,33 @@ static bool processNode(const TopoDS_Shape &shape, DATA &data)
     return ret;
 }
 
-Result import(const std::string &filename)
+Result STEPImporter::get_faces_and_points()
 {
-    Result result;
-    DATA data;
-    data.result = &result;
-    Handle(XCAFApp_Application) m_app = XCAFApp_Application::GetApplication();
+    Result res;
+    result = &res;
 
-    m_app->NewDocument("MDTV-XCAF", data.m_doc);
-    if (!readSTEP(data.m_doc, filename.c_str())) {
-        std::cout << "error loading " << filename << std::endl;
-        return result;
-    }
-    std::cout << "loaded" << std::endl;
-
-    data.m_assy = XCAFDoc_DocumentTool::ShapeTool(data.m_doc->Main());
-    data.m_color = XCAFDoc_DocumentTool::ColorTool(data.m_doc->Main());
     TDF_LabelSequence frshapes;
-    data.m_assy->GetFreeShapes(frshapes);
+    m_assy->GetFreeShapes(frshapes);
 
     int nshapes = frshapes.Length();
     int id = 1;
     std::cout << "shapes " << nshapes << std::endl;
     while (id <= nshapes) {
-        TopoDS_Shape shape = data.m_assy->GetShape(frshapes.Value(id));
-        if (!shape.IsNull() && processNode(shape, data)) {
+        TopoDS_Shape shape = m_assy->GetShape(frshapes.Value(id));
+        if (!shape.IsNull() && processNode(shape)) {
         }
         ++id;
     }
-
-    return result;
+    result = nullptr;
+    return res;
 }
+
+Result import(const std::string &filename)
+{
+    STEPImporter importer(filename);
+    if (!importer.is_loaded())
+        return {};
+    return importer.get_faces_and_points();
+}
+
 } // namespace horizon::STEPImporter
