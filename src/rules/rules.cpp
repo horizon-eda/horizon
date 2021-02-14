@@ -146,4 +146,15 @@ std::map<UUID, Rule *> Rules::get_rules(RuleID id)
     return r;
 }
 
+bool RulesCheckResult::check_disabled(const Rule &rule)
+{
+    if (!rule.enabled) {
+        level = RulesCheckErrorLevel::DISABLED;
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 } // namespace horizon

@@ -36,6 +36,7 @@ public:
     void clear();
     void update();
     json serialize() const;
+    bool check_disabled(const Rule &rule);
 
     RulesCheckErrorLevel level = RulesCheckErrorLevel::NOT_RUN;
     std::string comment;

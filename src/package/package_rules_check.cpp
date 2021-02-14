@@ -11,7 +11,10 @@ namespace horizon {
 RulesCheckResult PackageRules::check_package(const class Package &pkg) const
 {
     RulesCheckResult r;
+    if (r.check_disabled(rule_package_checks))
+        return r;
     r.level = RulesCheckErrorLevel::PASS;
+
 
     if (pkg.name.size() == 0) {
         r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
@@ -179,6 +182,8 @@ RulesCheckResult PackageRules::check_package(const class Package &pkg) const
 RulesCheckResult PackageRules::check_clearance(const class Package &pkg) const
 {
     RulesCheckResult r;
+    if (r.check_disabled(rule_clearance_package))
+        return r;
     r.level = RulesCheckErrorLevel::PASS;
 
     CanvasPatch ca;
