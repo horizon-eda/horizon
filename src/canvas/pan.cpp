@@ -60,7 +60,6 @@ void CanvasGL::pan_drag_move(GdkEventMotion *motion_event)
         offset = pan_offset_orig + Coordf(x, y) - pan_pointer_pos_orig;
         update_viewmat();
         pan_pointer_pos_orig += warp_distance;
-        queue_draw();
     }
 }
 
@@ -71,7 +70,6 @@ void CanvasGL::pan_drag_move(GdkEventScroll *scroll_event)
     offset.x -= dx * 50;
     offset.y -= dy * 50;
     update_viewmat();
-    queue_draw();
 }
 
 void CanvasGL::set_scale(float x, float y, float scale_new)
@@ -97,7 +95,6 @@ void CanvasGL::set_scale(float x, float y, float scale_new)
     }
     update_viewmat();
     s_signal_scale_changed.emit();
-    queue_draw();
 }
 
 int CanvasGL::_animate_step(GdkFrameClock *frame_clock)
