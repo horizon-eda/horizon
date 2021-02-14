@@ -736,6 +736,7 @@ SRC_PR_REVIEW = \
 SRC_OCE = \
 	src/import_step/step_importer.cpp\
 	src/export_step/export_step.cpp\
+	src/imp/3d/imp_package_3d_occt.cpp\
 
 SRC_PYTHON = \
 	src/python_module/horizonmodule.cpp \
@@ -929,7 +930,7 @@ $(BUILDDIR)/gen/help_texts.hpp: scripts/make_help.py src/help_texts.txt
 
 $(BUILDDIR)/horizon-imp: $(OBJ_COMMON) $(OBJ_ROUTER) $(OBJ_OCE) $(OBJ_IMP)
 	$(ECHO) " $@"
-	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(LDFLAGS_OCE) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libcurl) -lpodofo -o $@
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(LDFLAGS_OCE) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libcurl) -lpodofo -lTKHLR -lTKGeomBase -o $@
 
 $(BUILDDIR)/horizon-pool: $(OBJ_COMMON) $(OBJ_POOL_UTIL)
 	$(ECHO) " $@"

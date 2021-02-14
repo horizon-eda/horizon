@@ -142,6 +142,7 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu)
                     sp_shift.z->set_value((bb.zh + bb.zl) / -2 * 1e6);
                     origin_cb->set_active(true);
                 });
+                widgets_insenstive_without_model.push_back(it);
             }
 
             {
@@ -152,6 +153,7 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu)
                     imp.view_3d_stack->set_visible_child("place");
                     imp.place_model_box->init(model);
                 });
+                widgets_insenstive_without_model.push_back(it);
             }
 
             {
@@ -180,6 +182,12 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu)
 
             box->pack_start(*place_button, false, false, 0);
         }
+        {
+            auto project_button = Gtk::manage(new Gtk::Button("Project"));
+            project_button->signal_clicked().connect([this] { imp.project_model(model); });
+            box->pack_start(*project_button, false, false, 0);
+            widgets_insenstive_without_model.push_back(project_button);
+        }
 
         origin_cb = Gtk::manage(new Gtk::CheckButton("Rotate around package origin"));
         box->pack_end(*origin_cb, false, false, 0);
@@ -187,6 +195,10 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu)
         box->show_all();
         pack_start(*box, false, false, 0);
     }
+
+    update_widgets_insenstive();
+    imp.view_3d_window->get_canvas().signal_models_loading().connect(
+            sigc::track_obj([this](auto a, auto b) { update_widgets_insenstive(); }, *this));
 
     auto placement_grid = Gtk::manage(new Gtk::Grid);
     placement_grid->set_hexpand_set(true);
@@ -263,6 +275,14 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu)
     pack_start(*placement_grid, false, false, 0);
 
     imp.update_model_editors();
+}
+
+void ModelEditor::update_widgets_insenstive()
+{
+    const auto has_model = imp.view_3d_window->get_canvas().model_is_loaded(model.filename);
+    for (auto w : widgets_insenstive_without_model) {
+        w->set_sensitive(has_model);
+    }
 }
 
 void ModelEditor::set_is_current(const UUID &iuu)

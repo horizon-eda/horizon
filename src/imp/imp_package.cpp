@@ -39,6 +39,11 @@ void ImpPackage::canvas_update()
 {
     canvas->update(core_package.get_canvas_data());
     warnings_box->update(package.warnings);
+    if (projection_annotation->get_visible()) {
+        for (const auto &it : projection_targets) {
+            canvas->append_target(Target(UUID(), ObjectType::MODEL_3D, it));
+        }
+    }
     update_highlights();
 }
 
@@ -297,6 +302,8 @@ void ImpPackage::construct()
     main_window->add_action("reload_pool", [this] { trigger_action(ActionID::RELOAD_POOL); });
 
     view_options_menu_append_action("Bottom view", "win.bottom_view");
+    view_options_menu_append_action("3D projection", "win.show_projection");
+
     add_view_angle_actions();
 
     connect_action(ActionID::FOOTPRINT_GENERATOR, [this](auto &a) {
@@ -411,6 +418,16 @@ void ImpPackage::update_header()
     header_button->set_label(name);
     set_window_title(name);
     parameter_window->set_subtitle(name);
+}
+
+std::vector<std::string> ImpPackage::get_view_hints()
+{
+    auto r = ImpLayer::get_view_hints();
+
+    if (projection_annotation->get_visible())
+        r.emplace_back("3D projection");
+
+    return r;
 }
 
 ImpPackage::~ImpPackage()

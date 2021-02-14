@@ -21,6 +21,7 @@ enum class ColorP {
     SHADOW,
     CONNECTION_LINE,
     NOPOPULATE_X,
+    PROJECTION,
     N_COLORS,
     // colors after N_COLORS aren't part of the UBO
     BACKGROUND,

@@ -19,6 +19,7 @@ public:
     {
         return loaded;
     }
+    std::vector<TopoDS_Shape> get_shapes();
 
 private:
     bool readSTEP(const char *fname);

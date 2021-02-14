@@ -8,7 +8,12 @@
 #include <mutex>
 
 namespace horizon {
+namespace STEPImporter {
+class STEPImporter;
+}
+
 class ImpPackage : public ImpLayer {
+    class ImportCanvas3D;
     friend class ModelEditor;
     friend class PlaceModelBox;
     friend class ImportCanvas3D;
@@ -40,6 +45,8 @@ protected:
         return &searcher;
     }
 
+    std::vector<std::string> get_view_hints() override;
+
 private:
     void canvas_update() override;
     CorePackage core_package;
@@ -53,9 +60,21 @@ private:
 
     class FootprintGeneratorWindow *footprint_generator_window = nullptr;
     class View3DWindow *view_3d_window = nullptr;
-    class ImportCanvas3D *canvas_3d = nullptr;
-    std::map<std::string, std::vector<Point3D>> model_points;
-    std::mutex model_points_mutex;
+    class ModelInfo {
+    public:
+        std::vector<Point3D> points;
+        std::unique_ptr<STEPImporter::STEPImporter> importer;
+
+        ~ModelInfo();
+    };
+    void project_model(const Package::Model &model);
+
+    std::map<std::string, ModelInfo> model_info;
+    std::mutex model_info_mutex;
+
+    class CanvasAnnotation *projection_annotation = nullptr;
+    std::vector<Coordi> projection_targets;
+    Glib::RefPtr<Gio::SimpleAction> show_projection_action;
 
     std::string ask_3d_model_filename(const std::string &current_filename = "");
     void construct_3d();

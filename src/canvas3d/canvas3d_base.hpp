@@ -97,6 +97,8 @@ public:
         return s_signal_view_changed;
     }
 
+    bool model_is_loaded(const std::string &filename);
+
 protected:
     CanvasMesh ca;
 

@@ -35,6 +35,11 @@ void CanvasAnnotation::set_visible(bool v)
     ca->layer_display[layer].visible = v;
 }
 
+bool CanvasAnnotation::get_visible() const
+{
+    return ca->layer_display.at(layer).visible;
+}
+
 void CanvasAnnotation::set_display(const LayerDisplay &ld)
 {
     ca->set_layer_display(layer, ld);

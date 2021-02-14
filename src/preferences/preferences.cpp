@@ -94,6 +94,7 @@ static const LutEnumStr<ColorP> colorp_lut = {
         COLORP_LUT_ITEM(SHADOW),
         COLORP_LUT_ITEM(CONNECTION_LINE),
         COLORP_LUT_ITEM(NOPOPULATE_X),
+        COLORP_LUT_ITEM(PROJECTION),
 };
 
 json CanvasPreferences::serialize() const

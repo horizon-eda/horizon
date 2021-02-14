@@ -30,6 +30,7 @@ static const std::map<ColorP, std::string> color_names = {
         {ColorP::PIN_HIDDEN, "Hidden Pin"},
         {ColorP::DIFFPAIR, "Diff. pair"},
         {ColorP::NOPOPULATE_X, "Do not pop. X-out"},
+        {ColorP::PROJECTION, "3D projection"},
         {ColorP::BACKGROUND, "Background"},
         {ColorP::GRID, "Grid"},
         {ColorP::CURSOR_NORMAL, "Cursor"},
@@ -53,7 +54,7 @@ static const std::set<ColorP> colors_non_layer = {ColorP::NET,         ColorP::B
 
 static const std::set<ColorP> colors_layer = {ColorP::FRAG_ORPHAN, ColorP::AIRWIRE_ROUTER, ColorP::TEXT_OVERLAY,
                                               ColorP::HOLE,        ColorP::DIMENSION,      ColorP::AIRWIRE,
-                                              ColorP::SHADOW};
+                                              ColorP::SHADOW,      ColorP::PROJECTION};
 
 class ColorEditor : public Gtk::Box {
 public:

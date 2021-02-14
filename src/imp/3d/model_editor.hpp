@@ -25,6 +25,8 @@ private:
     Gtk::CheckButton *default_cb = nullptr;
     Gtk::CheckButton *origin_cb = nullptr;
     Gtk::Label *current_label = nullptr;
+    std::vector<Gtk::Widget *> widgets_insenstive_without_model;
+    void update_widgets_insenstive();
 
     XYZContainer<class SpinButtonDim *> sp_shift;
     XYZContainer<class SpinButtonAngle *> sp_angle;

@@ -11,6 +11,7 @@ public:
     CanvasAnnotation(class CanvasGL *c, int l);
     void set_display(const class LayerDisplay &ld);
     void set_visible(bool v);
+    bool get_visible() const;
     void clear();
     void draw_line(const std::deque<Coordf> &pts, ColorP color, uint64_t width);
     void draw_line(const Coordf &from, const Coordf &to, ColorP color, uint64_t width, bool highlight = false,

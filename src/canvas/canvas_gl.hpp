@@ -190,6 +190,8 @@ public:
 
     int get_last_grid_div() const;
 
+    void append_target(const Target &target);
+
 protected:
     void push() override;
     void request_push() override;

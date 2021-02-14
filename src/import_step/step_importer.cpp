@@ -437,6 +437,25 @@ Result STEPImporter::get_faces_and_points()
     return res;
 }
 
+std::vector<TopoDS_Shape> STEPImporter::get_shapes()
+{
+    std::vector<TopoDS_Shape> r;
+    TDF_LabelSequence frshapes;
+    m_assy->GetFreeShapes(frshapes);
+
+    int nshapes = frshapes.Length();
+    int id = 1;
+    std::cout << "shapes " << nshapes << std::endl;
+    while (id <= nshapes) {
+        TopoDS_Shape shape = m_assy->GetShape(frshapes.Value(id));
+        if (!shape.IsNull()) {
+            r.push_back(shape);
+        }
+        ++id;
+    }
+    return r;
+}
+
 Result import(const std::string &filename)
 {
     STEPImporter importer(filename);

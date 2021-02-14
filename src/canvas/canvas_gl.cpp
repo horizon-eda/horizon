@@ -497,6 +497,11 @@ void CanvasGL::update_markers()
     request_push(PF_MARKER);
 }
 
+void CanvasGL::append_target(const Target &trg)
+{
+    targets.emplace_back(trg);
+}
+
 void CanvasGL::set_flip_view(bool fl)
 {
     auto toggled = fl != flip_view;

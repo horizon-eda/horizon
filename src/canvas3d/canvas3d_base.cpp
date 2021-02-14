@@ -466,6 +466,12 @@ void Canvas3DBase::load_3d_model(const std::string &filename, const std::string 
     }
 }
 
+bool Canvas3DBase::model_is_loaded(const std::string &filename)
+{
+    std::lock_guard<std::mutex> lock(models_loading_mutex);
+    return models.count(filename);
+}
+
 void Canvas3DBase::set_point_transform(const glm::dmat4 &mat)
 {
     point_mat = mat;
