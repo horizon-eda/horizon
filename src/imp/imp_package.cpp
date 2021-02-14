@@ -7,7 +7,7 @@
 #include "parameter_window.hpp"
 #include "pool/part.hpp"
 #include "util/gtk_util.hpp"
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include "util/pool_completion.hpp"
 #include "util/changeable.hpp"
 #include "util/str_util.hpp"

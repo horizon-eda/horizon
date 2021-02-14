@@ -4,7 +4,7 @@
 #include "board/plane.hpp"
 #include "board/board_layers.hpp"
 #include "util/clipper_util.hpp"
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 
 namespace horizon {
 CanvasGerber::CanvasGerber(GerberExporter &exp) : Canvas::Canvas(), exporter(exp)

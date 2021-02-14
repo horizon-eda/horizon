@@ -1,5 +1,6 @@
 #include "kicad_symbol_import_wizard.hpp"
 #include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include "util/str_util.hpp"
 #include "util/gtk_util.hpp"
 #include "widgets/pool_browser_package.hpp"

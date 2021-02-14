@@ -4,6 +4,7 @@
 #include "imp/imp_interface.hpp"
 #include "tool_helper_move.hpp"
 #include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include "canvas/canvas_gl.hpp"
 
 namespace horizon {

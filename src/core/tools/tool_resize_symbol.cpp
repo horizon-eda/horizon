@@ -2,6 +2,8 @@
 #include "document/idocument_symbol.hpp"
 #include "pool/symbol.hpp"
 #include "util/util.hpp"
+#include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include "imp/imp_interface.hpp"
 
 namespace horizon {

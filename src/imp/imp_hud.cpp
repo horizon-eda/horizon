@@ -1,6 +1,7 @@
 #include "imp.hpp"
 #include "util/str_util.hpp"
 #include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include "util/selection_util.hpp"
 #include "pool/entity.hpp"
 #include "pool/part.hpp"

@@ -3,7 +3,7 @@
 #include "board/board_layers.hpp"
 #include "poly2tri/poly2tri.h"
 #include "logger/logger.hpp"
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 
 namespace horizon {
 void CanvasMesh::update(const Board &b)

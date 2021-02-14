@@ -24,7 +24,7 @@
 #include "selection_filter.hpp"
 #include "target.hpp"
 #include "util/placement.hpp"
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include "board/board_panel.hpp"
 #include "common/picture.hpp"
 #include "util/polygon_arc_removal_proxy.hpp"
@@ -1425,7 +1425,7 @@ void Canvas::render(const class Dimension &dim)
         draw_line({0, 0}, Coordf(-arrow_mul * dim.label_size, (int64_t)dim.label_size / -2), co, 10000, true, 0);
         transform_restore();
 
-        int angle_i = (angle / M_PI) * 32768;
+        const int angle_i = angle_from_rad(angle);
         auto real_text_bb = draw_text0(Coordi(text_pos.x, text_pos.y), dim.label_size, s,
                                        get_flip_view() ? (32768 - angle_i) : angle_i, get_flip_view(),
                                        TextOrigin::CENTER, co, 10000, 0, true);
@@ -1584,7 +1584,7 @@ void Canvas::render(const Picture &pic)
     }
     pictures.emplace_back();
     auto &x = pictures.back();
-    x.angle = pic.placement.get_angle() / 65536.0 * 2 * M_PI;
+    x.angle = pic.placement.get_angle_rad();
     x.x = pic.placement.shift.x;
     x.y = pic.placement.shift.y;
     x.px_size = pic.px_size;

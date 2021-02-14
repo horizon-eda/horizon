@@ -1,5 +1,6 @@
 #include "pnp.hpp"
 #include "pnp_export_settings.hpp"
+#include "util/geom_util.hpp"
 #include <sstream>
 #include <iomanip>
 #include <cmath>
@@ -105,10 +106,7 @@ static std::string fmt_pos(const std::string &fmt, int64_t x)
 
 static std::string pnp_angle_to_string(int x)
 {
-    while (x < 0) {
-        x += 65536;
-    }
-    x %= 65536;
+    x = wrap_angle(x);
 
     std::ostringstream ss;
     ss.imbue(std::locale::classic());

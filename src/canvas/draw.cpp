@@ -2,7 +2,7 @@
 #include "common/common.hpp"
 #include "common/text.hpp"
 #include "util/placement.hpp"
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include <cstdint>
 #include <glib.h>
 #include <math.h>

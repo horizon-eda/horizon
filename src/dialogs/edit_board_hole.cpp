@@ -5,7 +5,7 @@
 #include "package/pad.hpp"
 #include "widgets/pool_browser_padstack.hpp"
 #include "board/board_hole.hpp"
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include "pool/ipool.hpp"
 #include "block/block.hpp"
 #include <iostream>

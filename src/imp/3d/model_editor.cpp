@@ -7,14 +7,9 @@
 #include "canvas3d/canvas3d.hpp"
 #include "place_model_box.hpp"
 #include "util/gtk_util.hpp"
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 
 namespace horizon {
-
-static double angle_to_rad(int16_t a)
-{
-    return a / 32768. * M_PI;
-}
 
 glm::dmat4 mat_from_model(const Package::Model &model, double scale)
 {

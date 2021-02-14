@@ -1,6 +1,7 @@
 #include "canvas.hpp"
 #include "util/text_data.hpp"
 #include "util/str_util.hpp"
+#include "util/geom_util.hpp"
 #include <algorithm>
 #include <glibmm.h>
 
@@ -12,9 +13,7 @@ std::pair<Coordf, Coordf> Canvas::draw_text0(const Coordf &p, float size, const 
 {
     if (img_mode)
         img_draw_text(p, size, rtext, angle, flip, origin, layer, width, font, center, mirror);
-    while (angle < 0)
-        angle += 65536;
-    angle %= 65536;
+    angle = wrap_angle(angle);
     bool backwards = (angle > 16384) && (angle <= 49152);
     float sc = size / 21;
     float yshift = 0;

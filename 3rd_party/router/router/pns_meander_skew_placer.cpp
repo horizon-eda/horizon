@@ -28,7 +28,7 @@
 
 #include "pns_router.h"
 #include "pns_debug_decorator.h"
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 
 namespace PNS {
 

@@ -1,6 +1,7 @@
 #include "tuning_window.hpp"
 #include "board/board.hpp"
 #include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include <iomanip>
 
 namespace horizon {

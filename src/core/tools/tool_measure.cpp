@@ -3,7 +3,7 @@
 #include "imp/imp_interface.hpp"
 #include "canvas/canvas_gl.hpp"
 #include <sstream>
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include "common/object_descr.hpp"
 
 namespace horizon {
@@ -45,7 +45,7 @@ void ToolMeasure::update_tip()
         }
         else {
             ss << coord_to_string(delta, true) << " D:" << dim_to_string(sqrt(delta.mag_sq()), false);
-            ss << " α:" << angle_to_string(atan2(delta.y, delta.x) / M_PI * 32768, false);
+            ss << " α:" << angle_to_string(angle_from_rad(atan2(delta.y, delta.x)), false);
         }
     }
 

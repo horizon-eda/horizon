@@ -2,6 +2,7 @@
 #include "pool/part.hpp"
 #include "widgets/layer_box.hpp"
 #include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include "nlohmann/json.hpp"
 #include "util/gtk_util.hpp"
 #include "view_angle_window.hpp"
@@ -168,10 +169,7 @@ void ImpLayer::add_view_angle_actions()
 static std::string view_angle_to_string(int x)
 {
     const bool pos_only = false;
-    while (x < 0) {
-        x += 65536;
-    }
-    x %= 65536;
+    x = wrap_angle(x);
     if (!pos_only && x > 32768)
         x -= 65536;
 
@@ -204,7 +202,7 @@ void ImpLayer::set_view_angle(int angle)
     while (view_angle < 0) {
         view_angle += 65536;
     }
-    canvas->set_view_angle(angle * M_PI / 32768);
+    canvas->set_view_angle(angle_to_rad(angle));
     view_angle_label->set_text(view_angle_to_string(view_angle));
     view_angle_window_conn.block();
     view_angle_window->get_spinbutton().set_value(view_angle);

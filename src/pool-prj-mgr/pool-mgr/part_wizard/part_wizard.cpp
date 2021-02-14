@@ -1,6 +1,7 @@
 #include "part_wizard.hpp"
 #include "pool/package.hpp"
 #include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include "pad_editor.hpp"
 #include "gate_editor.hpp"
 #include "widgets/location_entry.hpp"

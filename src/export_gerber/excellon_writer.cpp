@@ -1,6 +1,7 @@
 #include "excellon_writer.hpp"
 #include <iomanip>
 #include "util/util.hpp"
+#include "util/geom_util.hpp"
 
 namespace horizon {
 
@@ -77,7 +78,7 @@ void ExcellonWriter::draw_slot(const Coordi &pos, uint64_t diameter, uint64_t le
 {
     unsigned int tool = get_tool_for_diameter(diameter);
     double d = std::max(((int64_t)length - (int64_t)diameter) / 2, (int64_t)0);
-    double phi = (angle / 65536.0) * 2 * M_PI;
+    double phi = angle_to_rad(angle);
     double dx = d * cos(phi);
     double dy = d * sin(phi);
 

@@ -12,7 +12,7 @@
 #include "pool/symbol.hpp"
 #include "imp/imp_interface.hpp"
 #include "util/accumulator.hpp"
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include <iostream>
 #include "core/tool_id.hpp"
 #include "dialogs/enter_datum_angle_window.hpp"
@@ -322,9 +322,7 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
 
             const double angle0 = atan2(v0.y, v0.x);
             const double angle = atan2(v.y, v.x) - angle0;
-            iangle = ((angle / (2 * M_PI)) * 65536);
-            iangle += 65536 * 2;
-            iangle %= 65536;
+            iangle = wrap_angle(angle_from_rad(angle));
             if (snap)
                 iangle = round_multiple(iangle, 8192);
             apply_placements_rotation(iangle);

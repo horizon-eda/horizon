@@ -5,7 +5,7 @@
 #include <algorithm>
 #include "widgets/spin_button_dim.hpp"
 #include "util/gtk_util.hpp"
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 
 namespace horizon {
 

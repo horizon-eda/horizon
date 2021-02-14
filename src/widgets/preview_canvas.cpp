@@ -10,6 +10,7 @@
 #include "canvas/canvas_gl.hpp"
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include <iomanip>
 
 namespace horizon {

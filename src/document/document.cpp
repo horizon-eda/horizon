@@ -7,7 +7,7 @@
 #include "common/dimension.hpp"
 #include "common/keepout.hpp"
 #include "common/picture.hpp"
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 
 namespace horizon {
 

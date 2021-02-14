@@ -11,6 +11,7 @@
 #include "tuning_window.hpp"
 #include "util/selection_util.hpp"
 #include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include "util/str_util.hpp"
 #include "canvas/annotation.hpp"
 #include "export_pdf/export_pdf_board.hpp"

@@ -1,5 +1,6 @@
 #include "placement.hpp"
 #include "nlohmann/json.hpp"
+#include "util/geom_util.hpp"
 
 namespace horizon {
 Placement::Placement(const json &j)
@@ -26,10 +27,7 @@ void Placement::make_relative(const Placement &to)
         shift.x = -shift.x;
     }
     angle -= to.angle;
-    while (angle < 0) {
-        angle += 65536;
-    }
-    angle %= 65536;
+    angle = wrap_angle(angle);
 
     Coordi s = shift;
     if (to.angle == 0) {
@@ -48,7 +46,7 @@ void Placement::make_relative(const Placement &to)
         shift.x = -s.y;
     }
     else {
-        double af = -(to.angle / 65536.0) * 2 * M_PI;
+        const double af = -to.get_angle_rad();
         shift.x = s.x * cos(af) - s.y * sin(af);
         shift.y = s.x * sin(af) + s.y * cos(af);
     }
@@ -74,7 +72,7 @@ void Placement::accumulate(const Placement &p)
         q.shift.x = p.shift.y;
     }
     else {
-        double af = (angle / 65536.0) * 2 * M_PI;
+        const double af = get_angle_rad();
         q.shift.x = p.shift.x * cos(af) - p.shift.y * sin(af);
         q.shift.y = p.shift.x * sin(af) + p.shift.y * cos(af);
     }
@@ -85,10 +83,7 @@ void Placement::accumulate(const Placement &p)
 
     shift += q.shift;
     angle += p.angle;
-    while (angle < 0) {
-        angle += 65536;
-    }
-    angle %= 65536;
+    angle = wrap_angle(angle);
     mirror ^= q.mirror;
 }
 
@@ -99,10 +94,7 @@ void Placement::invert_angle()
 
 void Placement::set_angle(int a)
 {
-    angle = a;
-    while (angle < 0)
-        angle += 65536;
-    angle = angle % 65536;
+    angle = wrap_angle(a);
 }
 
 void Placement::inc_angle(int a)
@@ -117,7 +109,7 @@ void Placement::set_angle_deg(int a)
 
 void Placement::set_angle_rad(double a)
 {
-    set_angle((a * 32768) / M_PI);
+    set_angle(angle_from_rad(a));
 }
 
 void Placement::inc_angle_deg(int a)
@@ -137,6 +129,6 @@ int Placement::get_angle_deg() const
 
 double Placement::get_angle_rad() const
 {
-    return (angle / 32768.0) * M_PI;
+    return angle_to_rad(angle);
 }
 } // namespace horizon

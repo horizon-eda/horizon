@@ -1,7 +1,7 @@
 #include "pool/symbol.hpp"
 #include "rules/cache.hpp"
 #include "util/accumulator.hpp"
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include <ctype.h>
 
 namespace horizon {

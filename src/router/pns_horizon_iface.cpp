@@ -10,7 +10,7 @@
 #include "router/pns_solid.h"
 #include "router/pns_topology.h"
 #include "router/pns_via.h"
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include "logger/logger.hpp"
 
 namespace PNS {

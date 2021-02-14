@@ -12,6 +12,7 @@
 #include "imp/imp_interface.hpp"
 #include "util/accumulator.hpp"
 #include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include <iostream>
 #include "core/tool_id.hpp"
 

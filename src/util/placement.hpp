@@ -35,7 +35,7 @@ public:
             r.x = c.y;
         }
         else {
-            double af = (angle / 65536.0) * 2 * M_PI;
+            double af = get_angle_rad();
             r.x = c.x * cos(af) - c.y * sin(af);
             r.y = c.x * sin(af) + c.y * cos(af);
         }

@@ -30,7 +30,7 @@
 #include "pns_diff_pair.h"
 #include "pns_router.h"
 #include "pns_utils.h"
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 
 namespace PNS {
 

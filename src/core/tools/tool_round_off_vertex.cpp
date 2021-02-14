@@ -1,7 +1,7 @@
 #include "tool_round_off_vertex.hpp"
 #include "common/polygon.hpp"
 #include "imp/imp_interface.hpp"
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include "document/idocument.hpp"
 #include "util/selection_util.hpp"
 #include "clipper/clipper.hpp"

@@ -2,6 +2,7 @@
 #include "pool/ipool.hpp"
 #include "pool/part.hpp"
 #include "util/util.hpp"
+#include "util/geom_util.hpp"
 
 namespace horizon {
 

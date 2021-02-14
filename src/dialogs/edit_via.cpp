@@ -3,7 +3,7 @@
 #include "widgets/chooser_buttons.hpp"
 #include "board/via.hpp"
 #include "board/via_padstack_provider.hpp"
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include "block/net.hpp"
 #include <iostream>
 #include <deque>

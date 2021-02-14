@@ -4,7 +4,7 @@
 #include "common/patch_type_names.hpp"
 #include "rules/cache.hpp"
 #include "util/accumulator.hpp"
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include <thread>
 #include <future>
 #include <sstream>

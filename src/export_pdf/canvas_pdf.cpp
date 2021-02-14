@@ -1,6 +1,7 @@
 #include "canvas_pdf.hpp"
 #include "common/pdf_export_settings.hpp"
 #include "util/str_util.hpp"
+#include "util/geom_util.hpp"
 #include "common/polygon.hpp"
 #include "common/hole.hpp"
 #include "canvas/appearance.hpp"
@@ -61,9 +62,7 @@ void CanvasPDF::img_draw_text(const Coordf &p, float size, const std::string &rt
     if (!pdf_layer_visible(layer))
         return;
 
-    while (angle < 0)
-        angle += 65536;
-    angle %= 65536;
+    angle = wrap_angle(angle);
     bool backwards = (angle > 16384) && (angle <= 49152);
     float yshift = 0;
     switch (origin) {
@@ -119,7 +118,7 @@ void CanvasPDF::img_draw_text(const Coordf &p, float size, const std::string &rt
                 xshift -= line_width / 2;
             }
         }
-        double fangle = (tf.get_angle() / 65536.0) * 2 * M_PI;
+        double fangle = tf.get_angle_rad();
         painter->Save();
         Coordi p0(xshift, yshift);
         Coordi pt = tf.transform(p0);

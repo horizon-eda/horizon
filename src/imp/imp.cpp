@@ -9,6 +9,7 @@
 #include "rules/rules_window.hpp"
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include "widgets/log_view.hpp"
 #include "widgets/log_window.hpp"
 #include "widgets/spin_button_dim.hpp"

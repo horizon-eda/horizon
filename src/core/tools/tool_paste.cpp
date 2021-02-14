@@ -10,6 +10,7 @@
 #include "imp/imp_interface.hpp"
 #include "pool/entity.hpp"
 #include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include "core/clipboard/clipboard.hpp"
 #include <iostream>
 #include <gtkmm.h>

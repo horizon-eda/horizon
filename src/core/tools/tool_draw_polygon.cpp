@@ -1,7 +1,7 @@
 #include "tool_draw_polygon.hpp"
 #include "document/idocument.hpp"
 #include "imp/imp_interface.hpp"
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include <iostream>
 #include <sstream>
 

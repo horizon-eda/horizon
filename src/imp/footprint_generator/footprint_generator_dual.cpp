@@ -1,5 +1,5 @@
 #include "footprint_generator_dual.hpp"
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include "widgets/pool_browser_button.hpp"
 #include "document/idocument_package.hpp"
 #include "pool/ipool.hpp"

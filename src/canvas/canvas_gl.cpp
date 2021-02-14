@@ -1,6 +1,6 @@
 #include "canvas_gl.hpp"
 #include "gl_util.hpp"
-#include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include <algorithm>
 #include <epoxy/gl.h>
 #include <iostream>
