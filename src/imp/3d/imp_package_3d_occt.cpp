@@ -1,6 +1,6 @@
 #include "../imp_package.hpp"
-#include "import_step/step_importer.hpp"
 #include "import_canvas_3d.hpp"
+#include "import_step/step_importer.hpp"
 #include "util/geom_util.hpp"
 #include <HLRBRep_Algo.hxx>
 #include <HLRBRep_HLRToShape.hxx>
