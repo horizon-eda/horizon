@@ -1,6 +1,7 @@
 #include "geom_util.hpp"
 #include <sstream>
 #include <iomanip>
+#include <cmath>
 #include "util.hpp"
 
 namespace horizon {
