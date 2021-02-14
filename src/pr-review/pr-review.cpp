@@ -1,5 +1,6 @@
 #include "pool/package.hpp"
 #include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include "nlohmann/json.hpp"
 #include "pool/pool.hpp"
 #include "board/board_layers.hpp"
