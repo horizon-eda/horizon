@@ -61,7 +61,7 @@ namespace horizon {
 
 // adapted from https://github.com/KiCad/kicad-source-mirror/blob/master/utils/kicad2step/pcb/oce_utils.cpp
 
-static TopoDS_Shape prism_from_countour(const ClipperLib::Path &contour, uint64_t thickness)
+static TopoDS_Shape face_from_countour(const ClipperLib::Path &contour)
 {
     BRepBuilderAPI_MakeWire wire;
     auto contour_sz = contour.size();
@@ -72,56 +72,63 @@ static TopoDS_Shape prism_from_countour(const ClipperLib::Path &contour, uint64_
         edge = BRepBuilderAPI_MakeEdge(gp_Pnt(pt1.X / 1e6, pt1.Y / 1e6, 0.0), gp_Pnt(pt2.X / 1e6, pt2.Y / 1e6, 0.0));
         wire.Add(edge);
     }
-    TopoDS_Face face = BRepBuilderAPI_MakeFace(wire);
-    return BRepPrimAPI_MakePrism(face, gp_Vec(0, 0, thickness / 1e6));
+    return BRepBuilderAPI_MakeFace(wire);
 }
 
 class CanvasHole : public Canvas {
 public:
-    CanvasHole(std::deque<TopoDS_Shape> &cs, int64_t th) : cutouts(cs), thickness(th)
+    CanvasHole(TopTools_ListOfShape &cs, int64_t th) : cutouts(cs), thickness(th)
     {
         img_mode = true;
     }
 
 private:
-    std::deque<TopoDS_Shape> &cutouts;
+    TopTools_ListOfShape &cutouts;
     int64_t thickness;
     void img_hole(const class Hole &hole) override
     {
         Placement tr = transform;
         tr.accumulate(hole.placement);
         if (hole.shape == Hole::Shape::ROUND) {
-            TopoDS_Shape s = BRepPrimAPI_MakeCylinder(hole.diameter / 2e6, thickness * 2e-6).Shape();
-            gp_Trsf shift;
-            shift.SetTranslation(gp_Vec(tr.shift.x / 1e6, tr.shift.y / 1e6, -thickness / 2e6));
-            BRepBuilderAPI_Transform t_hole(s, shift);
-            cutouts.push_back(t_hole.Shape());
+            auto ax = gp_Ax2(gp_Pnt(tr.shift.x / 1e6, tr.shift.y / 1e6, 0), gp_Dir(0, 0, 1));
+            auto circ = gp_Circ(ax, hole.diameter / 2e6);
+            auto edge = BRepBuilderAPI_MakeEdge(circ);
+            BRepBuilderAPI_MakeWire wire;
+            wire.Add(edge);
+            TopoDS_Shape face = BRepBuilderAPI_MakeFace(wire);
+            cutouts.Append(face);
         }
         else if (hole.shape == Hole::Shape::SLOT) {
-            int64_t box_width = hole.length - hole.diameter;
-            if (box_width > 0) {
-                TopoDS_Shape s = BRepPrimAPI_MakeBox(gp_Pnt(-box_width / 2e6, hole.diameter / -2e6, 0), box_width / 1e6,
-                                                     hole.diameter / 1e6, thickness * 2e-6)
-                                         .Shape();
-                gp_Trsf trsf;
-                trsf.SetTranslation(gp_Vec(tr.shift.x / 1e6, tr.shift.y / 1e6, -thickness / 2e6));
-                gp_Trsf rot;
-                if (tr.mirror)
-                    rot.SetRotation(gp_Ax1(), -tr.get_angle_rad());
-                else
-                    rot.SetRotation(gp_Ax1(), tr.get_angle_rad());
-                trsf.Multiply(rot);
-                BRepBuilderAPI_Transform s_shift(s, trsf);
-                cutouts.push_back(s_shift.Shape());
+            const int64_t box_width = hole.length - hole.diameter;
+            {
+                std::array<Coordd, 4> corners;
+                corners.at(0) = {box_width / -2.0, hole.diameter / -2.0};
+                corners.at(1) = {box_width / -2.0, hole.diameter / 2.0};
+                corners.at(2) = {box_width / 2.0, hole.diameter / 2.0};
+                corners.at(3) = {box_width / 2.0, hole.diameter / -2.0};
+
+                BRepBuilderAPI_MakeWire wire;
+                for (size_t i = 0; i < corners.size(); i++) {
+                    auto pt1 = tr.transform(corners.at(i));
+                    auto pt2 = tr.transform(corners.at((i + 1) % corners.size()));
+                    TopoDS_Edge edge;
+                    edge = BRepBuilderAPI_MakeEdge(gp_Pnt(pt1.x / 1e6, pt1.y / 1e6, 0.0),
+                                                   gp_Pnt(pt2.x / 1e6, pt2.y / 1e6, 0.0));
+                    wire.Add(edge);
+                }
+                TopoDS_Shape face = BRepBuilderAPI_MakeFace(wire);
+                cutouts.Append(face);
             }
 
             for (int mul : {1, -1}) {
-                TopoDS_Shape s = BRepPrimAPI_MakeCylinder(hole.diameter / 2e6, thickness * 2e-6).Shape();
-                gp_Trsf shift;
                 auto hole_pos = tr.transform(Coordi(mul * box_width / 2, 0));
-                shift.SetTranslation(gp_Vec(hole_pos.x / 1e6, hole_pos.y / 1e6, -thickness / 2e6));
-                BRepBuilderAPI_Transform t_hole(s, shift);
-                cutouts.push_back(t_hole.Shape());
+                auto ax = gp_Ax2(gp_Pnt(hole_pos.x / 1e6, hole_pos.y / 1e6, 0), gp_Dir(0, 0, 1));
+                auto circ = gp_Circ(ax, hole.diameter / 2e6);
+                auto edge = BRepBuilderAPI_MakeEdge(circ);
+                BRepBuilderAPI_MakeWire wire;
+                wire.Add(edge);
+                TopoDS_Shape face = BRepBuilderAPI_MakeFace(wire);
+                cutouts.Append(face);
             }
         }
     }
@@ -412,10 +419,10 @@ void export_step(const std::string &filename, const Board &brd, class IPool &poo
     }
 
     progress_cb("Board cutouts…");
-    std::deque<TopoDS_Shape> cutouts;
+    TopTools_ListOfShape cutouts;
     for (const auto &hole_node : result.Childs.front()->Childs) {
         auto hole_outline = hole_node->Contour;
-        cutouts.push_back(prism_from_countour(hole_outline, total_thickness));
+        cutouts.Append(face_from_countour(hole_outline));
     }
 
     progress_cb("Holes…");
@@ -425,9 +432,20 @@ void export_step(const std::string &filename, const Board &brd, class IPool &poo
     }
 
     progress_cb("Creating board…");
-    TopoDS_Shape board = prism_from_countour(outline, total_thickness);
-    for (const auto &it : cutouts) {
-        board = BRepAlgoAPI_Cut(board, it);
+    TopoDS_Shape board;
+    {
+        TopoDS_Shape board_face = face_from_countour(outline);
+        BRepAlgoAPI_Cut builder;
+
+        TopTools_ListOfShape board_shapes;
+        board_shapes.Append(board_face);
+
+        builder.SetArguments(board_shapes);
+        builder.SetTools(cutouts);
+        builder.SetRunParallel(Standard_True);
+        builder.Build();
+
+        board = BRepPrimAPI_MakePrism(builder.Shape(), gp_Vec(0, 0, total_thickness / 1e6));
     }
 
     TDF_Label board_label = assy->AddShape(board, false);
