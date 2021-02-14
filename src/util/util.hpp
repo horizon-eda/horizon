@@ -6,6 +6,7 @@
 #include <functional>
 #include <locale>
 #include <fstream>
+#include <optional>
 
 namespace horizon {
 using json = nlohmann::json;
@@ -59,8 +60,8 @@ std::string format_digits(unsigned int m, unsigned int digits_max);
 double parse_si(const std::string &inps);
 
 void rmdir_recursive(const std::string &dir_name);
-std::string replace_placeholders(const std::string &s, std::function<std::string(const std::string &)> fn,
-                                 bool keep_empty);
+std::string interpolate_text(const std::string &str,
+                             std::function<std::optional<std::string>(const std::string &s)> interpolator);
 
 std::pair<Coordi, bool> dir_from_action(InToolActionID a);
 

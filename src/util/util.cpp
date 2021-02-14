@@ -409,50 +409,93 @@ void rmdir_recursive(const std::string &dir_name)
         throw std::runtime_error("g_rmdir");
 }
 
-std::string replace_placeholders(const std::string &s, std::function<std::string(const std::string &)> fn,
-                                 bool keep_empty)
+static bool isvar(char c)
 {
-    std::string r;
-    r.reserve(s.size());
+    return std::isalnum(c) || c == '_' || c == ':';
+}
+
+std::string interpolate_text(const std::string &str,
+                             std::function<std::optional<std::string>(const std::string &s)> interpolator)
+{
+
+    enum class State { NORMAL, DOLLAR, VAR, VAR_BRACED };
+    State state = State::NORMAL;
+    std::string out;
     std::string var_current;
-    bool var_mode = false;
-    for (const auto &it : s) {
-        if (var_mode) {
-            if (std::isspace(it)) {
-                auto repl = fn(var_current);
-                if (repl.size()) {
-                    r += repl;
-                }
-                else if (keep_empty) {
-                    r += "$" + var_current;
-                }
-                r += it;
+    size_t i = 0;
+    while (true) {
+        const char c = str.c_str()[i++];
+        switch (state) {
+        case State::NORMAL:
+            if (c == '$') {
+                state = State::DOLLAR;
+            }
+            else if (c) {
+                out.append(1, c);
+            }
+            break;
+
+        case State::DOLLAR:
+            if (isvar(c)) {
                 var_current.clear();
-                var_mode = false;
+                var_current.append(1, c);
+                state = State::VAR;
+            }
+            else if (c == '{') {
+                var_current.clear();
+                state = State::VAR_BRACED;
             }
             else {
-                var_current += it;
+                out.append("$");
+                if (c)
+                    out.append(1, c);
+                state = State::NORMAL;
             }
-        }
-        else {
-            if (it == '$') {
-                var_mode = true;
+            break;
+
+        case State::VAR:
+            if (isvar(c)) {
+                var_current.append(1, c);
             }
             else {
-                r += it;
+                if (auto subst = interpolator(var_current)) {
+                    out.append(*subst);
+                }
+                else {
+                    out.append("$" + var_current);
+                }
+
+                if (c == '$') {
+                    state = State::DOLLAR;
+                }
+                else if (c) {
+                    out.append(1, c);
+                    state = State::NORMAL;
+                }
             }
+            break;
+
+        case State::VAR_BRACED:
+            if (c == '}') {
+                if (auto subst = interpolator(var_current)) {
+                    out.append(*subst);
+                }
+                else {
+                    out.append("${" + var_current + "}");
+                }
+                state = State::NORMAL;
+            }
+            else {
+                var_current.append(1, c);
+            }
+            break;
         }
+
+        if (!c)
+            break;
     }
-    if (var_mode) {
-        auto repl = fn(var_current);
-        if (repl.size()) {
-            r += repl;
-        }
-        else if (keep_empty) {
-            r += "$" + var_current;
-        }
-    }
-    return r;
+
+    return out;
 }
 
 std::pair<Coordi, bool> dir_from_action(InToolActionID a)

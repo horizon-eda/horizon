@@ -4,6 +4,7 @@
 #include "nlohmann/json.hpp"
 #include "schematic.hpp"
 #include "pool/ipool.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 
@@ -70,98 +71,9 @@ UUID SchematicSymbol::get_uuid() const
     return uuid;
 }
 
-static bool isvar(char c)
-{
-    return std::isalnum(c) || c == '_' || c == ':';
-}
-
-static std::string interpolate(const std::string &str,
-                               std::function<std::optional<std::string>(const std::string &s)> interpolator)
-{
-
-    enum class State { NORMAL, DOLLAR, VAR, VAR_BRACED };
-    State state = State::NORMAL;
-    std::string out;
-    std::string var_current;
-    size_t i = 0;
-    while (true) {
-        const char c = str.c_str()[i++];
-        switch (state) {
-        case State::NORMAL:
-            if (c == '$') {
-                state = State::DOLLAR;
-            }
-            else if (c) {
-                out.append(1, c);
-            }
-            break;
-
-        case State::DOLLAR:
-            if (isvar(c)) {
-                var_current.clear();
-                var_current.append(1, c);
-                state = State::VAR;
-            }
-            else if (c == '{') {
-                var_current.clear();
-                state = State::VAR_BRACED;
-            }
-            else {
-                out.append("$");
-                if (c)
-                    out.append(1, c);
-                state = State::NORMAL;
-            }
-            break;
-
-        case State::VAR:
-            if (isvar(c)) {
-                var_current.append(1, c);
-            }
-            else {
-                if (auto subst = interpolator(var_current)) {
-                    out.append(*subst);
-                }
-                else {
-                    out.append("$" + var_current);
-                }
-
-                if (c == '$') {
-                    state = State::DOLLAR;
-                }
-                else if (c) {
-                    out.append(1, c);
-                    state = State::NORMAL;
-                }
-            }
-            break;
-
-        case State::VAR_BRACED:
-            if (c == '}') {
-                if (auto subst = interpolator(var_current)) {
-                    out.append(*subst);
-                }
-                else {
-                    out.append("${" + var_current + "}");
-                }
-                state = State::NORMAL;
-            }
-            else {
-                var_current.append(1, c);
-            }
-            break;
-        }
-
-        if (!c)
-            break;
-    }
-
-    return out;
-}
-
 std::string SchematicSymbol::get_custom_value() const
 {
-    return interpolate(custom_value, [this](const auto &var) -> std::optional<std::string> {
+    return interpolate_text(custom_value, [this](const auto &var) -> std::optional<std::string> {
         std::string var_lower = var;
         std::transform(var_lower.begin(), var_lower.end(), var_lower.begin(),
                        [](unsigned char c) { return std::tolower(c); });

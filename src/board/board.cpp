@@ -622,13 +622,13 @@ void Board::vacuum_junctions()
 
 static std::string replace_text_map(const std::string &s, const std::map<std::string, std::string> &m)
 {
-    auto fn = [m](const auto &k) -> std::string {
+    auto fn = [&m](const auto &k) -> std::optional<std::string> {
         if (m.count(k))
             return m.at(k);
         else
-            return "";
+            return {};
     };
-    return replace_placeholders(s, fn, true);
+    return interpolate_text(s, fn);
 }
 
 void Board::expand()
