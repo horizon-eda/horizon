@@ -330,16 +330,18 @@ void Canvas::begin_group(int layer)
 void Canvas::end_group()
 {
     auto new_size = group_tris->size();
-    for (auto it : object_ref_idx) {
-        auto &layers = *it;
-        if (layers.count(group_layer)) {
-            auto &idxs = layers[group_layer];
-            idxs.second = new_size - 1;
-        }
-        else {
-            auto &idxs = layers[group_layer];
-            idxs.first = group_size;
-            idxs.second = new_size - 1;
+    if (new_size != group_size) { // something was drawn
+        for (auto it : object_ref_idx) {
+            auto &layers = *it;
+            if (layers.count(group_layer)) {
+                auto &idxs = layers[group_layer];
+                idxs.second = new_size - 1;
+            }
+            else {
+                auto &idxs = layers[group_layer];
+                idxs.first = group_size;
+                idxs.second = new_size - 1;
+            }
         }
     }
     group_tris = nullptr;
