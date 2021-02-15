@@ -40,12 +40,12 @@ void PoolBrowserPart::create_columns()
         auto col = append_column_with_item_source_cr("MPN", list_columns.MPN, Pango::ELLIPSIZE_END);
         col->set_resizable(true);
         col->set_expand(true);
-        col->set_min_width(200);
+        col->set_min_width(150);
     }
     {
         auto col = append_column("Manufacturer", list_columns.manufacturer, Pango::ELLIPSIZE_END);
         col->set_resizable(true);
-        col->set_min_width(200);
+        col->set_min_width(150);
     }
     {
         auto col = append_column("Description", list_columns.description, Pango::ELLIPSIZE_END);
