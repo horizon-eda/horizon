@@ -80,7 +80,7 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
     place_part_button->signal_clicked().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_place_part));
     assign_part_button->signal_clicked().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_assign_part));
 
-    preview = Gtk::manage(new PartPreview(pool, false));
+    preview = Gtk::manage(new PartPreview(pool, false, "part_browser"));
     {
         Gtk::Box *box;
         x->get_widget("box", box);
@@ -97,6 +97,12 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
     }
     notebook->set_current_page(notebook->page_num(*ch_search));
     signal_show().connect(sigc::track_obj([ch_search] { ch_search->search_once(); }, *ch_search));
+
+    {
+        Gtk::Paned *paned;
+        GET_WIDGET(paned);
+        paned_state_store.emplace(paned, "part_browser");
+    }
 }
 
 void PartBrowserWindow::handle_favorites_selected(Gtk::ListBoxRow *row)

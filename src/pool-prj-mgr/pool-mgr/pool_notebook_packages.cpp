@@ -238,6 +238,7 @@ void PoolNotebook::construct_packages()
     });
     append_page(*paned, "Packages");
     install_search_once(paned, br);
+    create_paned_state_store(paned, "packages");
 }
 
 } // namespace horizon

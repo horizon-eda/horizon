@@ -167,6 +167,7 @@ void PoolNotebook::construct_units()
     append_page(*paned, "Units");
     br->search_once(); // we're the first page to be displayed
     install_search_once(paned, br);
+    create_paned_state_store(paned, "units");
 }
 
 } // namespace horizon

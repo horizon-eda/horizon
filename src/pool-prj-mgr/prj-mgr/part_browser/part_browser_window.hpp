@@ -5,10 +5,12 @@
 #include "pool/pool_parametric.hpp"
 #include "util/uuid.hpp"
 #include "util/window_state_store.hpp"
+#include "util/paned_state_store.hpp"
 #include <array>
 #include <gtkmm.h>
 #include <set>
 #include "util/item_set.hpp"
+#include <optional>
 
 namespace horizon {
 
@@ -76,5 +78,6 @@ private:
     const class PoolCacheStatus *pool_cache_status = nullptr;
 
     WindowStateStore state_store;
+    std::optional<PanedStateStore> paned_state_store;
 };
 } // namespace horizon

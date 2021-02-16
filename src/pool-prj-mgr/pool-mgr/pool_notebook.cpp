@@ -278,7 +278,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         paned->add1(*br);
         paned->child_property_shrink(*br) = false;
 
-        auto preview = Gtk::manage(new PartPreview(pool));
+        auto preview = Gtk::manage(new PartPreview(pool, true, "pool_notebook_parametric_" + it_tab.first));
         preview->signal_goto().connect(sigc::mem_fun(*this, &PoolNotebook::go_to));
         br->signal_selected().connect([this, br, preview] {
             auto sel = br->get_selected();
@@ -292,6 +292,8 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         paned->add2(*preview);
         paned->show_all();
 
+        create_paned_state_store(paned, "parametric_" + it_tab.first);
+
         append_page(*paned, "Param: " + it_tab.second.display_name);
         install_search_once(paned, br);
         browsers_parametric.emplace(it_tab.first, br);
@@ -301,6 +303,11 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
     for (auto br : browsers) {
         add_context_menu(br.second);
     }
+}
+
+void PoolNotebook::create_paned_state_store(Gtk::Paned *paned, const std::string &prefix)
+{
+    paned_state_stores.emplace_back(std::make_unique<PanedStateStore>(paned, "pool_notebook_" + prefix));
 }
 
 void PoolNotebook::add_context_menu(PoolBrowser *br)

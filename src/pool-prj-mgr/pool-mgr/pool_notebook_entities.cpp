@@ -135,6 +135,7 @@ void PoolNotebook::construct_entities()
 
     append_page(*paned, "Entities");
     install_search_once(paned, br);
+    create_paned_state_store(paned, "entities");
 }
 
 } // namespace horizon

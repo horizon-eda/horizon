@@ -15,6 +15,7 @@
 #include "pool-update/pool-update.hpp"
 #include <zmq.hpp>
 #include "util/win32_undef.hpp"
+#include "util/paned_state_store.hpp"
 
 namespace horizon {
 class PoolNotebook : public Gtk::Notebook {
@@ -125,6 +126,9 @@ private:
 
     void install_search_once(Gtk::Widget *page, PoolBrowser *browser);
     bool widget_is_visible(Gtk::Widget *widget);
+
+    void create_paned_state_store(Gtk::Paned *paned, const std::string &prefix);
+    std::vector<std::unique_ptr<PanedStateStore>> paned_state_stores;
 
     std::string remote_repo;
     class PoolRemoteBox *remote_box = nullptr;

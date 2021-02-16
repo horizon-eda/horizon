@@ -5,12 +5,13 @@
 #include "util/uuid.hpp"
 #include "preview_base.hpp"
 #include "generic_combo_box.hpp"
-
+#include "util/paned_state_store.hpp"
+#include <optional>
 
 namespace horizon {
 class PartPreview : public Gtk::Box, public PreviewBase {
 public:
-    PartPreview(class IPool &pool, bool show_goto = true);
+    PartPreview(class IPool &pool, bool show_goto = true, const std::string &instance = "");
 
     void load(const class Part *part);
 
@@ -33,5 +34,6 @@ private:
     Gtk::Label *label_orderable_MPNs_title = nullptr;
 
     void handle_package_sel();
+    std::optional<PanedStateStore> state_store;
 };
 } // namespace horizon

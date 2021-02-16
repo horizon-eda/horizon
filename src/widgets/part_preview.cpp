@@ -9,7 +9,8 @@
 #include "entity_preview.hpp"
 
 namespace horizon {
-PartPreview::PartPreview(IPool &p, bool sgoto) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p), show_goto(sgoto)
+PartPreview::PartPreview(IPool &p, bool sgoto, const std::string &instance)
+    : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p), show_goto(sgoto)
 {
     auto infogrid = Gtk::manage(new Gtk::Grid());
     infogrid->property_margin() = 8;
@@ -162,6 +163,9 @@ PartPreview::PartPreview(IPool &p, bool sgoto) : Gtk::Box(Gtk::ORIENTATION_VERTI
     paned->show_all();
 
     load(nullptr);
+
+    if (instance.size())
+        state_store.emplace(paned, instance + "_part_preview");
 }
 
 void PartPreview::load(const Part *p)

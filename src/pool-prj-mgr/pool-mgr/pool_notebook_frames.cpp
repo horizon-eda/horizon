@@ -115,5 +115,6 @@ void PoolNotebook::construct_frames()
 
     append_page(*paned, "Frames");
     install_search_once(paned, br);
+    create_paned_state_store(paned, "frames");
 }
 } // namespace horizon

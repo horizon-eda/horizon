@@ -698,6 +698,7 @@ SRC_POOL_PRJ_MGR = \
 	src/util/kicad_package_parser.cpp\
 	src/util/automatic_prefs.cpp\
 	src/util/treeview_state_store.cpp\
+	src/util/paned_state_store.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp

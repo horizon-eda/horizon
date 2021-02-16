@@ -110,5 +110,6 @@ void PoolNotebook::construct_decals()
 
     append_page(*paned, "Decals");
     install_search_once(paned, br);
+    create_paned_state_store(paned, "decals");
 }
 } // namespace horizon

@@ -128,5 +128,6 @@ void PoolNotebook::construct_symbols()
 
     append_page(*paned, "Symbols");
     install_search_once(paned, br);
+    create_paned_state_store(paned, "symbols");
 }
 } // namespace horizon

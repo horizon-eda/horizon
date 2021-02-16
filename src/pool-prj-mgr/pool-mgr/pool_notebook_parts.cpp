@@ -145,7 +145,7 @@ void PoolNotebook::construct_parts()
     paned->add1(*box);
     paned->child_property_shrink(*box) = false;
 
-    auto preview = Gtk::manage(new PartPreview(pool));
+    auto preview = Gtk::manage(new PartPreview(pool, true, "pool_notebook_parts"));
     preview->signal_goto().connect(sigc::mem_fun(*this, &PoolNotebook::go_to));
 
     auto where_used = Gtk::manage(new WhereUsedBox(pool));
@@ -171,5 +171,6 @@ void PoolNotebook::construct_parts()
 
     append_page(*paned, "Parts");
     install_search_once(paned, br);
+    create_paned_state_store(paned, "parts");
 }
 } // namespace horizon
