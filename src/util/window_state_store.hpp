@@ -1,11 +1,16 @@
 #pragma once
-#include "sqlite.hpp"
+#include <string>
 
 namespace Gtk {
 class Window;
 }
 
+
 namespace horizon {
+namespace SQLite {
+class Database;
+}
+
 class WindowState {
 public:
     WindowState(int ax, int ay, int aw, int ah, bool m = false) : x(ax), y(ay), width(aw), height(ah), maximized(m){};
@@ -23,7 +28,7 @@ public:
     bool get_default_set() const;
 
 private:
-    SQLite::Database db;
+    SQLite::Database &db;
     const std::string window_name;
     Gtk::Window *win = nullptr;
     WindowState window_state;

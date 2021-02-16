@@ -491,6 +491,7 @@ SRC_IMP = \
 	src/util/keep_slope_util.cpp\
 	src/imp/view_angle_window.cpp\
 	src/imp/action_icon.cpp\
+  	src/util/automatic_prefs.cpp\
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\
@@ -694,6 +695,7 @@ SRC_POOL_PRJ_MGR = \
 	3rd_party/sexpr/sexpr_parser.cpp\
 	3rd_party/sexpr/sexpr.cpp\
 	src/util/kicad_package_parser.cpp\
+	src/util/automatic_prefs.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp

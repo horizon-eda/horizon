@@ -5,6 +5,7 @@
 #ifdef G_OS_WIN32
 #include <windows.h>
 #endif
+#include "util/automatic_prefs.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -17,6 +18,7 @@ int main(int argc, char *argv[])
     horizon::setup_locale();
     horizon::create_config_dir();
     horizon::PoolManager::init();
+    horizon::AutomaticPreferences::get();
     horizon::install_signal_exception_handler();
 
     // Start the application, showing the initial window,

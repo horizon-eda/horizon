@@ -2,6 +2,7 @@
 #include "util/window_state_store.hpp"
 #include "common/common.hpp"
 #include "util/changeable.hpp"
+#include "util/uuid.hpp"
 #include <gtkmm.h>
 #include <set>
 
