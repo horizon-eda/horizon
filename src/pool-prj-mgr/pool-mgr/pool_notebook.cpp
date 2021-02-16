@@ -270,7 +270,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
     }
 
     for (const auto &it_tab : pool_parametric.get_tables()) {
-        auto br = Gtk::manage(new PoolBrowserParametric(pool, pool_parametric, it_tab.first));
+        auto br = Gtk::manage(new PoolBrowserParametric(pool, pool_parametric, it_tab.first, "pool_notebook"));
         br->show();
         add_context_menu(br);
         br->signal_activated().connect([this, br] { go_to(ObjectType::PART, br->get_selected()); });

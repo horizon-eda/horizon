@@ -4,7 +4,7 @@
 namespace horizon {
 class PoolBrowserPackage : public PoolBrowser {
 public:
-    PoolBrowserPackage(class IPool &p, bool show_pads_filter = false);
+    PoolBrowserPackage(class IPool &p, bool show_pads_filter = false, const std::string &instance = "");
     void search() override;
     ObjectType get_type() const override
     {

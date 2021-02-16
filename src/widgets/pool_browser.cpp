@@ -8,7 +8,8 @@
 #include "tag_entry.hpp"
 
 namespace horizon {
-PoolBrowser::PoolBrowser(IPool &p) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p)
+PoolBrowser::PoolBrowser(IPool &p, const std::string &prefix)
+    : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p), store_prefix(prefix)
 {
     const auto &pools = PoolManager::get().get_pools();
     if (pools.count(pool.get_base_path())) {
@@ -208,6 +209,10 @@ void PoolBrowser::construct(Gtk::Widget *search_box)
 #endif
         }
     });
+
+    if (store_prefix.size()) {
+        state_store.emplace(treeview, store_prefix);
+    }
 }
 
 void PoolBrowser::set_busy(bool busy)

@@ -5,7 +5,8 @@
 #include <set>
 
 namespace horizon {
-PoolBrowserPackage::PoolBrowserPackage(IPool &p, bool pads_filter) : PoolBrowser(p)
+PoolBrowserPackage::PoolBrowserPackage(IPool &p, bool pads_filter, const std::string &instance)
+    : PoolBrowser(p, TreeViewStateStore::get_prefix(instance, "pool_browser_package"))
 {
     construct();
     name_entry = create_search_entry("Name");
@@ -48,8 +49,7 @@ void PoolBrowserPackage::create_columns()
     {
         auto col = append_column_with_item_source_cr("Package", list_columns.name, Pango::ELLIPSIZE_END);
         col->set_resizable(true);
-        col->set_expand(true);
-        col->set_min_width(200);
+        col->set_min_width(150);
         install_column_tooltip(*col, list_columns.name);
     }
     {

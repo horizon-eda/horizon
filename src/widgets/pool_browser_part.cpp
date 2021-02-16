@@ -6,7 +6,8 @@
 #include <set>
 
 namespace horizon {
-PoolBrowserPart::PoolBrowserPart(IPool &p, const UUID &uu) : PoolBrowserStockinfo(p), entity_uuid(uu)
+PoolBrowserPart::PoolBrowserPart(IPool &p, const UUID &uu, const std::string &instance)
+    : PoolBrowserStockinfo(p, TreeViewStateStore::get_prefix(instance, "pool_browser_part")), entity_uuid(uu)
 {
     construct();
     MPN_entry = create_search_entry("MPN");
@@ -39,13 +40,12 @@ void PoolBrowserPart::create_columns()
     {
         auto col = append_column_with_item_source_cr("MPN", list_columns.MPN, Pango::ELLIPSIZE_END);
         col->set_resizable(true);
-        col->set_expand(true);
-        col->set_min_width(150);
+        col->set_min_width(50);
     }
     {
         auto col = append_column("Manufacturer", list_columns.manufacturer, Pango::ELLIPSIZE_END);
         col->set_resizable(true);
-        col->set_min_width(150);
+        col->set_min_width(50);
     }
     {
         auto col = append_column("Description", list_columns.description, Pango::ELLIPSIZE_END);
@@ -56,12 +56,12 @@ void PoolBrowserPart::create_columns()
     {
         auto col = append_column("Package", list_columns.package, Pango::ELLIPSIZE_END);
         col->set_resizable(true);
-        col->set_min_width(100);
+        col->set_min_width(50);
     }
     {
         auto col = append_column("Tags", list_columns.tags, Pango::ELLIPSIZE_END);
         col->set_resizable(true);
-        col->set_min_width(100);
+        col->set_min_width(50);
         install_column_tooltip(*col, list_columns.tags);
     }
     path_column = append_column("Path", list_columns.path, Pango::ELLIPSIZE_START);

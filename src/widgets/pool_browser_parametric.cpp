@@ -205,8 +205,10 @@ private:
     type_signal_activated s_signal_activated;
 };
 
-PoolBrowserParametric::PoolBrowserParametric(IPool &p, PoolParametric &pp, const std::string &table_name)
-    : PoolBrowserStockinfo(p), pool_parametric(pp), table(pp.get_tables().at(table_name)), list_columns(table)
+PoolBrowserParametric::PoolBrowserParametric(IPool &p, PoolParametric &pp, const std::string &table_name,
+                                             const std::string &instance)
+    : PoolBrowserStockinfo(p, TreeViewStateStore::get_prefix(instance, "pool_browser_parametric_" + table_name)),
+      pool_parametric(pp), table(pp.get_tables().at(table_name)), list_columns(table)
 {
     search_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10));
     search_box->property_margin() = 10;
@@ -286,7 +288,6 @@ void PoolBrowserParametric::create_columns()
     {
         auto col = append_column_with_item_source_cr("MPN", list_columns.MPN, Pango::ELLIPSIZE_END);
         col->set_resizable(true);
-        col->set_expand(true);
         col->set_min_width(100);
     }
     {

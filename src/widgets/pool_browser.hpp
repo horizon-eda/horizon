@@ -6,11 +6,13 @@
 #include "util/sort_controller.hpp"
 #include "util/selection_provider.hpp"
 #include "common/common.hpp"
+#include "util/treeview_state_store.hpp"
+#include <optional>
 
 namespace horizon {
 class PoolBrowser : public Gtk::Box, public SelectionProvider {
 public:
-    PoolBrowser(class IPool &pool);
+    PoolBrowser(class IPool &pool, const std::string &prefix = "");
     UUID get_selected() override;
     bool get_any_selected();
     void set_show_none(bool v);
@@ -93,5 +95,7 @@ private:
     UUID selected_uuid_before_search;
 
     Gtk::Label *status_label = nullptr;
+    const std::string store_prefix;
+    std::optional<TreeViewStateStore> state_store;
 };
 } // namespace horizon

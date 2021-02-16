@@ -8,7 +8,8 @@ class PoolBrowserParametric : public PoolBrowserStockinfo {
 public:
     class FilterAppliedLabel;
     friend FilterAppliedLabel;
-    PoolBrowserParametric(class IPool &p, class PoolParametric &pp, const std::string &table_name);
+    PoolBrowserParametric(class IPool &p, class PoolParametric &pp, const std::string &table_name,
+                          const std::string &instance = "");
     void search() override;
     ObjectType get_type() const override
     {
