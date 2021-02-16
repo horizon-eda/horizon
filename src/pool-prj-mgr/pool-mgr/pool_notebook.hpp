@@ -114,6 +114,8 @@ private:
     void handle_create_decal();
     void handle_duplicate_decal(const UUID &uu);
 
+    void construct_parametric();
+
     Gtk::Button *add_action_button(const std::string &label, Gtk::Box *bbox, sigc::slot0<void>);
     Gtk::Button *add_action_button(const std::string &label, Gtk::Box *bbox, class PoolBrowser *br,
                                    sigc::slot1<void, UUID>);

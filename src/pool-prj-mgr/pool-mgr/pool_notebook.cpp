@@ -11,13 +11,10 @@
 #include "pool_remote_box.hpp"
 #include "pool_merge_dialog.hpp"
 #include "pool_git_box.hpp"
-#include <git2.h>
-#include "util/autofree_ptr.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app.hpp"
 #include "pool_update_error_dialog.hpp"
 #include "pool_settings_box.hpp"
 #include "pool/pool_manager.hpp"
-#include "pool/pool_parametric.hpp"
 #include "part_wizard/part_wizard.hpp"
 #include "widgets/part_preview.hpp"
 #include <thread>
@@ -269,36 +266,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         });
     }
 
-    for (const auto &it_tab : pool_parametric.get_tables()) {
-        auto br = Gtk::manage(new PoolBrowserParametric(pool, pool_parametric, it_tab.first, "pool_notebook"));
-        br->show();
-        add_context_menu(br);
-        br->signal_activated().connect([this, br] { go_to(ObjectType::PART, br->get_selected()); });
-        auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
-        paned->add1(*br);
-        paned->child_property_shrink(*br) = false;
-
-        auto preview = Gtk::manage(new PartPreview(pool, true, "pool_notebook_parametric_" + it_tab.first));
-        preview->signal_goto().connect(sigc::mem_fun(*this, &PoolNotebook::go_to));
-        br->signal_selected().connect([this, br, preview] {
-            auto sel = br->get_selected();
-            if (!sel) {
-                preview->load(nullptr);
-                return;
-            }
-            auto part = pool.get_part(sel);
-            preview->load(part);
-        });
-        paned->add2(*preview);
-        paned->show_all();
-
-        create_paned_state_store(paned, "parametric_" + it_tab.first);
-
-        append_page(*paned, "Param: " + it_tab.second.display_name);
-        install_search_once(paned, br);
-        browsers_parametric.emplace(it_tab.first, br);
-    }
-
+    construct_parametric();
 
     for (auto br : browsers) {
         add_context_menu(br.second);
