@@ -1108,7 +1108,13 @@ void Canvas::render_pad_overlay(const Pad &pad)
         return;
     transform_save();
     transform.accumulate(pad.placement);
-    auto bb = pad.padstack.get_bbox(true); // only copper
+    auto bb = pad.padstack.get_bbox(true);  // only copper
+    if (bb.second - bb.first == Coordi()) { // empty bbox
+        bb = pad.padstack.get_bbox(false);  // everything
+    }
+    if (bb.second - bb.first == Coordi()) { // still empty??
+        return;
+    }
     auto a = bb.first;
     auto b = bb.second;
     transform.accumulate(Placement((a + b) / 2));
