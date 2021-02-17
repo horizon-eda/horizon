@@ -474,13 +474,16 @@ void export_step(const std::string &filename, const Board &brd, class IPool &poo
 
     if (include_models) {
         progress_cb("Packages…");
-        auto n_pkg = brd.packages.size();
         size_t i = 1;
         std::vector<const BoardPackage *> pkgs;
         pkgs.reserve(brd.packages.size());
-        for (const auto &it : brd.packages) {
-            pkgs.push_back(&it.second);
+        for (const auto &[uuid, package] : brd.packages) {
+            if (package.component && package.component->nopopulate) {
+                continue;
+            }
+            pkgs.push_back(&package);
         }
+        auto n_pkg = std::to_string(pkgs.size());
         std::sort(pkgs.begin(), pkgs.end(),
                   [](auto a, auto b) { return strcmp_natural(a->component->refdes, b->component->refdes) < 0; });
 
@@ -488,8 +491,7 @@ void export_step(const std::string &filename, const Board &brd, class IPool &poo
             try {
                 auto model = it->package.get_model(it->model);
                 if (model) {
-                    progress_cb("Package " + it->component->refdes + " (" + std::to_string(i) + "/"
-                                + std::to_string(n_pkg) + ")");
+                    progress_cb("Package " + it->component->refdes + " (" + std::to_string(i) + "/" + n_pkg + ")");
                     TDF_Label lmodel;
 
                     if (!getModelLabel(pool.get_model_filename(it->package.uuid, model->uuid), lmodel, app, doc,
