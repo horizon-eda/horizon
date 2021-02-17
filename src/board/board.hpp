@@ -36,6 +36,7 @@ class BoardColors {
 public:
     BoardColors();
     Color solder_mask;
+    Color silkscreen;
     Color substrate;
 };
 

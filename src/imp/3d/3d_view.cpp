@@ -105,10 +105,6 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     auto explode_adj = Glib::RefPtr<Gtk::Adjustment>::cast_dynamic(x->get_object("explode_adj"));
     explode_adj->signal_value_changed().connect([explode_adj, this] { canvas->set_explode(explode_adj->get_value()); });
 
-    GET_WIDGET(solder_mask_color_button);
-    bind_color_button(solder_mask_color_button, &Canvas3D::set_solder_mask_color, [this] { s_signal_changed.emit(); });
-    solder_mask_color_button->set_color(Gdk::Color("#008000"));
-
     GET_WIDGET(background_top_color_button);
     bind_color_button(background_top_color_button, &Canvas3D::set_background_top_color, [this] {
         if (!setting_background_color_from_preset && background_color_preset_combo)
@@ -128,10 +124,19 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     solder_mask_switch->property_active().signal_changed().connect(
             [this, solder_mask_switch] { canvas->set_show_solder_mask(solder_mask_switch->get_active()); });
 
+    GET_WIDGET(solder_mask_color_button);
+    bind_color_button(solder_mask_color_button, &Canvas3D::set_solder_mask_color, [this] { s_signal_changed.emit(); });
+    solder_mask_color_button->set_color(Gdk::Color("#008000"));
+
+
     Gtk::Switch *silkscreen_switch;
     GET_WIDGET(silkscreen_switch);
     silkscreen_switch->property_active().signal_changed().connect(
             [this, silkscreen_switch] { canvas->set_show_silkscreen(silkscreen_switch->get_active()); });
+
+    GET_WIDGET(silkscreen_color_button);
+    bind_color_button(silkscreen_color_button, &Canvas3D::set_silkscreen_color, [this] { s_signal_changed.emit(); });
+    silkscreen_color_button->set_color(Gdk::Color("#FFFFFF"));
 
     Gtk::Switch *substrate_switch;
     GET_WIDGET(substrate_switch);
@@ -336,6 +341,16 @@ void View3DWindow::set_solder_mask_color(const Gdk::RGBA &c)
 Gdk::RGBA View3DWindow::get_solder_mask_color()
 {
     return solder_mask_color_button->get_rgba();
+}
+
+void View3DWindow::set_silkscreen_color(const Gdk::RGBA &c)
+{
+    silkscreen_color_button->set_rgba(c);
+}
+
+Gdk::RGBA View3DWindow::get_silkscreen_color()
+{
+    return silkscreen_color_button->get_rgba();
 }
 
 void View3DWindow::set_substrate_color(const Gdk::RGBA &c)

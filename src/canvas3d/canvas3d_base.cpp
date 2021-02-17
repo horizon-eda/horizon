@@ -38,7 +38,7 @@ Color Canvas3DBase::get_layer_color(int layer) const
         return {.7, .7, .7};
 
     if (layer == BoardLayers::TOP_SILKSCREEN || layer == BoardLayers::BOTTOM_SILKSCREEN)
-        return {1, 1, 1};
+        return silkscreen_color;
 
     if (layer == BoardLayers::L_OUTLINE || layer >= 10000)
         return substrate_color;

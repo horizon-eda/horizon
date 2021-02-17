@@ -30,11 +30,11 @@ json Board::StackupLayer::serialize() const
     return j;
 }
 
-BoardColors::BoardColors() : solder_mask({0, .5, 0}), substrate({.2, .15, 0})
+BoardColors::BoardColors() : solder_mask({0, .5, 0}), silkscreen({1, 1, 1}), substrate({.2, .15, 0})
 {
 }
 
-static const unsigned int app_version = 2;
+static const unsigned int app_version = 3;
 
 unsigned int Board::get_app_version()
 {
@@ -237,6 +237,9 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool, ViaPadst
         try {
             const auto &o = j.at("colors");
             colors.solder_mask = color_from_json(o.at("solder_mask"));
+            if (o.count("silkscreen")) {
+                colors.silkscreen = color_from_json(o.at("silkscreen"));
+            }
             colors.substrate = color_from_json(o.at("substrate"));
         }
         catch (const std::exception &e) {
@@ -1078,6 +1081,7 @@ json Board::serialize() const
     {
         json o;
         o["solder_mask"] = color_to_json(colors.solder_mask);
+        o["silkscreen"] = color_to_json(colors.silkscreen);
         o["substrate"] = color_to_json(colors.substrate);
         j["colors"] = o;
     }

@@ -131,6 +131,7 @@ template <typename T> struct FnGetSet {
     };
 
 
+// clang-format off
 #define ATTRS                                                                                                          \
     X(bool, render_background)                                                                                         \
     X(bool, show_models)                                                                                               \
@@ -150,7 +151,9 @@ template <typename T> struct FnGetSet {
     X(Color, background_top_color)                                                                                     \
     X(Color, background_bottom_color)                                                                                  \
     X(Color, solder_mask_color)                                                                                        \
+    X(Color, silkscreen_color)                                                                                         \
     X(Color, substrate_color)
+// clang-format on
 
 
 #define X GET_SET
