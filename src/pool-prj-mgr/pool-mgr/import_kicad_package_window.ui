@@ -13,11 +13,9 @@
     <property name="default-height">600</property>
     <property name="type-hint">dialog</property>
     <child>
-      <object class="GtkPaned" id="paned">
+      <object class="GtkPaned" id="paned1">
         <property name="visible">True</property>
         <property name="can-focus">True</property>
-        <property name="position">650</property>
-        <property name="position-set">True</property>
         <child>
           <object class="GtkFileChooserWidget" id="chooser_widget">
             <property name="visible">True</property>
@@ -66,7 +64,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkPaned">
+              <object class="GtkPaned" id="paned2">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="orientation">vertical</property>

@@ -2,6 +2,8 @@
 #include <gtkmm.h>
 #include "pool/package.hpp"
 #include <optional>
+#include "util/window_state_store.hpp"
+#include "util/paned_state_store.hpp"
 
 namespace horizon {
 class ImportKiCadPackageWindow : public Gtk::Window {
@@ -27,5 +29,9 @@ private:
 
     void update();
     void handle_import();
+
+    WindowStateStore window_state_store;
+    std::optional<PanedStateStore> paned1_state_store;
+    std::optional<PanedStateStore> paned2_state_store;
 };
 } // namespace horizon

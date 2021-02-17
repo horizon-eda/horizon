@@ -25,7 +25,7 @@ ImportKiCadPackageWindow *ImportKiCadPackageWindow::create(PoolProjectManagerApp
 
 ImportKiCadPackageWindow::ImportKiCadPackageWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
                                                    PoolProjectManagerAppWindow &aw)
-    : Gtk::Window(cobject), appwin(aw)
+    : Gtk::Window(cobject), appwin(aw), window_state_store(this, "import-kicad-package-window")
 {
     GET_WIDGET(chooser_widget);
     GET_WIDGET(package_name_label);
@@ -56,6 +56,17 @@ ImportKiCadPackageWindow::ImportKiCadPackageWindow(BaseObjectType *cobject, cons
     chooser_widget->signal_selection_changed().connect(sigc::mem_fun(*this, &ImportKiCadPackageWindow::update));
     import_button->signal_clicked().connect(sigc::mem_fun(*this, &ImportKiCadPackageWindow::handle_import));
     import_button->set_sensitive(false);
+
+    {
+        Gtk::Paned *paned1;
+        GET_WIDGET(paned1);
+        paned1_state_store.emplace(paned1, "import_kicad_package_window_h");
+    }
+    {
+        Gtk::Paned *paned2;
+        GET_WIDGET(paned2);
+        paned2_state_store.emplace(paned2, "import_kicad_package_window_v");
+    }
 }
 
 static std::string slurp_from_file(const std::string &filename)
