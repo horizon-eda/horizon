@@ -29,7 +29,8 @@ Wanna chat about the project? Join #horizon on freenode
 - Everything is referenced by UUIDs
 
 # Getting Started
-See the [the docs](https://docs.horizon-eda.org/en/latest/installation.html)
+See the [the docs](https://docs.horizon-eda.org/en/latest/installation.html).
+Debian packages are hosted by [packagecloud](https://packagecloud.io/).
 
 # Included third-party software
 
