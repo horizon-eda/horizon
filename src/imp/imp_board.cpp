@@ -579,9 +579,11 @@ void ImpBoard::construct()
 
     view_3d_window = View3DWindow::create(*core_board.get_board(), *pool.get(), View3DWindow::Mode::BOARD);
     view_3d_window->set_solder_mask_color(rgba_from_color(core_board.get_colors().solder_mask));
+    view_3d_window->set_silkscreen_color(rgba_from_color(core_board.get_colors().silkscreen));
     view_3d_window->set_substrate_color(rgba_from_color(core_board.get_colors().substrate));
     view_3d_window->signal_changed().connect([this] {
         core_board.get_colors().solder_mask = color_from_rgba(view_3d_window->get_solder_mask_color());
+        core_board.get_colors().silkscreen = color_from_rgba(view_3d_window->get_silkscreen_color());
         core_board.get_colors().substrate = color_from_rgba(view_3d_window->get_substrate_color());
         core_board.set_needs_save();
     });

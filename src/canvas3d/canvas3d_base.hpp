@@ -56,6 +56,7 @@ public:
     GET_SET_PICK(show_points, bool)
     GET_SET(use_layer_colors, bool)
     GET_SET(solder_mask_color, Color)
+    GET_SET(silkscreen_color, Color)
     GET_SET(substrate_color, Color)
     GET_SET_PICK(explode, float)
     GET_SET_PICK(cam_distance, float)
@@ -116,6 +117,7 @@ protected:
     bool show_copper = true;
     bool show_points = false;
     Color solder_mask_color = {0, .5, 0};
+    Color silkscreen_color = {1, 1, 1};
     Color substrate_color = {.2, .15, 0};
     float explode = 0;
     float highlight_intensity = .5;

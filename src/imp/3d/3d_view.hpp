@@ -17,10 +17,16 @@ public:
     void set_highlights(const std::set<UUID> &pkgs);
     void add_widget(Gtk::Widget *w);
     void set_smooth_zoom(bool smooth);
+
     void set_solder_mask_color(const Gdk::RGBA &c);
     Gdk::RGBA get_solder_mask_color();
+
+    void set_silkscreen_color(const Gdk::RGBA &c);
+    Gdk::RGBA get_silkscreen_color();
+
     void set_substrate_color(const Gdk::RGBA &c);
     Gdk::RGBA get_substrate_color();
+
     void set_appearance(const class Appearance &a);
     class Canvas3D &get_canvas()
     {
@@ -49,6 +55,7 @@ private:
     Gtk::ColorButton *background_top_color_button = nullptr;
     Gtk::ColorButton *background_bottom_color_button = nullptr;
     Gtk::ColorButton *solder_mask_color_button = nullptr;
+    Gtk::ColorButton *silkscreen_color_button = nullptr;
     Gtk::ColorButton *substrate_color_button = nullptr;
     Gtk::ComboBoxText *background_color_preset_combo = nullptr;
     bool setting_background_color_from_preset = false;
