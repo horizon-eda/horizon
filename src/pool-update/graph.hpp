@@ -18,6 +18,8 @@ public:
     std::set<class PoolUpdateNode *> dependants;
 };
 
+std::set<UUID> uuids_from_missing(const std::set<std::pair<const PoolUpdateNode *, UUID>> &missing);
+
 class PoolUpdateGraph {
 public:
     PoolUpdateGraph();

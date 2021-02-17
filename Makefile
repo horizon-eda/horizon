@@ -131,6 +131,15 @@ SRC_POOL_UPDATE = \
 	src/pool-update/pool-update.cpp\
 	src/pool-update/pool-update_parametric.cpp\
 	src/pool-update/pool-update_pool.cpp\
+	src/pool-update/pool_updater.cpp\
+	src/pool-update/pool_updater_frame.cpp\
+	src/pool-update/pool_updater_decal.cpp\
+	src/pool-update/pool_updater_unit.cpp\
+	src/pool-update/pool_updater_entity.cpp\
+	src/pool-update/pool_updater_padstack.cpp\
+	src/pool-update/pool_updater_package.cpp\
+	src/pool-update/pool_updater_part.cpp\
+	src/pool-update/pool_updater_symbol.cpp\
 	src/pool-update/graph.cpp\
 
 SRC_CANVAS = \

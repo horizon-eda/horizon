@@ -77,4 +77,14 @@ std::set<const PoolUpdateNode *> PoolUpdateGraph::get_not_visited(const std::set
     }
     return not_visited;
 }
+
+std::set<UUID> uuids_from_missing(const std::set<std::pair<const PoolUpdateNode *, UUID>> &missing)
+{
+    std::set<UUID> r;
+    for (const auto &it : missing) {
+        r.insert(it.second);
+    }
+    return r;
+}
+
 } // namespace horizon
