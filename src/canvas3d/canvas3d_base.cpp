@@ -322,7 +322,7 @@ void Canvas3DBase::render(RenderBackground mode)
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
-    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    glDrawBuffer(fb ? GL_COLOR_ATTACHMENT0 : GL_FRONT);
     glReadBuffer(GL_COLOR_ATTACHMENT0);
     glBlitFramebuffer(0, 0, width * a_get_scale_factor(), height * a_get_scale_factor(), 0, 0,
                       width * a_get_scale_factor(), height * a_get_scale_factor(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
