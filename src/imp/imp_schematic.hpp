@@ -57,7 +57,7 @@ private:
     std::map<UUID, std::pair<float, Coordf>> sheet_views;
     std::map<UUID, std::set<SelectableRef>> sheet_selections;
     class SheetBox *sheet_box;
-    void handle_selection_cross_probe();
+    void handle_selection_cross_probe() override;
     bool cross_probing_enabled = false;
 
     Coordf cursor_pos_drag_begin;

@@ -198,8 +198,6 @@ bool ImpBoard::handle_broadcast(const json &j)
 
 void ImpBoard::handle_selection_cross_probe()
 {
-    if (core_board.tool_is_active())
-        return;
     json j;
     j["op"] = "board-select";
     j["selection"] = nullptr;
@@ -472,8 +470,6 @@ void ImpBoard::construct()
                 update_highlights();
             }
         });
-
-        canvas->signal_selection_changed().connect(sigc::mem_fun(*this, &ImpBoard::handle_selection_cross_probe));
 
         connect_action(ActionID::GO_TO_SCHEMATIC, [this](const auto &conn) {
             json j;

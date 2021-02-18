@@ -194,8 +194,6 @@ bool ImpSchematic::handle_broadcast(const json &j)
 
 void ImpSchematic::handle_selection_cross_probe()
 {
-    if (core_schematic.tool_is_active())
-        return;
     json j;
     j["op"] = "schematic-select";
     j["selection"] = nullptr;
@@ -294,7 +292,6 @@ void ImpSchematic::construct()
     main_window->add_action("export_pdf", [this] { trigger_action(ActionID::PDF_EXPORT_WINDOW); });
 
     if (sockets_connected) {
-        canvas->signal_selection_changed().connect(sigc::mem_fun(*this, &ImpSchematic::handle_selection_cross_probe));
         hamburger_menu->append("Cross probing", "win.cross_probing");
         auto cp_action = main_window->add_action_bool("cross_probing", true);
         cross_probing_enabled = true;

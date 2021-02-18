@@ -1377,6 +1377,13 @@ void ImpBase::handle_selection_changed(void)
         update_highlights();
         update_property_panels();
     }
+    if (sockets_connected) {
+        auto selection = canvas->get_selection();
+        if (selection != last_canvas_selection) {
+            handle_selection_cross_probe();
+        }
+        last_canvas_selection = selection;
+    }
 }
 
 void ImpBase::update_property_panels()

@@ -213,10 +213,6 @@ void ImpSymbol::construct()
     bbox_annotation->on_top = false;
     bbox_annotation->set_display(LayerDisplay(true, LayerDisplay::Mode::OUTLINE));
 
-    if (sockets_connected) {
-        canvas->signal_selection_changed().connect(sigc::mem_fun(*this, &ImpSymbol::handle_selection_cross_probe));
-    }
-
     add_action_button(make_action(ToolID::DRAW_LINE_RECTANGLE));
     add_action_button(make_action(ToolID::PLACE_REFDES_AND_VALUE));
     {
@@ -266,8 +262,6 @@ void ImpSymbol::update_bbox_annotation()
 
 void ImpSymbol::handle_selection_cross_probe()
 {
-    if (core_symbol.tool_is_active())
-        return;
     json j;
     j["op"] = "symbol-select";
     j["unit"] = (std::string)symbol.unit->uuid;

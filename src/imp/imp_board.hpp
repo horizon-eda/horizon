@@ -45,7 +45,7 @@ protected:
 
 private:
     void canvas_update() override;
-    void handle_selection_cross_probe();
+    void handle_selection_cross_probe() override;
 
     CoreBoard core_board;
     const std::string project_dir;

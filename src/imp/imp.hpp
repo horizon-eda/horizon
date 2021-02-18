@@ -110,6 +110,9 @@ protected:
     virtual void expand_selection_for_property_panel(std::set<SelectableRef> &sel_extra,
                                                      const std::set<SelectableRef> &sel);
     void handle_selection_changed(void);
+    virtual void handle_selection_cross_probe()
+    {
+    }
     bool handle_key_press(const GdkEventKey *key_event);
     void handle_cursor_move(const Coordi &pos);
     bool handle_click(const GdkEventButton *button_event);
@@ -314,5 +317,7 @@ private:
     void check_version();
 
     void update_cursor(ToolID tool_id);
+
+    std::set<SelectableRef> last_canvas_selection;
 };
 } // namespace horizon
