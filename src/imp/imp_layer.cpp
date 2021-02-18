@@ -108,9 +108,7 @@ void ImpLayer::get_save_meta(json &j)
 void ImpLayer::apply_preferences()
 {
     const auto &canvas_prefs = get_canvas_preferences();
-    for (const auto &it : canvas_prefs.appearance.layer_colors) {
-        layer_box->set_layer_color(it.first, it.second);
-    }
+    layer_box->set_appearance(canvas_prefs.appearance);
     ImpBase::apply_preferences();
 }
 

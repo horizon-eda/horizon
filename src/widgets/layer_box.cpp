@@ -23,6 +23,7 @@ public:
     {
         return p_property_display_mode.get_proxy();
     }
+    void set_color(const Color &c);
 
 private:
     bool on_draw(const Cairo::RefPtr<::Cairo::Context> &cr) override;
@@ -89,6 +90,15 @@ bool LayerDisplayButton::on_button_press_event(GdkEventButton *ev)
     auto new_mode = static_cast<LayerDisplay::Mode>((old_mode + 1) % static_cast<int>(LayerDisplay::Mode::N_MODES));
     p_property_display_mode = new_mode;
     return true;
+}
+
+void LayerDisplayButton::set_color(const Color &c)
+{
+    Gdk::RGBA rgba;
+    rgba.set_red(c.r);
+    rgba.set_green(c.g);
+    rgba.set_blue(c.b);
+    property_color() = rgba;
 }
 
 
@@ -300,9 +310,10 @@ void LayerBox::update()
         if (layers_from_lb.count(la.first) == 0) {
             auto lr = Gtk::manage(new LayerBoxRow(la.first, la.second.name));
             lr->property_layer_visible().signal_changed().connect([this, lr] { emit_layer_display(lr); });
-            lr->ld_button->property_color().signal_changed().connect([this, lr] { emit_layer_display(lr); });
             lr->ld_button->property_display_mode().signal_changed().connect([this, lr] { emit_layer_display(lr); });
             lr->ld_button->property_display_mode() = LayerDisplay::Mode::FILL;
+            if (appearance.layer_colors.count(la.first))
+                lr->ld_button->set_color(appearance.layer_colors.at(la.first));
             lb->append(*lr);
             lr->show();
         }
@@ -390,18 +401,16 @@ void LayerBox::set_layer_display(int layer, const LayerDisplay &ld)
     }
 }
 
-void LayerBox::set_layer_color(int layer, const Color &c)
+void LayerBox::set_appearance(const Appearance &a)
 {
+    appearance = a;
     auto layers = lb->get_children();
     for (auto ch : layers) {
         auto lrow = dynamic_cast<Gtk::ListBoxRow *>(ch);
         auto row = dynamic_cast<LayerBoxRow *>(lrow->get_child());
-        if (row->layer == layer) {
-            Gdk::RGBA rgba;
-            rgba.set_red(c.r);
-            rgba.set_green(c.g);
-            rgba.set_blue(c.b);
-            row->ld_button->property_color() = rgba;
+        if (appearance.layer_colors.count(row->layer)) {
+            const auto &c = appearance.layer_colors.at(row->layer);
+            row->ld_button->set_color(c);
         }
     }
 }
