@@ -563,83 +563,31 @@ void PoolRemoteBox::merge_3d_model(const std::string &filename)
     update_items_merge();
 }
 
-bool PoolRemoteBox::exists_in_pool(Pool &pool, ObjectType ty, const UUID &uu)
-{
-    try {
-        pool.get_filename(ty, uu);
-        return true;
-    }
-    catch (...) {
-        return false;
-    }
-}
-
 ItemSet PoolRemoteBox::get_referenced(ObjectType ty, const UUID &uu)
 {
     ItemSet items;
-    items.emplace(ty, uu);
-    Pool pool_remote(notebook->remote_repo);
-    bool added = true;
-    while (added) {
-        added = false;
-        for (const auto &it : items) {
-            switch (it.first) {
-            case ObjectType::ENTITY: {
-                auto entity = notebook->pool.get_entity(it.second);
-                for (const auto &it_gate : entity->gates) {
-                    const Unit *unit = it_gate.second.unit;
-                    if (!exists_in_pool(pool_remote, ObjectType::UNIT, unit->uuid)) {
-                        if (items.emplace(ObjectType::UNIT, unit->uuid).second)
-                            added = true;
-                    }
-                }
-            } break;
-
-            case ObjectType::SYMBOL: {
-                auto symnol = notebook->pool.get_symbol(it.second);
-                const Unit *unit = symnol->unit;
-                if (!exists_in_pool(pool_remote, ObjectType::UNIT, unit->uuid)) {
-                    if (items.emplace(ObjectType::UNIT, unit->uuid).second)
-                        added = true;
-                }
-            } break;
-
-            case ObjectType::PART: {
-                auto part = notebook->pool.get_part(it.second);
-                const Entity *entity = part->entity;
-                const Package *package = part->package;
-                if (!exists_in_pool(pool_remote, ObjectType::ENTITY, entity->uuid)) {
-                    if (items.emplace(ObjectType::ENTITY, entity->uuid).second)
-                        added = true;
-                }
-                if (!exists_in_pool(pool_remote, ObjectType::PACKAGE, package->uuid)) {
-                    if (items.emplace(ObjectType::PACKAGE, package->uuid).second)
-                        added = true;
-                }
-            } break;
-
-            case ObjectType::PACKAGE: {
-                auto package = notebook->pool.get_package(it.second);
-                for (const auto &it_pad : package->pads) {
-                    const Padstack *padstack = it_pad.second.pool_padstack;
-                    if (!exists_in_pool(pool_remote, ObjectType::PADSTACK, padstack->uuid)) {
-                        if (items.emplace(ObjectType::PADSTACK, padstack->uuid).second)
-                            added = true;
-                    }
-                }
-                const Package *alt_pkg = package->alternate_for;
-                if (alt_pkg && !exists_in_pool(pool_remote, ObjectType::PACKAGE, alt_pkg->uuid)) {
-                    if (items.emplace(ObjectType::PACKAGE, alt_pkg->uuid).second)
-                        added = true;
-                }
-            } break;
-
-            default:;
-            }
-            if (added)
-                break;
-        }
+    {
+        SQLite::Query q(notebook->pool.db, "ATTACH ? AS remote");
+        q.bind(1, Glib::build_filename(notebook->remote_repo, "pool.db"));
+        q.step();
     }
+    const char *qs =
+            "WITH RECURSIVE deps(typex, uuidx) AS ( SELECT ?, ? UNION SELECT dep_type, dep_uuid FROM dependencies, "
+            "deps WHERE dependencies.type = deps.typex AND dependencies.uuid = deps.uuidx), "
+            "deps_sym(typey, uuidy) "
+            "AS (SELECT * FROM deps UNION SELECT 'symbol', symbols.uuid FROM symbols INNER JOIN deps "
+            "ON (symbols.unit = uuidx AND typex = 'unit')) "
+            "SELECT deps_sym.typey, deps_sym.uuidy FROM deps_sym "
+            "LEFT JOIN remote.all_items_view AS remote_items "
+            "ON (remote_items.type = deps_sym.typey AND remote_items.uuid = deps_sym.uuidy) "
+            "WHERE remote_items.uuid IS NULL";
+    SQLite::Query q(notebook->pool.db, qs);
+    q.bind(1, object_type_lut.lookup_reverse(ty));
+    q.bind(2, uu);
+    while (q.step()) {
+        items.emplace(object_type_lut.lookup(q.get<std::string>(0)), q.get<std::string>(1));
+    }
+    notebook->pool.db.execute("DETACH remote");
     return items;
 }
 

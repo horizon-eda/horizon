@@ -113,7 +113,6 @@ private:
     std::set<std::string> models_merge;
     void update_items_merge();
     ItemSet get_referenced(ObjectType ty, const UUID &uu);
-    bool exists_in_pool(class Pool &pool, ObjectType ty, const UUID &uu);
     git_oid items_to_tree(git_repository *repo);
     void push_branch(git_remote *remote, const std::string &branch_name);
 
