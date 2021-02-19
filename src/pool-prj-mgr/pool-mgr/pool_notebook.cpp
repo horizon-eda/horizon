@@ -302,7 +302,7 @@ void PoolNotebook::handle_delete(ObjectType ty, const UUID &uu)
     std::string item_name;
     {
         SQLite::Query q(pool.db, "SELECT name FROM all_items_view WHERE type = ? and uuid = ?");
-        q.bind(1, object_type_lut.lookup_reverse(ty));
+        q.bind(1, ty);
         q.bind(2, uu);
         if (q.step()) {
             item_name = q.get<std::string>(0);

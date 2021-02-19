@@ -437,7 +437,7 @@ void PoolRemoteBox::set_pr_update_mode(unsigned int pr, const std::string branch
             "'00000000-0000-0000-0000-000000000000' as uuid, '' as name, model_filename as filename FROM models) "
             "ON filename=git_filename WHERE filename IS NOT NULL");
     while (q.step()) {
-        const ObjectType type = object_type_lut.lookup(q.get<std::string>(0));
+        const auto type = q.get<ObjectType>(0);
         const UUID uu = q.get<std::string>(1);
         const auto filename = q.get<std::string>(3);
         if (type == ObjectType::MODEL_3D) {
@@ -582,10 +582,10 @@ ItemSet PoolRemoteBox::get_referenced(ObjectType ty, const UUID &uu)
             "ON (remote_items.type = deps_sym.typey AND remote_items.uuid = deps_sym.uuidy) "
             "WHERE remote_items.uuid IS NULL";
     SQLite::Query q(notebook->pool.db, qs);
-    q.bind(1, object_type_lut.lookup_reverse(ty));
+    q.bind(1, ty);
     q.bind(2, uu);
     while (q.step()) {
-        items.emplace(object_type_lut.lookup(q.get<std::string>(0)), q.get<std::string>(1));
+        items.emplace(q.get<ObjectType>(0), q.get<std::string>(1));
     }
     notebook->pool.db.execute("DETACH remote");
     return items;
@@ -717,7 +717,7 @@ void PoolRemoteBox::update_items_merge()
     for (const auto &it : items_merge) {
         SQLite::Query q(notebook->pool.db, "SELECT name FROM all_items_view WHERE uuid = ? AND type = ?");
         q.bind(1, it.second);
-        q.bind(2, object_type_lut.lookup_reverse(it.first));
+        q.bind(2, it.first);
         if (q.step()) {
             Gtk::TreeModel::Row row = *item_store->append();
             row[list_columns.name] = q.get<std::string>(0);
@@ -1024,7 +1024,7 @@ git_oid PoolRemoteBox::items_to_tree(git_repository *repo)
                         "SELECT filename FROM all_items_view WHERE "
                         "uuid = ? AND type = ?");
         q.bind(1, it.second);
-        q.bind(2, object_type_lut.lookup_reverse(it.first));
+        q.bind(2, it.first);
         if (q.step()) {
             std::string filename = q.get<std::string>(0);
             files_merge.insert(filename);

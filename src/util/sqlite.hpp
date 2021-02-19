@@ -1,8 +1,13 @@
 #pragma once
-#include "uuid.hpp"
 #include <sqlite3.h>
 #include <string>
 #include <tuple>
+#include <stdexcept>
+
+namespace horizon {
+enum class ObjectType;
+class UUID;
+} // namespace horizon
 
 namespace horizon::SQLite {
 class noncopyable {
@@ -43,6 +48,8 @@ public:
     void bind(const char *name, int v);
     void bind(int idx, const horizon::UUID &v);
     void bind(const char *name, const horizon::UUID &v);
+    void bind(int idx, ObjectType type);
+    void bind(const char *name, ObjectType type);
     void reset();
 
 private:
@@ -51,6 +58,7 @@ private:
 
     std::string get(int idx, std::string) const;
     int get(int idx, int) const;
+    ObjectType get(int idx, ObjectType) const;
 };
 
 class Error : public std::runtime_error {

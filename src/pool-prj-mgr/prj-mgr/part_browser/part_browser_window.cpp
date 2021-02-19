@@ -318,7 +318,7 @@ void PartBrowserWindow::update_out_of_date_info_bar()
                     "INNER JOIN deps ON (symbols.unit = uuidx AND typex = 'unit')");
     q.bind(1, part_current);
     while (q.step()) {
-        ObjectType type = object_type_lut.lookup(q.get<std::string>(0));
+        auto type = q.get<ObjectType>(0);
         UUID uu(q.get<std::string>(1));
 
         auto r = std::find_if(pool_cache_status->items.begin(), pool_cache_status->items.end(),

@@ -58,18 +58,18 @@ size_t WhereUsedBox::load(ObjectType type, const UUID &uu)
                     "WHERE where_used.typex = all_items_view.type "
                     "AND where_used.uuidx = all_items_view.uuid) "
                     "FROM where_used");
-    q.bind(1, object_type_lut.lookup_reverse(type));
+    q.bind(1, type);
     q.bind(2, uu);
     q.step(); // drop first one
     size_t count = 0;
     while (q.step()) {
-        std::string type_str = q.get<std::string>(0);
+        auto it_type = q.get<ObjectType>(0);
         UUID uuid = q.get<std::string>(1);
         std::string name = q.get<std::string>(2);
 
         Gtk::TreeModel::Row row;
         row = *store->append();
-        row[list_columns.type] = object_type_lut.lookup(type_str);
+        row[list_columns.type] = it_type;
         row[list_columns.uuid] = uuid;
         row[list_columns.name] = name;
         count++;

@@ -46,7 +46,7 @@ bool PoolUpdater::exists(ObjectType type, const UUID &uu)
 {
     q_exists->reset();
     q_exists->bind(1, uu);
-    q_exists->bind(2, object_type_lut.lookup_reverse(type));
+    q_exists->bind(2, type);
     return q_exists->step();
 }
 
@@ -229,9 +229,9 @@ const json &PoolUpdater::load_json(const std::string &filename)
 void PoolUpdater::add_dependency(ObjectType type, const UUID &uu, ObjectType dep_type, const UUID &dep_uuid)
 {
     q_add_dependency->reset();
-    q_add_dependency->bind(1, object_type_lut.lookup_reverse(type));
+    q_add_dependency->bind(1, type);
     q_add_dependency->bind(2, uu);
-    q_add_dependency->bind(3, object_type_lut.lookup_reverse(dep_type));
+    q_add_dependency->bind(3, dep_type);
     q_add_dependency->bind(4, dep_uuid);
     q_add_dependency->step();
 }
@@ -239,7 +239,7 @@ void PoolUpdater::add_dependency(ObjectType type, const UUID &uu, ObjectType dep
 void PoolUpdater::add_tag(ObjectType type, const UUID &uu, const std::string &tag)
 {
     q_add_tag->reset();
-    q_add_tag->bind("$type", object_type_lut.lookup_reverse(type));
+    q_add_tag->bind("$type", type);
     q_add_tag->bind("$uuid", uu);
     q_add_tag->bind("$tag", tag);
     q_add_tag->step();
@@ -250,7 +250,7 @@ void PoolUpdater::clear_tags(ObjectType type, const UUID &uu)
     {
         SQLite::Query q(pool->db, "DELETE FROM tags WHERE uuid = ? AND type = ?");
         q.bind(1, uu);
-        q.bind(2, object_type_lut.lookup_reverse(type));
+        q.bind(2, type);
         q.step();
     }
 }
@@ -260,7 +260,7 @@ void PoolUpdater::clear_dependencies(ObjectType type, const UUID &uu)
     {
         SQLite::Query q(pool->db, "DELETE FROM dependencies WHERE uuid = ? AND type = ?");
         q.bind(1, uu);
-        q.bind(2, object_type_lut.lookup_reverse(type));
+        q.bind(2, type);
         q.step();
     }
 }

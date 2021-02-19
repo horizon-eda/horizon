@@ -8,6 +8,7 @@
 #include "util/export_file_chooser.hpp"
 #include "pool/pool_parametric.hpp"
 #include "widgets/column_chooser.hpp"
+#include "util/uuid.hpp"
 
 namespace horizon {
 

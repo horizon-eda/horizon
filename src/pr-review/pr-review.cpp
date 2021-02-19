@@ -265,7 +265,7 @@ int main(int c_argc, char *c_argv[])
         ofs << "| --- | --- | --- | --- | --- |\n";
         SQLite::Query q(pool.db, "SELECT type, uuid, name, filename, status FROM git_files_view");
         while (q.step()) {
-            auto type = object_type_lut.lookup(q.get<std::string>(0));
+            const auto type = q.get<ObjectType>(0);
             const auto name = q.get<std::string>(2);
             ofs << "|" << delta_to_string(static_cast<git_delta_t>(q.get<int>(4))) << " | "
                 << object_descriptions.at(type).name << " | " << name;
@@ -379,7 +379,7 @@ int main(int c_argc, char *c_argv[])
         ofs << "Bold items are from this PR\n";
         SQLite::Query q(pool.db, "SELECT * FROM all_parts_tree");
         while (q.step()) {
-            const auto type = object_type_lut.lookup(q.get<std::string>(0));
+            const auto type = q.get<ObjectType>(0);
             const auto name = q.get<std::string>(1);
             const auto level = q.get<int>(2);
             const auto from_pr = q.get<int>(3);
@@ -403,7 +403,7 @@ int main(int c_argc, char *c_argv[])
             if (first)
                 ofs << "# Items not associated with any part\n";
             first = false;
-            auto type = object_type_lut.lookup(q.get<std::string>(0));
+            const auto type = q.get<ObjectType>(0);
 
             ofs << " - " << object_descriptions.at(type).name << " " << q.get<std::string>(1) << "\n";
         }

@@ -169,7 +169,7 @@ void TagEntry::TagPopover::update_list()
         q.bind("$ntags", ntags);
     }
     q.bind("$tag", "%" + search_entry->get_text() + "%");
-    q.bind("$type", object_type_lut.lookup_reverse(parent->type));
+    q.bind("$type", parent->type);
     while (q.step()) {
         Gtk::TreeModel::Row row = *store->append();
         row[list_columns.name] = q.get<std::string>(0);
@@ -213,7 +213,7 @@ void TagEntry::TagPopover::update_list_edit()
         q.bind("$ntags", ntags);
     }
     q.bind("$tag", "%" + search_entry->get_text() + "%");
-    q.bind("$type", object_type_lut.lookup_reverse(parent->type));
+    q.bind("$type", parent->type);
     while (q.step()) {
         Gtk::TreeModel::Row row = *store->append();
         row[list_columns.name] = q.get<std::string>(0);
@@ -353,7 +353,7 @@ void TagEntry::update_add_button_sensitivity()
             }
         }
         q.bind("$ntags", ntags);
-        q.bind("$type", object_type_lut.lookup_reverse(type));
+        q.bind("$type", type);
         tags_available = q.step();
     }
     add_button->set_sensitive(tags_available);

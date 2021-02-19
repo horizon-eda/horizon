@@ -2,6 +2,8 @@
 #include <glib.h>
 #include <string.h>
 #include "util/util.hpp"
+#include "util/uuid.hpp"
+#include "common/common.hpp"
 
 namespace horizon::SQLite {
 
@@ -103,6 +105,11 @@ int Query::get(int idx, int) const
     return sqlite3_column_int(stmt, idx);
 }
 
+ObjectType Query::get(int idx, ObjectType) const
+{
+    return object_type_lut.lookup(get<std::string>(idx));
+}
+
 void Query::bind(int idx, const std::string &v, bool copy)
 {
     if (sqlite3_bind_text(stmt, idx, v.c_str(), -1, copy ? SQLITE_TRANSIENT : SQLITE_STATIC) != SQLITE_OK) {
@@ -132,6 +139,15 @@ void Query::bind(int idx, const horizon::UUID &v)
 void Query::bind(const char *name, const horizon::UUID &v)
 {
     bind(name, (std::string)v);
+}
+
+void Query::bind(int idx, ObjectType v)
+{
+    bind(idx, object_type_lut.lookup_reverse(v));
+}
+void Query::bind(const char *name, ObjectType v)
+{
+    bind(name, object_type_lut.lookup_reverse(v));
 }
 
 void Query::reset()

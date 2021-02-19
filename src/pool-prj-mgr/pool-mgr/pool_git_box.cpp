@@ -392,7 +392,7 @@ void PoolGitBox::handle_add_with_deps()
                         "ON(all_items_view.type =deps_sym.typey AND all_items_view.uuid = deps_sym.uuidy) "
                         "UNION SELECT model_filename FROM models INNER JOIN deps "
                         "ON (deps.typex = 'package' AND deps.uuidx = models.package_uuid)");
-        q.bind(1, object_type_lut.lookup_reverse(type));
+        q.bind(1, type);
         q.bind(2, uu);
 
         autofree_ptr<git_repository> repo(git_repository_free);
