@@ -16,6 +16,7 @@
 #include "util/win32_undef.hpp"
 #include "check_column.hpp"
 #include "checks/check_item.hpp"
+#include "checks/check_util.hpp"
 
 
 namespace horizon {
@@ -26,6 +27,10 @@ public:
 
     Gtk::Entry *name_entry = nullptr;
     Gtk::Entry *email_entry = nullptr;
+
+private:
+    Gtk::Button *confirm_button;
+    void update_valid();
 };
 
 ConfirmPrDialog::ConfirmPrDialog(Gtk::Window *parent)
@@ -33,7 +38,7 @@ ConfirmPrDialog::ConfirmPrDialog(Gtk::Window *parent)
                   Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR)
 {
     add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
-    add_button("Confirm", Gtk::ResponseType::RESPONSE_OK);
+    confirm_button = add_button("Confirm", Gtk::ResponseType::RESPONSE_OK);
     set_default_response(Gtk::RESPONSE_OK);
     auto grid = Gtk::manage(new Gtk::Grid);
     grid->set_row_spacing(10);
@@ -49,6 +54,8 @@ ConfirmPrDialog::ConfirmPrDialog(Gtk::Window *parent)
 
     name_entry->signal_activate().connect([this] { email_entry->grab_focus(); });
     email_entry->signal_activate().connect([this] { response(Gtk::RESPONSE_OK); });
+    name_entry->signal_changed().connect(sigc::mem_fun(*this, &ConfirmPrDialog::update_valid));
+    email_entry->signal_changed().connect(sigc::mem_fun(*this, &ConfirmPrDialog::update_valid));
 
     auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 20));
     box->property_margin() = 20;
@@ -70,6 +77,27 @@ ConfirmPrDialog::ConfirmPrDialog(Gtk::Window *parent)
 
     get_content_area()->add(*box);
     box->show_all();
+    update_valid();
+}
+
+void ConfirmPrDialog::update_valid()
+{
+    bool valid = true;
+    for (auto entry : {email_entry, name_entry}) {
+        std::string txt = entry->get_text();
+        if (needs_trim(txt)) {
+            entry_set_warning(entry, "Has trailing/leading whitespace");
+            valid = false;
+        }
+        else if (txt.size() == 0) {
+            entry_set_warning(entry, "Must not be blank");
+            valid = false;
+        }
+        else {
+            entry_set_warning(entry, "");
+        }
+    }
+    confirm_button->set_sensitive(valid);
 }
 
 static const std::string github_client_id = "094ac4cbd2e4a51820b4";
@@ -1235,7 +1263,9 @@ void PoolRemoteBox::create_pr_thread()
 
 
             autofree_ptr<git_signature> signature(git_signature_free);
-            git_signature_default(&signature.ptr, repo);
+            if (git_signature_default(&signature.ptr, repo) != 0) {
+                throw std::runtime_error("error getting default signature");
+            }
 
             git_oid new_commit_oid;
             if (git_commit_create(&new_commit_oid, repo, "HEAD", signature, signature, "UTF-8", pr_title.c_str(), tree,
@@ -1372,7 +1402,9 @@ void PoolRemoteBox::update_pr_thread()
             }
 
             autofree_ptr<git_signature> signature(git_signature_free);
-            git_signature_default(&signature.ptr, repo);
+            if (git_signature_default(&signature.ptr, repo) != 0) {
+                throw std::runtime_error("error getting default signature");
+            }
 
             const git_commit *parent_commit_p = latest_commit.ptr;
 
