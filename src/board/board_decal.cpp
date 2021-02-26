@@ -60,7 +60,7 @@ void BoardDecal::apply_scale()
         it.width = pool_decal->lines.at(uu).width * scale;
     }
     for (auto &[uu, it] : decal.arcs) {
-        it.width = pool_decal->lines.at(uu).width * scale;
+        it.width = pool_decal->arcs.at(uu).width * scale;
     }
 }
 
