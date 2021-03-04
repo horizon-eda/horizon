@@ -205,6 +205,8 @@ private:
     void set_version_info(const std::string &s);
     bool project_read_only = false;
 
+    bool migrate_project(const std::string &path);
+
 public:
     zmq::context_t &zctx;
     void set_pool_updating(bool v, bool success);
