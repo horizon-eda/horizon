@@ -18,6 +18,8 @@ std::map<UUID, Polygon> &Package::MyParameterProgram::get_polygons()
     return pkg->polygons;
 }
 
+const UUID Package::Model::legacy_model_uuid = UUID("96c366ee-a963-41a0-9cc8-54c646979695");
+
 Package::Model::Model(const UUID &uu, const std::string &fn) : uuid(uu), filename(fn)
 {
 }
@@ -215,7 +217,7 @@ Package::Package(const UUID &uu, const json &j, IPool &pool)
     if (j.count("model_filename")) {
         std::string mfn = j.at("model_filename");
         if (mfn.size()) {
-            auto m_uu = UUID("96c366ee-a963-41a0-9cc8-54c646979695");
+            auto m_uu = Model::legacy_model_uuid;
             models.emplace(std::piecewise_construct, std::forward_as_tuple(m_uu),
                            std::forward_as_tuple(m_uu, j.at("model_filename").get<std::string>()));
             default_model = m_uu;

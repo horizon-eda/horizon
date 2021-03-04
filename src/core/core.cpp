@@ -274,7 +274,7 @@ void Core::autosave()
     save(autosave_suffix);
 }
 
-Core::Core(IPool &pool) : m_pool(pool)
+Core::Core(IPool &pool, IPool *pool_caching) : m_pool(pool), m_pool_caching(pool_caching ? *pool_caching : pool)
 {
 }
 

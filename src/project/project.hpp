@@ -32,17 +32,16 @@ public:
     ProjectBlock &get_top_block();
     const ProjectBlock &get_top_block() const;
 
-    std::string create(const std::map<std::string, std::string> &meta, const UUID &default_via);
+    std::string create(const std::map<std::string, std::string> &meta, const UUID &pool_uuid, const UUID &default_via);
 
     std::string base_path;
     UUID uuid;
     std::map<UUID, ProjectBlock> blocks;
 
-    UUID pool_uuid;
     std::string vias_directory;
     std::string pictures_directory;
     std::string board_filename;
-    std::string pool_cache_directory;
+    std::string pool_directory;
 
     FileVersion version;
 
@@ -51,5 +50,8 @@ public:
 private:
     std::string title_old;
     std::string name_old;
+
+    UUID pool_uuid_old;
+    std::string pool_cache_directory_old;
 };
 } // namespace horizon

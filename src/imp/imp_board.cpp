@@ -23,12 +23,11 @@
 #include "core/tool_id.hpp"
 #include "widgets/action_button.hpp"
 #include "parts_window.hpp"
-#include "pool/pool_cached.hpp"
 
 namespace horizon {
 ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
                    const std::string &pictures_dir, const PoolParams &pool_params)
-    : ImpLayer(pool_params), core_board(board_filename, block_filename, via_dir, pictures_dir, *pool),
+    : ImpLayer(pool_params), core_board(board_filename, block_filename, via_dir, pictures_dir, *pool, *pool_caching),
       project_dir(Glib::path_get_dirname(board_filename)), searcher(core_board)
 {
     core = &core_board;
@@ -573,7 +572,7 @@ void ImpBoard::construct()
         pdf_export_window->generate();
     });
 
-    view_3d_window = View3DWindow::create(*core_board.get_board(), *pool.get(), View3DWindow::Mode::BOARD);
+    view_3d_window = View3DWindow::create(*core_board.get_board(), *pool_caching, View3DWindow::Mode::BOARD);
     view_3d_window->set_solder_mask_color(rgba_from_color(core_board.get_colors().solder_mask));
     view_3d_window->set_silkscreen_color(rgba_from_color(core_board.get_colors().silkscreen));
     view_3d_window->set_substrate_color(rgba_from_color(core_board.get_colors().substrate));

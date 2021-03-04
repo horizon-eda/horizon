@@ -8,7 +8,7 @@
 #include "schematic/schematic.hpp"
 #include "board/board.hpp"
 #include "nlohmann/json.hpp"
-#include "pool/pool_cached.hpp"
+#include "pool/project_pool.hpp"
 
 namespace horizon {
 
@@ -29,7 +29,7 @@ static void mkdir_if_not_exists(const std::string &dir, bool keep)
     }
 }
 
-static const unsigned int app_version = 0;
+static const unsigned int app_version = 1;
 
 unsigned int Project::get_app_version()
 {
@@ -37,17 +37,17 @@ unsigned int Project::get_app_version()
 }
 
 Project::Project(const UUID &uu, const json &j, const std::string &base)
-    : base_path(base), uuid(uu), pool_uuid(j.at("pool_uuid").get<std::string>()),
-      vias_directory(Glib::build_filename(base, j.at("vias_directory"))),
+    : base_path(base), uuid(uu), vias_directory(Glib::build_filename(base, j.at("vias_directory"))),
       pictures_directory(Glib::build_filename(base, j.value("pictures_directory", "pictures"))),
       board_filename(Glib::build_filename(base, j.at("board_filename"))),
-      pool_cache_directory(Glib::build_filename(base, j.value("pool_cache_directory", "cache"))),
-      version(app_version, j), title_old(j.value("title", "")), name_old(j.value("name", ""))
+      pool_directory(Glib::build_filename(base, j.value("pool_directory", "pool"))), version(app_version, j),
+      title_old(j.value("title", "")), name_old(j.value("name", "")),
+      pool_uuid_old(j.at("pool_uuid").get<std::string>()),
+      pool_cache_directory_old(Glib::build_filename(base, j.value("pool_cache_directory", "cache")))
 {
     check_object_type(j, ObjectType::PROJECT);
     version.check(ObjectType::PROJECT, "", uuid);
 
-    mkdir_if_not_exists(pool_cache_directory, false);
     mkdir_if_not_exists(vias_directory, true);
     mkdir_if_not_exists(pictures_directory, true);
 
@@ -88,7 +88,8 @@ ProjectBlock &Project::get_top_block()
     return const_cast<ProjectBlock &>(const_cast<const Project *>(this)->get_top_block());
 }
 
-std::string Project::create(const std::map<std::string, std::string> &meta, const UUID &default_via)
+std::string Project::create(const std::map<std::string, std::string> &meta, const UUID &pool_uuid,
+                            const UUID &default_via)
 {
     if (Glib::file_test(base_path, Glib::FILE_TEST_EXISTS)) {
         throw std::runtime_error("project directory already exists");
@@ -118,11 +119,18 @@ std::string Project::create(const std::map<std::string, std::string> &meta, cons
     mkdir_if_not_exists(vias_directory, true);
     pictures_directory = Glib::build_filename(base_path, "pictures");
     mkdir_if_not_exists(pictures_directory, true);
-    pool_cache_directory = Glib::build_filename(base_path, "cache");
+    pool_cache_directory_old = Glib::build_filename(base_path, "cache");
+    pool_uuid_old = pool_uuid;
+    pool_directory = Glib::build_filename(base_path, "pool");
     {
-        auto fi = Gio::File::create_for_path(pool_cache_directory);
-        fi->make_directory();
-        Gio::File::create_for_path(Glib::build_filename(base_path, "cache", "3d_models"))->make_directory();
+        mkdir_if_not_exists(pool_directory, false);
+        PoolInfo info;
+        info.uuid = PoolInfo::project_pool_uuid;
+        info.name = "Project pool";
+        info.base_path = pool_directory;
+        info.pools_included = {pool_uuid};
+        info.save();
+        ProjectPool::create_directories(pool_directory);
     }
 
     Board board(UUID::random(), block);
@@ -153,11 +161,12 @@ json Project::serialize() const
     j["uuid"] = (std::string)uuid;
     j["title"] = title_old;
     j["name"] = name_old;
-    j["pool_uuid"] = (std::string)pool_uuid;
+    j["pool_uuid"] = (std::string)pool_uuid_old;
     j["vias_directory"] = get_filename_rel(vias_directory);
     j["pictures_filename"] = get_filename_rel(pictures_directory);
     j["board_filename"] = get_filename_rel(board_filename);
-    j["pool_cache_directory"] = get_filename_rel(pool_cache_directory);
+    j["pool_cache_directory"] = get_filename_rel(pool_cache_directory_old);
+    j["pool_directory"] = get_filename_rel(pool_directory);
     {
         json k;
         for (const auto &it : blocks) {

@@ -5,14 +5,15 @@
 #include "nlohmann/json.hpp"
 #include <giomm/file.h>
 #include <glibmm/fileutils.h>
-#include "pool/pool_cached.hpp"
+#include "pool/ipool.hpp"
 #include "pool/part.hpp"
 
 namespace horizon {
 CoreBoard::CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
-                     const std::string &pictures_dir, IPool &pool)
-    : Core(pool), via_padstack_provider(via_dir, pool), block(Block::new_from_file(block_filename, pool)),
-      brd(Board::new_from_file(board_filename, *block, pool, via_padstack_provider)), rules(brd->rules),
+                     const std::string &pictures_dir, IPool &pool, IPool &pool_caching)
+    : Core(pool, &pool_caching), via_padstack_provider(via_dir, pool_caching),
+      block(Block::new_from_file(block_filename, pool_caching)),
+      brd(Board::new_from_file(board_filename, *block, pool_caching, via_padstack_provider)), rules(brd->rules),
       fab_output_settings(brd->fab_output_settings), pdf_export_settings(brd->pdf_export_settings),
       step_export_settings(brd->step_export_settings), pnp_export_settings(brd->pnp_export_settings),
       colors(brd->colors), m_board_filename(board_filename), m_block_filename(block_filename),
@@ -24,7 +25,7 @@ CoreBoard::CoreBoard(const std::string &board_filename, const std::string &block
 
 void CoreBoard::reload_netlist()
 {
-    block = Block::new_from_file(m_block_filename, m_pool);
+    block = Block::new_from_file(m_block_filename, m_pool_caching);
     brd->block = &*block;
     brd->update_refs();
     for (auto it = brd->packages.begin(); it != brd->packages.end();) {
@@ -337,7 +338,7 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
             }
             else if (m_pool.get_alternate_packages(pkg->pool_package->uuid).count(alt_uuid)
                      != 0) { // see if really an alt package for pkg
-                pkg->alternate_package = m_pool.get_package(alt_uuid);
+                pkg->alternate_package = m_pool_caching.get_package(alt_uuid);
             }
             pkg->update(*brd);
             brd->update_refs();
@@ -641,8 +642,9 @@ void CoreBoard::reload_pool()
     const auto brd_j = brd->serialize();
     const auto block_j = block->serialize();
     m_pool.clear();
-    block.emplace(block->uuid, block_j, m_pool);
-    brd.emplace(brd->uuid, brd_j, *block, m_pool, via_padstack_provider);
+    m_pool_caching.clear();
+    block.emplace(block->uuid, block_j, m_pool_caching);
+    brd.emplace(brd->uuid, brd_j, *block, m_pool_caching, via_padstack_provider);
     history_clear();
     rebuild();
 }

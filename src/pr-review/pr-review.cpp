@@ -18,7 +18,6 @@
 #include "util/version.hpp"
 #include "board/board.hpp"
 #include "export_3d_image/export_3d_image.hpp"
-#include "pool/pool_cached.hpp"
 #include "checks/check_entity.hpp"
 #include "checks/check_part.hpp"
 #include "checks/check_unit.hpp"

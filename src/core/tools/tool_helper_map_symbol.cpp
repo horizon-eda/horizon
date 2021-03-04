@@ -41,7 +41,7 @@ const Symbol *ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool
     }
     settings.selected_symbols[unit_uu] = selected_symbol;
 
-    return doc.c->get_pool().get_symbol(selected_symbol);
+    return doc.c->get_pool_caching().get_symbol(selected_symbol);
 }
 
 
@@ -49,7 +49,7 @@ SchematicSymbol *ToolHelperMapSymbol::map_symbol(Component *comp, const Gate *ga
 {
     const Symbol *sym = nullptr;
     if (settings.selected_symbols.count(gate->unit->uuid))
-        sym = doc.c->get_pool().get_symbol(settings.selected_symbols.at(gate->unit->uuid));
+        sym = doc.c->get_pool_caching().get_symbol(settings.selected_symbols.at(gate->unit->uuid));
     if (!sym)
         sym = get_symbol_for_unit(gate->unit->uuid, nullptr, sym_default);
     if (!sym)

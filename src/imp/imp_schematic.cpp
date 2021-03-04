@@ -21,7 +21,7 @@
 namespace horizon {
 ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename,
                            const std::string &pictures_dir, const PoolParams &pool_params)
-    : ImpBase(pool_params), core_schematic(schematic_filename, block_filename, pictures_dir, *pool),
+    : ImpBase(pool_params), core_schematic(schematic_filename, block_filename, pictures_dir, *pool, *pool_caching),
       project_dir(Glib::path_get_dirname(schematic_filename)), searcher(core_schematic)
 {
     core = &core_schematic;

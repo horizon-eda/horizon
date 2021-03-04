@@ -136,6 +136,7 @@ private:
     class PoolRemoteBox *remote_box = nullptr;
     class PoolSettingsBox *settings_box = nullptr;
     class PoolGitBox *git_box = nullptr;
+    class PoolCacheBox *cache_box = nullptr;
 
     UUID pool_uuid;
 };

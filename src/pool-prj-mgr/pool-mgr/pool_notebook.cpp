@@ -14,6 +14,7 @@
 #include "pool-prj-mgr/pool-prj-mgr-app.hpp"
 #include "pool_update_error_dialog.hpp"
 #include "pool_settings_box.hpp"
+#include "pool_cache_box.hpp"
 #include "pool/pool_manager.hpp"
 #include "part_wizard/part_wizard.hpp"
 #include "widgets/part_preview.hpp"
@@ -72,6 +73,12 @@ void PoolNotebook::reload()
             git_box->refresh();
         else
             git_box->refreshed_once = false;
+    }
+    if (cache_box && cache_box->refreshed_once) {
+        if (widget_is_visible(cache_box))
+            cache_box->refresh_status();
+        else
+            cache_box->refreshed_once = false;
     }
 }
 
@@ -226,13 +233,30 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
     construct_decals();
 
     {
-
         settings_box = PoolSettingsBox::create(this, pool);
         pool_uuid = pool.get_pool_info().uuid;
 
         settings_box->show();
         append_page(*settings_box, "Settings");
         settings_box->unreference();
+    }
+
+
+    if (pool.get_pool_info().is_project_pool()) {
+        cache_box = PoolCacheBox::create(
+                Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(appwin->get_application()).get(), this, pool);
+        cache_box->show();
+        append_page(*cache_box, "Cache");
+        cache_box->unreference();
+
+        signal_switch_page().connect([this](Gtk::Widget *page, int page_num) {
+            if (in_destruction())
+                return;
+            if (page == cache_box && !cache_box->refreshed_once) {
+                cache_box->refresh_status();
+                cache_box->refreshed_once = true;
+            }
+        });
     }
 
     if (remote_repo.size()) {

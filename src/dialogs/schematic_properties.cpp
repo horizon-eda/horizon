@@ -13,7 +13,7 @@ namespace horizon {
 
 class SheetEditor : public Gtk::Box {
 public:
-    SheetEditor(Sheet &s, Schematic &c, IPool &pool);
+    SheetEditor(Sheet &s, Schematic &c, IPool &pool, class IPool &pool_caching);
 
 private:
     Gtk::Grid *grid = nullptr;
@@ -35,7 +35,8 @@ void SheetEditor::append_widget(const std::string &label, Gtk::Widget *w)
     top++;
 }
 
-SheetEditor::SheetEditor(Sheet &s, Schematic &c, IPool &pool) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), sheet(s)
+SheetEditor::SheetEditor(Sheet &s, Schematic &c, IPool &pool, class IPool &pool_caching)
+    : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), sheet(s)
 {
     grid = Gtk::manage(new Gtk::Grid);
     grid->set_column_spacing(10);
@@ -60,10 +61,10 @@ SheetEditor::SheetEditor(Sheet &s, Schematic &c, IPool &pool) : Gtk::Box(Gtk::OR
     frame_button->get_browser().set_show_none(true);
     if (sheet.pool_frame)
         frame_button->property_selected_uuid() = sheet.pool_frame->uuid;
-    frame_button->property_selected_uuid().signal_changed().connect([this, frame_button, &pool] {
+    frame_button->property_selected_uuid().signal_changed().connect([this, frame_button, &pool_caching] {
         UUID uu = frame_button->property_selected_uuid();
         if (uu)
-            sheet.pool_frame = pool.get_frame(uu);
+            sheet.pool_frame = pool_caching.get_frame(uu);
         else
             sheet.pool_frame = nullptr;
     });
@@ -78,7 +79,8 @@ SheetEditor::SheetEditor(Sheet &s, Schematic &c, IPool &pool) : Gtk::Box(Gtk::OR
     ed->show();
 }
 
-SchematicPropertiesDialog::SchematicPropertiesDialog(Gtk::Window *parent, Schematic &c, IPool &pool)
+SchematicPropertiesDialog::SchematicPropertiesDialog(Gtk::Window *parent, Schematic &c, IPool &pool,
+                                                     class IPool &pool_caching)
     : Gtk::Dialog("Schematic properties", *parent,
                   Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
       sch(c)
@@ -112,7 +114,7 @@ SchematicPropertiesDialog::SchematicPropertiesDialog(Gtk::Window *parent, Schema
     }
     std::sort(sheets.begin(), sheets.end(), [](auto a, auto b) { return a->index < b->index; });
     for (auto &it : sheets) {
-        auto ed = Gtk::manage(new SheetEditor(*it, sch, pool));
+        auto ed = Gtk::manage(new SheetEditor(*it, sch, pool, pool_caching));
         stack->add(*ed, (std::string)it->uuid, "Sheet " + it->name);
     }
 

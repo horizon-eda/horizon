@@ -99,13 +99,8 @@ std::string Pool::get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_
     pool_uuid_cache.emplace(std::piecewise_construct, std::forward_as_tuple(type, uu),
                             std::forward_as_tuple(other_pool_uuid));
     const auto other_pool_info = PoolManager::get().get_by_uuid(other_pool_uuid);
-    UUID this_pool_uuid;
-    const auto &pools = PoolManager::get().get_pools();
-    if (pools.count(base_path))
-        this_pool_uuid = pools.at(base_path).uuid;
 
-    if (other_pool_info && this_pool_uuid
-        && this_pool_uuid != other_pool_info->uuid) // don't override if item is in local pool
+    if (other_pool_info && pool_info.uuid != other_pool_info->uuid) // don't override if item is in local pool
         bp = other_pool_info->base_path;
 
     switch (type) {
@@ -316,8 +311,13 @@ std::string Pool::get_model_filename(const UUID &pkg_uuid, const UUID &model_uui
     UUID pool_uuid;
     auto pkg = get_package(pkg_uuid, &pool_uuid);
     auto model = pkg->get_model(model_uuid);
-    auto pool = PoolManager::get().get_by_uuid(pool_uuid);
-    if (model && pool) {
+    if (!model)
+        return "";
+
+    if (pool_uuid == pool_info.uuid) { // from this pool
+        return Glib::build_filename(base_path, model->filename);
+    }
+    else if (auto pool = PoolManager::get().get_by_uuid(pool_uuid)) {
         return Glib::build_filename(pool->base_path, model->filename);
     }
     else {

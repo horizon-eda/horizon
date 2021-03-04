@@ -63,6 +63,8 @@ public:
         void set_rotation(unsigned int ax, int angle);
         int get_rotation(unsigned int ax) const;
 
+        static const UUID legacy_model_uuid;
+
         json serialize() const;
     };
 

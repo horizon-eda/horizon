@@ -262,15 +262,15 @@ bool Dialogs::annotate(Schematic &s)
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::edit_board_hole(std::set<class BoardHole *> &holes, IPool &pool, Block &block)
+bool Dialogs::edit_board_hole(std::set<class BoardHole *> &holes, IPool &pool, IPool &pool_caching, Block &block)
 {
-    BoardHoleDialog dia(parent, holes, pool, block);
+    BoardHoleDialog dia(parent, holes, pool, pool_caching, block);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::edit_schematic_properties(class Schematic &sch, class IPool &pool)
+bool Dialogs::edit_schematic_properties(class Schematic &sch, class IPool &pool, class IPool &pool_caching)
 {
-    SchematicPropertiesDialog dia(parent, sch, pool);
+    SchematicPropertiesDialog dia(parent, sch, pool, pool_caching);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 

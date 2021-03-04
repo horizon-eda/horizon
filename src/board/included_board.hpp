@@ -20,10 +20,12 @@ public:
     UUID uuid;
     std::string project_filename;
 
-    std::unique_ptr<class PoolCached> pool;
+    std::unique_ptr<class ProjectPool> pool;
     std::unique_ptr<class Block> block;
     std::unique_ptr<class ViaPadstackProvider> vpp;
     std::unique_ptr<class Board> board;
+
+    ~IncludedBoard();
 
 private:
     IncludedBoard(const UUID &uu, const class Project &prj, const std::string &p);

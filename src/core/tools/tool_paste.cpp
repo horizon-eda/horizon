@@ -227,7 +227,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             component_xlat.emplace(it.key(), u);
-            Component comp(u, it.value(), doc.r->get_pool());
+            Component comp(u, it.value(), doc.r->get_pool_caching());
             for (auto &it_conn : comp.connections) {
                 it_conn.second.net = &block->nets.at(net_xlat.at(it_conn.second.net.uuid));
             }
@@ -242,7 +242,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             symbol_xlat.emplace(it.key(), u);
-            SchematicSymbol sym(u, it.value(), doc.r->get_pool());
+            SchematicSymbol sym(u, it.value(), doc.r->get_pool_caching());
             sym.component = &block->components.at(component_xlat.at(sym.component.uuid));
             sym.gate = &sym.component->entity->gates.at(sym.gate.uuid);
             auto x = &sheet->symbols.emplace(u, sym).first->second;
@@ -392,7 +392,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             auto brd = doc.b->get_board();
             auto x = &brd->holes
                               .emplace(std::piecewise_construct, std::forward_as_tuple(u),
-                                       std::forward_as_tuple(u, it.value(), nullptr, doc.r->get_pool()))
+                                       std::forward_as_tuple(u, it.value(), nullptr, doc.r->get_pool_caching()))
                               .first->second;
             if (net_xlat.count(x->net.uuid)) {
                 x->net = &brd->block->nets.at(net_xlat.at(x->net.uuid));
@@ -429,7 +429,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             auto brd = doc.b->get_board();
             auto &x = brd->decals
                               .emplace(std::piecewise_construct, std::forward_as_tuple(u),
-                                       std::forward_as_tuple(u, it.value(), doc.r->get_pool(), *brd))
+                                       std::forward_as_tuple(u, it.value(), doc.r->get_pool_caching(), *brd))
                               .first->second;
             apply_shift(x.placement.shift, cursor_pos_canvas);
             selection.emplace(u, ObjectType::BOARD_DECAL);

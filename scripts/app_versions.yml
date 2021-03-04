@@ -5,3 +5,5 @@ versions:
     3: add silkscreen color
   schematic:
     1: add custom values on symbols
+  project:
+    1: replace pool cache with project pool

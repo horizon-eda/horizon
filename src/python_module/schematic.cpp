@@ -1,9 +1,7 @@
 #include "schematic.hpp"
 #include "project/project.hpp"
-#include "pool/pool_manager.hpp"
 #include "block/block.hpp"
 #include "schematic/schematic.hpp"
-#include "pool/pool_cached.hpp"
 #include "nlohmann/json.hpp"
 #include "export_pdf/export_pdf.hpp"
 #include "export_bom/export_bom.hpp"
@@ -11,7 +9,7 @@
 #include <podofo/podofo.h>
 
 SchematicWrapper::SchematicWrapper(const horizon::Project &prj, const horizon::UUID &block_uuid)
-    : pool(horizon::PoolManager::get().get_by_uuid(prj.pool_uuid)->base_path, prj.pool_cache_directory),
+    : pool(prj.pool_directory, false),
       block(horizon::Block::new_from_file(prj.blocks.at(block_uuid).block_filename, pool)),
       schematic(horizon::Schematic::new_from_file(prj.blocks.at(block_uuid).schematic_filename, block, pool))
 {

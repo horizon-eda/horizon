@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.38.2 -->
+<interface>
+  <requires lib="gtk+" version="3.20"/>
+  <object class="GtkBox" id="box">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="orientation">vertical</property>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="margin-left">8</property>
+        <property name="margin-right">8</property>
+        <property name="margin-top">8</property>
+        <property name="margin-bottom">8</property>
+        <property name="spacing">20</property>
+        <child>
+          <object class="GtkButton" id="refresh_list_button">
+            <property name="label" translatable="yes">Refresh list</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="update_from_pool_button">
+            <property name="label" translatable="yes">Update from pool</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="cleanup_button">
+            <property name="label" translatable="yes">Remove unused</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="status_label">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">label</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkSeparator">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkPaned">
+        <property name="visible">True</property>
+        <property name="can-focus">True</property>
+        <property name="position">400</property>
+        <property name="position-set">True</property>
+        <child>
+          <object class="GtkScrolledWindow">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="hscrollbar-policy">never</property>
+            <child>
+              <object class="GtkTreeView" id="pool_item_view">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="resize">False</property>
+            <property name="shrink">False</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkStack" id="stack">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Item is up to date</property>
+                <attributes>
+                  <attribute name="style" value="oblique"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="name">up_to_date</property>
+                <property name="title" translatable="yes">page0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Item is missing in pool
+
+try updating the pool to the latest version</property>
+                <property name="justify">center</property>
+                <attributes>
+                  <attribute name="style" value="oblique"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="name">missing_in_pool</property>
+                <property name="title" translatable="yes">page0</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <child>
+                  <object class="GtkTextView" id="delta_text_view">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="editable">False</property>
+                    <property name="monospace">True</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="name">delta</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">3D model has changed</property>
+                <property name="justify">center</property>
+                <attributes>
+                  <attribute name="style" value="oblique"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="name">3d_changed</property>
+                <property name="title" translatable="yes">page0</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="resize">False</property>
+            <property name="shrink">False</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">True</property>
+        <property name="fill">True</property>
+        <property name="position">2</property>
+      </packing>
+    </child>
+  </object>
+</interface>

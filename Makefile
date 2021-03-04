@@ -111,14 +111,14 @@ SRC_COMMON = \
 	src/pool/pool_parametric.cpp \
 	src/board/included_board.cpp \
 	src/board/board_panel.cpp \
-	src/pool/pool_cached.cpp\
 	src/common/picture.cpp\
 	src/util/picture_data.cpp\
 	src/util/picture_load.cpp\
 	src/pool/decal.cpp\
 	src/symbol/symbol_rules.cpp\
 	src/symbol/rule_symbol_checks.cpp\
-	src/util/file_version.cpp
+	src/util/file_version.cpp\
+	src/pool/project_pool.cpp\
 
 
 ifeq ($(OS),Windows_NT)
@@ -456,7 +456,6 @@ SRC_IMP = \
 	src/canvas3d/background_renderer.cpp\
 	src/imp/header_button.cpp\
 	src/preferences/preferences.cpp\
-	src/pool/pool_cached.cpp\
 	src/canvas/canvas_pads.cpp\
 	src/util/window_state_store.cpp\
 	src/widgets/board_display_options.cpp\
@@ -609,6 +608,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/pool-mgr/duplicate/duplicate_window.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_remote_box.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_settings_box.cpp\
+	src/pool-prj-mgr/pool-mgr/pool_cache_box.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_merge_dialog.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_update_error_dialog.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_git_box.cpp\
@@ -645,16 +645,12 @@ SRC_POOL_PRJ_MGR = \
 	src/widgets/unit_preview.cpp\
 	src/widgets/symbol_preview.cpp\
 	src/util/pool_completion.cpp\
-	src/pool/pool_cached.cpp\
+	src/pool/pool_cache_status.cpp\
 	src/pool-prj-mgr/prj-mgr/prj-mgr_views.cpp\
-	src/pool-prj-mgr/prj-mgr/pool_cache_monitor.cpp\
-	src/pool-prj-mgr/prj-mgr/pool_cache_window.cpp\
 	src/pool-prj-mgr/prj-mgr/part_browser/part_browser_window.cpp\
-	src/pool-prj-mgr/prj-mgr/pool_cache_window.cpp\
 	src/pool-prj-mgr/close_utils.cpp\
 	src/pool-prj-mgr/prj-mgr/pool_cache_cleanup_dialog.cpp\
 	src/pool-prj-mgr/pool-mgr/view_create_pool.cpp\
-	src/widgets/pool_chooser.cpp\
 	src/preferences/preferences.cpp\
 	src/preferences/preferences_provider.cpp\
 	src/preferences/preferences_util.cpp\
@@ -825,7 +821,6 @@ SRC_SHARED_3D = \
 	src/canvas/gl_util.cpp\
 
 SRC_SHARED = $(SRC_COMMON) \
-	src/pool/pool_cached.cpp \
 	src/export_pdf/canvas_pdf.cpp \
 	src/export_pdf/export_pdf.cpp \
 	src/export_pdf/export_pdf_board.cpp \
