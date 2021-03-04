@@ -119,6 +119,7 @@ SRC_COMMON = \
 	src/symbol/rule_symbol_checks.cpp\
 	src/util/file_version.cpp\
 	src/pool/project_pool.cpp\
+	src/util/fs_util.cpp\
 
 
 ifeq ($(OS),Windows_NT)

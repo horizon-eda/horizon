@@ -170,7 +170,7 @@ void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb, 
         updater.update(paths);
     }
     else {
-        updater.update_some(pool_base_path, filenames, parts_updated);
+        updater.update_some(filenames, parts_updated);
     }
 
     if (parametric) {

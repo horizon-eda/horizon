@@ -10,8 +10,7 @@ class PoolUpdater {
 public:
     PoolUpdater(const std::string &bp, pool_update_cb_t status_cb);
     void update(const std::vector<std::string> &base_paths);
-    void update_some(const std::string &pool_base_path, const std::vector<std::string> &filenames,
-                     std::set<UUID> &all_parts_updated);
+    void update_some(const std::vector<std::string> &filenames, std::set<UUID> &all_parts_updated);
 
     PoolUpdatePool &get_pool()
     {

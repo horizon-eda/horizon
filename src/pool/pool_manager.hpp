@@ -26,6 +26,7 @@ public:
     void update_pool(const std::string &base_path);
     const std::map<std::string, PoolManagerPool> &get_pools() const;
     const PoolManagerPool *get_by_uuid(const UUID &uu) const;
+    const PoolManagerPool *get_for_file(const std::string &filename) const;
 
 private:
     std::map<std::string, PoolManagerPool> pools;

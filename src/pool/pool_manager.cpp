@@ -4,13 +4,16 @@
 #include <giomm/file.h>
 #include "util/util.hpp"
 #include "nlohmann/json.hpp"
+#include <filesystem>
+#include "util/fs_util.hpp"
 
 namespace horizon {
+namespace fs = std::filesystem;
 static PoolManager *the_pool_manager = nullptr;
 
 static std::string get_abs_path(const std::string &rel)
 {
-    return Gio::File::create_for_path(rel)->get_path();
+    return fs::absolute(fs::u8path(rel)).u8string();
 }
 
 PoolManager &PoolManager::get()
@@ -134,6 +137,15 @@ const PoolManagerPool *PoolManager::get_by_uuid(const UUID &uu) const
 {
     for (const auto &it : pools) {
         if (it.second.enabled && it.second.uuid == uu)
+            return &it.second;
+    }
+    return nullptr;
+}
+
+const PoolManagerPool *PoolManager::get_for_file(const std::string &filename) const
+{
+    for (const auto &it : pools) {
+        if (get_relative_filename(filename, it.second.base_path))
             return &it.second;
     }
     return nullptr;

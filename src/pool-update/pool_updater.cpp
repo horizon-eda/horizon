@@ -7,6 +7,7 @@
 #include "pool/pool_manager.hpp"
 #include "util/util.hpp"
 #include "common/object_descr.hpp"
+#include "util/fs_util.hpp"
 
 namespace horizon {
 PoolUpdater::PoolUpdater(const std::string &bp, pool_update_cb_t cb) : status_cb(cb)
@@ -146,21 +147,48 @@ void PoolUpdater::set_pool_info(const std::string &bp)
 
 std::string PoolUpdater::get_path_rel(const std::string &filename) const
 {
-    auto r = Gio::File::create_for_path(base_path)->get_relative_path(Gio::File::create_for_path(filename));
-    if (r.size() == 0)
+    auto r = get_relative_filename(filename, base_path);
+    if (!r)
         throw std::runtime_error(filename + " not in base path " + base_path);
     else
-        return r;
+        return *r;
 }
 
 
-void PoolUpdater::update_some(const std::string &pool_base_path, const std::vector<std::string> &filenames,
-                              std::set<UUID> &all_parts_updated)
+void PoolUpdater::update_some(const std::vector<std::string> &filenames, std::set<UUID> &all_parts_updated)
 {
-    set_pool_info(pool_base_path);
+    std::map<std::string, UUID> base_paths;
+    {
+        SQLite::Query q(pool->db, "SELECT uuid FROM pools_included WHERE level > 0");
+        while (q.step()) {
+            const UUID pool_uu(q.get<std::string>(0));
+            if (auto pool2 = PoolManager::get().get_by_uuid(pool_uu)) {
+                if (!base_paths.emplace(pool2->base_path, pool_uu).second) {
+                    throw std::runtime_error("conflicting base path " + pool2->base_path);
+                }
+            }
+            else {
+                throw std::runtime_error("pool not found");
+            }
+        }
+    }
+    base_paths.emplace(pool->get_base_path(), pool->get_pool_info().uuid);
     pool->db.execute("BEGIN TRANSACTION");
     std::set<UUID> parts_updated;
     for (const auto &filename : filenames) {
+        // find out base path
+        pool_uuid = UUID();
+        for (const auto &[bp, pool_uu] : base_paths) {
+            if (get_relative_filename(filename, bp)) { // is in base_path
+                base_path = bp;
+                pool_uuid = pool_uu;
+                break;
+            }
+        }
+        if (!pool_uuid) {
+            throw std::runtime_error(filename + " not found in any included pool");
+        }
+
         get_path_rel(filename); // throws if filename not in current base path
         auto j = load_json_from_file(filename);
         auto type = object_type_lut.lookup(j.at("type"));
