@@ -175,13 +175,6 @@ void PoolProjectManagerViewProject::handle_button_part_browser()
 void PoolProjectManagerViewProject::handle_button_project_pool()
 {
     auto path = Glib::build_filename(win->project->pool_directory, "pool.json");
-    for (auto ws : win->app->get_windows()) {
-        auto wi = dynamic_cast<PoolProjectManagerAppWindow *>(ws);
-        if (wi && wi->get_filename() == path) {
-            wi->present();
-            return;
-        }
-    }
     win->app->open_pool(path);
 }
 
