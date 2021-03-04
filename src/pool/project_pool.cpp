@@ -9,6 +9,7 @@
 
 namespace horizon {
 namespace fs = std::filesystem;
+
 ProjectPool::ProjectPool(const std::string &base, bool cache) : Pool(base, !cache), is_caching(cache)
 {
     create_directories(base_path);
@@ -16,11 +17,12 @@ ProjectPool::ProjectPool(const std::string &base, bool cache) : Pool(base, !cach
 
 void ProjectPool::create_directories(const std::string &base_path)
 {
+    const auto bp = fs::u8path(base_path);
     for (const auto &[type, it] : type_names) {
-        const auto p = fs::path(base_path) / it / "cache";
+        const auto p = bp / it / "cache";
         fs::create_directories(p);
     }
-    fs::create_directories(fs::path(base_path) / "3d_models" / "cache");
+    fs::create_directories(bp / "3d_models" / "cache");
 }
 
 static std::string prepend_model_filename(const UUID &pool_uuid, const std::string &filename)
@@ -128,9 +130,9 @@ void ProjectPool::update_model_filename(const UUID &pkg_uuid, const UUID &model_
 static std::vector<std::string> split_path(const std::string &path_str)
 {
     std::vector<std::string> r;
-    const auto path = std::filesystem::path(path_str);
+    const auto path = fs::u8path(path_str);
     for (const auto &it : path) {
-        r.push_back(it);
+        r.push_back(it.u8string());
     }
     return r;
 }

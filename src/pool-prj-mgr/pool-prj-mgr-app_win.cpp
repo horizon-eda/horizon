@@ -982,7 +982,7 @@ bool PoolProjectManagerAppWindow::migrate_project(const std::string &path)
             const json j_prj = load_json_from_file(path);
             const UUID pool_uuid = j_prj.at("pool_uuid").get<std::string>();
             const auto cache_directory =
-                    fs::path(path).parent_path() / j_prj.at("pool_cache_directory").get<std::string>();
+                    fs::u8path(path).parent_path() / fs::u8path(j_prj.at("pool_cache_directory").get<std::string>());
 
             PoolInfo info;
             info.uuid = PoolInfo::project_pool_uuid;
@@ -995,11 +995,12 @@ bool PoolProjectManagerAppWindow::migrate_project(const std::string &path)
 
             // copy pool items
             for (const auto &file : fs::directory_iterator(cache_directory)) {
-                if (file.is_regular_file() && endswith(file.path(), ".json")) {
-                    const auto j = load_json_from_file(file.path());
+                const auto filename = file.path().u8string();
+                if (file.is_regular_file() && endswith(filename, ".json")) {
+                    const auto j = load_json_from_file(filename);
                     const auto type = object_type_lut.lookup(j.at("type").get<std::string>());
                     const UUID uu = j.at("uuid").get<std::string>();
-                    const auto dest = fs::path(info.base_path) / Pool::type_names.at(type) / "cache"
+                    const auto dest = fs::u8path(info.base_path) / fs::u8path(Pool::type_names.at(type)) / "cache"
                                       / ((std::string)uu + ".json");
                     fs::copy(file.path(), dest);
                 }
@@ -1014,7 +1015,7 @@ bool PoolProjectManagerAppWindow::migrate_project(const std::string &path)
                         if (pool_dir_name.find("pool_") == 0 && pool_dir_name.size() == 41) {
                             const UUID model_pool_uuid(pool_dir_name.substr(5));
                             fs::copy(it,
-                                     fs::path(prj.pool_directory) / "3d_models" / "cache"
+                                     fs::u8path(prj.pool_directory) / "3d_models" / "cache"
                                              / (std::string)model_pool_uuid,
                                      fs::copy_options::recursive);
                         }
@@ -1441,11 +1442,11 @@ bool PoolProjectManagerAppWindow::cleanup_pool_cache(Gtk::Window *parent)
         }
     }
 
-    const auto model_cache_dir = fs::path("3d_models") / "cache";
+    const auto model_cache_dir = fs::u8path("3d_models") / "cache";
     std::set<std::string> models_cached;
-    for (auto &p : std::filesystem::recursive_directory_iterator(project_pool.get_base_path() / model_cache_dir)) {
+    for (auto &p : fs::recursive_directory_iterator(fs::u8path(project_pool.get_base_path()) / model_cache_dir)) {
         if (p.is_regular_file())
-            models_cached.emplace(fs::relative(p, project_pool.get_base_path()));
+            models_cached.emplace(fs::relative(p, fs::u8path(project_pool.get_base_path())).u8string());
     }
 
     std::map<std::pair<ObjectType, UUID>, std::string> items_cached;
@@ -1466,7 +1467,7 @@ bool PoolProjectManagerAppWindow::cleanup_pool_cache(Gtk::Window *parent)
     std::set<std::string> models_to_delete;
     for (const auto &it : models_cached) {
         if (models_needed.count(it) == 0) {
-            models_to_delete.insert(fs::path(project_pool.get_base_path()) / it);
+            models_to_delete.insert((fs::u8path(project_pool.get_base_path()) / it).u8string());
         }
     }
 
