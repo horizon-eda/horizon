@@ -12,15 +12,19 @@ using json = nlohmann::json;
 
 class PoolSettingsBox : public Gtk::Box {
 public:
-    PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class PoolNotebook *nb,
-                    class IPool &pool);
-    static PoolSettingsBox *create(class PoolNotebook *nb, class IPool &pool);
+    PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class IPool &pool);
+    static PoolSettingsBox *create(class IPool &pool);
     bool get_needs_save() const;
     void save();
     void pool_updated();
 
+    typedef sigc::signal<void, std::string> type_signal_open_pool;
+    type_signal_open_pool signal_open_pool()
+    {
+        return s_signal_open_pool;
+    }
+
 private:
-    class PoolNotebook *notebook = nullptr;
     IPool &pool;
     Gtk::Entry *entry_name = nullptr;
     Gtk::Button *save_button = nullptr;
@@ -43,5 +47,7 @@ private:
 
     bool needs_save = false;
     void set_needs_save();
+
+    type_signal_open_pool s_signal_open_pool;
 };
 } // namespace horizon

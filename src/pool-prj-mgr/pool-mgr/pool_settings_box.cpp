@@ -7,9 +7,16 @@
 
 namespace horizon {
 
-PoolSettingsBox::PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, PoolNotebook *nb,
-                                 IPool &p)
-    : Gtk::Box(cobject), notebook(nb), pool(p)
+
+class PoolListItem : public Gtk::Box {
+public:
+    PoolListItem(const UUID &uu);
+    const UUID uuid;
+    std::string base_path;
+};
+
+PoolSettingsBox::PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IPool &p)
+    : Gtk::Box(cobject), pool(p)
 {
     x->get_widget("button_save_pool", save_button);
     x->get_widget("pool_settings_name_entry", entry_name);
@@ -34,17 +41,24 @@ PoolSettingsBox::PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 
     pools_included = pool.get_pool_info().pools_included;
 
+    for (auto lb : {pools_available_listbox, pools_included_listbox, pools_actually_included_listbox}) {
+        lb->signal_row_activated().connect([this](Gtk::ListBoxRow *row) {
+            auto it = dynamic_cast<PoolListItem *>(row->get_child());
+            s_signal_open_pool.emit(it->base_path);
+        });
+    }
+
     update_pools();
     update_actual();
 }
 
-PoolSettingsBox *PoolSettingsBox::create(PoolNotebook *nb, IPool &p)
+PoolSettingsBox *PoolSettingsBox::create(IPool &p)
 {
     PoolSettingsBox *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     std::vector<Glib::ustring> widgets = {"box_settings", "image1", "image2", "image3", "image4"};
     x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/window.ui", widgets);
-    x->get_widget_derived("box_settings", w, nb, p);
+    x->get_widget_derived("box_settings", w, p);
     w->reference();
     return w;
 }
@@ -82,12 +96,6 @@ void PoolSettingsBox::pool_updated()
     update_actual();
 }
 
-class PoolListItem : public Gtk::Box {
-public:
-    PoolListItem(const UUID &uu);
-    const UUID uuid;
-};
-
 PoolListItem::PoolListItem(const UUID &uu) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 5), uuid(uu)
 {
     property_margin() = 5;
@@ -107,6 +115,8 @@ PoolListItem::PoolListItem(const UUID &uu) : Gtk::Box(Gtk::ORIENTATION_VERTICAL,
     }
     {
         auto la = Gtk::manage(new Gtk::Label(pool ? pool->base_path : "Not found"));
+        if (pool)
+            base_path = pool->base_path;
         la->set_xalign(0);
         pack_start(*la, true, true, 0);
         la->show();
