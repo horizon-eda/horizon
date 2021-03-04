@@ -974,6 +974,69 @@ bool PoolProjectManagerAppWindow::check_schema_update(const std::string &base_pa
     return true;
 }
 
+bool PoolProjectManagerAppWindow::migrate_project(const std::string &path)
+{
+    auto prj = Project::new_from_file(path);
+    if (prj.version.get_file() < 1) {
+        Gtk::MessageDialog md(*this, "Migrate project?", false /* use_markup */, Gtk::MESSAGE_QUESTION,
+                              Gtk::BUTTONS_NONE);
+        md.set_secondary_text(
+                "This project has been created with an older version of Horizon EDA and needs to be migrated to be "
+                "compatible with this version.\n"
+                "You'll still be able to open this project with older versions of Horizon EDA.");
+        md.add_button("Don't open", Gtk::RESPONSE_CANCEL);
+        md.add_button("Migrate", Gtk::RESPONSE_OK);
+        if (md.run() == Gtk::RESPONSE_OK) {
+            const json j_prj = load_json_from_file(path);
+            const UUID pool_uuid = j_prj.at("pool_uuid").get<std::string>();
+            const auto cache_directory =
+                    fs::path(path).parent_path() / j_prj.at("pool_cache_directory").get<std::string>();
+
+            PoolInfo info;
+            info.uuid = PoolInfo::project_pool_uuid;
+            info.name = "Project pool";
+            info.base_path = prj.pool_directory;
+            info.pools_included = {pool_uuid};
+            ProjectPool::create_directories(info.base_path);
+            info.save();
+            save_json_to_file(path, prj.serialize());
+
+            // copy pool items
+            for (const auto &file : fs::directory_iterator(cache_directory)) {
+                if (file.is_regular_file() && endswith(file.path(), ".json")) {
+                    const auto j = load_json_from_file(file.path());
+                    const auto type = object_type_lut.lookup(j.at("type").get<std::string>());
+                    const UUID uu = j.at("uuid").get<std::string>();
+                    const auto dest = fs::path(info.base_path) / Pool::type_names.at(type) / "cache"
+                                      / ((std::string)uu + ".json");
+                    fs::copy(file.path(), dest);
+                }
+            }
+
+            // copy 3D models
+            {
+                const auto models_dir = cache_directory / "3d_models";
+                if (fs::is_directory(models_dir)) {
+                    for (auto &it : fs::directory_iterator(models_dir)) {
+                        const auto pool_dir_name = it.path().filename().string();
+                        if (pool_dir_name.find("pool_") == 0 && pool_dir_name.size() == 41) {
+                            const UUID model_pool_uuid(pool_dir_name.substr(5));
+                            fs::copy(it,
+                                     fs::path(prj.pool_directory) / "3d_models" / "cache"
+                                             / (std::string)model_pool_uuid,
+                                     fs::copy_options::recursive);
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+        return false;
+    }
+    return true;
+}
+
 void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &file)
 {
     auto path = file->get_path();
@@ -1013,6 +1076,9 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
         }
     }
     else {
+        if (!migrate_project(path)) {
+            return;
+        }
         project = std::make_unique<Project>(Project::new_from_file(path));
         project_filename = path;
         check_schema_update(project->pool_directory);

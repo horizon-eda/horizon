@@ -8,7 +8,7 @@
 #include <filesystem>
 
 namespace horizon {
-
+namespace fs = std::filesystem;
 ProjectPool::ProjectPool(const std::string &base, bool cache) : Pool(base, !cache), is_caching(cache)
 {
     create_directories(base_path);
@@ -17,10 +17,10 @@ ProjectPool::ProjectPool(const std::string &base, bool cache) : Pool(base, !cach
 void ProjectPool::create_directories(const std::string &base_path)
 {
     for (const auto &[type, it] : type_names) {
-        auto p = Glib::build_filename(base_path, it, "cache");
-        if (!Glib::file_test(p, Glib::FILE_TEST_IS_DIR))
-            Gio::File::create_for_path(p)->make_directory_with_parents();
+        const auto p = fs::path(base_path) / it / "cache";
+        fs::create_directories(p);
     }
+    fs::create_directories(fs::path(base_path) / "3d_models" / "cache");
 }
 
 static std::string prepend_model_filename(const UUID &pool_uuid, const std::string &filename)
