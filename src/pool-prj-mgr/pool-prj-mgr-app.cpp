@@ -288,7 +288,7 @@ void PoolProjectManagerApplication::on_action_quit()
             for (const auto &it : files_from_dia) {
                 auto win = files_windows.at(it.first);
                 win->prepare_close();
-                if (ConfirmCloseDialog::RESPONSE_SAVE) {
+                if (r == ConfirmCloseDialog::RESPONSE_SAVE) {
                     for (const auto &it2 : it.second) {
                         win->process_save(it2);
                     }
