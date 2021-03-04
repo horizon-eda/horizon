@@ -27,9 +27,7 @@ void PoolUpdater::update_symbol(const std::string &filename, bool partial)
         bool overridden = false;
         if (exists(ObjectType::SYMBOL, symbol.uuid)) {
             overridden = true;
-            SQLite::Query q(pool->db, "DELETE FROM symbols WHERE uuid = ?");
-            q.bind(1, symbol.uuid);
-            q.step();
+            delete_item(ObjectType::SYMBOL, symbol.uuid);
         }
         if (partial)
             overridden = false;

@@ -26,9 +26,7 @@ void PoolUpdater::update_decal(const std::string &filename, bool partial)
         bool overridden = false;
         if (exists(ObjectType::DECAL, decal.uuid)) {
             overridden = true;
-            SQLite::Query q(pool->db, "DELETE FROM decals WHERE uuid = ?");
-            q.bind(1, decal.uuid);
-            q.step();
+            delete_item(ObjectType::DECAL, decal.uuid);
         }
         if (partial)
             overridden = false;

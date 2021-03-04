@@ -26,9 +26,7 @@ void PoolUpdater::update_unit(const std::string &filename, bool partial)
         bool overridden = false;
         if (exists(ObjectType::UNIT, unit.uuid)) {
             overridden = true;
-            SQLite::Query q(pool->db, "DELETE FROM units WHERE uuid = ?");
-            q.bind(1, unit.uuid);
-            q.step();
+            delete_item(ObjectType::UNIT, unit.uuid);
         }
         if (partial)
             overridden = false;

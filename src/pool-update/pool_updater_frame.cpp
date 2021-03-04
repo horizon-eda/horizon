@@ -26,9 +26,7 @@ void PoolUpdater::update_frame(const std::string &filename, bool partial)
         bool overridden = false;
         if (exists(ObjectType::FRAME, frame.uuid)) {
             overridden = true;
-            SQLite::Query q(pool->db, "DELETE FROM frames WHERE uuid = ?");
-            q.bind(1, frame.uuid);
-            q.step();
+            delete_item(ObjectType::FRAME, frame.uuid);
         }
         if (partial)
             overridden = false;

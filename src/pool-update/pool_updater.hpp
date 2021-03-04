@@ -45,6 +45,7 @@ private:
     void clear_dependencies(ObjectType type, const UUID &uu);
     void clear_tags(ObjectType type, const UUID &uu);
     bool exists(ObjectType type, const UUID &uu);
+    void delete_item(ObjectType type, const UUID &uu);
 
     void update_frame(const std::string &filename, bool partial);
     void update_decal(const std::string &filename, bool partial);

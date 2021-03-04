@@ -45,18 +45,7 @@ void PoolUpdater::update_part(const std::string &filename, bool partial)
             bool overridden = false;
             if (exists(ObjectType::PART, part.uuid)) {
                 overridden = true;
-                {
-                    SQLite::Query q(pool->db, "DELETE FROM parts WHERE uuid = ?");
-                    q.bind(1, part.uuid);
-                    q.step();
-                }
-                {
-                    SQLite::Query q(pool->db, "DELETE FROM orderable_MPNs WHERE part = ?");
-                    q.bind(1, part.uuid);
-                    q.step();
-                }
-                clear_tags(ObjectType::PART, part.uuid);
-                clear_dependencies(ObjectType::PART, part.uuid);
+                delete_item(ObjectType::PART, part.uuid);
             }
             if (partial)
                 overridden = false;

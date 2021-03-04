@@ -50,6 +50,72 @@ bool PoolUpdater::exists(ObjectType type, const UUID &uu)
     return q_exists->step();
 }
 
+void PoolUpdater::delete_item(ObjectType type, const UUID &uu)
+{
+    const char *query = nullptr;
+    switch (type) {
+    case ObjectType::UNIT:
+        query = "DELETE FROM units WHERE uuid = ?";
+        break;
+    case ObjectType::DECAL:
+        query = "DELETE FROM decals WHERE uuid = ?";
+        break;
+    case ObjectType::FRAME:
+        query = "DELETE FROM frames WHERE uuid = ?";
+        break;
+    case ObjectType::PADSTACK:
+        query = "DELETE FROM padstacks WHERE uuid = ?";
+        break;
+    case ObjectType::SYMBOL:
+        query = "DELETE FROM symbols WHERE uuid = ?";
+        break;
+    case ObjectType::PACKAGE:
+        query = "DELETE FROM packages WHERE uuid = ?";
+        break;
+    case ObjectType::PART:
+        query = "DELETE FROM parts WHERE uuid = ?";
+        break;
+    case ObjectType::ENTITY:
+        query = "DELETE FROM entities WHERE uuid = ?";
+        break;
+    default:
+        throw std::runtime_error("can't delete " + object_descriptions.at(type).name);
+    }
+    {
+        SQLite::Query q(pool->db, query);
+        q.bind(1, uu);
+        q.step();
+    }
+    switch (type) {
+    case ObjectType::PACKAGE:
+        clear_tags(ObjectType::PACKAGE, uu);
+        clear_dependencies(ObjectType::PACKAGE, uu);
+        {
+            SQLite::Query q(pool->db, "DELETE FROM models WHERE package_uuid = ?");
+            q.bind(1, uu);
+            q.step();
+        }
+        break;
+
+    case ObjectType::PART:
+        clear_tags(ObjectType::PART, uu);
+        clear_dependencies(ObjectType::PART, uu);
+        {
+            SQLite::Query q(pool->db, "DELETE FROM orderable_MPNs WHERE part = ?");
+            q.bind(1, uu);
+            q.step();
+        }
+        break;
+
+    case ObjectType::ENTITY:
+        clear_tags(ObjectType::ENTITY, uu);
+        clear_dependencies(ObjectType::ENTITY, uu);
+        break;
+
+    default:;
+    }
+}
+
 void PoolUpdater::set_pool_info(const std::string &bp)
 {
     base_path = bp;

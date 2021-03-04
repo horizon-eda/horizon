@@ -28,13 +28,7 @@ void PoolUpdater::update_entity(const std::string &filename, bool partial)
         bool overridden = false;
         if (exists(ObjectType::ENTITY, entity.uuid)) {
             overridden = true;
-            {
-                SQLite::Query q(pool->db, "DELETE FROM entities WHERE uuid = ?");
-                q.bind(1, entity.uuid);
-                q.step();
-            }
-            clear_tags(ObjectType::ENTITY, entity.uuid);
-            clear_dependencies(ObjectType::ENTITY, entity.uuid);
+            delete_item(ObjectType::ENTITY, entity.uuid);
         }
         if (partial)
             overridden = false;

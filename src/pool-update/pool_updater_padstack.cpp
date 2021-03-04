@@ -60,9 +60,7 @@ void PoolUpdater::update_padstacks(const std::string &directory, const std::stri
                                 bool overridden = false;
                                 if (exists(ObjectType::PADSTACK, padstack.uuid)) {
                                     overridden = true;
-                                    SQLite::Query q(pool->db, "DELETE FROM padstacks WHERE uuid = ?");
-                                    q.bind(1, padstack.uuid);
-                                    q.step();
+                                    delete_item(ObjectType::PADSTACK, padstack.uuid);
                                 }
                                 add_padstack(padstack, pkg_uuid, overridden,
                                              Glib::build_filename("packages", prefix, it, "padstacks", it2));
@@ -96,9 +94,7 @@ void PoolUpdater::update_padstacks_global(const std::string &directory, const st
                 bool overridden = false;
                 if (exists(ObjectType::PADSTACK, padstack.uuid)) {
                     overridden = true;
-                    SQLite::Query q(pool->db, "DELETE FROM padstacks WHERE uuid = ?");
-                    q.bind(1, padstack.uuid);
-                    q.step();
+                    delete_item(ObjectType::PADSTACK, padstack.uuid);
                 }
                 add_padstack(padstack, UUID(), overridden, Glib::build_filename("padstacks", prefix, it));
             }
@@ -121,11 +117,7 @@ void PoolUpdater::update_padstack(const std::string &filename)
         status_cb(PoolUpdateStatus::FILE, filename, "");
         auto padstack = Padstack::new_from_file(filename);
         UUID package_uuid;
-        {
-            SQLite::Query q(pool->db, "DELETE FROM padstacks WHERE uuid = ?");
-            q.bind(1, padstack.uuid);
-            q.step();
-        }
+        delete_item(ObjectType::PADSTACK, padstack.uuid);
         auto ps_dir = Glib::path_get_dirname(filename);
         if (Glib::path_get_basename(ps_dir) == "padstacks") {
             auto pkg_dir = Glib::path_get_dirname(ps_dir);

@@ -89,18 +89,7 @@ void PoolUpdater::update_package(const std::string &filename, bool partial)
         bool overridden = false;
         if (exists(ObjectType::PACKAGE, package.uuid)) {
             overridden = true;
-            {
-                SQLite::Query q(pool->db, "DELETE FROM packages WHERE uuid = ?");
-                q.bind(1, package.uuid);
-                q.step();
-            }
-            clear_tags(ObjectType::PACKAGE, package.uuid);
-            clear_dependencies(ObjectType::PACKAGE, package.uuid);
-            {
-                SQLite::Query q(pool->db, "DELETE FROM models WHERE package_uuid = ?");
-                q.bind(1, package.uuid);
-                q.step();
-            }
+            delete_item(ObjectType::PACKAGE, package.uuid);
         }
         if (partial)
             overridden = false;
