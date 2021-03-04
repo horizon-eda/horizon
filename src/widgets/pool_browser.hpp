@@ -20,7 +20,8 @@ public:
     bool get_any_selected();
     void set_show_none(bool v);
     void set_show_path(bool v);
-    void add_context_menu_item(const std::string &label, sigc::slot1<void, UUID> cb);
+    void add_context_menu_item(const std::string &label, std::function<void(UUID)> cb,
+                               std::function<bool(UUID)> cb_sensitive = nullptr);
     virtual void add_copy_name_context_menu_item(){};
     virtual void search() = 0;
     void search_once();
@@ -101,5 +102,7 @@ private:
     Gtk::Label *status_label = nullptr;
     const std::string store_prefix;
     std::optional<TreeViewStateStore> state_store;
+
+    std::vector<std::pair<Gtk::Widget *, std::function<bool(UUID)>>> menu_item_sensitive_cbs;
 };
 } // namespace horizon

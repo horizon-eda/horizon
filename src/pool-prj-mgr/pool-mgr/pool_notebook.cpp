@@ -303,19 +303,41 @@ void PoolNotebook::create_paned_state_store(Gtk::Paned *paned, const std::string
 
 void PoolNotebook::add_context_menu(PoolBrowser *br)
 {
-    ObjectType ty = br->get_type();
-    br->add_context_menu_item("Delete", [this, ty](const UUID &uu) { handle_delete(ty, uu); });
-    br->add_context_menu_item("Move/rename", [this, ty](const UUID &uu) { handle_move_rename(ty, uu); });
+    const auto ty = br->get_type();
+    auto this_pool_lambda = [this, ty](const UUID &uu) {
+        return get_pool_uuids(ty, uu).pool == pool.get_pool_info().uuid;
+    };
+
+    br->add_context_menu_item(
+            "Delete", [this, ty](const UUID &uu) { handle_delete(ty, uu); }, this_pool_lambda);
+    br->add_context_menu_item(
+            "Move/rename", [this, ty](const UUID &uu) { handle_move_rename(ty, uu); }, this_pool_lambda);
     br->add_context_menu_item("Copy path", [this, ty](const UUID &uu) { handle_copy_path(ty, uu); });
     br->add_context_menu_item("Copy UUID", [](const UUID &uu) {
         auto clip = Gtk::Clipboard::get();
         clip->set_text((std::string)uu);
     });
     br->add_copy_name_context_menu_item();
-    br->add_context_menu_item("Update this item", [this, ty](const UUID &uu) {
-        auto filename = pool.get_filename(ty, uu);
-        pool_update(nullptr, {filename});
-    });
+    br->add_context_menu_item(
+            "Update this item",
+            [this, ty](const UUID &uu) {
+                auto filename = pool.get_filename(ty, uu);
+                pool_update(nullptr, {filename});
+            },
+            this_pool_lambda);
+}
+
+PoolNotebook::ItemPoolInfo PoolNotebook::get_pool_uuids(ObjectType ty, const UUID &uu)
+{
+    SQLite::Query q(pool.get_db(), "SELECT pool_uuid, last_pool_uuid FROM all_items_view WHERE type = ? AND uuid = ?");
+    q.bind(1, ty);
+    q.bind(2, uu);
+    if (q.step()) {
+        const UUID pool_uu(q.get<std::string>(0));
+        const UUID last_pool_uu(q.get<std::string>(1));
+        return {pool_uu, last_pool_uu};
+    }
+    throw std::runtime_error("item not found");
 }
 
 void PoolNotebook::handle_delete(ObjectType ty, const UUID &uu)

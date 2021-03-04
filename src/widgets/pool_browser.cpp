@@ -198,13 +198,22 @@ void PoolBrowser::construct(Gtk::Widget *search_box)
         path_column->set_visible(false);
     }
     treeview->signal_button_press_event().connect_notify([this](GdkEventButton *ev) {
-        Gtk::TreeModel::Path path;
         if (ev->button == 3 && context_menu.get_children().size()) {
+            Gtk::TreeModel::Path path;
+            if (treeview->get_bin_window()->gobj() == ev->window && treeview->get_path_at_pos(ev->x, ev->y, path)) {
+                if (auto it = store->get_iter(path)) {
+                    Gtk::TreeModel::Row row = *it;
+                    auto sel = uuid_from_row(row);
+                    for (auto &[widget, cb] : menu_item_sensitive_cbs) {
+                        widget->set_visible(!sel || cb(sel));
+                    }
 #if GTK_CHECK_VERSION(3, 22, 0)
-            context_menu.popup_at_pointer((GdkEvent *)ev);
+                    context_menu.popup_at_pointer((GdkEvent *)ev);
 #else
-            context_menu.popup(ev->button, gtk_get_current_event_time());
+                    context_menu.popup(ev->button, gtk_get_current_event_time());
 #endif
+                }
+            }
         }
     });
 
@@ -296,12 +305,15 @@ void PoolBrowser::go_to(const UUID &uu)
     scroll_to_selection();
 }
 
-void PoolBrowser::add_context_menu_item(const std::string &label, sigc::slot1<void, UUID> cb)
+void PoolBrowser::add_context_menu_item(const std::string &label, std::function<void(UUID)> cb,
+                                        std::function<bool(UUID)> cb_sensitive)
 {
     auto la = Gtk::manage(new Gtk::MenuItem(label));
     la->show();
     context_menu.append(*la);
     la->signal_activate().connect([this, cb] { cb(get_selected()); });
+    if (cb_sensitive)
+        menu_item_sensitive_cbs.emplace_back(la, cb_sensitive);
 }
 
 PoolBrowser::PoolItemSource PoolBrowser::pool_item_source_from_db(const SQLite::Query &q, int idx_uu,
