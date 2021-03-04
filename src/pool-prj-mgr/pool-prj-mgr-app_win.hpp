@@ -85,6 +85,7 @@ public:
     void open_pool(const std::string &pool_json, ObjectType type = ObjectType::INVALID, const UUID &uu = UUID());
     void handle_download(bool back_to_start = false);
     void update_pool_cache_status_now();
+    const std::string &get_project_title() const;
 
 private:
     Glib::RefPtr<Gtk::Builder> builder;
@@ -210,6 +211,7 @@ private:
     bool project_read_only = false;
 
     bool migrate_project(const std::string &path);
+    std::string project_title;
 
 public:
     zmq::context_t &zctx;

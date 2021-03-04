@@ -1056,8 +1056,22 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
             pool_box->pack_start(*pool_notebook, true, true, 0);
             pool_notebook->show();
             header->set_subtitle(pool_base_path);
-            if (pool->get_pool_info().is_project_pool())
+
+            if (pool->get_pool_info().is_project_pool()) {
                 button_close->hide();
+                auto project_path = Glib::path_get_dirname(pool_base_path);
+                for (auto win : app->get_windows()) {
+                    if (auto w = dynamic_cast<PoolProjectManagerAppWindow *>(win)) {
+                        if (w->get_view_mode() == PoolProjectManagerAppWindow::ViewMode::PROJECT) {
+                            const auto win_path = Glib::path_get_dirname(w->get_filename());
+                            if (win_path == project_path) {
+                                set_title(w->get_project_title() + " - Pool");
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         }
         catch (const std::exception &e) {
             Gtk::MessageDialog md(*this, "Error opening pool", false /* use_markup */, Gtk::MESSAGE_ERROR,
@@ -1112,6 +1126,13 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
             md.run();
         }
     }
+}
+
+const std::string &PoolProjectManagerAppWindow::get_project_title() const
+{
+    if (!project)
+        throw std::runtime_error("not a project");
+    return project_title;
 }
 
 void PoolProjectManagerAppWindow::open_pool(const std::string &pool_json, ObjectType type, const UUID &uu)

@@ -192,6 +192,7 @@ bool PoolProjectManagerViewProject::update_meta()
         win->set_title("Project Manager");
     label_project_title->set_text(title);
     label_project_author->set_text(author);
+    win->project_title = title;
     return meta.size();
 }
 
