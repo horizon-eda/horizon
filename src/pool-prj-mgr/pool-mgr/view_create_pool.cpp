@@ -3,6 +3,7 @@
 #include "view_create_pool.hpp"
 #include "nlohmann/json.hpp"
 #include "util/util.hpp"
+#include "pool/pool.hpp"
 #include <fstream>
 
 namespace horizon {
@@ -55,12 +56,9 @@ std::pair<bool, std::string> PoolProjectManagerViewCreatePool::create()
         j["default_via"] = (std::string)UUID();
         j["uuid"] = (std::string)UUID::random();
 
-        mkdir_pool(base_path, "units");
-        mkdir_pool(base_path, "symbols");
-        mkdir_pool(base_path, "entities");
-        mkdir_pool(base_path, "padstacks");
-        mkdir_pool(base_path, "packages");
-        mkdir_pool(base_path, "parts");
+        for (const auto &[type, name] : Pool::type_names) {
+            mkdir_pool(base_path, name);
+        }
         mkdir_pool(base_path, "3d_models");
 
         save_json_to_file(pool_json, j);
