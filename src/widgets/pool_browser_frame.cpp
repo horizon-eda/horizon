@@ -6,7 +6,7 @@ namespace horizon {
 PoolBrowserFrame::PoolBrowserFrame(IPool &p) : PoolBrowser(p)
 {
     construct();
-    name_entry = create_search_entry("Name");
+    name_entry = create_search_entry("Name", create_pool_selector());
     install_pool_item_source_tooltip();
 }
 
@@ -37,9 +37,10 @@ void PoolBrowserFrame::search()
             "SELECT frames.uuid, frames.name, frames.filename, frames.pool_uuid, frames.last_pool_uuid FROM frames "
             "WHERE "
             "frames.name LIKE ?"
-            + sort_controller->get_order_by();
+            + get_pool_selector_query() + sort_controller->get_order_by();
     SQLite::Query q(pool.get_db(), query);
     q.bind(1, "%" + name_search + "%");
+    bind_pool_selector_query(q);
 
     Gtk::TreeModel::Row row;
     if (show_none) {

@@ -6,7 +6,7 @@ namespace horizon {
 PoolBrowserUnit::PoolBrowserUnit(IPool &p) : PoolBrowser(p)
 {
     construct();
-    name_entry = create_search_entry("Name");
+    name_entry = create_search_entry("Name", create_pool_selector());
     install_pool_item_source_tooltip();
 }
 
@@ -37,10 +37,12 @@ void PoolBrowserUnit::search()
 
     std::string query =
             "SELECT units.uuid, units.name, units.manufacturer, units.filename, units.pool_uuid, units.last_pool_uuid "
-            "FROM units WHERE units.name LIKE ?"
-            + sort_controller->get_order_by();
+            "FROM units WHERE units.name LIKE ?";
+    query += get_pool_selector_query();
+    query += sort_controller->get_order_by();
     SQLite::Query q(pool.get_db(), query);
     q.bind(1, "%" + name_search + "%");
+    bind_pool_selector_query(q);
 
     Gtk::TreeModel::Row row;
     if (show_none) {

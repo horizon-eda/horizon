@@ -13,7 +13,7 @@ PoolBrowserPart::PoolBrowserPart(IPool &p, const UUID &uu, const std::string &in
     MPN_entry = create_search_entry("MPN");
     manufacturer_entry = create_search_entry("Manufacturer");
     desc_entry = create_search_entry("Description");
-    tag_entry = create_tag_entry("Tags");
+    tag_entry = create_tag_entry("Tags", create_pool_selector());
 
     install_pool_item_source_tooltip();
 }
@@ -97,6 +97,7 @@ void PoolBrowserPart::search()
              "AND parts.manufacturer LIKE $manufacturer "
              "AND parts.description LIKE $desc "
              "AND (parts.entity=$entity or $entity_all) ";
+    query += get_pool_selector_query();
     query += sort_controller->get_order_by();
     std::cout << query << std::endl;
     SQLite::Query q(pool.get_db(), query);
@@ -106,6 +107,7 @@ void PoolBrowserPart::search()
     q.bind("$entity", entity_uuid);
     q.bind("$entity_all", entity_uuid == UUID());
     bind_tags_query(q, tags);
+    bind_pool_selector_query(q);
 
     if (show_none) {
         row = *(store->append());

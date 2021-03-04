@@ -367,6 +367,7 @@ SRC_IMP = \
 	src/widgets/net_class_button.cpp\
 	src/widgets/parameter_set_editor.cpp\
 	src/widgets/pool_browser.cpp\
+	src/widgets/pool_selector.cpp\
 	src/widgets/component_selector.cpp\
 	src/widgets/component_button.cpp\
 	src/widgets/preview_canvas.cpp\
@@ -615,6 +616,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/pool-mgr/pool_git_box.cpp\
 	src/pool-prj-mgr/forced_pool_update_dialog.cpp\
 	src/widgets/pool_browser.cpp\
+	src/widgets/pool_selector.cpp\
 	src/widgets/pool_browser_unit.cpp\
 	src/widgets/pool_browser_symbol.cpp\
 	src/widgets/pool_browser_entity.cpp\

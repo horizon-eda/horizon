@@ -11,7 +11,7 @@ PoolBrowserPackage::PoolBrowserPackage(IPool &p, bool pads_filter, const std::st
     construct();
     name_entry = create_search_entry("Name");
     manufacturer_entry = create_search_entry("Manufacturer");
-    tag_entry = create_tag_entry("Tags");
+    tag_entry = create_tag_entry("Tags", create_pool_selector());
     if (pads_filter) {
         pads_cb = Gtk::manage(new Gtk::CheckButton);
         pads_cb->set_active(true);
@@ -94,6 +94,7 @@ void PoolBrowserPackage::search()
     if (pads_cb && pads_cb->get_active()) {
         query += "AND packages.n_pads = $npads ";
     }
+    query += get_pool_selector_query();
     query += sort_controller->get_order_by();
 
     SQLite::Query q(pool.get_db(), query);
@@ -103,6 +104,7 @@ void PoolBrowserPackage::search()
     if (pads_cb && pads_cb->get_active()) {
         q.bind("$npads", pads_sp->get_value_as_int());
     }
+    bind_pool_selector_query(q);
 
     if (show_none) {
         row = *(store->append());

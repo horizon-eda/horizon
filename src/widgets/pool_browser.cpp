@@ -7,6 +7,7 @@
 #include "pool/pool_manager.hpp"
 #include "tag_entry.hpp"
 #include "util/sqlite.hpp"
+#include "pool_selector.hpp"
 
 namespace horizon {
 PoolBrowser::PoolBrowser(IPool &p, const std::string &prefix)
@@ -17,35 +18,80 @@ PoolBrowser::PoolBrowser(IPool &p, const std::string &prefix)
     pool_uuid = pool_info.uuid;
 }
 
-Gtk::Entry *PoolBrowser::create_search_entry(const std::string &label)
+Gtk::Entry *PoolBrowser::create_search_entry(const std::string &label, Gtk::Widget *extra_widget)
 {
     auto entry = Gtk::manage(new Gtk::SearchEntry());
-    add_search_widget(label, *entry);
+    add_search_widget(label, *entry, extra_widget);
     entry->signal_search_changed().connect(sigc::mem_fun(*this, &PoolBrowser::search));
     search_entries.insert(entry);
     return entry;
 }
 
-TagEntry *PoolBrowser::create_tag_entry(const std::string &label)
+TagEntry *PoolBrowser::create_tag_entry(const std::string &label, Gtk::Widget *extra_widget)
 {
     auto entry = Gtk::manage(new TagEntry(pool, get_type()));
-    add_search_widget(label, *entry);
+    add_search_widget(label, *entry, extra_widget);
     entry->signal_changed().connect(sigc::mem_fun(*this, &PoolBrowser::search));
     tag_entries.insert(entry);
     return entry;
 }
 
-void PoolBrowser::add_search_widget(const std::string &label, Gtk::Widget &w)
+void PoolBrowser::add_search_widget(const std::string &label, Gtk::Widget &w, Gtk::Widget *extra_widget)
 {
     auto la = Gtk::manage(new Gtk::Label(label));
     la->get_style_context()->add_class("dim-label");
     la->set_halign(Gtk::ALIGN_END);
     grid->attach(*la, 0, grid_top, 1, 1);
     w.set_hexpand(true);
-    grid->attach(w, 1, grid_top, 1, 1);
+    if (extra_widget == nullptr) {
+        grid->attach(w, 1, grid_top, 1, 1);
+        w.show();
+    }
+    else {
+        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 10));
+        box->pack_start(w, true, true, 0);
+        box->pack_start(*extra_widget, false, false, 0);
+        box->show_all();
+        grid->attach(*box, 1, grid_top, 1, 1);
+    }
     grid_top++;
     la->show();
-    w.show();
+}
+
+Gtk::Widget *PoolBrowser::create_pool_selector()
+{
+    if (pools_included) {
+        if (pool_selector)
+            throw std::runtime_error("can't create pool selector twice");
+        pool_selector = Gtk::manage(new PoolSelector(pool));
+        pool_selector->signal_changed().connect(sigc::mem_fun(*this, &PoolBrowser::search));
+        return pool_selector;
+    }
+    else {
+        return nullptr;
+    }
+}
+
+std::string PoolBrowser::get_pool_selector_query() const
+{
+    if (!pool_selector)
+        return "";
+
+    if (pool_selector->get_selected_pool() == UUID())
+        return "";
+
+    return " AND (" + Pool::type_names.at(get_type()) + ".pool_uuid = $pool_uuid) ";
+}
+
+void PoolBrowser::bind_pool_selector_query(SQLite::Query &q) const
+{
+    if (!pool_selector)
+        return;
+
+    if (pool_selector->get_selected_pool() == UUID())
+        return;
+
+    q.bind("$pool_uuid", pool_selector->get_selected_pool());
 }
 
 void PoolBrowser::install_column_tooltip(Gtk::TreeViewColumn &tvc, const Gtk::TreeModelColumnBase &col)

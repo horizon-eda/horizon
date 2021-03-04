@@ -267,6 +267,10 @@ PoolBrowserParametric::PoolBrowserParametric(IPool &p, PoolParametric &pp, const
     filters_applied_box->show();
     hbox->pack_start(*filters_applied_box, true, true, 0);
 
+    if (auto selector = create_pool_selector()) {
+        hbox->pack_start(*selector, false, false, 0);
+        selector->show();
+    }
 
     hbox->show();
     search_box->pack_start(*hbox, false, false, 0);
@@ -390,6 +394,7 @@ void PoolBrowserParametric::search()
             }
         }
     }
+    qs += get_pool_selector_query();
     qs += sort_controller->get_order_by();
     std::cout << qs << std::endl;
     SQLite::Query q(pool_parametric.db, qs);
