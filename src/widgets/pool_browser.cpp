@@ -403,8 +403,11 @@ CellRendererColorBox *PoolBrowser::create_pool_item_source_cr(Gtk::TreeViewColum
         Color co(1, 0, 1);
         switch (pool_item_source_from_row(*it)) {
         case PoolItemSource::LOCAL:
-        case PoolItemSource::OVERRIDDEN_LOCAL:
             co = Color::new_from_int(138, 226, 52);
+            break;
+
+        case PoolItemSource::OVERRIDDEN_LOCAL:
+            co = Color::new_from_int(0x72, 0x9f, 0xcf);
             break;
 
         case PoolItemSource::INCLUDED:
