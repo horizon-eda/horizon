@@ -1066,6 +1066,8 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
             pool_box->pack_start(*pool_notebook, true, true, 0);
             pool_notebook->show();
             header->set_subtitle(pool_base_path);
+            if (pool->get_pool_info().is_project_pool())
+                button_close->hide();
         }
         catch (const std::exception &e) {
             Gtk::MessageDialog md(*this, "Error opening pool", false /* use_markup */, Gtk::MESSAGE_ERROR,
