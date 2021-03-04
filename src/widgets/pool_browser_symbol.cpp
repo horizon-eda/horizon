@@ -6,7 +6,7 @@ namespace horizon {
 PoolBrowserSymbol::PoolBrowserSymbol(IPool &p, const UUID &uu) : PoolBrowser(p), unit_uuid(uu)
 {
     construct();
-    name_entry = create_search_entry("Name");
+    name_entry = create_search_entry("Name", create_pool_selector());
     install_pool_item_source_tooltip();
 }
 
@@ -48,11 +48,12 @@ void PoolBrowserSymbol::search()
             "units.manufacturer, symbols.filename, symbols.pool_uuid, symbols.last_pool_uuid FROM symbols,units WHERE "
             "symbols.unit = units.uuid AND (units.uuid=? OR ?) AND "
             "symbols.name LIKE ?"
-            + sort_controller->get_order_by();
+            + get_pool_selector_query() + sort_controller->get_order_by();
     SQLite::Query q(pool.get_db(), query);
     q.bind(1, unit_uuid);
     q.bind(2, unit_uuid == UUID());
     q.bind(3, "%" + name_search + "%");
+    bind_pool_selector_query(q);
 
     Gtk::TreeModel::Row row;
     if (show_none) {

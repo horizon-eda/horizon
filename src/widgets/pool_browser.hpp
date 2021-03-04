@@ -56,10 +56,9 @@ protected:
     class CellRendererColorBox *create_pool_item_source_cr(Gtk::TreeViewColumn *tvc);
     void install_column_tooltip(Gtk::TreeViewColumn &tvc, const Gtk::TreeModelColumnBase &col);
 
-    Gtk::Entry *create_search_entry(const std::string &label);
-    class TagEntry *create_tag_entry(const std::string &label);
-    void add_search_widget(const std::string &label, Gtk::Widget &w);
-
+    Gtk::Entry *create_search_entry(const std::string &label, Gtk::Widget *extra_widget = nullptr);
+    class TagEntry *create_tag_entry(const std::string &label, Gtk::Widget *extra_widget = nullptr);
+    void add_search_widget(const std::string &label, Gtk::Widget &w, Gtk::Widget *extra_widget = nullptr);
 
     virtual Glib::RefPtr<Gtk::ListStore> create_list_store() = 0;
     virtual void create_columns() = 0;
@@ -95,6 +94,10 @@ protected:
     std::string get_tags_query(const std::set<std::string> &tags) const;
     void bind_tags_query(SQLite::Query &q, const std::set<std::string> &tags) const;
 
+    Gtk::Widget *create_pool_selector();
+    std::string get_pool_selector_query() const;
+    void bind_pool_selector_query(SQLite::Query &q) const;
+
 private:
     Gtk::Grid *grid = nullptr;
     int grid_top = 0;
@@ -107,5 +110,7 @@ private:
     std::optional<TreeViewStateStore> state_store;
 
     std::vector<std::pair<Gtk::Widget *, std::function<bool(UUID)>>> menu_item_sensitive_cbs;
+
+    class PoolSelector *pool_selector = nullptr;
 };
 } // namespace horizon

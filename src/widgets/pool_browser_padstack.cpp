@@ -7,7 +7,7 @@ namespace horizon {
 PoolBrowserPadstack::PoolBrowserPadstack(IPool &p) : PoolBrowser(p)
 {
     construct();
-    name_entry = create_search_entry("Name");
+    name_entry = create_search_entry("Name", create_pool_selector());
     install_pool_item_source_tooltip();
 }
 
@@ -61,7 +61,8 @@ void PoolBrowserPadstack::search()
             "(packages.uuid=? OR ? OR padstacks.package = "
             "'00000000-0000-0000-0000-000000000000')  AND "
             "padstacks.name LIKE ? AND padstacks.type IN (?, ?, ?, ?, "
-            "?, ?) " + sort_controller->get_order_by());
+            "?, ?) " + get_pool_selector_query()
+                    + sort_controller->get_order_by());
     q.bind(1, package_uuid);
     q.bind(2, package_uuid == UUID());
     q.bind(3, "%" + name_search + "%");
@@ -95,6 +96,7 @@ void PoolBrowserPadstack::search()
     else
         q.bind(9, std::string(""));
 
+    bind_pool_selector_query(q);
 
     Gtk::TreeModel::Row row;
     if (show_none) {

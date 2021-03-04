@@ -9,7 +9,7 @@ PoolBrowserEntity::PoolBrowserEntity(IPool &p) : PoolBrowser(p)
 {
     construct();
     name_entry = create_search_entry("Name");
-    tag_entry = create_tag_entry("Tags");
+    tag_entry = create_tag_entry("Tags", create_pool_selector());
     install_pool_item_source_tooltip();
 }
 
@@ -52,11 +52,13 @@ void PoolBrowserEntity::search()
             "LEFT JOIN tags_view ON tags_view.uuid = entities.uuid AND tags_view.type = 'entity' ";
     query += get_tags_query(tags);
     query += "WHERE entities.name LIKE $name ";
+    query += get_pool_selector_query();
     query += sort_controller->get_order_by();
     std::cout << query << std::endl;
     SQLite::Query q(pool.get_db(), query);
     q.bind("$name", "%" + name_search + "%");
     bind_tags_query(q, tags);
+    bind_pool_selector_query(q);
 
     Gtk::TreeModel::Row row;
     if (show_none) {
