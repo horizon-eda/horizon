@@ -25,6 +25,7 @@ ConfirmCloseDialog::ConfirmCloseDialog(Gtk::Window *parent)
         tvc->add_attribute(cr_text->property_markup(), tree_columns.display_name);
         tvc->add_attribute(cr_toggle->property_active(), tree_columns.save);
         tvc->add_attribute(cr_toggle->property_inconsistent(), tree_columns.inconsistent);
+        tvc->add_attribute(cr_toggle->property_sensitive(), tree_columns.sensitive);
 
         tv->append_column(*tvc);
         cr_toggle->signal_toggled().connect([this](const Glib::ustring &path) {
@@ -38,7 +39,7 @@ ConfirmCloseDialog::ConfirmCloseDialog(Gtk::Window *parent)
                 else {
                     row[tree_columns.save] = !row[tree_columns.save];
                 }
-                if (auto it_parent = it->parent()) {
+                if (auto it_parent = it->parent()) { // leaf node (filename)
                     auto children = it_parent->children();
                     int v = -1;
                     bool inconsistent = false;
@@ -63,7 +64,8 @@ ConfirmCloseDialog::ConfirmCloseDialog(Gtk::Window *parent)
                     auto children = it->children();
                     for (auto &ch : children) {
                         Gtk::TreeModel::Row row_ch = *ch;
-                        row_ch[tree_columns.save] = static_cast<bool>(row[tree_columns.save]);
+                        if (row_ch[tree_columns.sensitive])
+                            row_ch[tree_columns.save] = static_cast<bool>(row[tree_columns.save]);
                     }
                 }
             }
@@ -97,17 +99,28 @@ void ConfirmCloseDialog::set_files(std::map<std::string, std::map<UUID, std::str
         auto dir_parent = Gio::File::create_for_path(it.first)->get_parent();
         row[tree_columns.save] = true;
         row[tree_columns.inconsistent] = false;
+        row[tree_columns.sensitive] = true;
         for (const auto &it2 : it.second) {
             auto itt2 = store->append(itt->children());
             row = *itt2;
             row[tree_columns.name] = it2.second;
             row[tree_columns.uuid] = it2.first;
-            if (it2.second.size())
-                row[tree_columns.display_name] = Glib::Markup::escape_text(
-                        dir_parent->get_relative_path(Gio::File::create_for_path(it2.second)));
-            else
-                row[tree_columns.display_name] = "<i>not saved yet</i>";
+            row[tree_columns.sensitive] = true;
             row[tree_columns.save] = true;
+            if (it2.second.size()) {
+                std::string p = dir_parent->get_relative_path(Gio::File::create_for_path(it2.second));
+                if (p.size() == 0) {
+                    p = it2.second;
+                    row[tree_columns.sensitive] = false;
+                    row[tree_columns.save] = false;
+                }
+                row[tree_columns.display_name] = Glib::Markup::escape_text(p);
+            }
+            else {
+                row[tree_columns.display_name] = "<i>not saved yet</i>";
+                row[tree_columns.sensitive] = false;
+                row[tree_columns.save] = false;
+            }
             row[tree_columns.inconsistent] = false;
         }
     }

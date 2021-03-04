@@ -130,9 +130,9 @@ public:
 };
 
 EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p, class PoolParametric *pp,
-                           bool read_only, bool is_temp)
+                           bool a_read_only, bool is_temp)
     : Gtk::Window(), type(ty), pool(*p), pool_parametric(pp),
-      state_store(this, "pool-editor-win-" + std::to_string(static_cast<int>(type)))
+      state_store(this, "pool-editor-win-" + std::to_string(static_cast<int>(type))), read_only(a_read_only)
 {
     set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
     auto hb = Gtk::manage(new Gtk::HeaderBar());
@@ -250,7 +250,7 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
     if (!state_store.get_default_set())
         set_default_size(-1, 600);
 
-    signal_delete_event().connect([this, read_only](GdkEventAny *ev) {
+    signal_delete_event().connect([this](GdkEventAny *ev) {
         if (iface && iface->get_needs_save()) {
             if (!read_only) { // not read only
                 Gtk::MessageDialog md(*this, "Save changes before closing?", false /* use_markup */,
@@ -313,6 +313,8 @@ void EditorWindow::set_original_filename(const std::string &s)
 
 void EditorWindow::save()
 {
+    if (read_only)
+        return;
     if (store->filename.size()) {
         if (iface)
             iface->save();
