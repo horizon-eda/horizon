@@ -40,16 +40,13 @@ public:
         }
     }
 
-    const T get_active_key()
+    const T get_active_key() const
     {
-        auto it = get_active();
-        if (store->iter_is_valid(it)) {
-            Gtk::TreeModel::Row row = *it;
-            return row[list_columns.key];
-        }
-        else {
+        if (get_active_row_number() == -1)
             return T();
-        }
+        const auto it = get_active();
+        Gtk::TreeModel::Row row = *it;
+        return row.get_value(list_columns.key);
     }
 
     void remove_all()
