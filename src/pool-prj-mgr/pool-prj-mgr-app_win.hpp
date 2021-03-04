@@ -35,6 +35,10 @@ public:
     bool really_close_pool_or_project();
     void wait_for_all_processes();
     std::string get_filename() const;
+    class PoolProjectManagerApplication &get_app()
+    {
+        return *app;
+    }
 
     PoolProjectManagerProcess *spawn(PoolProjectManagerProcess::Type type, const std::vector<std::string> &args,
                                      const std::vector<std::string> &env = {}, bool read_only = false,

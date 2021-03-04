@@ -38,9 +38,8 @@ void PoolProjectManagerViewCreateProject::clear()
     project_path_chooser->unselect_all();
 }
 
-void PoolProjectManagerViewCreateProject::populate_pool_combo(const Glib::RefPtr<Gtk::Application> &app)
+void PoolProjectManagerViewCreateProject::populate_pool_combo()
 {
-    auto mapp = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(app);
     project_pool_combo->remove_all();
     for (const auto &it : PoolManager::get().get_pools()) {
         if (it.second.enabled)
@@ -59,7 +58,6 @@ std::pair<bool, std::string> PoolProjectManagerViewCreateProject::create()
                 Glib::build_filename(project_path_chooser->get_file()->get_path(), meta_values.at("project_name"));
         auto pool_uuid = static_cast<std::string>(project_pool_combo->get_active_id());
 
-        auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(win->get_application());
         s = prj.create(meta_values, pool_uuid, PoolManager::get().get_by_uuid(pool_uuid)->default_via);
         r = true;
     }

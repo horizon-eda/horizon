@@ -40,9 +40,7 @@ void PoolNotebook::pool_updated(bool success)
         pool_update_done_cb = nullptr;
     }
     if (success)
-        Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(appwin->get_application())
-                ->signal_pool_updated()
-                .emit(pool_uuid);
+        appwin->get_app().signal_pool_updated().emit(pool_uuid);
 }
 
 void PoolNotebook::reload()
@@ -243,8 +241,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
 
 
     if (pool.get_pool_info().is_project_pool()) {
-        cache_box = PoolCacheBox::create(
-                Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(appwin->get_application()).get(), this, pool);
+        cache_box = PoolCacheBox::create(&appwin->get_app(), this, pool);
         cache_box->show();
         append_page(*cache_box, "Cache");
         cache_box->unreference();
