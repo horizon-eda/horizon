@@ -26,11 +26,10 @@ namespace horizon {
 
 class PoolParams {
 public:
-    PoolParams(const std::string &bp, const std::string &cp = "") : base_path(bp), cache_path(cp)
+    PoolParams(const std::string &bp) : base_path(bp)
     {
     }
     std::string base_path;
-    std::string cache_path;
 };
 
 class ImpBase {
