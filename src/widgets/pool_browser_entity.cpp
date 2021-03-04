@@ -42,49 +42,21 @@ void PoolBrowserEntity::search()
 {
     prepare_search();
 
-    std::string name_search = name_entry->get_text();
+    const std::string name_search = name_entry->get_text();
 
-    auto tags = tag_entry->get_tags();
-    std::string query;
-    if (tags.size() == 0) {
-        query = "SELECT entities.uuid, entities.name, entities.prefix, "
-                "entities.n_gates, tags_view.tags, "
-                "entities.manufacturer, entities.filename, entities.pool_uuid, entities.last_pool_uuid FROM entities "
-                "LEFT JOIN tags_view ON tags_view.uuid = entities.uuid AND tags_view.type = 'entity' "
-                "WHERE entities.name LIKE $name "
-                + sort_controller->get_order_by();
-    }
-    else {
-        std::ostringstream qs;
-        qs << "SELECT entities.uuid, entities.name, entities.prefix, "
-              "entities.n_gates, tags_view.tags, entities.manufacturer, "
-              "entities.filename, entities.pool_uuid, entities.last_pool_uuid FROM entities "
-              "LEFT JOIN tags_view ON tags_view.uuid = entities.uuid AND tags_view.type = 'entity' "
-              "INNER JOIN (SELECT uuid FROM tags WHERE tags.tag IN (";
-
-        int i = 0;
-        for (const auto &it : tags) {
-            (void)sizeof it;
-            qs << "$tag" << i << ", ";
-            i++;
-        }
-        qs << "'') AND tags.type = 'entity' "
-              "GROUP by tags.uuid HAVING count(*) >= $ntags) as x ON x.uuid = entities.uuid "
-              "WHERE entities.name LIKE $name ";
-
-        qs << sort_controller->get_order_by();
-        query = qs.str();
-    }
+    const auto tags = tag_entry->get_tags();
+    std::string query =
+            "SELECT entities.uuid, entities.name, entities.prefix, "
+            "entities.n_gates, tags_view.tags, entities.manufacturer, "
+            "entities.filename, entities.pool_uuid, entities.last_pool_uuid FROM entities "
+            "LEFT JOIN tags_view ON tags_view.uuid = entities.uuid AND tags_view.type = 'entity' ";
+    query += get_tags_query(tags);
+    query += "WHERE entities.name LIKE $name ";
+    query += sort_controller->get_order_by();
     std::cout << query << std::endl;
     SQLite::Query q(pool.get_db(), query);
     q.bind("$name", "%" + name_search + "%");
-    int i = 0;
-    for (const auto &it : tags) {
-        q.bind(("$tag" + std::to_string(i)).c_str(), it);
-        i++;
-    }
-    if (tags.size())
-        q.bind("$ntags", tags.size());
+    bind_tags_query(q, tags);
 
     Gtk::TreeModel::Row row;
     if (show_none) {

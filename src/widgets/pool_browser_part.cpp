@@ -80,55 +80,32 @@ void PoolBrowserPart::search()
     prepare_search();
     iter_cache.clear();
     Gtk::TreeModel::Row row;
-    std::string MPN_search = MPN_entry->get_text();
-    std::string manufacturer_search = manufacturer_entry->get_text();
-    std::string desc_search = desc_entry->get_text();
+    const std::string MPN_search = MPN_entry->get_text();
+    const std::string manufacturer_search = manufacturer_entry->get_text();
+    const std::string desc_search = desc_entry->get_text();
 
-    auto tags = tag_entry->get_tags();
-    std::stringstream query;
-    if (tags.size() == 0) {
-        query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, "
-                 "packages.name, tags_view.tags, parts.filename, "
-                 "parts.description, parts.pool_uuid, parts.last_pool_uuid "
-                 "FROM parts LEFT JOIN tags_view ON "
-                 "tags_view.uuid = parts.uuid AND tags_view.type = 'part' "
-                 "LEFT JOIN packages ON packages.uuid = parts.package ";
-    }
-    else {
-        query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, "
-                 "packages.name, tags_view.tags, parts.filename, "
-                 "parts.description, parts.pool_uuid, parts.last_pool_uuid FROM parts "
-                 "LEFT JOIN tags_view ON tags_view.uuid = parts.uuid AND tags_view.type = 'part' "
-                 "LEFT JOIN packages ON packages.uuid = parts.package "
-                 "INNER JOIN (SELECT uuid FROM tags WHERE tags.tag IN (";
-        int i = 0;
-        for (const auto &it : tags) {
-            (void)sizeof it;
-            query << "$tag" << i << ", ";
-            i++;
-        }
-        query << "'') AND tags.type = 'part' "
-                 "GROUP by tags.uuid HAVING count(*) >= $ntags) as x ON x.uuid = parts.uuid ";
-    }
-    query << "WHERE parts.MPN LIKE $mpn "
+    const auto tags = tag_entry->get_tags();
+    std::string query =
+            "SELECT parts.uuid, parts.MPN, parts.manufacturer, "
+            "packages.name, tags_view.tags, parts.filename, "
+            "parts.description, parts.pool_uuid, parts.last_pool_uuid "
+            "FROM parts LEFT JOIN tags_view ON "
+            "tags_view.uuid = parts.uuid AND tags_view.type = 'part' "
+            "LEFT JOIN packages ON packages.uuid = parts.package ";
+    query += get_tags_query(tags);
+    query += "WHERE parts.MPN LIKE $mpn "
              "AND parts.manufacturer LIKE $manufacturer "
              "AND parts.description LIKE $desc "
              "AND (parts.entity=$entity or $entity_all) ";
-    query << sort_controller->get_order_by();
-    std::cout << query.str() << std::endl;
-    SQLite::Query q(pool.get_db(), query.str());
+    query += sort_controller->get_order_by();
+    std::cout << query << std::endl;
+    SQLite::Query q(pool.get_db(), query);
     q.bind("$mpn", "%" + MPN_search + "%");
     q.bind("$desc", "%" + desc_search + "%");
     q.bind("$manufacturer", "%" + manufacturer_search + "%");
     q.bind("$entity", entity_uuid);
     q.bind("$entity_all", entity_uuid == UUID());
-    int i = 0;
-    for (const auto &it : tags) {
-        q.bind(("$tag" + std::to_string(i)).c_str(), it);
-        i++;
-    }
-    if (tags.size())
-        q.bind("$ntags", tags.size());
+    bind_tags_query(q, tags);
 
     if (show_none) {
         row = *(store->append());
