@@ -126,8 +126,7 @@ void PoolNotebook::construct_parts()
             ->get_style_context()
             ->add_class("suggested-action");
 
-    if (remote_repo.size())
-        add_action_button("Merge", bbox, br, [this](const UUID &uu) { remote_box->merge_item(ObjectType::PART, uu); });
+    add_merge_button(bbox, br);
 
     auto stack = Gtk::manage(new Gtk::Stack);
     add_preview_stack_switcher(bbox, stack);

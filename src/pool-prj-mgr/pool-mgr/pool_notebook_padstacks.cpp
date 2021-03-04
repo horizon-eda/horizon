@@ -90,9 +90,7 @@ void PoolNotebook::construct_padstacks()
     add_action_button("Create", bbox, sigc::mem_fun(*this, &PoolNotebook::handle_create_padstack));
     add_action_button("Edit", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_edit_padstack));
     add_action_button("Duplicate", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_duplicate_padstack));
-    if (remote_repo.size())
-        add_action_button("Merge", bbox, br,
-                          [this](const UUID &uu) { remote_box->merge_item(ObjectType::PADSTACK, uu); });
+    add_merge_button(bbox, br);
 
     auto stack = Gtk::manage(new Gtk::Stack);
     add_preview_stack_switcher(bbox, stack);

@@ -119,6 +119,7 @@ private:
     Gtk::Button *add_action_button(const std::string &label, Gtk::Box *bbox, sigc::slot0<void>);
     Gtk::Button *add_action_button(const std::string &label, Gtk::Box *bbox, class PoolBrowser *br,
                                    sigc::slot1<void, UUID>);
+    Gtk::Button *add_merge_button(Gtk::Box *bbox, class PoolBrowser *br, std::function<void(UUID)> cb = nullptr);
     void add_preview_stack_switcher(Gtk::Box *bbox, Gtk::Stack *stack);
 
     void handle_delete(ObjectType ty, const UUID &uu);

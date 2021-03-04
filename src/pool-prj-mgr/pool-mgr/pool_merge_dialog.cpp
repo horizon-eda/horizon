@@ -475,6 +475,7 @@ void PoolMergeDialog::populate_store()
                         "INNER JOIN remote.all_items_view "
                         "ON (main.all_items_view.uuid = remote.all_items_view.uuid AND "
                         "main.all_items_view.type = remote.all_items_view.type) "
+                        "WHERE remote.all_items_view.pool_uuid = $pool_uuid "
                         "UNION "
 
                         // items present remote only
@@ -485,6 +486,7 @@ void PoolMergeDialog::populate_store()
                         "ON (main.all_items_view.uuid = remote.all_items_view.uuid AND "
                         "main.all_items_view.type = remote.all_items_view.type) "
                         "WHERE main.all_items_view.uuid IS NULL "
+                        "AND remote.all_items_view.pool_uuid = $pool_uuid "
                         "UNION "
 
                         // items present local only
@@ -494,7 +496,9 @@ void PoolMergeDialog::populate_store()
                         "LEFT JOIN remote.all_items_view "
                         "ON (main.all_items_view.uuid = remote.all_items_view.uuid AND "
                         "main.all_items_view.type = remote.all_items_view.type) "
-                        "WHERE remote.all_items_view.uuid IS NULL");
+                        "WHERE remote.all_items_view.uuid IS NULL "
+                        "AND main.all_items_view.pool_uuid = $pool_uuid");
+        q.bind("$pool_uuid", pool_local.get_pool_info().uuid);
         while (q.step()) {
             std::string type_str = q.get<std::string>(0);
             UUID uuid = q.get<std::string>(1);
@@ -551,7 +555,11 @@ void PoolMergeDialog::populate_store()
         }
     }
     {
-        SQLite::Query q(pool_local.db, "SELECT DISTINCT model_filename FROM remote.models");
+        SQLite::Query q(pool_local.db,
+                        "SELECT DISTINCT model_filename FROM remote.models "
+                        "INNER JOIN remote.packages ON remote.models.package_uuid = remote.packages.uuid "
+                        "WHERE packages.pool_uuid = $pool_uuid");
+        q.bind("$pool_uuid", pool_local.get_pool_info().uuid);
         while (q.step()) {
             std::string filename = q.get<std::string>(0);
             std::string remote_filename = Glib::build_filename(remote_path, filename);
