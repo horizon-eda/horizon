@@ -9,12 +9,6 @@
 
 namespace horizon {
 
-static const std::map<ObjectType, std::string> type_dirs = {
-        {ObjectType::UNIT, "units"},         {ObjectType::SYMBOL, "symbols"},   {ObjectType::ENTITY, "entities"},
-        {ObjectType::PADSTACK, "padstacks"}, {ObjectType::PACKAGE, "packages"}, {ObjectType::PART, "parts"},
-        {ObjectType::FRAME, "frames"},       {ObjectType::DECAL, "decals"},
-};
-
 ProjectPool::ProjectPool(const std::string &base, bool cache) : Pool(base, !cache), is_caching(cache)
 {
     create_directories(base_path);
@@ -22,7 +16,7 @@ ProjectPool::ProjectPool(const std::string &base, bool cache) : Pool(base, !cach
 
 void ProjectPool::create_directories(const std::string &base_path)
 {
-    for (const auto &[type, it] : type_dirs) {
+    for (const auto &[type, it] : type_names) {
         auto p = Glib::build_filename(base_path, it, "cache");
         if (!Glib::file_test(p, Glib::FILE_TEST_IS_DIR))
             Gio::File::create_for_path(p)->make_directory_with_parents();
@@ -73,7 +67,7 @@ std::string ProjectPool::get_filename(ObjectType type, const UUID &uu, UUID *poo
         return filename;
     }
     else { // copy to cache
-        auto dest = Glib::build_filename(type_dirs.at(type), "cache", (std::string)uu + ".json");
+        auto dest = Glib::build_filename(type_names.at(type), "cache", (std::string)uu + ".json");
 
         if (type == ObjectType::PACKAGE) { // fix up 3d model paths in a minimally invasive way
             json j = load_json_from_file(filename);
@@ -81,7 +75,7 @@ std::string ProjectPool::get_filename(ObjectType type, const UUID &uu, UUID *poo
             for (const auto &[model_uu, model_filename] : models_update) {
                 update_model_filename(uu, model_uu, model_filename);
             }
-            dest = Glib::build_filename(type_dirs.at(type), "cache", (std::string)uu, "package.json");
+            dest = Glib::build_filename(type_names.at(type), "cache", (std::string)uu, "package.json");
             const auto dest_abs = Glib::build_filename(base_path, dest);
             ensure_parent_dir(dest_abs);
             save_json_to_file(dest_abs, j);
@@ -93,7 +87,7 @@ std::string ProjectPool::get_filename(ObjectType type, const UUID &uu, UUID *poo
                 if (q.step()) {
                     const UUID package_uuid = q.get<std::string>(0);
                     if (package_uuid) {
-                        dest = Glib::build_filename(type_dirs.at(ObjectType::PACKAGE), "cache",
+                        dest = Glib::build_filename(type_names.at(ObjectType::PACKAGE), "cache",
                                                     (std::string)package_uuid, "padstacks", (std::string)uu + ".json");
                         ensure_parent_dir(Glib::build_filename(base_path, dest));
                     }
@@ -108,7 +102,7 @@ std::string ProjectPool::get_filename(ObjectType type, const UUID &uu, UUID *poo
             src->copy(dst);
         }
 
-        SQLite::Query q(db, "UPDATE " + type_dirs.at(type)
+        SQLite::Query q(db, "UPDATE " + type_names.at(type)
                                     + " SET filename = ?, pool_uuid = ?, last_pool_uuid = ? WHERE uuid = ?");
         q.bind(1, dest);
         q.bind(2, pool_info.uuid);

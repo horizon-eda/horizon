@@ -39,48 +39,14 @@ void Pool::clear()
 
 std::string Pool::get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_out)
 {
-    std::string query;
-    switch (type) {
-    case ObjectType::UNIT:
-        query = "SELECT filename, pool_uuid FROM units WHERE uuid = ?";
-        break;
+    if (type_names.count(type) == 0)
+        throw std::runtime_error("pool doesn't support " + object_descriptions.at(type).name_pl);
 
-    case ObjectType::ENTITY:
-        query = "SELECT filename, pool_uuid FROM entities WHERE uuid = ?";
-        break;
-
-    case ObjectType::SYMBOL:
-        query = "SELECT filename, pool_uuid FROM symbols WHERE uuid = ?";
-        break;
-
-    case ObjectType::PACKAGE:
-        query = "SELECT filename, pool_uuid FROM packages WHERE uuid = ?";
-        break;
-
-    case ObjectType::PADSTACK:
-        query = "SELECT filename, pool_uuid FROM padstacks WHERE uuid = ?";
-        break;
-
-    case ObjectType::PART:
-        query = "SELECT filename, pool_uuid FROM parts WHERE uuid = ?";
-        break;
-
-    case ObjectType::FRAME:
-        query = "SELECT filename, pool_uuid FROM frames WHERE uuid = ?";
-        break;
-
-    case ObjectType::DECAL:
-        query = "SELECT filename, pool_uuid FROM decals WHERE uuid = ?";
-        break;
-
-    default:
-        return "";
-    }
+    const std::string query = "SELECT filename, pool_uuid FROM " + type_names.at(type) + " WHERE UUID = ?";
     SQLite::Query q(db, query);
     q.bind(1, uu);
     if (!q.step()) {
         auto tf = get_tmp_filename(type, uu);
-
         if (tf.size() && Glib::file_test(tf, Glib::FILE_TEST_IS_REGULAR)) {
             if (pool_uuid_out)
                 *pool_uuid_out = Pool::tmp_pool_uuid;
@@ -103,20 +69,7 @@ std::string Pool::get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_
     if (other_pool_info && pool_info.uuid != other_pool_info->uuid) // don't override if item is in local pool
         bp = other_pool_info->base_path;
 
-    switch (type) {
-    case ObjectType::UNIT:
-    case ObjectType::ENTITY:
-    case ObjectType::SYMBOL:
-    case ObjectType::PACKAGE:
-    case ObjectType::PADSTACK:
-    case ObjectType::PART:
-    case ObjectType::FRAME:
-    case ObjectType::DECAL:
-        return Glib::build_filename(bp, filename);
-
-    default:
-        return "";
-    }
+    return Glib::build_filename(bp, filename);
 }
 
 const std::string &Pool::get_base_path() const
@@ -325,56 +278,24 @@ std::string Pool::get_model_filename(const UUID &pkg_uuid, const UUID &model_uui
     }
 }
 
-static std::string get_dir_for_type(ObjectType type)
-{
-    using O = ObjectType;
-    switch (type) {
-    case O::UNIT:
-        return "units";
-
-    case O::SYMBOL:
-        return "symbols";
-
-    case O::ENTITY:
-        return "entities";
-
-    case O::PADSTACK:
-        return "padstacks";
-
-    case O::PACKAGE:
-        return "packages";
-
-    case O::PART:
-        return "parts";
-
-    case O::FRAME:
-        return "frames";
-
-    case O::DECAL:
-        return "decals";
-
-    default:
-        return "";
-    }
-}
-
-static bool check_type(ObjectType type)
-{
-    return get_dir_for_type(type).size();
-}
+const std::map<ObjectType, std::string> Pool::type_names = {
+        {ObjectType::UNIT, "units"},         {ObjectType::SYMBOL, "symbols"},   {ObjectType::ENTITY, "entities"},
+        {ObjectType::PADSTACK, "padstacks"}, {ObjectType::PACKAGE, "packages"}, {ObjectType::PART, "parts"},
+        {ObjectType::FRAME, "frames"},       {ObjectType::DECAL, "decals"},
+};
 
 bool Pool::check_filename(ObjectType type, const std::string &filename, std::string *error_msg) const
 {
-    if (!check_type(type)) {
+    if (!type_names.count(type)) {
         if (error_msg)
             *error_msg = "unsupported object type";
         return false;
     }
     if (type == ObjectType::PADSTACK) {
-        const std::string bp_ps = Glib::build_filename(base_path, get_dir_for_type(type));
+        const std::string bp_ps = Glib::build_filename(base_path, type_names.at(type));
         if (Gio::File::create_for_path(filename)->has_prefix(Gio::File::create_for_path(bp_ps)))
             return true;
-        const std::string bp_pkg = Glib::build_filename(base_path, get_dir_for_type(type));
+        const std::string bp_pkg = Glib::build_filename(base_path, type_names.at(type));
         if (Gio::File::create_for_path(filename)->has_prefix(Gio::File::create_for_path(bp_pkg))) {
             return true;
         }
@@ -383,7 +304,7 @@ bool Pool::check_filename(ObjectType type, const std::string &filename, std::str
         return false;
     }
     else {
-        const std::string bp = Glib::build_filename(base_path, get_dir_for_type(type));
+        const std::string bp = Glib::build_filename(base_path, type_names.at(type));
         auto r = Gio::File::create_for_path(filename)->has_prefix(Gio::File::create_for_path(bp));
         if (!r) {
             if (error_msg)
