@@ -76,6 +76,8 @@ public:
     static const UUID tmp_pool_uuid;
     static const std::map<ObjectType, std::string> type_names;
 
+    std::map<std::string, UUID> get_actually_included_pools(bool include_self);
+
 protected:
     const std::string base_path;
     const PoolInfo pool_info;

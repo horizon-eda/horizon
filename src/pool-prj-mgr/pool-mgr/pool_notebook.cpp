@@ -22,6 +22,7 @@
 #include "nlohmann/json.hpp"
 #include "widgets/where_used_box.hpp"
 #include "util/win32_undef.hpp"
+#include "util/fs_util.hpp"
 
 namespace horizon {
 
@@ -39,8 +40,6 @@ void PoolNotebook::pool_updated(bool success)
         pool_update_done_cb();
         pool_update_done_cb = nullptr;
     }
-    if (success)
-        appwin->get_app().signal_pool_updated().emit(pool_uuid);
 }
 
 void PoolNotebook::reload()
@@ -170,8 +169,22 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
             },
             *this));
 
-    {
+    pool_item_edited_conn = appwin->get_app().signal_pool_items_edited().connect(sigc::track_obj(
+            [this](const auto &filenames) {
+                const auto base_paths = pool.get_actually_included_pools(true);
+                if (std::all_of(filenames.begin(), filenames.end(), [&base_paths](const auto &fn) {
+                        for (const auto &[base, uu] : base_paths) {
+                            if (get_relative_filename(fn, base))
+                                return true;
+                        }
+                        return false;
+                    })) {
+                    pool_update(nullptr, filenames);
+                }
+            },
+            *this));
 
+    {
         pool_update_dispatcher.connect([this] {
             if (in_pool_update_handler)
                 return;
@@ -594,6 +607,11 @@ void PoolNotebook::pool_update(std::function<void()> cb, const std::vector<std::
     if (pool_updating)
         return;
 
+    if (filenames.size()) {
+        pool_item_edited_conn.block();
+        appwin->get_app().signal_pool_items_edited().emit(filenames);
+        pool_item_edited_conn.unblock();
+    }
     appwin->set_pool_updating(true, true);
     pool_update_n_files = 0;
     pool_updating = true;

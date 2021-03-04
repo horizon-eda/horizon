@@ -38,10 +38,10 @@ public:
     class PreferencesWindow *show_preferences_window(guint32 timestamp = 0);
     class LogWindow *show_log_window(guint32 timestamp = 0);
 
-    typedef sigc::signal<void, UUID> type_signal_pool_updated;
-    type_signal_pool_updated signal_pool_updated()
+    typedef sigc::signal<void, std::vector<std::string>> type_signal_pool_items_edited;
+    type_signal_pool_items_edited signal_pool_items_edited()
     {
-        return s_signal_pool_updated;
+        return s_signal_pool_items_edited;
     }
 
 protected:
@@ -67,7 +67,7 @@ private:
     LogDispatcher log_dispatcher;
     class LogWindow *log_window = nullptr;
 
-    type_signal_pool_updated s_signal_pool_updated;
+    type_signal_pool_items_edited s_signal_pool_items_edited;
 
 
 public:
