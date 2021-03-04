@@ -325,6 +325,18 @@ void PoolNotebook::add_context_menu(PoolBrowser *br)
                 pool_update(nullptr, {filename});
             },
             this_pool_lambda);
+    br->add_context_menu_item(
+            "Open in included pool",
+            [this, ty](const UUID &uu) {
+                auto x = get_pool_uuids(ty, uu);
+                if (auto pool2 = PoolManager::get().get_by_uuid(x.last ? x.last : x.pool)) {
+                    appwin->get_app().open_pool(Glib::build_filename(pool2->base_path, "pool.json"), ty, uu);
+                }
+            },
+            [this, ty](const UUID &uu) -> bool {
+                auto x = get_pool_uuids(ty, uu);
+                return x.last || x.pool != pool.get_pool_info().uuid;
+            });
 }
 
 PoolNotebook::ItemPoolInfo PoolNotebook::get_pool_uuids(ObjectType ty, const UUID &uu)
