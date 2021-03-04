@@ -184,15 +184,14 @@ void PoolNotebook::construct_packages()
     add_action_button("Import KiCad package", bbox, sigc::mem_fun(*this, &PoolNotebook::handle_import_kicad_package))
             ->get_style_context()
             ->add_class("suggested-action");
-    if (remote_repo.size()) {
-        add_action_button("Merge", bbox, br,
-                          [this](const UUID &uu) { remote_box->merge_item(ObjectType::PACKAGE, uu); });
-        add_action_button("Merge 3D", bbox, br, [this](const UUID &uu) {
+    add_merge_button(bbox, br);
+    if (auto bu = add_merge_button(bbox, br, [this](const UUID &uu) {
             auto pkg = pool.get_package(uu);
             for (const auto &it : pkg->models) {
                 remote_box->merge_3d_model(it.second.filename);
             }
-        });
+        })) {
+        bu->set_label("Merge 3D");
     }
 
     auto stack = Gtk::manage(new Gtk::Stack);

@@ -110,6 +110,30 @@ Gtk::Button *PoolNotebook::add_action_button(const std::string &label, Gtk::Box 
     return bu;
 }
 
+Gtk::Button *PoolNotebook::add_merge_button(Gtk::Box *bbox, class PoolBrowser *br, std::function<void(UUID)> cb)
+{
+    if (!remote_repo.size())
+        return nullptr;
+
+    auto bu = Gtk::manage(new Gtk::Button("Merge"));
+    bbox->pack_start(*bu, false, false, 0);
+    if (cb)
+        bu->signal_clicked().connect([br, cb] { cb(br->get_selected()); });
+    else
+        bu->signal_clicked().connect([this, br] { remote_box->merge_item(br->get_type(), br->get_selected()); });
+    br->signal_selected().connect([this, bu, br] {
+        const auto uu = br->get_selected();
+        if (!uu) {
+            bu->set_sensitive(false);
+            return;
+        }
+        const auto from_this_pool = get_pool_uuids(br->get_type(), uu).pool == pool.get_pool_info().uuid;
+        bu->set_sensitive(from_this_pool);
+    });
+    bu->set_sensitive(false);
+    return bu;
+}
+
 void PoolNotebook::add_preview_stack_switcher(Gtk::Box *obox, Gtk::Stack *stack)
 {
     auto bbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));

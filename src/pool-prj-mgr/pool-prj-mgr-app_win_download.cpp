@@ -5,6 +5,7 @@
 #include "pool/pool.hpp"
 #include "util/util.hpp"
 #include "util/autofree_ptr.hpp"
+#include "pool/pool_manager.hpp"
 
 namespace horizon {
 
@@ -55,6 +56,14 @@ void PoolProjectManagerAppWindow::git_checkout_progress_cb(const char *path, siz
         return;                                                                                                        \
     }
 
+class RawClient : public HTTP::RESTClient {
+public:
+    RawClient() : RESTClient("https://api.github.com")
+    {
+        append_header("Accept: application/vnd.github.v3.raw");
+    }
+};
+
 void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::string gh_repo, std::string dest_dir)
 {
     try {
@@ -75,7 +84,19 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
 
         GitHubClient client;
         json repo = client.get_repo(gh_username, gh_repo);
-        std::string clone_url = repo.at("clone_url");
+        const std::string clone_url = repo.at("clone_url");
+
+        {
+            RawClient raw_client;
+            const auto j_pool = raw_client.get("/repos/" + gh_username + "/" + gh_repo + "/contents/pool.json");
+            PoolInfo info;
+            info.from_json(j_pool);
+            for (const auto &it : info.pools_included) {
+                if (PoolManager::get().get_by_uuid(it) == nullptr) {
+                    throw std::runtime_error("Included pool " + (std::string)it + " not found locally");
+                }
+            }
+        }
 
         autofree_ptr<git_repository> cloned_repo(git_repository_free);
         git_clone_options clone_opts = GIT_CLONE_OPTIONS_INIT;
@@ -89,6 +110,11 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
         clone_opts.checkout_opts.progress_payload = this;
 
         download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Cloning repository…");
+
+        for (const auto &[type, name] : Pool::type_names) {
+            auto type_dir = Glib::build_filename(dest_dir, name);
+            Gio::File::create_for_path(type_dir)->make_directory_with_parents();
+        }
 
         auto remote_dir = Glib::build_filename(dest_dir, ".remote");
         Gio::File::create_for_path(remote_dir)->make_directory_with_parents();
@@ -114,13 +140,18 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
         size_t i = 0;
         {
             SQLite::Query q_count(pool_remote.db,
-                                  "SELECT SUM(n) FROM (SELECT COUNT(filename) AS n FROM all_items_view UNION "
-                                  "SELECT COUNT(DISTINCT model_filename) AS n FROM models);");
+                                  "SELECT SUM(n) FROM (SELECT COUNT(filename) AS n FROM all_items_view "
+                                  "WHERE pool_uuid = $pool_uuid UNION "
+                                  "SELECT COUNT(DISTINCT model_filename) AS n FROM models "
+                                  "INNER JOIN packages ON models.package_uuid = packages.uuid "
+                                  "WHERE packages.pool_uuid = $pool_uuid);");
+            q_count.bind("$pool_uuid", pool_remote.get_pool_info().uuid);
             q_count.step();
             n_total = q_count.get<int>(0);
         }
         {
-            SQLite::Query q(pool_remote.db, "SELECT filename FROM all_items_view");
+            SQLite::Query q(pool_remote.db, "SELECT filename FROM all_items_view WHERE pool_uuid = ?");
+            q.bind(1, pool_remote.get_pool_info().uuid);
             while (q.step()) {
                 RETURN_IF_CANCELLED
                 const std::string msg = "Copying " + format_m_of_n(i, n_total);
@@ -136,7 +167,11 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
             }
         }
         {
-            SQLite::Query q(pool_remote.db, "SELECT DISTINCT model_filename FROM models");
+            SQLite::Query q(pool_remote.db,
+                            "SELECT DISTINCT model_filename FROM models "
+                            "INNER JOIN packages ON models.package_uuid = packages.uuid "
+                            "WHERE packages.pool_uuid = ?");
+            q.bind(1, pool_remote.get_pool_info().uuid);
             while (q.step()) {
                 RETURN_IF_CANCELLED
                 const std::string msg = "Copying " + format_m_of_n(i, n_total);

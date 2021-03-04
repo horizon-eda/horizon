@@ -119,8 +119,7 @@ void PoolNotebook::construct_units()
     add_action_button("Duplicate", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_duplicate_unit));
     add_action_button("Create Symbol", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_create_symbol_for_unit));
     add_action_button("Create Entity", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_create_entity_for_unit));
-    if (remote_repo.size())
-        add_action_button("Merge", bbox, br, [this](const UUID &uu) { remote_box->merge_item(ObjectType::UNIT, uu); });
+    add_merge_button(bbox, br);
 
     auto stack = Gtk::manage(new Gtk::Stack);
     add_preview_stack_switcher(bbox, stack);

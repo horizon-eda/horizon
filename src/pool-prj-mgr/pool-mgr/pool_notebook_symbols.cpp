@@ -98,9 +98,7 @@ void PoolNotebook::construct_symbols()
     add_action_button("Create", bbox, sigc::mem_fun(*this, &PoolNotebook::handle_create_symbol));
     add_action_button("Edit", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_edit_symbol));
     add_action_button("Duplicate", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_duplicate_symbol));
-    if (remote_repo.size())
-        add_action_button("Merge", bbox, br,
-                          [this](const UUID &uu) { remote_box->merge_item(ObjectType::SYMBOL, uu); });
+    add_merge_button(bbox, br);
     bbox->show_all();
 
     box->pack_start(*bbox, false, false, 0);

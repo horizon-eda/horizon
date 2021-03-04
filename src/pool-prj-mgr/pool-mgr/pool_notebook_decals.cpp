@@ -83,6 +83,7 @@ void PoolNotebook::construct_decals()
     add_action_button("Create", bbox, sigc::mem_fun(*this, &PoolNotebook::handle_create_decal));
     add_action_button("Edit", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_edit_decal));
     add_action_button("Duplicate", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_duplicate_decal));
+    add_merge_button(bbox, br);
     bbox->show_all();
 
     box->pack_start(*bbox, false, false, 0);

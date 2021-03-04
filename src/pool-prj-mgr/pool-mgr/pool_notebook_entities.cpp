@@ -81,9 +81,7 @@ void PoolNotebook::construct_entities()
     add_action_button("Create", bbox, sigc::mem_fun(*this, &PoolNotebook::handle_create_entity));
     add_action_button("Edit", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_edit_entity));
     add_action_button("Duplicate", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_duplicate_entity));
-    if (remote_repo.size())
-        add_action_button("Merge", bbox, br,
-                          [this](const UUID &uu) { remote_box->merge_item(ObjectType::ENTITY, uu); });
+    add_merge_button(bbox, br);
     add_action_button("Import KiCad symbol", bbox,
                       sigc::mem_fun(*this, &PoolNotebook::handle_kicad_symbol_import_wizard))
             ->get_style_context()

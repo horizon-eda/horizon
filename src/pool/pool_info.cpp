@@ -11,6 +11,11 @@ PoolInfo::PoolInfo(const std::string &bp) : base_path(bp)
 {
     auto pool_json = Glib::build_filename(base_path, "pool.json");
     auto j = load_json_from_file(pool_json);
+    from_json(j);
+}
+
+void PoolInfo::from_json(const json &j)
+{
     uuid = j.at("uuid").get<std::string>();
     default_via = j.at("default_via").get<std::string>();
     name = j.at("name");
