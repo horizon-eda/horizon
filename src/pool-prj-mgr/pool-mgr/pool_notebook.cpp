@@ -318,13 +318,10 @@ void PoolNotebook::add_context_menu(PoolBrowser *br)
         clip->set_text((std::string)uu);
     });
     br->add_copy_name_context_menu_item();
-    br->add_context_menu_item(
-            "Update this item",
-            [this, ty](const UUID &uu) {
-                auto filename = pool.get_filename(ty, uu);
-                pool_update(nullptr, {filename});
-            },
-            this_pool_lambda);
+    br->add_context_menu_item("Update this item", [this, ty](const UUID &uu) {
+        auto filename = pool.get_filename(ty, uu);
+        pool_update(nullptr, {filename});
+    });
     br->add_context_menu_item(
             "Open in included pool",
             [this, ty](const UUID &uu) {
