@@ -4,24 +4,10 @@
 #include <glibmm/fileutils.h>
 #include "util/util.hpp"
 #include "pool_manager.hpp"
+#include <filesystem>
 
 namespace horizon {
-
-static void find_files(const std::string &base_path, std::function<void(const std::string &)> cb,
-                       const std::string &path = "")
-{
-    auto this_path = Glib::build_filename(base_path, path);
-    Glib::Dir dir(this_path);
-    for (const auto &it : dir) {
-        auto itempath = Glib::build_filename(this_path, it);
-        if (Glib::file_test(itempath, Glib::FILE_TEST_IS_DIR)) {
-            find_files(base_path, cb, Glib::build_filename(path, it));
-        }
-        else if (Glib::file_test(itempath, Glib::FILE_TEST_IS_REGULAR)) {
-            cb(Glib::build_filename(path, it));
-        }
-    }
-}
+namespace fs = std::filesystem;
 
 PoolCacheStatus PoolCacheStatus::from_project_pool(class IPool &pool)
 {
@@ -96,43 +82,42 @@ PoolCacheStatus PoolCacheStatus::from_project_pool(class IPool &pool)
         }
     }
     {
-        auto models_path = Glib::build_filename(pool.get_base_path(), "3d_models", "cache");
-        if (Glib::file_test(models_path, Glib::FILE_TEST_IS_DIR)) {
-            Glib::Dir dir_3d(models_path);
-            for (const auto &it : dir_3d) {
-                UUID pool_uuid(it);
-                auto it_pool = PoolManager::get().get_by_uuid(pool_uuid);
-                if (it_pool) {
-                    auto &this_pool_base_path = it_pool->base_path;
-                    auto this_pool_cache_path = Glib::build_filename(models_path, it);
-                    find_files(this_pool_cache_path, [&this_pool_base_path, &this_pool_cache_path, &status,
-                                                      &pool_uuid](const std::string &path) {
-                        status.items.emplace_back();
-                        auto &item = status.items.back();
-                        status.n_total++;
-                        auto filename_cached = Glib::build_filename(this_pool_cache_path, path);
-                        auto filename_pool = Glib::build_filename(this_pool_base_path, path);
-                        item.filename_cached = filename_cached;
-                        item.filename_pool = filename_pool;
-                        item.name = Glib::path_get_basename(path);
-                        item.type = ObjectType::MODEL_3D;
-                        item.uuid = UUID::random();
-                        item.pool_uuid = pool_uuid;
-                        if (Glib::file_test(filename_pool, Glib::FILE_TEST_IS_REGULAR)) {
-                            if (compare_files(filename_cached, filename_pool)) {
-                                item.state = PoolCacheStatus::Item::State::CURRENT;
-                                status.n_current++;
+        const auto models_path = fs::path(pool.get_base_path()) / "3d_models" / "cache";
+        if (fs::is_directory(models_path)) {
+            for (const auto &it_pool_dir : fs::directory_iterator(models_path)) {
+                const UUID pool_uuid(it_pool_dir.path().filename().string());
+                if (auto it_pool = PoolManager::get().get_by_uuid(pool_uuid)) {
+                    const auto this_pool_base_path = fs::path(it_pool->base_path);
+                    for (const auto &filename_cached_entry : fs::recursive_directory_iterator(it_pool_dir)) {
+                        if (filename_cached_entry.is_regular_file()) {
+                            const auto filename_cached = filename_cached_entry.path();
+                            status.items.emplace_back();
+                            auto &item = status.items.back();
+                            status.n_total++;
+                            const auto filename_rel = fs::relative(filename_cached, it_pool_dir);
+                            const auto filename_pool = this_pool_base_path / filename_rel;
+                            item.filename_cached = filename_cached;
+                            item.filename_pool = filename_pool;
+                            item.name = filename_cached.filename();
+                            item.type = ObjectType::MODEL_3D;
+                            item.uuid = UUID::random();
+                            item.pool_uuid = pool_uuid;
+                            if (fs::is_regular_file(filename_pool)) {
+                                if (compare_files(filename_cached, filename_pool)) {
+                                    item.state = PoolCacheStatus::Item::State::CURRENT;
+                                    status.n_current++;
+                                }
+                                else {
+                                    item.state = PoolCacheStatus::Item::State::OUT_OF_DATE;
+                                    status.n_out_of_date++;
+                                }
                             }
                             else {
-                                item.state = PoolCacheStatus::Item::State::OUT_OF_DATE;
-                                status.n_out_of_date++;
+                                item.state = PoolCacheStatus::Item::State::MISSING_IN_POOL;
+                                status.n_missing++;
                             }
                         }
-                        else {
-                            item.state = PoolCacheStatus::Item::State::MISSING_IN_POOL;
-                            status.n_missing++;
-                        }
-                    });
+                    }
                 }
             }
         }
