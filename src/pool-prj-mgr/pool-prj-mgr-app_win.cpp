@@ -893,7 +893,7 @@ void PoolProjectManagerAppWindow::set_view_mode(ViewMode mode)
         header->set_show_close_button(false);
         button_cancel->show();
         button_create->show();
-        view_create_project.populate_pool_combo(get_application());
+        view_create_project.populate_pool_combo();
         view_create_project.update();
         header->set_title("Horizon EDA");
         break;
@@ -1221,8 +1221,7 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
         if (proc->proc) {
             auto pid = proc->proc->get_pid();
             allow_set_foreground_window(pid);
-            Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application())
-                    ->send_json(pid, {{"op", "present"}, {"time", gtk_get_current_event_time()}});
+            app->send_json(pid, {{"op", "present"}, {"time", gtk_get_current_event_time()}});
         }
         else {
             proc->win->present();

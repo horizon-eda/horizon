@@ -57,8 +57,7 @@ WelcomeWindow::WelcomeWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 
 void WelcomeWindow::handle_open()
 {
-    auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(appwin->get_application());
-    auto prefs_window = app->show_preferences_window();
+    auto prefs_window = appwin->get_app().show_preferences_window();
     prefs_window->open_pool();
     delete this;
 }

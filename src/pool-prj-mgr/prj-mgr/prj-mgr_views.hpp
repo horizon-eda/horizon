@@ -17,7 +17,7 @@ public:
     {
         return s_signal_valid_change;
     }
-    void populate_pool_combo(const Glib::RefPtr<Gtk::Application> &app);
+    void populate_pool_combo();
     void update();
 
 private:
