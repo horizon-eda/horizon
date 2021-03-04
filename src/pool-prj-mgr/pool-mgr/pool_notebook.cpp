@@ -226,14 +226,13 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
     construct_decals();
 
     {
-        if (PoolManager::get().get_pools().count(pool.get_base_path())) {
-            settings_box = PoolSettingsBox::create(this, pool.get_base_path());
-            pool_uuid = PoolManager::get().get_pools().at(pool.get_base_path()).uuid;
 
-            settings_box->show();
-            append_page(*settings_box, "Settings");
-            settings_box->unreference();
-        }
+        settings_box = PoolSettingsBox::create(this, pool);
+        pool_uuid = pool.get_pool_info().uuid;
+
+        settings_box->show();
+        append_page(*settings_box, "Settings");
+        settings_box->unreference();
     }
 
     if (remote_repo.size()) {

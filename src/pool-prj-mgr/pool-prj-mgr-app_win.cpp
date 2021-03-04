@@ -428,7 +428,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
         auto type = object_type_lut.lookup(j.at("type"));
         UUID uu(j.at("uuid").get<std::string>());
         try {
-            UUID this_pool_uuid = PoolManager::get().get_pools().at(pool->get_base_path()).uuid;
+            UUID this_pool_uuid = pool->get_pool_info().uuid;
             UUID item_pool_uuid;
             auto path = pool->get_filename(type, uu, &item_pool_uuid);
             PoolProjectManagerProcess::Type ptype;

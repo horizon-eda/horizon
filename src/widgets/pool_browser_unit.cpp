@@ -36,7 +36,7 @@ void PoolBrowserUnit::search()
     std::string name_search = name_entry->get_text();
 
     std::string query =
-            "SELECT units.uuid, units.name, units.manufacturer, units.filename, units.pool_uuid, units.overridden "
+            "SELECT units.uuid, units.name, units.manufacturer, units.filename, units.pool_uuid, units.last_pool_uuid "
             "FROM units WHERE units.name LIKE ?"
             + sort_controller->get_order_by();
     SQLite::Query q(pool.get_db(), query);
@@ -55,7 +55,7 @@ void PoolBrowserUnit::search()
             row[list_columns.name] = q.get<std::string>(1);
             row[list_columns.manufacturer] = q.get<std::string>(2);
             row[list_columns.path] = q.get<std::string>(3);
-            row[list_columns.source] = pool_item_source_from_db(q.get<std::string>(4), q.get<int>(5));
+            row[list_columns.source] = pool_item_source_from_db(q, 4, 5);
         }
         set_busy(false);
     }

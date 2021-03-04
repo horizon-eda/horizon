@@ -45,7 +45,7 @@ void PoolBrowserSymbol::search()
 
     std::string query =
             "SELECT symbols.uuid, symbols.name, units.name, "
-            "units.manufacturer, symbols.filename, symbols.pool_uuid, symbols.overridden FROM symbols,units WHERE "
+            "units.manufacturer, symbols.filename, symbols.pool_uuid, symbols.last_pool_uuid FROM symbols,units WHERE "
             "symbols.unit = units.uuid AND (units.uuid=? OR ?) AND "
             "symbols.name LIKE ?"
             + sort_controller->get_order_by();
@@ -69,7 +69,7 @@ void PoolBrowserSymbol::search()
             row[list_columns.unit_name] = q.get<std::string>(2);
             row[list_columns.unit_manufacturer] = q.get<std::string>(3);
             row[list_columns.path] = q.get<std::string>(4);
-            row[list_columns.source] = pool_item_source_from_db(q.get<std::string>(5), q.get<int>(6));
+            row[list_columns.source] = pool_item_source_from_db(q, 5, 6);
         }
         set_busy(false);
     }

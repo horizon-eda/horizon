@@ -34,7 +34,8 @@ void PoolBrowserDecal::search()
     std::string name_search = name_entry->get_text();
 
     std::string query =
-            "SELECT decals.uuid, decals.name, decals.filename, decals.pool_uuid, decals.overridden FROM decals WHERE "
+            "SELECT decals.uuid, decals.name, decals.filename, decals.pool_uuid, decals.last_pool_uuid FROM decals "
+            "WHERE "
             "decals.name LIKE ?"
             + sort_controller->get_order_by();
     SQLite::Query q(pool.get_db(), query);
@@ -52,7 +53,7 @@ void PoolBrowserDecal::search()
             row[list_columns.uuid] = q.get<std::string>(0);
             row[list_columns.name] = q.get<std::string>(1);
             row[list_columns.path] = q.get<std::string>(2);
-            row[list_columns.source] = pool_item_source_from_db(q.get<std::string>(3), q.get<int>(4));
+            row[list_columns.source] = pool_item_source_from_db(q, 3, 4);
         }
         set_busy(false);
     }

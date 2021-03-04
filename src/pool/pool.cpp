@@ -14,7 +14,7 @@
 namespace horizon {
 
 Pool::Pool(const std::string &bp, bool read_only)
-    : db(bp + "/pool.db", read_only ? SQLITE_OPEN_READONLY : SQLITE_OPEN_READWRITE), base_path(bp)
+    : db(bp + "/pool.db", read_only ? SQLITE_OPEN_READONLY : SQLITE_OPEN_READWRITE), base_path(bp), pool_info(bp)
 {
 }
 
@@ -131,7 +131,7 @@ const std::string &Pool::get_base_path() const
 
 int Pool::get_required_schema_version()
 { // keep in sync with schema definition
-    return 17;
+    return 18;
 }
 
 std::string Pool::get_tmp_filename(ObjectType type, const UUID &uu) const

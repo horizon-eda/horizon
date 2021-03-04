@@ -27,27 +27,32 @@ PoolUpdater::PoolUpdater(const std::string &bp, pool_update_cb_t cb) : status_cb
         }
     }
     pool.emplace(bp, false);
-    q_exists.emplace(pool->db, "SELECT uuid FROM all_items_view WHERE uuid = ? AND type = ?");
+    q_exists.emplace(pool->db, "SELECT pool_uuid, last_pool_uuid FROM all_items_view WHERE uuid = ? AND type = ?");
     q_add_dependency.emplace(pool->db, "INSERT INTO dependencies VALUES (?, ?, ?, ?)");
-    q_insert_part.emplace(pool->db,
-                          "INSERT INTO parts "
-                          "(uuid, MPN, manufacturer, entity, package, description, filename, pool_uuid, overridden, "
-                          "parametric_table, base) "
-                          "VALUES "
-                          "($uuid, $MPN, $manufacturer, $entity, $package, $description, $filename, $pool_uuid, "
-                          "$overridden, $parametric_table, $base)");
+    q_insert_part.emplace(
+            pool->db,
+            "INSERT INTO parts "
+            "(uuid, MPN, manufacturer, entity, package, description, filename, pool_uuid, last_pool_uuid, "
+            "parametric_table, base) "
+            "VALUES "
+            "($uuid, $MPN, $manufacturer, $entity, $package, $description, $filename, $pool_uuid, "
+            "$last_pool_uuid, $parametric_table, $base)");
     q_add_tag.emplace(pool->db,
                       "INSERT into tags (tag, uuid, type) "
                       "VALUES ($tag, $uuid, $type)");
     pool->db.execute("PRAGMA journal_mode=WAL");
+    set_pool_info(bp);
 }
 
-bool PoolUpdater::exists(ObjectType type, const UUID &uu)
+std::optional<std::pair<UUID, UUID>> PoolUpdater::exists(ObjectType type, const UUID &uu)
 {
     q_exists->reset();
     q_exists->bind(1, uu);
     q_exists->bind(2, type);
-    return q_exists->step();
+    if (q_exists->step())
+        return std::make_pair(UUID(q_exists->get<std::string>(0)), UUID(q_exists->get<std::string>(1)));
+    else
+        return {};
 }
 
 void PoolUpdater::delete_item(ObjectType type, const UUID &uu)
@@ -116,14 +121,27 @@ void PoolUpdater::delete_item(ObjectType type, const UUID &uu)
     }
 }
 
+UUID PoolUpdater::handle_override(ObjectType type, const UUID &uu)
+{
+    UUID last_pool_uuid;
+    if (auto l = exists(type, uu)) {
+        const auto &[item_pool_uuid, item_last_pool_uuid] = *l;
+        if (item_pool_uuid != pool_uuid) { // item is overriding, i.e. item is in different pool than current item
+            last_pool_uuid = item_pool_uuid;
+        }
+        else { // not overriding, partial update
+            last_pool_uuid = item_last_pool_uuid;
+        }
+        delete_item(type, uu);
+    }
+    return last_pool_uuid;
+}
+
 void PoolUpdater::set_pool_info(const std::string &bp)
 {
     base_path = bp;
-    const auto pools = PoolManager::get().get_pools();
-    if (pools.count(bp)) {
-        auto pool_info = PoolManager::get().get_pools().at(bp);
-        pool_uuid = pool_info.uuid;
-    }
+    const PoolInfo pool_info(bp);
+    pool_uuid = pool_info.uuid;
 }
 
 std::string PoolUpdater::get_path_rel(const std::string &filename) const
@@ -143,31 +161,32 @@ void PoolUpdater::update_some(const std::string &pool_base_path, const std::vect
     pool->db.execute("BEGIN TRANSACTION");
     std::set<UUID> parts_updated;
     for (const auto &filename : filenames) {
+        get_path_rel(filename); // throws if filename not in current base path
         auto j = load_json_from_file(filename);
         auto type = object_type_lut.lookup(j.at("type"));
         switch (type) {
         case ObjectType::FRAME:
-            update_frame(filename, true);
+            update_frame(filename);
             break;
         case ObjectType::DECAL:
-            update_decal(filename, true);
+            update_decal(filename);
             break;
         case ObjectType::PART:
-            update_part(filename, true);
+            update_part(filename);
             parts_updated.emplace(j.at("uuid").get<std::string>());
             all_parts_updated.emplace(j.at("uuid").get<std::string>());
             break;
         case ObjectType::UNIT:
-            update_unit(filename, true);
+            update_unit(filename);
             break;
         case ObjectType::SYMBOL:
-            update_symbol(filename, true);
+            update_symbol(filename);
             break;
         case ObjectType::ENTITY:
-            update_entity(filename, true);
+            update_entity(filename);
             break;
         case ObjectType::PACKAGE:
-            update_package(filename, true);
+            update_package(filename);
             break;
         case ObjectType::PADSTACK:
             update_padstack(filename);
@@ -193,7 +212,7 @@ void PoolUpdater::update_some(const std::string &pool_base_path, const std::vect
             UUID uuid = q.get<std::string>(0);
             all_parts_updated.insert(uuid);
             auto filename = pool->get_filename(ObjectType::PART, uuid);
-            update_part(filename, true);
+            update_part(filename);
         }
     }
     pool->db.execute("COMMIT");

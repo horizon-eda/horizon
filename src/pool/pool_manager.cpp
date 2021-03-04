@@ -27,37 +27,6 @@ void PoolManager::init()
     }
 }
 
-PoolManagerPool::PoolManagerPool(const std::string &bp) : base_path(bp)
-{
-    auto pool_json = Glib::build_filename(base_path, "pool.json");
-    auto j = load_json_from_file(pool_json);
-    uuid = j.at("uuid").get<std::string>();
-    default_via = j.at("default_via").get<std::string>();
-    name = j.at("name");
-    if (j.count("pools_included")) {
-        auto &o = j.at("pools_included");
-        for (auto &it : o) {
-            pools_included.emplace_back(it.get<std::string>());
-        }
-    }
-}
-
-void PoolManagerPool::save()
-{
-    json j;
-    j["uuid"] = (std::string)uuid;
-    j["default_via"] = (std::string)default_via;
-    j["name"] = name;
-    j["type"] = "pool";
-    json o = json::array();
-    for (const auto &it : pools_included) {
-        o.push_back((std::string)it);
-    }
-    j["pools_included"] = o;
-    save_json_to_file(Glib::build_filename(base_path, "pool.json"), j);
-}
-
-
 PoolManager::PoolManager()
 {
     auto pool_prj_mgr_config = Glib::build_filename(get_config_dir(), "pool-project-manager.json");
@@ -101,7 +70,6 @@ void PoolManager::set_pool_enabled(const std::string &base_path, bool enabled)
     auto path = get_abs_path(base_path);
     set_pool_enabled_no_write(path, enabled);
     write();
-    s_signal_changed.emit();
 }
 
 void PoolManager::set_pool_enabled_no_write(const std::string &base_path, bool enabled)
@@ -134,7 +102,6 @@ void PoolManager::remove_pool(const std::string &base_path)
         return;
     pools.erase(path);
     write();
-    s_signal_changed.emit();
 }
 
 void PoolManager::write()
@@ -148,15 +115,14 @@ void PoolManager::write()
     save_json_to_file(Glib::build_filename(get_config_dir(), "pools.json"), j);
 }
 
-void PoolManager::update_pool(const std::string &base_path, const PoolManagerPool &settings)
+void PoolManager::update_pool(const std::string &base_path)
 {
     auto path = get_abs_path(base_path);
     auto &p = pools.at(path);
+    PoolInfo settings(base_path);
     p.name = settings.name;
     p.default_via = settings.default_via;
     p.pools_included = settings.pools_included;
-    p.save();
-    s_signal_changed.emit();
 }
 
 const std::map<std::string, PoolManagerPool> &PoolManager::get_pools() const

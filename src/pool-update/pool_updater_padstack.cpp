@@ -6,21 +6,21 @@
 
 namespace horizon {
 
-void PoolUpdater::add_padstack(const Padstack &padstack, const UUID &pkg_uuid, bool overridden,
+void PoolUpdater::add_padstack(const Padstack &padstack, const UUID &pkg_uuid, const UUID &last_pool_uuid,
                                const std::string &filename)
 {
     SQLite::Query q(pool->db,
                     "INSERT INTO padstacks "
-                    "(uuid, name, well_known_name, filename, package, type, pool_uuid, overridden) "
+                    "(uuid, name, well_known_name, filename, package, type, pool_uuid, last_pool_uuid) "
                     "VALUES "
-                    "($uuid, $name, $well_known_name, $filename, $package, $type, $pool_uuid, $overridden)");
+                    "($uuid, $name, $well_known_name, $filename, $package, $type, $pool_uuid, $last_pool_uuid)");
     q.bind("$uuid", padstack.uuid);
     q.bind("$name", padstack.name);
     q.bind("$well_known_name", padstack.well_known_name);
     q.bind("$type", Padstack::type_lut.lookup_reverse(padstack.type));
     q.bind("$package", pkg_uuid);
     q.bind("$pool_uuid", pool_uuid);
-    q.bind("$overridden", overridden);
+    q.bind("$last_pool_uuid", last_pool_uuid);
     q.bind("$filename", filename);
     q.step();
 }
@@ -57,12 +57,8 @@ void PoolUpdater::update_padstacks(const std::string &directory, const std::stri
                             try {
                                 status_cb(PoolUpdateStatus::FILE, filename, "");
                                 auto padstack = Padstack::new_from_file(filename);
-                                bool overridden = false;
-                                if (exists(ObjectType::PADSTACK, padstack.uuid)) {
-                                    overridden = true;
-                                    delete_item(ObjectType::PADSTACK, padstack.uuid);
-                                }
-                                add_padstack(padstack, pkg_uuid, overridden,
+                                const auto last_pool_uuid = handle_override(ObjectType::PADSTACK, padstack.uuid);
+                                add_padstack(padstack, pkg_uuid, last_pool_uuid,
                                              Glib::build_filename("packages", prefix, it, "padstacks", it2));
                             }
                             catch (const std::exception &e) {
@@ -91,12 +87,8 @@ void PoolUpdater::update_padstacks_global(const std::string &directory, const st
             try {
                 status_cb(PoolUpdateStatus::FILE, filename, "");
                 auto padstack = Padstack::new_from_file(filename);
-                bool overridden = false;
-                if (exists(ObjectType::PADSTACK, padstack.uuid)) {
-                    overridden = true;
-                    delete_item(ObjectType::PADSTACK, padstack.uuid);
-                }
-                add_padstack(padstack, UUID(), overridden, Glib::build_filename("padstacks", prefix, it));
+                const auto last_pool_uuid = handle_override(ObjectType::PADSTACK, padstack.uuid);
+                add_padstack(padstack, UUID(), last_pool_uuid, Glib::build_filename("padstacks", prefix, it));
             }
             catch (const std::exception &e) {
                 status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());
@@ -117,7 +109,6 @@ void PoolUpdater::update_padstack(const std::string &filename)
         status_cb(PoolUpdateStatus::FILE, filename, "");
         auto padstack = Padstack::new_from_file(filename);
         UUID package_uuid;
-        delete_item(ObjectType::PADSTACK, padstack.uuid);
         auto ps_dir = Glib::path_get_dirname(filename);
         if (Glib::path_get_basename(ps_dir) == "padstacks") {
             auto pkg_dir = Glib::path_get_dirname(ps_dir);
@@ -127,7 +118,8 @@ void PoolUpdater::update_padstack(const std::string &filename)
                 package_uuid = j.at("uuid").get<std::string>();
             }
         }
-        add_padstack(padstack, package_uuid, false, get_path_rel(filename));
+        const auto last_pool_uuid = handle_override(ObjectType::PADSTACK, padstack.uuid);
+        add_padstack(padstack, package_uuid, last_pool_uuid, get_path_rel(filename));
     }
     catch (const std::exception &e) {
         status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());

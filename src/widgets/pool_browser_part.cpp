@@ -89,7 +89,7 @@ void PoolBrowserPart::search()
     if (tags.size() == 0) {
         query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, "
                  "packages.name, tags_view.tags, parts.filename, "
-                 "parts.description, parts.pool_uuid, parts.overridden "
+                 "parts.description, parts.pool_uuid, parts.last_pool_uuid "
                  "FROM parts LEFT JOIN tags_view ON "
                  "tags_view.uuid = parts.uuid AND tags_view.type = 'part' "
                  "LEFT JOIN packages ON packages.uuid = parts.package ";
@@ -97,7 +97,7 @@ void PoolBrowserPart::search()
     else {
         query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, "
                  "packages.name, tags_view.tags, parts.filename, "
-                 "parts.description, parts.pool_uuid, parts.overridden FROM parts "
+                 "parts.description, parts.pool_uuid, parts.last_pool_uuid FROM parts "
                  "LEFT JOIN tags_view ON tags_view.uuid = parts.uuid AND tags_view.type = 'part' "
                  "LEFT JOIN packages ON packages.uuid = parts.package "
                  "INNER JOIN (SELECT uuid FROM tags WHERE tags.tag IN (";
@@ -152,7 +152,7 @@ void PoolBrowserPart::search()
             row[list_columns.tags] = q.get<std::string>(4);
             row[list_columns.path] = q.get<std::string>(5);
             row[list_columns.description] = q.get<std::string>(6);
-            row[list_columns.source] = pool_item_source_from_db(q.get<std::string>(7), q.get<int>(8));
+            row[list_columns.source] = pool_item_source_from_db(q, 7, 8);
         }
         set_busy(false);
     }

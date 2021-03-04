@@ -10,7 +10,7 @@ void PoolUpdater::update_units(const std::string &directory, const std::string &
     for (const auto &it : dir) {
         std::string filename = Glib::build_filename(directory, it);
         if (endswith(it, ".json")) {
-            update_unit(filename, false);
+            update_unit(filename);
         }
         else if (Glib::file_test(filename, Glib::FILE_TEST_IS_DIR)) {
             update_units(filename, Glib::build_filename(prefix, it));
@@ -18,30 +18,23 @@ void PoolUpdater::update_units(const std::string &directory, const std::string &
     }
 }
 
-void PoolUpdater::update_unit(const std::string &filename, bool partial)
+void PoolUpdater::update_unit(const std::string &filename)
 {
     try {
         status_cb(PoolUpdateStatus::FILE, filename, "");
         auto unit = Unit::new_from_file(filename);
-        bool overridden = false;
-        if (exists(ObjectType::UNIT, unit.uuid)) {
-            overridden = true;
-            delete_item(ObjectType::UNIT, unit.uuid);
-        }
-        if (partial)
-            overridden = false;
-
+        const auto last_pool_uuid = handle_override(ObjectType::UNIT, unit.uuid);
         SQLite::Query q(pool->db,
                         "INSERT INTO units "
-                        "(uuid, name, manufacturer, filename, pool_uuid, overridden) "
+                        "(uuid, name, manufacturer, filename, pool_uuid, last_pool_uuid) "
                         "VALUES "
-                        "($uuid, $name, $manufacturer, $filename, $pool_uuid, $overridden)");
+                        "($uuid, $name, $manufacturer, $filename, $pool_uuid, $last_pool_uuid)");
         q.bind("$uuid", unit.uuid);
         q.bind("$name", unit.name);
         q.bind("$manufacturer", unit.manufacturer);
         q.bind("$filename", get_path_rel(filename));
         q.bind("$pool_uuid", pool_uuid);
-        q.bind("$overridden", overridden);
+        q.bind("$last_pool_uuid", last_pool_uuid);
         q.step();
     }
     catch (const std::exception &e) {

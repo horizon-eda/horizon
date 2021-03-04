@@ -34,16 +34,13 @@ PoolParametric::PoolParametric(const std::string &bp, bool read_only)
     }
     std::vector<std::string> table_jsons;
 
-    auto pools = PoolManager::get().get_pools();
-    if (pools.count(base_path)) {
-        auto &this_pool = pools.at(base_path);
-        for (const auto &it : this_pool.pools_included) {
-            auto other_pool = PoolManager::get().get_by_uuid(it);
-            if (other_pool) {
-                auto fn = Glib::build_filename(other_pool->base_path, "tables.json");
-                if (Glib::file_test(fn, Glib::FILE_TEST_IS_REGULAR)) {
-                    table_jsons.push_back(fn);
-                }
+    SQLite::Query q(db, "SELECT uuid FROM pool.pools_included WHERE level != 0 ORDER BY level DESC");
+    while (q.step()) {
+        const UUID uu = q.get<std::string>(0);
+        if (auto other_pool = PoolManager::get().get_by_uuid(uu)) {
+            auto fn = Glib::build_filename(other_pool->base_path, "tables.json");
+            if (Glib::file_test(fn, Glib::FILE_TEST_IS_REGULAR)) {
+                table_jsons.push_back(fn);
             }
         }
     }

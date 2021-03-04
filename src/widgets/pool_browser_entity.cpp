@@ -49,7 +49,7 @@ void PoolBrowserEntity::search()
     if (tags.size() == 0) {
         query = "SELECT entities.uuid, entities.name, entities.prefix, "
                 "entities.n_gates, tags_view.tags, "
-                "entities.manufacturer, entities.filename, entities.pool_uuid, entities.overridden FROM entities "
+                "entities.manufacturer, entities.filename, entities.pool_uuid, entities.last_pool_uuid FROM entities "
                 "LEFT JOIN tags_view ON tags_view.uuid = entities.uuid AND tags_view.type = 'entity' "
                 "WHERE entities.name LIKE $name "
                 + sort_controller->get_order_by();
@@ -58,7 +58,7 @@ void PoolBrowserEntity::search()
         std::ostringstream qs;
         qs << "SELECT entities.uuid, entities.name, entities.prefix, "
               "entities.n_gates, tags_view.tags, entities.manufacturer, "
-              "entities.filename, entities.pool_uuid, entities.overridden FROM entities "
+              "entities.filename, entities.pool_uuid, entities.last_pool_uuid FROM entities "
               "LEFT JOIN tags_view ON tags_view.uuid = entities.uuid AND tags_view.type = 'entity' "
               "INNER JOIN (SELECT uuid FROM tags WHERE tags.tag IN (";
 
@@ -102,7 +102,7 @@ void PoolBrowserEntity::search()
             row[list_columns.tags] = q.get<std::string>(4);
             row[list_columns.entity_manufacturer] = q.get<std::string>(5);
             row[list_columns.path] = q.get<std::string>(6);
-            row[list_columns.source] = pool_item_source_from_db(q.get<std::string>(7), q.get<int>(8));
+            row[list_columns.source] = pool_item_source_from_db(q, 7, 8);
         }
         set_busy(false);
     }

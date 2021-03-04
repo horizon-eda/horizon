@@ -12,7 +12,7 @@ void PoolUpdater::update_entities(const std::string &directory, const std::strin
     for (const auto &it : dir) {
         std::string filename = Glib::build_filename(directory, it);
         if (endswith(it, ".json")) {
-            update_entity(filename, false);
+            update_entity(filename);
         }
         else if (Glib::file_test(filename, Glib::FILE_TEST_IS_DIR)) {
             update_entities(filename, Glib::build_filename(prefix, it));
@@ -20,30 +20,24 @@ void PoolUpdater::update_entities(const std::string &directory, const std::strin
     }
 }
 
-void PoolUpdater::update_entity(const std::string &filename, bool partial)
+void PoolUpdater::update_entity(const std::string &filename)
 {
     try {
         status_cb(PoolUpdateStatus::FILE, filename, "");
         auto entity = Entity::new_from_file(filename, *pool);
-        bool overridden = false;
-        if (exists(ObjectType::ENTITY, entity.uuid)) {
-            overridden = true;
-            delete_item(ObjectType::ENTITY, entity.uuid);
-        }
-        if (partial)
-            overridden = false;
+        const auto last_pool_uuid = handle_override(ObjectType::ENTITY, entity.uuid);
         SQLite::Query q(pool->db,
                         "INSERT INTO entities "
-                        "(uuid, name, manufacturer, filename, n_gates, prefix, pool_uuid, overridden) "
+                        "(uuid, name, manufacturer, filename, n_gates, prefix, pool_uuid, last_pool_uuid) "
                         "VALUES "
-                        "($uuid, $name, $manufacturer, $filename, $n_gates, $prefix, $pool_uuid, $overridden)");
+                        "($uuid, $name, $manufacturer, $filename, $n_gates, $prefix, $pool_uuid, $last_pool_uuid)");
         q.bind("$uuid", entity.uuid);
         q.bind("$name", entity.name);
         q.bind("$manufacturer", entity.manufacturer);
         q.bind("$n_gates", entity.gates.size());
         q.bind("$prefix", entity.prefix);
         q.bind("$pool_uuid", pool_uuid);
-        q.bind("$overridden", overridden);
+        q.bind("$last_pool_uuid", last_pool_uuid);
         q.bind("$filename", get_path_rel(filename));
         q.step();
         for (const auto &it_tag : entity.tags) {

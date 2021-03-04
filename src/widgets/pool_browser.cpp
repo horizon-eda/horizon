@@ -6,17 +6,15 @@
 #include "cell_renderer_color_box.hpp"
 #include "pool/pool_manager.hpp"
 #include "tag_entry.hpp"
+#include "util/sqlite.hpp"
 
 namespace horizon {
 PoolBrowser::PoolBrowser(IPool &p, const std::string &prefix)
     : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p), store_prefix(prefix)
 {
-    const auto &pools = PoolManager::get().get_pools();
-    if (pools.count(pool.get_base_path())) {
-        const auto &mpool = pools.at(pool.get_base_path());
-        pools_included = mpool.pools_included.size();
-        pool_uuid = mpool.uuid;
-    }
+    const auto &pool_info = pool.get_pool_info();
+    pools_included = pool_info.pools_included.size();
+    pool_uuid = pool_info.uuid;
 }
 
 Gtk::Entry *PoolBrowser::create_search_entry(const std::string &label)
@@ -306,14 +304,24 @@ void PoolBrowser::add_context_menu_item(const std::string &label, sigc::slot1<vo
     la->signal_activate().connect([this, cb] { cb(get_selected()); });
 }
 
-PoolBrowser::PoolItemSource PoolBrowser::pool_item_source_from_db(const UUID &uu, bool overridden)
+PoolBrowser::PoolItemSource PoolBrowser::pool_item_source_from_db(const SQLite::Query &q, int idx_uu,
+                                                                  int idx_last_uu) const
 {
-    if (overridden && uu == pool_uuid)
-        return PoolItemSource::OVERRIDING;
-    else if (uu == pool_uuid)
+    return pool_item_source_from_db(q.get<std::string>(idx_uu), q.get<std::string>(idx_last_uu));
+}
+
+
+PoolBrowser::PoolItemSource PoolBrowser::pool_item_source_from_db(const UUID &uu, const UUID &last_uu) const
+{
+    if (uu == pool_uuid && last_uu == UUID())
         return PoolItemSource::LOCAL;
-    else
+    else if (uu == pool_uuid && last_uu != UUID())
+        return PoolItemSource::OVERRIDDEN_LOCAL;
+    if (uu != pool_uuid && last_uu == UUID())
         return PoolItemSource::INCLUDED;
+    else if (uu != pool_uuid && last_uu != UUID())
+        return PoolItemSource::OVERRIDDEN;
+    throw std::logic_error("unhandled case");
 }
 
 void PoolBrowser::install_pool_item_source_tooltip()
@@ -351,8 +359,11 @@ void PoolBrowser::install_pool_item_source_tooltip()
                         case PoolItemSource::INCLUDED:
                             tooltip->set_text("Item is from included pool");
                             break;
-                        case PoolItemSource::OVERRIDING:
+                        case PoolItemSource::OVERRIDDEN_LOCAL:
                             tooltip->set_text("Item is from this pool overriding an item from an included pool");
+                            break;
+                        case PoolItemSource::OVERRIDDEN:
+                            tooltip->set_text("Item is from another pool overriding an item from an included pool");
                             break;
                         }
                         //

@@ -1,12 +1,14 @@
 #include "pool_settings_box.hpp"
 #include "pool_notebook.hpp"
 #include "pool/pool_manager.hpp"
+#include "pool/ipool.hpp"
+#include "pool/pool_info.hpp"
 
 namespace horizon {
 
 PoolSettingsBox::PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, PoolNotebook *nb,
-                                 const std::string &bp)
-    : Gtk::Box(cobject), notebook(nb), pool_base_path(bp)
+                                 IPool &p)
+    : Gtk::Box(cobject), notebook(nb), pool(p)
 {
     x->get_widget("button_save_pool", save_button);
     x->get_widget("pool_settings_name_entry", entry_name);
@@ -18,38 +20,38 @@ PoolSettingsBox::PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     x->get_widget("pool_down_button", pool_down_button);
     x->get_widget("pool_settings_hint_label", hint_label);
     hint_label->hide();
-    entry_name->set_text(PoolManager::get().get_pools().at(bp).name);
+    entry_name->set_text(pool.get_pool_info().name);
     entry_name->signal_changed().connect(sigc::mem_fun(*this, &PoolSettingsBox::set_needs_save));
     save_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolSettingsBox::save));
     save_button->set_sensitive(false);
 
-    PoolManager::get().signal_changed().connect(sigc::mem_fun(*this, &PoolSettingsBox::update_pools));
-
     pool_inc_button->signal_clicked().connect([this] { inc_excl_pool(true); });
     pool_excl_button->signal_clicked().connect([this] { inc_excl_pool(false); });
 
-    pools_included = PoolManager::get().get_pools().at(bp).pools_included;
+    pools_included = pool.get_pool_info().pools_included;
 
     update_pools();
 }
 
-PoolSettingsBox *PoolSettingsBox::create(PoolNotebook *nb, const std::string &bp)
+PoolSettingsBox *PoolSettingsBox::create(PoolNotebook *nb, IPool &p)
 {
     PoolSettingsBox *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     std::vector<Glib::ustring> widgets = {"box_settings", "image1", "image2", "image3", "image4"};
     x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/window.ui", widgets);
-    x->get_widget_derived("box_settings", w, nb, bp);
+    x->get_widget_derived("box_settings", w, nb, p);
     w->reference();
     return w;
 }
 
 void PoolSettingsBox::save()
 {
-    PoolManagerPool p(PoolManager::get().get_pools().at(pool_base_path));
+    PoolInfo p = pool.get_pool_info();
     p.name = entry_name->get_text();
     p.pools_included = pools_included;
-    PoolManager::get().update_pool(pool_base_path, p);
+    p.save();
+    if (PoolManager::get().get_pools().count(p.base_path))
+        PoolManager::get().update_pool(p.base_path);
     save_button->set_sensitive(false);
     hint_label->set_markup("Almost there! For the items of the included pool to show up, click <i>Update pool</i>.");
     needs_save = false;
@@ -133,7 +135,7 @@ void PoolSettingsBox::update_pools()
         delete it;
     }
     for (const auto &it : PoolManager::get().get_pools()) {
-        if (it.second.enabled && it.second.uuid != PoolManager::get().get_pools().at(pool_base_path).uuid
+        if (it.second.enabled && it.second.uuid != pool.get_pool_info().uuid
             && std::count(pools_included.begin(), pools_included.end(), it.second.uuid) == 0) {
             auto w = Gtk::manage(new PoolListItem(it.second.uuid));
             pools_available_listbox->append(*w);

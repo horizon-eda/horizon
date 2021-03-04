@@ -30,6 +30,8 @@ public:
 
     virtual class PoolParametric *get_parametric() = 0;
 
+    virtual const class PoolInfo &get_pool_info() const = 0;
+
     virtual ~IPool()
     {
     }

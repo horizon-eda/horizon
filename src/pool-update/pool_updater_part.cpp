@@ -36,19 +36,13 @@ void PoolUpdater::part_add_dir_to_graph(PoolUpdateGraph &graph, const std::strin
     }
 }
 
-void PoolUpdater::update_part(const std::string &filename, bool partial)
+void PoolUpdater::update_part(const std::string &filename)
 {
     try {
         if (filename.size()) {
             status_cb(PoolUpdateStatus::FILE, filename, "");
             auto part = Part::new_from_json(load_json(filename), *pool);
-            bool overridden = false;
-            if (exists(ObjectType::PART, part.uuid)) {
-                overridden = true;
-                delete_item(ObjectType::PART, part.uuid);
-            }
-            if (partial)
-                overridden = false;
+            const auto last_pool_uuid = handle_override(ObjectType::PART, part.uuid);
             std::string table;
             if (part.parametric.count("table"))
                 table = part.parametric.at("table");
@@ -60,7 +54,7 @@ void PoolUpdater::update_part(const std::string &filename, bool partial)
             q_insert_part->bind("$entity", part.entity->uuid);
             q_insert_part->bind("$description", part.get_description());
             q_insert_part->bind("$pool_uuid", pool_uuid);
-            q_insert_part->bind("$overridden", overridden);
+            q_insert_part->bind("$last_pool_uuid", last_pool_uuid);
             q_insert_part->bind("$parametric_table", table);
             q_insert_part->bind("$base", part.base ? part.base->uuid : UUID());
             q_insert_part->bind("$filename", get_path_rel(filename));
@@ -105,7 +99,7 @@ void PoolUpdater::update_part_node(const PoolUpdateNode &node, std::set<UUID> &v
     visited.insert(node.uuid);
 
     auto filename = node.filename;
-    update_part(filename, false);
+    update_part(filename);
     for (const auto dependant : node.dependants) {
         update_part_node(*dependant, visited);
     }

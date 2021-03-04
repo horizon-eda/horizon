@@ -53,14 +53,15 @@ void PoolBrowserPadstack::search()
 
     std::string name_search = name_entry->get_text();
 
-    SQLite::Query q(pool.get_db(),
-                    "SELECT padstacks.uuid, padstacks.name, padstacks.type, "
-                    "packages.name, padstacks.filename, padstacks.pool_uuid, padstacks.overridden FROM padstacks LEFT "
-                    "JOIN packages ON padstacks.package = packages.uuid WHERE "
-                    "(packages.uuid=? OR ? OR padstacks.package = "
-                    "'00000000-0000-0000-0000-000000000000')  AND "
-                    "padstacks.name LIKE ? AND padstacks.type IN (?, ?, ?, ?, "
-                    "?, ?) " + sort_controller->get_order_by());
+    SQLite::Query q(
+            pool.get_db(),
+            "SELECT padstacks.uuid, padstacks.name, padstacks.type, "
+            "packages.name, padstacks.filename, padstacks.pool_uuid, padstacks.last_pool_uuid FROM padstacks LEFT "
+            "JOIN packages ON padstacks.package = packages.uuid WHERE "
+            "(packages.uuid=? OR ? OR padstacks.package = "
+            "'00000000-0000-0000-0000-000000000000')  AND "
+            "padstacks.name LIKE ? AND padstacks.type IN (?, ?, ?, ?, "
+            "?, ?) " + sort_controller->get_order_by());
     q.bind(1, package_uuid);
     q.bind(2, package_uuid == UUID());
     q.bind(3, "%" + name_search + "%");
@@ -109,7 +110,7 @@ void PoolBrowserPadstack::search()
             row[list_columns.padstack_type] = q.get<std::string>(2);
             row[list_columns.package_name] = q.get<std::string>(3);
             row[list_columns.path] = q.get<std::string>(4);
-            row[list_columns.source] = pool_item_source_from_db(q.get<std::string>(5), q.get<int>(6));
+            row[list_columns.source] = pool_item_source_from_db(q, 5, 6);
         }
         set_busy(false);
     }

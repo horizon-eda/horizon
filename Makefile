@@ -84,6 +84,7 @@ SRC_COMMON = \
 	src/board/pnp.cpp\
 	src/board/board_decal.cpp\
 	src/pool/pool.cpp \
+	src/pool/pool_info.cpp \
 	src/util/placement.cpp\
 	src/util/util.cpp\
 	src/util/geom_util.cpp\

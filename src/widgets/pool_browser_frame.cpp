@@ -34,7 +34,8 @@ void PoolBrowserFrame::search()
     std::string name_search = name_entry->get_text();
 
     std::string query =
-            "SELECT frames.uuid, frames.name, frames.filename, frames.pool_uuid, frames.overridden FROM frames WHERE "
+            "SELECT frames.uuid, frames.name, frames.filename, frames.pool_uuid, frames.last_pool_uuid FROM frames "
+            "WHERE "
             "frames.name LIKE ?"
             + sort_controller->get_order_by();
     SQLite::Query q(pool.get_db(), query);
@@ -52,7 +53,7 @@ void PoolBrowserFrame::search()
             row[list_columns.uuid] = q.get<std::string>(0);
             row[list_columns.name] = q.get<std::string>(1);
             row[list_columns.path] = q.get<std::string>(2);
-            row[list_columns.source] = pool_item_source_from_db(q.get<std::string>(3), q.get<int>(4));
+            row[list_columns.source] = pool_item_source_from_db(q, 3, 4);
         }
         set_busy(false);
     }

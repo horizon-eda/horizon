@@ -86,7 +86,7 @@ void PoolBrowserPackage::search()
     auto tags = tag_entry->get_tags();
     std::ostringstream qs;
     qs << "SELECT packages.uuid, packages.name, packages.manufacturer, "
-          "packages.n_pads, tags_view.tags, packages.filename, packages.pool_uuid, packages.overridden "
+          "packages.n_pads, tags_view.tags, packages.filename, packages.pool_uuid, packages.last_pool_uuid "
           "FROM packages "
           "LEFT JOIN tags_view ON tags_view.uuid = packages.uuid AND tags_view.type = 'package' ";
 
@@ -136,7 +136,7 @@ void PoolBrowserPackage::search()
             row[list_columns.n_pads] = q.get<int>(3);
             row[list_columns.tags] = q.get<std::string>(4);
             row[list_columns.path] = q.get<std::string>(5);
-            row[list_columns.source] = pool_item_source_from_db(q.get<std::string>(6), q.get<int>(7));
+            row[list_columns.source] = pool_item_source_from_db(q, 6, 7);
         }
         set_busy(false);
     }

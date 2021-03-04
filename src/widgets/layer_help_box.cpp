@@ -5,6 +5,7 @@
 #include "imp/action_catalog.hpp"
 #include "pool/ipool.hpp"
 #include "pool/pool_manager.hpp"
+#include "util/sqlite.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -37,16 +38,13 @@ LayerHelpBox::LayerHelpBox(class IPool &pool) : Gtk::ScrolledWindow()
             },
             false);
 
-    auto base_path = pool.get_base_path();
-    load(base_path);
-    auto pools = PoolManager::get().get_pools();
-    if (pools.count(base_path)) {
-        const auto &pools_included = pools.at(base_path).pools_included;
-        for (auto it = pools_included.crbegin(); it != pools_included.crend(); it++) {
-            auto other_pool = PoolManager::get().get_by_uuid(*it);
-            if (other_pool) {
-                load(other_pool->base_path);
-            }
+    load(pool.get_base_path());
+
+    SQLite::Query q(pool.get_db(), "SELECT uuid FROM pools_included WHERE level != 0 ORDER BY level ASC");
+    while (q.step()) {
+        const UUID uu = q.get<std::string>(0);
+        if (auto other_pool = PoolManager::get().get_by_uuid(uu)) {
+            load(other_pool->base_path);
         }
     }
 }

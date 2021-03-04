@@ -13,15 +13,15 @@ using json = nlohmann::json;
 class PoolSettingsBox : public Gtk::Box {
 public:
     PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class PoolNotebook *nb,
-                    const std::string &bp);
-    static PoolSettingsBox *create(class PoolNotebook *nb, const std::string &bp);
+                    class IPool &pool);
+    static PoolSettingsBox *create(class PoolNotebook *nb, class IPool &pool);
     bool get_needs_save() const;
     void save();
     void pool_updated();
 
 private:
     class PoolNotebook *notebook = nullptr;
-    std::string pool_base_path;
+    IPool &pool;
     Gtk::Entry *entry_name = nullptr;
     Gtk::Button *save_button = nullptr;
     Gtk::ListBox *pools_available_listbox = nullptr;

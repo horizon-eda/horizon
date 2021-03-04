@@ -10,6 +10,9 @@
 #include <optional>
 
 namespace horizon {
+namespace SQLite {
+class Query;
+}
 class PoolBrowser : public Gtk::Box, public SelectionProvider {
 public:
     PoolBrowser(class IPool &pool, const std::string &prefix = "");
@@ -29,7 +32,7 @@ public:
     void go_to(const UUID &uu);
     void clear_search();
 
-    enum class PoolItemSource { LOCAL, INCLUDED, OVERRIDING };
+    enum class PoolItemSource { LOCAL, INCLUDED, OVERRIDDEN, OVERRIDDEN_LOCAL };
 
 protected:
     void construct(Gtk::Widget *search_box = nullptr);
@@ -75,7 +78,8 @@ protected:
     std::set<Gtk::Entry *> search_entries;
     std::set<TagEntry *> tag_entries;
 
-    PoolItemSource pool_item_source_from_db(const UUID &uu, bool overridden);
+    PoolItemSource pool_item_source_from_db(const SQLite::Query &q, int idx_uu, int idx_last_uu) const;
+    PoolItemSource pool_item_source_from_db(const UUID &uu, const UUID &last_uu) const;
 
     void install_pool_item_source_tooltip();
     virtual PoolItemSource pool_item_source_from_row(const Gtk::TreeModel::Row &row);

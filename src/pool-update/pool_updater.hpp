@@ -33,7 +33,8 @@ private:
     void update_units(const std::string &directory, const std::string &prefix = "");
     void update_entities(const std::string &directory, const std::string &prefix = "");
     void update_symbols(const std::string &directory, const std::string &prefix = "");
-    void add_padstack(const Padstack &padstack, const UUID &pkg_uuid, bool overridden, const std::string &filename);
+    void add_padstack(const Padstack &padstack, const UUID &pkg_uuid, const UUID &last_pool_uuid,
+                      const std::string &filename);
     void update_padstacks(const std::string &directory, const std::string &prefix = "");
     void update_padstacks_global(const std::string &directory, const std::string &prefix = "");
     void update_packages(const std::string &directory);
@@ -44,16 +45,17 @@ private:
     void add_tag(ObjectType type, const UUID &uu, const std::string &tag);
     void clear_dependencies(ObjectType type, const UUID &uu);
     void clear_tags(ObjectType type, const UUID &uu);
-    bool exists(ObjectType type, const UUID &uu);
+    std::optional<std::pair<UUID, UUID>> exists(ObjectType type, const UUID &uu);
     void delete_item(ObjectType type, const UUID &uu);
+    UUID handle_override(ObjectType type, const UUID &u);
 
-    void update_frame(const std::string &filename, bool partial);
-    void update_decal(const std::string &filename, bool partial);
-    void update_part(const std::string &filename, bool partial);
-    void update_unit(const std::string &filename, bool partial);
-    void update_symbol(const std::string &filename, bool partial);
-    void update_entity(const std::string &filename, bool partial);
-    void update_package(const std::string &filename, bool partial);
+    void update_frame(const std::string &filename);
+    void update_decal(const std::string &filename);
+    void update_part(const std::string &filename);
+    void update_unit(const std::string &filename);
+    void update_symbol(const std::string &filename);
+    void update_entity(const std::string &filename);
+    void update_package(const std::string &filename);
     void update_padstack(const std::string &filename);
 
     void part_add_dir_to_graph(PoolUpdateGraph &graph, const std::string &directory);

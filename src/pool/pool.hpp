@@ -11,6 +11,7 @@
 #include <set>
 #include <vector>
 #include "ipool.hpp"
+#include "pool_info.hpp"
 
 #include "util/sqlite.hpp"
 
@@ -53,6 +54,11 @@ public:
         return nullptr;
     }
 
+    const PoolInfo &get_pool_info() const override
+    {
+        return pool_info;
+    }
+
     /**
      * The database connection.
      * You may use it to perform more advanced queries on the pool.
@@ -70,7 +76,9 @@ public:
     static const UUID tmp_pool_uuid;
 
 protected:
-    std::string base_path;
+    const std::string base_path;
+    const PoolInfo pool_info;
+
     std::string get_flat_filename(ObjectType type, const UUID &uu) const;
 
     std::map<UUID, Unit> units;

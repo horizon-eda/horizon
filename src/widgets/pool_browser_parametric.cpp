@@ -369,7 +369,7 @@ void PoolBrowserParametric::search()
               "all_derived.uuidy = parts.base) ";
     }
     qs += "SELECT p.*, parts.MPN, parts.manufacturer, packages.name, parts.filename, parts.pool_uuid, "
-          "parts.overridden "
+          "parts.last_pool_uuid "
           "FROM "
           + table.name
           + " AS p LEFT JOIN pool.parts USING (uuid) LEFT JOIN pool.packages ON parts.package = packages.uuid ";
@@ -424,7 +424,7 @@ void PoolBrowserParametric::search()
             std::string manufacturer = q.get<std::string>(ofs + 1);
             std::string package = q.get<std::string>(ofs + 2);
             row[list_columns.path] = q.get<std::string>(ofs + 3);
-            row[list_columns.source] = pool_item_source_from_db(q.get<std::string>(ofs + 4), q.get<int>(ofs + 5));
+            row[list_columns.source] = pool_item_source_from_db(q, ofs + 4, ofs + 5);
             row[list_columns.manufacturer] = manufacturer;
             row[list_columns.package] = package;
             values_remaining["_manufacturer"].emplace(manufacturer);

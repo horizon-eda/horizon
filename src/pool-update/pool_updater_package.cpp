@@ -74,30 +74,24 @@ void PoolUpdater::update_package_node(const PoolUpdateNode &node, std::set<UUID>
 
     auto filename = node.filename;
     if (filename.size())
-        update_package(filename, false);
+        update_package(filename);
 
     for (const auto dependant : node.dependants) {
         update_package_node(*dependant, visited);
     }
 }
 
-void PoolUpdater::update_package(const std::string &filename, bool partial)
+void PoolUpdater::update_package(const std::string &filename)
 {
     try {
         status_cb(PoolUpdateStatus::FILE, filename, "");
         auto package = Package::new_from_file(filename, *pool);
-        bool overridden = false;
-        if (exists(ObjectType::PACKAGE, package.uuid)) {
-            overridden = true;
-            delete_item(ObjectType::PACKAGE, package.uuid);
-        }
-        if (partial)
-            overridden = false;
+        const auto last_pool_uuid = handle_override(ObjectType::PACKAGE, package.uuid);
         SQLite::Query q(pool->db,
                         "INSERT INTO packages "
-                        "(uuid, name, manufacturer, filename, n_pads, alternate_for, pool_uuid, overridden) "
+                        "(uuid, name, manufacturer, filename, n_pads, alternate_for, pool_uuid, last_pool_uuid) "
                         "VALUES "
-                        "($uuid, $name, $manufacturer, $filename, $n_pads, $alt_for, $pool_uuid, $overridden)");
+                        "($uuid, $name, $manufacturer, $filename, $n_pads, $alt_for, $pool_uuid, $last_pool_uuid)");
         q.bind("$uuid", package.uuid);
         q.bind("$name", package.name);
         q.bind("$manufacturer", package.manufacturer);
@@ -110,7 +104,7 @@ void PoolUpdater::update_package(const std::string &filename, bool partial)
         auto rel = bp->get_relative_path(Gio::File::create_for_path(filename));
         q.bind("$filename", rel);
         q.bind("$pool_uuid", pool_uuid);
-        q.bind("$overridden", overridden);
+        q.bind("$last_pool_uuid", last_pool_uuid);
         q.step();
         for (const auto &it_tag : package.tags) {
             add_tag(ObjectType::PACKAGE, package.uuid, it_tag);

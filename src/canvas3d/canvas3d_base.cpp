@@ -493,14 +493,8 @@ std::map<std::string, std::string> Canvas3DBase::get_model_filenames(IPool &pool
             std::string model_filename;
             const Package *pool_package = nullptr;
 
-            UUID this_pool_uuid;
+            UUID this_pool_uuid = pool.get_pool_info().uuid;
             UUID pkg_pool_uuid;
-            auto base_path = pool.get_base_path();
-            const auto &pools = PoolManager::get().get_pools();
-            if (pools.count(base_path))
-                this_pool_uuid = pools.at(base_path).uuid;
-
-
             try {
                 pool_package = pool.get_package(it.second.package.uuid, &pkg_pool_uuid);
             }

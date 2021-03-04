@@ -11,7 +11,7 @@ void PoolUpdater::update_symbols(const std::string &directory, const std::string
     for (const auto &it : dir) {
         std::string filename = Glib::build_filename(directory, it);
         if (endswith(it, ".json")) {
-            update_symbol(filename, false);
+            update_symbol(filename);
         }
         else if (Glib::file_test(filename, Glib::FILE_TEST_IS_DIR)) {
             update_symbols(filename, Glib::build_filename(prefix, it));
@@ -19,29 +19,22 @@ void PoolUpdater::update_symbols(const std::string &directory, const std::string
     }
 }
 
-void PoolUpdater::update_symbol(const std::string &filename, bool partial)
+void PoolUpdater::update_symbol(const std::string &filename)
 {
     try {
         status_cb(PoolUpdateStatus::FILE, filename, "");
         auto symbol = Symbol::new_from_file(filename, *pool);
-        bool overridden = false;
-        if (exists(ObjectType::SYMBOL, symbol.uuid)) {
-            overridden = true;
-            delete_item(ObjectType::SYMBOL, symbol.uuid);
-        }
-        if (partial)
-            overridden = false;
-
+        const auto last_pool_uuid = handle_override(ObjectType::SYMBOL, symbol.uuid);
         SQLite::Query q(pool->db,
                         "INSERT INTO symbols "
-                        "(uuid, name, filename, unit, pool_uuid, overridden) "
+                        "(uuid, name, filename, unit, pool_uuid, last_pool_uuid) "
                         "VALUES "
-                        "($uuid, $name, $filename, $unit, $pool_uuid, $overridden)");
+                        "($uuid, $name, $filename, $unit, $pool_uuid, $last_pool_uuid)");
         q.bind("$uuid", symbol.uuid);
         q.bind("$name", symbol.name);
         q.bind("$unit", symbol.unit->uuid);
         q.bind("$pool_uuid", pool_uuid);
-        q.bind("$overridden", overridden);
+        q.bind("$last_pool_uuid", last_pool_uuid);
         q.bind("$filename", get_path_rel(filename));
         q.step();
         add_dependency(ObjectType::SYMBOL, symbol.uuid, ObjectType::UNIT, symbol.unit->uuid);
