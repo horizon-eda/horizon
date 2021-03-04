@@ -10,7 +10,7 @@ namespace horizon {
 class CoreSchematic : public Core, public virtual IDocumentSchematic {
 public:
     CoreSchematic(const std::string &schematic_filename, const std::string &block_filename,
-                  const std::string &pictures_dir, IPool &pool);
+                  const std::string &pictures_dir, IPool &pool, IPool &pool_caching);
     bool has_object_type(ObjectType ty) const override;
 
     Junction *get_junction(const UUID &uu) override;

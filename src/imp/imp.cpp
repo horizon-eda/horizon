@@ -4,7 +4,7 @@
 #include "export_gerber/gerber_export.hpp"
 #include "logger/logger.hpp"
 #include "pool/part.hpp"
-#include "pool/pool_cached.hpp"
+#include "pool/project_pool.hpp"
 #include "property_panels/property_panels.hpp"
 #include "rules/rules_window.hpp"
 #include "util/gtk_util.hpp"
@@ -42,9 +42,9 @@
 
 namespace horizon {
 
-class PoolWithParametric : public PoolCached {
+class PoolWithParametric : public ProjectPool {
 public:
-    PoolWithParametric(const std::string &bp, const std::string &cp) : PoolCached(bp, cp), parametric(bp)
+    PoolWithParametric(const std::string &bp, bool cache) : ProjectPool(bp, cache), parametric(bp)
     {
     }
 
@@ -59,16 +59,30 @@ private:
 
 static std::unique_ptr<Pool> make_pool(const PoolParams &p)
 {
-    if (p.cache_path.size() && Glib::file_test(p.cache_path, Glib::FILE_TEST_IS_DIR)) {
-        return std::make_unique<PoolWithParametric>(p.base_path, p.cache_path);
+    if (PoolInfo(p.base_path).uuid == PoolInfo::project_pool_uuid) {
+        return std::make_unique<PoolWithParametric>(p.base_path, false);
     }
     else {
         return std::make_unique<Pool>(p.base_path);
     }
 }
 
+
+static std::unique_ptr<Pool> make_pool_caching(const PoolParams &p)
+{
+    if (PoolInfo(p.base_path).uuid == PoolInfo::project_pool_uuid) {
+        return std::make_unique<PoolWithParametric>(p.base_path, true);
+    }
+    else {
+        return nullptr;
+    }
+}
+
+
 ImpBase::ImpBase(const PoolParams &params)
-    : pool(make_pool(params)), core(nullptr), sock_broadcast_rx(zctx, ZMQ_SUB), sock_project(zctx, ZMQ_REQ)
+    : pool(make_pool(params)), real_pool_caching(make_pool_caching(params)),
+      pool_caching(real_pool_caching ? real_pool_caching.get() : pool.get()), core(nullptr),
+      sock_broadcast_rx(zctx, ZMQ_SUB), sock_project(zctx, ZMQ_REQ)
 {
     auto ep_broadcast = Glib::getenv("HORIZON_EP_BROADCAST");
     if (ep_broadcast.size()) {

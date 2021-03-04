@@ -9,12 +9,14 @@ namespace horizon {
 
 class BoardHoleDialog : public Gtk::Dialog {
 public:
-    BoardHoleDialog(Gtk::Window *parent, std::set<class BoardHole *> &pads, class IPool &p, class Block &block);
+    BoardHoleDialog(Gtk::Window *parent, std::set<class BoardHole *> &pads, class IPool &p, class IPool &pool_caching,
+                    class Block &block);
     bool valid = false;
 
 
 private:
     class IPool &pool;
+    class IPool &pool_caching;
     class Block &block;
     class ParameterSetEditor *editor = nullptr;
     class PoolBrowserButton *padstack_button = nullptr;

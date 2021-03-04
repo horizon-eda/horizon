@@ -55,6 +55,10 @@ public:
     {
         return m_pool;
     }
+    class IPool &get_pool_caching() override
+    {
+        return m_pool_caching;
+    }
     virtual ObjectType get_object_type() const = 0;
 
     /**
@@ -166,8 +170,9 @@ public:
     }
 
 protected:
-    Core(class IPool &pool);
+    Core(class IPool &pool, IPool *m_pool_caching);
     class IPool &m_pool;
+    class IPool &m_pool_caching;
 
     std::unique_ptr<ToolBase> tool = nullptr;
     type_signal_tool_changed s_signal_tool_changed;

@@ -1,5 +1,4 @@
 #include "board.hpp"
-#include "pool/pool_manager.hpp"
 #include "nlohmann/json.hpp"
 #include "util.hpp"
 #include "export_gerber/gerber_export.hpp"
@@ -14,14 +13,14 @@
 #include "board/board.hpp"
 #include "board/via_padstack_provider.hpp"
 #include "project/project.hpp"
-#include "pool/pool_cached.hpp"
+#include "pool/project_pool.hpp"
 #include "rules/rule_descr.hpp"
 #include "3d_image_exporter.hpp"
 
 class BoardWrapper : public horizon::DocumentBoard {
 public:
     BoardWrapper(const horizon::Project &prj);
-    horizon::PoolCached pool;
+    horizon::ProjectPool pool;
     horizon::Block block;
     horizon::ViaPadstackProvider vpp;
     horizon::Board board;
@@ -34,6 +33,10 @@ public:
         return &block;
     }
     horizon::IPool &get_pool() override
+    {
+        return pool;
+    }
+    horizon::IPool &get_pool_caching() override
     {
         return pool;
     }
@@ -81,9 +84,8 @@ class BoardWrapper *create_board_wrapper(const horizon::Project &prj)
 }
 
 BoardWrapper::BoardWrapper(const horizon::Project &prj)
-    : pool(horizon::PoolManager::get().get_by_uuid(prj.pool_uuid)->base_path, prj.pool_cache_directory),
-      block(horizon::Block::new_from_file(prj.get_top_block().block_filename, pool)), vpp(prj.vias_directory, pool),
-      board(horizon::Board::new_from_file(prj.board_filename, block, pool, vpp))
+    : pool(prj.pool_directory, false), block(horizon::Block::new_from_file(prj.get_top_block().block_filename, pool)),
+      vpp(prj.vias_directory, pool), board(horizon::Board::new_from_file(prj.board_filename, block, pool, vpp))
 {
     board.expand();
     board.update_planes();

@@ -51,7 +51,7 @@ ToolResponse ToolAssignPart::begin(const ToolArgs &args)
         }
     }
     if (part_uuid) {
-        auto part = doc.r->get_pool().get_part(part_uuid);
+        auto part = doc.r->get_pool_caching().get_part(part_uuid);
         if (part->entity->uuid != entity->uuid) {
             imp->tool_bar_flash("wrong entity");
             return ToolResponse::end();

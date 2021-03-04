@@ -16,7 +16,7 @@ ToolResponse ToolPlaceDecal::begin(const ToolArgs &args)
 {
     if (auto r = imp->dialogs.select_decal(doc.b->get_pool())) {
         auto uu = UUID::random();
-        const auto &dec = *doc.b->get_pool().get_decal(*r);
+        const auto &dec = *doc.b->get_pool_caching().get_decal(*r);
         temp = &doc.b->get_board()
                         ->decals
                         .emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, dec))

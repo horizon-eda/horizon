@@ -14,9 +14,10 @@
 
 namespace horizon {
 
-BoardHoleDialog::BoardHoleDialog(Gtk::Window *parent, std::set<BoardHole *> &holes, IPool &p, Block &b)
+BoardHoleDialog::BoardHoleDialog(Gtk::Window *parent, std::set<BoardHole *> &holes, IPool &p, IPool &p_caching,
+                                 Block &b)
     : Gtk::Dialog("Edit hole", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
-      pool(p), block(b)
+      pool(p), pool_caching(p_caching), block(b)
 {
     set_default_size(300, 600);
     add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
@@ -53,7 +54,7 @@ BoardHoleDialog::BoardHoleDialog(Gtk::Window *parent, std::set<BoardHole *> &hol
     padstack_apply_all_button->set_image_from_icon_name("object-select-symbolic", Gtk::ICON_SIZE_BUTTON);
     padstack_apply_all_button->set_tooltip_text("Apply to all pads");
     padstack_apply_all_button->signal_clicked().connect([this, holes] {
-        auto ps = pool.get_padstack(padstack_button->property_selected_uuid());
+        auto ps = pool_caching.get_padstack(padstack_button->property_selected_uuid());
         for (auto &it : holes) {
             it->pool_padstack = ps;
             it->padstack = *ps;

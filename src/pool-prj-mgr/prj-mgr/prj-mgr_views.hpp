@@ -36,11 +36,7 @@ public:
     PoolProjectManagerViewProject(const Glib::RefPtr<Gtk::Builder> &refBuilder, class PoolProjectManagerAppWindow *w);
     Gtk::Label *label_project_title = nullptr;
     Gtk::Label *label_project_author = nullptr;
-    Gtk::Label *label_pool_name = nullptr;
-    Gtk::Label *label_pool_path = nullptr;
     Gtk::Label *label_project_directory = nullptr;
-    Gtk::InfoBar *pool_info_bar = nullptr;
-    Gtk::Label *pool_info_bar_label = nullptr;
 
     void open_top_schematic();
     void open_board();
@@ -53,13 +49,11 @@ private:
     Gtk::Button *button_top_schematic = nullptr;
     Gtk::Button *button_board = nullptr;
     Gtk::Button *button_part_browser = nullptr;
-    Gtk::Button *button_pool_cache = nullptr;
-    Gtk::Button *button_change_pool = nullptr;
+    Gtk::Button *button_project_pool = nullptr;
     Gtk::Label *pool_cache_status_label = nullptr;
 
 
     void handle_button_part_browser();
-    void handle_button_pool_cache();
-    void handle_button_change_pool();
+    void handle_button_project_pool();
 };
 } // namespace horizon

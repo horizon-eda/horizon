@@ -39,8 +39,6 @@ public:
     PoolProjectManagerProcess *spawn(PoolProjectManagerProcess::Type type, const std::vector<std::string> &args,
                                      const std::vector<std::string> &env = {}, bool read_only = false,
                                      bool is_temp = false);
-    PoolProjectManagerProcess *spawn_for_project(PoolProjectManagerProcess::Type type,
-                                                 const std::vector<std::string> &args);
 
     std::map<UUID, PoolProjectManagerProcess *> get_processes();
 
@@ -73,7 +71,7 @@ public:
     std::string get_proc_filename(const UUID &uu);
     void process_save(const UUID &uu);
     void process_close(const UUID &uu);
-    void cleanup_pool_cache();
+    bool cleanup_pool_cache(Gtk::Window *parent);
 
     enum class ViewMode { OPEN, POOL, DOWNLOAD, PROJECT, CREATE_PROJECT, CREATE_POOL };
     ViewMode get_view_mode() const;
@@ -142,8 +140,6 @@ private:
     bool project_needs_save = false;
     void save_project();
     class PartBrowserWindow *part_browser_window = nullptr;
-    class PoolCacheWindow *pool_cache_window = nullptr;
-    std::unique_ptr<class PoolCacheMonitor> pool_cache_monitor;
     void cleanup();
 
     ViewMode view_mode = ViewMode::OPEN;

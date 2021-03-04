@@ -50,7 +50,8 @@ ToolResponse ToolManageBuses::begin(const ToolArgs &args)
         r = imp->dialogs.manage_net_classes(*sch->block);
     }
     else if (tool_id == ToolID::EDIT_SCHEMATIC_PROPERTIES) {
-        r = imp->dialogs.edit_schematic_properties(*doc.c->get_schematic(), doc.c->get_pool());
+        r = imp->dialogs.edit_schematic_properties(*doc.c->get_schematic(), doc.c->get_pool(),
+                                                   doc.c->get_pool_caching());
     }
     else if (tool_id == ToolID::EDIT_STACKUP) {
         r = imp->dialogs.edit_stackup(*doc.b);

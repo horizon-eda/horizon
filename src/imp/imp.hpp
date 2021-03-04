@@ -84,6 +84,8 @@ protected:
     std::optional<GridController> grid_controller;
 
     std::unique_ptr<Pool> pool;
+    std::unique_ptr<Pool> real_pool_caching;
+    Pool *pool_caching;
     class Core *core = nullptr;
     std::unique_ptr<ClipboardBase> clipboard = nullptr;
     std::unique_ptr<ClipboardHandler> clipboard_handler = nullptr;

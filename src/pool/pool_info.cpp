@@ -4,6 +4,9 @@
 #include "nlohmann/json.hpp"
 
 namespace horizon {
+
+const UUID PoolInfo::project_pool_uuid = UUID("466088f9-3f15-420d-af8a-fff902537aed");
+
 PoolInfo::PoolInfo(const std::string &bp) : base_path(bp)
 {
     auto pool_json = Glib::build_filename(base_path, "pool.json");
@@ -17,6 +20,15 @@ PoolInfo::PoolInfo(const std::string &bp) : base_path(bp)
             pools_included.emplace_back(it.get<std::string>());
         }
     }
+}
+
+PoolInfo::PoolInfo()
+{
+}
+
+bool PoolInfo::is_project_pool() const
+{
+    return uuid == project_pool_uuid;
 }
 
 void PoolInfo::save() const

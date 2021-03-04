@@ -48,7 +48,7 @@ ToolResponse ToolAddPart::begin(const ToolArgs &args)
             }
         }
         imp->part_placed(part_uuid);
-        auto part = doc.c->get_pool().get_part(part_uuid);
+        auto part = doc.c->get_pool_caching().get_part(part_uuid);
 
         auto uu = UUID::random();
         comp = &sch->block->components.emplace(uu, uu).first->second;
@@ -59,7 +59,7 @@ ToolResponse ToolAddPart::begin(const ToolArgs &args)
         if (auto r = imp->dialogs.select_entity(doc.r->get_pool())) {
             auto uu = UUID::random();
             comp = &sch->block->components.emplace(uu, uu).first->second;
-            comp->entity = doc.c->get_pool().get_entity(*r);
+            comp->entity = doc.c->get_pool_caching().get_entity(*r);
         }
         else {
             return ToolResponse::end();

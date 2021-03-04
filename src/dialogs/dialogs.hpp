@@ -43,12 +43,13 @@ public:
     bool manage_power_nets(class Block &b);
     bool manage_via_templates(class Board &b, class ViaPadstackProvider &vpp);
     bool manage_included_boards(class Board &b);
-    bool edit_board_hole(std::set<class BoardHole *> &holes, class IPool &pool, class Block &block);
+    bool edit_board_hole(std::set<class BoardHole *> &holes, class IPool &pool, class IPool &pool_caching,
+                         class Block &block);
     bool annotate(class Schematic &s);
     bool edit_plane(class Plane &plane, class Board &brd);
     bool edit_keepout(class Keepout &keepout, class IDocument &c, bool add_mode);
     bool edit_stackup(class IDocumentBoard &brd);
-    bool edit_schematic_properties(class Schematic &s, class IPool &pool);
+    bool edit_schematic_properties(class Schematic &s, class IPool &pool, class IPool &pool_caching);
     bool edit_frame_properties(class Frame &fr);
     std::optional<int64_t> ask_datum(const std::string &label, int64_t def = 0);
     std::optional<Coordi> ask_datum_coord(const std::string &label, Coordi def = Coordi());

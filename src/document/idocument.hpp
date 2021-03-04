@@ -49,6 +49,7 @@ public:
     virtual class Block *get_block() = 0;
     virtual class Rules *get_rules() = 0;
     virtual class IPool &get_pool() = 0;
+    virtual class IPool &get_pool_caching() = 0;
     virtual class LayerProvider &get_layer_provider() = 0;
 
     virtual std::string get_display_name(ObjectType type, const UUID &uu) = 0;

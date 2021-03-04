@@ -8,7 +8,6 @@
 #include <list>
 #include "nlohmann/json.hpp"
 #include "pool/ipool.hpp"
-#include "pool/pool_cached.hpp"
 #include "common/junction_util.hpp"
 #include "util/bbox_accumulator.hpp"
 

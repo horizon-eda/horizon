@@ -10,7 +10,7 @@ namespace horizon {
 class CoreBoard : public Core, public DocumentBoard {
 public:
     CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
-              const std::string &pictures_dir, IPool &pool);
+              const std::string &pictures_dir, IPool &pool, IPool &pool_caching);
 
     class Block *get_block() override;
     class LayerProvider &get_layer_provider() override;

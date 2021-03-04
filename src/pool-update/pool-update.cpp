@@ -143,17 +143,23 @@ void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb, 
         db.execute("DELETE FROM pools_included");
         unsigned int order = pools_sorted.size();
         for (auto &it : pools_sorted) {
-            auto inc = PoolManager::get().get_by_uuid(it);
-            if (inc) {
-                paths.push_back(inc->base_path);
-                SQLite::Query q(db, "INSERT INTO pools_included (uuid, level) VALUES (?, ?)");
-                q.bind(1, it);
-                q.bind(2, --order);
-                q.step();
+            std::string path;
+            if (it == pool_info.uuid) {
+                path = pool_base_path;
             }
             else {
-                throw std::logic_error("pool " + (std::string)it + " not found");
+                auto inc = PoolManager::get().get_by_uuid(it);
+                if (inc)
+                    path = inc->base_path;
+                else
+                    throw std::logic_error("pool " + (std::string)it + " not found");
             }
+
+            paths.push_back(path);
+            SQLite::Query q(db, "INSERT INTO pools_included (uuid, level) VALUES (?, ?)");
+            q.bind(1, it);
+            q.bind(2, --order);
+            q.step();
         }
         db.execute("COMMIT");
 

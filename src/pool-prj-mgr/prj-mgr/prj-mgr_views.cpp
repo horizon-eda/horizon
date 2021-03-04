@@ -4,11 +4,10 @@
 #include "project/project.hpp"
 #include "pool/pool_manager.hpp"
 #include "nlohmann/json.hpp"
-#include "pool_cache_window.hpp"
 #include "part_browser/part_browser_window.hpp"
-#include "widgets/pool_chooser.hpp"
 #include "widgets/project_meta_editor.hpp"
 #include "block/block.hpp"
+#include "pool/pool_cache_status.hpp"
 
 namespace horizon {
 
@@ -58,10 +57,10 @@ std::pair<bool, std::string> PoolProjectManagerViewCreateProject::create()
         Project prj(UUID::random());
         prj.base_path =
                 Glib::build_filename(project_path_chooser->get_file()->get_path(), meta_values.at("project_name"));
-        prj.pool_uuid = static_cast<std::string>(project_pool_combo->get_active_id());
+        auto pool_uuid = static_cast<std::string>(project_pool_combo->get_active_id());
 
         auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(win->get_application());
-        s = prj.create(meta_values, PoolManager::get().get_by_uuid(prj.pool_uuid)->default_via);
+        s = prj.create(meta_values, pool_uuid, PoolManager::get().get_by_uuid(pool_uuid)->default_via);
         r = true;
     }
     catch (const std::exception &e) {
@@ -110,29 +109,11 @@ PoolProjectManagerViewProject::PoolProjectManagerViewProject(const Glib::RefPtr<
     builder->get_widget("button_top_schematic", button_top_schematic);
     builder->get_widget("button_board", button_board);
     builder->get_widget("button_part_browser", button_part_browser);
-    builder->get_widget("button_pool_cache", button_pool_cache);
+    builder->get_widget("button_project_pool", button_project_pool);
     builder->get_widget("label_project_title", label_project_title);
     builder->get_widget("label_project_author", label_project_author);
-    builder->get_widget("label_pool_name", label_pool_name);
-    builder->get_widget("label_pool_path", label_pool_path);
     builder->get_widget("label_project_directory", label_project_directory);
-    builder->get_widget("prj_pool_change_button", button_change_pool);
-    builder->get_widget("prj_pool_info_bar", pool_info_bar);
     builder->get_widget("pool_cache_status_label", pool_cache_status_label);
-    label_pool_name->signal_activate_link().connect(
-            [this](const Glib::ustring &l) {
-                auto path = Glib::build_filename(l, "pool.json");
-                for (auto ws : win->app->get_windows()) {
-                    auto wi = dynamic_cast<PoolProjectManagerAppWindow *>(ws);
-                    if (wi && wi->get_filename() == path) {
-                        wi->present();
-                        return true;
-                    }
-                }
-                win->app->open_pool(path);
-                return true;
-            },
-            false);
 
     Gtk::Button *open_button;
     builder->get_widget("prj_open_dir_button", open_button);
@@ -157,38 +138,13 @@ PoolProjectManagerViewProject::PoolProjectManagerViewProject(const Glib::RefPtr<
         }
     });
 
-    pool_info_bar->hide();
-    auto reopen_button = pool_info_bar->add_button("Reopen project", 1);
-    reopen_button->signal_clicked().connect([this] {
-        Glib::signal_idle().connect_once([this] {
-            std::string prj_filename = win->project_filename;
-            if (win->close_pool_or_project()) {
-                win->open_file_view(Gio::File::create_for_path(prj_filename));
-            }
-        });
-    });
-
     button_top_schematic->signal_clicked().connect(
             sigc::mem_fun(*this, &PoolProjectManagerViewProject::open_top_schematic));
     button_board->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerViewProject::open_board));
     button_part_browser->signal_clicked().connect(
             sigc::mem_fun(*this, &PoolProjectManagerViewProject::handle_button_part_browser));
-    button_pool_cache->signal_clicked().connect(
-            sigc::mem_fun(*this, &PoolProjectManagerViewProject::handle_button_pool_cache));
-    button_change_pool->signal_clicked().connect(
-            sigc::mem_fun(*this, &PoolProjectManagerViewProject::handle_button_change_pool));
-}
-
-
-void PoolProjectManagerViewProject::handle_button_change_pool()
-{
-    PoolChooserDialog dia(win);
-    dia.select_pool(win->project->pool_uuid);
-    if (dia.run() == Gtk::RESPONSE_OK) {
-        win->project->pool_uuid = dia.get_selected_pool();
-        pool_info_bar->show();
-        win->project_needs_save = true;
-    }
+    button_project_pool->signal_clicked().connect(
+            sigc::mem_fun(*this, &PoolProjectManagerViewProject::handle_button_project_pool));
 }
 
 void PoolProjectManagerViewProject::open_top_schematic()
@@ -196,7 +152,7 @@ void PoolProjectManagerViewProject::open_top_schematic()
     auto prj = win->project.get();
     auto top_block = prj->get_top_block();
     std::vector<std::string> args = {top_block.schematic_filename, top_block.block_filename, prj->pictures_directory};
-    win->spawn_for_project(PoolProjectManagerProcess::Type::IMP_SCHEMATIC, args);
+    win->spawn(PoolProjectManagerProcess::Type::IMP_SCHEMATIC, args);
 }
 
 void PoolProjectManagerViewProject::open_board()
@@ -207,7 +163,7 @@ void PoolProjectManagerViewProject::open_board()
     if (top_block != prj->blocks.end()) {
         std::vector<std::string> args = {prj->board_filename, top_block->second.block_filename, prj->vias_directory,
                                          prj->pictures_directory};
-        win->spawn_for_project(PoolProjectManagerProcess::Type::IMP_BOARD, args);
+        win->spawn(PoolProjectManagerProcess::Type::IMP_BOARD, args);
     }
 }
 
@@ -216,10 +172,17 @@ void PoolProjectManagerViewProject::handle_button_part_browser()
     win->part_browser_window->present();
 }
 
-void PoolProjectManagerViewProject::handle_button_pool_cache()
+void PoolProjectManagerViewProject::handle_button_project_pool()
 {
-    win->update_pool_cache_status_now();
-    win->pool_cache_window->present();
+    auto path = Glib::build_filename(win->project->pool_directory, "pool.json");
+    for (auto ws : win->app->get_windows()) {
+        auto wi = dynamic_cast<PoolProjectManagerAppWindow *>(ws);
+        if (wi && wi->get_filename() == path) {
+            wi->present();
+            return;
+        }
+    }
+    win->app->open_pool(path);
 }
 
 bool PoolProjectManagerViewProject::update_meta()

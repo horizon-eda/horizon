@@ -3,14 +3,14 @@
 #include "block/block.hpp"
 #include "schematic/schematic.hpp"
 #include "project/project.hpp"
-#include "pool/pool_cached.hpp"
+#include "pool/project_pool.hpp"
 
 extern PyTypeObject SchematicType;
 
 class SchematicWrapper {
 public:
     SchematicWrapper(const horizon::Project &prj, const horizon::UUID &block_uuid);
-    horizon::PoolCached pool;
+    horizon::ProjectPool pool;
     horizon::Block block;
     horizon::Schematic schematic;
 };

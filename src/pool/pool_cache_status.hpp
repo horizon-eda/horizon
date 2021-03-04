@@ -14,8 +14,10 @@ public:
     public:
         std::string name;
         std::string filename_cached;
+        std::string filename_pool;
         ObjectType type;
         UUID uuid;
+        UUID pool_uuid;
         enum class State { CURRENT, OUT_OF_DATE, MISSING_IN_POOL };
 
         State state;
@@ -27,5 +29,6 @@ public:
     unsigned int n_current = 0;
     unsigned int n_missing = 0;
     unsigned int n_out_of_date = 0;
+    static PoolCacheStatus from_project_pool(class IPool &pool);
 };
 } // namespace horizon

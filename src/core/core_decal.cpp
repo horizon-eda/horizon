@@ -6,7 +6,7 @@
 
 namespace horizon {
 CoreDecal::CoreDecal(const std::string &decal_filename, IPool &pool)
-    : Core(pool), decal(Decal::new_from_file(decal_filename)), m_decal_filename(decal_filename)
+    : Core(pool, nullptr), decal(Decal::new_from_file(decal_filename)), m_decal_filename(decal_filename)
 {
     rebuild();
 }

@@ -11,10 +11,10 @@
 
 namespace horizon {
 CoreSchematic::CoreSchematic(const std::string &schematic_filename, const std::string &block_filename,
-                             const std::string &pictures_dir, IPool &pool)
-    : Core(pool), block(Block::new_from_file(block_filename, pool)),
+                             const std::string &pictures_dir, IPool &pool, IPool &pool_caching)
+    : Core(pool, &pool_caching), block(Block::new_from_file(block_filename, pool_caching)),
       project_meta_loaded_from_block(block->project_meta.size()),
-      sch(Schematic::new_from_file(schematic_filename, *block, pool)), rules(sch->rules),
+      sch(Schematic::new_from_file(schematic_filename, *block, pool_caching)), rules(sch->rules),
       bom_export_settings(block->bom_export_settings), pdf_export_settings(sch->pdf_export_settings),
       m_schematic_filename(schematic_filename), m_block_filename(block_filename), m_pictures_dir(pictures_dir)
 {
@@ -651,8 +651,9 @@ void CoreSchematic::reload_pool()
     const auto sch_j = sch->serialize();
     const auto block_j = block->serialize();
     m_pool.clear();
-    block.emplace(block->uuid, block_j, m_pool);
-    sch.emplace(sch->uuid, sch_j, *block, m_pool);
+    m_pool_caching.clear();
+    block.emplace(block->uuid, block_j, m_pool_caching);
+    sch.emplace(sch->uuid, sch_j, *block, m_pool_caching);
     history_clear();
     rebuild();
 }

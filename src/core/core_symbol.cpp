@@ -10,7 +10,7 @@
 
 namespace horizon {
 CoreSymbol::CoreSymbol(const std::string &filename, IPool &pool)
-    : Core(pool), sym(Symbol::new_from_file(filename, pool)), m_filename(filename)
+    : Core(pool, nullptr), sym(Symbol::new_from_file(filename, pool)), m_filename(filename)
 {
     rebuild();
 }
