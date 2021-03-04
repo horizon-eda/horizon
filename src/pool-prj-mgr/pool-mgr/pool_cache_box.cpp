@@ -11,6 +11,7 @@
 #include "pool/pool_manager.hpp"
 #include "../pool-prj-mgr-app.hpp"
 #include "../pool-prj-mgr-app_win.hpp"
+#include <iomanip>
 
 namespace horizon {
 
