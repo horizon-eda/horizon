@@ -6,12 +6,12 @@
 #include "common/common.hpp"
 #include "nlohmann/json.hpp"
 #include "pool/pool_cache_status.hpp"
-#include <git2.h>
+#include "util/pool_goto_provider.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
 
-class PoolCacheBox : public Gtk::Box {
+class PoolCacheBox : public Gtk::Box, public PoolGotoProvider {
 public:
     PoolCacheBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class PoolProjectManagerApplication *app,
                  class PoolNotebook *nb, class IPool &pool);

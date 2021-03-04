@@ -127,6 +127,17 @@ PoolCacheBox::PoolCacheBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     }
 
     item_store->set_sort_column(tree_columns.state, Gtk::SORT_ASCENDING);
+
+    pool_item_view->signal_row_activated().connect(
+            [this](const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *column) {
+                auto it = item_store->get_iter(path);
+                if (it) {
+                    Gtk::TreeModel::Row row = *it;
+                    const auto &item = row.get_value(tree_columns.item);
+                    if (item.type != ObjectType::MODEL_3D)
+                        s_signal_goto.emit(item.type, item.uuid);
+                }
+            });
 }
 
 void PoolCacheBox::refresh_status()

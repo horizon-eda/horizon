@@ -244,6 +244,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
 
     if (pool.get_pool_info().is_project_pool()) {
         cache_box = PoolCacheBox::create(&appwin->get_app(), this, pool);
+        cache_box->signal_goto().connect(sigc::mem_fun(*this, &PoolNotebook::go_to));
         cache_box->show();
         append_page(*cache_box, "Cache");
         cache_box->unreference();
