@@ -3,6 +3,7 @@
 #include "pool/pool_manager.hpp"
 #include "pool/ipool.hpp"
 #include "pool/pool_info.hpp"
+#include "util/sqlite.hpp"
 
 namespace horizon {
 
@@ -14,6 +15,7 @@ PoolSettingsBox::PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     x->get_widget("pool_settings_name_entry", entry_name);
     x->get_widget("pool_settings_available_listbox", pools_available_listbox);
     x->get_widget("pool_settings_included_listbox", pools_included_listbox);
+    x->get_widget("pool_settings_actually_included_listbox", pools_actually_included_listbox);
     x->get_widget("pool_inc_button", pool_inc_button);
     x->get_widget("pool_excl_button", pool_excl_button);
     x->get_widget("pool_up_button", pool_up_button);
@@ -33,6 +35,7 @@ PoolSettingsBox::PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     pools_included = pool.get_pool_info().pools_included;
 
     update_pools();
+    update_actual();
 }
 
 PoolSettingsBox *PoolSettingsBox::create(PoolNotebook *nb, IPool &p)
@@ -76,6 +79,7 @@ void PoolSettingsBox::pool_updated()
 {
     if (!needs_save)
         hint_label->hide();
+    update_actual();
 }
 
 class PoolListItem : public Gtk::Box {
@@ -194,5 +198,20 @@ void PoolSettingsBox::update_pools()
         }
     }
 }
+
+void PoolSettingsBox::update_actual()
+{
+    for (auto &it : pools_actually_included_listbox->get_children()) {
+        delete it;
+    }
+    SQLite::Query q(pool.get_db(), "SELECT uuid FROM pools_included WHERE level != 0 ORDER BY level ASC");
+    while (q.step()) {
+        const UUID uu = q.get<std::string>(0);
+        auto w = Gtk::manage(new PoolListItem(uu));
+        pools_actually_included_listbox->append(*w);
+        w->show();
+    }
+}
+
 
 } // namespace horizon

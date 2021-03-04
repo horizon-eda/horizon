@@ -26,6 +26,7 @@ private:
     Gtk::Button *save_button = nullptr;
     Gtk::ListBox *pools_available_listbox = nullptr;
     Gtk::ListBox *pools_included_listbox = nullptr;
+    Gtk::ListBox *pools_actually_included_listbox = nullptr;
     Gtk::Button *pool_inc_button = nullptr;
     Gtk::Button *pool_excl_button = nullptr;
     Gtk::Button *pool_up_button = nullptr;
@@ -35,6 +36,7 @@ private:
     std::vector<UUID> pools_included;
 
     void update_pools();
+    void update_actual();
 
     void inc_excl_pool(bool inc);
     void pool_up_down(bool up);
