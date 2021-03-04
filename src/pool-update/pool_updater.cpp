@@ -157,22 +157,7 @@ std::string PoolUpdater::get_path_rel(const std::string &filename) const
 
 void PoolUpdater::update_some(const std::vector<std::string> &filenames, std::set<UUID> &all_parts_updated)
 {
-    std::map<std::string, UUID> base_paths;
-    {
-        SQLite::Query q(pool->db, "SELECT uuid FROM pools_included WHERE level > 0");
-        while (q.step()) {
-            const UUID pool_uu(q.get<std::string>(0));
-            if (auto pool2 = PoolManager::get().get_by_uuid(pool_uu)) {
-                if (!base_paths.emplace(pool2->base_path, pool_uu).second) {
-                    throw std::runtime_error("conflicting base path " + pool2->base_path);
-                }
-            }
-            else {
-                throw std::runtime_error("pool not found");
-            }
-        }
-    }
-    base_paths.emplace(pool->get_base_path(), pool->get_pool_info().uuid);
+    const auto base_paths = pool->get_actually_included_pools(true);
     pool->db.execute("BEGIN TRANSACTION");
     std::set<UUID> parts_updated;
     for (const auto &filename : filenames) {

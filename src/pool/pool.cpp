@@ -314,5 +314,27 @@ bool Pool::check_filename(ObjectType type, const std::string &filename, std::str
     }
 }
 
+std::map<std::string, UUID> Pool::get_actually_included_pools(bool include_self)
+{
+    std::map<std::string, UUID> base_paths;
+    {
+        SQLite::Query q(db, "SELECT uuid FROM pools_included WHERE level > 0");
+        while (q.step()) {
+            const UUID pool_uu(q.get<std::string>(0));
+            if (auto pool2 = PoolManager::get().get_by_uuid(pool_uu)) {
+                if (!base_paths.emplace(pool2->base_path, pool_uu).second) {
+                    throw std::runtime_error("conflicting base path " + pool2->base_path);
+                }
+            }
+            else {
+                throw std::runtime_error("pool not found");
+            }
+        }
+    }
+    if (include_self)
+        base_paths.emplace(get_base_path(), get_pool_info().uuid);
+    return base_paths;
+}
+
 
 } // namespace horizon

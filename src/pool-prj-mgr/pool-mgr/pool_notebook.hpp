@@ -144,5 +144,6 @@ private:
     class PoolCacheBox *cache_box = nullptr;
 
     UUID pool_uuid;
+    sigc::connection pool_item_edited_conn;
 };
 } // namespace horizon
