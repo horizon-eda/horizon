@@ -37,6 +37,7 @@ private:
     void update_pools();
 
     void inc_excl_pool(bool inc);
+    void pool_up_down(bool up);
 
     bool needs_save = false;
     void set_needs_save();

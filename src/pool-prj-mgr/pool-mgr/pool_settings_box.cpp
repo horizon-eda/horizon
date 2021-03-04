@@ -27,6 +27,8 @@ PoolSettingsBox::PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 
     pool_inc_button->signal_clicked().connect([this] { inc_excl_pool(true); });
     pool_excl_button->signal_clicked().connect([this] { inc_excl_pool(false); });
+    pool_up_button->signal_clicked().connect([this] { pool_up_down(true); });
+    pool_down_button->signal_clicked().connect([this] { pool_up_down(false); });
 
     pools_included = pool.get_pool_info().pools_included;
 
@@ -107,6 +109,17 @@ PoolListItem::PoolListItem(const UUID &uu) : Gtk::Box(Gtk::ORIENTATION_VERTICAL,
     }
 }
 
+static std::optional<UUID> pool_from_listbox(Gtk::ListBox *lb)
+{
+    if (auto row = lb->get_selected_row()) {
+        auto it = dynamic_cast<PoolListItem *>(row->get_child());
+        return it->uuid;
+    }
+    else {
+        return {};
+    }
+}
+
 void PoolSettingsBox::inc_excl_pool(bool inc)
 {
     Gtk::ListBox *lb;
@@ -115,40 +128,70 @@ void PoolSettingsBox::inc_excl_pool(bool inc)
     else
         lb = pools_included_listbox;
 
-    if (auto row = lb->get_selected_row()) {
-        auto it = dynamic_cast<PoolListItem *>(row->get_child());
-        UUID uu = it->uuid;
+    if (const auto uu = pool_from_listbox(lb)) {
         if (inc) {
-            pools_included.push_back(uu);
+            pools_included.push_back(*uu);
         }
         else {
-            pools_included.erase(std::remove(pools_included.begin(), pools_included.end(), uu), pools_included.end());
+            pools_included.erase(std::remove(pools_included.begin(), pools_included.end(), *uu), pools_included.end());
         }
         update_pools();
+        set_needs_save();
     }
-    set_needs_save();
+}
+
+void PoolSettingsBox::pool_up_down(bool up)
+{
+    if (const auto sel = pool_from_listbox(pools_included_listbox)) {
+        const auto uu = *sel;
+        auto it = std::find(pools_included.begin(), pools_included.end(), uu);
+        if (it == pools_included.end())
+            throw std::logic_error("pool not found");
+        if (up && it != pools_included.begin()) {
+            std::swap(*it, *(it - 1));
+            update_pools();
+            set_needs_save();
+        }
+        else if (!up && (it != (pools_included.end() - 1))) {
+            std::swap(*it, *(it + 1));
+            update_pools();
+            set_needs_save();
+        }
+    }
 }
 
 void PoolSettingsBox::update_pools()
 {
-    for (auto &it : pools_available_listbox->get_children()) {
-        delete it;
-    }
-    for (const auto &it : PoolManager::get().get_pools()) {
-        if (it.second.enabled && it.second.uuid != pool.get_pool_info().uuid
-            && std::count(pools_included.begin(), pools_included.end(), it.second.uuid) == 0) {
-            auto w = Gtk::manage(new PoolListItem(it.second.uuid));
-            pools_available_listbox->append(*w);
-            w->show();
+    {
+        const auto sel = pool_from_listbox(pools_available_listbox);
+        for (auto &it : pools_available_listbox->get_children()) {
+            delete it;
+        }
+        for (const auto &it : PoolManager::get().get_pools()) {
+            if (it.second.enabled && it.second.uuid != pool.get_pool_info().uuid
+                && std::count(pools_included.begin(), pools_included.end(), it.second.uuid) == 0) {
+                auto w = Gtk::manage(new PoolListItem(it.second.uuid));
+                pools_available_listbox->append(*w);
+                w->show();
+                if (sel && it.second.uuid == *sel) {
+                    pools_available_listbox->select_row(dynamic_cast<Gtk::ListBoxRow &>(*w->get_parent()));
+                }
+            }
         }
     }
-    for (auto &it : pools_included_listbox->get_children()) {
-        delete it;
-    }
-    for (const auto &uu : pools_included) {
-        auto w = Gtk::manage(new PoolListItem(uu));
-        pools_included_listbox->append(*w);
-        w->show();
+    {
+        const auto sel = pool_from_listbox(pools_included_listbox);
+        for (auto &it : pools_included_listbox->get_children()) {
+            delete it;
+        }
+        for (const auto &uu : pools_included) {
+            auto w = Gtk::manage(new PoolListItem(uu));
+            pools_included_listbox->append(*w);
+            w->show();
+            if (sel && uu == *sel) {
+                pools_included_listbox->select_row(dynamic_cast<Gtk::ListBoxRow &>(*w->get_parent()));
+            }
+        }
     }
 }
 
