@@ -82,12 +82,12 @@ PoolCacheStatus PoolCacheStatus::from_project_pool(class IPool &pool)
         }
     }
     {
-        const auto models_path = fs::path(pool.get_base_path()) / "3d_models" / "cache";
+        const auto models_path = fs::u8path(pool.get_base_path()) / "3d_models" / "cache";
         if (fs::is_directory(models_path)) {
             for (const auto &it_pool_dir : fs::directory_iterator(models_path)) {
                 const UUID pool_uuid(it_pool_dir.path().filename().string());
                 if (auto it_pool = PoolManager::get().get_by_uuid(pool_uuid)) {
-                    const auto this_pool_base_path = fs::path(it_pool->base_path);
+                    const auto this_pool_base_path = fs::u8path(it_pool->base_path);
                     for (const auto &filename_cached_entry : fs::recursive_directory_iterator(it_pool_dir)) {
                         if (filename_cached_entry.is_regular_file()) {
                             const auto filename_cached = filename_cached_entry.path();
@@ -96,14 +96,14 @@ PoolCacheStatus PoolCacheStatus::from_project_pool(class IPool &pool)
                             status.n_total++;
                             const auto filename_rel = fs::relative(filename_cached, it_pool_dir);
                             const auto filename_pool = this_pool_base_path / filename_rel;
-                            item.filename_cached = filename_cached;
-                            item.filename_pool = filename_pool;
-                            item.name = filename_cached.filename();
+                            item.filename_cached = filename_cached.u8string();
+                            item.filename_pool = filename_pool.u8string();
+                            item.name = filename_cached.filename().u8string();
                             item.type = ObjectType::MODEL_3D;
                             item.uuid = UUID::random();
                             item.pool_uuid = pool_uuid;
                             if (fs::is_regular_file(filename_pool)) {
-                                if (compare_files(filename_cached, filename_pool)) {
+                                if (compare_files(filename_cached.u8string(), filename_pool.u8string())) {
                                     item.state = PoolCacheStatus::Item::State::CURRENT;
                                     status.n_current++;
                                 }
