@@ -92,6 +92,9 @@ protected:
 
     Gtk::Box *status_box = nullptr;
 
+    std::string get_tags_query(const std::set<std::string> &tags) const;
+    void bind_tags_query(SQLite::Query &q, const std::set<std::string> &tags) const;
+
 private:
     Gtk::Grid *grid = nullptr;
     int grid_top = 0;

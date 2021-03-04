@@ -80,43 +80,26 @@ void PoolBrowserPackage::search()
     prepare_search();
 
     Gtk::TreeModel::Row row;
-    std::string name_search = name_entry->get_text();
-    std::string manufacturer_search = manufacturer_entry->get_text();
+    const std::string name_search = name_entry->get_text();
+    const std::string manufacturer_search = manufacturer_entry->get_text();
 
-    auto tags = tag_entry->get_tags();
-    std::ostringstream qs;
-    qs << "SELECT packages.uuid, packages.name, packages.manufacturer, "
-          "packages.n_pads, tags_view.tags, packages.filename, packages.pool_uuid, packages.last_pool_uuid "
-          "FROM packages "
-          "LEFT JOIN tags_view ON tags_view.uuid = packages.uuid AND tags_view.type = 'package' ";
-
-    if (tags.size()) {
-        qs << "INNER JOIN (SELECT uuid FROM tags WHERE tags.tag IN (";
-        int i = 0;
-        for (const auto &it : tags) {
-            (void)sizeof it;
-            qs << "$tag" << i << ", ";
-            i++;
-        }
-        qs << "'') AND tags.type = 'package' "
-              "GROUP by tags.uuid HAVING count(*) >= $ntags) as x ON x.uuid = packages.uuid ";
-    }
-    qs << "WHERE packages.name LIKE $name AND packages.manufacturer LIKE $manufacturer ";
+    const auto tags = tag_entry->get_tags();
+    std::string query =
+            "SELECT packages.uuid, packages.name, packages.manufacturer, "
+            "packages.n_pads, tags_view.tags, packages.filename, packages.pool_uuid, packages.last_pool_uuid "
+            "FROM packages "
+            "LEFT JOIN tags_view ON tags_view.uuid = packages.uuid AND tags_view.type = 'package' ";
+    query += get_tags_query(tags);
+    query += "WHERE packages.name LIKE $name AND packages.manufacturer LIKE $manufacturer ";
     if (pads_cb && pads_cb->get_active()) {
-        qs << "AND packages.n_pads = $npads ";
+        query += "AND packages.n_pads = $npads ";
     }
-    qs << sort_controller->get_order_by();
+    query += sort_controller->get_order_by();
 
-    SQLite::Query q(pool.get_db(), qs.str());
+    SQLite::Query q(pool.get_db(), query);
     q.bind("$name", "%" + name_search + "%");
     q.bind("$manufacturer", "%" + manufacturer_search + "%");
-    int i = 0;
-    for (const auto &it : tags) {
-        q.bind(("$tag" + std::to_string(i)).c_str(), it);
-        i++;
-    }
-    if (tags.size())
-        q.bind("$ntags", tags.size());
+    bind_tags_query(q, tags);
     if (pads_cb && pads_cb->get_active()) {
         q.bind("$npads", pads_sp->get_value_as_int());
     }

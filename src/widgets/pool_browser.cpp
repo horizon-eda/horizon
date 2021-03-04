@@ -1,5 +1,5 @@
 #include "pool_browser.hpp"
-#include "pool/ipool.hpp"
+#include "pool/pool.hpp"
 #include <set>
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
@@ -454,6 +454,37 @@ void PoolBrowser::finish_search()
     scroll_to_selection();
     auto n_items = store->children().size();
     status_label->set_text(format_digits(n_items, 5) + " " + (n_items == 1 ? "Result" : "Results"));
+}
+
+std::string PoolBrowser::get_tags_query(const std::set<std::string> &tags) const
+{
+    if (tags.size() == 0)
+        return "";
+    std::string query;
+    query += "INNER JOIN (SELECT uuid FROM tags WHERE tags.tag IN (";
+    int i = 0;
+    for (const auto &it : tags) {
+        (void)it;
+        query += "$tag" + std::to_string(i) + ", ";
+        i++;
+    }
+    query += "'') AND tags.type = $tag_type "
+             "GROUP by tags.uuid HAVING count(*) >= $ntags) as x_tags ON x_tags.uuid = "
+             + Pool::type_names.at(get_type()) + ".uuid ";
+    return query;
+}
+
+void PoolBrowser::bind_tags_query(SQLite::Query &q, const std::set<std::string> &tags) const
+{
+    int i = 0;
+    for (const auto &it : tags) {
+        q.bind(("$tag" + std::to_string(i)).c_str(), it);
+        i++;
+    }
+    if (tags.size()) {
+        q.bind("$ntags", tags.size());
+        q.bind("$tag_type", get_type());
+    }
 }
 
 } // namespace horizon
