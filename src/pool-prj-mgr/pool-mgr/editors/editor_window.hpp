@@ -73,5 +73,6 @@ private:
 
     WindowStateStore state_store;
     void run_checks();
+    bool read_only;
 };
 } // namespace horizon

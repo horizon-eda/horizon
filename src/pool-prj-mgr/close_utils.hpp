@@ -25,12 +25,14 @@ private:
             Gtk::TreeModelColumnRecord::add(uuid);
             Gtk::TreeModelColumnRecord::add(save);
             Gtk::TreeModelColumnRecord::add(inconsistent);
+            Gtk::TreeModelColumnRecord::add(sensitive);
         }
         Gtk::TreeModelColumn<Glib::ustring> name;
         Gtk::TreeModelColumn<Glib::ustring> display_name;
         Gtk::TreeModelColumn<UUID> uuid;
         Gtk::TreeModelColumn<bool> save;
         Gtk::TreeModelColumn<bool> inconsistent;
+        Gtk::TreeModelColumn<bool> sensitive;
     };
     TreeColumns tree_columns;
 
