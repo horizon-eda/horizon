@@ -461,25 +461,15 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
         UUID uu = j.at("uuid").get<std::string>();
         UUID pool_uu = j.at("pool_uuid").get<std::string>();
         ObjectType type = object_type_lut.lookup(j.at("type"));
-        bool shown = false;
-        for (auto win : app->get_windows()) {
-            auto w = dynamic_cast<PoolProjectManagerAppWindow *>(win);
-            if (w) {
-                if (w->get_view_mode() == ViewMode::POOL && (w->get_pool_uuid() == pool_uu)) {
-                    w->pool_notebook_go_to(type, uu);
-                    w->present(timestamp);
-                    shown = true;
-                }
-            }
+        std::string pool_path;
+        if (pool_uu == PoolInfo::project_pool_uuid && project) {
+            pool_path = project->pool_directory;
         }
-        if (!shown) { // need to open
-            if (pool_uu == PoolInfo::project_pool_uuid && project) {
-                app->open_pool(Glib::build_filename(project->pool_directory, "pool.json"), type, uu, timestamp);
-            }
-            else if (auto pool2 = PoolManager::get().get_by_uuid(pool_uu)) {
-                auto pool_json = Glib::build_filename(pool2->base_path, "pool.json");
-                app->open_pool(pool_json, type, uu, timestamp);
-            }
+        else if (auto pool2 = PoolManager::get().get_by_uuid(pool_uu)) {
+            pool_path = pool2->base_path;
+        }
+        if (pool_path.size()) {
+            app->open_pool(Glib::build_filename(pool_path, "pool.json"), type, uu, timestamp);
         }
     }
     else if (op == "backannotate") {

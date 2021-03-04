@@ -224,7 +224,16 @@ void PoolProjectManagerApplication::on_open(const Gio::Application::type_vec_fil
 void PoolProjectManagerApplication::open_pool(const std::string &pool_json, ObjectType type, const UUID &uu,
                                               guint32 timestamp)
 {
-    auto appwindow = create_appwindow();
+    PoolProjectManagerAppWindow *appwindow = nullptr;
+    for (auto ws : get_windows()) {
+        auto wi = dynamic_cast<PoolProjectManagerAppWindow *>(ws);
+        if (wi && wi->get_filename() == pool_json) {
+            appwindow = wi;
+            break;
+        }
+    }
+    if (!appwindow)
+        appwindow = create_appwindow();
     appwindow->open_pool(pool_json, type, uu);
     appwindow->present(timestamp);
 }
