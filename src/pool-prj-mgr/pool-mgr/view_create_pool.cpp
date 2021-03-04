@@ -50,18 +50,17 @@ std::pair<bool, std::string> PoolProjectManagerViewCreatePool::create()
             }
         }
         auto pool_json = Glib::build_filename(base_path, "pool.json");
-        json j;
-        j["type"] = "pool";
-        j["name"] = static_cast<std::string>(pool_name_entry->get_text());
-        j["default_via"] = (std::string)UUID();
-        j["uuid"] = (std::string)UUID::random();
+        PoolInfo pool_info;
+        pool_info.name = pool_name_entry->get_text();
+        pool_info.default_via = UUID();
+        pool_info.uuid = UUID::random();
+        pool_info.base_path = base_path;
+        pool_info.save();
 
         for (const auto &[type, name] : Pool::type_names) {
             mkdir_pool(base_path, name);
         }
         mkdir_pool(base_path, "3d_models");
-
-        save_json_to_file(pool_json, j);
 
         {
             auto ofs = make_ofstream(Glib::build_filename(base_path, ".gitignore"));
