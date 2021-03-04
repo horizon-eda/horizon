@@ -227,14 +227,16 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
                               chan, Glib::IO_IN | Glib::IO_HUP);
 
 
-    Glib::signal_idle().connect_once([this] {
-        update_recent_items();
-        if (PoolManager::get().get_pools().size() == 0) {
-            auto w = WelcomeWindow::create(this);
-            w->set_modal(true);
-            w->present();
-        }
-    });
+    Glib::signal_idle().connect_once(sigc::track_obj(
+            [this] {
+                update_recent_items();
+                if (PoolManager::get().get_pools().size() == 0) {
+                    auto w = WelcomeWindow::create(this);
+                    w->set_modal(true);
+                    w->present();
+                }
+            },
+            *this));
 
     for (auto &lb : recent_listboxes) {
         lb->set_header_func(sigc::ptr_fun(header_func_separator));
