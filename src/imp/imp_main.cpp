@@ -1,6 +1,3 @@
-#include "canvas/canvas.hpp"
-#include "common/common.hpp"
-#include "common/lut.hpp"
 #include "imp.hpp"
 #include "imp_board.hpp"
 #include "imp_package.hpp"
@@ -20,7 +17,6 @@
 #include "util/automatic_prefs.hpp"
 #include <curl/curl.h>
 #include <fstream>
-#include <gtkmm.h>
 #include <iostream>
 #include <memory>
 #ifdef G_OS_WIN32
@@ -118,15 +114,13 @@ int main(int argc, char *argv[])
     options.parse(argc, argv);
 
     auto pool_base_path = Glib::getenv("HORIZON_POOL");
-    auto pool_cache_path = Glib::getenv("HORIZON_POOL_CACHE");
     horizon::setup_locale();
 
     horizon::create_config_dir();
 
     std::unique_ptr<horizon::ImpBase> imp = nullptr;
     if (mode_sch) {
-        imp.reset(new horizon::ImpSchematic(filenames.at(0), filenames.at(1), filenames.at(2),
-                                            {pool_base_path, pool_cache_path}));
+        imp.reset(new horizon::ImpSchematic(filenames.at(0), filenames.at(1), filenames.at(2), {pool_base_path}));
     }
     else if (mode_symbol) {
         imp.reset(new horizon::ImpSymbol(filenames.at(0), pool_base_path));
@@ -139,7 +133,7 @@ int main(int argc, char *argv[])
     }
     else if (mode_board) {
         imp.reset(new horizon::ImpBoard(filenames.at(0), filenames.at(1), filenames.at(2), filenames.at(3),
-                                        {pool_base_path, pool_cache_path}));
+                                        {pool_base_path}));
     }
     else if (mode_frame) {
         imp.reset(new horizon::ImpFrame(filenames.at(0), pool_base_path));
