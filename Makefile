@@ -796,7 +796,7 @@ endif
 
 ifeq ($(OS),Windows_NT)
 	LDFLAGS += -lrpcrt4
-	DEFINES += -DWIN32_UUID
+	DEFINES += -DWIN32_UUID -DGTKMM_USE_GENDEF
 	LDFLAGS_GUI = -Wl,-subsystem,windows
 else
 	UNAME := $(shell uname)
