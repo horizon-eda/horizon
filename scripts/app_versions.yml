@@ -3,6 +3,7 @@ versions:
     1: add holes to PDF export
     2: support pick & place export format customisation
     3: add silkscreen color
+    4: add rule net class regex matching
   schematic:
     1: add custom values on symbols
   project:
