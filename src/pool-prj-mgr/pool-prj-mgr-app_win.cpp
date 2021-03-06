@@ -1000,9 +1000,20 @@ bool PoolProjectManagerAppWindow::migrate_project(const std::string &path)
                     const auto j = load_json_from_file(filename);
                     const auto type = object_type_lut.lookup(j.at("type").get<std::string>());
                     const UUID uu = j.at("uuid").get<std::string>();
-                    const auto dest = fs::u8path(info.base_path) / fs::u8path(Pool::type_names.at(type)) / "cache"
-                                      / ((std::string)uu + ".json");
-                    fs::copy(file.path(), dest);
+                    if (type != ObjectType::PACKAGE) {
+                        const auto dest = fs::u8path(info.base_path) / fs::u8path(Pool::type_names.at(type)) / "cache"
+                                          / ((std::string)uu + ".json");
+                        fs::copy(file.path(), dest);
+                    }
+                    else {
+                        const auto dest_dir = fs::u8path(info.base_path) / fs::u8path(Pool::type_names.at(type))
+                                              / "cache" / ((std::string)uu);
+                        fs::create_directories(dest_dir);
+                        const auto dest = dest_dir / "package.json";
+                        json j_pkg = j;
+                        ProjectPool::patch_package(j_pkg, pool_uuid);
+                        save_json_to_file((dest_dir / "package.json").u8string(), j_pkg);
+                    }
                 }
             }
 
