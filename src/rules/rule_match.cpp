@@ -12,6 +12,7 @@ static const LutEnumStr<RuleMatch::Mode> mode_lut = {
         {"net", RuleMatch::Mode::NET},
         {"net_class", RuleMatch::Mode::NET_CLASS},
         {"net_name_regex", RuleMatch::Mode::NET_NAME_REGEX},
+        {"net_class_regex", RuleMatch::Mode::NET_CLASS_REGEX},
 };
 
 RuleMatch::RuleMatch()
@@ -20,7 +21,8 @@ RuleMatch::RuleMatch()
 
 RuleMatch::RuleMatch(const json &j)
     : mode(mode_lut.lookup(j.at("mode"))), net(j.at("net").get<std::string>()),
-      net_class(j.at("net_class").get<std::string>()), net_name_regex(j.at("net_name_regex").get<std::string>())
+      net_class(j.at("net_class").get<std::string>()), net_name_regex(j.at("net_name_regex").get<std::string>()),
+      net_class_regex(j.value("net_class_regex", ""))
 {
 }
 
@@ -36,6 +38,8 @@ json RuleMatch::serialize() const
     j["net"] = static_cast<std::string>(net);
     j["net_class"] = static_cast<std::string>(net_class);
     j["net_name_regex"] = net_name_regex;
+    if (net_class_regex.size())
+        j["net_class_regex"] = net_class_regex;
 
     return j;
 }
@@ -53,8 +57,15 @@ bool RuleMatch::match(const Net *n) const
         return n && n->net_class->uuid == net_class;
 
     case Mode::NET_NAME_REGEX: {
-        const auto re = Glib::Regex::create(net_name_regex);
+        const Glib::ustring u(net_name_regex);
+        const auto re = Glib::Regex::create(u);
         return n && re->match(n->name);
+    }
+
+    case Mode::NET_CLASS_REGEX: {
+        const Glib::ustring u(net_class_regex);
+        const auto re = Glib::Regex::create(u);
+        return n && n->net_class && re->match(n->net_class->name);
     }
     }
     return false;
@@ -83,6 +94,9 @@ std::string RuleMatch::get_brief(const Block *block) const
 
         case Mode::NET_NAME_REGEX:
             return "Net name regex";
+
+        case Mode::NET_CLASS_REGEX:
+            return "Net class regex";
         }
     }
     else {
@@ -98,6 +112,9 @@ std::string RuleMatch::get_brief(const Block *block) const
 
         case Mode::NET_NAME_REGEX:
             return "Net name regex";
+
+        case Mode::NET_CLASS_REGEX:
+            return "Net class regex";
         }
     }
     return "";
@@ -109,6 +126,7 @@ bool RuleMatch::can_export() const
     case Mode::ALL:
     case Mode::NET_CLASS:
     case Mode::NET_NAME_REGEX:
+    case Mode::NET_CLASS_REGEX:
         return true;
     default:
         return false;

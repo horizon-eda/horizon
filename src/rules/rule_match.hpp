@@ -15,12 +15,13 @@ public:
     void cleanup(const class Block *block);
     bool can_export() const;
 
-    enum class Mode { ALL, NET, NET_CLASS, NET_NAME_REGEX };
+    enum class Mode { ALL, NET, NET_CLASS, NET_NAME_REGEX, NET_CLASS_REGEX };
     Mode mode = Mode::ALL;
 
     UUID net;
     UUID net_class;
     std::string net_name_regex;
+    std::string net_class_regex;
 
     bool match(const class Net *net) const;
 };

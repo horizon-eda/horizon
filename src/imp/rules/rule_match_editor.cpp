@@ -14,6 +14,7 @@ RuleMatchEditor::RuleMatchEditor(RuleMatch &ma, class IDocument &c)
     combo_mode->append(std::to_string(static_cast<int>(RuleMatch::Mode::NET)), "Net");
     combo_mode->append(std::to_string(static_cast<int>(RuleMatch::Mode::NET_CLASS)), "Net class");
     combo_mode->append(std::to_string(static_cast<int>(RuleMatch::Mode::NET_NAME_REGEX)), "Net name (regex)");
+    combo_mode->append(std::to_string(static_cast<int>(RuleMatch::Mode::NET_CLASS_REGEX)), "Net class (regex)");
     combo_mode->set_active_id(std::to_string(static_cast<int>(match.mode)));
     combo_mode->signal_changed().connect([this] {
         match.mode = static_cast<RuleMatch::Mode>(std::stoi(combo_mode->get_active_id()));
@@ -54,6 +55,14 @@ RuleMatchEditor::RuleMatchEditor(RuleMatch &ma, class IDocument &c)
         s_signal_updated.emit();
     });
     sel_stack->add(*net_name_regex_entry, std::to_string(static_cast<int>(RuleMatch::Mode::NET_NAME_REGEX)));
+
+    net_class_regex_entry = Gtk::manage(new Gtk::Entry());
+    net_class_regex_entry->set_text(match.net_class_regex);
+    net_class_regex_entry->signal_changed().connect([this] {
+        match.net_class_regex = net_class_regex_entry->get_text();
+        s_signal_updated.emit();
+    });
+    sel_stack->add(*net_class_regex_entry, std::to_string(static_cast<int>(RuleMatch::Mode::NET_CLASS_REGEX)));
 
     auto *dummy_label = Gtk::manage(new Gtk::Label("matches all nets"));
     sel_stack->add(*dummy_label, std::to_string(static_cast<int>(RuleMatch::Mode::ALL)));
