@@ -1,5 +1,5 @@
 #include "pool_browser.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
 #include <set>
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
@@ -80,7 +80,7 @@ std::string PoolBrowser::get_pool_selector_query() const
     if (pool_selector->get_selected_pool() == UUID())
         return "";
 
-    return " AND (" + Pool::type_names.at(get_type()) + ".pool_uuid = $pool_uuid) ";
+    return " AND (" + IPool::type_names.at(get_type()) + ".pool_uuid = $pool_uuid) ";
 }
 
 void PoolBrowser::bind_pool_selector_query(SQLite::Query &q) const
@@ -516,7 +516,7 @@ std::string PoolBrowser::get_tags_query(const std::set<std::string> &tags) const
     }
     query += "'') AND tags.type = $tag_type "
              "GROUP by tags.uuid HAVING count(*) >= $ntags) as x_tags ON x_tags.uuid = "
-             + Pool::type_names.at(get_type()) + ".uuid ";
+             + IPool::type_names.at(get_type()) + ".uuid ";
     return query;
 }
 

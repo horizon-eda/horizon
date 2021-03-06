@@ -1,9 +1,11 @@
 #pragma once
 #include <string>
 #include <set>
+#include <map>
 
 namespace horizon {
 class UUID;
+enum class ObjectType;
 
 namespace SQLite {
 class Database;
@@ -31,6 +33,9 @@ public:
     virtual class PoolParametric *get_parametric() = 0;
 
     virtual const class PoolInfo &get_pool_info() const = 0;
+
+    static const std::map<ObjectType, std::string> type_names;
+    virtual std::map<std::string, UUID> get_actually_included_pools(bool include_self) = 0;
 
     virtual ~IPool()
     {

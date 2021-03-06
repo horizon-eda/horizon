@@ -278,12 +278,6 @@ std::string Pool::get_model_filename(const UUID &pkg_uuid, const UUID &model_uui
     }
 }
 
-const std::map<ObjectType, std::string> Pool::type_names = {
-        {ObjectType::UNIT, "units"},         {ObjectType::SYMBOL, "symbols"},   {ObjectType::ENTITY, "entities"},
-        {ObjectType::PADSTACK, "padstacks"}, {ObjectType::PACKAGE, "packages"}, {ObjectType::PART, "parts"},
-        {ObjectType::FRAME, "frames"},       {ObjectType::DECAL, "decals"},
-};
-
 bool Pool::check_filename(ObjectType type, const std::string &filename, std::string *error_msg) const
 {
     if (!type_names.count(type)) {

@@ -74,9 +74,8 @@ public:
     static int get_required_schema_version();
     virtual ~Pool();
     static const UUID tmp_pool_uuid;
-    static const std::map<ObjectType, std::string> type_names;
 
-    std::map<std::string, UUID> get_actually_included_pools(bool include_self);
+    std::map<std::string, UUID> get_actually_included_pools(bool include_self) override;
 
 protected:
     const std::string base_path;
