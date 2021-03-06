@@ -33,7 +33,7 @@ public:
     void go_to(const UUID &uu);
     void clear_search();
 
-    enum class PoolItemSource { LOCAL, INCLUDED, OVERRIDDEN, OVERRIDDEN_LOCAL };
+    enum class PoolItemSource { LOCAL, INCLUDED, OVERRIDDEN, OVERRIDDEN_LOCAL, CACHED };
 
 protected:
     void construct(Gtk::Widget *search_box = nullptr);

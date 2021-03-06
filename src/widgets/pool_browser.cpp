@@ -373,9 +373,11 @@ PoolBrowser::PoolItemSource PoolBrowser::pool_item_source_from_db(const UUID &uu
 {
     if (uu == pool_uuid && last_uu == UUID())
         return PoolItemSource::LOCAL;
+    else if (uu == pool_uuid && last_uu != UUID() && uu == PoolInfo::project_pool_uuid)
+        return PoolItemSource::CACHED;
     else if (uu == pool_uuid && last_uu != UUID())
         return PoolItemSource::OVERRIDDEN_LOCAL;
-    if (uu != pool_uuid && last_uu == UUID())
+    else if (uu != pool_uuid && last_uu == UUID())
         return PoolItemSource::INCLUDED;
     else if (uu != pool_uuid && last_uu != UUID())
         return PoolItemSource::OVERRIDDEN;
@@ -420,6 +422,9 @@ void PoolBrowser::install_pool_item_source_tooltip()
                         case PoolItemSource::OVERRIDDEN_LOCAL:
                             tooltip->set_text("Item is from this pool overriding an item from an included pool");
                             break;
+                        case PoolItemSource::CACHED:
+                            tooltip->set_text("Item is cached from an included pool");
+                            break;
                         case PoolItemSource::OVERRIDDEN:
                             tooltip->set_text("Item is from another pool overriding an item from an included pool");
                             break;
@@ -452,8 +457,12 @@ CellRendererColorBox *PoolBrowser::create_pool_item_source_cr(Gtk::TreeViewColum
             co = Color::new_from_int(138, 226, 52);
             break;
 
-        case PoolItemSource::OVERRIDDEN_LOCAL:
+        case PoolItemSource::CACHED:
             co = Color::new_from_int(0x72, 0x9f, 0xcf);
+            break;
+
+        case PoolItemSource::OVERRIDDEN_LOCAL:
+            co = Color::new_from_int(0xad, 0x7f, 0xa8);
             break;
 
         case PoolItemSource::INCLUDED:
