@@ -12,11 +12,27 @@ namespace fs = std::filesystem;
 PoolCacheStatus PoolCacheStatus::from_project_pool(class IPool &pool)
 {
     PoolCacheStatus status;
-    SQLite::Query q(pool.get_db(),
-                    "SELECT type, uuid, name, filename, last_pool_uuid FROM all_items_view WHERE pool_uuid = ? AND "
-                    "last_pool_uuid != '00000000-0000-0000-0000-000000000000'");
+    std::string query =
+            "SELECT type, uuid, name, filename, last_pool_uuid FROM all_items_view WHERE pool_uuid = ? AND "
+            "(last_pool_uuid != '00000000-0000-0000-0000-000000000000' ";
+    for (const auto &[type, name] : Pool::type_names) {
+        query += " OR filename GLOB '" + name + "/cache/*'";
+    }
+    query += ")";
+    SQLite::Query q(pool.get_db(), query);
     q.bind(1, PoolInfo::project_pool_uuid);
+
+    auto included_pools = pool.get_actually_included_pools(false);
     std::map<UUID, Pool> other_pools;
+
+    for (auto &[bp, uu] : included_pools) {
+        if (!other_pools.count(uu)) {
+            if (auto other_pool_info = PoolManager::get().get_by_uuid(uu)) {
+                other_pools.emplace(uu, other_pool_info->base_path);
+            }
+        }
+    }
+
     while (q.step()) {
         const auto filename = q.get<std::string>(3);
         const auto type = q.get<ObjectType>(0);
@@ -42,22 +58,22 @@ PoolCacheStatus PoolCacheStatus::from_project_pool(class IPool &pool)
 
         std::string pool_filename;
 
-        if (!other_pools.count(last_pool_uuid)) {
-            if (auto other_pool_info = PoolManager::get().get_by_uuid(last_pool_uuid)) {
-                other_pools.emplace(last_pool_uuid, other_pool_info->base_path);
+        if (last_pool_uuid) {
+            if (!other_pools.count(last_pool_uuid)) {
+                throw std::runtime_error("pool " + (std::string)last_pool_uuid + " not found in included pools");
+            }
+            auto &other_pool = other_pools.at(last_pool_uuid);
+            try {
+                pool_filename = other_pool.get_filename(type, uuid);
+            }
+            catch (const SQLite::Error &e) {
+                throw;
+            }
+            catch (...) {
+                pool_filename = "";
             }
         }
-        auto &other_pool = other_pools.at(last_pool_uuid);
 
-        try {
-            pool_filename = other_pool.get_filename(type, uuid);
-        }
-        catch (const SQLite::Error &e) {
-            throw;
-        }
-        catch (...) {
-            pool_filename = "";
-        }
         if (pool_filename.size() && Glib::file_test(pool_filename, Glib::FILE_TEST_IS_REGULAR)) {
             item.filename_pool = pool_filename;
             json j_pool;
@@ -80,28 +96,33 @@ PoolCacheStatus PoolCacheStatus::from_project_pool(class IPool &pool)
                 status.n_current++;
             }
         }
+        else {
+            item.state = PoolCacheStatus::Item::State::MISSING_IN_POOL;
+            status.n_missing++;
+        }
     }
     {
         const auto models_path = fs::u8path(pool.get_base_path()) / "3d_models" / "cache";
         if (fs::is_directory(models_path)) {
             for (const auto &it_pool_dir : fs::directory_iterator(models_path)) {
                 const UUID pool_uuid(it_pool_dir.path().filename().string());
-                if (auto it_pool = PoolManager::get().get_by_uuid(pool_uuid)) {
-                    const auto this_pool_base_path = fs::u8path(it_pool->base_path);
-                    for (const auto &filename_cached_entry : fs::recursive_directory_iterator(it_pool_dir)) {
-                        if (filename_cached_entry.is_regular_file()) {
-                            const auto filename_cached = filename_cached_entry.path();
-                            status.items.emplace_back();
-                            auto &item = status.items.back();
-                            status.n_total++;
-                            const auto filename_rel = fs::relative(filename_cached, it_pool_dir);
+                for (const auto &filename_cached_entry : fs::recursive_directory_iterator(it_pool_dir)) {
+                    if (filename_cached_entry.is_regular_file()) {
+                        const auto filename_cached = filename_cached_entry.path();
+                        status.items.emplace_back();
+                        auto &item = status.items.back();
+                        status.n_total++;
+                        const auto filename_rel = fs::relative(filename_cached, it_pool_dir);
+                        item.filename_cached = filename_cached.u8string();
+                        item.name = filename_cached.filename().u8string();
+                        item.type = ObjectType::MODEL_3D;
+                        item.uuid = UUID::random();
+                        item.pool_uuid = pool_uuid;
+
+                        if (other_pools.count(pool_uuid)) {
+                            const auto this_pool_base_path = fs::u8path(other_pools.at(pool_uuid).get_base_path());
                             const auto filename_pool = this_pool_base_path / filename_rel;
-                            item.filename_cached = filename_cached.u8string();
                             item.filename_pool = filename_pool.u8string();
-                            item.name = filename_cached.filename().u8string();
-                            item.type = ObjectType::MODEL_3D;
-                            item.uuid = UUID::random();
-                            item.pool_uuid = pool_uuid;
                             if (fs::is_regular_file(filename_pool)) {
                                 if (compare_files(filename_cached.u8string(), filename_pool.u8string())) {
                                     item.state = PoolCacheStatus::Item::State::CURRENT;
@@ -116,6 +137,10 @@ PoolCacheStatus PoolCacheStatus::from_project_pool(class IPool &pool)
                                 item.state = PoolCacheStatus::Item::State::MISSING_IN_POOL;
                                 status.n_missing++;
                             }
+                        }
+                        else {
+                            item.state = PoolCacheStatus::Item::State::MISSING_IN_POOL;
+                            status.n_missing++;
                         }
                     }
                 }
