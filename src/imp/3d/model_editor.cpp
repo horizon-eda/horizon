@@ -204,9 +204,6 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu)
     placement_grid->set_hexpand_set(true);
     placement_grid->set_row_spacing(5);
     placement_grid->set_column_spacing(5);
-    placement_grid->attach(*make_label("X"), 0, 0, 1, 1);
-    placement_grid->attach(*make_label("Y"), 0, 1, 1, 1);
-    placement_grid->attach(*make_label("Z"), 0, 2, 1, 1);
     std::set<Gtk::SpinButton *> placement_spin_buttons;
     static const std::array<std::string, 3> s_xyz = {"X", "Y", "Z"};
     for (unsigned int ax = 0; ax < 3; ax++) {
