@@ -65,6 +65,7 @@ std::pair<bool, std::string> PoolProjectManagerViewCreatePool::create()
         {
             auto ofs = make_ofstream(Glib::build_filename(base_path, ".gitignore"));
             ofs << "*.db\n\
+*.db-*\n\
 tmp/*.json\n\
 3d_models/local\n\
 ";
