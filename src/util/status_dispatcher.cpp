@@ -24,12 +24,7 @@ void StatusDispatcher::notify()
             revealer->set_reveal_child(true);
         }
         else {
-            timeout_conn = Glib::signal_timeout().connect(
-                    [this] {
-                        revealer->set_reveal_child(false);
-                        return false;
-                    },
-                    750);
+            timeout_conn = Glib::signal_timeout().connect(sigc::mem_fun(*this, &StatusDispatcher::hide_revealer), 750);
         }
     }
     if (label)
@@ -45,6 +40,12 @@ void StatusDispatcher::notify()
     n.msg = m;
     n.progress = p;
     s_signal_notified.emit(n);
+}
+
+bool StatusDispatcher::hide_revealer()
+{
+    revealer->set_reveal_child(false);
+    return false;
 }
 
 void StatusDispatcher::attach(Gtk::Label *w)

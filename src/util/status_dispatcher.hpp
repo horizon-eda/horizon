@@ -34,6 +34,7 @@ public:
 
 private:
     void notify();
+    bool hide_revealer();
     Glib::Dispatcher dispatcher;
     std::mutex mutex;
     std::string msg;
