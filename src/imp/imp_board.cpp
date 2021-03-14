@@ -1011,10 +1011,10 @@ ToolID ImpBoard::get_tool_for_drag_move(bool ctrl, const std::set<SelectableRef>
         return ImpBase::get_tool_for_drag_move(ctrl, sel);
 }
 
-void ImpBoard::handle_maybe_drag()
+void ImpBoard::handle_maybe_drag(bool ctrl)
 {
     if (!preferences.board.drag_start_track) {
-        ImpBase::handle_maybe_drag();
+        ImpBase::handle_maybe_drag(ctrl);
         return;
     }
     auto target = canvas->get_current_target();
@@ -1023,19 +1023,19 @@ void ImpBoard::handle_maybe_drag()
         auto &pkg = brd->packages.at(target.path.at(0));
         auto &pad = pkg.package.pads.at(target.path.at(1));
         if (pad.padstack.type == Padstack::Type::MECHANICAL || pad.is_nc) {
-            ImpBase::handle_maybe_drag();
+            ImpBase::handle_maybe_drag(ctrl);
             return;
         }
     }
     else if (target.type == ObjectType::JUNCTION) {
         const auto &ju = brd->junctions.at(target.path.at(0));
         if (!ju.net) {
-            ImpBase::handle_maybe_drag();
+            ImpBase::handle_maybe_drag(ctrl);
             return;
         }
     }
     else {
-        ImpBase::handle_maybe_drag();
+        ImpBase::handle_maybe_drag(ctrl);
         return;
     }
     canvas->inhibit_drag_selection();

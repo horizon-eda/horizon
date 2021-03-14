@@ -694,10 +694,10 @@ void ImpSchematic::handle_highlight_group_tag(const ActionConnection &a)
     }
 }
 
-void ImpSchematic::handle_maybe_drag()
+void ImpSchematic::handle_maybe_drag(bool ctrl)
 {
     if (!preferences.schematic.drag_start_net_line) {
-        ImpBase::handle_maybe_drag();
+        ImpBase::handle_maybe_drag(ctrl);
         return;
     }
 
@@ -709,7 +709,7 @@ void ImpSchematic::handle_maybe_drag()
         cursor_pos_drag_begin = canvas->get_cursor_pos_win();
     }
     else {
-        ImpBase::handle_maybe_drag();
+        ImpBase::handle_maybe_drag(ctrl);
     }
 }
 

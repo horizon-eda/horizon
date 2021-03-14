@@ -149,7 +149,7 @@ protected:
 
     std::unique_ptr<WindowStateStore> state_store = nullptr;
 
-    virtual void handle_maybe_drag();
+    virtual void handle_maybe_drag(bool ctrl);
 
     virtual ActionCatalogItem::Availability get_editor_type_for_action() const = 0;
     ObjectType get_editor_type() const;
@@ -237,7 +237,7 @@ protected:
 private:
     void fix_cursor_pos();
     Glib::RefPtr<Gio::FileMonitor> preferences_monitor;
-    void handle_drag(bool ctrl);
+    void handle_drag();
     void update_selection_label();
     std::string get_tool_settings_filename(ToolID id);
 
@@ -272,6 +272,7 @@ private:
 
     class LogWindow *log_window = nullptr;
     std::set<SelectableRef> selection_for_drag_move;
+    ToolID drag_tool;
     Coordf cursor_pos_drag_begin;
     Coordi cursor_pos_grid_drag_begin;
 

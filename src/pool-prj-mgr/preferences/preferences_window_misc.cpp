@@ -258,6 +258,12 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
         box->pack_start(*gr, false, false, 0);
         gr->show();
         {
+            auto r = Gtk::manage(new PreferencesRowBool("Drag to move",
+                                                        "Drag selected items to invoke the \"Move\" tool", preferences,
+                                                        preferences.mouse.drag_to_move));
+            gr->add_row(*r);
+        }
+        {
             auto r = Gtk::manage(new PreferencesRowBool("Switch layers with navigation buttons",
                                                         "Use back/forward buttons on mouse to move one layer down/up",
                                                         preferences, preferences.mouse.switch_layers));

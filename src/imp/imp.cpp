@@ -82,7 +82,7 @@ static std::unique_ptr<Pool> make_pool_caching(const PoolParams &p)
 ImpBase::ImpBase(const PoolParams &params)
     : pool(make_pool(params)), real_pool_caching(make_pool_caching(params)),
       pool_caching(real_pool_caching ? real_pool_caching.get() : pool.get()), core(nullptr),
-      sock_broadcast_rx(zctx, ZMQ_SUB), sock_project(zctx, ZMQ_REQ)
+      sock_broadcast_rx(zctx, ZMQ_SUB), sock_project(zctx, ZMQ_REQ), drag_tool(ToolID::NONE)
 {
     auto ep_broadcast = Glib::getenv("HORIZON_EP_BROADCAST");
     if (ep_broadcast.size()) {
@@ -798,9 +798,7 @@ void ImpBase::run(int argc, char *argv[])
     Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(), cssp, 700);
 
     canvas->signal_motion_notify_event().connect([this](GdkEventMotion *ev) {
-        if (selection_for_drag_move.size()) {
-            handle_drag(ev->state & Gdk::CONTROL_MASK);
-        }
+        handle_drag();
         return false;
     });
 
@@ -913,26 +911,32 @@ ToolID ImpBase::get_tool_for_drag_move(bool ctrl, const std::set<SelectableRef> 
     if (preferences.mouse.drag_polygon_edges && sel.size() == 1 && sel.begin()->type == ObjectType::POLYGON_EDGE)
         return ToolID::DRAG_POLYGON_EDGE;
 
-    return ToolID::MOVE;
+    if (preferences.mouse.drag_to_move)
+        return ToolID::MOVE;
+    else
+        return ToolID::NONE;
 }
 
-void ImpBase::handle_drag(bool ctrl)
+void ImpBase::handle_drag()
 {
+    if (drag_tool == ToolID::NONE)
+        return;
+    if (selection_for_drag_move.size() == 0)
+        return;
     auto pos = canvas->get_cursor_pos_win();
     auto delta = pos - cursor_pos_drag_begin;
     if (delta.mag_sq() > (50 * 50)) {
-        {
-            highlights.clear();
-            update_highlights();
-            ToolArgs args;
-            args.coords = cursor_pos_grid_drag_begin;
-            args.selection = selection_for_drag_move;
-            ToolID tool_id = get_tool_for_drag_move(ctrl, selection_for_drag_move);
+        highlights.clear();
+        update_highlights();
+        ToolArgs args;
+        args.coords = cursor_pos_grid_drag_begin;
+        args.selection = selection_for_drag_move;
 
-            ToolResponse r = core->tool_begin(tool_id, args, imp_interface.get(), true);
-            tool_process(r);
-        }
+        ToolResponse r = core->tool_begin(drag_tool, args, imp_interface.get(), true);
+        tool_process(r);
+
         selection_for_drag_move.clear();
+        drag_tool = ToolID::NONE;
     }
 }
 
@@ -1244,7 +1248,7 @@ bool ImpBase::handle_click(const GdkEventButton *button_event)
         }
     }
     else if (!core->tool_is_active() && button_event->button == 1 && !(button_event->state & Gdk::SHIFT_MASK)) {
-        handle_maybe_drag();
+        handle_maybe_drag(button_event->state & Gdk::CONTROL_MASK);
     }
     else if (!core->tool_is_active() && button_event->button == 3) {
         for (const auto it : context_menu->get_children()) {
@@ -1324,7 +1328,7 @@ std::string ImpBase::get_complete_display_name(const SelectableRef &sr)
 }
 
 
-void ImpBase::handle_maybe_drag()
+void ImpBase::handle_maybe_drag(bool ctrl)
 {
     auto c = canvas->screen2canvas(canvas->get_cursor_pos_win());
     auto sel_at_cursor = canvas->get_selection_at(Coordi(c.x, c.y));
@@ -1333,10 +1337,13 @@ void ImpBase::handle_maybe_drag()
     std::set_intersection(sel_from_canvas.begin(), sel_from_canvas.end(), sel_at_cursor.begin(), sel_at_cursor.end(),
                           std::inserter(isect, isect.begin()));
     if (isect.size()) {
-        canvas->inhibit_drag_selection();
-        cursor_pos_drag_begin = canvas->get_cursor_pos_win();
-        cursor_pos_grid_drag_begin = canvas->get_cursor_pos();
-        selection_for_drag_move = sel_from_canvas;
+        drag_tool = get_tool_for_drag_move(ctrl, sel_from_canvas);
+        if (drag_tool != ToolID::NONE) {
+            canvas->inhibit_drag_selection();
+            cursor_pos_drag_begin = canvas->get_cursor_pos_win();
+            cursor_pos_grid_drag_begin = canvas->get_cursor_pos();
+            selection_for_drag_move = sel_from_canvas;
+        }
     }
 }
 

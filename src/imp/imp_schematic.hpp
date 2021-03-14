@@ -14,7 +14,7 @@ public:
 protected:
     void construct() override;
     bool handle_broadcast(const json &j) override;
-    void handle_maybe_drag() override;
+    void handle_maybe_drag(bool ctrl) override;
     void update_action_sensitivity() override;
 
     ActionCatalogItem::Availability get_editor_type_for_action() const override
