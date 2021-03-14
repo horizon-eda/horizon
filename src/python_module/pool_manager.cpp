@@ -53,10 +53,30 @@ static PyObject *PyPoolManager_add_pool(PyObject *pself, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static PyObject *PyPoolManager_remove_pool(PyObject *pself, PyObject *args)
+{
+    const char *path;
+    if (!PyArg_ParseTuple(args, "s", &path))
+        return NULL;
+    try {
+        horizon::PoolManager::get().remove_pool(path);
+    }
+    catch (const std::exception &e) {
+        PyErr_SetString(PyExc_IOError, e.what());
+        return NULL;
+    }
+    catch (...) {
+        PyErr_SetString(PyExc_IOError, "unknown exception");
+        return NULL;
+    }
+    Py_RETURN_NONE;
+}
+
 
 static PyMethodDef PyPoolManager_methods[] = {
         {"get_pools", (PyCFunction)PyPoolManager_get_pools, METH_NOARGS | METH_STATIC, "Get Pools"},
         {"add_pool", (PyCFunction)PyPoolManager_add_pool, METH_VARARGS | METH_STATIC, "Add Pool"},
+        {"remove_pool", (PyCFunction)PyPoolManager_remove_pool, METH_VARARGS | METH_STATIC, "Remove Pool"},
         {NULL} /* Sentinel */
 };
 
