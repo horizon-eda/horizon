@@ -16,6 +16,7 @@
 #include "logger/logger.hpp"
 #include "widgets/log_view.hpp"
 #include "util/zmq_helper.hpp"
+#include "pools_window/pools_window.hpp"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>
@@ -117,6 +118,7 @@ void PoolProjectManagerApplication::on_startup()
     curl_global_init(CURL_GLOBAL_ALL);
 
     add_action("preferences", [this] { show_preferences_window(); });
+    add_action("pools", [this] { show_pools_window(); });
     add_action("logger", [this] { show_log_window(); });
     add_action("quit", sigc::mem_fun(*this, &PoolProjectManagerApplication::on_action_quit));
     add_action("new_window", sigc::mem_fun(*this, &PoolProjectManagerApplication::on_action_new_window));
@@ -174,6 +176,20 @@ PreferencesWindow *PoolProjectManagerApplication::show_preferences_window(guint3
     }
     preferences_window->present(timestamp);
     return preferences_window;
+}
+
+PoolsWindow *PoolProjectManagerApplication::show_pools_window(guint32 timestamp)
+{
+    if (!pools_window) {
+        pools_window = PoolsWindow::create();
+
+        pools_window->signal_hide().connect([this] {
+            delete pools_window;
+            pools_window = nullptr;
+        });
+    }
+    pools_window->present(timestamp);
+    return pools_window;
 }
 
 LogWindow *PoolProjectManagerApplication::show_log_window(guint32 timestamp)

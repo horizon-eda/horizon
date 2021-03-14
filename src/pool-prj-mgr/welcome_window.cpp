@@ -1,7 +1,7 @@
 #include "welcome_window.hpp"
 #include "pool-prj-mgr-app_win.hpp"
 #include "pool-prj-mgr-app.hpp"
-#include "preferences/preferences_window.hpp"
+#include "pools_window/pools_window.hpp"
 
 namespace horizon {
 WelcomeWindow *WelcomeWindow::create(PoolProjectManagerAppWindow *aw)
@@ -37,7 +37,7 @@ WelcomeWindow::WelcomeWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     banner_area->signal_draw().connect(sigc::mem_fun(*this, &WelcomeWindow::draw_banner));
 
     button_download->signal_clicked().connect([this] {
-        appwin->handle_download(true);
+        appwin->get_app().show_pools_window();
         delete this;
     });
 
@@ -57,8 +57,8 @@ WelcomeWindow::WelcomeWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 
 void WelcomeWindow::handle_open()
 {
-    auto prefs_window = appwin->get_app().show_preferences_window();
-    prefs_window->open_pool();
+    auto pools_window = appwin->get_app().show_pools_window();
+    pools_window->add_pool("");
     delete this;
 }
 

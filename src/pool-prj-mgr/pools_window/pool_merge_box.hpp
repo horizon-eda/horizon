@@ -2,34 +2,35 @@
 #include <gtkmm.h>
 #include "common/common.hpp"
 #include "util/uuid.hpp"
-#include "nlohmann/json_fwd.hpp"
+#include "nlohmann/json.hpp"
+#include "pool_status_provider.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
 
-class PoolMergeDialog : public Gtk::Dialog {
+class PoolMergeBox2 : public Gtk::Box {
 public:
-    PoolMergeDialog(Gtk::Window *parent, const std::string &local_path, const std::string &remote_path);
-    bool get_merged() const;
+    PoolMergeBox2(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, PoolStatusProviderPoolManager &prv);
+    static PoolMergeBox2 *create(PoolStatusProviderPoolManager &prv);
 
 
 private:
-    std::string local_path;
-    std::string remote_path;
-    class PoolMergeBox *box = nullptr;
-    void do_merge();
-    void populate_store();
-    void selection_changed();
-    void action_toggled(const Glib::ustring &path);
+    Gtk::TreeView *pool_item_view = nullptr;
+    Gtk::Stack *stack = nullptr;
+    Gtk::TextView *delta_text_view = nullptr;
+    Gtk::CheckButton *cb_update_layer_help = nullptr;
+    Gtk::CheckButton *cb_update_tables = nullptr;
+    Gtk::Menu context_menu;
+    Gtk::Button *button_update = nullptr;
 
-    enum class ItemState {
-        CURRENT,
-        LOCAL_ONLY,
-        REMOTE_ONLY,
-        MOVED,
-        CHANGED,
-        MOVED_CHANGED,
-    };
+    PoolStatusProviderPoolManager &prv;
+    void update_from_prv();
+    void selection_changed();
+
+    enum class MenuOP { CHECK, UNCHECK, TOGGLE };
+    void append_context_menu_item(const std::string &name, MenuOP op);
+
+    void action_toggled(const Glib::ustring &path);
 
     class TreeColumns : public Gtk::TreeModelColumnRecord {
     public:
@@ -51,17 +52,10 @@ private:
         Gtk::TreeModelColumn<UUID> uuid;
         Gtk::TreeModelColumn<json> delta;
         Gtk::TreeModelColumn<bool> merge;
-        Gtk::TreeModelColumn<ItemState> state;
+        Gtk::TreeModelColumn<PoolStatusPoolManager::ItemInfo::ItemState> state;
     };
     TreeColumns list_columns;
 
     Glib::RefPtr<Gtk::ListStore> item_store;
-    bool merged = false;
-
-    std::string tables_remote, tables_local;
-    std::string layer_help_remote, layer_help_local;
-
-    enum class MenuOP { CHECK, UNCHECK, TOGGLE };
-    void append_context_menu_item(const std::string &name, MenuOP op);
 };
 } // namespace horizon

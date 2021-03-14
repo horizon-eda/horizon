@@ -52,7 +52,6 @@ private:
     Gtk::TreeView *merge_items_view = nullptr;
     Gtk::Label *merge_items_placeholder_label = nullptr;
     Gtk::Label *pr_body_placeholder_label = nullptr;
-    Gtk::Button *upgrade_button = nullptr;
     Gtk::Button *create_pr_button = nullptr;
     Gtk::Button *refresh_prs_button = nullptr;
     Gtk::Revealer *upgrade_revealer = nullptr;
@@ -75,13 +74,11 @@ private:
     Gtk::Button *pr_update_cancel_button = nullptr;
 
 
-    void handle_remote_upgrade();
     void handle_create_pr();
     void handle_update_pr();
     void update_body_placeholder_label();
 
 
-    void remote_upgrade_thread();
     void create_pr_thread();
     void update_pr_thread();
     void update_prepare_pr_thread();
@@ -98,8 +95,8 @@ private:
 
     Glib::Dispatcher git_thread_dispatcher;
 
-    enum class GitThreadMode { UPGRADE, PULL_REQUEST, PULL_REQUEST_UPDATE, LOGIN, PULL_REQUEST_UPDATE_PREPARE };
-    GitThreadMode git_thread_mode = GitThreadMode::UPGRADE;
+    enum class GitThreadMode { PULL_REQUEST, PULL_REQUEST_UPDATE, LOGIN, PULL_REQUEST_UPDATE_PREPARE };
+    GitThreadMode git_thread_mode = GitThreadMode::LOGIN;
     bool git_thread_busy = false;
     std::string git_thread_status;
     bool git_thread_error = false;

@@ -5,7 +5,6 @@
 #include "preferences_window_keys.hpp"
 #include "preferences_window_in_tool_keys.hpp"
 #include "preferences_window_canvas.hpp"
-#include "preferences_window_pool.hpp"
 #include "preferences_window_partinfo.hpp"
 #include "preferences_window_misc.hpp"
 #include "canvas/color_palette.hpp"
@@ -70,21 +69,9 @@ PreferencesWindow::PreferencesWindow(Preferences &prefs) : Gtk::Window(), prefer
         ed->show();
         ed->unreference();
     }
-    {
-        auto ed = PoolPreferencesEditor::create();
-        stack->add(*ed, "pools", "Pools");
-        ed->show();
-        pool_prefs_editor = ed;
-    }
 
     box->show();
     add(*box);
-}
-
-void PreferencesWindow::open_pool(const std::string &path)
-{
-    stack->set_visible_child("pools");
-    pool_prefs_editor->add_pool(path);
 }
 
 void PreferencesWindow::show_page(const std::string &pg)

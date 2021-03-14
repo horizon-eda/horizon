@@ -36,6 +36,7 @@ public:
                    guint32 timestamp = 0);
 
     class PreferencesWindow *show_preferences_window(guint32 timestamp = 0);
+    class PoolsWindow *show_pools_window(guint32 timestamp = 0);
     class LogWindow *show_log_window(guint32 timestamp = 0);
 
     typedef sigc::signal<void, std::vector<std::string>> type_signal_pool_items_edited;
@@ -63,6 +64,7 @@ private:
     void load_from_config(const std::string &config_filename);
     Preferences preferences;
     class PreferencesWindow *preferences_window = nullptr;
+    class PoolsWindow *pools_window = nullptr;
 
     LogDispatcher log_dispatcher;
     class LogWindow *log_window = nullptr;

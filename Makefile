@@ -583,7 +583,6 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/pool-prj-mgr-main.cpp\
 	src/pool-prj-mgr/pool-prj-mgr-app.cpp\
 	src/pool-prj-mgr/pool-prj-mgr-app_win.cpp\
-	src/pool-prj-mgr/pool-prj-mgr-app_win_download.cpp\
 	src/pool-prj-mgr/pool-prj-mgr-process.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_notebook.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_notebook_units.cpp\
@@ -612,7 +611,6 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/pool-mgr/pool_remote_box.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_settings_box.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_cache_box.cpp\
-	src/pool-prj-mgr/pool-mgr/pool_merge_dialog.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_update_error_dialog.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_git_box.cpp\
 	src/pool-prj-mgr/forced_pool_update_dialog.cpp\
@@ -662,7 +660,6 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/preferences/preferences_window_keys.cpp\
 	src/pool-prj-mgr/preferences/preferences_window_in_tool_keys.cpp\
 	src/pool-prj-mgr/preferences/preferences_window_canvas.cpp\
-	src/pool-prj-mgr/preferences/preferences_window_pool.cpp\
 	src/pool-prj-mgr/preferences/preferences_window_partinfo.cpp\
 	src/pool-prj-mgr/preferences/preferences_window_misc.cpp\
 	src/pool-prj-mgr/preferences/action_editor.cpp\
@@ -710,6 +707,12 @@ SRC_POOL_PRJ_MGR = \
 	src/util/automatic_prefs.cpp\
 	src/util/treeview_state_store.cpp\
 	src/util/paned_state_store.cpp\
+	src/pool-prj-mgr/pools_window/pools_window.cpp\
+	src/pool-prj-mgr/pools_window/pools_window_available.cpp\
+	src/pool-prj-mgr/pools_window/pool_index.cpp\
+	src/pool-prj-mgr/pools_window/pool_status_provider.cpp\
+	src/pool-prj-mgr/pools_window/pool_merge_box.cpp\
+	src/pool-prj-mgr/pools_window/pool_download_window.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp

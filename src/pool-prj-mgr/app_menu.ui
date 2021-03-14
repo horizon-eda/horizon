@@ -12,6 +12,10 @@
         <attribute name="action">app.preferences</attribute>
       </item>
       <item>
+        <attribute name="label" translatable="yes">_Pools</attribute>
+        <attribute name="action">app.pools</attribute>
+      </item>
+      <item>
         <attribute name="label" translatable="yes">View Log</attribute>
         <attribute name="action">app.view_log</attribute>
       </item>

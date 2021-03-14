@@ -9,7 +9,6 @@
 #include "duplicate/duplicate_window.hpp"
 #include "common/object_descr.hpp"
 #include "pool_remote_box.hpp"
-#include "pool_merge_dialog.hpp"
 #include "pool_git_box.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app.hpp"
 #include "pool_update_error_dialog.hpp"

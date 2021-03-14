@@ -1,23 +1,112 @@
-#include "pool-prj-mgr-app_win.hpp"
+#include "pool_download_window.hpp"
+#include "pool_index.hpp"
+#include "util/gtk_util.hpp"
+#include "pool/pool_manager.hpp"
+#include "util/util.hpp"
+#include "util/http_client.hpp"
 #include "util/github_client.hpp"
+#include "util/autofree_ptr.hpp"
+#include "pool/pool.hpp"
 #include "pool-update/pool-update.hpp"
 #include <thread>
-#include "pool/pool.hpp"
-#include "util/util.hpp"
-#include "util/autofree_ptr.hpp"
-#include "pool/pool_manager.hpp"
 
 namespace horizon {
 
-void PoolProjectManagerAppWindow::handle_do_download()
+PoolDownloadWindow *PoolDownloadWindow::create(const PoolIndex *idx)
+{
+    PoolDownloadWindow *w;
+    Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
+    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/pools_window/pool_download_window.ui");
+    x->get_widget_derived("window", w, idx);
+
+    return w;
+}
+
+PoolDownloadWindow::PoolDownloadWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
+                                       const PoolIndex *idx)
+    : Gtk::Window(cobject)
+{
+    GET_WIDGET(download_button);
+    GET_WIDGET(cancel_button);
+    GET_WIDGET(download_revealer);
+    GET_WIDGET(download_label);
+    GET_WIDGET(download_spinner);
+    GET_WIDGET(download_progress);
+    GET_WIDGET(download_gh_repo_entry);
+    GET_WIDGET(download_gh_username_entry);
+    GET_WIDGET(download_dest_dir_button);
+    GET_WIDGET(download_dest_dir_entry);
+    if (idx) {
+        download_gh_repo_entry->set_text(idx->gh_repo);
+        download_gh_username_entry->set_text(idx->gh_user);
+        download_dest_dir_entry->set_text(
+                Glib::build_filename(Glib::get_user_special_dir(Glib::USER_DIRECTORY_DOCUMENTS), "horizon-pools",
+                                     idx->gh_user, idx->gh_repo));
+    }
+    else {
+        download_dest_dir_entry->set_text(
+                Glib::build_filename(Glib::get_user_special_dir(Glib::USER_DIRECTORY_DOCUMENTS), "horizon-pool"));
+    }
+    download_status_dispatcher.attach(download_revealer);
+    download_status_dispatcher.attach(download_label);
+    download_status_dispatcher.attach(download_spinner);
+    download_status_dispatcher.attach(download_progress);
+    label_set_tnum(download_label);
+
+    download_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolDownloadWindow::handle_do_download));
+    cancel_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolDownloadWindow::handle_cancel));
+
+    signal_delete_event().connect([this](GdkEventAny *ev) {
+        if (downloading) {
+            handle_cancel();
+            return true;
+        }
+        else {
+            return false;
+        }
+    });
+
+    download_status_dispatcher.signal_notified().connect([this](const StatusDispatcher::Notification &n) {
+        auto is_busy = n.status == StatusDispatcher::Status::BUSY;
+        download_button->set_sensitive(!is_busy);
+        download_gh_repo_entry->set_sensitive(!is_busy);
+        download_gh_username_entry->set_sensitive(!is_busy);
+        download_dest_dir_button->set_sensitive(!is_busy);
+        download_dest_dir_entry->set_sensitive(!is_busy);
+        downloading = is_busy;
+        if (n.status == StatusDispatcher::Status::DONE) {
+            if (download_cancel) {
+                close();
+                return;
+            }
+            PoolManager::get().add_pool(download_dest_dir_entry->get_text());
+            s_signal_downloaded.emit();
+            close();
+        }
+    });
+
+    download_dest_dir_button->signal_clicked().connect([this] {
+        GtkFileChooserNative *native = gtk_file_chooser_native_new(
+                "Select", GTK_WINDOW(this->gobj()), GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER, "Set", "_Cancel");
+        auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+        chooser->set_filename(download_dest_dir_entry->get_text());
+
+        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+            download_dest_dir_entry->set_text(chooser->get_filename());
+        }
+    });
+}
+
+
+void PoolDownloadWindow::handle_do_download()
 {
 
     std::string dest_dir = download_dest_dir_entry->get_text();
     if (dest_dir.size()) {
         download_status_dispatcher.reset("Starting…");
         download_cancel = false;
-        std::thread dl_thread(&PoolProjectManagerAppWindow::download_thread, this,
-                              download_gh_username_entry->get_text(), download_gh_repo_entry->get_text(), dest_dir);
+        std::thread dl_thread(&PoolDownloadWindow::download_thread, this, download_gh_username_entry->get_text(),
+                              download_gh_repo_entry->get_text(), dest_dir);
         dl_thread.detach();
         downloading = true;
     }
@@ -28,9 +117,9 @@ void PoolProjectManagerAppWindow::handle_do_download()
     }
 }
 
-int PoolProjectManagerAppWindow::git_transfer_cb(const git_transfer_progress *stats, void *payload)
+int PoolDownloadWindow::git_transfer_cb(const git_transfer_progress *stats, void *payload)
 {
-    auto self = static_cast<PoolProjectManagerAppWindow *>(payload);
+    auto self = static_cast<PoolDownloadWindow *>(payload);
     const std::string msg = "Cloning: fetching object " + format_m_of_n(stats->received_objects, stats->total_objects);
     self->download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, msg,
                                                 ((double)stats->received_objects) / stats->total_objects);
@@ -39,10 +128,10 @@ int PoolProjectManagerAppWindow::git_transfer_cb(const git_transfer_progress *st
     return 0;
 }
 
-void PoolProjectManagerAppWindow::git_checkout_progress_cb(const char *path, size_t completed_steps, size_t total_steps,
-                                                           void *payload)
+void PoolDownloadWindow::git_checkout_progress_cb(const char *path, size_t completed_steps, size_t total_steps,
+                                                  void *payload)
 {
-    auto self = static_cast<PoolProjectManagerAppWindow *>(payload);
+    auto self = static_cast<PoolDownloadWindow *>(payload);
     const std::string msg = "Cloning: checking out " + format_m_of_n(completed_steps, total_steps);
     self->download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, msg,
                                                 ((double)completed_steps) / total_steps);
@@ -64,7 +153,7 @@ public:
     }
 };
 
-void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::string gh_repo, std::string dest_dir)
+void PoolDownloadWindow::download_thread(std::string gh_username, std::string gh_repo, std::string dest_dir)
 {
     try {
 
@@ -104,14 +193,14 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
 
         checkout_opts.checkout_strategy = GIT_CHECKOUT_SAFE;
         clone_opts.checkout_opts = checkout_opts;
-        clone_opts.fetch_opts.callbacks.transfer_progress = &PoolProjectManagerAppWindow::git_transfer_cb;
+        clone_opts.fetch_opts.callbacks.transfer_progress = &PoolDownloadWindow::git_transfer_cb;
         clone_opts.fetch_opts.callbacks.payload = this;
-        clone_opts.checkout_opts.progress_cb = &PoolProjectManagerAppWindow::git_checkout_progress_cb;
+        clone_opts.checkout_opts.progress_cb = &PoolDownloadWindow::git_checkout_progress_cb;
         clone_opts.checkout_opts.progress_payload = this;
 
         download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Cloning repository…");
 
-        for (const auto &[type, name] : Pool::type_names) {
+        for (const auto &[type, name] : IPool::type_names) {
             auto type_dir = Glib::build_filename(dest_dir, name);
             Gio::File::create_for_path(type_dir)->make_directory_with_parents();
         }
@@ -213,6 +302,13 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
             }
         }
         RETURN_IF_CANCELLED
+
+
+        download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Updating local pool…");
+
+        pool_update(dest_dir, nullptr, true);
+        RETURN_IF_CANCELLED
+
         download_status_dispatcher.set_status(StatusDispatcher::Status::DONE, "Done");
     }
     catch (const std::exception &e) {
@@ -220,6 +316,16 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
     }
     catch (const Gio::Error &e) {
         download_status_dispatcher.set_status(StatusDispatcher::Status::ERROR, "Error: " + std::string(e.what()));
+    }
+}
+
+void PoolDownloadWindow::handle_cancel()
+{
+    if (downloading) {
+        download_cancel = true;
+    }
+    else {
+        close();
     }
 }
 

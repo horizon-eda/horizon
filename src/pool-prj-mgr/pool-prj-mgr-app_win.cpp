@@ -1,6 +1,7 @@
 #include "pool-prj-mgr-app_win.hpp"
 #include "pool-prj-mgr-app.hpp"
 #include "preferences/preferences_window.hpp"
+#include "pools_window/pools_window.hpp"
 #include <iostream>
 #include "util/util.hpp"
 #include "pool/pool_manager.hpp"
@@ -45,8 +46,6 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     builder->get_widget("button_close", button_close);
     builder->get_widget("button_update", button_update);
     builder->get_widget("spinner_update", spinner_update);
-    builder->get_widget("button_download", button_download);
-    builder->get_widget("button_do_download", button_do_download);
     builder->get_widget("button_cancel", button_cancel);
     builder->get_widget("button_create", button_create);
     builder->get_widget("button_new", button_new);
@@ -59,14 +58,6 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     builder->get_widget("pool_update_status_rev", pool_update_status_rev);
     builder->get_widget("pool_update_status_close_button", pool_update_status_close_button);
     builder->get_widget("pool_update_progress", pool_update_progress);
-    builder->get_widget("download_revealer", download_revealer);
-    builder->get_widget("download_label", download_label);
-    builder->get_widget("download_spinner", download_spinner);
-    builder->get_widget("download_progress", download_progress);
-    builder->get_widget("download_gh_repo_entry", download_gh_repo_entry);
-    builder->get_widget("download_gh_username_entry", download_gh_username_entry);
-    builder->get_widget("download_dest_dir_button", download_dest_dir_button);
-    builder->get_widget("download_dest_dir_entry", download_dest_dir_entry);
     builder->get_widget("info_bar", info_bar);
     builder->get_widget("info_bar_label", info_bar_label);
     builder->get_widget("show_output_button", show_output_button);
@@ -95,9 +86,6 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     button_open->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_open));
     button_close->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_close));
     button_update->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_update));
-    button_download->signal_clicked().connect([this] { handle_download(); });
-    button_do_download->signal_clicked().connect(
-            sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_do_download));
     button_cancel->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_cancel));
     menu_new_project->signal_activate().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_new_project));
     menu_new_pool->signal_activate().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_new_pool));
@@ -122,8 +110,8 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     info_bar_pool_not_added->signal_response().connect([this](int resp) {
         if (resp == Gtk::RESPONSE_OK) {
             if (pool) {
-                auto prefs_window = app->show_preferences_window();
-                prefs_window->open_pool(Glib::build_filename(pool->get_base_path(), "pool.json"));
+                auto pools_window = app->show_pools_window();
+                pools_window->add_pool(Glib::build_filename(pool->get_base_path(), "pool.json"));
             }
         }
         info_bar_hide(info_bar_pool_not_added);
@@ -145,47 +133,6 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
 
     view_create_project.signal_valid_change().connect([this](bool v) { button_create->set_sensitive(v); });
     view_create_pool.signal_valid_change().connect([this](bool v) { button_create->set_sensitive(v); });
-
-    download_status_dispatcher.attach(download_revealer);
-    download_status_dispatcher.attach(download_label);
-    download_status_dispatcher.attach(download_spinner);
-    download_status_dispatcher.attach(download_progress);
-    label_set_tnum(download_label);
-
-    download_status_dispatcher.signal_notified().connect([this](const StatusDispatcher::Notification &n) {
-        auto is_busy = n.status == StatusDispatcher::Status::BUSY;
-        button_do_download->set_sensitive(!is_busy);
-        downloading = is_busy;
-        if (n.status == StatusDispatcher::Status::DONE) {
-            if (download_cancel) {
-                set_view_mode(ViewMode::OPEN);
-                return;
-            }
-            PoolManager::get().add_pool(download_dest_dir_entry->get_text());
-            if (download_back_to_start) {
-                app->recent_items[Glib::build_filename(download_dest_dir_entry->get_text(), "pool.json")] =
-                        Glib::DateTime::create_now_local();
-                check_schema_update(download_dest_dir_entry->get_text());
-                update_recent_items();
-                set_view_mode(ViewMode::OPEN);
-            }
-            else {
-                open_file_view(Gio::File::create_for_path(
-                        Glib::build_filename(download_dest_dir_entry->get_text(), "pool.json")));
-            }
-        }
-    });
-
-    download_dest_dir_button->signal_clicked().connect([this] {
-        GtkFileChooserNative *native = gtk_file_chooser_native_new(
-                "Select", GTK_WINDOW(this->gobj()), GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER, "Set", "_Cancel");
-        auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-        chooser->set_filename(download_dest_dir_entry->get_text());
-
-        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-            download_dest_dir_entry->set_text(chooser->get_filename());
-        }
-    });
 
     sock_mgr.bind("tcp://127.0.0.1:*");
     {
@@ -567,20 +514,9 @@ void PoolProjectManagerAppWindow::handle_recent()
     // open_file_view(file);
 }
 
-void PoolProjectManagerAppWindow::handle_download(bool back_to_start)
-{
-    download_back_to_start = back_to_start;
-    set_view_mode(ViewMode::DOWNLOAD);
-}
-
 void PoolProjectManagerAppWindow::handle_cancel()
 {
-    if (downloading) {
-        download_cancel = true;
-    }
-    else {
-        set_view_mode(ViewMode::OPEN);
-    }
+    set_view_mode(ViewMode::OPEN);
 }
 
 void PoolProjectManagerAppWindow::save_project()
@@ -837,8 +773,6 @@ void PoolProjectManagerAppWindow::set_view_mode(ViewMode mode)
     button_open->hide();
     button_close->hide();
     button_update->hide();
-    button_download->hide();
-    button_do_download->hide();
     button_cancel->hide();
     button_save->hide();
     button_create->hide();
@@ -852,7 +786,6 @@ void PoolProjectManagerAppWindow::set_view_mode(ViewMode mode)
     case ViewMode::OPEN:
         stack->set_visible_child("open");
         button_open->show();
-        button_download->show();
         button_new->show();
         hamburger_menu_button->show();
         header->set_title("Horizon EDA");
@@ -868,18 +801,6 @@ void PoolProjectManagerAppWindow::set_view_mode(ViewMode mode)
         header->set_title("Pool manager");
         if (!app->pool_doc_info_bar_dismissed)
             info_bar_show(info_bar_pool_doc);
-        break;
-
-    case ViewMode::DOWNLOAD:
-        stack->set_visible_child("download");
-        button_cancel->show();
-        button_do_download->show();
-        header->set_show_close_button(false);
-        download_revealer->set_reveal_child(true);
-        download_revealer->set_reveal_child(false);
-        header->set_title("Horizon EDA");
-        download_dest_dir_entry->set_text(
-                Glib::build_filename(Glib::get_user_special_dir(Glib::USER_DIRECTORY_DOCUMENTS), "horizon-pool"));
         break;
 
     case ViewMode::PROJECT:

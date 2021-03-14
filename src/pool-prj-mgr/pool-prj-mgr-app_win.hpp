@@ -7,13 +7,11 @@
 #include "nlohmann/json_fwd.hpp"
 #include "util/editor_process.hpp"
 #include "util/window_state_store.hpp"
-#include "util/status_dispatcher.hpp"
 #include "pool-prj-mgr-process.hpp"
 #include "project/project.hpp"
 #include "prj-mgr/prj-mgr_views.hpp"
 #include "pool-mgr/view_create_pool.hpp"
 #include "common/common.hpp"
-#include <git2.h>
 
 namespace horizon {
 using json = nlohmann::json;
@@ -77,13 +75,12 @@ public:
     void process_close(const UUID &uu);
     bool cleanup_pool_cache(Gtk::Window *parent);
 
-    enum class ViewMode { OPEN, POOL, DOWNLOAD, PROJECT, CREATE_PROJECT, CREATE_POOL };
+    enum class ViewMode { OPEN, POOL, PROJECT, CREATE_PROJECT, CREATE_POOL };
     ViewMode get_view_mode() const;
 
     UUID get_pool_uuid() const;
     void pool_notebook_go_to(ObjectType type, const UUID &uu);
     void open_pool(const std::string &pool_json, ObjectType type = ObjectType::INVALID, const UUID &uu = UUID());
-    void handle_download(bool back_to_start = false);
     void update_pool_cache_status_now();
     const std::string &get_project_title() const;
 
@@ -93,23 +90,12 @@ private:
     Gtk::Button *button_open = nullptr;
     Gtk::Button *button_close = nullptr;
     Gtk::Button *button_update = nullptr;
-    Gtk::Button *button_download = nullptr;
-    Gtk::Button *button_do_download = nullptr;
     Gtk::Button *button_cancel = nullptr;
     Gtk::MenuButton *button_new = nullptr;
     Gtk::Button *button_create = nullptr;
     Gtk::Button *button_save = nullptr;
     Gtk::Spinner *spinner_update = nullptr;
-    Gtk::Revealer *download_revealer = nullptr;
-    Gtk::Label *download_label = nullptr;
-    Gtk::Spinner *download_spinner = nullptr;
-    Gtk::ProgressBar *download_progress = nullptr;
     Gtk::MenuButton *hamburger_menu_button = nullptr;
-
-    Gtk::Entry *download_gh_username_entry = nullptr;
-    Gtk::Entry *download_gh_repo_entry = nullptr;
-    Gtk::Entry *download_dest_dir_entry = nullptr;
-    Gtk::Button *download_dest_dir_button = nullptr;
 
     Gtk::HeaderBar *header = nullptr;
     Gtk::ListBox *recent_pools_listbox = nullptr;
@@ -156,7 +142,6 @@ private:
     void handle_close();
     void handle_recent();
     void handle_update();
-    void handle_do_download();
     void handle_new_project();
     void handle_new_pool();
     void handle_create();
@@ -165,10 +150,6 @@ private:
     json handle_req(const json &j);
 
     bool on_delete_event(GdkEventAny *ev) override;
-
-    void download_thread(std::string gh_username, std::string gh_repo, std::string dest_dir);
-
-    StatusDispatcher download_status_dispatcher;
 
     WindowStateStore state_store;
 
@@ -198,14 +179,7 @@ private:
     bool check_pools();
     bool check_schema_update(const std::string &base_path);
 
-    bool download_back_to_start = false;
-
     bool check_autosave(PoolProjectManagerProcess::Type type, const std::vector<std::string> &filenames);
-
-    static int git_transfer_cb(const git_transfer_progress *stats, void *payload);
-    static void git_checkout_progress_cb(const char *path, size_t completed_steps, size_t total_steps, void *payload);
-    bool downloading = false;
-    bool download_cancel = false;
 
     void set_version_info(const std::string &s);
     bool project_read_only = false;
