@@ -209,6 +209,7 @@ json ZoomPreferences::serialize() const
     j["smooth_zoom_3d"] = smooth_zoom_3d;
     j["touchpad_pan"] = touchpad_pan;
     j["zoom_factor"] = zoom_factor;
+    j["keyboard_zoom_to_cursor"] = keyboard_zoom_to_cursor;
     return j;
 }
 
@@ -218,6 +219,7 @@ void ZoomPreferences::load_from_json(const json &j)
     smooth_zoom_3d = j.value("smooth_zoom_3d", false);
     touchpad_pan = j.value("touchpad_pan", false);
     zoom_factor = j.value("zoom_factor", 50);
+    keyboard_zoom_to_cursor = j.value("keyboard_zoom_to_cursor", false);
 }
 
 json KeySequencesPreferences::serialize() const

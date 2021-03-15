@@ -67,6 +67,7 @@ public:
     bool smooth_zoom_3d = false;
     bool touchpad_pan = false;
     float zoom_factor = 50;
+    bool keyboard_zoom_to_cursor = false;
 
     void load_from_json(const json &j);
     json serialize() const;

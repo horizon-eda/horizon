@@ -450,6 +450,14 @@ void CanvasGL::zoom_to_center(float factor)
     set_scale(m_width / 2, m_height / 2, scale * factor);
 }
 
+void CanvasGL::zoom_to_cursor(float factor)
+{
+    if (!can_set_scale())
+        return;
+    const auto p = get_cursor_pos_win();
+    set_scale(p.x, p.y, scale * factor);
+}
+
 void CanvasGL::ensure_min_size(float w, float h)
 {
     auto sc_x = m_width / w;

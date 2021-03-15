@@ -65,6 +65,25 @@ void PreferencesRowBool::activate()
     sw->set_active(!sw->get_active());
 }
 
+class PreferencesRowBoolButton : public PreferencesRow {
+public:
+    PreferencesRowBoolButton(const std::string &title, const std::string &subtitle, const std::string &label_true,
+                             const std::string &label_false, Preferences &prefs, bool &v);
+
+private:
+    Preferences &preferences;
+};
+
+PreferencesRowBoolButton::PreferencesRowBoolButton(const std::string &title, const std::string &subtitle,
+                                                   const std::string &label_true, const std::string &label_false,
+                                                   Preferences &prefs, bool &v)
+    : PreferencesRow(title, subtitle), preferences(prefs)
+{
+    auto box = make_boolean_ganged_switch(v, label_false, label_true,
+                                          [this](bool x) { preferences.signal_changed().emit(); });
+    pack_start(*box, false, false, 0);
+}
+
 class PreferencesRowNumeric : public PreferencesRow {
 public:
     PreferencesRowNumeric(const std::string &title, const std::string &subtitle, Preferences &prefs, float &v);
@@ -250,6 +269,12 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
             auto r = Gtk::manage(new PreferencesRowBool("Use touchpad to pan",
                                                         "Scrolling on the touchpad will pan rather than zoom",
                                                         preferences, preferences.zoom.touchpad_pan));
+            gr->add_row(*r);
+        }
+        {
+            auto r = Gtk::manage(new PreferencesRowBoolButton("Keyboard zoom center", "Where to zoom in using keyboard",
+                                                              "Cursor", "Screen center", preferences,
+                                                              preferences.zoom.keyboard_zoom_to_cursor));
             gr->add_row(*r);
         }
     }

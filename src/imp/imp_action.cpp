@@ -297,7 +297,11 @@ void ImpBase::handle_zoom_action(const ActionConnection &c)
     auto factor = canvas->zoom_base;
     if (c.action_id == ActionID::ZOOM_OUT)
         factor = 1 / factor;
-    canvas->zoom_to_center(factor);
+
+    if (preferences.zoom.keyboard_zoom_to_cursor)
+        canvas->zoom_to_cursor(factor);
+    else
+        canvas->zoom_to_center(factor);
 }
 
 void ImpBase::force_end_tool()
