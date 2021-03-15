@@ -261,8 +261,8 @@ void PoolStatusProviderPoolManager::worker()
             x->tables_needs_update = PoolStatusPoolManager::UpdateState::NO;
         }
         else if (tables_remote_exist && tables_local_exist) {
-            auto j_tables_remote = load_json_from_file(tables_remote);
-            auto j_tables_local = load_json_from_file(tables_local);
+            auto j_tables_remote = load_json_from_file(tables_remote.u8string());
+            auto j_tables_local = load_json_from_file(tables_local.u8string());
             auto diff = json::diff(j_tables_local, j_tables_remote);
             if (diff.size() > 0) { // different
                 x->tables_needs_update = PoolStatusPoolManager::UpdateState::OPTIONAL;

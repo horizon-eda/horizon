@@ -2,6 +2,7 @@
 #include "widgets/cell_renderer_color_box.hpp"
 #include "common/object_descr.hpp"
 #include "util/gtk_util.hpp"
+#include <iomanip>
 
 namespace horizon {
 
