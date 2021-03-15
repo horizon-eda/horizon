@@ -6,14 +6,17 @@ namespace horizon {
 
 class PreferencesRow : public Gtk::Box {
 public:
-    PreferencesRow(const std::string &title, const std::string &subtitle);
+    PreferencesRow(const std::string &title, const std::string &subtitle, Preferences &prefs);
     virtual void activate()
     {
     }
+
+protected:
+    Preferences &preferences;
 };
 
-PreferencesRow::PreferencesRow(const std::string &title, const std::string &subtitle)
-    : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 48)
+PreferencesRow::PreferencesRow(const std::string &title, const std::string &subtitle, Preferences &prefs)
+    : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 48), preferences(prefs)
 {
     set_valign(Gtk::ALIGN_CENTER);
     property_margin() = 10;
@@ -44,13 +47,12 @@ public:
     void activate() override;
 
 private:
-    Preferences &preferences;
     Gtk::Switch *sw = nullptr;
 };
 
 PreferencesRowBool::PreferencesRowBool(const std::string &title, const std::string &subtitle, Preferences &prefs,
                                        bool &v)
-    : PreferencesRow(title, subtitle), preferences(prefs)
+    : PreferencesRow(title, subtitle, prefs)
 {
     sw = Gtk::manage(new Gtk::Switch);
     sw->set_valign(Gtk::ALIGN_CENTER);
@@ -69,15 +71,12 @@ class PreferencesRowBoolButton : public PreferencesRow {
 public:
     PreferencesRowBoolButton(const std::string &title, const std::string &subtitle, const std::string &label_true,
                              const std::string &label_false, Preferences &prefs, bool &v);
-
-private:
-    Preferences &preferences;
 };
 
 PreferencesRowBoolButton::PreferencesRowBoolButton(const std::string &title, const std::string &subtitle,
                                                    const std::string &label_true, const std::string &label_false,
                                                    Preferences &prefs, bool &v)
-    : PreferencesRow(title, subtitle), preferences(prefs)
+    : PreferencesRow(title, subtitle, prefs)
 {
     auto box = make_boolean_ganged_switch(v, label_false, label_true,
                                           [this](bool x) { preferences.signal_changed().emit(); });
@@ -92,14 +91,13 @@ public:
     void bind();
 
 private:
-    Preferences &preferences;
     float &value;
     Gtk::SpinButton *sp = nullptr;
 };
 
 PreferencesRowNumeric::PreferencesRowNumeric(const std::string &title, const std::string &subtitle, Preferences &prefs,
                                              float &v)
-    : PreferencesRow(title, subtitle), preferences(prefs), value(v)
+    : PreferencesRow(title, subtitle, prefs), value(v)
 {
     sp = Gtk::manage(new Gtk::SpinButton);
     sp->set_valign(Gtk::ALIGN_CENTER);
