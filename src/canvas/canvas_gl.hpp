@@ -250,6 +250,7 @@ private:
     void pan_drag_move(GdkEventMotion *motion_event);
     void pan_drag_move(GdkEventScroll *scroll_event);
     void pan_zoom(GdkEventScroll *scroll_event, bool to_cursor = true);
+    void start_smooth_zoom(const Coordf &c, float inc);
     void cursor_move(GdkEvent *motion_event);
     void hover_prelight_update(GdkEvent *motion_event);
     bool pan_dragging = false;

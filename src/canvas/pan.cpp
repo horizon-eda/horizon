@@ -155,19 +155,25 @@ void CanvasGL::pan_zoom(GdkEventScroll *scroll_event, bool to_cursor)
     }
     inc *= factor;
     if (smooth_zoom) {
-        if (inc == 0)
-            return;
-        if (!zoom_animator.is_running()) {
-            zoom_animator.start();
-            zoom_animation_scale_orig = scale;
-            gtk_widget_add_tick_callback(GTK_WIDGET(gobj()), &tick_cb, nullptr, nullptr);
-        }
-        zoom_animator.target += inc;
-        zoom_animation_pos.x = x;
-        zoom_animation_pos.y = y;
+        start_smooth_zoom(Coordf(x, y), inc);
     }
     else {
         set_scale(x, y, scale * pow(zoom_base, inc));
     }
 }
+
+void CanvasGL::start_smooth_zoom(const Coordf &c, float inc)
+{
+    if (inc == 0)
+        return;
+    if (!zoom_animator.is_running()) {
+        zoom_animator.start();
+        zoom_animation_scale_orig = scale;
+        gtk_widget_add_tick_callback(GTK_WIDGET(gobj()), &tick_cb, nullptr, nullptr);
+    }
+    zoom_animator.target += inc;
+    zoom_animation_pos = c;
+}
+
+
 } // namespace horizon
