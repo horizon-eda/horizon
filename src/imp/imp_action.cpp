@@ -292,16 +292,18 @@ void ImpBase::handle_pan_action(const ActionConnection &c)
     canvas->set_scale_and_offset(sc, offset);
 }
 
-void ImpBase::handle_zoom_action(const ActionConnection &c)
+void ImpBase::handle_zoom_action(const ActionConnection &conn)
 {
-    auto factor = canvas->zoom_base;
-    if (c.action_id == ActionID::ZOOM_OUT)
-        factor = 1 / factor;
+    auto inc = 1;
+    if (conn.action_id == ActionID::ZOOM_OUT)
+        inc = -1;
 
+    Coordf c;
     if (preferences.zoom.keyboard_zoom_to_cursor)
-        canvas->zoom_to_cursor(factor);
+        c = canvas->get_cursor_pos_win();
     else
-        canvas->zoom_to_center(factor);
+        c = Coordf(canvas->get_width(), canvas->get_height()) / 2;
+    canvas->zoom_to(c, inc);
 }
 
 void ImpBase::force_end_tool()

@@ -443,19 +443,15 @@ void CanvasGL::zoom_to_bbox(const std::pair<Coordf, Coordf> &bb)
     zoom_to_bbox(bb.first, bb.second);
 }
 
-void CanvasGL::zoom_to_center(float factor)
+void CanvasGL::zoom_to(const Coordf &c, float inc)
 {
     if (!can_set_scale())
         return;
-    set_scale(m_width / 2, m_height / 2, scale * factor);
-}
 
-void CanvasGL::zoom_to_cursor(float factor)
-{
-    if (!can_set_scale())
-        return;
-    const auto p = get_cursor_pos_win();
-    set_scale(p.x, p.y, scale * factor);
+    if (smooth_zoom)
+        start_smooth_zoom(c, inc);
+    else
+        set_scale(c.x, c.y, scale * pow(zoom_base, inc));
 }
 
 void CanvasGL::ensure_min_size(float w, float h)
