@@ -242,7 +242,6 @@ protected:
 
     Gtk::SpinButton *sp = nullptr;
     PropertyValueInt value;
-    void changed();
 };
 
 class PropertyEditorExpand : public PropertyEditorInt {

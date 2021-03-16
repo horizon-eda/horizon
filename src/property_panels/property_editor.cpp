@@ -118,7 +118,6 @@ void PropertyEditorString::activate()
         return;
     }
     modified = false;
-    std::string txt = en->get_text();
     s_signal_changed.emit();
     s_signal_activate.emit();
 }
@@ -368,7 +367,8 @@ Gtk::Widget *PropertyEditorInt::create_editor()
     sp = Gtk::manage(new Gtk::SpinButton());
     sp->set_range(0, 65536);
     sp->set_width_chars(7);
-    connections.push_back(sp->signal_value_changed().connect(sigc::mem_fun(*this, &PropertyEditorInt::changed)));
+    connections.push_back(sp->signal_value_changed().connect([this] { s_signal_changed.emit(); }));
+    sp->signal_activate().connect([this] { s_signal_activate.emit(); });
     return sp;
 }
 
@@ -376,11 +376,6 @@ void PropertyEditorInt::reload()
 {
     ScopedBlock block(connections);
     sp->set_value(value.value);
-}
-
-void PropertyEditorInt::changed()
-{
-    s_signal_changed.emit();
 }
 
 PropertyValue &PropertyEditorInt::get_value()
