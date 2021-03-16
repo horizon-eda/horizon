@@ -15,6 +15,20 @@ const SelectableRef &sel_find_one(const std::set<SelectableRef> &sel, ObjectType
     return *r;
 }
 
+const SelectableRef *sel_find_exactly_one(const std::set<SelectableRef> &sel, ObjectType type)
+{
+    const SelectableRef *s = nullptr;
+    for (const auto &it : sel) {
+        if (it.type == type) {
+            if (s == nullptr)
+                s = &it;
+            else
+                return nullptr;
+        }
+    }
+    return s;
+}
+
 template <class T, class Comp, class Alloc, class Predicate>
 void discard_if(std::set<T, Comp, Alloc> &c, Predicate pred)
 {

@@ -945,8 +945,8 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
         sel_erase_type(sel, ObjectType::TRACK);
     }
     trim(s);
-    if (sel_count_type(sel, ObjectType::BOARD_PACKAGE) == 1) {
-        const auto &pkg = core_board.get_board()->packages.at(sel_find_one(sel, ObjectType::BOARD_PACKAGE).uuid);
+    if (auto it_sel = sel_find_exactly_one(sel, ObjectType::BOARD_PACKAGE)) {
+        const auto &pkg = core_board.get_board()->packages.at(it_sel->uuid);
         s += "\n\n<b>Package " + pkg.component->refdes + "</b>";
         if (pkg.fixed) {
             s += " (not movable)";

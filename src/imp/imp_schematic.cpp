@@ -630,15 +630,15 @@ UUID ImpSchematic::net_from_selectable(const SelectableRef &sr)
 std::string ImpSchematic::get_hud_text(std::set<SelectableRef> &sel)
 {
     std::string s;
-    if (sel_count_type(sel, ObjectType::SCHEMATIC_SYMBOL) == 1) {
-        const auto &sym = core_schematic.get_sheet()->symbols.at(sel_find_one(sel, ObjectType::SCHEMATIC_SYMBOL).uuid);
+    if (auto it = sel_find_exactly_one(sel, ObjectType::SCHEMATIC_SYMBOL)) {
+        const auto &sym = core_schematic.get_sheet()->symbols.at(it->uuid);
         s += "<b>Symbol " + sym.component->refdes + "</b>\n";
         s += get_hud_text_for_component(sym.component);
         sel_erase_type(sel, ObjectType::SCHEMATIC_SYMBOL);
     }
 
-    if (sel_count_type(sel, ObjectType::TEXT) == 1) {
-        const auto text = core->get_text(sel_find_one(sel, ObjectType::TEXT).uuid);
+    if (auto it = sel_find_exactly_one(sel, ObjectType::TEXT)) {
+        const auto text = core->get_text(it->uuid);
         const auto txt = Glib::ustring(text->text);
         Glib::MatchInfo ma;
         if (core_schematic.get_schematic()->get_sheetref_regex()->match(txt, ma)) {

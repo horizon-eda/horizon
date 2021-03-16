@@ -55,44 +55,44 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
     }
 
     // Display the length if a single edge of a polygon is given
-    if (sel_count_type(sel, ObjectType::POLYGON_EDGE) == 1) {
+    if (auto it = sel_find_exactly_one(sel, ObjectType::POLYGON_EDGE)) {
         s += "\n\n<b>" + object_descriptions.at(ObjectType::POLYGON_EDGE).name + "</b>\n";
-        const auto it = sel_find_one(sel, ObjectType::POLYGON_EDGE);
-        const auto li = core->get_polygon(it.uuid);
-        const auto pair = li->get_vertices_for_edge(it.vertex);
+        const auto li = core->get_polygon(it->uuid);
+        const auto pair = li->get_vertices_for_edge(it->vertex);
         const int64_t length =
                 sqrt((li->vertices.at(pair.first).position - li->vertices.at(pair.second).position).mag_sq());
         s += "Layer: ";
         s += core->get_layer_provider().get_layers().at(li->layer).name + " ";
         s += "\nLength: " + dim_to_string(length, false);
         if (preferences.hud_debug)
-            s += "\nVertex: " + std::to_string(it.vertex);
+            s += "\nVertex: " + std::to_string(it->vertex);
         sel_erase_type(sel, ObjectType::POLYGON_EDGE);
     }
 
-    if (sel_count_type(sel, ObjectType::POLYGON_VERTEX) == 1) {
+    if (auto it = sel_find_exactly_one(sel, ObjectType::POLYGON_VERTEX)) {
         s += "\n\n<b>" + object_descriptions.at(ObjectType::POLYGON_VERTEX).name + "</b>\n";
-        const auto it = sel_find_one(sel, ObjectType::POLYGON_VERTEX);
-        const auto poly = core->get_polygon(it.uuid);
-        s += coord_to_string(poly->vertices.at(it.vertex).position);
+        const auto poly = core->get_polygon(it->uuid);
+        s += coord_to_string(poly->vertices.at(it->vertex).position);
         if (preferences.hud_debug)
-            s += "\nVertex: " + std::to_string(it.vertex);
+            s += "\nVertex: " + std::to_string(it->vertex);
         sel_erase_type(sel, ObjectType::POLYGON_VERTEX);
     }
 
-    if (preferences.hud_debug && (sel_count_type(sel, ObjectType::TEXT) == 1)) {
-        const auto txt = core->get_text(sel_find_one(sel, ObjectType::TEXT).uuid);
-        s += "\n\n<b>Text:</b>\n";
-        if (txt->overridden) {
-            s += "Overriden: " + txt->text_override;
-        }
-        else {
-            s += "Not overridden";
+    if (preferences.hud_debug) {
+        if (auto it = sel_find_exactly_one(sel, ObjectType::TEXT)) {
+            const auto txt = core->get_text(it->uuid);
+            s += "\n\n<b>Text:</b>\n";
+            if (txt->overridden) {
+                s += "Overriden: " + txt->text_override;
+            }
+            else {
+                s += "Not overridden";
+            }
         }
     }
 
-    if (sel_count_type(sel, ObjectType::TEXT) == 1) {
-        const auto text = core->get_text(sel_find_one(sel, ObjectType::TEXT).uuid);
+    if (auto it = sel_find_exactly_one(sel, ObjectType::TEXT)) {
+        const auto text = core->get_text(it->uuid);
         const auto txt = Glib::ustring(text->text);
         auto regex = Glib::Regex::create(R"((https?:\/\/|file:\/\/\/?)([\w\.-]+)(\/\S+)?)");
         Glib::MatchInfo ma;
@@ -116,18 +116,20 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
         }
     }
 
-    if (preferences.hud_debug && (sel_count_type(sel, ObjectType::JUNCTION) == 1)) {
-        const auto ju = core->get_junction(sel_find_one(sel, ObjectType::JUNCTION).uuid);
-        s += "\n\n<b>Junction:</b>\n";
-        s += "Layers " + std::to_string(ju->layer.start()) + " — " + std::to_string(ju->layer.end()) + "\n";
-        const Net *net = nullptr;
-        if (auto ju_b = dynamic_cast<BoardJunction *>(ju))
-            net = ju_b->net;
-        if (net)
-            s += "Net: " + core->get_block()->get_net_name(net->uuid);
-        else
-            s += "No net";
-        sel_erase_type(sel, ObjectType::JUNCTION);
+    if (preferences.hud_debug) {
+        if (auto it = sel_find_exactly_one(sel, ObjectType::JUNCTION)) {
+            const auto ju = core->get_junction(it->uuid);
+            s += "\n\n<b>Junction:</b>\n";
+            s += "Layers " + std::to_string(ju->layer.start()) + " — " + std::to_string(ju->layer.end()) + "\n";
+            const Net *net = nullptr;
+            if (auto ju_b = dynamic_cast<BoardJunction *>(ju))
+                net = ju_b->net;
+            if (net)
+                s += "Net: " + core->get_block()->get_net_name(net->uuid);
+            else
+                s += "No net";
+            sel_erase_type(sel, ObjectType::JUNCTION);
+        }
     }
 
     trim(s);
