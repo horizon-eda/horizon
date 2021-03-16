@@ -94,6 +94,8 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                   {ObjectProperty::ID::FROM_RULES, {ObjectProperty::Type::BOOL, "From rules", 1}},
                   {ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Net", 0}},
                   {ObjectProperty::ID::LOCKED, {ObjectProperty::Type::BOOL, "Locked", 2}},
+                  {ObjectProperty::ID::POSITION_X, {ObjectProperty::Type::DIM, "Position X", 3}},
+                  {ObjectProperty::ID::POSITION_Y, {ObjectProperty::Type::DIM, "Position Y", 4}},
           }}},
         {ObjectType::SHAPE,
          {"Shape",

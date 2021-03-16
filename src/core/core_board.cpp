@@ -205,6 +205,14 @@ bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID
             return true;
         }
 
+        case ObjectProperty::ID::POSITION_X:
+            dynamic_cast<PropertyValueInt &>(value).value = via->junction->position.x;
+            return true;
+
+        case ObjectProperty::ID::POSITION_Y:
+            dynamic_cast<PropertyValueInt &>(value).value = via->junction->position.y;
+            return true;
+
         default:
             return false;
         }
@@ -435,6 +443,14 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
         case ObjectProperty::ID::LOCKED:
             via->locked = dynamic_cast<const PropertyValueBool &>(value).value;
             break;
+
+        case ObjectProperty::ID::POSITION_X:
+            via->junction->position.x = dynamic_cast<const PropertyValueInt &>(value).value;
+            return true;
+
+        case ObjectProperty::ID::POSITION_Y:
+            via->junction->position.y = dynamic_cast<const PropertyValueInt &>(value).value;
+            return true;
 
         default:
             return false;
