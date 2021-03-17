@@ -40,6 +40,7 @@ private:
     State state = State::ORIGIN;
     std::map<SelectableRef, Placement> placements;
     std::map<UUID, double> decal_scales;
+    std::map<UUID, uint64_t> picture_px_sizes;
     class CanvasAnnotation *annotation = nullptr;
     std::set<UUID> nets;
     void update_airwires(bool fast);

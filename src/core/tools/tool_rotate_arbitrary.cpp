@@ -190,6 +190,11 @@ void ToolRotateArbitrary::save_placements()
             placements[it] = dec.placement;
             decal_scales[it.uuid] = dec.get_scale();
         } break;
+        case ObjectType::PICTURE: {
+            const auto pic = doc.r->get_picture(it.uuid);
+            placements[it] = pic->placement;
+            picture_px_sizes[it.uuid] = pic->px_size;
+        } break;
         case ObjectType::PAD:
             placements[it] = doc.k->get_package().pads.at(it.uuid).placement;
             break;
@@ -234,6 +239,9 @@ void ToolRotateArbitrary::apply_placements_rotation(int angle)
         case ObjectType::BOARD_DECAL:
             doc.b->get_board()->decals.at(it.first.uuid).placement = rotate_placement(it.second, origin, angle);
             break;
+        case ObjectType::PICTURE:
+            doc.r->get_picture(it.first.uuid)->placement = rotate_placement(it.second, origin, angle);
+            break;
         case ObjectType::PAD:
             doc.k->get_package().pads.at(it.first.uuid).placement = rotate_placement(it.second, origin, angle);
             break;
@@ -277,6 +285,11 @@ void ToolRotateArbitrary::apply_placements_scale(double sc)
             auto &dec = doc.b->get_board()->decals.at(it.first.uuid);
             dec.placement = scale_placement(it.second, origin, sc);
             dec.set_scale(decal_scales.at(it.first.uuid) * sc);
+        } break;
+        case ObjectType::PICTURE: {
+            auto pic = doc.r->get_picture(it.first.uuid);
+            pic->placement = scale_placement(it.second, origin, sc);
+            pic->px_size = picture_px_sizes.at(it.first.uuid) * sc;
         } break;
         default:;
         }
