@@ -56,8 +56,8 @@ void ImpPackage::apply_preferences()
 std::string ImpPackage::get_hud_text(std::set<SelectableRef> &sel)
 {
     std::string s;
-    if (auto it = sel_find_exactly_one(sel, ObjectType::PAD)) {
-        const auto &pad = package.pads.at(it->uuid);
+    if (auto it_sel = sel_find_exactly_one(sel, ObjectType::PAD)) {
+        const auto &pad = package.pads.at(it_sel->uuid);
         s += "<b>Pad " + pad.name + "</b>\n";
         for (const auto &it : pad.parameter_set) {
             s += parameter_id_to_name(it.first) + ": " + dim_to_string(it.second, true) + "\n";
