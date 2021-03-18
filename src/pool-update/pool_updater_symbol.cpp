@@ -25,6 +25,8 @@ void PoolUpdater::update_symbol(const std::string &filename)
         status_cb(PoolUpdateStatus::FILE, filename, "");
         auto symbol = Symbol::new_from_file(filename, *pool);
         const auto last_pool_uuid = handle_override(ObjectType::SYMBOL, symbol.uuid);
+        if (!last_pool_uuid)
+            return;
         SQLite::Query q(pool->db,
                         "INSERT INTO symbols "
                         "(uuid, name, filename, unit, pool_uuid, last_pool_uuid) "
@@ -34,7 +36,7 @@ void PoolUpdater::update_symbol(const std::string &filename)
         q.bind("$name", symbol.name);
         q.bind("$unit", symbol.unit->uuid);
         q.bind("$pool_uuid", pool_uuid);
-        q.bind("$last_pool_uuid", last_pool_uuid);
+        q.bind("$last_pool_uuid", *last_pool_uuid);
         q.bind("$filename", get_path_rel(filename));
         q.step();
         add_dependency(ObjectType::SYMBOL, symbol.uuid, ObjectType::UNIT, symbol.unit->uuid);

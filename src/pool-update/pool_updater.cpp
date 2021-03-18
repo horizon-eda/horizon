@@ -122,20 +122,37 @@ void PoolUpdater::delete_item(ObjectType type, const UUID &uu)
     }
 }
 
-UUID PoolUpdater::handle_override(ObjectType type, const UUID &uu)
+std::optional<UUID> PoolUpdater::handle_override(ObjectType type, const UUID &uu)
 {
-    UUID last_pool_uuid;
+    std::optional<UUID> last_pool_uuid;
     if (auto l = exists(type, uu)) {
         const auto &[item_pool_uuid, item_last_pool_uuid] = *l;
-        if (item_pool_uuid != pool_uuid) { // item is overriding, i.e. item is in different pool than current item
-            last_pool_uuid = item_pool_uuid;
+        // pool_uuid is pool the item specified by type, uu is in
+
+        if (is_partial_update) {
+            if (item_pool_uuid == pool_uuid) {
+                // updating existing item, keep last pool UUID
+                last_pool_uuid = item_last_pool_uuid;
+            }
+            else {
+                // updating existing item with item from other pool is not allowed
+                // skip this item
+                return {};
+            }
         }
-        else { // not overriding, partial update
-            last_pool_uuid = item_last_pool_uuid;
+        else {
+            if (item_pool_uuid != pool_uuid) {
+                // item is overriding, i.e. item is in different pool than current item
+                last_pool_uuid = item_pool_uuid;
+            }
+            else {
+                throw std::runtime_error("duplicate UUID in complete pool update");
+            }
         }
         delete_item(type, uu);
+        return last_pool_uuid;
     }
-    return last_pool_uuid;
+    return UUID();
 }
 
 void PoolUpdater::set_pool_info(const std::string &bp)
@@ -157,6 +174,7 @@ std::string PoolUpdater::get_path_rel(const std::string &filename) const
 
 void PoolUpdater::update_some(const std::vector<std::string> &filenames, std::set<UUID> &all_parts_updated)
 {
+    is_partial_update = true;
     const auto base_paths = pool->get_actually_included_pools(true);
     pool->db.execute("BEGIN TRANSACTION");
     std::set<UUID> parts_updated;
@@ -171,7 +189,8 @@ void PoolUpdater::update_some(const std::vector<std::string> &filenames, std::se
             }
         }
         if (!pool_uuid) {
-            throw std::runtime_error(filename + " not found in any included pool");
+            // not in any included pool, don't care
+            continue;
         }
 
         get_path_rel(filename); // throws if filename not in current base path

@@ -87,6 +87,8 @@ void PoolUpdater::update_package(const std::string &filename)
         status_cb(PoolUpdateStatus::FILE, filename, "");
         auto package = Package::new_from_file(filename, *pool);
         const auto last_pool_uuid = handle_override(ObjectType::PACKAGE, package.uuid);
+        if (!last_pool_uuid)
+            return;
         SQLite::Query q(pool->db,
                         "INSERT INTO packages "
                         "(uuid, name, manufacturer, filename, n_pads, alternate_for, pool_uuid, last_pool_uuid) "
@@ -104,7 +106,7 @@ void PoolUpdater::update_package(const std::string &filename)
         auto rel = bp->get_relative_path(Gio::File::create_for_path(filename));
         q.bind("$filename", rel);
         q.bind("$pool_uuid", pool_uuid);
-        q.bind("$last_pool_uuid", last_pool_uuid);
+        q.bind("$last_pool_uuid", *last_pool_uuid);
         q.step();
         for (const auto &it_tag : package.tags) {
             add_tag(ObjectType::PACKAGE, package.uuid, it_tag);

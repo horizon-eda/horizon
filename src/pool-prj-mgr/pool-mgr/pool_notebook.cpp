@@ -192,20 +192,8 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
             },
             *this));
 
-    pool_item_edited_conn = appwin->get_app().signal_pool_items_edited().connect(sigc::track_obj(
-            [this](const auto &filenames) {
-                const auto base_paths = pool.get_actually_included_pools(true);
-                if (std::all_of(filenames.begin(), filenames.end(), [&base_paths](const auto &fn) {
-                        for (const auto &[base, uu] : base_paths) {
-                            if (get_relative_filename(fn, base))
-                                return true;
-                        }
-                        return false;
-                    })) {
-                    pool_update(nullptr, filenames);
-                }
-            },
-            *this));
+    pool_item_edited_conn = appwin->get_app().signal_pool_items_edited().connect(
+            sigc::track_obj([this](const auto &filenames) { pool_update(nullptr, filenames); }, *this));
 
     {
         pool_update_dispatcher.connect([this] {

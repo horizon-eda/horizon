@@ -24,6 +24,8 @@ void PoolUpdater::update_unit(const std::string &filename)
         status_cb(PoolUpdateStatus::FILE, filename, "");
         auto unit = Unit::new_from_file(filename);
         const auto last_pool_uuid = handle_override(ObjectType::UNIT, unit.uuid);
+        if (!last_pool_uuid)
+            return;
         SQLite::Query q(pool->db,
                         "INSERT INTO units "
                         "(uuid, name, manufacturer, filename, pool_uuid, last_pool_uuid) "
@@ -34,7 +36,7 @@ void PoolUpdater::update_unit(const std::string &filename)
         q.bind("$manufacturer", unit.manufacturer);
         q.bind("$filename", get_path_rel(filename));
         q.bind("$pool_uuid", pool_uuid);
-        q.bind("$last_pool_uuid", last_pool_uuid);
+        q.bind("$last_pool_uuid", *last_pool_uuid);
         q.step();
     }
     catch (const std::exception &e) {

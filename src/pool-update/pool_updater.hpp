@@ -46,7 +46,7 @@ private:
     void clear_tags(ObjectType type, const UUID &uu);
     std::optional<std::pair<UUID, UUID>> exists(ObjectType type, const UUID &uu);
     void delete_item(ObjectType type, const UUID &uu);
-    UUID handle_override(ObjectType type, const UUID &u);
+    std::optional<UUID> handle_override(ObjectType type, const UUID &u);
 
     void update_frame(const std::string &filename);
     void update_decal(const std::string &filename);
@@ -62,6 +62,7 @@ private:
     const json &load_json(const std::string &filename);
 
     UUID pool_uuid;
+    bool is_partial_update = false;
     void set_pool_info(const std::string &bp);
     std::string get_path_rel(const std::string &filename) const;
 };

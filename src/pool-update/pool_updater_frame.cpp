@@ -24,6 +24,8 @@ void PoolUpdater::update_frame(const std::string &filename)
         status_cb(PoolUpdateStatus::FILE, filename, "");
         auto frame = Frame::new_from_file(filename);
         const auto last_pool_uuid = handle_override(ObjectType::FRAME, frame.uuid);
+        if (!last_pool_uuid)
+            return;
         SQLite::Query q(pool->db,
                         "INSERT INTO frames "
                         "(uuid, name, filename, pool_uuid, last_pool_uuid) "
@@ -33,7 +35,7 @@ void PoolUpdater::update_frame(const std::string &filename)
         q.bind("$name", frame.name);
         q.bind("$filename", get_path_rel(filename));
         q.bind("$pool_uuid", pool_uuid);
-        q.bind("$last_pool_uuid", last_pool_uuid);
+        q.bind("$last_pool_uuid", *last_pool_uuid);
         q.step();
     }
     catch (const std::exception &e) {

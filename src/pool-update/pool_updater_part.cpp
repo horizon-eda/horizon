@@ -43,6 +43,8 @@ void PoolUpdater::update_part(const std::string &filename)
             status_cb(PoolUpdateStatus::FILE, filename, "");
             auto part = Part::new_from_json(load_json(filename), *pool);
             const auto last_pool_uuid = handle_override(ObjectType::PART, part.uuid);
+            if (!last_pool_uuid)
+                return;
             std::string table;
             if (part.parametric.count("table"))
                 table = part.parametric.at("table");
@@ -54,7 +56,7 @@ void PoolUpdater::update_part(const std::string &filename)
             q_insert_part->bind("$entity", part.entity->uuid);
             q_insert_part->bind("$description", part.get_description());
             q_insert_part->bind("$pool_uuid", pool_uuid);
-            q_insert_part->bind("$last_pool_uuid", last_pool_uuid);
+            q_insert_part->bind("$last_pool_uuid", *last_pool_uuid);
             q_insert_part->bind("$parametric_table", table);
             q_insert_part->bind("$base", part.base ? part.base->uuid : UUID());
             q_insert_part->bind("$filename", get_path_rel(filename));
