@@ -11,6 +11,7 @@ PoolBrowserPart::PoolBrowserPart(IPool &p, const UUID &uu, const std::string &in
 {
     construct();
     MPN_entry = create_search_entry("MPN");
+    focus_widget = MPN_entry;
     manufacturer_entry = create_search_entry("Manufacturer");
     desc_entry = create_search_entry("Description");
     tag_entry = create_tag_entry("Tags", create_pool_selector());

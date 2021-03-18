@@ -88,6 +88,7 @@ PoolBrowserDialog::PoolBrowserDialog(Gtk::Window *parent, ObjectType type, IPool
     browser->signal_selected().connect([button_ok, this] { button_ok->set_sensitive(browser->get_any_selected()); });
 
     get_content_area()->show_all();
+    browser->focus_search();
 }
 
 

@@ -10,6 +10,7 @@ PoolBrowserEntity::PoolBrowserEntity(IPool &p) : PoolBrowser(p)
     construct();
     name_entry = create_search_entry("Name");
     tag_entry = create_tag_entry("Tags", create_pool_selector());
+    focus_widget = name_entry;
     install_pool_item_source_tooltip();
 }
 

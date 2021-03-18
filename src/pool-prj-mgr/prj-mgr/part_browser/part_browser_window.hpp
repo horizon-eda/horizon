@@ -39,6 +39,7 @@ public:
     void go_to_part(const UUID &uu);
     void set_can_assign(bool v);
     void set_pool_cache_status(const class PoolCacheStatus &st);
+    void focus_search();
 
 private:
     Gtk::Menu *add_search_menu = nullptr;

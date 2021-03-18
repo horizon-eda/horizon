@@ -7,6 +7,7 @@ PoolBrowserDecal::PoolBrowserDecal(IPool &p) : PoolBrowser(p)
 {
     construct();
     name_entry = create_search_entry("Name", create_pool_selector());
+    focus_widget = name_entry;
     install_pool_item_source_tooltip();
 }
 

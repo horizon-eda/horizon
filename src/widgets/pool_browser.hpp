@@ -32,6 +32,7 @@ public:
     };
     void go_to(const UUID &uu);
     void clear_search();
+    void focus_search();
 
     enum class PoolItemSource { LOCAL, INCLUDED, OVERRIDDEN, OVERRIDDEN_LOCAL, CACHED };
 
@@ -97,6 +98,8 @@ protected:
     Gtk::Widget *create_pool_selector();
     std::string get_pool_selector_query() const;
     void bind_pool_selector_query(SQLite::Query &q) const;
+
+    Gtk::Widget *focus_widget = nullptr;
 
 private:
     Gtk::Grid *grid = nullptr;

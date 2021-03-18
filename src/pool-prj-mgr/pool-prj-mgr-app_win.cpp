@@ -251,6 +251,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
     }
     else if (op == "show-browser") {
         part_browser_window->present(timestamp);
+        part_browser_window->focus_search();
     }
     else if (op == "schematic-select") {
         if (auto proc = find_board_process()) {

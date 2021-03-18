@@ -367,6 +367,7 @@ PoolBrowserPart *PartBrowserWindow::add_search(const UUID &part)
     ch->signal_activated().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_place_part));
     if (part)
         ch->go_to(part);
+    ch->focus_search();
     return ch;
 }
 
@@ -406,6 +407,14 @@ PoolBrowserParametric *PartBrowserWindow::add_search_parametric(const std::strin
             },
             *ch));
     return ch;
+}
+
+void PartBrowserWindow::focus_search()
+{
+    auto page = notebook->get_nth_page(notebook->get_current_page());
+    if (auto br = dynamic_cast<PoolBrowserPart *>(page)) {
+        br->focus_search();
+    }
 }
 
 PartBrowserWindow *PartBrowserWindow::create(Gtk::Window *p, const std::string &pool_path, std::deque<UUID> &favs)

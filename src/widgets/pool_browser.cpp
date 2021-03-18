@@ -343,6 +343,12 @@ void PoolBrowser::clear_search()
     }
 }
 
+void PoolBrowser::focus_search()
+{
+    if (focus_widget)
+        focus_widget->grab_focus();
+}
+
 void PoolBrowser::go_to(const UUID &uu)
 {
     clear_search();

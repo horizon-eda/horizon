@@ -10,6 +10,7 @@ PoolBrowserPackage::PoolBrowserPackage(IPool &p, bool pads_filter, const std::st
 {
     construct();
     name_entry = create_search_entry("Name");
+    focus_widget = name_entry;
     manufacturer_entry = create_search_entry("Manufacturer");
     tag_entry = create_tag_entry("Tags", create_pool_selector());
     if (pads_filter) {
