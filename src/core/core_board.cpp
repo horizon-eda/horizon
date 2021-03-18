@@ -7,6 +7,7 @@
 #include <glibmm/fileutils.h>
 #include "pool/ipool.hpp"
 #include "pool/part.hpp"
+#include "util/picture_load.hpp"
 
 namespace horizon {
 CoreBoard::CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
@@ -655,12 +656,15 @@ void CoreBoard::history_load(unsigned int i)
 
 void CoreBoard::reload_pool()
 {
+    PictureKeeper keeper;
+    keeper.save(brd->pictures);
     const auto brd_j = brd->serialize();
     const auto block_j = block->serialize();
     m_pool.clear();
     m_pool_caching.clear();
     block.emplace(block->uuid, block_j, m_pool_caching);
     brd.emplace(brd->uuid, brd_j, *block, m_pool_caching, via_padstack_provider);
+    keeper.restore(brd->pictures);
     history_clear();
     rebuild();
 }

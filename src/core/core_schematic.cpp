@@ -8,6 +8,7 @@
 #include <glibmm/fileutils.h>
 #include "pool/ipool.hpp"
 #include "util/str_util.hpp"
+#include "util/picture_load.hpp"
 
 namespace horizon {
 CoreSchematic::CoreSchematic(const std::string &schematic_filename, const std::string &block_filename,
@@ -648,12 +649,19 @@ void CoreSchematic::history_load(unsigned int i)
 
 void CoreSchematic::reload_pool()
 {
+    PictureKeeper keeper;
+    for (const auto &[uu_sheet, sheet] : sch->sheets) {
+        keeper.save(sheet.pictures);
+    }
     const auto sch_j = sch->serialize();
     const auto block_j = block->serialize();
     m_pool.clear();
     m_pool_caching.clear();
     block.emplace(block->uuid, block_j, m_pool_caching);
     sch.emplace(sch->uuid, sch_j, *block, m_pool_caching);
+    for (auto &[uu_sheet, sheet] : sch->sheets) {
+        keeper.restore(sheet.pictures);
+    }
     history_clear();
     rebuild();
 }

@@ -105,4 +105,21 @@ void pictures_save(const std::list<const std::map<UUID, Picture> *> &pictures, c
         Gio::File::create_for_path(build_pic_filename(pic_dir, it, suffix))->remove();
     }
 }
+
+void PictureKeeper::save(const std::map<UUID, Picture> &pics)
+{
+    for (const auto &[uu, it] : pics) {
+        if (it.data)
+            pictures.emplace(it.data->uuid, it.data);
+    }
+}
+
+void PictureKeeper::restore(std::map<UUID, Picture> &pics)
+{
+    for (auto &[uu, it] : pics) {
+        if (pictures.count(it.data_uuid))
+            it.data = pictures.at(it.data_uuid);
+    }
+}
+
 } // namespace horizon
