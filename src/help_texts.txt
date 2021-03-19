@@ -32,3 +32,7 @@ Set this for box-style symbols if there are alternate pin names or the user is e
 
 #PLANE_PRIORITY
 Planes with lower priority will get filled first. Make sure to assign distinct priorities to overlapping planes.
+
+#ROUTING_OFFSET
+When routing or dragging a track, this offset gets added to the clearance specified in the rules.
+You can override it in the router tool.

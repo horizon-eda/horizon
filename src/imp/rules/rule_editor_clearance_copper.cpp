@@ -7,6 +7,8 @@
 #include "dialogs/dialogs.hpp"
 #include "rule_match_editor.hpp"
 #include "widgets/spin_button_dim.hpp"
+#include "widgets/help_button.hpp"
+#include "help_texts.hpp"
 
 namespace horizon {
 
@@ -57,6 +59,7 @@ void RuleEditorClearanceCopper::populate()
         rule2->routing_offset = sp_routing_offset->get_value_as_int();
         s_signal_updated.emit();
     });
+    HelpButton::pack_into(builder, "routing_offset_label_box", HelpTexts::ROUTING_OFFSET);
 
     Gtk::Grid *clearance_grid;
     builder->get_widget("clearance_grid", clearance_grid);

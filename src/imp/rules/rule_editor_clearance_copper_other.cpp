@@ -8,6 +8,8 @@
 #include "widgets/spin_button_dim.hpp"
 #include "dialogs/dialogs.hpp"
 #include "common/layer_provider.hpp"
+#include "widgets/help_button.hpp"
+#include "help_texts.hpp"
 
 namespace horizon {
 
@@ -45,7 +47,10 @@ void RuleEditorClearanceCopperOther::populate()
         auto la = Gtk::manage(new Gtk::Label("Routing offset"));
         la->get_style_context()->add_class("dim-label");
         la->set_halign(Gtk::ALIGN_START);
-        grid->attach(*la, 2, 0, 1, 1);
+        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5));
+        box->pack_start(*la, false, false, 0);
+        HelpButton::pack_into(*box, HelpTexts::ROUTING_OFFSET);
+        grid->attach(*box, 2, 0, 1, 1);
     }
 
     auto match_editor = Gtk::manage(new RuleMatchEditor(rule2->match, core));
