@@ -166,7 +166,10 @@ int PNS_HORIZON_RULE_RESOLVER::Clearance(const PNS::ITEM *aA, const PNS::ITEM *a
         auto layer = layers.Start();
 
         auto clearance = m_rules->get_clearance_copper_other(net, PNS_HORIZON_IFACE::layer_from_router(layer));
-        return clearance->get_clearance(pt, horizon::PatchType::BOARD_EDGE) + clearance->routing_offset;
+        int64_t routing_offset = clearance->routing_offset;
+        if (m_iface->get_override_routing_offset() >= 0)
+            routing_offset = m_iface->get_override_routing_offset();
+        return clearance->get_clearance(pt, horizon::PatchType::BOARD_EDGE) + routing_offset;
     }
 
     if ((parent_a && parent_a->pad && parent_a->pad->padstack.type == horizon::Padstack::Type::MECHANICAL)
@@ -188,7 +191,10 @@ int PNS_HORIZON_RULE_RESOLVER::Clearance(const PNS::ITEM *aA, const PNS::ITEM *a
         auto layer = layers.Start();
 
         auto clearance = m_rules->get_clearance_copper_other(net, PNS_HORIZON_IFACE::layer_from_router(layer));
-        return clearance->get_clearance(pt, horizon::PatchType::HOLE_NPTH) + clearance->routing_offset;
+        int64_t routing_offset = clearance->routing_offset;
+        if (m_iface->get_override_routing_offset() >= 0)
+            routing_offset = m_iface->get_override_routing_offset();
+        return clearance->get_clearance(pt, horizon::PatchType::HOLE_NPTH) + routing_offset;
     }
 
     if ((parent_a && parent_a->keepout) || (parent_b && parent_b->keepout)) { // one is keepout
@@ -196,12 +202,14 @@ int PNS_HORIZON_RULE_RESOLVER::Clearance(const PNS::ITEM *aA, const PNS::ITEM *a
         auto net = net_a ? net_a : net_b; // only one has net
         horizon::KeepoutContour keepout_contour;
         keepout_contour.keepout = a_is_keepout ? parent_a->keepout : parent_b->keepout;
-        ;
         keepout_contour.pkg = a_is_keepout ? parent_a->package : parent_b->package;
         for (const auto &rule : m_rules_keepout) {
             if (rule->enabled && rule->match.match(net) && rule->match_keepout.match(&keepout_contour)) {
                 auto cl = rule->get_clearance(a_is_keepout ? pt_b : pt_a);
-                return rule->routing_offset + cl;
+                int64_t routing_offset = rule->routing_offset;
+                if (m_iface->get_override_routing_offset() >= 0)
+                    routing_offset = m_iface->get_override_routing_offset();
+                return routing_offset + cl;
             }
         }
         return 0;
