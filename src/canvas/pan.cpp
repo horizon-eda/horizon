@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <epoxy/gl.h>
 #include <iostream>
+#include "util/warp_cursor.hpp"
 
 namespace horizon {
 void CanvasGL::pan_drag_begin(GdkEventButton *button_event)
@@ -29,34 +30,7 @@ void CanvasGL::pan_drag_move(GdkEventMotion *motion_event)
     gdk_event_get_coords((GdkEvent *)motion_event, &x, &y);
 
     if (pan_dragging) {
-        const bool wr = x >= get_allocated_width();
-        const bool wl = x <= 0;
-        const bool wb = y >= get_allocated_height();
-        const bool wt = y <= 0;
-        Coordi warp_distance;
-        if (wr || wl || wb || wt) {
-            auto dev = gdk_event_get_device((GdkEvent *)motion_event);
-            auto srcdev = gdk_event_get_source_device((GdkEvent *)motion_event);
-            const auto src = gdk_device_get_source(srcdev);
-            if (src != GDK_SOURCE_PEN) {
-                auto scr = gdk_event_get_screen((GdkEvent *)motion_event);
-                gdouble rx, ry;
-                gdk_event_get_root_coords((GdkEvent *)motion_event, &rx, &ry);
-                if (wr) {
-                    warp_distance = Coordi(-get_allocated_width(), 0);
-                }
-                else if (wl) {
-                    warp_distance = Coordi(+get_allocated_width(), 0);
-                }
-                else if (wb) {
-                    warp_distance = Coordi(0, -get_allocated_height());
-                }
-                else if (wt) {
-                    warp_distance = Coordi(0, get_allocated_height());
-                }
-                gdk_device_warp(dev, scr, rx + warp_distance.x, ry + warp_distance.y);
-            }
-        }
+        const Coordi warp_distance = warp_cursor((GdkEvent *)motion_event, *this);
         offset = pan_offset_orig + Coordf(x, y) - pan_pointer_pos_orig;
         update_viewmat();
         pan_pointer_pos_orig += warp_distance;
