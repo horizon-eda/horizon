@@ -50,7 +50,7 @@ private:
 
     void update_frame(const std::string &filename);
     void update_decal(const std::string &filename);
-    void update_part(const std::string &filename);
+    bool update_part(const std::string &filename);
     void update_unit(const std::string &filename);
     void update_symbol(const std::string &filename);
     void update_entity(const std::string &filename);

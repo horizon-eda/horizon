@@ -36,7 +36,7 @@ void PoolUpdater::part_add_dir_to_graph(PoolUpdateGraph &graph, const std::strin
     }
 }
 
-void PoolUpdater::update_part(const std::string &filename)
+bool PoolUpdater::update_part(const std::string &filename)
 {
     try {
         if (filename.size()) {
@@ -44,7 +44,7 @@ void PoolUpdater::update_part(const std::string &filename)
             auto part = Part::new_from_json(load_json(filename), *pool);
             const auto last_pool_uuid = handle_override(ObjectType::PART, part.uuid);
             if (!last_pool_uuid)
-                return;
+                return false;
             std::string table;
             if (part.parametric.count("table"))
                 table = part.parametric.at("table");
@@ -82,6 +82,7 @@ void PoolUpdater::update_part(const std::string &filename)
                 add_dependency(ObjectType::PART, part.uuid, ObjectType::PACKAGE, part.package->uuid);
             }
             pool->inject_part(part, filename, pool_uuid);
+            return true;
         }
     }
     catch (const std::exception &e) {
@@ -90,6 +91,7 @@ void PoolUpdater::update_part(const std::string &filename)
     catch (...) {
         status_cb(PoolUpdateStatus::FILE_ERROR, filename, "unknown exception");
     }
+    return false;
 }
 
 void PoolUpdater::update_part_node(const PoolUpdateNode &node, std::set<UUID> &visited)

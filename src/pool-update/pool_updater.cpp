@@ -204,9 +204,10 @@ void PoolUpdater::update_some(const std::vector<std::string> &filenames, std::se
             update_decal(filename);
             break;
         case ObjectType::PART:
-            update_part(filename);
-            parts_updated.emplace(j.at("uuid").get<std::string>());
-            all_parts_updated.emplace(j.at("uuid").get<std::string>());
+            if (update_part(filename)) {
+                parts_updated.emplace(j.at("uuid").get<std::string>());
+                all_parts_updated.emplace(j.at("uuid").get<std::string>());
+            }
             break;
         case ObjectType::UNIT:
             update_unit(filename);
