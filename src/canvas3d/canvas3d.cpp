@@ -16,6 +16,7 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <iostream>
 #include <thread>
+#include "util/warp_cursor.hpp"
 
 namespace horizon {
 
@@ -106,7 +107,8 @@ bool Canvas3D::on_button_press_event(GdkEventButton *button_event)
 
 bool Canvas3D::on_motion_notify_event(GdkEventMotion *motion_event)
 {
-    auto delta = glm::mat2(1, 0, 0, -1) * (glm::vec2(motion_event->x, motion_event->y) - pointer_pos_orig);
+    const auto delta = glm::mat2(1, 0, 0, -1) * (glm::vec2(motion_event->x, motion_event->y) - pointer_pos_orig);
+    const auto warp_distance = warp_cursor((GdkEvent *)motion_event, *this);
     if (pan_mode == PanMode::ROTATE) {
         set_cam_azimuth(cam_azimuth_orig - (delta.x / width) * 360);
         set_cam_elevation(cam_elevation_orig - (delta.y / height) * 90);
@@ -114,6 +116,7 @@ bool Canvas3D::on_motion_notify_event(GdkEventMotion *motion_event)
     else if (pan_mode == PanMode::MOVE) {
         set_center(center_orig + get_center_shift(delta));
     }
+    pointer_pos_orig += glm::vec2(warp_distance.x, warp_distance.y);
     return Gtk::GLArea::on_motion_notify_event(motion_event);
 }
 
