@@ -320,6 +320,7 @@ SRC_IMP = \
 	src/dialogs/manage_buses.cpp\
 	src/dialogs/ask_datum.cpp\
 	src/dialogs/ask_datum_string.cpp\
+	src/widgets/text_editor.cpp\
 	src/dialogs/select_via_padstack.cpp\
 	src/dialogs/dialogs.cpp\
 	src/dialogs/annotate.cpp\

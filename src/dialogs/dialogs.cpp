@@ -296,7 +296,7 @@ std::optional<int64_t> Dialogs::ask_datum(const std::string &label, int64_t def)
 
 std::optional<std::string> Dialogs::ask_datum_string(const std::string &label, const std::string &def)
 {
-    AskDatumStringDialog dia(parent, label, false);
+    AskDatumStringDialog dia(parent, label, TextEditor::Lines::SINGLE);
     dia.set_text(def);
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK) {
@@ -309,7 +309,7 @@ std::optional<std::string> Dialogs::ask_datum_string(const std::string &label, c
 
 std::optional<std::string> Dialogs::ask_datum_string_multiline(const std::string &label, const std::string &def)
 {
-    AskDatumStringDialog dia(parent, label, true);
+    AskDatumStringDialog dia(parent, label, TextEditor::Lines::MULTI);
     dia.set_text(def);
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK) {
