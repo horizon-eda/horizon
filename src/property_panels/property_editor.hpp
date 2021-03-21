@@ -221,10 +221,9 @@ protected:
     Gtk::Widget *create_editor() override;
 
 private:
-    Gtk::TextView *en = nullptr;
+    class TextEditor *editor = nullptr;
     void changed();
     void activate();
-    bool focus_out_event(GdkEventFocus *e);
     bool modified = false;
 
     PropertyValueString value;

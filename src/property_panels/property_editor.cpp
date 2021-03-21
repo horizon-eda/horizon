@@ -6,6 +6,7 @@
 #include "widgets/spin_button_dim.hpp"
 #include "widgets/spin_button_angle.hpp"
 #include "util/util.hpp"
+#include "widgets/text_editor.hpp"
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
@@ -308,45 +309,37 @@ PropertyValue &PropertyEditorAngle::get_value()
 
 Gtk::Widget *PropertyEditorStringMultiline::create_editor()
 {
-    en = Gtk::manage(new Gtk::TextView());
-    en->set_left_margin(3);
-    en->set_right_margin(3);
-    en->set_top_margin(3);
-    en->set_bottom_margin(3);
+    editor = Gtk::manage(new TextEditor(TextEditor::Lines::MULTI));
     connections.push_back(
-            en->get_buffer()->signal_changed().connect(sigc::mem_fun(*this, &PropertyEditorStringMultiline::changed)));
-    en->signal_focus_out_event().connect(sigc::mem_fun(*this, &PropertyEditorStringMultiline::focus_out_event));
-    auto sc = Gtk::manage(new Gtk::ScrolledWindow());
-    sc->set_shadow_type(Gtk::SHADOW_IN);
-    sc->add(*en);
-    en->show();
-    return sc;
+            editor->signal_changed().connect(sigc::mem_fun(*this, &PropertyEditorStringMultiline::changed)));
+    connections.push_back(
+            editor->signal_activate().connect(sigc::mem_fun(*this, &PropertyEditorStringMultiline::activate)));
+    connections.push_back(
+            editor->signal_lost_focus().connect(sigc::mem_fun(*this, &PropertyEditorStringMultiline::activate)));
+    return editor;
 }
 
 void PropertyEditorStringMultiline::activate()
 {
-    if (!modified)
+    if (!modified) {
+        s_signal_activate.emit();
         return;
+    }
     modified = false;
     s_signal_changed.emit();
-}
-
-bool PropertyEditorStringMultiline::focus_out_event(GdkEventFocus *e)
-{
-    activate();
-    return false;
+    s_signal_activate.emit();
 }
 
 void PropertyEditorStringMultiline::reload()
 {
     ScopedBlock block(connections);
-    en->get_buffer()->set_text(value.value);
+    editor->set_text(value.value, TextEditor::Select::NO);
     modified = false;
 }
 
 PropertyValue &PropertyEditorStringMultiline::get_value()
 {
-    value.value = en->get_buffer()->get_text();
+    value.value = editor->get_text();
     return value;
 }
 
