@@ -682,6 +682,11 @@ void Board::expand_some()
         if (it.second.padstack.type != Padstack::Type::HOLE && it.second.padstack.type != Padstack::Type::MECHANICAL) {
             warnings.emplace_back(it.second.placement.shift, "Illegal padstack type");
         }
+        for (auto p : it.second.pool_padstack->parameters_required) {
+            if (it.second.parameter_set.count(p) == 0) {
+                warnings.emplace_back(it.second.placement.shift, "missing parameter " + parameter_id_to_name(p));
+            }
+        }
     }
 
     for (const auto &it : junctions) {

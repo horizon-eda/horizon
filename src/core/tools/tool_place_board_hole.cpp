@@ -35,6 +35,9 @@ void ToolPlaceBoardHole::create_hole(const Coordi &pos)
     auto uu = UUID::random();
     temp = &brd->holes.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, padstack))
                     .first->second;
+    for (auto &p : padstack->parameters_required) {
+        temp->parameter_set[p] = padstack->parameter_set.at(p);
+    }
     temp->placement.shift = pos;
 }
 
