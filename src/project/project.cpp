@@ -149,7 +149,10 @@ std::string Project::create(const std::map<std::string, std::string> &meta, cons
     {
         auto ofs = make_ofstream(Glib::build_filename(base_path, ".gitignore"));
         ofs << "pool/*.db\n"
-               "pool/*.db-*\n";
+               "pool/*.db-*\n"
+               "*.imp_meta\n"
+               "*.autosave\n"
+               "*.bak";
     }
 
     return prj_filename;
