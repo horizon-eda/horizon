@@ -1336,9 +1336,11 @@ void Canvas::render(const BoardHole &hole, bool interactive)
     transform_save();
     transform.accumulate(hole.placement);
     auto bb = hole.padstack.get_bbox();
-    if (interactive)
-        selectables.append(hole.uuid, ObjectType::BOARD_HOLE, {0, 0}, bb.first, bb.second, 0,
-                           LayerRange(BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER));
+    if (interactive) {
+        const auto layers = LayerRange(BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER);
+        selectables.append(hole.uuid, ObjectType::BOARD_HOLE, {0, 0}, bb.first, bb.second, 0, layers);
+        targets.emplace_back(hole.uuid, ObjectType::BOARD_HOLE, transform.transform(Coordi()), 0, layers);
+    }
     img_net(hole.net);
     if (hole.padstack.type == Padstack::Type::HOLE)
         img_patch_type(PatchType::HOLE_PTH);
