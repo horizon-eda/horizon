@@ -261,8 +261,10 @@ void PoolUpdater::update(const std::vector<std::string> &base_paths)
     pool->db.execute("BEGIN TRANSACTION");
     pool->db.execute("DELETE FROM units");
     for (const auto &bp : base_paths) {
-        set_pool_info(bp);
-        update_units(Glib::build_filename(bp, "units"));
+        if (Glib::file_test(Glib::build_filename(bp, "units"), Glib::FILE_TEST_IS_DIR)) {
+            set_pool_info(bp);
+            update_units(Glib::build_filename(bp, "units"));
+        }
     }
     pool->db.execute("COMMIT");
 
@@ -270,8 +272,10 @@ void PoolUpdater::update(const std::vector<std::string> &base_paths)
     pool->db.execute("BEGIN TRANSACTION");
     pool->db.execute("DELETE FROM entities");
     for (const auto &bp : base_paths) {
-        set_pool_info(bp);
-        update_entities(Glib::build_filename(bp, "entities"));
+        if (Glib::file_test(Glib::build_filename(bp, "entities"), Glib::FILE_TEST_IS_DIR)) {
+            set_pool_info(bp);
+            update_entities(Glib::build_filename(bp, "entities"));
+        }
     }
     pool->db.execute("COMMIT");
 
@@ -279,8 +283,10 @@ void PoolUpdater::update(const std::vector<std::string> &base_paths)
     pool->db.execute("BEGIN TRANSACTION");
     pool->db.execute("DELETE FROM symbols");
     for (const auto &bp : base_paths) {
-        set_pool_info(bp);
-        update_symbols(Glib::build_filename(bp, "symbols"));
+        if (Glib::file_test(Glib::build_filename(bp, "symbols"), Glib::FILE_TEST_IS_DIR)) {
+            set_pool_info(bp);
+            update_symbols(Glib::build_filename(bp, "symbols"));
+        }
     }
     pool->db.execute("COMMIT");
 
@@ -289,8 +295,12 @@ void PoolUpdater::update(const std::vector<std::string> &base_paths)
     pool->db.execute("DELETE FROM padstacks");
     for (const auto &bp : base_paths) {
         set_pool_info(bp);
-        update_padstacks_global(Glib::build_filename(bp, "padstacks"));
-        update_padstacks(Glib::build_filename(bp, "packages"));
+        if (Glib::file_test(Glib::build_filename(bp, "padstacks"), Glib::FILE_TEST_IS_DIR)) {
+            update_padstacks_global(Glib::build_filename(bp, "padstacks"));
+        }
+        if (Glib::file_test(Glib::build_filename(bp, "packages"), Glib::FILE_TEST_IS_DIR)) {
+            update_padstacks(Glib::build_filename(bp, "packages"));
+        }
     }
     pool->db.execute("COMMIT");
 
@@ -299,8 +309,10 @@ void PoolUpdater::update(const std::vector<std::string> &base_paths)
     pool->db.execute("DELETE FROM packages");
     pool->db.execute("DELETE FROM models");
     for (const auto &bp : base_paths) {
-        set_pool_info(bp);
-        update_packages(Glib::build_filename(bp, "packages"));
+        if (Glib::file_test(Glib::build_filename(bp, "packages"), Glib::FILE_TEST_IS_DIR)) {
+            set_pool_info(bp);
+            update_packages(Glib::build_filename(bp, "packages"));
+        }
     }
     pool->db.execute("COMMIT");
 
@@ -309,8 +321,10 @@ void PoolUpdater::update(const std::vector<std::string> &base_paths)
     pool->db.execute("DELETE FROM parts");
     pool->db.execute("DELETE FROM orderable_MPNs");
     for (const auto &bp : base_paths) {
-        set_pool_info(bp);
-        update_parts(Glib::build_filename(bp, "parts"));
+        if (Glib::file_test(Glib::build_filename(bp, "parts"), Glib::FILE_TEST_IS_DIR)) {
+            set_pool_info(bp);
+            update_parts(Glib::build_filename(bp, "parts"));
+        }
     }
     pool->db.execute("COMMIT");
 
