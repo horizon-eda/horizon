@@ -145,6 +145,13 @@ std::string Project::create(const std::map<std::string, std::string> &meta, cons
 
     auto prj_filename = Glib::build_filename(base_path, name + ".hprj");
     save_json_to_file(prj_filename, serialize());
+
+    {
+        auto ofs = make_ofstream(Glib::build_filename(base_path, ".gitignore"));
+        ofs << "pool/*.db\n"
+               "pool/*.db-*\n";
+    }
+
     return prj_filename;
 }
 
