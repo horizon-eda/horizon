@@ -103,6 +103,11 @@
               <object class="GtkTreeView" id="pool_item_view">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
+                <child internal-child="selection">
+                  <object class="GtkTreeSelection">
+                    <property name="mode">multiple</property>
+                  </object>
+                </child>
               </object>
             </child>
           </object>
