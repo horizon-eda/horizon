@@ -186,7 +186,13 @@ std::string ProjectPool::get_model_filename(const UUID &pkg_uuid, const UUID &mo
                 auto src = Gio::File::create_for_path(Glib::build_filename(orig_pool->base_path, orig_filename));
                 auto dst = Gio::File::create_for_path(model_filename);
                 ensure_parent_dir(model_filename);
-                src->copy(dst);
+                try {
+                    src->copy(dst);
+                }
+                catch (Gio::Error &e) {
+                    if (e.code() != Gio::Error::NOT_FOUND)
+                        throw;
+                }
             }
         }
     }
