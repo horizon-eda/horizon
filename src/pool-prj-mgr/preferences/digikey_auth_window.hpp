@@ -1,6 +1,5 @@
 #pragma once
 #include <gtkmm.h>
-#include <thread>
 #include "util/status_dispatcher.hpp"
 
 namespace horizon {
@@ -14,7 +13,6 @@ private:
     Gtk::Entry *code_entry = nullptr;
     Gtk::Button *login_button = nullptr;
     Gtk::Button *cancel_button = nullptr;
-
 
     std::string client_id;
     std::string client_secret;

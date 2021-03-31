@@ -90,4 +90,4 @@ PartinfoPreferencesEditor *PartinfoPreferencesEditor::create(Preferences &prefs)
     return w;
 }
 
-}
+} // namespace horizon

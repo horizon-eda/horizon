@@ -1,8 +1,10 @@
 #include "digikey_auth_window.hpp"
 #include "util/gtk_util.hpp"
-#include "util/http_client.hpp"
 #include "util/util.hpp"
 #include "util/sqlite.hpp"
+#include "util/uuid.hpp"
+#include "util/http_client.hpp"
+#include "util/win32_undef.hpp"
 #include <iostream>
 #include "preferences/preferences.hpp"
 #include "preferences/preferences_provider.hpp"

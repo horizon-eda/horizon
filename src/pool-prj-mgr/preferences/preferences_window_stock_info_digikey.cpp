@@ -7,6 +7,7 @@
 #include <iostream>
 #include "util/stock_info_provider_digikey.hpp"
 #include "util/sqlite.hpp"
+#include "util/win32_undef.hpp"
 #include "digikey_auth_window.hpp"
 
 namespace horizon {
