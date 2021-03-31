@@ -1,11 +1,10 @@
-#include "preferences_window_partinfo.hpp"
+#include "preferences_window_stock_info_partinfo.hpp"
 #include "common/common.hpp"
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include "preferences/preferences.hpp"
 #include <set>
 #include <iostream>
-
 
 namespace horizon {
 
@@ -13,7 +12,6 @@ PartinfoPreferencesEditor::PartinfoPreferencesEditor(BaseObjectType *cobject, co
                                                      Preferences &prefs)
     : Gtk::Box(cobject), preferences(prefs), partinfo_preferences(preferences.partinfo)
 {
-    GET_WIDGET(partinfo_enable_switch);
     GET_WIDGET(partinfo_base_url_entry);
     {
         Gtk::Box *partinfo_preferred_distributor_combo_box;
@@ -49,8 +47,6 @@ PartinfoPreferencesEditor::PartinfoPreferencesEditor(BaseObjectType *cobject, co
     partinfo_preferred_distributor_combo->append("Newark");
     partinfo_preferred_distributor_combo->append("RS");
 
-    bind_widget(partinfo_enable_switch, partinfo_preferences.enable);
-    partinfo_enable_switch->property_active().signal_changed().connect([this] { preferences.signal_changed().emit(); });
     bind_widget(partinfo_base_url_entry, partinfo_preferences.url,
                 [this](std::string &v) { preferences.signal_changed().emit(); });
     bind_widget(partinfo_ignore_moq_1_cb, partinfo_preferences.ignore_moq_gt_1);

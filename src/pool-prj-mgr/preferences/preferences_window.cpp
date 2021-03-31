@@ -5,7 +5,7 @@
 #include "preferences_window_keys.hpp"
 #include "preferences_window_in_tool_keys.hpp"
 #include "preferences_window_canvas.hpp"
-#include "preferences_window_partinfo.hpp"
+#include "preferences_window_stock_info.hpp"
 #include "preferences_window_misc.hpp"
 #include "canvas/color_palette.hpp"
 #include "board/board_layers.hpp"
@@ -52,10 +52,9 @@ PreferencesWindow::PreferencesWindow(Preferences &prefs) : Gtk::Window(), prefer
         ed->show();
     }
     {
-        auto ed = PartinfoPreferencesEditor::create(preferences);
-        stack->add(*ed, "partinfo", "Partinfo");
+        auto ed = Gtk::manage(new StockInfoPreferencesEditor(preferences));
+        stack->add(*ed, "stockinfo", "Stock info");
         ed->show();
-        ed->unreference();
     }
     {
         auto ed = KeySequencesPreferencesEditor::create(preferences);

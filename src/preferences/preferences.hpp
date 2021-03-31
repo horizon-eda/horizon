@@ -75,13 +75,24 @@ public:
 
 class PartInfoPreferences {
 public:
-    bool enable = false;
     std::string url = "https://dev-partinfo.kitspace.org/graphql";
     std::string preferred_distributor;
     bool ignore_moq_gt_1 = true;
     unsigned int max_price_breaks = 3;
     unsigned int cache_days = 5;
-    bool is_enabled() const;
+
+    void load_from_json(const json &j);
+    json serialize() const;
+};
+
+class DigiKeyApiPreferences {
+public:
+    std::string client_id;
+    std::string client_secret;
+    std::string site = "DE";
+    std::string currency = "EUR";
+    unsigned int max_price_breaks = 3;
+    unsigned int cache_days = 5;
 
     void load_from_json(const json &j);
     json serialize() const;
@@ -125,7 +136,12 @@ public:
     KeySequencesPreferences key_sequences;
     ZoomPreferences zoom;
     bool capture_output = false;
+
+    enum class StockInfoProviderSel { NONE, PARTINFO, DIGIKEY };
+    StockInfoProviderSel stock_info_provider = StockInfoProviderSel::NONE;
+
     PartInfoPreferences partinfo;
+    DigiKeyApiPreferences digikey_api;
     ActionBarPreferences action_bar;
     InToolKeySequencesPreferences in_tool_key_sequences;
     MousePreferences mouse;

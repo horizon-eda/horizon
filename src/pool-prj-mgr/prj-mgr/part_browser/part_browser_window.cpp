@@ -3,7 +3,7 @@
 #include "widgets/part_preview.hpp"
 #include "widgets/pool_browser_part.hpp"
 #include "widgets/pool_browser_parametric.hpp"
-#include "util/stock_info_provider_partinfo.hpp"
+#include "util/stock_info_provider.hpp"
 #include "preferences/preferences_provider.hpp"
 #include "util/win32_undef.hpp"
 #include "preferences/preferences.hpp"
@@ -343,8 +343,7 @@ void PartBrowserWindow::set_can_assign(bool v)
 PoolBrowserPart *PartBrowserWindow::add_search(const UUID &part)
 {
     auto ch = Gtk::manage(new PoolBrowserPart(pool, UUID(), "part_browser"));
-    if (PreferencesProvider::get_prefs().partinfo.is_enabled()) {
-        auto prv = std::make_unique<StockInfoProviderPartinfo>(pool.get_base_path());
+    if (auto prv = StockInfoProvider::create(pool.get_base_path())) {
         ch->add_stock_info_provider(std::move(prv));
     }
     ch->get_style_context()->add_class("background");
@@ -374,8 +373,7 @@ PoolBrowserPart *PartBrowserWindow::add_search(const UUID &part)
 PoolBrowserParametric *PartBrowserWindow::add_search_parametric(const std::string &table_name)
 {
     auto ch = Gtk::manage(new PoolBrowserParametric(pool, pool_parametric, table_name, "part_browser"));
-    if (PreferencesProvider::get_prefs().partinfo.is_enabled()) {
-        auto prv = std::make_unique<StockInfoProviderPartinfo>(pool.get_base_path());
+    if (auto prv = StockInfoProvider::create(pool.get_base_path())) {
         ch->add_stock_info_provider(std::move(prv));
     }
     ch->add_copy_name_context_menu_item();

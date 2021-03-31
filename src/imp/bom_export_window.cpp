@@ -9,7 +9,7 @@
 #include "widgets/pool_browser_parametric.hpp"
 #include "preferences/preferences_provider.hpp"
 #include "preferences/preferences.hpp"
-#include "util/stock_info_provider_partinfo.hpp"
+#include "util/stock_info_provider.hpp"
 
 namespace horizon {
 
@@ -392,8 +392,7 @@ void BOMExportWindow::update_concrete_parts()
         browser_param->search();
         float tol = rb_tol_10->get_active() ? .1 : .01;
         browser_param->filter_similar(part->uuid, tol);
-        if (PreferencesProvider::get_prefs().partinfo.is_enabled()) {
-            auto prv = std::make_unique<StockInfoProviderPartinfo>(pool.get_base_path());
+        if (auto prv = StockInfoProvider::create(pool.get_base_path())) {
             browser_param->add_stock_info_provider(std::move(prv));
         }
         browser_param->search();

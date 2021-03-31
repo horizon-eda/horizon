@@ -6,6 +6,7 @@
 #include <windows.h>
 #endif
 #include "util/automatic_prefs.hpp"
+#include "util/stock_info_provider.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -19,6 +20,7 @@ int main(int argc, char *argv[])
     horizon::create_config_dir();
     horizon::PoolManager::init();
     horizon::AutomaticPreferences::get();
+    horizon::StockInfoProvider::init_db();
     horizon::install_signal_exception_handler();
 
     // Start the application, showing the initial window,
