@@ -16,6 +16,7 @@ public:
     {
         append_header(header.c_str());
     }
+    void clear_headers();
 
     std::string get(const std::string &url);
     std::string post(const std::string &url, const std::string &postdata = "");

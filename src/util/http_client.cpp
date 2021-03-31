@@ -49,6 +49,13 @@ void Client::append_header(const char *header)
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header_list);
 }
 
+void Client::clear_headers()
+{
+    curl_slist_free_all(header_list);
+    header_list = nullptr;
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, NULL);
+}
+
 void Client::set_auth(const std::string &user, const std::string &passwd)
 {
     curl_easy_setopt(curl, CURLOPT_USERNAME, user.c_str());
