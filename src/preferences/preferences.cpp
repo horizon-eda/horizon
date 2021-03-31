@@ -29,6 +29,11 @@ static const LutEnumStr<Appearance::CursorSize> cursor_size_lut = {
         {"full", Appearance::CursorSize::FULL},
 };
 
+static const LutEnumStr<Preferences::StockInfoProviderSel> stock_info_provider_lut = {
+        {"none", Preferences::StockInfoProviderSel::NONE},
+        {"partinfo", Preferences::StockInfoProviderSel::PARTINFO},
+        {"digikey", Preferences::StockInfoProviderSel::DIGIKEY}};
+
 #ifdef G_OS_WIN32
 static const bool capture_output_default = true;
 #else
@@ -350,7 +355,6 @@ void InToolKeySequencesPreferences::append_from_json(const json &j)
 
 void PartInfoPreferences::load_from_json(const json &j)
 {
-    enable = j.at("enable");
     url = j.at("url");
     preferred_distributor = j.at("preferred_distributor");
     ignore_moq_gt_1 = j.at("ignore_moq_gt_1");
@@ -360,7 +364,7 @@ void PartInfoPreferences::load_from_json(const json &j)
 json PartInfoPreferences::serialize() const
 {
     json j;
-    j["enable"] = enable;
+    j["enable"] = false;
     j["url"] = url;
     j["preferred_distributor"] = preferred_distributor;
     j["ignore_moq_gt_1"] = ignore_moq_gt_1;
@@ -368,9 +372,25 @@ json PartInfoPreferences::serialize() const
     return j;
 }
 
-bool PartInfoPreferences::is_enabled() const
+void DigiKeyApiPreferences::load_from_json(const json &j)
 {
-    return enable && preferred_distributor.size();
+    client_id = j.at("client_id");
+    client_secret = j.at("client_secret");
+    currency = j.value("currency", "EUR");
+    site = j.value("site", "DE");
+    max_price_breaks = j.value("max_price_breaks", 3);
+}
+
+json DigiKeyApiPreferences::serialize() const
+{
+    json j;
+    j["enable"] = false;
+    j["client_id"] = client_id;
+    j["client_secret"] = client_secret;
+    j["site"] = site;
+    j["currency"] = currency;
+    j["max_price_breaks"] = max_price_breaks;
+    return j;
 }
 
 json ActionBarPreferences::serialize() const
@@ -416,7 +436,9 @@ json Preferences::serialize() const
     j["board"] = board.serialize();
     j["zoom"] = zoom.serialize();
     j["capture_output"] = capture_output;
+    j["stock_info_provider"] = stock_info_provider_lut.lookup_reverse(stock_info_provider);
     j["partinfo"] = partinfo.serialize();
+    j["digikey_api"] = digikey_api.serialize();
     j["action_bar"] = action_bar.serialize();
     j["mouse"] = mouse.serialize();
     j["show_pull_request_tools"] = show_pull_request_tools;
@@ -457,8 +479,11 @@ void Preferences::load_from_json(const json &j)
     capture_output = j.value("capture_output", capture_output_default);
     show_pull_request_tools = j.value("show_pull_request_tools", false);
     hud_debug = j.value("hud_debug", false);
+    stock_info_provider = stock_info_provider_lut.lookup(j.value("stock_info_provider", "none"));
     if (j.count("partinfo"))
         partinfo.load_from_json(j.at("partinfo"));
+    if (j.count("digikey_api"))
+        digikey_api.load_from_json(j.at("digikey_api"));
 }
 
 void Preferences::load()
