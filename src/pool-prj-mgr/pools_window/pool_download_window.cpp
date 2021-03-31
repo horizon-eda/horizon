@@ -51,6 +51,7 @@ PoolDownloadWindow::PoolDownloadWindow(BaseObjectType *cobject, const Glib::RefP
     download_status_dispatcher.attach(download_label);
     download_status_dispatcher.attach(download_spinner);
     download_status_dispatcher.attach(download_progress);
+    download_status_dispatcher.attach(this);
     label_set_tnum(download_label);
 
     download_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolDownloadWindow::handle_do_download));

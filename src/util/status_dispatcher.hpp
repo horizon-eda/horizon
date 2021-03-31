@@ -31,6 +31,7 @@ public:
     void attach(Gtk::Label *w);
     void attach(Gtk::Revealer *w);
     void attach(Gtk::ProgressBar *w);
+    void attach(Gtk::Window *win);
 
 private:
     void notify();
@@ -48,5 +49,6 @@ private:
     Gtk::Label *label = nullptr;
     Gtk::Revealer *revealer = nullptr;
     Gtk::ProgressBar *progress_bar = nullptr;
+    Gtk::Window *window = nullptr;
 };
 } // namespace horizon

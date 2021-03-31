@@ -172,6 +172,7 @@ PDFExportWindow::PDFExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     status_dispatcher.attach(progress_bar);
     status_dispatcher.attach(spinner);
     status_dispatcher.attach(progress_revealer);
+    status_dispatcher.attach(this);
     status_dispatcher.signal_notified().connect([this](const StatusDispatcher::Notification &n) {
         is_busy = n.status == StatusDispatcher::Status::BUSY;
         update_export_button();

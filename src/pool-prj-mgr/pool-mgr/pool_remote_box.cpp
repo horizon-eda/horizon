@@ -201,6 +201,7 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     refresh_prs_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolRemoteBox::handle_refresh_prs));
 
     pr_status_dispatcher.attach(pr_spinner);
+    pr_status_dispatcher.attach(dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW)));
     pr_status_dispatcher.signal_notified().connect([this](const StatusDispatcher::Notification &n) {
         auto is_busy = n.status == StatusDispatcher::Status::BUSY;
         if (!is_busy) {

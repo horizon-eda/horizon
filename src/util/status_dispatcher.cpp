@@ -27,13 +27,24 @@ void StatusDispatcher::notify()
             timeout_conn = Glib::signal_timeout().connect(sigc::mem_fun(*this, &StatusDispatcher::hide_revealer), 750);
         }
     }
-    if (label)
+    if (label) {
         label->set_text(m);
+        label->set_selectable(status == StatusDispatcher::Status::ERROR);
+    }
     if (spinner)
         spinner->property_active() = status == StatusDispatcher::Status::BUSY;
     if (progress_bar) {
         progress_bar->set_visible(progress >= 0);
         progress_bar->set_fraction(progress);
+    }
+    if (window) {
+        auto win = window->get_window();
+        if (status == StatusDispatcher::Status::BUSY) {
+            win->set_cursor(Gdk::Cursor::create(win->get_display(), "progress"));
+        }
+        else {
+            win->set_cursor();
+        }
     }
     Notification n;
     n.status = st;
@@ -66,6 +77,11 @@ void StatusDispatcher::attach(Gtk::Revealer *w)
 void StatusDispatcher::attach(Gtk::ProgressBar *w)
 {
     progress_bar = w;
+}
+
+void StatusDispatcher::attach(Gtk::Window *w)
+{
+    window = w;
 }
 
 void StatusDispatcher::reset(const std::string &m)
