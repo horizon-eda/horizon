@@ -5,13 +5,9 @@
 #include "check_part.hpp"
 #include "pool/symbol.hpp"
 #include "pool/package.hpp"
+#include "check_util.hpp"
 
 namespace horizon {
-
-static void accumulate_level(RulesCheckErrorLevel &r, RulesCheckErrorLevel l)
-{
-    r = static_cast<RulesCheckErrorLevel>(std::max(static_cast<int>(r), static_cast<int>(l)));
-}
 
 RulesCheckResult check_item(IPool &pool, ObjectType type, const UUID &uu)
 {

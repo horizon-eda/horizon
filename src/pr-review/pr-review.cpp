@@ -163,6 +163,13 @@ int main(int c_argc, char *c_argv[])
     entry_images_prefix.set_description("images prefix");
     group.add_entry_filename(entry_images_prefix, images_prefix);
 
+    std::string labels_filename;
+    Glib::OptionEntry entry_labels_filename;
+    entry_labels_filename.set_long_name("labels-file");
+    entry_labels_filename.set_short_name('l');
+    entry_labels_filename.set_description("labels filename");
+    group.add_entry_filename(entry_labels_filename, labels_filename);
+
 
     std::vector<std::string> filenames;
     Glib::OptionEntry entry_f;
@@ -259,6 +266,7 @@ int main(int c_argc, char *c_argv[])
             "ON filename=git_filename");
 
     {
+        RulesCheckErrorLevel overall_result = RulesCheckErrorLevel::PASS;
         ofs << "# Items in this PR\n";
         ofs << "| State | Type | Name | Checks | Filename |\n";
         ofs << "| --- | --- | --- | --- | --- |\n";
@@ -272,6 +280,7 @@ int main(int c_argc, char *c_argv[])
                 ofs << " " << whitespace_warning;
             ofs << " | ";
             const auto r = check_item(pool, type, UUID(q.get<std::string>(1)));
+            accumulate_level(overall_result, r.level);
             switch (r.level) {
             case RulesCheckErrorLevel::WARN:
                 ofs << ":warning: ";
@@ -287,6 +296,25 @@ int main(int c_argc, char *c_argv[])
             ofs << rules_check_error_level_to_string(r.level);
 
             ofs << " | " << q.get<std::string>(3) << "\n";
+            if (labels_filename.size()) {
+                std::string label;
+                switch (overall_result) {
+                case RulesCheckErrorLevel::PASS:
+                    label = "pass";
+                    break;
+                case RulesCheckErrorLevel::WARN:
+                    label = "warn";
+                    break;
+                case RulesCheckErrorLevel::FAIL:
+                    label = "fail";
+                    break;
+                default:;
+                }
+                if (label.size()) {
+                    const json j = {"bot: " + label};
+                    save_json_to_file(labels_filename, j);
+                }
+            }
         }
         ofs << "\n";
     }
