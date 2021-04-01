@@ -39,3 +39,7 @@ artifacts:
 test_script:
     - set PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%
     - bash -c "cd $APPVEYOR_BUILD_FOLDER && ./check_dll.sh"
+
+on_failure:
+    - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
