@@ -505,8 +505,11 @@ int main(int c_argc, char *c_argv[])
                 SQLite::Query qtags(pool.db, "SELECT tags FROM tags_view WHERE type = 'part' AND uuid = ?");
                 qtags.bind(1, part.uuid);
                 if (qtags.step()) {
-                    ofs << "|Tags | " << qtags.get<std::string>(0) << "\n";
+                    ofs << "|Tags | " << qtags.get<std::string>(0);
                 }
+                if (part.inherit_tags)
+                    ofs << " (inherited)";
+                ofs << "\n";
             }
             ofs << "\n\n";
 
