@@ -31,6 +31,7 @@ public:
 
     static std::unique_ptr<StockInfoProvider> create(const std::string &pool_base_path);
     static void init_db();
+    static void cleanup();
 };
 
 

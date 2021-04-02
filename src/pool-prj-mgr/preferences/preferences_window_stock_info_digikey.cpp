@@ -33,26 +33,9 @@ DigiKeyApiPreferencesEditor::DigiKeyApiPreferencesEditor(BaseObjectType *cobject
     GET_WIDGET(digikey_client_id_entry);
     GET_WIDGET(digikey_client_secret_entry);
     GET_WIDGET(digikey_max_price_breaks_sp);
-    GET_WIDGET(digikey_cache_days_sp);
     GET_WIDGET(digikey_site_combo);
     GET_WIDGET(digikey_currency_combo);
     GET_WIDGET(digikey_token_label);
-
-    digikey_cache_days_sp->signal_output().connect([this] {
-        int v = digikey_cache_days_sp->get_value_as_int();
-        if (v == 1)
-            digikey_cache_days_sp->set_text("one day");
-        else
-            digikey_cache_days_sp->set_text(std::to_string(v) + " days");
-        return true;
-    });
-    entry_set_tnum(*digikey_cache_days_sp);
-    digikey_cache_days_sp->set_value(digikey_preferences.cache_days);
-    digikey_cache_days_sp->signal_changed().connect([this] {
-        digikey_preferences.cache_days = digikey_cache_days_sp->get_value_as_int();
-        preferences.signal_changed().emit();
-    });
-
 
     bind_widget(digikey_client_id_entry, digikey_preferences.client_id, [this](std::string &v) {
         update_warnings();
@@ -164,13 +147,6 @@ DigiKeyApiPreferencesEditor::DigiKeyApiPreferencesEditor(BaseObjectType *cobject
         });
     }
 
-    {
-        Gtk::Button *digikey_clear_cache_button;
-        GET_WIDGET(digikey_clear_cache_button);
-        digikey_clear_cache_button->signal_clicked().connect(
-                sigc::mem_fun(*this, &DigiKeyApiPreferencesEditor::clear_cache));
-    }
-
     update_warnings();
     update_token();
 }
@@ -208,12 +184,6 @@ void DigiKeyApiPreferencesEditor::update_token()
         digikey_token_label->set_text("No token, log in to obtain one.");
     }
 }
-
-void DigiKeyApiPreferencesEditor::clear_cache()
-{
-    db.execute("DELETE FROM cache");
-}
-
 
 DigiKeyApiPreferencesEditor *DigiKeyApiPreferencesEditor::create(Preferences &prefs)
 {

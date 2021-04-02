@@ -17,6 +17,7 @@
 #include "widgets/log_view.hpp"
 #include "util/zmq_helper.hpp"
 #include "pools_window/pools_window.hpp"
+#include "util/stock_info_provider.hpp"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>
@@ -215,6 +216,8 @@ void PoolProjectManagerApplication::on_shutdown()
     }
     j["pool_doc_info_bar_dismissed"] = pool_doc_info_bar_dismissed;
     save_json_to_file(config_filename, j);
+
+    StockInfoProvider::cleanup();
 }
 
 void PoolProjectManagerApplication::on_open(const Gio::Application::type_vec_files &files,

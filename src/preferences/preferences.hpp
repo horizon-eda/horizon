@@ -92,7 +92,6 @@ public:
     std::string site = "DE";
     std::string currency = "EUR";
     unsigned int max_price_breaks = 3;
-    unsigned int cache_days = 5;
 
     void load_from_json(const json &j);
     json serialize() const;

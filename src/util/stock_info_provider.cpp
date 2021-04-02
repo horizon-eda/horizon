@@ -31,4 +31,9 @@ void StockInfoProvider::init_db()
     StockInfoProviderDigiKey::init_db();
 }
 
+void StockInfoProvider::cleanup()
+{
+    StockInfoProviderDigiKey::cleanup();
+}
+
 } // namespace horizon

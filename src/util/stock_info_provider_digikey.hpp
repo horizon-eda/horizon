@@ -26,6 +26,7 @@ public:
     static std::string get_db_filename();
     static std::string update_tokens_from_response(SQLite::Database &db, const json &j);
     static bool is_valid();
+    static void cleanup();
 
 private:
     class StockInfoProviderDigiKeyWorker *worker = nullptr;

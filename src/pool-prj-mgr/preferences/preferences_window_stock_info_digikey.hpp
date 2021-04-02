@@ -15,7 +15,6 @@ private:
     Gtk::Entry *digikey_client_id_entry = nullptr;
     Gtk::Entry *digikey_client_secret_entry = nullptr;
     Gtk::SpinButton *digikey_max_price_breaks_sp = nullptr;
-    Gtk::SpinButton *digikey_cache_days_sp = nullptr;
     Gtk::ComboBoxText *digikey_site_combo = nullptr;
     Gtk::ComboBoxText *digikey_currency_combo = nullptr;
     Gtk::Label *digikey_token_label = nullptr;
@@ -25,7 +24,6 @@ private:
 
     void update_warnings();
     void update_token();
-    void clear_cache();
     SQLite::Database db;
 };
 

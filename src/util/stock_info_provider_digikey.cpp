@@ -43,6 +43,12 @@ bool StockInfoProviderDigiKey::is_valid()
     return q.step();
 }
 
+void StockInfoProviderDigiKey::cleanup()
+{
+    SQLite::Database db(get_db_filename(), SQLITE_OPEN_READWRITE, 1000);
+    db.execute("DELETE FROM cache");
+}
+
 static void update_token(SQLite::Database &db, const std::string &key, const std::string &value, int expiry_seconds)
 {
     SQLite::Query q(db,
@@ -86,10 +92,9 @@ public:
     {
         SQLite::Query q(cache_db,
                         "SELECT data, last_updated FROM cache WHERE MPN=? AND manufacturer=? AND "
-                        "last_updated > datetime('now', ?)");
+                        "last_updated > datetime('now', '-1 days')");
         q.bind(1, MPN);
         q.bind(2, manufacturer);
-        q.bind(3, "-" + std::to_string(prefs.cache_days) + " days");
         if (q.step()) {
             return {true, json::parse(q.get<std::string>(0))};
         }
