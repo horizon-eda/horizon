@@ -6,8 +6,10 @@
 #include "util/util.hpp"
 #include "util/win32_undef.hpp"
 #include "preferences/preferences.hpp"
+#include "util/str_util.hpp"
 #include <list>
 #include <iomanip>
+#include <atomic>
 
 namespace horizon {
 
@@ -71,6 +73,18 @@ std::string StockInfoProviderDigiKey::update_tokens_from_response(SQLite::Databa
     return access_token;
 }
 
+static int remaining_from_headers(const HTTP::Client::ResponseHeaders &headers)
+{
+    for (const auto &it : headers) {
+        if (it.find("X-RateLimit-Remaining:") == 0) {
+            std::string s = it.substr(22);
+            trim(s);
+            return std::stoi(s);
+        }
+    }
+    return 0;
+}
+
 class DigiKeyCacheManager {
 public:
     static std::shared_ptr<DigiKeyCacheManager> &get()
@@ -103,9 +117,10 @@ public:
         }
     }
 
-    json query(const std::string &MPN, const std::string &manufacturer)
+    std::pair<json, unsigned int> query(const std::string &MPN, const std::string &manufacturer)
     {
         std::unique_lock<std::mutex> lk(mutex);
+        unsigned int n_remaining = 0;
 
         json j;
         std::string access_token;
@@ -132,6 +147,11 @@ public:
                 }
             }
             cache_db.execute("COMMIT");
+        }
+        catch (const std::exception &e) {
+            std::cerr << e.what() << std::endl;
+            cache_db.execute("ROLLBACK");
+            return {};
         }
         catch (...) {
             cache_db.execute("ROLLBACK");
@@ -163,6 +183,8 @@ public:
                         {"ExcludeMarketPlaceProducts", true},
                 };
                 const json response = rest_client.post("Search/v3/Products/Keyword", query);
+                n_remaining = remaining_from_headers(rest_client.get_response_headers());
+
                 {
                     SQLite::Query q_insert(
                             cache_db,
@@ -173,7 +195,7 @@ public:
                     q_insert.bind(3, response.dump());
                     q_insert.step();
                 }
-                return response;
+                return {response, n_remaining};
             }
             catch (const std::exception &e) {
                 std::cout << e.what() << std::endl;
@@ -284,6 +306,11 @@ public:
         return n_items_fetched;
     }
 
+    unsigned int get_n_remaining() const
+    {
+        return n_remaining;
+    }
+
 private:
     Pool pool;
     std::shared_ptr<class DigiKeyCacheManager> cache_mgr;
@@ -316,9 +343,10 @@ private:
     void emit();
     std::thread fetch_thread;
 
-    unsigned int n_items_from_cache = 0;
-    unsigned int n_items_to_fetch = 0;
-    unsigned int n_items_fetched = 0;
+    std::atomic<unsigned int> n_items_from_cache = 0;
+    std::atomic<unsigned int> n_items_to_fetch = 0;
+    std::atomic<unsigned int> n_items_fetched = 0;
+    std::atomic<unsigned int> n_remaining = 0;
 };
 
 void StockInfoProviderDigiKeyWorker::emit()
@@ -409,8 +437,9 @@ void StockInfoProviderDigiKeyWorker::fetch_worker()
         for (const auto &[uu, MPN, manufacturer] : my_parts) {
             n_items_fetched++;
 
-            const auto r = cache_mgr->query(MPN, manufacturer);
+            const auto [r, remaining] = cache_mgr->query(MPN, manufacturer);
             add_record(uu, r, MPN, manufacturer);
+            n_remaining = remaining;
 
             if (my_parts_rev != parts_rev_fetch) {
                 cancel = true;
@@ -545,6 +574,9 @@ StockInfoProviderDigiKey::StockInfoProviderDigiKey(const std::string &pool_base_
             std::string txt = "Digi-Key: " + format_digits(worker->get_n_items_from_cache(), 5) + " from cache";
             if (worker->get_n_items_to_fetch()) {
                 txt += ", fetching " + format_m_of_n(worker->get_n_items_fetched(), worker->get_n_items_to_fetch());
+            }
+            if (auto remaining = worker->get_n_remaining()) {
+                txt += ", " + std::to_string(remaining) + " queries remaining";
             }
             status_label->set_text(txt);
         }
