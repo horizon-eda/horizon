@@ -2,6 +2,7 @@
 #include "nlohmann/json.hpp"
 #include <curl/curl.h>
 #include <string>
+#include <list>
 
 namespace horizon::HTTP {
 class Client {
@@ -17,10 +18,15 @@ public:
         append_header(header.c_str());
     }
     void clear_headers();
+    using ResponseHeaders = std::list<std::string>;
 
     std::string get(const std::string &url);
     std::string post(const std::string &url, const std::string &postdata = "");
     std::string post_form(const std::string &url, const std::vector<std::pair<std::string, std::string>> &fields);
+    const ResponseHeaders &get_response_headers() const
+    {
+        return headers_received;
+    }
 
     ~Client();
 
@@ -38,6 +44,7 @@ private:
         size_t sizeleft = 0;
     };
     PostBuffer post_buffer;
+    ResponseHeaders headers_received;
 };
 
 using json = nlohmann::json;

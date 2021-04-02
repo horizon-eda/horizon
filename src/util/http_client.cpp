@@ -15,6 +15,14 @@ static size_t write_callback(void *contents, size_t size, size_t nmemb, void *us
     return realsize;
 }
 
+static size_t header_callback(char *buffer, size_t size, size_t nitems, void *userdata)
+{
+    auto headers = reinterpret_cast<std::list<std::string> *>(userdata);
+    assert(size == 1);
+    headers->emplace_back(buffer, nitems);
+    return nitems * size;
+}
+
 Client::Client()
 {
     curl = curl_easy_init();
@@ -25,6 +33,9 @@ Client::Client()
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headers_received);
 
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
@@ -68,6 +79,7 @@ std::string Client::get(const std::string &url)
     curl_easy_setopt(curl, CURLOPT_POST, 0);
     curl_easy_setopt(curl, CURLOPT_URL, full_url.c_str());
     response.clear();
+    headers_received.clear();
     auto res = curl_easy_perform(curl);
     if (res != CURLE_OK) {
         std::string errorstr = curl_easy_strerror(res);
@@ -92,6 +104,7 @@ std::string Client::post(const std::string &url, const std::string &postdata_i)
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postdata.c_str());
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, postdata.size());
     response.clear();
+    headers_received.clear();
     auto res = curl_easy_perform(curl);
     if (res != CURLE_OK) {
         std::string errorstr = curl_easy_strerror(res);
@@ -119,6 +132,7 @@ std::string Client::post_form(const std::string &url, const std::vector<std::pai
     }
     curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
     response.clear();
+    headers_received.clear();
     auto res = curl_easy_perform(curl);
     curl_mime_free(mime);
     if (res != CURLE_OK) {
