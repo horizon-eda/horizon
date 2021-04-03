@@ -48,8 +48,13 @@ const Symbol *ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool
 SchematicSymbol *ToolHelperMapSymbol::map_symbol(Component *comp, const Gate *gate, const UUID &sym_default)
 {
     const Symbol *sym = nullptr;
-    if (settings.selected_symbols.count(gate->unit->uuid))
-        sym = doc.c->get_pool_caching().get_symbol(settings.selected_symbols.at(gate->unit->uuid));
+    if (settings.selected_symbols.count(gate->unit->uuid)) {
+        const auto sym_uu = settings.selected_symbols.at(gate->unit->uuid);
+        SQLite::Query q(doc.r->get_pool().get_db(), "SELECT uuid FROM symbols WHERE uuid = ?");
+        q.bind(1, sym_uu);
+        if (q.step()) // if symbol exists
+            sym = doc.c->get_pool_caching().get_symbol(sym_uu);
+    }
     if (!sym)
         sym = get_symbol_for_unit(gate->unit->uuid, nullptr, sym_default);
     if (!sym)
