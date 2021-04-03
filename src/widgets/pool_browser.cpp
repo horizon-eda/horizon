@@ -212,11 +212,12 @@ void PoolBrowser::construct(Gtk::Widget *search_box)
 
     {
         status_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
-        status_box->get_style_context()->add_class("dim-label");
-        status_box->property_margin() = 2;
+        status_box->get_style_context()->add_class("pool-browser-status-box");
         status_label = Gtk::manage(new Gtk::Label("Status"));
         label_set_tnum(status_label);
         status_label->set_xalign(0);
+        status_label->get_style_context()->add_class("dim-label");
+        status_label->property_margin() = 2;
         status_label->show();
         status_box->pack_start(*status_label, false, false, 0);
         pack_start(*status_box, false, false, 0);

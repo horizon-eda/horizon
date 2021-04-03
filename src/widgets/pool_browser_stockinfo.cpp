@@ -20,8 +20,11 @@ void PoolBrowserStockinfo::add_stock_info_provider(std::unique_ptr<StockInfoProv
             if (iter_cache.count(it->get_uuid())) {
                 if (iter_cache.at(it->get_uuid())->get_value(get_stock_info_column()) == nullptr)
                     iter_cache.at(it->get_uuid())->set_value(get_stock_info_column(), it);
-                else
-                    iter_cache.at(it->get_uuid())->get_value(get_stock_info_column())->append(*it.get());
+                else {
+                    auto x = iter_cache.at(it->get_uuid())->get_value(get_stock_info_column());
+                    x->append(*it.get());
+                    iter_cache.at(it->get_uuid())->set_value(get_stock_info_column(), x);
+                }
             }
         }
     });

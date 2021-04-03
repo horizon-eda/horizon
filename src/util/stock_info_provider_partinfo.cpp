@@ -763,6 +763,8 @@ StockInfoProviderPartinfo::~StockInfoProviderPartinfo()
 Gtk::Widget *StockInfoProviderPartinfo::create_status_widget()
 {
     status_label = Gtk::manage(new Gtk::Label(""));
+    status_label->get_style_context()->add_class("dim-label");
+    status_label->property_margin() = 2;
     label_set_tnum(status_label);
     return status_label;
 }

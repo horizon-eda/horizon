@@ -230,7 +230,7 @@ public:
     void append(const StockInfoRecord &aother) override
     {
         auto other = dynamic_cast<const StockInfoRecordDigiKey &>(aother);
-        if (other.stock > stock) {
+        if (other.stock >= stock) {
             stock = other.stock;
             state = other.state;
             for (auto &it : other.parts) {
@@ -252,7 +252,7 @@ public:
         json j;
     };
     std::list<OrderablePart> parts;
-    int stock;
+    int stock = -1;
     std::string currency;
     UUID uuid;
 };
@@ -328,6 +328,7 @@ private:
     std::condition_variable cond;
     std::list<UUID> parts;
     unsigned int parts_rev = 0;
+    unsigned int n_parts_load = 0;
     std::mutex parts_mutex;
 
     std::condition_variable cond_fetch;
@@ -468,11 +469,13 @@ void StockInfoProviderDigiKeyWorker::worker()
     unsigned int my_parts_rev = 0;
     while (1) {
         std::list<UUID> my_parts;
+        int max_fetch = 20;
         {
             std::unique_lock<std::mutex> lk(parts_mutex);
             cond.wait(lk, [this, &my_parts_rev] { return parts_rev != my_parts_rev; });
             my_parts_rev = parts_rev;
             my_parts = parts;
+            max_fetch = n_parts_load;
         }
         if (worker_exit) {
             std::cout << "worker bye" << std::endl;
@@ -525,7 +528,6 @@ void StockInfoProviderDigiKeyWorker::worker()
             {
                 std::unique_lock<std::mutex> lk(parts_mutex_fetch);
                 parts_fetch.clear();
-                int max_fetch = 20;
                 while (max_fetch && parts_not_in_cache.size()) {
                     parts_fetch.push_back(parts_not_in_cache.front());
                     parts_not_in_cache.pop_front();
@@ -571,7 +573,7 @@ StockInfoProviderDigiKey::StockInfoProviderDigiKey(const std::string &pool_base_
 {
     dispatcher.connect([this] {
         if (status_label) {
-            std::string txt = "Digi-Key: " + format_digits(worker->get_n_items_from_cache(), 5) + " from cache";
+            std::string txt = format_digits(worker->get_n_items_from_cache(), 5) + " from cache";
             if (worker->get_n_items_to_fetch()) {
                 txt += ", fetching " + format_m_of_n(worker->get_n_items_fetched(), worker->get_n_items_to_fetch());
             }
@@ -784,6 +786,7 @@ void StockInfoProviderDigiKeyWorker::update_parts(const std::list<UUID> &aparts)
     {
         std::unique_lock<std::mutex> lk(parts_mutex);
         parts = aparts;
+        n_parts_load = 0;
         parts_rev++;
     }
     cond.notify_all();
@@ -793,6 +796,7 @@ void StockInfoProviderDigiKeyWorker::load_more()
 {
     {
         std::unique_lock<std::mutex> lk(parts_mutex);
+        n_parts_load = 20;
         parts_rev++;
     }
     cond.notify_all();
@@ -807,9 +811,30 @@ StockInfoProviderDigiKey::~StockInfoProviderDigiKey()
 
 Gtk::Widget *StockInfoProviderDigiKey::create_status_widget()
 {
+    auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
+
+    {
+        auto la = Gtk::manage(new Gtk::Label("Digi-Key"));
+        la->show();
+        la->get_style_context()->add_class("dim-label");
+        la->property_margin() = 2;
+        box->pack_start(*la, false, false, 0);
+    }
+
     status_label = Gtk::manage(new Gtk::Label(""));
     label_set_tnum(status_label);
-    return status_label;
+    status_label->show();
+    status_label->get_style_context()->add_class("dim-label");
+    status_label->property_margin() = 2;
+
+    auto bu = Gtk::manage(new Gtk::Button("Load"));
+    bu->show();
+    bu->signal_clicked().connect([this] { worker->load_more(); });
+
+    box->pack_start(*bu, false, false, 0);
+
+    box->pack_start(*status_label, false, false, 0);
+    return box;
 }
 
 } // namespace horizon

@@ -134,3 +134,10 @@
 .imp-property-all-button {
   min-height: 0px;
 }
+
+.pool-browser-status-box button {
+  min-height:0px;
+  border-top:0px;
+  border-bottom:0px;
+  border-radius:0px;
+}
