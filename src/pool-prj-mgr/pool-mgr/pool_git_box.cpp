@@ -388,7 +388,7 @@ void PoolGitBox::handle_add_with_deps()
                         "WHERE dependencies.type = deps.typex AND dependencies.uuid = deps.uuidx) "
                         ", deps_sym(typey, uuidy) AS (SELECT * FROM deps UNION SELECT 'symbol', symbols.uuid FROM "
                         "symbols INNER JOIN deps ON (symbols.unit = uuidx AND typex = 'unit')) "
-                        "SELECT filename FROM deps_sym INNER JOIN all_items_view "
+                        "SELECT filename FROM deps_sym LEFT JOIN all_items_view "
                         "ON(all_items_view.type =deps_sym.typey AND all_items_view.uuid = deps_sym.uuidy) "
                         "UNION SELECT model_filename FROM models INNER JOIN deps "
                         "ON (deps.typex = 'package' AND deps.uuidx = models.package_uuid)");
