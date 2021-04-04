@@ -9,13 +9,15 @@ namespace horizon {
 
 class PoolsWindow : public Gtk::Window {
 public:
-    PoolsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x);
-    static PoolsWindow *create();
+    PoolsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
+                class PoolProjectManagerApplication &a_app);
+    static PoolsWindow *create(class PoolProjectManagerApplication &a_app);
     void add_pool(const std::string &path);
     ~PoolsWindow();
 
 private:
     class PoolManager &mgr;
+    class PoolProjectManagerApplication &app;
     Gtk::Stack *stack = nullptr;
     Gtk::Stack *button_stack = nullptr;
     Gtk::ListBox *installed_listbox = nullptr;

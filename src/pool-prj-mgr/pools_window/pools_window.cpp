@@ -11,6 +11,7 @@
 #include "common/object_descr.hpp"
 #include "pool_status_provider.hpp"
 #include "pool_merge_box.hpp"
+#include "../pool-prj-mgr-app.hpp"
 
 namespace horizon {
 namespace fs = std::filesystem;
@@ -79,8 +80,8 @@ private:
 class PoolInfoBox : public Gtk::Box {
 public:
     PoolInfoBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const PoolManagerPool &apool,
-                PoolStatusProviderBase *aprv)
-        : Gtk::Box(cobject), base_path(apool.base_path), prv(aprv)
+                PoolStatusProviderBase *aprv, PoolProjectManagerApplication &a_app)
+        : Gtk::Box(cobject), base_path(apool.base_path), prv(aprv), app(a_app)
     {
         Gtk::Label *pool_info_name_label;
         Gtk::Label *pool_info_stats_label;
@@ -108,14 +109,21 @@ public:
             box->show();
             box->unreference();
         }
+        {
+            Gtk::Button *pool_info_open_button;
+            GET_WIDGET(pool_info_open_button);
+            pool_info_open_button->signal_clicked().connect(
+                    [this] { app.open_pool((fs::u8path(base_path) / "pool.json").u8string()); });
+        }
     }
-    static PoolInfoBox *create(const PoolManagerPool &pool, PoolStatusProviderBase *prv)
+    static PoolInfoBox *create(const PoolManagerPool &pool, PoolStatusProviderBase *prv,
+                               PoolProjectManagerApplication &app)
     {
         PoolInfoBox *w;
         Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
         std::vector<Glib::ustring> objs = {"pool_info_box"};
         x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/pools_window/pools_window.ui", objs);
-        x->get_widget_derived("pool_info_box", w, pool, prv);
+        x->get_widget_derived("pool_info_box", w, pool, prv, app);
 
         w->reference();
         return w;
@@ -125,21 +133,23 @@ public:
 private:
     const std::string base_path;
     PoolStatusProviderBase *prv;
+    PoolProjectManagerApplication &app;
 };
 
-PoolsWindow *PoolsWindow::create()
+PoolsWindow *PoolsWindow::create(class PoolProjectManagerApplication &a_app)
 {
     PoolsWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     std::vector<Glib::ustring> objs = {"window", "image2"};
     x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/pools_window/pools_window.ui", objs);
-    x->get_widget_derived("window", w);
+    x->get_widget_derived("window", w, a_app);
 
     return w;
 }
 
-PoolsWindow::PoolsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x)
-    : Gtk::Window(cobject), mgr(PoolManager::get())
+PoolsWindow::PoolsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
+                         class PoolProjectManagerApplication &a_app)
+    : Gtk::Window(cobject), mgr(PoolManager::get()), app(a_app)
 {
     GET_WIDGET(installed_listbox);
     GET_WIDGET(info_box);
@@ -174,7 +184,7 @@ PoolsWindow::PoolsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
                 if (pool_status_providers.count(ch->base_path)) {
                     prv = pool_status_providers.at(ch->base_path).get();
                 }
-                pool_info_box = PoolInfoBox::create(PoolManager::get().get_pools().at(ch->base_path), prv);
+                pool_info_box = PoolInfoBox::create(PoolManager::get().get_pools().at(ch->base_path), prv, app);
                 info_box->pack_start(*pool_info_box, true, true, 0);
                 pool_info_box->show();
                 pool_info_box->unreference();

@@ -182,7 +182,7 @@ PreferencesWindow *PoolProjectManagerApplication::show_preferences_window(guint3
 PoolsWindow *PoolProjectManagerApplication::show_pools_window(guint32 timestamp)
 {
     if (!pools_window) {
-        pools_window = PoolsWindow::create();
+        pools_window = PoolsWindow::create(*this);
 
         pools_window->signal_hide().connect([this] {
             delete pools_window;
