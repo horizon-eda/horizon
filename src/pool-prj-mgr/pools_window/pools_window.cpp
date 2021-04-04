@@ -129,9 +129,9 @@ public:
         return w;
     }
 
+    const std::string base_path;
 
 private:
-    const std::string base_path;
     PoolStatusProviderBase *prv;
     PoolProjectManagerApplication &app;
 };
@@ -225,6 +225,12 @@ PoolsWindow::PoolsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     }
 }
 
+void PoolsWindow::check_for_updates()
+{
+    if (pool_info_box && pool_status_providers.count(pool_info_box->base_path)) {
+        pool_status_providers.at(pool_info_box->base_path)->check_for_updates();
+    }
+}
 
 void PoolsWindow::update()
 {
@@ -292,6 +298,22 @@ void PoolsWindow::add_pool(const std::string &path)
         auto cpath = chooser->get_file()->get_parent()->get_path();
         mgr.add_pool(cpath);
         update();
+    }
+}
+
+void PoolsWindow::show_pool(const std::string &path)
+{
+
+    auto children = installed_listbox->get_children();
+    for (auto it : children) {
+        if (auto row = dynamic_cast<Gtk::ListBoxRow *>(it)) {
+            if (auto w = dynamic_cast<PoolItemEditor *>(row->get_child())) {
+                if (w->base_path == path) {
+                    installed_listbox->select_row(*row);
+                    return;
+                }
+            }
+        }
     }
 }
 

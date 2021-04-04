@@ -13,6 +13,8 @@ public:
                 class PoolProjectManagerApplication &a_app);
     static PoolsWindow *create(class PoolProjectManagerApplication &a_app);
     void add_pool(const std::string &path);
+    void show_pool(const std::string &path);
+    void check_for_updates();
     ~PoolsWindow();
 
 private:

@@ -323,7 +323,17 @@
         <property name="margin-bottom">10</property>
         <property name="spacing">8</property>
         <child>
-          <placeholder/>
+          <object class="GtkButton" id="remote_check_update_button">
+            <property name="label" translatable="yes">Check for updates</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
         </child>
         <child>
           <object class="GtkButton" id="button_do_create_pr">
@@ -482,7 +492,7 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
@@ -2035,9 +2045,6 @@ In case of modifying an existing part, provide rationale for the modification.</
               </packing>
             </child>
             <child>
-              <placeholder/>
-            </child>
-            <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
@@ -2436,7 +2443,7 @@ In case of modifying an existing part, provide rationale for the modification.</
               <packing>
                 <property name="name">project</property>
                 <property name="title" translatable="yes">page0</property>
-                <property name="position">3</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -2618,7 +2625,7 @@ In case of modifying an existing part, provide rationale for the modification.</
               <packing>
                 <property name="name">create_project</property>
                 <property name="title" translatable="yes">page1</property>
-                <property name="position">4</property>
+                <property name="position">3</property>
               </packing>
             </child>
             <child>
@@ -2771,7 +2778,7 @@ In case of modifying an existing part, provide rationale for the modification.</
               <packing>
                 <property name="name">create_pool</property>
                 <property name="title" translatable="yes">page0</property>
-                <property name="position">5</property>
+                <property name="position">4</property>
               </packing>
             </child>
           </object>

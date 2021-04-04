@@ -33,6 +33,10 @@ public:
     void go_to(ObjectType type, const UUID &uu);
     const UUID &get_pool_uuid() const;
     ~PoolNotebook();
+    PoolProjectManagerAppWindow &get_appwin()
+    {
+        return *appwin;
+    }
 
 private:
     const std::string base_path;

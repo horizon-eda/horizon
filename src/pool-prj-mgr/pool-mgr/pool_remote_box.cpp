@@ -16,7 +16,10 @@
 #include "check_column.hpp"
 #include "checks/check_item.hpp"
 #include "checks/check_util.hpp"
-
+#include "../pool-prj-mgr-app_win.hpp"
+#include "../pool-prj-mgr-app.hpp"
+#include "../pools_window/pools_window.hpp"
+#include "pool/pool_manager.hpp"
 
 namespace horizon {
 
@@ -318,6 +321,21 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     });
 
     pr_body_textview->get_buffer()->signal_changed().connect([this] { update_body_placeholder_label(); });
+
+    {
+        Gtk::Button *remote_check_update_button;
+        GET_WIDGET(remote_check_update_button);
+        if (PoolManager::get().get_pools().count(notebook->base_path)) {
+            remote_check_update_button->signal_clicked().connect([this] {
+                auto w = notebook->get_appwin().get_app().show_pools_window();
+                w->show_pool(notebook->base_path);
+                w->check_for_updates();
+            });
+        }
+        else {
+            remote_check_update_button->hide();
+        }
+    }
 
     set_pr_update_mode(0, "");
 }
