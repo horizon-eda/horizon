@@ -98,7 +98,8 @@ void PoolNotebook::handle_duplicate_package(const UUID &uu)
             "Save Package", top->gobj(), GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER, "_Save", "_Cancel");
     auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
     chooser->set_do_overwrite_confirmation(true);
-    auto pkg_filename = Glib::path_get_dirname(pool.get_filename(ObjectType::PACKAGE, uu));
+    auto pkg_filename = Glib::build_filename(pool.get_base_path(),
+                                             Glib::path_get_dirname(pool.get_rel_filename(ObjectType::PACKAGE, uu)));
     auto pkg_basename = Glib::path_get_basename(pkg_filename);
     auto pkg_dirname = Glib::path_get_dirname(pkg_filename);
     chooser->set_current_folder(pkg_dirname);
