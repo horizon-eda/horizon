@@ -57,8 +57,8 @@ public:
         grid_attach_label_and_widget(grid, "Name", name_entry, top);
 
         location_entry = Gtk::manage(new LocationEntry(pool.get_base_path()));
-        location_entry->set_filename(Glib::path_get_dirname(pool.get_filename(ObjectType::PACKAGE, pkg.uuid))
-                                     + "-copy");
+        location_entry->set_rel_filename(Glib::path_get_dirname(pool.get_rel_filename(ObjectType::PACKAGE, pkg.uuid))
+                                         + "-copy");
         grid_attach_label_and_widget(grid, "Filename", location_entry, top);
 
         grid->show_all();
@@ -113,8 +113,8 @@ DuplicatePartWidget::DuplicatePartWidget(Pool &p, const UUID &part_uuid, Gtk::Bo
     grid_attach_label_and_widget(grid, "Manufacturer", manufacturer_entry, top);
 
     location_entry = Gtk::manage(new LocationEntry(pool.get_base_path()));
-    location_entry->set_filename(
-            DuplicateUnitWidget::insert_filename(pool.get_filename(ObjectType::PART, part.uuid), "-copy"));
+    location_entry->set_rel_filename(
+            DuplicateUnitWidget::insert_filename(pool.get_rel_filename(ObjectType::PART, part.uuid), "-copy"));
     grid_attach_label_and_widget(grid, "Filename", location_entry, top);
 
     grid->show_all();
@@ -148,6 +148,7 @@ UUID DuplicatePartWidget::duplicate(std::vector<std::string> *filenames)
     auto part_filename = location_entry->get_filename();
     if (filenames)
         filenames->push_back(part_filename);
+    ensure_parent_dir(part_filename);
     save_json_to_file(part_filename, new_part_json);
 
     return new_part.uuid;
@@ -177,6 +178,7 @@ UUID DuplicatePartWidget::duplicate_package(Pool &pool, const UUID &uu, const st
             }
         }
         auto new_padstack_filename = Glib::build_filename(padstack_dir, padstack_basename);
+        ensure_parent_dir(new_padstack_filename);
         save_json_to_file(new_padstack_filename, padstack.serialize());
         if (filenames)
             filenames->push_back(new_padstack_filename);
@@ -184,6 +186,7 @@ UUID DuplicatePartWidget::duplicate_package(Pool &pool, const UUID &uu, const st
     std::string new_pkg_filename = Glib::build_filename(new_dir, "package.json");
     if (filenames)
         filenames->push_back(new_pkg_filename);
+    ensure_parent_dir(new_pkg_filename);
     save_json_to_file(new_pkg_filename, pkg_json);
     return pkg.uuid;
 }

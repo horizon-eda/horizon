@@ -20,6 +20,11 @@ void LocationEntry::set_filename(const std::string &s)
         entry->set_text(s);
 }
 
+void LocationEntry::set_rel_filename(const std::string &s)
+{
+    entry->set_text(s);
+}
+
 std::string LocationEntry::get_filename()
 {
     if (relative_to.size())

@@ -30,14 +30,6 @@ static std::string prepend_model_filename(const UUID &pool_uuid, const std::stri
     return Glib::build_filename("3d_models", "cache", (std::string)pool_uuid, filename);
 }
 
-static void ensure_parent_dir(const std::string &path)
-{
-    auto parent = Glib::path_get_dirname(path);
-    if (!Glib::file_test(parent, Glib::FILE_TEST_IS_DIR)) {
-        Gio::File::create_for_path(parent)->make_directory_with_parents();
-    }
-}
-
 std::map<UUID, std::string> ProjectPool::patch_package(json &j, const UUID &pool_uuid)
 {
     std::map<UUID, std::string> models;

@@ -56,8 +56,8 @@ public:
         grid_attach_label_and_widget(grid, "Name", name_entry, top);
 
         location_entry = Gtk::manage(new LocationEntry(pool.get_base_path()));
-        location_entry->set_filename(
-                DuplicateUnitWidget::insert_filename(pool.get_filename(ObjectType::SYMBOL, sym.uuid), "-copy"));
+        location_entry->set_rel_filename(
+                DuplicateUnitWidget::insert_filename(pool.get_rel_filename(ObjectType::SYMBOL, sym.uuid), "-copy"));
         grid_attach_label_and_widget(grid, "Filename", location_entry, top);
 
         grid->show_all();
@@ -75,6 +75,7 @@ public:
             auto new_sym_json = new_sym.serialize();
             new_sym_json["unit"] = (std::string)new_unit_uuid;
             auto filename = location_entry->get_filename();
+            ensure_parent_dir(filename);
             save_json_to_file(filename, new_sym_json);
             return filename;
         }
@@ -148,7 +149,7 @@ DuplicateUnitWidget::DuplicateUnitWidget(Pool &p, const UUID &unit_uuid, bool op
     grid_attach_label_and_widget(grid, "Name", name_entry, top);
 
     location_entry = Gtk::manage(new LocationEntry(pool.get_base_path()));
-    location_entry->set_filename(insert_filename(pool.get_filename(ObjectType::UNIT, unit.uuid), "-copy"));
+    location_entry->set_rel_filename(insert_filename(pool.get_rel_filename(ObjectType::UNIT, unit.uuid), "-copy"));
     grid_attach_label_and_widget(grid, "Filename", location_entry, top);
 
     grid->show_all();
@@ -172,7 +173,9 @@ UUID DuplicateUnitWidget::duplicate(std::vector<std::string> *filenames)
         Unit new_unit(unit);
         new_unit.uuid = UUID::random();
         new_unit.name = name_entry->get_text();
-        save_json_to_file(location_entry->get_filename(), new_unit.serialize());
+        const auto filename = location_entry->get_filename();
+        ensure_parent_dir(filename);
+        save_json_to_file(filename, new_unit.serialize());
         if (filenames)
             filenames->push_back(location_entry->get_filename());
 

@@ -72,5 +72,6 @@ template <typename T> constexpr bool any_of(T value, std::initializer_list<T> ch
 }
 
 void check_object_type(const json &j, ObjectType type);
+void ensure_parent_dir(const std::string &path);
 
 } // namespace horizon

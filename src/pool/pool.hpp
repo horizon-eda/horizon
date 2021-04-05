@@ -41,6 +41,7 @@ public:
     std::string get_model_filename(const UUID &pkg_uuid, const UUID &model_uuid) override;
 
     virtual std::string get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_out = nullptr);
+    std::string get_rel_filename(ObjectType type, const UUID &uu);
     const std::string &get_base_path() const override;
     bool check_filename(ObjectType type, const std::string &filename, std::string *error_msg = nullptr) const;
 

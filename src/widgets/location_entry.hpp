@@ -7,6 +7,7 @@ class LocationEntry : public Gtk::Box {
 public:
     LocationEntry(const std::string &rel = "");
     void set_filename(const std::string &s);
+    void set_rel_filename(const std::string &s);
     std::string get_filename();
     void set_warning(const std::string &t);
 

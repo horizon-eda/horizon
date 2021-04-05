@@ -37,6 +37,19 @@ void Pool::clear()
     pool_uuid_cache.clear();
 }
 
+std::string Pool::get_rel_filename(ObjectType type, const UUID &uu)
+{
+    const std::string query = "SELECT filename, pool_uuid FROM " + type_names.at(type) + " WHERE UUID = ?";
+    SQLite::Query q(db, query);
+    q.bind(1, uu);
+    if (q.step()) {
+        return q.get<std::string>(0);
+    }
+    else {
+        throw std::runtime_error(object_descriptions.at(type).name + " " + (std::string)uu + " not found");
+    }
+}
+
 std::string Pool::get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_out)
 {
     if (type_names.count(type) == 0)

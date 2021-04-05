@@ -66,8 +66,8 @@ DuplicateEntityWidget::DuplicateEntityWidget(Pool &p, const UUID &entity_uuid, G
     grid_attach_label_and_widget(grid, "Name", name_entry, top);
 
     location_entry = Gtk::manage(new LocationEntry(pool.get_base_path()));
-    location_entry->set_filename(
-            DuplicateUnitWidget::insert_filename(pool.get_filename(ObjectType::ENTITY, entity.uuid), "-copy"));
+    location_entry->set_rel_filename(
+            DuplicateUnitWidget::insert_filename(pool.get_rel_filename(ObjectType::ENTITY, entity.uuid), "-copy"));
     grid_attach_label_and_widget(grid, "Filename", location_entry, top);
 
     grid->show_all();
@@ -122,6 +122,7 @@ UUID DuplicateEntityWidget::duplicate(std::vector<std::string> *filenames)
         auto entity_filename = location_entry->get_filename();
         if (filenames)
             filenames->push_back(entity_filename);
+        ensure_parent_dir(entity_filename);
         save_json_to_file(entity_filename, new_entity_json);
         return new_entity.uuid;
     }

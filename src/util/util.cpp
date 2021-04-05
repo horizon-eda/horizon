@@ -534,4 +534,12 @@ void check_object_type(const json &j, ObjectType type)
     }
 }
 
+void ensure_parent_dir(const std::string &path)
+{
+    auto parent = Glib::path_get_dirname(path);
+    if (!Glib::file_test(parent, Glib::FILE_TEST_IS_DIR)) {
+        Gio::File::create_for_path(parent)->make_directory_with_parents();
+    }
+}
+
 } // namespace horizon
