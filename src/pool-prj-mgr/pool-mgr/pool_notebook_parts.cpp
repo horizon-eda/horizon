@@ -14,11 +14,7 @@
 namespace horizon {
 void PoolNotebook::handle_edit_part(const UUID &uu)
 {
-    if (!uu)
-        return;
-    UUID item_pool_uuid;
-    auto path = pool.get_filename(ObjectType::PART, uu, &item_pool_uuid);
-    appwin->spawn(PoolProjectManagerProcess::Type::PART, {path}, {}, pool_uuid && (item_pool_uuid != pool_uuid));
+    handle_edit_item(ObjectType::PART, uu);
 }
 
 void PoolNotebook::handle_create_part()
@@ -50,7 +46,7 @@ void PoolNotebook::handle_create_part()
     part.entity = entity;
     std::string fn = pool.get_tmp_filename(ObjectType::PART, part.uuid);
     save_json_to_file(fn, part.serialize());
-    appwin->spawn(PoolProjectManagerProcess::Type::PART, {fn}, {}, false, true);
+    appwin->spawn(PoolProjectManagerProcess::Type::PART, {fn}, PoolProjectManagerAppWindow::SpawnFlags::TEMP);
 }
 
 void PoolNotebook::handle_create_part_from_part(const UUID &uu)
@@ -69,8 +65,8 @@ void PoolNotebook::handle_create_part_from_part(const UUID &uu)
     std::string fn = pool.get_tmp_filename(ObjectType::PART, part.uuid);
     save_json_to_file(fn, part.serialize());
     appwin->spawn(PoolProjectManagerProcess::Type::PART,
-                  {fn, Glib::build_filename(pool.get_base_path(), pool.get_rel_filename(ObjectType::PART, uu))}, {},
-                  false, true);
+                  {fn, Glib::build_filename(pool.get_base_path(), pool.get_rel_filename(ObjectType::PART, uu))},
+                  PoolProjectManagerAppWindow::SpawnFlags::TEMP);
 }
 
 void PoolNotebook::handle_part_wizard()

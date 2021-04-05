@@ -13,11 +13,7 @@
 namespace horizon {
 void PoolNotebook::handle_edit_frame(const UUID &uu)
 {
-    if (!uu)
-        return;
-    UUID item_pool_uuid;
-    auto path = pool.get_filename(ObjectType::FRAME, uu, &item_pool_uuid);
-    appwin->spawn(PoolProjectManagerProcess::Type::IMP_FRAME, {path}, {}, pool_uuid && (item_pool_uuid != pool_uuid));
+    handle_edit_item(ObjectType::FRAME, uu);
 }
 
 void PoolNotebook::handle_create_frame()

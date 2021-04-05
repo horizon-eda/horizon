@@ -15,11 +15,7 @@
 namespace horizon {
 void PoolNotebook::handle_edit_package(const UUID &uu)
 {
-    if (!uu)
-        return;
-    UUID item_pool_uuid;
-    auto path = pool.get_filename(ObjectType::PACKAGE, uu, &item_pool_uuid);
-    appwin->spawn(PoolProjectManagerProcess::Type::IMP_PACKAGE, {path}, {}, pool_uuid && (item_pool_uuid != pool_uuid));
+    handle_edit_item(ObjectType::PACKAGE, uu);
 }
 
 void PoolNotebook::handle_create_package()

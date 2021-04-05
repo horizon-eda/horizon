@@ -135,6 +135,7 @@ private:
         UUID last;
     };
     ItemPoolInfo get_pool_uuids(ObjectType ty, const UUID &uu);
+    void handle_edit_item(ObjectType ty, const UUID &uu);
 
     void install_search_once(Gtk::Widget *page, PoolBrowser *browser);
     bool widget_is_visible(Gtk::Widget *widget);

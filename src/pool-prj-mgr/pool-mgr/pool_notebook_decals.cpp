@@ -11,11 +11,7 @@
 namespace horizon {
 void PoolNotebook::handle_edit_decal(const UUID &uu)
 {
-    if (!uu)
-        return;
-    UUID item_pool_uuid;
-    auto path = pool.get_filename(ObjectType::DECAL, uu, &item_pool_uuid);
-    appwin->spawn(PoolProjectManagerProcess::Type::IMP_DECAL, {path}, {}, pool_uuid && (item_pool_uuid != pool_uuid));
+    handle_edit_item(ObjectType::DECAL, uu);
 }
 
 void PoolNotebook::handle_create_decal()

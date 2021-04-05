@@ -12,11 +12,7 @@
 namespace horizon {
 void PoolNotebook::handle_edit_entity(const UUID &uu)
 {
-    if (!uu)
-        return;
-    UUID item_pool_uuid;
-    auto path = pool.get_filename(ObjectType::ENTITY, uu, &item_pool_uuid);
-    appwin->spawn(PoolProjectManagerProcess::Type::ENTITY, {path}, {}, pool_uuid && (item_pool_uuid != pool_uuid));
+    handle_edit_item(ObjectType::ENTITY, uu);
 }
 
 void PoolNotebook::handle_create_entity()

@@ -392,8 +392,9 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             default:
                 return nullptr;
             }
-            spawn(ptype, {path}, {},
-                  (item_pool_uuid != Pool::tmp_pool_uuid) && this_pool_uuid && (item_pool_uuid != this_pool_uuid));
+            const bool spawn_read_only =
+                    (item_pool_uuid != Pool::tmp_pool_uuid) && this_pool_uuid && (item_pool_uuid != this_pool_uuid);
+            spawn(ptype, {path}, spawn_read_only ? SpawnFlags::READ_ONLY : SpawnFlags::NONE);
         }
         catch (const std::exception &e) {
             Gtk::MessageDialog md(*this, "Can't open editor", false /* use_markup */, Gtk::MESSAGE_ERROR,
@@ -1105,9 +1106,7 @@ bool PoolProjectManagerAppWindow::on_delete_event(GdkEventAny *ev)
 }
 
 PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManagerProcess::Type type,
-                                                              const std::vector<std::string> &args,
-                                                              const std::vector<std::string> &ienv, bool read_only,
-                                                              bool is_temp)
+                                                              const std::vector<std::string> &args, SpawnFlags flags)
 {
     std::string pool_base_path;
     if (pool)
@@ -1121,7 +1120,6 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
         std::vector<std::string> env = {"HORIZON_POOL=" + pool_base_path,
                                         "HORIZON_EP_BROADCAST=" + app->get_ep_broadcast(),
                                         "HORIZON_EP_MGR=" + sock_mgr_ep, "HORIZON_MGR_PID=" + std::to_string(getpid())};
-        env.insert(env.end(), ienv.begin(), ienv.end());
         std::string filename = args.at(0);
         if (filename.size()) {
             if (!Glib::file_test(filename, Glib::FILE_TEST_IS_REGULAR)) {
@@ -1138,6 +1136,8 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
             return nullptr;
 
         auto uu = UUID::random();
+        const bool read_only = static_cast<int>(flags) & static_cast<int>(SpawnFlags::READ_ONLY);
+        const bool is_temp = static_cast<int>(flags) & static_cast<int>(SpawnFlags::TEMP);
         auto &proc =
                 processes
                         .emplace(std::piecewise_construct, std::forward_as_tuple(uu),

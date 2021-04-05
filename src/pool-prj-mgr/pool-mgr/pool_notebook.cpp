@@ -109,6 +109,26 @@ Gtk::Button *PoolNotebook::add_action_button(const std::string &label, Gtk::Box 
     return bu;
 }
 
+using OT = ObjectType;
+using PT = PoolProjectManagerProcess::Type;
+static const std::map<OT, PT> editor_type_map = {
+        {OT::UNIT, PT::UNIT},         {OT::ENTITY, PT::ENTITY},         {OT::PART, PT::PART},
+        {OT::SYMBOL, PT::IMP_SYMBOL}, {OT::PADSTACK, PT::IMP_PADSTACK}, {OT::PACKAGE, PT::IMP_PACKAGE},
+        {OT::FRAME, PT::IMP_FRAME},   {OT::DECAL, PT::IMP_DECAL},
+};
+
+void PoolNotebook::handle_edit_item(ObjectType ty, const UUID &uu)
+{
+    if (!uu)
+        return;
+
+    UUID item_pool_uuid;
+    const auto path = pool.get_filename(ty, uu, &item_pool_uuid);
+    const auto spawn_read_only = pool_uuid && (item_pool_uuid != pool_uuid);
+    using F = PoolProjectManagerAppWindow::SpawnFlags;
+    appwin->spawn(editor_type_map.at(ty), {path}, spawn_read_only ? F::READ_ONLY : F::NONE);
+}
+
 Gtk::Button *PoolNotebook::add_merge_button(Gtk::Box *bbox, class PoolBrowser *br, std::function<void(UUID)> cb)
 {
     if (!remote_repo.size())

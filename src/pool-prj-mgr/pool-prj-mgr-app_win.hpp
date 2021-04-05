@@ -38,9 +38,10 @@ public:
         return *app;
     }
 
+    enum class SpawnFlags { NONE = 0, READ_ONLY = (1 << 0), TEMP = (1 << 1) };
+
     PoolProjectManagerProcess *spawn(PoolProjectManagerProcess::Type type, const std::vector<std::string> &args,
-                                     const std::vector<std::string> &env = {}, bool read_only = false,
-                                     bool is_temp = false);
+                                     SpawnFlags flags = SpawnFlags::NONE);
 
     std::map<UUID, PoolProjectManagerProcess *> get_processes();
 

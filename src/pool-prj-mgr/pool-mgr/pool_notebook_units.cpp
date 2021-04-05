@@ -16,11 +16,7 @@ void PoolNotebook::handle_create_unit()
 
 void PoolNotebook::handle_edit_unit(const UUID &uu)
 {
-    if (!uu)
-        return;
-    UUID item_pool_uuid;
-    auto path = pool.get_filename(ObjectType::UNIT, uu, &item_pool_uuid);
-    appwin->spawn(PoolProjectManagerProcess::Type::UNIT, {path}, {}, pool_uuid && (item_pool_uuid != pool_uuid));
+    handle_edit_item(ObjectType::UNIT, uu);
 }
 
 void PoolNotebook::handle_create_symbol_for_unit(const UUID &uu)
