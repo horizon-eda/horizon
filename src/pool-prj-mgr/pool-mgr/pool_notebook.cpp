@@ -22,6 +22,8 @@
 #include "widgets/where_used_box.hpp"
 #include "util/win32_undef.hpp"
 #include "util/fs_util.hpp"
+#include "duplicate/duplicate_unit.hpp"
+#include "editors/editor_window.hpp"
 
 namespace horizon {
 
@@ -127,6 +129,55 @@ void PoolNotebook::handle_edit_item(ObjectType ty, const UUID &uu)
     const auto spawn_read_only = pool_uuid && (item_pool_uuid != pool_uuid);
     using F = PoolProjectManagerAppWindow::SpawnFlags;
     appwin->spawn(editor_type_map.at(ty), {path}, spawn_read_only ? F::READ_ONLY : F::NONE);
+}
+
+void PoolNotebook::handle_duplicate_item(ObjectType ty, const UUID &uu)
+{
+    if (!uu)
+        return;
+    auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
+
+    GtkFileChooserNative *native =
+            gtk_file_chooser_native_new(("Save " + object_descriptions.at(ty).name).c_str(), top->gobj(),
+                                        GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
+    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+    chooser->set_do_overwrite_confirmation(true);
+    auto it_filename = Glib::build_filename(pool.get_base_path(), pool.get_rel_filename(ty, uu));
+    auto it_basename = Glib::path_get_basename(it_filename);
+    auto it_dirname = Glib::path_get_dirname(it_filename);
+    chooser->set_current_folder(it_dirname);
+    chooser->set_current_name(DuplicateUnitWidget::insert_filename(it_basename, "-copy"));
+
+    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+        std::string fn = EditorWindow::fix_filename(chooser->get_filename());
+        switch (ty) {
+        case ObjectType::DECAL: {
+            Decal dec(*pool.get_decal(uu));
+            dec.name += " (Copy)";
+            dec.uuid = UUID::random();
+            save_json_to_file(fn, dec.serialize());
+        } break;
+
+        case ObjectType::FRAME: {
+            Frame fr(*pool.get_frame(uu));
+            fr.name += " (Copy)";
+            fr.uuid = UUID::random();
+            save_json_to_file(fn, fr.serialize());
+        } break;
+
+        case ObjectType::PADSTACK: {
+            Padstack ps(*pool.get_padstack(uu));
+            ps.name += " (Copy)";
+            ps.uuid = UUID::random();
+            save_json_to_file(fn, ps.serialize());
+        } break;
+
+        default:
+            throw std::runtime_error("Can't duplicate " + object_descriptions.at(ty).name);
+        }
+        pool_update(nullptr, {fn});
+        appwin->spawn(editor_type_map.at(ty), {fn});
+    }
 }
 
 Gtk::Button *PoolNotebook::add_merge_button(Gtk::Box *bbox, class PoolBrowser *br, std::function<void(UUID)> cb)

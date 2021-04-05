@@ -36,29 +36,7 @@ void PoolNotebook::handle_create_decal()
 
 void PoolNotebook::handle_duplicate_decal(const UUID &uu)
 {
-    if (!uu)
-        return;
-    auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
-
-    GtkFileChooserNative *native =
-            gtk_file_chooser_native_new("Save Decal", top->gobj(), GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
-    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-    chooser->set_do_overwrite_confirmation(true);
-    auto dec_filename = pool.get_filename(ObjectType::DECAL, uu);
-    auto dec_basename = Glib::path_get_basename(dec_filename);
-    auto dec_dirname = Glib::path_get_dirname(dec_filename);
-    chooser->set_current_folder(dec_dirname);
-    chooser->set_current_name(DuplicateUnitWidget::insert_filename(dec_basename, "-copy"));
-
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-        std::string fn = EditorWindow::fix_filename(chooser->get_filename());
-        Decal dec(*pool.get_decal(uu));
-        dec.name += " (Copy)";
-        dec.uuid = UUID::random();
-        save_json_to_file(fn, dec.serialize());
-        pool_update(nullptr, {fn});
-        appwin->spawn(PoolProjectManagerProcess::Type::IMP_DECAL, {fn});
-    }
+    handle_duplicate_item(ObjectType::DECAL, uu);
 }
 
 void PoolNotebook::construct_decals()
