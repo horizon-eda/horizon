@@ -444,6 +444,7 @@ SelectPRDialog::SelectPRDialog(Gtk::Window &parent)
 
     int top = 0;
     pr_id_sp = Gtk::manage(new Gtk::SpinButton);
+    pr_id_sp->set_increments(1, 1);
     pr_id_sp->set_range(0, 10000);
     pr_id_sp->signal_activate().connect([this] { response(Gtk::RESPONSE_OK); });
     grid_attach_label_and_widget(grid, "PR #", pr_id_sp, top);
