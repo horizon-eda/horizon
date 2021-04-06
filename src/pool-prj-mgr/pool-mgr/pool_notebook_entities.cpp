@@ -1,12 +1,9 @@
 #include "pool_notebook.hpp"
-#include "editors/editor_window.hpp"
-#include "duplicate/duplicate_unit.hpp"
 #include "util/util.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "widgets/pool_browser_entity.hpp"
 #include "widgets/entity_preview.hpp"
 #include "widgets/entity_info_box.hpp"
-#include "pool_remote_box.hpp"
 #include "pool-prj-mgr/pool-mgr/kicad_symbol_import_wizard/kicad_symbol_import_wizard.hpp"
 
 namespace horizon {

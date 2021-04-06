@@ -1,6 +1,5 @@
 #include "pool_notebook.hpp"
 #include "editors/editor_window.hpp"
-#include "duplicate/duplicate_unit.hpp"
 #include "util/util.hpp"
 #include "nlohmann/json.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"

@@ -3,10 +3,8 @@
 #include "duplicate/duplicate_unit.hpp"
 #include "util/util.hpp"
 #include "dialogs/pool_browser_dialog.hpp"
-#include "widgets/pool_browser_unit.hpp"
 #include "widgets/pool_browser_symbol.hpp"
 #include "widgets/symbol_preview.hpp"
-#include "pool_remote_box.hpp"
 #include "nlohmann/json.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 

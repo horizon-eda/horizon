@@ -4,7 +4,6 @@
 #include "nlohmann/json.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "widgets/pool_browser_unit.hpp"
-#include "pool_remote_box.hpp"
 #include "widgets/unit_preview.hpp"
 #include "widgets/unit_info_box.hpp"
 

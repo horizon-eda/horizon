@@ -1,13 +1,11 @@
 #include "pool_notebook.hpp"
 #include "editors/editor_window.hpp"
-#include "duplicate/duplicate_unit.hpp"
 #include "util/util.hpp"
 #include "nlohmann/json.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "widgets/pool_browser_padstack.hpp"
 #include "widgets/padstack_preview.hpp"
 #include "widgets/where_used_box.hpp"
-#include "pool_remote_box.hpp"
 
 namespace horizon {
 void PoolNotebook::handle_edit_padstack(const UUID &uu)
