@@ -400,6 +400,7 @@ void PoolBrowserParametric::search()
     SQLite::Query q(pool_parametric.db, qs);
     bind_set(q, "_manufacturer", manufacturers);
     bind_set(q, "_package", packages);
+    bind_pool_selector_query(q);
     if (similar_part_uuid) {
         q.bind("$similar_part", similar_part_uuid);
     }
