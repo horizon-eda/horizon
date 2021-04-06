@@ -478,7 +478,8 @@ void PoolGitBox::handle_pr()
     }
 
     Glib::ustring remote_url(git_remote_url(remote));
-    const auto regex_url = Glib::Regex::create(R"(^git@github\.com:([\w-]+)\/([\w-]+).git$)");
+    const auto regex_url =
+            Glib::Regex::create(R"(^(?:git@github\.com:|https://github.com/)([\w-]+)\/([\w-]+)(?:.git)?$)");
     Glib::MatchInfo ma;
     if (regex_url->match(remote_url, ma)) {
         auto gh_owner = ma.fetch(1);
