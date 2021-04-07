@@ -42,7 +42,12 @@ std::pair<Coordf, Coordf> Canvas::draw_text0(const Coordf &p, float size, const 
     }
     begin_group(layer);
     while (std::getline(ss, line, '\n')) {
-        TextData td(line, font);
+        TextData::Decoration decoration = TextData::Decoration::NONE;
+        if (line.size() && line.front() == '~') {
+            line = line.substr(1);
+            decoration = TextData::Decoration::OVERLINE;
+        }
+        const TextData td{line, font, decoration};
 
         Placement tf;
         tf.shift.x = p.x;

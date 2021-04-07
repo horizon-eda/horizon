@@ -20,7 +20,10 @@ public:
         SCRIPT_SIMPLEX,
         SCRIPT_COMPLEX
     };
-    TextData(const std::string &s, Font font = Font::SIMPLEX);
+
+    enum class Decoration { NONE = 0, OVERLINE = (1 << 1) };
+
+    TextData(const std::string &s, Font font = Font::SIMPLEX, Decoration decoration = Decoration::NONE);
     std::vector<std::pair<Coordi, Coordi>> lines;
     int ymin = 0;
     int ymax = 0;

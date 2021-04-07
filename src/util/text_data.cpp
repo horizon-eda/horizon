@@ -178,7 +178,12 @@ static unsigned int codepoint_to_hershey(gunichar c, TextData::Font font)
 
 extern const char *hershey_glyphs[];
 
-TextData::TextData(const std::string &str, Font font)
+bool operator&(TextData::Decoration a, TextData::Decoration b)
+{
+    return static_cast<int>(a) & static_cast<int>(b);
+}
+
+TextData::TextData(const std::string &str, Font font, Decoration decoration)
 {
     Glib::ustring ustr(str);
     int x0 = 0;
@@ -219,5 +224,10 @@ TextData::TextData(const std::string &str, Font font)
         x0 += right - left;
     }
     xright = x0;
+    if (decoration & Decoration::OVERLINE) {
+        int bar_y = 24;
+        lines.emplace_back(std::piecewise_construct, std::forward_as_tuple(0, bar_y),
+                           std::forward_as_tuple(xright, bar_y));
+    }
 }
 } // namespace horizon
