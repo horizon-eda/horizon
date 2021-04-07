@@ -55,6 +55,7 @@ bool PoolUpdater::update_part(const std::string &filename)
             q_insert_part->bind("$package", part.package->uuid);
             q_insert_part->bind("$entity", part.entity->uuid);
             q_insert_part->bind("$description", part.get_description());
+            q_insert_part->bind("$datasheet", part.get_datasheet());
             q_insert_part->bind("$pool_uuid", pool_uuid);
             q_insert_part->bind("$last_pool_uuid", *last_pool_uuid);
             q_insert_part->bind("$parametric_table", table);
