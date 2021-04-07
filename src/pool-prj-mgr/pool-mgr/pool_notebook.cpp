@@ -24,6 +24,7 @@
 #include "util/fs_util.hpp"
 #include "duplicate/duplicate_unit.hpp"
 #include "editors/editor_window.hpp"
+#include "move_window.hpp"
 
 namespace horizon {
 
@@ -429,6 +430,21 @@ void PoolNotebook::add_context_menu(PoolBrowser *br)
                 auto x = get_pool_uuids(ty, uu);
                 return x.last || x.pool != pool.get_pool_info().uuid;
             });
+    br->add_context_menu_item(
+            "Move to other pool",
+            [this](const UUID &uu) {
+                auto win = MoveWindow::create(pool, ObjectType::PART, uu);
+                auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
+                win->set_transient_for(*top);
+                win->present();
+                win->signal_hide().connect([this, win] {
+                    if (win->get_moved()) {
+                        this->pool_update();
+                    }
+                    delete win;
+                });
+            },
+            this_pool_lambda);
 }
 
 PoolNotebook::ItemPoolInfo PoolNotebook::get_pool_uuids(ObjectType ty, const UUID &uu)

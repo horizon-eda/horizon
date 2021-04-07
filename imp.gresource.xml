@@ -22,6 +22,7 @@
     <file>pool-prj-mgr/pool-mgr/github_login_window.ui</file>
     <file>pool-prj-mgr/pool-mgr/import_kicad_package_window.ui</file>
     <file>pool-prj-mgr/pool-mgr/pool_cache_box.ui</file>
+    <file>pool-prj-mgr/pool-mgr/move_window.ui</file>
     <file>pool-prj-mgr/prj-mgr/part_browser/part_browser.ui</file>
     <file>pool-prj-mgr/welcome.ui</file>
     <file>pool-prj-mgr/output_window.ui</file>

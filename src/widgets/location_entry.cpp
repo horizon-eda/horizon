@@ -8,6 +8,10 @@ std::string LocationEntry::get_rel_filename(const std::string &s) const
     return Gio::File::create_for_path(relative_to)->get_relative_path(Gio::File::create_for_path(s));
 }
 
+void LocationEntry::set_relative_to(const std::string &s)
+{
+    relative_to = s;
+}
 
 void LocationEntry::set_filename(const std::string &s)
 {

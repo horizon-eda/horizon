@@ -722,6 +722,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/pools_window/pool_status_provider.cpp\
 	src/pool-prj-mgr/pools_window/pool_merge_box.cpp\
 	src/pool-prj-mgr/pools_window/pool_download_window.cpp\
+	src/pool-prj-mgr/pool-mgr/move_window.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp
