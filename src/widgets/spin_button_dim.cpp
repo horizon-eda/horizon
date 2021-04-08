@@ -10,7 +10,7 @@ SpinButtonDim::SpinButtonDim() : Gtk::SpinButton()
     set_width_chars(11);
     entry_set_tnum(*this);
 #if GTK_CHECK_VERSION(3, 22, 20)
-    set_input_hints(Gtk::INPUT_HINT_NO_EMOJI);
+    gtk_entry_set_input_hints(GTK_ENTRY(gobj()), GTK_INPUT_HINT_NO_EMOJI);
 #endif
 }
 
