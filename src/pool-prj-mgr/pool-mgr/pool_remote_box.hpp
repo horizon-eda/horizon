@@ -17,8 +17,8 @@ using json = nlohmann::json;
 
 class PoolRemoteBox : public Gtk::Box {
 public:
-    PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class PoolNotebook *nb);
-    static PoolRemoteBox *create(class PoolNotebook *nb);
+    PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class PoolNotebook &nb);
+    static PoolRemoteBox *create(class PoolNotebook &nb);
 
     void merge_item(ObjectType ty, const UUID &uu);
     void merge_3d_model(const std::string &filename);
@@ -28,7 +28,7 @@ public:
     void login_once();
 
 private:
-    class PoolNotebook *notebook = nullptr;
+    class PoolNotebook &notebook;
 
     class ListColumns : public Gtk::TreeModelColumnRecord {
     public:

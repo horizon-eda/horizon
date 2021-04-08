@@ -34,7 +34,7 @@ LocationEntry *PartWizard::pack_location_entry(const Glib::RefPtr<Gtk::Builder> 
 }
 
 PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const UUID &pkg_uuid,
-                       const std::string &bp, class Pool &po, PoolProjectManagerAppWindow *aw)
+                       const std::string &bp, class Pool &po, PoolProjectManagerAppWindow &aw)
     : Gtk::Window(cobject), pool_base_path(bp), pool(po), part(UUID::random()), entity(UUID::random()), appwin(aw),
       state_store(this, "part-wizard")
 {
@@ -735,7 +735,7 @@ void PartWizard::prepare_edit()
                     save_json_to_file(symbol_filename, sym.serialize());
                 }
 
-                auto proc = appwin->spawn(PoolProjectManagerProcess::Type::IMP_SYMBOL, {symbol_filename});
+                auto proc = appwin.spawn(PoolProjectManagerProcess::Type::IMP_SYMBOL, {symbol_filename});
                 processes.emplace(symbol_filename, proc);
                 symbols_open.emplace(symbol_uuid);
                 proc->signal_exited().connect([this, symbol_filename, symbol_uuid, ed](int status, bool modified) {
@@ -1132,7 +1132,7 @@ void PartWizard::update_steps()
 }
 
 PartWizard *PartWizard::create(const UUID &pkg_uuid, const std::string &bp, class Pool &po,
-                               class PoolProjectManagerAppWindow *aw)
+                               class PoolProjectManagerAppWindow &aw)
 {
     PartWizard *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();

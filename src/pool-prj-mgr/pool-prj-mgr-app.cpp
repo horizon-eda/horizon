@@ -60,7 +60,7 @@ Glib::RefPtr<PoolProjectManagerApplication> PoolProjectManagerApplication::creat
 
 PoolProjectManagerAppWindow *PoolProjectManagerApplication::create_appwindow()
 {
-    auto appwindow = PoolProjectManagerAppWindow::create(this);
+    auto appwindow = PoolProjectManagerAppWindow::create(*this);
 
     // Make sure that the application runs for as long this window is still
     // open.

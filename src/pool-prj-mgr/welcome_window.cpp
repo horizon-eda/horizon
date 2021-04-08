@@ -4,20 +4,20 @@
 #include "pools_window/pools_window.hpp"
 
 namespace horizon {
-WelcomeWindow *WelcomeWindow::create(PoolProjectManagerAppWindow *aw)
+WelcomeWindow *WelcomeWindow::create(PoolProjectManagerAppWindow &aw)
 {
     WelcomeWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/welcome.ui");
     x->get_widget_derived("window", w, aw);
 
-    w->set_transient_for(*aw);
+    w->set_transient_for(aw);
 
     return w;
 }
 
 WelcomeWindow::WelcomeWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
-                             PoolProjectManagerAppWindow *aw)
+                             PoolProjectManagerAppWindow &aw)
     : Gtk::Window(cobject), appwin(aw)
 {
     Gtk::Button *button_download = nullptr;
@@ -37,7 +37,7 @@ WelcomeWindow::WelcomeWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     banner_area->signal_draw().connect(sigc::mem_fun(*this, &WelcomeWindow::draw_banner));
 
     button_download->signal_clicked().connect([this] {
-        appwin->get_app().show_pools_window();
+        appwin.app.show_pools_window();
         delete this;
     });
 
@@ -57,7 +57,7 @@ WelcomeWindow::WelcomeWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 
 void WelcomeWindow::handle_open()
 {
-    auto pools_window = appwin->get_app().show_pools_window();
+    auto pools_window = appwin.app.show_pools_window();
     pools_window->add_pool("");
     delete this;
 }

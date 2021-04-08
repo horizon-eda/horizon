@@ -29,7 +29,7 @@ void PoolNotebook::handle_create_decal()
         Decal dec(horizon::UUID::random());
         save_json_to_file(fn, dec.serialize());
         pool_update(nullptr, {fn});
-        appwin->spawn(PoolProjectManagerProcess::Type::IMP_DECAL, {fn});
+        appwin.spawn(PoolProjectManagerProcess::Type::IMP_DECAL, {fn});
     }
 }
 

@@ -104,7 +104,7 @@ void ConfirmPrDialog::update_valid()
 
 static const std::string github_client_id = "094ac4cbd2e4a51820b4";
 
-PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, PoolNotebook *nb)
+PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, PoolNotebook &nb)
     : Gtk::Box(cobject), notebook(nb)
 {
     x->get_widget("button_do_create_pr", create_pr_button);
@@ -176,7 +176,7 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     show_only_my_prs_cb->signal_toggled().connect(sigc::mem_fun(*this, &PoolRemoteBox::update_prs));
 
     autofree_ptr<git_repository> repo(git_repository_free);
-    if (git_repository_open(&repo.ptr, notebook->remote_repo.c_str()) != 0) {
+    if (git_repository_open(&repo.ptr, notebook.remote_repo.c_str()) != 0) {
         throw std::runtime_error("error opening repo");
     }
 
@@ -208,7 +208,7 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     pr_status_dispatcher.signal_notified().connect([this](const StatusDispatcher::Notification &n) {
         auto is_busy = n.status == StatusDispatcher::Status::BUSY;
         if (!is_busy) {
-            notebook->pool_updating = false;
+            notebook.pool_updating = false;
         }
         if (n.status == StatusDispatcher::Status::DONE) {
             update_prs();
@@ -230,7 +230,7 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
         logout_button->set_visible(gh_username.size() || login_succeeded == false);
         update_my_prs();
         if (!git_thread_busy) {
-            notebook->pool_updating = false;
+            notebook.pool_updating = false;
         }
 
         if (git_thread_mode == GitThreadMode::PULL_REQUEST && !git_thread_busy && !git_thread_error) {
@@ -274,7 +274,7 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
                 Gtk::TreeModel::Row row = *item_store->get_iter(path);
                 const ObjectType type = row[list_columns.type];
                 if (type != ObjectType::MODEL_3D)
-                    notebook->go_to(type, row[list_columns.uuid]);
+                    notebook.go_to(type, row[list_columns.uuid]);
             });
 
     merge_items_view->append_column("Name", list_columns.name);
@@ -325,10 +325,10 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     {
         Gtk::Button *remote_check_update_button;
         GET_WIDGET(remote_check_update_button);
-        if (PoolManager::get().get_pools().count(notebook->base_path)) {
+        if (PoolManager::get().get_pools().count(notebook.base_path)) {
             remote_check_update_button->signal_clicked().connect([this] {
-                auto w = notebook->get_appwin().get_app().show_pools_window();
-                w->show_pool(notebook->base_path);
+                auto w = notebook.appwin.app.show_pools_window();
+                w->show_pool(notebook.base_path);
                 w->check_for_updates();
             });
         }
@@ -377,7 +377,7 @@ static std::pair<git_oid, autofree_ptr<git_tree>> find_base(git_repository *repo
 
 void PoolRemoteBox::pr_diff_file_cb(const git_diff_delta *delta)
 {
-    SQLite::Query q(notebook->pool.db, "INSERT INTO 'git_files' VALUES (?)");
+    SQLite::Query q(notebook.pool.db, "INSERT INTO 'git_files' VALUES (?)");
     q.bind(1, std::string(delta->new_file.path));
     q.step();
 }
@@ -407,7 +407,7 @@ void PoolRemoteBox::set_pr_update_mode(unsigned int pr, const std::string branch
     }
 
     autofree_ptr<git_repository> repo(git_repository_free);
-    if (git_repository_open(&repo.ptr, notebook->remote_repo.c_str()) != 0) {
+    if (git_repository_open(&repo.ptr, notebook.remote_repo.c_str()) != 0) {
         throw std::runtime_error("error opening repo");
     }
 
@@ -416,10 +416,10 @@ void PoolRemoteBox::set_pr_update_mode(unsigned int pr, const std::string branch
         err == GIT_ENOTFOUND) {
         // branch not found
 
-        if (notebook->pool_updating)
+        if (notebook.pool_updating)
             return;
 
-        notebook->pool_updating = true;
+        notebook.pool_updating = true;
         git_thread_busy = true;
         git_thread_error = false;
         git_thread_mode = GitThreadMode::PULL_REQUEST_UPDATE_PREPARE;
@@ -463,13 +463,13 @@ void PoolRemoteBox::set_pr_update_mode(unsigned int pr, const std::string branch
     git_diff_tree_to_tree(&diff.ptr, repo, base_tree, tree, &diff_opts);
 
 
-    notebook->pool.db.execute("CREATE TEMP TABLE 'git_files' ('git_filename' TEXT NOT NULL);");
-    notebook->pool.db.execute("BEGIN TRANSACTION");
+    notebook.pool.db.execute("CREATE TEMP TABLE 'git_files' ('git_filename' TEXT NOT NULL);");
+    notebook.pool.db.execute("BEGIN TRANSACTION");
     git_diff_foreach(diff, &PoolRemoteBox::pr_diff_file_cb_c, nullptr, nullptr, nullptr, this);
-    notebook->pool.db.execute("COMMIT");
+    notebook.pool.db.execute("COMMIT");
 
     SQLite::Query q(
-            notebook->pool.db,
+            notebook.pool.db,
             "SELECT type, uuid, name, filename FROM git_files LEFT JOIN "
             "(SELECT type, uuid, name, filename FROM all_items_view UNION ALL SELECT DISTINCT 'model_3d' AS type, "
             "'00000000-0000-0000-0000-000000000000' as uuid, '' as name, model_filename as filename FROM models) "
@@ -487,7 +487,7 @@ void PoolRemoteBox::set_pr_update_mode(unsigned int pr, const std::string branch
     }
     update_items_merge();
 
-    notebook->pool.db.execute("DROP TABLE 'git_files'");
+    notebook.pool.db.execute("DROP TABLE 'git_files'");
 }
 
 class PullRequestItemBox : public Gtk::Box {
@@ -605,8 +605,8 @@ ItemSet PoolRemoteBox::get_referenced(ObjectType ty, const UUID &uu)
 {
     ItemSet items;
     {
-        SQLite::Query q(notebook->pool.db, "ATTACH ? AS remote");
-        q.bind(1, Glib::build_filename(notebook->remote_repo, "pool.db"));
+        SQLite::Query q(notebook.pool.db, "ATTACH ? AS remote");
+        q.bind(1, Glib::build_filename(notebook.remote_repo, "pool.db"));
         q.step();
     }
     const char *qs =
@@ -619,17 +619,17 @@ ItemSet PoolRemoteBox::get_referenced(ObjectType ty, const UUID &uu)
             "LEFT JOIN remote.all_items_view AS remote_items "
             "ON (remote_items.type = deps_sym.typey AND remote_items.uuid = deps_sym.uuidy) "
             "WHERE remote_items.uuid IS NULL";
-    SQLite::Query q(notebook->pool.db, qs);
+    SQLite::Query q(notebook.pool.db, qs);
     q.bind(1, ty);
     q.bind(2, uu);
     while (q.step()) {
         items.emplace(q.get<ObjectType>(0), q.get<std::string>(1));
     }
-    notebook->pool.db.execute("DETACH remote");
+    notebook.pool.db.execute("DETACH remote");
     return items;
 }
 
-PoolRemoteBox *PoolRemoteBox::create(PoolNotebook *nb)
+PoolRemoteBox *PoolRemoteBox::create(PoolNotebook &nb)
 {
     PoolRemoteBox *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
@@ -642,9 +642,9 @@ PoolRemoteBox *PoolRemoteBox::create(PoolNotebook *nb)
 
 void PoolRemoteBox::handle_refresh_prs()
 {
-    if (notebook->pool_updating)
+    if (notebook.pool_updating)
         return;
-    notebook->pool_updating = true;
+    notebook.pool_updating = true;
 
     pr_status_dispatcher.reset("Starting…");
     std::thread thr(&PoolRemoteBox::refresh_prs_thread, this);
@@ -654,14 +654,14 @@ void PoolRemoteBox::handle_refresh_prs()
 
 void PoolRemoteBox::handle_create_pr()
 {
-    if (notebook->pool_updating)
+    if (notebook.pool_updating)
         return;
 
     auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
 
     { // confirm user name
         autofree_ptr<git_repository> repo(git_repository_free);
-        if (git_repository_open(&repo.ptr, notebook->remote_repo.c_str()) != 0) {
+        if (git_repository_open(&repo.ptr, notebook.remote_repo.c_str()) != 0) {
             throw std::runtime_error("error opening repo");
         }
 
@@ -692,7 +692,7 @@ void PoolRemoteBox::handle_create_pr()
         git_config_set_string(repo_config, "user.email", dia.email_entry->get_text().c_str());
     }
 
-    notebook->pool_updating = true;
+    notebook.pool_updating = true;
     git_thread_busy = true;
     git_thread_error = false;
     git_thread_mode = GitThreadMode::PULL_REQUEST;
@@ -709,13 +709,13 @@ void PoolRemoteBox::handle_create_pr()
 
 void PoolRemoteBox::handle_update_pr()
 {
-    if (notebook->pool_updating)
+    if (notebook.pool_updating)
         return;
 
     if (!pr_update_nr)
         return;
 
-    notebook->pool_updating = true;
+    notebook.pool_updating = true;
     git_thread_busy = true;
     git_thread_error = false;
     git_thread_mode = GitThreadMode::PULL_REQUEST_UPDATE;
@@ -739,7 +739,7 @@ void PoolRemoteBox::update_items_merge()
     merge_items_run_checks_button->set_sensitive(can_merge);
     merge_items_placeholder_label->set_visible(items_merge.size() == 0 && models_merge.size() == 0);
     for (const auto &it : items_merge) {
-        SQLite::Query q(notebook->pool.db, "SELECT name FROM all_items_view WHERE uuid = ? AND type = ?");
+        SQLite::Query q(notebook.pool.db, "SELECT name FROM all_items_view WHERE uuid = ? AND type = ?");
         q.bind(1, it.second);
         q.bind(2, it.first);
         if (q.step()) {
@@ -747,7 +747,7 @@ void PoolRemoteBox::update_items_merge()
             row[list_columns.name] = q.get<std::string>(0);
             row[list_columns.type] = it.first;
             row[list_columns.uuid] = it.second;
-            auto result = check_item(notebook->pool, it.first, it.second);
+            auto result = check_item(notebook.pool, it.first, it.second);
             row[list_columns.check_result] = result;
         }
     }
@@ -759,13 +759,13 @@ void PoolRemoteBox::update_items_merge()
         row[list_columns.filename] = it;
     }
 
-    if (notebook->page_num(*this) != -1) {
+    if (notebook.page_num(*this) != -1) {
         const auto n = items_merge.size() + models_merge.size();
         if (n > 0) {
-            notebook->set_tab_label_text(*this, "Remote (" + std::to_string(n) + ")");
+            notebook.set_tab_label_text(*this, "Remote (" + std::to_string(n) + ")");
         }
         else {
-            notebook->set_tab_label_text(*this, "Remote");
+            notebook.set_tab_label_text(*this, "Remote");
         }
     }
 }
@@ -802,7 +802,7 @@ void PoolRemoteBox::refresh_prs_thread()
 
 std::string PoolRemoteBox::get_token_filename() const
 {
-    return Glib::build_filename(notebook->remote_repo, ".auth.json");
+    return Glib::build_filename(notebook.remote_repo, ".auth.json");
 }
 
 bool PoolRemoteBox::update_login()
@@ -818,9 +818,9 @@ bool PoolRemoteBox::update_login()
         logout_button->hide();
     }
     else {
-        if (notebook->pool_updating)
+        if (notebook.pool_updating)
             return false;
-        notebook->pool_updating = true;
+        notebook.pool_updating = true;
         git_thread_busy = true;
         git_thread_error = false;
         git_thread_mode = GitThreadMode::LOGIN;
@@ -928,7 +928,7 @@ git_oid PoolRemoteBox::items_to_tree(git_repository *repo)
     std::set<std::string> files_merge;
 
     for (const auto &it : items_merge) {
-        SQLite::Query q(notebook->pool.db,
+        SQLite::Query q(notebook.pool.db,
                         "SELECT filename FROM all_items_view WHERE "
                         "uuid = ? AND type = ?");
         q.bind(1, it.second);
@@ -942,8 +942,8 @@ git_oid PoolRemoteBox::items_to_tree(git_repository *repo)
 
     for (std::string filename : files_merge) {
         std::cout << "merge " << filename << std::endl;
-        std::string filename_src = Glib::build_filename(notebook->base_path, filename);
-        std::string filename_dest = Glib::build_filename(notebook->remote_repo, filename);
+        std::string filename_src = Glib::build_filename(notebook.base_path, filename);
+        std::string filename_dest = Glib::build_filename(notebook.remote_repo, filename);
         std::string dirname_dest = Glib::path_get_dirname(filename_dest);
         if (!Glib::file_test(dirname_dest, Glib::FILE_TEST_IS_DIR))
             Gio::File::create_for_path(dirname_dest)->make_directory_with_parents();
@@ -1093,7 +1093,7 @@ void PoolRemoteBox::create_pr_thread()
         git_thread_dispatcher.emit();
 
         autofree_ptr<git_repository> repo(git_repository_free);
-        if (git_repository_open(&repo.ptr, notebook->remote_repo.c_str()) != 0) {
+        if (git_repository_open(&repo.ptr, notebook.remote_repo.c_str()) != 0) {
             throw std::runtime_error("error opening repo");
         }
 
@@ -1241,7 +1241,7 @@ void PoolRemoteBox::update_pr_thread()
         git_thread_dispatcher.emit();
 
         autofree_ptr<git_repository> repo(git_repository_free);
-        if (git_repository_open(&repo.ptr, notebook->remote_repo.c_str()) != 0) {
+        if (git_repository_open(&repo.ptr, notebook.remote_repo.c_str()) != 0) {
             throw std::runtime_error("error opening repo");
         }
 
@@ -1388,7 +1388,7 @@ void PoolRemoteBox::update_prepare_pr_thread()
         git_thread_dispatcher.emit();
 
         autofree_ptr<git_repository> repo(git_repository_free);
-        if (git_repository_open(&repo.ptr, notebook->remote_repo.c_str()) != 0) {
+        if (git_repository_open(&repo.ptr, notebook.remote_repo.c_str()) != 0) {
             throw std::runtime_error("error opening repo");
         }
 

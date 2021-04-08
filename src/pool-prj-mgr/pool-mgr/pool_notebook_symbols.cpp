@@ -42,7 +42,7 @@ void PoolNotebook::handle_create_symbol()
             sym.name = unit->name;
             sym.unit = unit;
             save_json_to_file(fn, sym.serialize());
-            appwin->spawn(PoolProjectManagerProcess::Type::IMP_SYMBOL, {fn});
+            appwin.spawn(PoolProjectManagerProcess::Type::IMP_SYMBOL, {fn});
         }
     }
 }
@@ -70,7 +70,7 @@ void PoolNotebook::handle_duplicate_symbol(const UUID &uu)
         sym.uuid = UUID::random();
         save_json_to_file(fn, sym.serialize());
         pool_update(nullptr, {fn});
-        appwin->spawn(PoolProjectManagerProcess::Type::IMP_SYMBOL, {fn});
+        appwin.spawn(PoolProjectManagerProcess::Type::IMP_SYMBOL, {fn});
     }
 }
 

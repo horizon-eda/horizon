@@ -36,10 +36,10 @@ namespace horizon {
 namespace fs = std::filesystem;
 PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject,
                                                          const Glib::RefPtr<Gtk::Builder> &refBuilder,
-                                                         PoolProjectManagerApplication *aapp)
-    : Gtk::ApplicationWindow(cobject), builder(refBuilder), state_store(this, "pool-mgr"),
-      view_create_project(refBuilder, this), view_project(refBuilder, this), view_create_pool(refBuilder, this),
-      app(aapp), sock_mgr(app->zctx, ZMQ_REP), zctx(app->zctx)
+                                                         PoolProjectManagerApplication &aapp)
+    : Gtk::ApplicationWindow(cobject), app(aapp), builder(refBuilder), state_store(this, "pool-mgr"),
+      view_create_project(refBuilder, *this), view_project(refBuilder, *this), view_create_pool(refBuilder),
+      sock_mgr(app.zctx, ZMQ_REP), zctx(app.zctx)
 {
     builder->get_widget("stack", stack);
     builder->get_widget("button_open", button_open);
@@ -110,7 +110,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     info_bar_pool_not_added->signal_response().connect([this](int resp) {
         if (resp == Gtk::RESPONSE_OK) {
             if (pool) {
-                auto pools_window = app->show_pools_window();
+                auto pools_window = app.show_pools_window();
                 pools_window->add_pool(Glib::build_filename(pool->get_base_path(), "pool.json"));
             }
         }
@@ -121,7 +121,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     info_bar_pool_doc->signal_response().connect([this](int resp) {
         if (resp == Gtk::RESPONSE_OK) {
             info_bar_hide(info_bar_pool_doc);
-            app->pool_doc_info_bar_dismissed = true;
+            app.pool_doc_info_bar_dismissed = true;
         }
     });
     info_bar_hide(info_bar_pool_doc);
@@ -178,7 +178,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
             [this] {
                 update_recent_items();
                 if (PoolManager::get().get_pools().size() == 0) {
-                    auto w = WelcomeWindow::create(this);
+                    auto w = WelcomeWindow::create(*this);
                     w->set_modal(true);
                     w->present();
                 }
@@ -259,7 +259,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             json tx;
             tx["op"] = "highlight";
             tx["objects"] = j.at("selection");
-            app->send_json(pid, tx);
+            app.send_json(pid, tx);
         }
         const json &o = j.at("selection");
         bool can_assign = false;
@@ -276,7 +276,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             json tx;
             tx["op"] = "highlight";
             tx["objects"] = j.at("selection");
-            app->send_json(pid, tx);
+            app.send_json(pid, tx);
         }
     }
     else if (op == "to-board") {
@@ -286,7 +286,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             tx["op"] = "place";
             tx["time"] = timestamp;
             tx["components"] = j.at("selection");
-            app->send_json(pid, tx);
+            app.send_json(pid, tx);
         }
     }
     else if (op == "show-in-browser") {
@@ -317,7 +317,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             json tx;
             tx["op"] = "reload-netlist";
             tx["time"] = timestamp;
-            app->send_json(pid, tx);
+            app.send_json(pid, tx);
         }
     }
     else if (op == "present-board") {
@@ -326,7 +326,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             json tx;
             tx["op"] = "present";
             tx["time"] = timestamp;
-            app->send_json(pid, tx);
+            app.send_json(pid, tx);
         }
         else {
             view_project.open_board();
@@ -338,7 +338,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             json tx;
             tx["op"] = "present";
             tx["time"] = timestamp;
-            app->send_json(pid, tx);
+            app.send_json(pid, tx);
         }
         else {
             view_project.open_top_schematic();
@@ -359,7 +359,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
                         auto board_pid = proc_board->proc->get_pid();
                         json tx;
                         tx["op"] = "reload-netlist-hint";
-                        app->send_json(board_pid, tx);
+                        app.send_json(board_pid, tx);
                     }
                 }
             }
@@ -404,7 +404,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
         }
     }
     else if (op == "preferences") {
-        auto win = app->show_preferences_window(timestamp);
+        auto win = app.show_preferences_window(timestamp);
         if (j.count("page"))
             win->show_page(j.at("page"));
     }
@@ -420,7 +420,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             pool_path = pool2->base_path;
         }
         if (pool_path.size()) {
-            app->open_pool(Glib::build_filename(pool_path, "pool.json"), type, uu, timestamp);
+            app.open_pool(Glib::build_filename(pool_path, "pool.json"), type, uu, timestamp);
         }
     }
     else if (op == "backannotate") {
@@ -430,7 +430,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             tx["op"] = "backannotate";
             tx["connections"] = j.at("connections");
             tx["time"] = timestamp;
-            app->send_json(pid, tx);
+            app.send_json(pid, tx);
         }
     }
     else if (op == "symbol-select") {
@@ -534,7 +534,7 @@ void PoolProjectManagerAppWindow::handle_save()
 {
     if (project) {
         save_project();
-        app->send_json(0, {{"op", "save"}});
+        app.send_json(0, {{"op", "save"}});
     }
 }
 
@@ -628,8 +628,6 @@ static std::optional<std::string> peek_name(const std::string &path)
 
 void PoolProjectManagerAppWindow::update_recent_items()
 {
-    if (!app)
-        return;
     {
         for (auto &lb : recent_listboxes) {
             auto chs = lb->get_children();
@@ -638,7 +636,7 @@ void PoolProjectManagerAppWindow::update_recent_items()
             }
         }
     }
-    std::vector<std::pair<std::string, Glib::DateTime>> recent_items_sorted = recent_sort(app->recent_items);
+    std::vector<std::pair<std::string, Glib::DateTime>> recent_items_sorted = recent_sort(app.recent_items);
     for (const auto &it : recent_items_sorted) {
         const std::string &path = it.first;
         if (const auto name = peek_name(path)) {
@@ -649,7 +647,7 @@ void PoolProjectManagerAppWindow::update_recent_items()
                 recent_projects_listbox->append(*box);
             box->show();
             box->signal_remove().connect([this, box] {
-                app->recent_items.erase(box->path);
+                app.recent_items.erase(box->path);
                 Glib::signal_idle().connect_once([this] { update_recent_items(); });
             });
         }
@@ -743,8 +741,7 @@ bool PoolProjectManagerAppWindow::really_close_pool_or_project()
         }
         if (pool_notebook)
             pool_notebook->prepare_close();
-        app->recent_items[Glib::build_filename(pool->get_base_path(), "pool.json")] =
-                Glib::DateTime::create_now_local();
+        app.recent_items[Glib::build_filename(pool->get_base_path(), "pool.json")] = Glib::DateTime::create_now_local();
         delete pool_notebook;
         info_bar_hide(info_bar_pool_not_added);
         pool_notebook = nullptr;
@@ -758,7 +755,7 @@ bool PoolProjectManagerAppWindow::really_close_pool_or_project()
             md.run();
             return false;
         }
-        app->recent_items[project_filename] = Glib::DateTime::create_now_local();
+        app.recent_items[project_filename] = Glib::DateTime::create_now_local();
         project.reset();
         cleanup();
         set_view_mode(ViewMode::OPEN);
@@ -801,7 +798,7 @@ void PoolProjectManagerAppWindow::set_view_mode(ViewMode mode)
         button_update->show();
         hamburger_menu_button->show();
         header->set_title("Pool manager");
-        if (!app->pool_doc_info_bar_dismissed)
+        if (!app.pool_doc_info_bar_dismissed)
             info_bar_show(info_bar_pool_doc);
         break;
 
@@ -853,7 +850,7 @@ void PoolProjectManagerAppWindow::pool_notebook_go_to(ObjectType type, const UUI
         pool_notebook->go_to(type, uu);
 }
 
-PoolProjectManagerAppWindow *PoolProjectManagerAppWindow::create(PoolProjectManagerApplication *app)
+PoolProjectManagerAppWindow *PoolProjectManagerAppWindow::create(PoolProjectManagerApplication &app)
 {
     // Load the Builder file and instantiate its widgets.
     std::vector<Glib::ustring> widgets = {"app_window",        "sg_dest",         "sg_repo",           "menu1",
@@ -967,9 +964,9 @@ bool PoolProjectManagerAppWindow::migrate_project(const std::string &path)
 void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &file)
 {
     auto path = file->get_path();
-    app->recent_items[path] = Glib::DateTime::create_now_local();
+    app.recent_items[path] = Glib::DateTime::create_now_local();
 
-    auto windows = dynamic_cast_vector<PoolProjectManagerAppWindow *>(app->get_windows());
+    auto windows = dynamic_cast_vector<PoolProjectManagerAppWindow *>(app.get_windows());
     for (auto &win : windows) {
         if (win->get_filename() == path) {
             win->present();
@@ -986,7 +983,7 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
             auto pool_base_path = file->get_parent()->get_path();
             check_schema_update(pool_base_path);
             set_view_mode(ViewMode::POOL);
-            pool_notebook = new PoolNotebook(pool_base_path, this);
+            pool_notebook = new PoolNotebook(pool_base_path, *this);
             if (!PoolManager::get().get_pools().count(pool_base_path) && !pool->get_pool_info().is_project_pool()) {
                 info_bar_show(info_bar_pool_not_added);
             }
@@ -997,7 +994,7 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
             if (pool->get_pool_info().is_project_pool()) {
                 button_close->hide();
                 auto project_path = Glib::path_get_dirname(pool_base_path);
-                for (auto win : app->get_windows()) {
+                for (auto win : app.get_windows()) {
                     if (auto w = dynamic_cast<PoolProjectManagerAppWindow *>(win)) {
                         if (w->get_view_mode() == PoolProjectManagerAppWindow::ViewMode::PROJECT) {
                             const auto win_path = Glib::path_get_dirname(w->get_filename());
@@ -1047,7 +1044,7 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
 
         view_project.reset_pool_cache_status();
 
-        part_browser_window = PartBrowserWindow::create(this, project->pool_directory, app->part_favorites);
+        part_browser_window = PartBrowserWindow::create(this, project->pool_directory, app.part_favorites);
         part_browser_window->signal_place_part().connect(
                 sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_place_part));
         part_browser_window->signal_assign_part().connect(
@@ -1085,7 +1082,7 @@ void PoolProjectManagerAppWindow::handle_place_part(const UUID &uu)
     if (auto proc = find_top_schematic_process()) {
         auto pid = proc->proc->get_pid();
         allow_set_foreground_window(pid);
-        app->send_json(pid, {{"op", "place-part"}, {"part", (std::string)uu}, {"time", gtk_get_current_event_time()}});
+        app.send_json(pid, {{"op", "place-part"}, {"part", (std::string)uu}, {"time", gtk_get_current_event_time()}});
     }
 }
 
@@ -1094,7 +1091,7 @@ void PoolProjectManagerAppWindow::handle_assign_part(const UUID &uu)
     if (auto proc = find_top_schematic_process()) {
         auto pid = proc->proc->get_pid();
         allow_set_foreground_window(pid);
-        app->send_json(pid, {{"op", "assign-part"}, {"part", (std::string)uu}, {"time", gtk_get_current_event_time()}});
+        app.send_json(pid, {{"op", "assign-part"}, {"part", (std::string)uu}, {"time", gtk_get_current_event_time()}});
     }
 }
 
@@ -1118,7 +1115,7 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
     if (find_process(args.at(0)) == nullptr || args.at(0).size() == 0) { // need to launch imp
 
         std::vector<std::string> env = {"HORIZON_POOL=" + pool_base_path,
-                                        "HORIZON_EP_BROADCAST=" + app->get_ep_broadcast(),
+                                        "HORIZON_EP_BROADCAST=" + app.get_ep_broadcast(),
                                         "HORIZON_EP_MGR=" + sock_mgr_ep, "HORIZON_MGR_PID=" + std::to_string(getpid())};
         std::string filename = args.at(0);
         if (filename.size()) {
@@ -1153,7 +1150,7 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
             if (status != 0) {
                 info_bar_label->set_text("Editor for '" + real_filename + "' exited with status "
                                          + std::to_string(status));
-                show_output_button->set_visible(app->get_preferences().capture_output);
+                show_output_button->set_visible(app.get_preferences().capture_output);
                 info_bar_show(info_bar);
             }
         });
@@ -1178,7 +1175,7 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
         if (proc->proc) {
             auto pid = proc->proc->get_pid();
             allow_set_foreground_window(pid);
-            app->send_json(pid, {{"op", "present"}, {"time", gtk_get_current_event_time()}});
+            app.send_json(pid, {{"op", "present"}, {"time", gtk_get_current_event_time()}});
         }
         else {
             proc->win->present();
@@ -1264,7 +1261,7 @@ void PoolProjectManagerAppWindow::process_save(const UUID &uu)
     }
     else if (proc.proc) {
         auto pid = proc.proc->get_pid();
-        app->send_json(pid, {{"op", "save"}});
+        app.send_json(pid, {{"op", "save"}});
     }
 }
 
@@ -1276,7 +1273,7 @@ void PoolProjectManagerAppWindow::process_close(const UUID &uu)
     }
     else if (proc.proc) {
         auto pid = proc.proc->get_pid();
-        app->send_json(pid, {{"op", "close"}});
+        app.send_json(pid, {{"op", "close"}});
     }
 }
 

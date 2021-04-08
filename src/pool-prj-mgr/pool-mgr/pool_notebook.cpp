@@ -36,7 +36,7 @@ void PoolNotebook::pool_updated(bool success)
         PoolUpdateErrorDialog dia(top, pool_update_error_queue);
         dia.run();
     }
-    appwin->set_pool_updating(false, success);
+    appwin.set_pool_updating(false, success);
     reload();
     if (success && pool_update_done_cb) {
         pool_update_done_cb();
@@ -61,7 +61,7 @@ void PoolNotebook::reload()
         else
             br.second->clear_search_once();
     }
-    auto procs = appwin->get_processes();
+    auto procs = appwin.get_processes();
     for (auto &it : procs) {
         it.second->reload();
     }
@@ -91,8 +91,8 @@ bool PoolNotebook::widget_is_visible(Gtk::Widget *widget)
 
 PoolNotebook::~PoolNotebook()
 {
-    appwin->pool = nullptr;
-    appwin->pool_parametric = nullptr;
+    appwin.pool = nullptr;
+    appwin.pool_parametric = nullptr;
 }
 
 Gtk::Button *PoolNotebook::add_action_button(const std::string &label, Gtk::Box *bbox, sigc::slot0<void> cb)
@@ -131,7 +131,7 @@ void PoolNotebook::handle_edit_item(ObjectType ty, const UUID &uu)
     const auto path = pool.get_filename(ty, uu, &item_pool_uuid);
     const auto spawn_read_only = pool_uuid && (item_pool_uuid != pool_uuid);
     using F = PoolProjectManagerAppWindow::SpawnFlags;
-    appwin->spawn(editor_type_map.at(ty), {path}, spawn_read_only ? F::READ_ONLY : F::NONE);
+    appwin.spawn(editor_type_map.at(ty), {path}, spawn_read_only ? F::READ_ONLY : F::NONE);
 }
 
 void PoolNotebook::handle_duplicate_item(ObjectType ty, const UUID &uu)
@@ -179,7 +179,7 @@ void PoolNotebook::handle_duplicate_item(ObjectType ty, const UUID &uu)
             throw std::runtime_error("Can't duplicate " + object_descriptions.at(ty).name);
         }
         pool_update(nullptr, {fn});
-        appwin->spawn(editor_type_map.at(ty), {fn});
+        appwin.spawn(editor_type_map.at(ty), {fn});
     }
 }
 
@@ -248,13 +248,13 @@ private:
     bool &value;
 };
 
-PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWindow *aw)
-    : Gtk::Notebook(), base_path(bp), pool(bp), pool_parametric(bp), appwin(aw)
+PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWindow &aw)
+    : Gtk::Notebook(), appwin(aw), base_path(bp), pool(bp), pool_parametric(bp)
 {
-    appwin->pool = &pool;
-    appwin->pool_parametric = &pool_parametric;
+    appwin.pool = &pool;
+    appwin.pool_parametric = &pool_parametric;
 
-    appwin->signal_process_saved().connect(sigc::track_obj(
+    appwin.signal_process_saved().connect(sigc::track_obj(
             [this](std::string filename) {
                 auto in_pool = Gio::File::create_for_path(base_path)
                                        ->get_relative_path(Gio::File::create_for_path(filename))
@@ -266,7 +266,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
             },
             *this));
 
-    pool_item_edited_conn = appwin->get_app().signal_pool_items_edited().connect(
+    pool_item_edited_conn = appwin.app.signal_pool_items_edited().connect(
             sigc::track_obj([this](const auto &filenames) { pool_update(nullptr, filenames); }, *this));
 
     {
@@ -298,18 +298,18 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
                         pool_update_error_queue.emplace_back(last_status, last_filename, last_msg);
                     }
                     else if (last_status == PoolUpdateStatus::ERROR) {
-                        appwin->set_pool_update_status_text(last_msg + " Last file: " + pool_update_last_file);
+                        appwin.set_pool_update_status_text(last_msg + " Last file: " + pool_update_last_file);
                         pool_updated(false);
                         return;
                     }
                 }
                 if (pool_update_last_info != last_info)
-                    appwin->set_pool_update_status_text(pool_update_last_info);
+                    appwin.set_pool_update_status_text(pool_update_last_info);
                 if (pool_update_n_files_last && pool_update_filenames.size() == 0) { // only for full update
-                    appwin->set_pool_update_progress((float)pool_update_n_files / pool_update_n_files_last);
+                    appwin.set_pool_update_progress((float)pool_update_n_files / pool_update_n_files_last);
                 }
                 else {
-                    appwin->set_pool_update_progress(-1);
+                    appwin.set_pool_update_progress(-1);
                 }
             }
         });
@@ -331,7 +331,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
     {
         settings_box = PoolSettingsBox::create(pool);
         settings_box->signal_open_pool().connect(
-                [this](auto pool_bp) { appwin->get_app().open_pool(Glib::build_filename(pool_bp, "pool.json")); });
+                [this](auto pool_bp) { appwin.app.open_pool(Glib::build_filename(pool_bp, "pool.json")); });
         pool_uuid = pool.get_pool_info().uuid;
 
         settings_box->show();
@@ -341,7 +341,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
 
 
     if (pool.get_pool_info().is_project_pool()) {
-        cache_box = PoolCacheBox::create(&appwin->get_app(), this, pool);
+        cache_box = PoolCacheBox::create(&appwin.app, this, pool);
         cache_box->signal_goto().connect(sigc::mem_fun(*this, &PoolNotebook::go_to));
         cache_box->show();
         append_page(*cache_box, "Cache");
@@ -358,7 +358,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
     }
 
     if (remote_repo.size()) {
-        remote_box = PoolRemoteBox::create(this);
+        remote_box = PoolRemoteBox::create(*this);
 
         remote_box->show();
         append_page(*remote_box, "Remote");
@@ -374,7 +374,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
     }
 
     if (Glib::file_test(Glib::build_filename(base_path, ".git"), Glib::FILE_TEST_IS_DIR)) {
-        git_box = PoolGitBox::create(this);
+        git_box = PoolGitBox::create(*this);
         git_box->show();
         append_page(*git_box, "Git");
         git_box->unreference();
@@ -425,7 +425,7 @@ void PoolNotebook::add_context_menu(PoolBrowser *br)
             [this, ty](const UUID &uu) {
                 auto x = get_pool_uuids(ty, uu);
                 if (auto pool2 = PoolManager::get().get_by_uuid(x.last ? x.last : x.pool)) {
-                    appwin->get_app().open_pool(Glib::build_filename(pool2->base_path, "pool.json"), ty, uu);
+                    appwin.app.open_pool(Glib::build_filename(pool2->base_path, "pool.json"), ty, uu);
                 }
             },
             [this, ty](const UUID &uu) -> bool {
@@ -709,10 +709,10 @@ void PoolNotebook::pool_update(std::function<void()> cb, const std::vector<std::
 
     if (filenames.size()) {
         pool_item_edited_conn.block();
-        appwin->get_app().signal_pool_items_edited().emit(filenames);
+        appwin.app.signal_pool_items_edited().emit(filenames);
         pool_item_edited_conn.unblock();
     }
-    appwin->set_pool_updating(true, true);
+    appwin.set_pool_updating(true, true);
     pool_update_n_files = 0;
     pool_updating = true;
     pool_update_done_cb = cb;

@@ -49,7 +49,7 @@ void PoolGitBox::make_treeview(Gtk::TreeView *treeview)
         if (it) {
             Gtk::TreeModel::Row row = *it;
             if ((row[list_columns.type] != ObjectType::INVALID) && (row[list_columns.type] != ObjectType::MODEL_3D)) {
-                notebook->go_to(row[list_columns.type], row[list_columns.uuid]);
+                notebook.go_to(row[list_columns.type], row[list_columns.uuid]);
             }
         }
     });
@@ -70,7 +70,7 @@ static const std::map<unsigned int, std::string> status_names = {{GIT_STATUS_CUR
                                                                  {GIT_STATUS_IGNORED, "Ignored"},
                                                                  {GIT_STATUS_CONFLICTED, "Conflicted"}};
 
-PoolGitBox::PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, PoolNotebook *nb)
+PoolGitBox::PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, PoolNotebook &nb)
     : Gtk::Box(cobject), notebook(nb)
 {
     x->get_widget("button_git_refresh", refresh_button);
@@ -173,15 +173,15 @@ PoolGitBox::PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         back_to_master_delete_button->hide();
     }
 
-    notebook->pool.db.execute(
+    notebook.pool.db.execute(
             "CREATE TEMP TABLE 'git_files_status' ('git_filename' TEXT NOT NULL, status INTEGER NOT NULL);");
-    notebook->pool.db.execute(
+    notebook.pool.db.execute(
             "CREATE TEMP TABLE 'git_files_diff' ('git_filename' TEXT NOT NULL, status INTEGER NOT NULL);");
-    notebook->pool.db.execute("CREATE INDEX git_file_status ON git_files_status (git_filename)");
-    notebook->pool.db.execute("CREATE INDEX git_file_diff ON git_files_diff (git_filename)");
+    notebook.pool.db.execute("CREATE INDEX git_file_status ON git_files_status (git_filename)");
+    notebook.pool.db.execute("CREATE INDEX git_file_diff ON git_files_diff (git_filename)");
 
-    q_diff.emplace(notebook->pool.db, "INSERT INTO 'git_files_diff' VALUES (?, ?)");
-    q_status.emplace(notebook->pool.db, "INSERT INTO 'git_files_status' VALUES (?, ?)");
+    q_diff.emplace(notebook.pool.db, "INSERT INTO 'git_files_diff' VALUES (?, ?)");
+    q_status.emplace(notebook.pool.db, "INSERT INTO 'git_files_status' VALUES (?, ?)");
 }
 
 void PoolGitBox::diff_file_cb(const git_diff_delta *delta)
@@ -220,7 +220,7 @@ void PoolGitBox::refresh()
 {
     try {
         autofree_ptr<git_repository> repo(git_repository_free);
-        if (git_repository_open(&repo.ptr, notebook->base_path.c_str()) != 0) {
+        if (git_repository_open(&repo.ptr, notebook.base_path.c_str()) != 0) {
             throw std::runtime_error("error opening repo");
         }
         autofree_ptr<git_reference> head(git_reference_free);
@@ -263,19 +263,19 @@ void PoolGitBox::refresh()
         {
             autofree_ptr<git_diff> diff(git_diff_free);
             git_diff_tree_to_workdir_with_index(&diff.ptr, repo, tree_master, nullptr);
-            notebook->pool.db.execute("BEGIN");
-            notebook->pool.db.execute("DELETE FROM git_files_diff");
+            notebook.pool.db.execute("BEGIN");
+            notebook.pool.db.execute("DELETE FROM git_files_diff");
             git_diff_foreach(diff, &PoolGitBox::diff_file_cb_c, nullptr, nullptr, nullptr, this);
-            notebook->pool.db.execute("COMMIT");
+            notebook.pool.db.execute("COMMIT");
             diff_box->set_visible(tree_master != tree_head);
             update_diff();
         }
 
         {
-            notebook->pool.db.execute("BEGIN");
-            notebook->pool.db.execute("DELETE FROM git_files_status");
+            notebook.pool.db.execute("BEGIN");
+            notebook.pool.db.execute("DELETE FROM git_files_status");
             git_status_foreach(repo, &PoolGitBox::status_cb_c, this);
-            notebook->pool.db.execute("COMMIT");
+            notebook.pool.db.execute("COMMIT");
             update_status();
         }
 
@@ -308,7 +308,7 @@ void PoolGitBox::store_from_db(View view, const std::string &extra_q)
            "(SELECT type, uuid, name, filename FROM all_items_view UNION ALL SELECT DISTINCT 'model_3d' AS type, "
            "'00000000-0000-0000-0000-000000000000' as uuid, '' as name, model_filename as filename FROM models) "
            "ON filename=git_filename " + extra_q  + " " + order;
-    SQLite::Query q(notebook->pool.db, qs);
+    SQLite::Query q(notebook.pool.db, qs);
     while (q.step()) {
         Gtk::TreeModel::Row row = *store->append();
         const auto stype = q.get<std::string>(0);
@@ -322,7 +322,7 @@ void PoolGitBox::store_from_db(View view, const std::string &extra_q)
             row[list_columns.uuid] = uu;
             row[list_columns.name] = name;
             if (view == View::STATUS) {
-                auto result = check_item(notebook->pool, type, uu);
+                auto result = check_item(notebook.pool, type, uu);
                 row[list_columns.check_result] = result;
             }
         }
@@ -381,7 +381,7 @@ void PoolGitBox::handle_add_with_deps()
         Gtk::TreeModel::Row row = *it;
         UUID uu = row[list_columns.uuid];
         ObjectType type = row[list_columns.type];
-        SQLite::Query q(notebook->pool.db,
+        SQLite::Query q(notebook.pool.db,
                         "WITH RECURSIVE deps(typex, uuidx) AS "
                         "( SELECT ?, ? UNION "
                         "SELECT dep_type, dep_uuid FROM dependencies, deps "
@@ -396,7 +396,7 @@ void PoolGitBox::handle_add_with_deps()
         q.bind(2, uu);
 
         autofree_ptr<git_repository> repo(git_repository_free);
-        if (git_repository_open(&repo.ptr, notebook->base_path.c_str()) != 0) {
+        if (git_repository_open(&repo.ptr, notebook.base_path.c_str()) != 0) {
             throw std::runtime_error("error opening repo");
         }
 
@@ -458,7 +458,7 @@ void PoolGitBox::handle_pr()
 {
     unsigned int pr_id = 0;
     {
-        SelectPRDialog dia(*notebook->appwin);
+        SelectPRDialog dia(notebook.appwin);
         if (dia.run() == Gtk::RESPONSE_OK) {
             pr_id = dia.pr_id_sp->get_value_as_int();
         }
@@ -468,7 +468,7 @@ void PoolGitBox::handle_pr()
     }
 
     autofree_ptr<git_repository> repo(git_repository_free);
-    if (git_repository_open(&repo.ptr, notebook->base_path.c_str()) != 0) {
+    if (git_repository_open(&repo.ptr, notebook.base_path.c_str()) != 0) {
         throw std::runtime_error("error opening repo");
     }
 
@@ -640,7 +640,7 @@ void PoolGitBox::handle_pr()
             git_repository_state_cleanup(repo);
         }
         refresh();
-        notebook->pool_update();
+        notebook.pool_update();
     }
 }
 
@@ -660,7 +660,7 @@ static void remove_branch(git_repository *repo, const char *branch_name)
 void PoolGitBox::handle_back_to_master(bool delete_pr)
 {
     autofree_ptr<git_repository> repo(git_repository_free);
-    if (git_repository_open(&repo.ptr, notebook->base_path.c_str()) != 0) {
+    if (git_repository_open(&repo.ptr, notebook.base_path.c_str()) != 0) {
         throw std::runtime_error("error opening repo");
     }
 
@@ -713,11 +713,11 @@ void PoolGitBox::handle_back_to_master(bool delete_pr)
     }
 
     refresh();
-    notebook->pool_update();
+    notebook.pool_update();
 }
 
 
-PoolGitBox *PoolGitBox::create(PoolNotebook *nb)
+PoolGitBox *PoolGitBox::create(PoolNotebook &nb)
 {
     PoolGitBox *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();

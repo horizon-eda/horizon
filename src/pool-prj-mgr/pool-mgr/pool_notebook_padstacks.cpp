@@ -28,7 +28,7 @@ void PoolNotebook::handle_create_padstack()
         std::string fn = EditorWindow::fix_filename(chooser->get_filename());
         Padstack ps(horizon::UUID::random());
         save_json_to_file(fn, ps.serialize());
-        appwin->spawn(PoolProjectManagerProcess::Type::IMP_PADSTACK, {fn});
+        appwin.spawn(PoolProjectManagerProcess::Type::IMP_PADSTACK, {fn});
     }
 }
 

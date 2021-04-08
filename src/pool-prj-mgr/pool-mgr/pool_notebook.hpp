@@ -23,7 +23,7 @@ class PoolNotebook : public Gtk::Notebook {
     friend class PoolGitBox;
 
 public:
-    PoolNotebook(const std::string &bp, class PoolProjectManagerAppWindow *aw);
+    PoolNotebook(const std::string &bp, class PoolProjectManagerAppWindow &aw);
     void populate();
     bool get_close_prohibited() const;
     void prepare_close();
@@ -33,16 +33,12 @@ public:
     void go_to(ObjectType type, const UUID &uu);
     const UUID &get_pool_uuid() const;
     ~PoolNotebook();
-    PoolProjectManagerAppWindow &get_appwin()
-    {
-        return *appwin;
-    }
+    PoolProjectManagerAppWindow &appwin;
 
 private:
     const std::string base_path;
     Pool pool;
     PoolParametric pool_parametric;
-    class PoolProjectManagerAppWindow *appwin;
     std::map<ObjectType, class PoolBrowser *> browsers;
     std::map<std::string, class PoolBrowserParametric *> browsers_parametric;
     class PartWizard *part_wizard = nullptr;

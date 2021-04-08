@@ -10,7 +10,7 @@
 namespace horizon {
 void PoolNotebook::handle_create_unit()
 {
-    appwin->spawn(PoolProjectManagerProcess::Type::UNIT, {""});
+    appwin.spawn(PoolProjectManagerProcess::Type::UNIT, {""});
 }
 
 void PoolNotebook::handle_edit_unit(const UUID &uu)
@@ -46,7 +46,7 @@ void PoolNotebook::handle_create_symbol_for_unit(const UUID &uu)
         sym.unit = unit;
         save_json_to_file(fn, sym.serialize());
         pool_update(nullptr, {fn});
-        appwin->spawn(PoolProjectManagerProcess::Type::IMP_SYMBOL, {fn});
+        appwin.spawn(PoolProjectManagerProcess::Type::IMP_SYMBOL, {fn});
     }
 }
 
@@ -82,7 +82,7 @@ void PoolNotebook::handle_create_entity_for_unit(const UUID &uu)
 
         save_json_to_file(fn, entity.serialize());
         pool_update(nullptr, {fn});
-        appwin->spawn(PoolProjectManagerProcess::Type::ENTITY, {fn});
+        appwin.spawn(PoolProjectManagerProcess::Type::ENTITY, {fn});
     }
 }
 

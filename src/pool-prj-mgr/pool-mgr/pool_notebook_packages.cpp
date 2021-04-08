@@ -52,7 +52,7 @@ void PoolNotebook::handle_create_package()
                 Package pkg(horizon::UUID::random());
                 auto pkg_filename = Glib::build_filename(fn, "package.json");
                 save_json_to_file(pkg_filename, pkg.serialize());
-                appwin->spawn(PoolProjectManagerProcess::Type::IMP_PACKAGE, {pkg_filename});
+                appwin.spawn(PoolProjectManagerProcess::Type::IMP_PACKAGE, {pkg_filename});
             }
         }
         break;
@@ -79,7 +79,7 @@ void PoolNotebook::handle_create_padstack_for_package(const UUID &uu)
         Padstack ps(horizon::UUID::random());
         ps.name = "Pad";
         save_json_to_file(fn, ps.serialize());
-        appwin->spawn(PoolProjectManagerProcess::Type::IMP_PADSTACK, {fn});
+        appwin.spawn(PoolProjectManagerProcess::Type::IMP_PADSTACK, {fn});
     }
 }
 
@@ -123,7 +123,7 @@ void PoolNotebook::handle_duplicate_package(const UUID &uu)
                 std::string new_pkg_filename = Glib::build_filename(fn, "package.json");
                 pool_update(
                         [this, new_pkg_filename] {
-                            appwin->spawn(PoolProjectManagerProcess::Type::IMP_PACKAGE, {new_pkg_filename});
+                            appwin.spawn(PoolProjectManagerProcess::Type::IMP_PACKAGE, {new_pkg_filename});
                         },
                         filenames);
             }
@@ -136,7 +136,7 @@ void PoolNotebook::handle_import_kicad_package()
 {
     if (!import_kicad_package_window) {
 
-        import_kicad_package_window = ImportKiCadPackageWindow::create(*appwin);
+        import_kicad_package_window = ImportKiCadPackageWindow::create(appwin);
         import_kicad_package_window->present();
         import_kicad_package_window->signal_hide().connect([this] {
             const auto files_saved = import_kicad_package_window->get_files_saved();

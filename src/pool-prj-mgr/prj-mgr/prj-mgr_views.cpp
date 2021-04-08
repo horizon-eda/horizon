@@ -12,7 +12,7 @@
 namespace horizon {
 
 PoolProjectManagerViewCreateProject::PoolProjectManagerViewCreateProject(const Glib::RefPtr<Gtk::Builder> &builder,
-                                                                         class PoolProjectManagerAppWindow *w)
+                                                                         class PoolProjectManagerAppWindow &w)
     : win(w)
 {
     builder->get_widget("create_project_path_chooser", project_path_chooser);
@@ -63,14 +63,14 @@ std::pair<bool, std::string> PoolProjectManagerViewCreateProject::create()
     }
     catch (const std::exception &e) {
         r = false;
-        Gtk::MessageDialog md(*win, "Error creating project", false /* use_markup */, Gtk::MESSAGE_ERROR,
+        Gtk::MessageDialog md(win, "Error creating project", false /* use_markup */, Gtk::MESSAGE_ERROR,
                               Gtk::BUTTONS_OK);
         md.set_secondary_text(e.what());
         md.run();
     }
     catch (const Glib::Error &e) {
         r = false;
-        Gtk::MessageDialog md(*win, "Error creating project", false /* use_markup */, Gtk::MESSAGE_ERROR,
+        Gtk::MessageDialog md(win, "Error creating project", false /* use_markup */, Gtk::MESSAGE_ERROR,
                               Gtk::BUTTONS_OK);
         md.set_secondary_text(e.what());
         md.run();
@@ -101,7 +101,7 @@ void PoolProjectManagerViewCreateProject::update()
 }
 
 PoolProjectManagerViewProject::PoolProjectManagerViewProject(const Glib::RefPtr<Gtk::Builder> &builder,
-                                                             PoolProjectManagerAppWindow *w)
+                                                             PoolProjectManagerAppWindow &w)
     : win(w)
 {
     builder->get_widget("button_top_schematic", button_top_schematic);
@@ -116,21 +116,21 @@ PoolProjectManagerViewProject::PoolProjectManagerViewProject(const Glib::RefPtr<
     Gtk::Button *open_button;
     builder->get_widget("prj_open_dir_button", open_button);
     open_button->signal_clicked().connect([this] {
-        auto uri = Gio::File::create_for_path(Glib::path_get_dirname(win->project_filename))->get_uri();
+        auto uri = Gio::File::create_for_path(Glib::path_get_dirname(win.project_filename))->get_uri();
         Gio::AppInfo::launch_default_for_uri(uri);
     });
 
     Gtk::Button *edit_button;
     builder->get_widget("prj_edit_meta_button", edit_button);
     edit_button->signal_clicked().connect([this] {
-        if (auto proc = win->find_top_schematic_process()) {
-            win->app->send_json(proc->proc->get_pid(), {{"op", "edit-meta"}});
+        if (auto proc = win.find_top_schematic_process()) {
+            win.app.send_json(proc->proc->get_pid(), {{"op", "edit-meta"}});
         }
         else {
             open_top_schematic();
-            if (auto proc2 = win->find_top_schematic_process()) {
+            if (auto proc2 = win.find_top_schematic_process()) {
                 proc2->signal_ready().connect([this, proc2] {
-                    win->app->send_json(proc2->proc->get_pid(), {{"op", "edit-meta"}});
+                    win.app.send_json(proc2->proc->get_pid(), {{"op", "edit-meta"}});
                 });
             }
         }
@@ -147,38 +147,38 @@ PoolProjectManagerViewProject::PoolProjectManagerViewProject(const Glib::RefPtr<
 
 void PoolProjectManagerViewProject::open_top_schematic()
 {
-    auto prj = win->project.get();
+    auto prj = win.project.get();
     auto top_block = prj->get_top_block();
     std::vector<std::string> args = {top_block.schematic_filename, top_block.block_filename, prj->pictures_directory};
-    win->spawn(PoolProjectManagerProcess::Type::IMP_SCHEMATIC, args);
+    win.spawn(PoolProjectManagerProcess::Type::IMP_SCHEMATIC, args);
 }
 
 void PoolProjectManagerViewProject::open_board()
 {
-    auto prj = win->project.get();
+    auto prj = win.project.get();
     auto top_block =
             std::find_if(prj->blocks.begin(), prj->blocks.end(), [](const auto &a) { return a.second.is_top; });
     if (top_block != prj->blocks.end()) {
         std::vector<std::string> args = {prj->board_filename, top_block->second.block_filename,
                                          prj->pictures_directory};
-        win->spawn(PoolProjectManagerProcess::Type::IMP_BOARD, args);
+        win.spawn(PoolProjectManagerProcess::Type::IMP_BOARD, args);
     }
 }
 
 void PoolProjectManagerViewProject::handle_button_part_browser()
 {
-    win->part_browser_window->present();
+    win.part_browser_window->present();
 }
 
 void PoolProjectManagerViewProject::handle_button_project_pool()
 {
-    auto path = Glib::build_filename(win->project->pool_directory, "pool.json");
-    win->app->open_pool(path);
+    auto path = Glib::build_filename(win.project->pool_directory, "pool.json");
+    win.app.open_pool(path);
 }
 
 bool PoolProjectManagerViewProject::update_meta()
 {
-    auto top_block_filename = win->project->get_top_block().block_filename;
+    auto top_block_filename = win.project->get_top_block().block_filename;
     auto meta = Block::peek_project_meta(top_block_filename);
     std::string title;
     std::string author;
@@ -187,12 +187,12 @@ bool PoolProjectManagerViewProject::update_meta()
     if (meta.count("author"))
         author = meta.at("author");
     if (title.size())
-        win->set_title(title + " - Horizon EDA");
+        win.set_title(title + " - Horizon EDA");
     else
-        win->set_title("Project Manager");
+        win.set_title("Project Manager");
     label_project_title->set_text(title);
     label_project_author->set_text(author);
-    win->project_title = title;
+    win.project_title = title;
     return meta.size();
 }
 

@@ -16,8 +16,8 @@ class KiCadSymbolImportWizard : public Gtk::Window {
 
 public:
     KiCadSymbolImportWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const UUID &pkg_uuid,
-                            class Pool &po, class PoolProjectManagerAppWindow *aw, const std::string &lib_filename);
-    static KiCadSymbolImportWizard *create(const UUID &pkg_uuid, class Pool &po, class PoolProjectManagerAppWindow *aw,
+                            class Pool &po, class PoolProjectManagerAppWindow &aw, const std::string &lib_filename);
+    static KiCadSymbolImportWizard *create(const UUID &pkg_uuid, class Pool &po, class PoolProjectManagerAppWindow &aw,
                                            const std::string &lib_filename);
     std::vector<std::string> get_files_saved() const;
     void reload();
@@ -27,7 +27,7 @@ public:
 private:
     Pool &pool;
 
-    class PoolProjectManagerAppWindow *appwin;
+    class PoolProjectManagerAppWindow &appwin;
 
     Gtk::HeaderBar *header = nullptr;
     Gtk::Button *button_skip = nullptr;

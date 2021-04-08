@@ -77,7 +77,7 @@ GateEditorImportWizard *GateEditorImportWizard::create(const UUID &g, const UUID
 void GateEditorImportWizard::handle_edit_unit()
 {
     std::string filename = parent.pool.get_tmp_filename(ObjectType::UNIT, unit_uu);
-    auto proc = parent.appwin->spawn(PoolProjectManagerProcess::Type::UNIT, {filename});
+    auto proc = parent.appwin.spawn(PoolProjectManagerProcess::Type::UNIT, {filename});
     parent.processes.emplace(filename, proc);
     proc->signal_exited().connect([this, filename](int status, bool modified) {
         parent.processes.erase(filename);
@@ -89,7 +89,7 @@ void GateEditorImportWizard::handle_edit_unit()
 void GateEditorImportWizard::handle_edit_symbol()
 {
     std::string filename = parent.pool.get_tmp_filename(ObjectType::SYMBOL, parent.symbols.at(unit_uu));
-    auto proc = parent.appwin->spawn(PoolProjectManagerProcess::Type::IMP_SYMBOL, {filename});
+    auto proc = parent.appwin.spawn(PoolProjectManagerProcess::Type::IMP_SYMBOL, {filename});
     parent.processes.emplace(filename, proc);
     proc->signal_exited().connect([this, filename](int status, bool modified) {
         parent.processes.erase(filename);

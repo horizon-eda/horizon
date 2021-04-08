@@ -16,7 +16,7 @@ namespace horizon {
 
 KiCadSymbolImportWizard::KiCadSymbolImportWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
                                                  const UUID &pkg_uuid, class Pool &po,
-                                                 class PoolProjectManagerAppWindow *aw, const std::string &lib_filename)
+                                                 class PoolProjectManagerAppWindow &aw, const std::string &lib_filename)
     : Gtk::Window(cobject), pool(po), appwin(aw), state_store(this, "kicad-symbol-import-wizard")
 {
     GET_WIDGET(header);
@@ -455,7 +455,7 @@ void KiCadSymbolImportWizard::select_symbol()
 void KiCadSymbolImportWizard::handle_edit_entity()
 {
     std::string entity_filename = pool.get_tmp_filename(ObjectType::ENTITY, entity_uuid);
-    auto proc = appwin->spawn(PoolProjectManagerProcess::Type::ENTITY, {entity_filename});
+    auto proc = appwin.spawn(PoolProjectManagerProcess::Type::ENTITY, {entity_filename});
     processes.emplace(entity_filename, proc);
     proc->signal_exited().connect([this, entity_filename](int status, bool modified) {
         processes.erase(entity_filename);
@@ -478,7 +478,7 @@ void KiCadSymbolImportWizard::handle_edit_entity()
 void KiCadSymbolImportWizard::handle_edit_part()
 {
     std::string part_filename = pool.get_tmp_filename(ObjectType::PART, part_uuid);
-    auto proc = appwin->spawn(PoolProjectManagerProcess::Type::PART, {part_filename});
+    auto proc = appwin.spawn(PoolProjectManagerProcess::Type::PART, {part_filename});
     processes.emplace(part_filename, proc);
     proc->signal_exited().connect([this, part_filename](int status, bool modified) {
         processes.erase(part_filename);
@@ -576,7 +576,7 @@ void KiCadSymbolImportWizard::update_can_finish()
 }
 
 KiCadSymbolImportWizard *KiCadSymbolImportWizard::create(const UUID &pkg_uuid, class Pool &po,
-                                                         class PoolProjectManagerAppWindow *aw,
+                                                         class PoolProjectManagerAppWindow &aw,
                                                          const std::string &lib_filename)
 {
     KiCadSymbolImportWizard *w;

@@ -22,10 +22,10 @@ class PoolProjectManagerAppWindow : public Gtk::ApplicationWindow {
 
 public:
     PoolProjectManagerAppWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &refBuilder,
-                                class PoolProjectManagerApplication *app);
+                                class PoolProjectManagerApplication &app);
     ~PoolProjectManagerAppWindow();
 
-    static PoolProjectManagerAppWindow *create(class PoolProjectManagerApplication *app);
+    static PoolProjectManagerAppWindow *create(class PoolProjectManagerApplication &app);
 
     void open_file_view(const Glib::RefPtr<Gio::File> &file);
     void prepare_close();
@@ -33,10 +33,6 @@ public:
     bool really_close_pool_or_project();
     void wait_for_all_processes();
     std::string get_filename() const;
-    class PoolProjectManagerApplication &get_app()
-    {
-        return *app;
-    }
 
     enum class SpawnFlags { NONE = 0, READ_ONLY = (1 << 0), TEMP = (1 << 1) };
 
@@ -60,8 +56,6 @@ public:
         return s_signal_process_saved;
     }
 
-    void reload();
-
     class ClosePolicy {
     public:
         bool can_close = true;
@@ -84,6 +78,8 @@ public:
     void open_pool(const std::string &pool_json, ObjectType type = ObjectType::INVALID, const UUID &uu = UUID());
     void update_pool_cache_status_now();
     const std::string &get_project_title() const;
+
+    PoolProjectManagerApplication &app;
 
 private:
     Glib::RefPtr<Gtk::Builder> builder;
@@ -173,7 +169,6 @@ private:
     void handle_place_part(const UUID &uu);
     void handle_assign_part(const UUID &uu);
 
-    PoolProjectManagerApplication *app;
     zmq::socket_t sock_mgr;
     std::string sock_mgr_ep;
 

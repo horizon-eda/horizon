@@ -14,7 +14,7 @@ void PoolNotebook::handle_edit_entity(const UUID &uu)
 
 void PoolNotebook::handle_create_entity()
 {
-    appwin->spawn(PoolProjectManagerProcess::Type::ENTITY, {""});
+    appwin.spawn(PoolProjectManagerProcess::Type::ENTITY, {""});
 }
 
 void PoolNotebook::handle_duplicate_entity(const UUID &uu)
@@ -28,7 +28,7 @@ void PoolNotebook::handle_kicad_symbol_import_wizard()
 {
     if (!kicad_symbol_import_wizard) {
         auto package_uuid = browsers.at(ObjectType::PACKAGE)->get_selected();
-        GtkFileChooserNative *native = gtk_file_chooser_native_new("Import KiCad library", GTK_WINDOW(appwin->gobj()),
+        GtkFileChooserNative *native = gtk_file_chooser_native_new("Import KiCad library", GTK_WINDOW(appwin.gobj()),
                                                                    GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
         auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
         auto filter = Gtk::FileFilter::create();

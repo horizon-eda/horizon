@@ -9,7 +9,7 @@ namespace horizon {
 class PoolProjectManagerViewCreateProject {
 public:
     PoolProjectManagerViewCreateProject(const Glib::RefPtr<Gtk::Builder> &refBuilder,
-                                        class PoolProjectManagerAppWindow *w);
+                                        class PoolProjectManagerAppWindow &w);
     void clear();
     std::pair<bool, std::string> create();
     typedef sigc::signal<void, bool> type_signal_valid_change;
@@ -21,7 +21,7 @@ public:
     void update();
 
 private:
-    PoolProjectManagerAppWindow *win = nullptr;
+    PoolProjectManagerAppWindow &win;
     Gtk::FileChooserButton *project_path_chooser = nullptr;
     Gtk::Label *project_dir_label = nullptr;
     Gtk::ComboBoxText *project_pool_combo = nullptr;
@@ -33,7 +33,7 @@ private:
 
 class PoolProjectManagerViewProject {
 public:
-    PoolProjectManagerViewProject(const Glib::RefPtr<Gtk::Builder> &refBuilder, class PoolProjectManagerAppWindow *w);
+    PoolProjectManagerViewProject(const Glib::RefPtr<Gtk::Builder> &refBuilder, class PoolProjectManagerAppWindow &w);
     Gtk::Label *label_project_title = nullptr;
     Gtk::Label *label_project_author = nullptr;
     Gtk::Label *label_project_directory = nullptr;
@@ -45,7 +45,7 @@ public:
     void reset_pool_cache_status();
 
 private:
-    PoolProjectManagerAppWindow *win = nullptr;
+    PoolProjectManagerAppWindow &win;
     Gtk::Button *button_top_schematic = nullptr;
     Gtk::Button *button_board = nullptr;
     Gtk::Button *button_part_browser = nullptr;
