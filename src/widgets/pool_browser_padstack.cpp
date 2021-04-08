@@ -37,14 +37,14 @@ void PoolBrowserPadstack::set_package_uuid(const UUID &uu)
     search();
 }
 
-void PoolBrowserPadstack::set_include_padstack_type(Padstack::Type ty, bool v)
+const std::set<Padstack::Type> &PoolBrowserPadstack::get_padstacks_included() const
 {
-    if (padstacks_included.count(ty)) {
-        if (!v)
-            padstacks_included.erase(ty);
-    }
-    if (v)
-        padstacks_included.insert(ty);
+    return padstacks_included;
+}
+
+void PoolBrowserPadstack::set_padstacks_included(const std::set<Padstack::Type> &types)
+{
+    padstacks_included = types;
     search();
 }
 

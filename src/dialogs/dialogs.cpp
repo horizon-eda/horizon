@@ -98,7 +98,8 @@ std::optional<UUID> Dialogs::select_padstack(IPool &pool, const UUID &package_uu
     PoolBrowserDialog dia(parent, ObjectType::PADSTACK, pool);
     auto &br = dynamic_cast<PoolBrowserPadstack &>(dia.get_browser());
     br.set_package_uuid(package_uuid);
-    br.set_include_padstack_type(Padstack::Type::MECHANICAL, true);
+    using PT = Padstack::Type;
+    br.set_padstacks_included({PT::TOP, PT::BOTTOM, PT::THROUGH, PT::MECHANICAL});
     if (dia.run() == Gtk::RESPONSE_OK) {
         return br.get_selected();
     }
@@ -111,11 +112,8 @@ std::optional<UUID> Dialogs::select_hole_padstack(IPool &pool)
 {
     PoolBrowserDialog dia(parent, ObjectType::PADSTACK, pool);
     auto &br = dynamic_cast<PoolBrowserPadstack &>(dia.get_browser());
-    br.set_include_padstack_type(Padstack::Type::MECHANICAL, true);
-    br.set_include_padstack_type(Padstack::Type::HOLE, true);
-    br.set_include_padstack_type(Padstack::Type::TOP, false);
-    br.set_include_padstack_type(Padstack::Type::THROUGH, false);
-    br.set_include_padstack_type(Padstack::Type::BOTTOM, false);
+    using PT = Padstack::Type;
+    br.set_padstacks_included({PT::MECHANICAL, PT::HOLE});
     if (dia.run() == Gtk::RESPONSE_OK) {
         return br.get_selected();
     }

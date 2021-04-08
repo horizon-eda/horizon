@@ -41,9 +41,8 @@ void PoolNotebook::construct_padstacks()
 {
     auto br = Gtk::manage(new PoolBrowserPadstack(pool));
     br->set_show_path(true);
-    br->set_include_padstack_type(Padstack::Type::VIA, true);
-    br->set_include_padstack_type(Padstack::Type::MECHANICAL, true);
-    br->set_include_padstack_type(Padstack::Type::HOLE, true);
+    using PT = Padstack::Type;
+    br->set_padstacks_included({PT::BOTTOM, PT::HOLE, PT::MECHANICAL, PT::THROUGH, PT::TOP, PT::VIA});
     br->signal_activated().connect([this, br] { handle_edit_padstack(br->get_selected()); });
 
     br->show();

@@ -8,7 +8,8 @@ public:
     PoolBrowserPadstack(class IPool &p);
     void search() override;
     void set_package_uuid(const UUID &uu);
-    void set_include_padstack_type(Padstack::Type ty, bool v);
+    const std::set<Padstack::Type> &get_padstacks_included() const;
+    void set_padstacks_included(const std::set<Padstack::Type> &types);
     ObjectType get_type() const override
     {
         return ObjectType::PADSTACK;
