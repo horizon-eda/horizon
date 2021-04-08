@@ -158,12 +158,18 @@ void SchematicSymbol::apply_expand()
     symbol.apply_expand(*pool_symbol, expand);
 }
 
+static std::string append_tilde(const std::string &s)
+{
+    if (s.size() && s.front() == '~')
+        return s + "~";
+    return s;
+}
 
 static void append_pin_name(std::string &name, const std::string &x)
 {
     if (name.size())
         name += " ";
-    name += x;
+    name += append_tilde(x);
 }
 
 void SchematicSymbol::apply_pin_names()
@@ -175,13 +181,13 @@ void SchematicSymbol::apply_pin_names()
         for (auto &it_pin : symbol.pins) {
             auto pin_uuid = it_pin.first;
             for (auto &pin_name : gate->unit->pins.at(pin_uuid).names) {
-                it_pin.second.name += pin_name + " ";
+                it_pin.second.name += append_tilde(pin_name) + " ";
             }
             UUIDPath<2> path(gate->uuid, pin_uuid);
             if (component->custom_pin_names.count(path)) {
-                it_pin.second.name += component->custom_pin_names.at(path) + " ";
+                it_pin.second.name += append_tilde(component->custom_pin_names.at(path)) + " ";
             }
-            it_pin.second.name += "(" + gate->unit->pins.at(pin_uuid).primary_name + ")";
+            it_pin.second.name += "(" + append_tilde(gate->unit->pins.at(pin_uuid).primary_name) + ")";
         }
     }
     else if (pin_display_mode == SchematicSymbol::PinDisplayMode::CUSTOM_ONLY) {
@@ -189,10 +195,10 @@ void SchematicSymbol::apply_pin_names()
             auto pin_uuid = it_pin.first;
             UUIDPath<2> path(gate->uuid, pin_uuid);
             if (component->custom_pin_names.count(path) && component->custom_pin_names.at(path).size()) {
-                it_pin.second.name = component->custom_pin_names.at(path);
+                it_pin.second.name = append_tilde(component->custom_pin_names.at(path));
             }
             else {
-                it_pin.second.name = gate->unit->pins.at(pin_uuid).primary_name;
+                it_pin.second.name = append_tilde(gate->unit->pins.at(pin_uuid).primary_name);
             }
         }
     }
@@ -204,7 +210,7 @@ void SchematicSymbol::apply_pin_names()
             if (component->pin_names.count(path) && component->pin_names.at(path).size()) {
                 const auto &names = component->pin_names.at(path);
                 if (names.count(-1) || (pin_display_mode == SchematicSymbol::PinDisplayMode::BOTH))
-                    it_pin.second.name = gate->unit->pins.at(pin_uuid).primary_name;
+                    it_pin.second.name = append_tilde(gate->unit->pins.at(pin_uuid).primary_name);
                 for (const auto &it : names) {
                     if (it == -2) {
                         // nop, see later
@@ -222,7 +228,7 @@ void SchematicSymbol::apply_pin_names()
                 }
             }
             else {
-                it_pin.second.name = gate->unit->pins.at(pin_uuid).primary_name;
+                it_pin.second.name = append_tilde(gate->unit->pins.at(pin_uuid).primary_name);
             }
         }
     }

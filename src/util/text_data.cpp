@@ -178,17 +178,29 @@ static unsigned int codepoint_to_hershey(gunichar c, TextData::Font font)
 
 extern const char *hershey_glyphs[];
 
-bool operator&(TextData::Decoration a, TextData::Decoration b)
-{
-    return static_cast<int>(a) & static_cast<int>(b);
-}
-
-TextData::TextData(const std::string &str, Font font, Decoration decoration)
+TextData::TextData(const std::string &str, Font font)
 {
     Glib::ustring ustr(str);
     int x0 = 0;
     lines.reserve(ustr.size());
+    int overbar_start = -1;
+    const int bar_y = 24;
     for (const gunichar c : ustr) {
+        if (c == '~') {
+            if (overbar_start == -1) {
+                overbar_start = x0;
+                continue;
+            }
+            else {
+                if (overbar_start != x0) {
+                    lines.emplace_back(std::piecewise_construct, std::forward_as_tuple(overbar_start, bar_y),
+                                       std::forward_as_tuple(x0, bar_y));
+                    overbar_start = -1;
+                    continue;
+                }
+                overbar_start = -1;
+            }
+        }
         const char *s = hershey_glyphs[codepoint_to_hershey(c, font)];
         int left = s[0] - 'R';
         int right = s[1] - 'R';
@@ -211,7 +223,6 @@ TextData::TextData(const std::string &str, Font font, Decoration decoration)
                 xmax = std::max(xmax, x0 + x + xshift);
                 s += 2;
                 if (n > 0) {
-
                     lines.emplace_back(std::piecewise_construct, std::forward_as_tuple(x0 + x + xshift, y),
                                        std::forward_as_tuple(x0 + x2 + xshift, y2));
                 }
@@ -224,10 +235,8 @@ TextData::TextData(const std::string &str, Font font, Decoration decoration)
         x0 += right - left;
     }
     xright = x0;
-    if (decoration & Decoration::OVERLINE) {
-        int bar_y = 24;
-        lines.emplace_back(std::piecewise_construct, std::forward_as_tuple(0, bar_y),
-                           std::forward_as_tuple(xright, bar_y));
-    }
+    if (overbar_start != -1)
+        lines.emplace_back(std::piecewise_construct, std::forward_as_tuple(overbar_start, bar_y),
+                           std::forward_as_tuple(x0, bar_y));
 }
 } // namespace horizon
