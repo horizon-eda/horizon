@@ -9,5 +9,6 @@ public:
 protected:
     int on_input(double *new_value) override;
     bool on_output() override;
+    void on_populate_popup(Gtk::Menu *menu) override;
 };
 } // namespace horizon

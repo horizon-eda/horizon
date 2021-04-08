@@ -9,6 +9,53 @@ SpinButtonDim::SpinButtonDim() : Gtk::SpinButton()
     set_increments(.1e6, .01e6);
     set_width_chars(11);
     entry_set_tnum(*this);
+    set_input_hints(Gtk::INPUT_HINT_NO_EMOJI);
+}
+
+static std::string format_length(double l)
+{
+    l /= 1e6;
+    std::stringstream ss;
+    ss.imbue(get_locale());
+    if (l < 1)
+        ss << std::setprecision(2);
+    ss << l;
+    ss << " mm";
+    return ss.str();
+}
+
+bool is_close(double a, double b)
+{
+    auto r = a / b;
+    return std::abs(1 - r) < 1e-3;
+}
+
+void SpinButtonDim::on_populate_popup(Gtk::Menu *menu)
+{
+    auto it_sub = Gtk::manage(new Gtk::MenuItem("Increment"));
+    it_sub->show();
+    menu->append(*it_sub);
+    auto sub = Gtk::manage(new Gtk::Menu());
+    it_sub->set_submenu(*sub);
+    int exp = 3;
+    double page, step;
+    get_increments(step, page);
+    while (exp < 8) {
+        const auto inc = pow(10., (double)exp);
+        auto it = Gtk::manage(new Gtk::RadioMenuItem());
+        auto la = Gtk::manage(new Gtk::Label(format_length(inc)));
+        la->set_xalign(1);
+        la->get_style_context()->add_class("spin-button-dim-incr-set-label");
+        it->add(*la);
+        la->show();
+        if (is_close(step, inc)) {
+            it->set_active(true);
+        }
+        it->signal_activate().connect([this, inc] { set_increments(inc, inc / 10); });
+        it->show();
+        sub->append(*it);
+        exp++;
+    }
 }
 
 bool SpinButtonDim::on_output()
