@@ -36,7 +36,7 @@ void rules_apply(const Rules &r, RuleID id, class IDocument &c)
 {
     if (auto rules = dynamic_cast<const BoardRules *>(&r)) {
         auto &core = dynamic_cast<IDocumentBoard &>(c);
-        rules->apply(id, *core.get_board(), core.get_via_padstack_provider());
+        rules->apply(id, *core.get_board(), core.get_pool_caching());
     }
 }
 

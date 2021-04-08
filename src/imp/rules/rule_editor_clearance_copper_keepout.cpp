@@ -3,7 +3,6 @@
 #include "common/patch_type_names.hpp"
 #include "rule_match_editor.hpp"
 #include "rule_match_keepout_editor.hpp"
-#include "widgets/chooser_buttons.hpp"
 #include "widgets/parameter_set_editor.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "util/gtk_util.hpp"

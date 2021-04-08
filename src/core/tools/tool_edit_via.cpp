@@ -25,7 +25,7 @@ std::set<Via *> ToolEditVia::get_vias()
 ToolResponse ToolEditVia::begin(const ToolArgs &args)
 {
     auto vias = get_vias();
-    bool r = imp->dialogs.edit_via(vias, doc.b->get_via_padstack_provider());
+    bool r = imp->dialogs.edit_via(vias, doc.b->get_pool(), doc.b->get_pool_caching());
     if (r) {
         for (auto via : vias) {
             via->expand(*doc.b->get_board());

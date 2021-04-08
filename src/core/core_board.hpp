@@ -9,8 +9,8 @@
 namespace horizon {
 class CoreBoard : public Core, public DocumentBoard {
 public:
-    CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
-              const std::string &pictures_dir, IPool &pool, IPool &pool_caching);
+    CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &pictures_dir,
+              IPool &pool, IPool &pool_caching);
 
     class Block *get_block() override;
     class LayerProvider &get_layer_provider() override;
@@ -28,11 +28,6 @@ public:
     const Board &get_canvas_data();
     Board *get_board() override;
     const Board *get_board() const;
-
-    ViaPadstackProvider &get_via_padstack_provider() override
-    {
-        return via_padstack_provider;
-    }
 
     class Rules *get_rules() override;
     FabOutputSettings &get_fab_output_settings() override
@@ -77,8 +72,6 @@ public:
     void reload_pool() override;
 
 private:
-    ViaPadstackProvider via_padstack_provider;
-
     std::optional<Block> block;
     std::optional<Board> brd;
 

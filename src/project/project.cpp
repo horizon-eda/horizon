@@ -37,18 +37,18 @@ unsigned int Project::get_app_version()
 }
 
 Project::Project(const UUID &uu, const json &j, const std::string &base)
-    : base_path(base), uuid(uu), vias_directory(Glib::build_filename(base, j.at("vias_directory"))),
+    : base_path(base), uuid(uu),
       pictures_directory(Glib::build_filename(base, j.value("pictures_directory", "pictures"))),
       board_filename(Glib::build_filename(base, j.at("board_filename"))),
       pool_directory(Glib::build_filename(base, j.value("pool_directory", "pool"))), version(app_version, j),
       title_old(j.value("title", "")), name_old(j.value("name", "")),
+      vias_directory_old(Glib::build_filename(base, j.value("vias_directory", "vias"))),
       pool_uuid_old(j.at("pool_uuid").get<std::string>()),
       pool_cache_directory_old(Glib::build_filename(base, j.value("pool_cache_directory", "cache")))
 {
     check_object_type(j, ObjectType::PROJECT);
     version.check(ObjectType::PROJECT, "", uuid);
 
-    mkdir_if_not_exists(vias_directory, true);
     mkdir_if_not_exists(pictures_directory, true);
 
     if (j.count("blocks")) {
@@ -115,8 +115,6 @@ std::string Project::create(const std::map<std::string, std::string> &meta, cons
 
     blocks.emplace(block.uuid, ProjectBlock(block.uuid, block_filename, schematic_filename, true));
 
-    vias_directory = Glib::build_filename(base_path, "vias");
-    mkdir_if_not_exists(vias_directory, true);
     pictures_directory = Glib::build_filename(base_path, "pictures");
     mkdir_if_not_exists(pictures_directory, true);
     pool_cache_directory_old = Glib::build_filename(base_path, "cache");
@@ -172,7 +170,7 @@ json Project::serialize() const
     j["title"] = title_old;
     j["name"] = name_old;
     j["pool_uuid"] = (std::string)pool_uuid_old;
-    j["vias_directory"] = get_filename_rel(vias_directory);
+    j["vias_directory"] = get_filename_rel(vias_directory_old);
     j["pictures_filename"] = get_filename_rel(pictures_directory);
     j["board_filename"] = get_filename_rel(board_filename);
     j["pool_cache_directory"] = get_filename_rel(pool_cache_directory_old);

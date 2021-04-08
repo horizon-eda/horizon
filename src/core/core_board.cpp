@@ -10,11 +10,10 @@
 #include "util/picture_load.hpp"
 
 namespace horizon {
-CoreBoard::CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
+CoreBoard::CoreBoard(const std::string &board_filename, const std::string &block_filename,
                      const std::string &pictures_dir, IPool &pool, IPool &pool_caching)
-    : Core(pool, &pool_caching), via_padstack_provider(via_dir, pool_caching),
-      block(Block::new_from_file(block_filename, pool_caching)),
-      brd(Board::new_from_file(board_filename, *block, pool_caching, via_padstack_provider)), rules(brd->rules),
+    : Core(pool, &pool_caching), block(Block::new_from_file(block_filename, pool_caching)),
+      brd(Board::new_from_file(board_filename, *block, pool_caching)), rules(brd->rules),
       fab_output_settings(brd->fab_output_settings), pdf_export_settings(brd->pdf_export_settings),
       step_export_settings(brd->step_export_settings), pnp_export_settings(brd->pnp_export_settings),
       colors(brd->colors), m_board_filename(board_filename), m_block_filename(block_filename),
@@ -663,7 +662,7 @@ void CoreBoard::reload_pool()
     m_pool.clear();
     m_pool_caching.clear();
     block.emplace(block->uuid, block_j, m_pool_caching);
-    brd.emplace(brd->uuid, brd_j, *block, m_pool_caching, via_padstack_provider);
+    brd.emplace(brd->uuid, brd_j, *block, m_pool_caching);
     keeper.restore(brd->pictures);
     history_clear();
     rebuild();

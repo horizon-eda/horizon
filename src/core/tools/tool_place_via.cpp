@@ -4,6 +4,7 @@
 #include "imp/imp_interface.hpp"
 #include <iostream>
 #include "logger/logger.hpp"
+#include "pool/ipool.hpp"
 
 namespace horizon {
 
@@ -46,7 +47,7 @@ void ToolPlaceVia::insert_junction()
 void ToolPlaceVia::create_attached()
 {
     auto uu = UUID::random();
-    auto ps = doc.b->get_via_padstack_provider().get_padstack(rules->get_via_padstack_uuid(net));
+    auto ps = doc.b->get_pool_caching().get_padstack(rules->get_via_padstack_uuid(net));
     if (!ps) {
         throw std::runtime_error("padstack not found");
     }

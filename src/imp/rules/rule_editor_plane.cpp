@@ -2,7 +2,6 @@
 #include "board/rule_plane.hpp"
 #include "document/idocument_board.hpp"
 #include "rule_match_editor.hpp"
-#include "widgets/chooser_buttons.hpp"
 #include "widgets/plane_editor.hpp"
 #include "common/layer_provider.hpp"
 

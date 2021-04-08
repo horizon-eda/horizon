@@ -11,7 +11,6 @@
 #include <podofo/podofo.h>
 #include "block/block.hpp"
 #include "board/board.hpp"
-#include "board/via_padstack_provider.hpp"
 #include "project/project.hpp"
 #include "pool/project_pool.hpp"
 #include "rules/rule_descr.hpp"
@@ -22,7 +21,6 @@ public:
     BoardWrapper(const horizon::Project &prj);
     horizon::ProjectPool pool;
     horizon::Block block;
-    horizon::ViaPadstackProvider vpp;
     horizon::Board board;
     horizon::Board *get_board() override
     {
@@ -47,10 +45,6 @@ public:
     horizon::LayerProvider &get_layer_provider() override
     {
         return board;
-    }
-    horizon::ViaPadstackProvider &get_via_padstack_provider() override
-    {
-        return vpp;
     }
     horizon::FabOutputSettings &get_fab_output_settings() override
     {
@@ -85,7 +79,7 @@ class BoardWrapper *create_board_wrapper(const horizon::Project &prj)
 
 BoardWrapper::BoardWrapper(const horizon::Project &prj)
     : pool(prj.pool_directory, false), block(horizon::Block::new_from_file(prj.get_top_block().block_filename, pool)),
-      vpp(prj.vias_directory, pool), board(horizon::Board::new_from_file(prj.board_filename, block, pool, vpp))
+      board(horizon::Board::new_from_file(prj.board_filename, block, pool))
 {
     board.expand();
     board.update_planes();

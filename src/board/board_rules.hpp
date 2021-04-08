@@ -28,7 +28,7 @@ public:
     void load_from_json(const json &j) override;
     RulesCheckResult check(RuleID id, const class Board &b, class RulesCheckCache &cache,
                            check_status_cb_t status_cb) const;
-    void apply(RuleID id, class Board &b, class ViaPadstackProvider &vpp) const;
+    void apply(RuleID id, class Board &b, class IPool &pool) const;
     json serialize() const override;
     std::set<RuleID> get_rule_ids() const override;
     const Rule *get_rule(RuleID id) const override;

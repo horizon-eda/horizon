@@ -2,9 +2,10 @@
 #include "board/rule_via.hpp"
 #include "document/idocument_board.hpp"
 #include "rule_match_editor.hpp"
-#include "widgets/chooser_buttons.hpp"
 #include "widgets/parameter_set_editor.hpp"
 #include "widgets/spin_button_dim.hpp"
+#include "widgets/pool_browser_button.hpp"
+#include "widgets/pool_browser_padstack.hpp"
 
 namespace horizon {
 void RuleEditorVia::populate()
@@ -37,7 +38,11 @@ void RuleEditorVia::populate()
     grid->attach(*match_editor, 0, 1, 1, 1);
 
     auto &c = dynamic_cast<IDocumentBoard &>(core);
-    auto ps_button = Gtk::manage(new ViaPadstackButton(c.get_via_padstack_provider()));
+    auto ps_button = Gtk::manage(new PoolBrowserButton(ObjectType::PADSTACK, c.get_pool()));
+    {
+        auto &br = dynamic_cast<PoolBrowserPadstack &>(ps_button->get_browser());
+        br.set_padstacks_included({Padstack::Type::VIA});
+    }
     ps_button->property_selected_uuid() = rule2->padstack;
     ps_button->property_selected_uuid().signal_changed().connect(
             [this, ps_button] { rule2->padstack = ps_button->property_selected_uuid(); });

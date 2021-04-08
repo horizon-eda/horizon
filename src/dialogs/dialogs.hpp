@@ -29,7 +29,7 @@ public:
     std::optional<UUID> select_unit(class IPool &pool);
     std::optional<UUID> select_padstack(class IPool &pool, const UUID &package_uuid);
     std::optional<UUID> select_hole_padstack(class IPool &pool);
-    std::optional<UUID> select_via_padstack(class ViaPadstackProvider &vpp);
+    std::optional<UUID> select_via_padstack(class IPool &pool);
     std::optional<UUID> select_net(const class Block &block, bool power_only, const UUID &net_default = UUID());
     std::optional<UUID> select_bus(const class Block &block);
     std::optional<UUID> select_bus_member(const class Block &block, const UUID &bus_uuid);
@@ -41,7 +41,6 @@ public:
     bool manage_buses(class Block &b);
     bool manage_net_classes(class Block &b);
     bool manage_power_nets(class Block &b);
-    bool manage_via_templates(class Board &b, class ViaPadstackProvider &vpp);
     bool manage_included_boards(class Board &b);
     bool edit_board_hole(std::set<class BoardHole *> &holes, class IPool &pool, class IPool &pool_caching,
                          class Block &block);
@@ -59,7 +58,7 @@ public:
     std::optional<std::string> ask_datum_string(const std::string &label, const std::string &def);
     std::optional<int> ask_datum_angle(const std::string &label, int def = 0);
     bool edit_shapes(std::set<class Shape *> shapes);
-    bool edit_via(std::set<class Via *> &vias, class ViaPadstackProvider &vpp);
+    bool edit_via(std::set<class Via *> &vias, class IPool &pool, IPool &pool_caching);
     bool edit_custom_value(class SchematicSymbol &sym);
     std::optional<std::string> ask_dxf_filename();
     std::optional<std::string> ask_kicad_package_filename();

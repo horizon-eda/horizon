@@ -1,7 +1,6 @@
 #include "pns_horizon_iface.hpp"
 #include "board/board.hpp"
 #include "board/board_layers.hpp"
-#include "board/via_padstack_provider.hpp"
 #include "canvas/canvas_gl.hpp"
 #include "clipper/clipper.hpp"
 #include "geometry/shape_simple.h"
@@ -12,6 +11,7 @@
 #include "router/pns_via.h"
 #include "util/geom_util.hpp"
 #include "logger/logger.hpp"
+#include "pool/ipool.hpp"
 
 namespace PNS {
 
@@ -407,9 +407,9 @@ void PNS_HORIZON_IFACE::SetRules(const horizon::BoardRules *ru)
     rules = ru;
 }
 
-void PNS_HORIZON_IFACE::SetViaPadstackProvider(horizon::ViaPadstackProvider *v)
+void PNS_HORIZON_IFACE::SetPool(horizon::IPool *p)
 {
-    vpp = v;
+    pool = p;
 }
 
 int PNS_HORIZON_IFACE::get_net_code(const horizon::UUID &uu)
@@ -986,7 +986,7 @@ void PNS_HORIZON_IFACE::AddItem(PNS::ITEM *aItem)
         PNS::VIA *pvia = static_cast<PNS::VIA *>(aItem);
         auto uu = horizon::UUID::random();
         auto net = get_net_for_code(pvia->Net());
-        auto padstack = vpp->get_padstack(rules->get_via_padstack_uuid(net));
+        auto padstack = pool->get_padstack(rules->get_via_padstack_uuid(net));
         if (padstack) {
             auto ps = rules->get_via_parameter_set(net);
             auto via = &board->vias

@@ -1350,8 +1350,7 @@ bool PoolProjectManagerAppWindow::cleanup_pool_cache(Gtk::Window *parent)
     auto block = Block::new_from_file(project->get_top_block().block_filename, project_pool);
     auto sch = Schematic::new_from_file(project->get_top_block().schematic_filename, block, project_pool);
     sch.expand();
-    ViaPadstackProvider vpp(project->vias_directory, project_pool);
-    auto board = Board::new_from_file(project->board_filename, block, project_pool, vpp);
+    auto board = Board::new_from_file(project->board_filename, block, project_pool);
     board.expand();
 
     {

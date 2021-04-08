@@ -355,12 +355,9 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             auto brd = doc.b->get_board();
             auto x = &brd->vias
                               .emplace(std::piecewise_construct, std::forward_as_tuple(u),
-                                       std::forward_as_tuple(u, it.value()))
+                                       std::forward_as_tuple(u, it.value(), doc.b->get_pool_caching(), nullptr))
                               .first->second;
-            if (auto ps = doc.b->get_via_padstack_provider().get_padstack(x->vpp_padstack.uuid)) {
-                x->vpp_padstack = ps;
-                x->expand(*brd);
-            }
+            x->expand(*brd);
             if (brd->block->nets.count(x->net_set.uuid)) {
                 x->net_set = &brd->block->nets.at(x->net_set.uuid);
             }

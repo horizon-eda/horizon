@@ -15,7 +15,6 @@
 #include "ask_datum.hpp"
 #include "ask_datum_string.hpp"
 #include "ask_datum_angle.hpp"
-#include "select_via_padstack.hpp"
 #include "annotate.hpp"
 #include "pool/part.hpp"
 #include "edit_shape.hpp"
@@ -212,9 +211,9 @@ bool Dialogs::edit_shapes(std::set<Shape *> shapes)
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::edit_via(std::set<class Via *> &vias, class ViaPadstackProvider &vpp)
+bool Dialogs::edit_via(std::set<class Via *> &vias, class IPool &pool, IPool &pool_caching)
 {
-    EditViaDialog dia(parent, vias, vpp);
+    EditViaDialog dia(parent, vias, pool, pool_caching);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
@@ -396,12 +395,13 @@ std::optional<UUID> Dialogs::map_package(const std::vector<std::pair<Component *
     }
 }
 
-std::optional<UUID> Dialogs::select_via_padstack(class ViaPadstackProvider &vpp)
+std::optional<UUID> Dialogs::select_via_padstack(class IPool &pool)
 {
-    SelectViaPadstackDialog dia(parent, vpp);
-    auto r = dia.run();
-    if (r == Gtk::RESPONSE_OK && dia.selection_valid) {
-        return dia.selected_uuid;
+    PoolBrowserDialog dia(parent, ObjectType::PADSTACK, pool);
+    auto &br = dynamic_cast<PoolBrowserPadstack &>(dia.get_browser());
+    br.set_padstacks_included({Padstack::Type::VIA});
+    if (dia.run() == Gtk::RESPONSE_OK) {
+        return br.get_selected();
     }
     else {
         return {};

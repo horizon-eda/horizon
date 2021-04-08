@@ -40,7 +40,7 @@ unsigned int Board::get_app_version()
     return app_version;
 }
 
-Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool, ViaPadstackProvider &vpp)
+Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool)
     : uuid(uu), block(&iblock), name(j.at("name").get<std::string>()), version(app_version, j),
       n_inner_layers(j.value("n_inner_layers", 0))
 {
@@ -127,7 +127,7 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool, ViaPadst
         const json &o = j["vias"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            load_and_log(vias, ObjectType::VIA, std::forward_as_tuple(u, it.value(), this, &vpp),
+            load_and_log(vias, ObjectType::VIA, std::forward_as_tuple(u, it.value(), pool, this),
                          Logger::Domain::BOARD);
         }
     }
@@ -274,10 +274,10 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool, ViaPadst
     update_refs(); // fill in smashed texts
 }
 
-Board Board::new_from_file(const std::string &filename, Block &block, IPool &pool, ViaPadstackProvider &vpp)
+Board Board::new_from_file(const std::string &filename, Block &block, IPool &pool)
 {
     auto j = load_json_from_file(filename);
-    return Board(UUID(j.at("uuid").get<std::string>()), j, block, pool, vpp);
+    return Board(UUID(j.at("uuid").get<std::string>()), j, block, pool);
 }
 
 
@@ -1197,7 +1197,7 @@ ItemSet Board::get_pool_items_used() const
         }
     }
     for (const auto &it_via : vias) {
-        items_needed.emplace(ObjectType::PADSTACK, it_via.second.vpp_padstack->uuid);
+        items_needed.emplace(ObjectType::PADSTACK, it_via.second.pool_padstack->uuid);
     }
     for (const auto &it_hole : holes) {
         items_needed.emplace(ObjectType::PADSTACK, it_hole.second.pool_padstack->uuid);

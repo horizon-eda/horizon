@@ -9,13 +9,13 @@ namespace horizon {
 
 class EditViaDialog : public Gtk::Dialog {
 public:
-    EditViaDialog(Gtk::Window *parent, std::set<class Via *> &vias, class ViaPadstackProvider &vpp);
+    EditViaDialog(Gtk::Window *parent, std::set<class Via *> &vias, class IPool &pool, IPool &pool_caching);
     bool valid = false;
 
 private:
     class ParameterSetEditor *editor = nullptr;
     Gtk::CheckButton *cb_from_rules = nullptr;
-    class ViaPadstackButton *button_vp = nullptr;
+    class PoolBrowserButton *button_vp = nullptr;
     void update_sensitive();
 };
 } // namespace horizon

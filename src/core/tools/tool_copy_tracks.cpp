@@ -143,7 +143,7 @@ ToolResponse ToolCopyTracks::update(const ToolArgs &args)
                         auto uu = UUID::random();
                         auto &new_via = brd->vias
                                                 .emplace(std::piecewise_construct, std::forward_as_tuple(uu),
-                                                         std::forward_as_tuple(uu, via->vpp_padstack.ptr))
+                                                         std::forward_as_tuple(uu, via->pool_padstack.ptr))
                                                 .first->second;
                         new_via.junction = junction_map.at(via->junction);
                         new_via.from_rules = via->from_rules;

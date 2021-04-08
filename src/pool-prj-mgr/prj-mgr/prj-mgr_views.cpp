@@ -159,7 +159,7 @@ void PoolProjectManagerViewProject::open_board()
     auto top_block =
             std::find_if(prj->blocks.begin(), prj->blocks.end(), [](const auto &a) { return a.second.is_top; });
     if (top_block != prj->blocks.end()) {
-        std::vector<std::string> args = {prj->board_filename, top_block->second.block_filename, prj->vias_directory,
+        std::vector<std::string> args = {prj->board_filename, top_block->second.block_filename,
                                          prj->pictures_directory};
         win->spawn(PoolProjectManagerProcess::Type::IMP_BOARD, args);
     }

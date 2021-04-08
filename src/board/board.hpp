@@ -18,7 +18,6 @@
 #include "util/uuid.hpp"
 #include "util/warning.hpp"
 #include "via.hpp"
-#include "via_padstack_provider.hpp"
 #include "connection_line.hpp"
 #include "step_export_settings.hpp"
 #include "pnp_export_settings.hpp"
@@ -50,8 +49,8 @@ private:
     void vacuum_junctions();
 
 public:
-    Board(const UUID &uu, const json &, Block &block, IPool &pool, ViaPadstackProvider &vpp);
-    static Board new_from_file(const std::string &filename, Block &block, IPool &pool, ViaPadstackProvider &vpp);
+    Board(const UUID &uu, const json &, Block &block, IPool &pool);
+    static Board new_from_file(const std::string &filename, Block &block, IPool &pool);
     Board(const UUID &uu, Block &block);
     static unsigned int get_app_version();
 

@@ -22,7 +22,6 @@ public:
 
     std::unique_ptr<class ProjectPool> pool;
     std::unique_ptr<class Block> block;
-    std::unique_ptr<class ViaPadstackProvider> vpp;
     std::unique_ptr<class Board> board;
 
     ~IncludedBoard();

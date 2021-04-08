@@ -25,9 +25,9 @@
 #include "parts_window.hpp"
 
 namespace horizon {
-ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
+ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename,
                    const std::string &pictures_dir, const PoolParams &pool_params)
-    : ImpLayer(pool_params), core_board(board_filename, block_filename, via_dir, pictures_dir, *pool, *pool_caching),
+    : ImpLayer(pool_params), core_board(board_filename, block_filename, pictures_dir, *pool, *pool_caching),
       project_dir(Glib::path_get_dirname(board_filename)), searcher(core_board)
 {
     core = &core_board;

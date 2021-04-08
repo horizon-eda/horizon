@@ -57,7 +57,6 @@ SRC_COMMON = \
 	src/board/board_package.cpp\
 	src/board/track.cpp\
 	src/board/airwire.cpp\
-	src/board/via_padstack_provider.cpp\
 	src/board/via.cpp\
 	src/board/plane.cpp\
 	src/board/board_rules.cpp\
@@ -321,7 +320,6 @@ SRC_IMP = \
 	src/dialogs/ask_datum.cpp\
 	src/dialogs/ask_datum_string.cpp\
 	src/widgets/text_editor.cpp\
-	src/dialogs/select_via_padstack.cpp\
 	src/dialogs/dialogs.cpp\
 	src/dialogs/annotate.cpp\
 	src/dialogs/edit_shape.cpp\
@@ -365,7 +363,6 @@ SRC_IMP = \
 	src/widgets/net_button.cpp\
 	src/widgets/layer_box.cpp\
 	src/widgets/spin_button_dim.cpp\
-	src/widgets/chooser_buttons.cpp\
 	src/widgets/cell_renderer_color_box.cpp\
 	src/widgets/net_class_button.cpp\
 	src/widgets/parameter_set_editor.cpp\

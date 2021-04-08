@@ -19,7 +19,7 @@ class Junction;
 class Net;
 class BoardRules;
 class Polygon;
-class ViaPadstackProvider;
+class IPool;
 class Keepout;
 class KeepoutContour;
 template <typename T> class Coord;
@@ -72,7 +72,7 @@ public:
     void SetBoard(horizon::Board *brd);
     void SetCanvas(class horizon::CanvasGL *ca);
     void SetRules(const horizon::BoardRules *rules);
-    void SetViaPadstackProvider(horizon::ViaPadstackProvider *v);
+    void SetPool(horizon::IPool *pool);
 
     void SyncWorld(PNS::NODE *aWorld) override;
     void EraseView() override;
@@ -124,7 +124,7 @@ private:
     horizon::Board *board = nullptr;
     class horizon::CanvasGL *canvas = nullptr;
     const class horizon::BoardRules *rules = nullptr;
-    class horizon::ViaPadstackProvider *vpp = nullptr;
+    class horizon::IPool *pool = nullptr;
     PNS::ROUTER *m_router;
 
     std::unique_ptr<PNS::SOLID> syncPad(const horizon::BoardPackage *pkg, const horizon::Pad *pad);

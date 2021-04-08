@@ -38,7 +38,6 @@ public:
     UUID uuid;
     std::map<UUID, ProjectBlock> blocks;
 
-    std::string vias_directory;
     std::string pictures_directory;
     std::string board_filename;
     std::string pool_directory;
@@ -50,6 +49,7 @@ public:
 private:
     std::string title_old;
     std::string name_old;
+    std::string vias_directory_old;
 
     UUID pool_uuid_old;
     std::string pool_cache_directory_old;

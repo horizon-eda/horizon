@@ -5,6 +5,7 @@
 #include "util/util.hpp"
 #include "nlohmann/json.hpp"
 #include "board_rules_import.hpp"
+#include "pool/ipool.hpp"
 
 namespace horizon {
 BoardRules::BoardRules()
@@ -196,7 +197,7 @@ void BoardRules::cleanup(const Block *block)
     }
 }
 
-void BoardRules::apply(RuleID id, Board &brd, ViaPadstackProvider &vpp) const
+void BoardRules::apply(RuleID id, Board &brd, IPool &pool) const
 {
     if (id == RuleID::TRACK_WIDTH) {
         for (auto &it : brd.tracks) {
@@ -217,9 +218,9 @@ void BoardRules::apply(RuleID id, Board &brd, ViaPadstackProvider &vpp) const
         for (auto &it : brd.vias) {
             auto &via = it.second;
             if (via.from_rules && via.junction->net) {
-                if (auto ps = vpp.get_padstack(get_via_padstack_uuid(via.junction->net))) {
+                if (auto ps = pool.get_padstack(get_via_padstack_uuid(via.junction->net))) {
                     via.parameter_set = get_via_parameter_set(via.junction->net);
-                    via.vpp_padstack = ps;
+                    via.pool_padstack = ps;
                     via.expand(brd);
                 }
             }

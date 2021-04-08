@@ -1,17 +1,18 @@
 #include "edit_via.hpp"
 #include "widgets/parameter_set_editor.hpp"
-#include "widgets/chooser_buttons.hpp"
 #include "board/via.hpp"
-#include "board/via_padstack_provider.hpp"
+#include "pool/ipool.hpp"
 #include "util/geom_util.hpp"
 #include "block/net.hpp"
 #include <iostream>
 #include <deque>
 #include <algorithm>
+#include "widgets/pool_browser_button.hpp"
+#include "widgets/pool_browser_padstack.hpp"
 
 namespace horizon {
 
-EditViaDialog::EditViaDialog(Gtk::Window *parent, std::set<Via *> &vias, ViaPadstackProvider &vpp)
+EditViaDialog::EditViaDialog(Gtk::Window *parent, std::set<Via *> &vias, IPool &pool, IPool &pool_caching)
     : Gtk::Dialog("Edit via", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR)
 {
     set_default_size(400, 300);
@@ -42,10 +43,10 @@ EditViaDialog::EditViaDialog(Gtk::Window *parent, std::set<Via *> &vias, ViaPads
     auto padstack_apply_all_button = Gtk::manage(new Gtk::Button);
     padstack_apply_all_button->set_image_from_icon_name("object-select-symbolic", Gtk::ICON_SIZE_BUTTON);
     padstack_apply_all_button->set_tooltip_text("Apply to all selected vias");
-    padstack_apply_all_button->signal_clicked().connect([this, vias, &vpp] {
+    padstack_apply_all_button->signal_clicked().connect([this, vias, &pool_caching] {
         for (auto &via : vias) {
             if (!via->from_rules) {
-                via->vpp_padstack = vpp.get_padstack(button_vp->property_selected_uuid());
+                via->pool_padstack = pool_caching.get_padstack(button_vp->property_selected_uuid());
             }
         }
     });
@@ -78,7 +79,7 @@ EditViaDialog::EditViaDialog(Gtk::Window *parent, std::set<Via *> &vias, ViaPads
         viamap.emplace(via->uuid, via);
     }
 
-    combo->signal_changed().connect([this, combo, viamap, box, grid, vias, &vpp] {
+    combo->signal_changed().connect([this, combo, viamap, box, grid, vias, &pool, &pool_caching] {
         UUID uu(combo->get_active_id());
         auto via = viamap.at(uu);
         if (editor)
@@ -98,11 +99,15 @@ EditViaDialog::EditViaDialog(Gtk::Window *parent, std::set<Via *> &vias, ViaPads
         if (button_vp)
             delete button_vp;
 
-        button_vp = Gtk::manage(new ViaPadstackButton(vpp));
-        button_vp->property_selected_uuid() = via->vpp_padstack->uuid;
-        button_vp->property_selected_uuid().signal_changed().connect([this, via, &vpp] {
+        button_vp = Gtk::manage(new PoolBrowserButton(ObjectType::PADSTACK, pool));
+        {
+            auto &br = dynamic_cast<PoolBrowserPadstack &>(button_vp->get_browser());
+            br.set_padstacks_included({Padstack::Type::VIA});
+        }
+        button_vp->property_selected_uuid() = via->pool_padstack->uuid;
+        button_vp->property_selected_uuid().signal_changed().connect([this, via, &pool_caching] {
             if (!via->from_rules)
-                via->vpp_padstack = vpp.get_padstack(button_vp->property_selected_uuid());
+                via->pool_padstack = pool_caching.get_padstack(button_vp->property_selected_uuid());
         });
         button_vp->set_hexpand(true);
         grid->attach(*button_vp, 1, 0, 1, 1);
