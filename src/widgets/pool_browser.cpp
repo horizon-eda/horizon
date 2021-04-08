@@ -64,12 +64,24 @@ Gtk::Widget *PoolBrowser::create_pool_selector()
         if (pool_selector)
             throw std::runtime_error("can't create pool selector twice");
         pool_selector = Gtk::manage(new PoolSelector(pool));
-        pool_selector->signal_changed().connect(sigc::mem_fun(*this, &PoolBrowser::search));
+        pool_selector->signal_changed().connect([this] {
+            if (!pools_reloading)
+                search();
+        });
         return pool_selector;
     }
     else {
         return nullptr;
     }
+}
+
+void PoolBrowser::reload_pools()
+{
+    if (!pool_selector)
+        return;
+    pools_reloading = true;
+    pool_selector->reload();
+    pools_reloading = false;
 }
 
 std::string PoolBrowser::get_pool_selector_query() const

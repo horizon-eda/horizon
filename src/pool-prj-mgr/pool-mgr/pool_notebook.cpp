@@ -48,12 +48,14 @@ void PoolNotebook::reload()
 {
     pool.clear();
     for (auto &br : browsers) {
+        br.second->reload_pools();
         if (widget_is_visible(br.second))
             br.second->search();
         else
             br.second->clear_search_once();
     }
     for (auto &br : browsers_parametric) {
+        br.second->reload_pools();
         if (widget_is_visible(br.second))
             br.second->search();
         else

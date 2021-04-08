@@ -5,10 +5,29 @@
 #include "pool/pool_manager.hpp"
 
 namespace horizon {
-PoolSelector::PoolSelector(IPool &pool)
+PoolSelector::PoolSelector(IPool &apool) : pool(apool)
+{
+    populate();
+    set_active_key(UUID());
+}
+
+UUID PoolSelector::get_selected_pool() const
+{
+    return get_active_key();
+}
+
+void PoolSelector::reload()
+{
+    auto k = get_active_key();
+    remove_all();
+    populate();
+    if (!set_active_key(k))
+        set_active_key(UUID());
+}
+
+void PoolSelector::populate()
 {
     append(UUID(), "All pools");
-    set_active_key(UUID());
     {
         const auto &info = pool.get_pool_info();
         append(info.uuid, info.name + " (This)");
@@ -22,11 +41,6 @@ PoolSelector::PoolSelector(IPool &pool)
             }
         }
     }
-}
-
-UUID PoolSelector::get_selected_pool() const
-{
-    return get_active_key();
 }
 
 } // namespace horizon

@@ -33,6 +33,7 @@ public:
     void go_to(const UUID &uu);
     void clear_search();
     void focus_search();
+    void reload_pools();
 
     enum class PoolItemSource { LOCAL, INCLUDED, OVERRIDDEN, OVERRIDDEN_LOCAL, CACHED };
 
@@ -115,5 +116,6 @@ private:
     std::vector<std::pair<Gtk::Widget *, std::function<bool(UUID)>>> menu_item_sensitive_cbs;
 
     class PoolSelector *pool_selector = nullptr;
+    bool pools_reloading = false;
 };
 } // namespace horizon

@@ -7,6 +7,11 @@ class PoolSelector : public GenericComboBox<UUID> {
 public:
     PoolSelector(class IPool &pool);
     UUID get_selected_pool() const;
+    void reload();
+
+private:
+    void populate();
+    IPool &pool;
 };
 
 } // namespace horizon

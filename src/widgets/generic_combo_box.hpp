@@ -29,15 +29,16 @@ public:
         return *cr_text;
     }
 
-    void set_active_key(const T &key)
+    bool set_active_key(const T &key)
     {
         for (const auto &it : store->children()) {
             Gtk::TreeModel::Row row = *it;
             if (row[list_columns.key] == key) {
                 set_active(it);
-                break;
+                return true;
             }
         }
+        return false;
     }
 
     const T get_active_key() const
