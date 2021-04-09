@@ -47,7 +47,6 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     builder->get_widget("button_open", button_open);
     builder->get_widget("button_close", button_close);
     builder->get_widget("button_update", button_update);
-    builder->get_widget("spinner_update", spinner_update);
     builder->get_widget("button_cancel", button_cancel);
     builder->get_widget("button_create", button_create);
     builder->get_widget("button_new", button_new);
@@ -635,10 +634,11 @@ void PoolProjectManagerAppWindow::set_pool_updating(bool v, bool success)
                     500);
         }
     }
+    auto win = get_window();
     if (v)
-        spinner_update->start();
+        win->set_cursor(Gdk::Cursor::create(win->get_display(), "progress"));
     else
-        spinner_update->stop();
+        win->set_cursor();
 }
 
 void PoolProjectManagerAppWindow::set_pool_update_status_text(const std::string &txt)

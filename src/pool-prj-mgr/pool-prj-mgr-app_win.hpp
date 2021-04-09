@@ -95,7 +95,6 @@ private:
     Gtk::MenuButton *button_new = nullptr;
     Gtk::Button *button_create = nullptr;
     Gtk::Button *button_save = nullptr;
-    Gtk::Spinner *spinner_update = nullptr;
     Gtk::MenuButton *hamburger_menu_button = nullptr;
 
     Gtk::HeaderBar *header = nullptr;

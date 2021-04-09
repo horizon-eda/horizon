@@ -2885,13 +2885,7 @@ In case of modifying an existing part, provide rationale for the modification.</
           <placeholder/>
         </child>
         <child>
-          <object class="GtkSpinner" id="spinner_update">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-          </object>
-          <packing>
-            <property name="position">8</property>
-          </packing>
+          <placeholder/>
         </child>
         <child>
           <object class="GtkButton" id="button_create">
