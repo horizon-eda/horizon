@@ -74,7 +74,6 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
         la->show();
         add_search_menu->append(*la);
     }
-    notebook->signal_switch_page().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_switch_page));
     fav_toggled_conn =
             fav_button->signal_toggled().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_fav_toggled));
     place_part_button->signal_clicked().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_place_part));
@@ -97,11 +96,58 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
     }
     notebook->set_current_page(notebook->page_num(*ch_search));
     signal_show().connect(sigc::track_obj([ch_search] { ch_search->search_once(); }, *ch_search));
+    signal_show().connect([this] {
+        if (needs_reload) {
+            needs_reload = false;
+            reload();
+        }
+    });
+
+    notebook->signal_switch_page().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_switch_page));
 
     {
         Gtk::Paned *paned;
         GET_WIDGET(paned);
         paned_state_store.emplace(paned, "part_browser");
+    }
+}
+
+void PartBrowserWindow::reload()
+{
+    pool.clear();
+    auto current_page = notebook->get_nth_page(notebook->get_current_page());
+    for (auto page : notebook->get_children()) {
+        if (auto ch = dynamic_cast<PoolBrowser *>(page)) {
+            ch->reload_pools();
+            if (current_page == ch)
+                ch->search();
+            else
+                ch->clear_search_once();
+        }
+    }
+}
+
+void PartBrowserWindow::pool_updated(const std::string &p)
+{
+    for (const auto &[it_path, it_uu] : pool.get_actually_included_pools(true)) {
+        if (it_path == p) {
+            if (!is_visible()) {
+                needs_reload = true;
+                return;
+            }
+
+            pool_updated_conn.disconnect();
+            // debounce since we might receive multiple updated signals in short succession
+            pool_updated_conn = Glib::signal_timeout().connect(sigc::track_obj(
+                                                                       [this] {
+                                                                           reload();
+                                                                           return false;
+                                                                       },
+                                                                       *this),
+                                                               500);
+
+            return;
+        }
     }
 }
 
@@ -129,7 +175,6 @@ void PartBrowserWindow::handle_assign_part()
 
 void PartBrowserWindow::handle_fav_toggled()
 {
-    std::cout << "fav toggled" << std::endl;
     if (part_current) {
         if (fav_button->get_active()) {
             assert(std::count(favorites.begin(), favorites.end(), part_current) == 0);
@@ -144,9 +189,13 @@ void PartBrowserWindow::handle_fav_toggled()
     }
 }
 
-void PartBrowserWindow::handle_switch_page(Gtk::Widget *w, guint index)
+void PartBrowserWindow::handle_switch_page(Gtk::Widget *page, guint index)
 {
     update_part_current();
+    if (notebook->in_destruction())
+        return;
+    if (auto ch = dynamic_cast<PoolBrowser *>(page))
+        ch->search_once();
 }
 
 void PartBrowserWindow::placed_part(const UUID &uu)
@@ -396,14 +445,6 @@ PoolBrowserParametric *PartBrowserWindow::add_search_parametric(const std::strin
     ch->signal_selected().connect(sigc::mem_fun(*this, &PartBrowserWindow::update_part_current));
     ch->signal_activated().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_place_part));
 
-    notebook->signal_switch_page().connect(sigc::track_obj(
-            [this, ch](Gtk::Widget *page, guint pagenum) {
-                if (notebook->in_destruction())
-                    return;
-                if (page == ch)
-                    ch->search_once();
-            },
-            *ch));
     return ch;
 }
 

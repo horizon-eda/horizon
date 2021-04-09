@@ -208,6 +208,12 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     pool_update_dispatcher.connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_pool_update_progress));
     app.signal_pool_items_edited().connect(
             sigc::track_obj([this](const auto &filenames) { pool_update(filenames); }, *this));
+    app.signal_pool_updated().connect(sigc::track_obj(
+            [this](const auto &path) {
+                if (part_browser_window)
+                    part_browser_window->pool_updated(path);
+            },
+            *this));
 }
 
 
