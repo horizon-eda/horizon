@@ -49,8 +49,6 @@ Project::Project(const UUID &uu, const json &j, const std::string &base)
     check_object_type(j, ObjectType::PROJECT);
     version.check(ObjectType::PROJECT, "", uuid);
 
-    mkdir_if_not_exists(pictures_directory, true);
-
     if (j.count("blocks")) {
         const json &o = j.at("blocks");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -116,7 +114,6 @@ std::string Project::create(const std::map<std::string, std::string> &meta, cons
     blocks.emplace(block.uuid, ProjectBlock(block.uuid, block_filename, schematic_filename, true));
 
     pictures_directory = Glib::build_filename(base_path, "pictures");
-    mkdir_if_not_exists(pictures_directory, true);
     pool_cache_directory_old = Glib::build_filename(base_path, "cache");
     pool_uuid_old = pool_uuid;
     pool_directory = Glib::build_filename(base_path, "pool");
