@@ -40,7 +40,6 @@ public:
     void set_can_assign(bool v);
     void set_pool_cache_status(const class PoolCacheStatus &st);
     void focus_search();
-    void reload();
     void pool_updated(const std::string &bp);
 
 private:
@@ -85,5 +84,6 @@ private:
 
     sigc::connection pool_updated_conn;
     bool needs_reload = false;
+    void reload();
 };
 } // namespace horizon

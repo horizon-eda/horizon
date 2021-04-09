@@ -100,7 +100,6 @@ void PoolBrowserPart::search()
              "AND (parts.entity=$entity or $entity_all) ";
     query += get_pool_selector_query();
     query += sort_controller->get_order_by();
-    std::cout << query << std::endl;
     SQLite::Query q(pool.get_db(), query);
     q.bind("$mpn", "%" + MPN_search + "%");
     q.bind("$desc", "%" + desc_search + "%");

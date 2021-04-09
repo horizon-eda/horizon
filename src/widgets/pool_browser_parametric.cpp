@@ -396,7 +396,6 @@ void PoolBrowserParametric::search()
     }
     qs += get_pool_selector_query();
     qs += sort_controller->get_order_by();
-    std::cout << qs << std::endl;
     SQLite::Query q(pool_parametric.db, qs);
     bind_set(q, "_manufacturer", manufacturers);
     bind_set(q, "_package", packages);

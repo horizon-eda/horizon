@@ -55,7 +55,6 @@ void PoolBrowserEntity::search()
     query += "WHERE entities.name LIKE $name ";
     query += get_pool_selector_query();
     query += sort_controller->get_order_by();
-    std::cout << query << std::endl;
     SQLite::Query q(pool.get_db(), query);
     q.bind("$name", "%" + name_search + "%");
     bind_tags_query(q, tags);
