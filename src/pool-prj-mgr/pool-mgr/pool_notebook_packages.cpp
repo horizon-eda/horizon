@@ -121,11 +121,10 @@ void PoolNotebook::handle_duplicate_package(const UUID &uu)
                 std::vector<std::string> filenames;
                 DuplicatePartWidget::duplicate_package(pool, uu, fn, Glib::path_get_basename(fn), &filenames);
                 std::string new_pkg_filename = Glib::build_filename(fn, "package.json");
-                pool_update(
-                        [this, new_pkg_filename] {
-                            appwin.spawn(PoolProjectManagerProcess::Type::IMP_PACKAGE, {new_pkg_filename});
-                        },
-                        filenames);
+                pool_update_done_cb = [this, new_pkg_filename] {
+                    appwin.spawn(PoolProjectManagerProcess::Type::IMP_PACKAGE, {new_pkg_filename});
+                };
+                pool_update(filenames);
             }
         }
         break;
@@ -141,7 +140,7 @@ void PoolNotebook::handle_import_kicad_package()
         import_kicad_package_window->signal_hide().connect([this] {
             const auto files_saved = import_kicad_package_window->get_files_saved();
             if (files_saved.size()) {
-                pool_update(nullptr, files_saved);
+                pool_update(files_saved);
             }
             delete import_kicad_package_window;
             import_kicad_package_window = nullptr;

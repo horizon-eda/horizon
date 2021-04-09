@@ -43,7 +43,7 @@ void PoolNotebook::handle_kicad_symbol_import_wizard()
             kicad_symbol_import_wizard->signal_hide().connect([this] {
                 auto files_saved = kicad_symbol_import_wizard->get_files_saved();
                 if (files_saved.size()) {
-                    pool_update(nullptr, files_saved);
+                    pool_update(files_saved);
                 }
                 delete kicad_symbol_import_wizard;
                 kicad_symbol_import_wizard = nullptr;

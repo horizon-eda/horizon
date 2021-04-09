@@ -207,7 +207,7 @@ void PoolCacheBox::update_from_pool()
             }
         }
     }
-    notebook->pool_update(nullptr, filenames);
+    notebook->pool_update(filenames);
 }
 
 void PoolCacheBox::refresh_list(const PoolCacheStatus &status)

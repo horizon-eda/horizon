@@ -612,7 +612,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/pool-mgr/pool_remote_box.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_settings_box.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_cache_box.cpp\
-	src/pool-prj-mgr/pool-mgr/pool_update_error_dialog.cpp\
+	src/pool-prj-mgr/pool_update_error_dialog.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_git_box.cpp\
 	src/pool-prj-mgr/forced_pool_update_dialog.cpp\
 	src/widgets/pool_browser.cpp\

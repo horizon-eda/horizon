@@ -25,6 +25,8 @@
 #include "util/item_set.hpp"
 #include "pool/pool_cache_status.hpp"
 #include "util/zmq_helper.hpp"
+#include "pool-update/pool-update.hpp"
+#include "pool_update_error_dialog.hpp"
 #include <filesystem>
 
 #ifdef G_OS_WIN32
@@ -203,7 +205,166 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
         }
         return false;
     });
+
+    pool_update_dispatcher.connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_pool_update_progress));
+    app.signal_pool_items_edited().connect(
+            sigc::track_obj([this](const auto &filenames) { pool_update(filenames); }, *this));
 }
+
+
+class SetReset {
+public:
+    SetReset(bool &v) : value(v)
+    {
+        value = true;
+    }
+
+    ~SetReset()
+    {
+        value = false;
+    }
+
+private:
+    bool &value;
+};
+
+void PoolProjectManagerAppWindow::handle_pool_update_progress()
+{
+    if (in_pool_update_handler)
+        return;
+    SetReset rst(in_pool_update_handler);
+    decltype(pool_update_status_queue) my_queue;
+    {
+        std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
+        my_queue.splice(my_queue.begin(), pool_update_status_queue);
+    }
+    if (my_queue.size()) {
+        const auto last_info = pool_update_last_info;
+        for (const auto &[last_status, last_filename, last_msg] : my_queue) {
+            if (last_status == PoolUpdateStatus::DONE) {
+                pool_updated(true);
+                if (pool_update_filenames.size() == 0) // only for full update
+                    pool_update_n_files_last = pool_update_n_files;
+            }
+            else if (last_status == PoolUpdateStatus::FILE) {
+                pool_update_last_file = last_filename;
+                pool_update_n_files++;
+            }
+            else if (last_status == PoolUpdateStatus::INFO) {
+                pool_update_last_info = last_msg;
+            }
+            else if (last_status == PoolUpdateStatus::FILE_ERROR) {
+                pool_update_error_queue.emplace_back(last_status, last_filename, last_msg);
+            }
+            else if (last_status == PoolUpdateStatus::ERROR) {
+                set_pool_update_status_text(last_msg + " Last file: " + pool_update_last_file);
+                pool_updated(false);
+                return;
+            }
+        }
+        if (pool_update_last_info != last_info)
+            set_pool_update_status_text(pool_update_last_info);
+        if (pool_update_n_files_last && pool_update_filenames.size() == 0) { // only for full update
+            set_pool_update_progress((float)pool_update_n_files / pool_update_n_files_last);
+        }
+        else {
+            set_pool_update_progress(-1);
+        }
+    }
+}
+
+void PoolProjectManagerAppWindow::pool_updated(bool success)
+{
+    pool_updating = false;
+    if (pool_update_error_queue.size()) {
+        auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
+        PoolUpdateErrorDialog dia(top, pool_update_error_queue);
+        dia.run();
+    }
+    set_pool_updating(false, success);
+    if (success) {
+        app.signal_pool_updated().emit(get_pool_base_path());
+    }
+}
+
+void PoolProjectManagerAppWindow::pool_update(const std::vector<std::string> &filenames)
+{
+    if (pool_updating)
+        return;
+
+    if (project) { // if there's an open pool window, delegate pool update to that one
+        auto path = Glib::build_filename(project->pool_directory, "pool.json");
+        for (auto ws : app.get_windows()) {
+            auto wi = dynamic_cast<PoolProjectManagerAppWindow *>(ws);
+            if (wi && wi->get_filename() == path) {
+                return;
+            }
+        }
+    }
+
+    set_pool_updating(true, true);
+    pool_update_n_files = 0;
+    pool_updating = true;
+    pool_update_filenames = filenames;
+    pool_update_status_queue.clear();
+    pool_update_error_queue.clear();
+    std::thread thr(&PoolProjectManagerAppWindow::pool_update_thread, this);
+    thr.detach();
+}
+
+void PoolProjectManagerAppWindow::pool_update_thread()
+{
+    std::cout << "hello from thread" << std::endl;
+
+    try {
+        clock_t begin = clock();
+        horizon::pool_update(
+                get_pool_base_path(),
+                [this](PoolUpdateStatus st, std::string filename, std::string msg) {
+                    {
+                        std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
+                        pool_update_status_queue.emplace_back(st, filename, msg);
+                    }
+                    pool_update_dispatcher.emit();
+                },
+                true, pool_update_filenames);
+        clock_t end = clock();
+        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+        std::cout << "pool update took " << elapsed_secs << std::endl;
+    }
+    catch (const std::runtime_error &e) {
+        {
+            std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
+            pool_update_status_queue.emplace_back(PoolUpdateStatus::ERROR, "",
+                                                  std::string("runtime exception: ") + e.what());
+        }
+        pool_update_dispatcher.emit();
+    }
+    catch (const std::exception &e) {
+        {
+            std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
+            pool_update_status_queue.emplace_back(PoolUpdateStatus::ERROR, "",
+                                                  std::string("generic exception: ") + e.what());
+        }
+        pool_update_dispatcher.emit();
+    }
+    catch (const Glib::FileError &e) {
+        {
+            std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
+            pool_update_status_queue.emplace_back(PoolUpdateStatus::ERROR, "",
+                                                  std::string("file exception: ") + e.what());
+        }
+        pool_update_dispatcher.emit();
+    }
+    catch (...) {
+        {
+            std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
+            pool_update_status_queue.emplace_back(PoolUpdateStatus::ERROR, "", "unknown exception");
+        }
+        pool_update_dispatcher.emit();
+    }
+}
+
 
 PoolProjectManagerProcess *PoolProjectManagerAppWindow::find_process(const std::string &filename)
 {
@@ -562,9 +723,7 @@ void PoolProjectManagerAppWindow::handle_close()
 
 void PoolProjectManagerAppWindow::handle_update()
 {
-    if (pool_notebook) {
-        pool_notebook->pool_update();
-    }
+    pool_update();
 }
 
 void PoolProjectManagerAppWindow::handle_new_project()
@@ -1102,16 +1261,21 @@ bool PoolProjectManagerAppWindow::on_delete_event(GdkEventAny *ev)
     return !close_pool_or_project();
 }
 
+std::string PoolProjectManagerAppWindow::get_pool_base_path() const
+{
+    if (pool)
+        return pool->get_base_path();
+    else if (project)
+        return project->pool_directory;
+    else
+        throw std::runtime_error("can't locate pool");
+}
+
 PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManagerProcess::Type type,
                                                               const std::vector<std::string> &args, SpawnFlags flags)
 {
-    std::string pool_base_path;
-    if (pool)
-        pool_base_path = pool->get_base_path();
-    else if (project)
-        pool_base_path = project->pool_directory;
-    else
-        throw std::runtime_error("can't locate pool");
+    const auto pool_base_path = get_pool_base_path();
+
     if (find_process(args.at(0)) == nullptr || args.at(0).size() == 0) { // need to launch imp
 
         std::vector<std::string> env = {"HORIZON_POOL=" + pool_base_path,
@@ -1290,10 +1454,15 @@ std::string PoolProjectManagerAppWindow::get_filename() const
 PoolProjectManagerAppWindow::ClosePolicy PoolProjectManagerAppWindow::get_close_policy()
 {
     PoolProjectManagerAppWindow::ClosePolicy r;
+    if (pool_updating) {
+        r.can_close = false;
+        r.reason = "Pool is updating";
+        return r;
+    }
     if (pool_notebook) {
         auto close_prohibited = pool_notebook->get_close_prohibited();
         r.can_close = !close_prohibited;
-        r.reason = "Pool is updating or dialog is open";
+        r.reason = "Pool is busy or dialog is open";
         if (pool_notebook->get_needs_save())
             r.procs_need_save.push_back(uuid_pool_manager);
     }

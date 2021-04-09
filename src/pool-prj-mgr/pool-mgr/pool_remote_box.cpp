@@ -208,7 +208,7 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     pr_status_dispatcher.signal_notified().connect([this](const StatusDispatcher::Notification &n) {
         auto is_busy = n.status == StatusDispatcher::Status::BUSY;
         if (!is_busy) {
-            notebook.pool_updating = false;
+            notebook.pool_busy = false;
         }
         if (n.status == StatusDispatcher::Status::DONE) {
             update_prs();
@@ -230,7 +230,7 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
         logout_button->set_visible(gh_username.size() || login_succeeded == false);
         update_my_prs();
         if (!git_thread_busy) {
-            notebook.pool_updating = false;
+            notebook.pool_busy = false;
         }
 
         if (git_thread_mode == GitThreadMode::PULL_REQUEST && !git_thread_busy && !git_thread_error) {
@@ -416,10 +416,10 @@ void PoolRemoteBox::set_pr_update_mode(unsigned int pr, const std::string branch
         err == GIT_ENOTFOUND) {
         // branch not found
 
-        if (notebook.pool_updating)
+        if (notebook.pool_busy)
             return;
 
-        notebook.pool_updating = true;
+        notebook.pool_busy = true;
         git_thread_busy = true;
         git_thread_error = false;
         git_thread_mode = GitThreadMode::PULL_REQUEST_UPDATE_PREPARE;
@@ -642,9 +642,9 @@ PoolRemoteBox *PoolRemoteBox::create(PoolNotebook &nb)
 
 void PoolRemoteBox::handle_refresh_prs()
 {
-    if (notebook.pool_updating)
+    if (notebook.pool_busy)
         return;
-    notebook.pool_updating = true;
+    notebook.pool_busy = true;
 
     pr_status_dispatcher.reset("Starting…");
     std::thread thr(&PoolRemoteBox::refresh_prs_thread, this);
@@ -654,7 +654,7 @@ void PoolRemoteBox::handle_refresh_prs()
 
 void PoolRemoteBox::handle_create_pr()
 {
-    if (notebook.pool_updating)
+    if (notebook.pool_busy)
         return;
 
     auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
@@ -692,7 +692,7 @@ void PoolRemoteBox::handle_create_pr()
         git_config_set_string(repo_config, "user.email", dia.email_entry->get_text().c_str());
     }
 
-    notebook.pool_updating = true;
+    notebook.pool_busy = true;
     git_thread_busy = true;
     git_thread_error = false;
     git_thread_mode = GitThreadMode::PULL_REQUEST;
@@ -709,13 +709,13 @@ void PoolRemoteBox::handle_create_pr()
 
 void PoolRemoteBox::handle_update_pr()
 {
-    if (notebook.pool_updating)
+    if (notebook.pool_busy)
         return;
 
     if (!pr_update_nr)
         return;
 
-    notebook.pool_updating = true;
+    notebook.pool_busy = true;
     git_thread_busy = true;
     git_thread_error = false;
     git_thread_mode = GitThreadMode::PULL_REQUEST_UPDATE;
@@ -818,9 +818,9 @@ bool PoolRemoteBox::update_login()
         logout_button->hide();
     }
     else {
-        if (notebook.pool_updating)
+        if (notebook.pool_busy)
             return false;
-        notebook.pool_updating = true;
+        notebook.pool_busy = true;
         git_thread_busy = true;
         git_thread_error = false;
         git_thread_mode = GitThreadMode::LOGIN;

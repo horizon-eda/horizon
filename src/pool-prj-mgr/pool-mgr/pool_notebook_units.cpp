@@ -45,7 +45,7 @@ void PoolNotebook::handle_create_symbol_for_unit(const UUID &uu)
         sym.name = unit->name;
         sym.unit = unit;
         save_json_to_file(fn, sym.serialize());
-        pool_update(nullptr, {fn});
+        pool_update({fn});
         appwin.spawn(PoolProjectManagerProcess::Type::IMP_SYMBOL, {fn});
     }
 }
@@ -81,7 +81,7 @@ void PoolNotebook::handle_create_entity_for_unit(const UUID &uu)
         gate->name = "Main";
 
         save_json_to_file(fn, entity.serialize());
-        pool_update(nullptr, {fn});
+        pool_update({fn});
         appwin.spawn(PoolProjectManagerProcess::Type::ENTITY, {fn});
     }
 }

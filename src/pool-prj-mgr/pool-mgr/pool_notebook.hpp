@@ -12,7 +12,6 @@
 #include "pool/pool.hpp"
 #include "pool/pool_parametric.hpp"
 #include "util/editor_process.hpp"
-#include "pool-update/pool-update.hpp"
 #include <zmq.hpp>
 #include "util/win32_undef.hpp"
 #include "util/paned_state_store.hpp"
@@ -27,7 +26,7 @@ public:
     void populate();
     bool get_close_prohibited() const;
     void prepare_close();
-    void pool_update(std::function<void()> cb = nullptr, const std::vector<std::string> &filenames = {});
+    void pool_update(const std::vector<std::string> &filenames = {});
     bool get_needs_save() const;
     void save();
     void go_to(ObjectType type, const UUID &uu);
@@ -47,22 +46,8 @@ private:
     class ImportKiCadPackageWindow *import_kicad_package_window = nullptr;
     bool closing = false;
 
-    Glib::Dispatcher pool_update_dispatcher;
-    bool in_pool_update_handler = false;
-    std::mutex pool_update_status_queue_mutex;
-    std::list<std::tuple<PoolUpdateStatus, std::string, std::string>> pool_update_status_queue;
-    std::list<std::tuple<PoolUpdateStatus, std::string, std::string>> pool_update_error_queue;
-    bool pool_updating = false;
-    void pool_updated(bool success);
     void reload();
-    std::string pool_update_last_file;
-    std::string pool_update_last_info;
-    unsigned int pool_update_n_files = 0;
-    unsigned int pool_update_n_files_last = 0;
     std::function<void()> pool_update_done_cb = nullptr;
-    std::vector<std::string> pool_update_filenames;
-
-    void pool_update_thread();
 
     void show_duplicate_window(ObjectType ty, const UUID &uu);
 
@@ -147,6 +132,8 @@ private:
     class PoolCacheBox *cache_box = nullptr;
 
     UUID pool_uuid;
-    sigc::connection pool_item_edited_conn;
+
+    void pool_updated();
+    bool pool_busy = false;
 };
 } // namespace horizon

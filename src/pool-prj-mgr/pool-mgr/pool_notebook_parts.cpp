@@ -76,7 +76,7 @@ void PoolNotebook::handle_part_wizard()
         part_wizard->signal_hide().connect([this] {
             auto files_saved = part_wizard->get_files_saved();
             if (files_saved.size()) {
-                pool_update(nullptr, files_saved);
+                pool_update(files_saved);
             }
             delete part_wizard;
             part_wizard = nullptr;

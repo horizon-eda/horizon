@@ -45,6 +45,12 @@ public:
         return s_signal_pool_items_edited;
     }
 
+    typedef sigc::signal<void, std::string> type_signal_pool_updated;
+    type_signal_pool_updated signal_pool_updated()
+    {
+        return s_signal_pool_updated;
+    }
+
 protected:
     // Override default signal handlers:
     void on_activate() override;
@@ -70,6 +76,7 @@ private:
     class LogWindow *log_window = nullptr;
 
     type_signal_pool_items_edited s_signal_pool_items_edited;
+    type_signal_pool_updated s_signal_pool_updated;
 
 
 public:

@@ -16,6 +16,8 @@
 namespace horizon {
 using json = nlohmann::json;
 
+enum class PoolUpdateStatus;
+
 class PoolProjectManagerAppWindow : public Gtk::ApplicationWindow {
     friend class PoolProjectManagerViewProject;
     friend class PoolProjectManagerViewCreateProject;
@@ -78,6 +80,8 @@ public:
     void open_pool(const std::string &pool_json, ObjectType type = ObjectType::INVALID, const UUID &uu = UUID());
     void update_pool_cache_status_now();
     const std::string &get_project_title() const;
+
+    void pool_update(const std::vector<std::string> &filenames = {});
 
     PoolProjectManagerApplication &app;
 
@@ -183,10 +187,28 @@ private:
     bool migrate_project(const std::string &path);
     std::string project_title;
 
-public:
-    zmq::context_t &zctx;
+    Glib::Dispatcher pool_update_dispatcher;
+    bool in_pool_update_handler = false;
+    std::mutex pool_update_status_queue_mutex;
+    std::list<std::tuple<PoolUpdateStatus, std::string, std::string>> pool_update_status_queue;
+    std::list<std::tuple<PoolUpdateStatus, std::string, std::string>> pool_update_error_queue;
+    bool pool_updating = false;
+    void pool_updated(bool success);
+    std::string pool_update_last_file;
+    std::string pool_update_last_info;
+    unsigned int pool_update_n_files = 0;
+    unsigned int pool_update_n_files_last = 0;
+    std::vector<std::string> pool_update_filenames;
+
+    void pool_update_thread();
+    void handle_pool_update_progress();
     void set_pool_updating(bool v, bool success);
     void set_pool_update_status_text(const std::string &txt);
     void set_pool_update_progress(float progress);
+
+    std::string get_pool_base_path() const;
+
+public:
+    zmq::context_t &zctx;
 };
 }; // namespace horizon

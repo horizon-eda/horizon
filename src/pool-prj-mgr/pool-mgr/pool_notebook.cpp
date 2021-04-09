@@ -11,7 +11,6 @@
 #include "pool_remote_box.hpp"
 #include "pool_git_box.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app.hpp"
-#include "pool_update_error_dialog.hpp"
 #include "pool_settings_box.hpp"
 #include "pool_cache_box.hpp"
 #include "pool/pool_manager.hpp"
@@ -28,17 +27,10 @@
 
 namespace horizon {
 
-void PoolNotebook::pool_updated(bool success)
+void PoolNotebook::pool_updated()
 {
-    pool_updating = false;
-    if (pool_update_error_queue.size()) {
-        auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
-        PoolUpdateErrorDialog dia(top, pool_update_error_queue);
-        dia.run();
-    }
-    appwin.set_pool_updating(false, success);
     reload();
-    if (success && pool_update_done_cb) {
+    if (pool_update_done_cb) {
         pool_update_done_cb();
         pool_update_done_cb = nullptr;
     }
@@ -178,7 +170,7 @@ void PoolNotebook::handle_duplicate_item(ObjectType ty, const UUID &uu)
         default:
             throw std::runtime_error("Can't duplicate " + object_descriptions.at(ty).name);
         }
-        pool_update(nullptr, {fn});
+        pool_update({fn});
         appwin.spawn(editor_type_map.at(ty), {fn});
     }
 }
@@ -232,22 +224,6 @@ void PoolNotebook::add_preview_stack_switcher(Gtk::Box *obox, Gtk::Stack *stack)
     obox->pack_end(*bbox, false, false, 0);
 }
 
-class SetReset {
-public:
-    SetReset(bool &v) : value(v)
-    {
-        value = true;
-    }
-
-    ~SetReset()
-    {
-        value = false;
-    }
-
-private:
-    bool &value;
-};
-
 PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWindow &aw)
     : Gtk::Notebook(), appwin(aw), base_path(bp), pool(bp), pool_parametric(bp)
 {
@@ -260,60 +236,12 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
                                        ->get_relative_path(Gio::File::create_for_path(filename))
                                        .size();
                 if (in_pool)
-                    pool_update(nullptr, {filename});
+                    pool_update({filename});
                 else
                     reload();
             },
             *this));
 
-    pool_item_edited_conn = appwin.app.signal_pool_items_edited().connect(
-            sigc::track_obj([this](const auto &filenames) { pool_update(nullptr, filenames); }, *this));
-
-    {
-        pool_update_dispatcher.connect([this] {
-            if (in_pool_update_handler)
-                return;
-            SetReset rst(in_pool_update_handler);
-            decltype(pool_update_status_queue) my_queue;
-            {
-                std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
-                my_queue.splice(my_queue.begin(), pool_update_status_queue);
-            }
-            if (my_queue.size()) {
-                const auto last_info = pool_update_last_info;
-                for (const auto &[last_status, last_filename, last_msg] : my_queue) {
-                    if (last_status == PoolUpdateStatus::DONE) {
-                        pool_updated(true);
-                        if (pool_update_filenames.size() == 0) // only for full update
-                            pool_update_n_files_last = pool_update_n_files;
-                    }
-                    else if (last_status == PoolUpdateStatus::FILE) {
-                        pool_update_last_file = last_filename;
-                        pool_update_n_files++;
-                    }
-                    else if (last_status == PoolUpdateStatus::INFO) {
-                        pool_update_last_info = last_msg;
-                    }
-                    else if (last_status == PoolUpdateStatus::FILE_ERROR) {
-                        pool_update_error_queue.emplace_back(last_status, last_filename, last_msg);
-                    }
-                    else if (last_status == PoolUpdateStatus::ERROR) {
-                        appwin.set_pool_update_status_text(last_msg + " Last file: " + pool_update_last_file);
-                        pool_updated(false);
-                        return;
-                    }
-                }
-                if (pool_update_last_info != last_info)
-                    appwin.set_pool_update_status_text(pool_update_last_info);
-                if (pool_update_n_files_last && pool_update_filenames.size() == 0) { // only for full update
-                    appwin.set_pool_update_progress((float)pool_update_n_files / pool_update_n_files_last);
-                }
-                else {
-                    appwin.set_pool_update_progress(-1);
-                }
-            }
-        });
-    }
     remote_repo = Glib::build_filename(base_path, ".remote");
     if (!Glib::file_test(remote_repo, Glib::FILE_TEST_IS_DIR)) {
         remote_repo = "";
@@ -392,6 +320,17 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
     for (auto br : browsers) {
         add_context_menu(br.second);
     }
+
+    appwin.app.signal_pool_updated().connect(sigc::track_obj(
+            [this](const std::string &p) {
+                for (const auto &[it_path, it_uu] : pool.get_actually_included_pools(true)) {
+                    if (it_path == p) {
+                        pool_updated();
+                        return;
+                    }
+                }
+            },
+            *this));
 }
 
 void PoolNotebook::create_paned_state_store(Gtk::Paned *paned, const std::string &prefix)
@@ -418,7 +357,7 @@ void PoolNotebook::add_context_menu(PoolBrowser *br)
     br->add_copy_name_context_menu_item();
     br->add_context_menu_item("Update this item", [this, ty](const UUID &uu) {
         auto filename = pool.get_filename(ty, uu);
-        pool_update(nullptr, {filename});
+        pool_update({filename});
     });
     br->add_context_menu_item(
             "Open in included pool",
@@ -606,7 +545,7 @@ void PoolNotebook::show_duplicate_window(ObjectType ty, const UUID &uu)
         duplicate_window->signal_hide().connect([this] {
             auto files_duplicated = duplicate_window->get_filenames();
             if (files_duplicated.size()) {
-                pool_update(nullptr, files_duplicated);
+                pool_update(files_duplicated);
             }
             delete duplicate_window;
             duplicate_window = nullptr;
@@ -619,8 +558,7 @@ void PoolNotebook::show_duplicate_window(ObjectType ty, const UUID &uu)
 
 bool PoolNotebook::get_close_prohibited() const
 {
-    return part_wizard || pool_updating || duplicate_window || kicad_symbol_import_wizard
-           || import_kicad_package_window;
+    return pool_busy || part_wizard || duplicate_window || kicad_symbol_import_wizard || import_kicad_package_window;
 }
 
 void PoolNotebook::prepare_close()
@@ -646,81 +584,17 @@ void PoolNotebook::save()
         settings_box->save();
 }
 
-void PoolNotebook::pool_update_thread()
-{
-    std::cout << "hello from thread" << std::endl;
-
-    try {
-        clock_t begin = clock();
-        horizon::pool_update(
-                pool.get_base_path(),
-                [this](PoolUpdateStatus st, std::string filename, std::string msg) {
-                    {
-                        std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
-                        pool_update_status_queue.emplace_back(st, filename, msg);
-                    }
-                    pool_update_dispatcher.emit();
-                },
-                true, pool_update_filenames);
-        clock_t end = clock();
-        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-        std::cout << "pool update took " << elapsed_secs << std::endl;
-    }
-    catch (const std::runtime_error &e) {
-        {
-            std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
-            pool_update_status_queue.emplace_back(PoolUpdateStatus::ERROR, "",
-                                                  std::string("runtime exception: ") + e.what());
-        }
-        pool_update_dispatcher.emit();
-    }
-    catch (const std::exception &e) {
-        {
-            std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
-            pool_update_status_queue.emplace_back(PoolUpdateStatus::ERROR, "",
-                                                  std::string("generic exception: ") + e.what());
-        }
-        pool_update_dispatcher.emit();
-    }
-    catch (const Glib::FileError &e) {
-        {
-            std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
-            pool_update_status_queue.emplace_back(PoolUpdateStatus::ERROR, "",
-                                                  std::string("file exception: ") + e.what());
-        }
-        pool_update_dispatcher.emit();
-    }
-    catch (...) {
-        {
-            std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
-            pool_update_status_queue.emplace_back(PoolUpdateStatus::ERROR, "", "unknown exception");
-        }
-        pool_update_dispatcher.emit();
-    }
-}
-
-void PoolNotebook::pool_update(std::function<void()> cb, const std::vector<std::string> &filenames)
+void PoolNotebook::pool_update(const std::vector<std::string> &filenames)
 {
     if (closing)
         return;
 
-    if (pool_updating)
-        return;
-
     if (filenames.size()) {
-        pool_item_edited_conn.block();
         appwin.app.signal_pool_items_edited().emit(filenames);
-        pool_item_edited_conn.unblock();
     }
-    appwin.set_pool_updating(true, true);
-    pool_update_n_files = 0;
-    pool_updating = true;
-    pool_update_done_cb = cb;
-    pool_update_filenames = filenames;
-    pool_update_status_queue.clear();
-    pool_update_error_queue.clear();
-    std::thread thr(&PoolNotebook::pool_update_thread, this);
-    thr.detach();
+    else {
+        appwin.pool_update();
+    }
 }
 
 void PoolNotebook::install_search_once(Gtk::Widget *widget, PoolBrowser *browser)

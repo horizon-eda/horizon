@@ -28,7 +28,7 @@ void PoolNotebook::handle_create_decal()
         std::string fn = EditorWindow::fix_filename(chooser->get_filename());
         Decal dec(horizon::UUID::random());
         save_json_to_file(fn, dec.serialize());
-        pool_update(nullptr, {fn});
+        pool_update({fn});
         appwin.spawn(PoolProjectManagerProcess::Type::IMP_DECAL, {fn});
     }
 }
