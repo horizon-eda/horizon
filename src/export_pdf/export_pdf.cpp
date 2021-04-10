@@ -47,7 +47,7 @@ void export_pdf(const class Schematic &sch, const class PDFExportSettings &setti
     bool first_outline_item = true;
 #endif
 
-    CanvasPDF ca(&painter, font, settings);
+    CanvasPDF ca(painter, *font, settings);
     ca.use_layer_colors = false;
     for (const auto sheet : sheets) {
         cb("Exporting sheet " + format_m_of_n(sheet->index, sheets.size()), ((double)sheet->index) / sheets.size());

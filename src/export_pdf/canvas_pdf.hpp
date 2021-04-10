@@ -16,7 +16,7 @@ template <typename T> static T to_pt(T x)
 
 class CanvasPDF : public Canvas {
 public:
-    CanvasPDF(PoDoFo::PdfPainterMM *painter, PoDoFo::PdfFont *font, const class PDFExportSettings &settings);
+    CanvasPDF(PoDoFo::PdfPainterMM &painter, PoDoFo::PdfFont &font, const class PDFExportSettings &settings);
     void push() override
     {
     }
@@ -28,8 +28,8 @@ public:
     bool use_layer_colors = false;
 
 private:
-    PoDoFo::PdfPainterMM *painter;
-    PoDoFo::PdfFont *font;
+    PoDoFo::PdfPainterMM &painter;
+    PoDoFo::PdfFont &font;
     const PDFExportSettings &settings;
     const PoDoFo::PdfFontMetrics *metrics;
     void img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, int layer, bool tr) override;

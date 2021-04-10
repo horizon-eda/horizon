@@ -10,8 +10,8 @@
 namespace horizon {
 
 
-CanvasPDF::CanvasPDF(PoDoFo::PdfPainterMM *p, PoDoFo::PdfFont *f, const PDFExportSettings &s)
-    : Canvas::Canvas(), painter(p), font(f), settings(s), metrics(font->GetFontMetrics())
+CanvasPDF::CanvasPDF(PoDoFo::PdfPainterMM &p, PoDoFo::PdfFont &f, const PDFExportSettings &s)
+    : Canvas::Canvas(), painter(p), font(f), settings(s), metrics(font.GetFontMetrics())
 {
     img_mode = true;
     Appearance apperarance;
@@ -38,9 +38,9 @@ void CanvasPDF::img_line(const Coordi &p0, const Coordi &p1, const uint64_t widt
 {
     if (!pdf_layer_visible(layer))
         return;
-    painter->Save();
+    painter.Save();
     auto w = std::max(width, settings.min_line_width);
-    painter->SetStrokeWidthMM(to_um(w));
+    painter.SetStrokeWidthMM(to_um(w));
     Coordi rp0 = p0;
     Coordi rp1 = p1;
     if (tr) {
@@ -48,9 +48,9 @@ void CanvasPDF::img_line(const Coordi &p0, const Coordi &p1, const uint64_t widt
         rp1 = transform.transform(p1);
     }
     auto color = get_pdf_layer_color(layer);
-    painter->SetStrokingColor(color.r, color.g, color.b);
-    painter->DrawLineMM(to_um(rp0.x), to_um(rp0.y), to_um(rp1.x), to_um(rp1.y));
-    painter->Restore();
+    painter.SetStrokingColor(color.r, color.g, color.b);
+    painter.DrawLineMM(to_um(rp0.x), to_um(rp0.y), to_um(rp1.x), to_um(rp1.y));
+    painter.Restore();
 }
 
 void CanvasPDF::img_draw_text(const Coordf &p, float size, const std::string &rtext, int angle, bool flip,
@@ -83,7 +83,7 @@ void CanvasPDF::img_draw_text(const Coordf &p, float size, const std::string &rt
     if (mirror) {
         lineskip *= -1;
     }
-    font->SetFontSize(to_pt(size) * 1.6);
+    font.SetFontSize(to_pt(size) * 1.6);
     while (std::getline(ss, line, '\n')) {
         line = TextData::trim(line);
         int64_t line_width = metrics->StringWidthMM(line.c_str()) * 1000;
@@ -120,14 +120,14 @@ void CanvasPDF::img_draw_text(const Coordf &p, float size, const std::string &rt
             }
         }
         double fangle = tf.get_angle_rad();
-        painter->Save();
+        painter.Save();
         Coordi p0(xshift, yshift);
         Coordi pt = tf.transform(p0);
 
-        painter->SetTransformationMatrix(cos(fangle), sin(fangle), -sin(fangle), cos(fangle), to_pt(pt.x), to_pt(pt.y));
+        painter.SetTransformationMatrix(cos(fangle), sin(fangle), -sin(fangle), cos(fangle), to_pt(pt.x), to_pt(pt.y));
         PoDoFo::PdfString pstr(reinterpret_cast<const PoDoFo::pdf_utf8 *>(line.c_str()));
-        painter->DrawTextMM(0, to_um(size) / -2, pstr);
-        painter->Restore();
+        painter.DrawTextMM(0, to_um(size) / -2, pstr);
+        painter.Restore();
 
         i_line++;
     }
@@ -137,11 +137,11 @@ void CanvasPDF::img_polygon(const Polygon &ipoly, bool tr)
 {
     if (!pdf_layer_visible(ipoly.layer))
         return;
-    painter->Save();
+    painter.Save();
     auto color = get_pdf_layer_color(ipoly.layer);
-    painter->SetColor(color.r, color.g, color.b);
-    painter->SetStrokingColor(color.r, color.g, color.b);
-    painter->SetStrokeWidthMM(to_um(settings.min_line_width));
+    painter.SetColor(color.r, color.g, color.b);
+    painter.SetStrokingColor(color.r, color.g, color.b);
+    painter.SetStrokeWidthMM(to_um(settings.min_line_width));
     auto poly = ipoly.remove_arcs(64);
     if (poly.usage == nullptr) { // regular patch
         bool first = true;
@@ -150,16 +150,16 @@ void CanvasPDF::img_polygon(const Polygon &ipoly, bool tr)
             if (tr)
                 p = transform.transform(p);
             if (first)
-                painter->MoveToMM(to_um(p.x), to_um(p.y));
+                painter.MoveToMM(to_um(p.x), to_um(p.y));
             else
-                painter->LineToMM(to_um(p.x), to_um(p.y));
+                painter.LineToMM(to_um(p.x), to_um(p.y));
             first = false;
         }
-        painter->ClosePath();
+        painter.ClosePath();
         if (fill)
-            painter->Fill();
+            painter.Fill();
         else
-            painter->Stroke();
+            painter.Stroke();
     }
     else if (auto plane = dynamic_cast<const Plane *>(ipoly.usage.ptr)) {
         for (const auto &frag : plane->fragments) {
@@ -170,32 +170,32 @@ void CanvasPDF::img_polygon(const Polygon &ipoly, bool tr)
                     if (tr)
                         p = transform.transform(p);
                     if (first)
-                        painter->MoveToMM(to_um(p.x), to_um(p.y));
+                        painter.MoveToMM(to_um(p.x), to_um(p.y));
                     else
-                        painter->LineToMM(to_um(p.x), to_um(p.y));
+                        painter.LineToMM(to_um(p.x), to_um(p.y));
                     first = false;
                 }
             }
-            painter->ClosePath();
+            painter.ClosePath();
         }
         if (fill)
-            painter->Fill(true);
+            painter.Fill(true);
         else
-            painter->Stroke();
+            painter.Stroke();
     }
-    painter->Restore();
+    painter.Restore();
 }
 
 void CanvasPDF::img_hole(const Hole &hole)
 {
     if (!pdf_layer_visible(PDFExportSettings::HOLES_LAYER))
         return;
-    painter->Save();
+    painter.Save();
 
     auto color = get_pdf_layer_color(PDFExportSettings::HOLES_LAYER);
-    painter->SetColor(color.r, color.g, color.b);
-    painter->SetStrokingColor(color.r, color.g, color.b);
-    painter->SetStrokeWidthMM(to_um(settings.min_line_width));
+    painter.SetColor(color.r, color.g, color.b);
+    painter.SetStrokingColor(color.r, color.g, color.b);
+    painter.SetStrokeWidthMM(to_um(settings.min_line_width));
 
     auto hole2 = hole;
     if (settings.set_holes_size) {
@@ -207,17 +207,17 @@ void CanvasPDF::img_hole(const Hole &hole)
         Coordi p = it.position;
         p = transform.transform(p);
         if (first)
-            painter->MoveToMM(to_um(p.x), to_um(p.y));
+            painter.MoveToMM(to_um(p.x), to_um(p.y));
         else
-            painter->LineToMM(to_um(p.x), to_um(p.y));
+            painter.LineToMM(to_um(p.x), to_um(p.y));
         first = false;
     }
-    painter->ClosePath();
+    painter.ClosePath();
     if (fill)
-        painter->Fill(true);
+        painter.Fill(true);
     else
-        painter->Stroke();
-    painter->Restore();
+        painter.Stroke();
+    painter.Restore();
 }
 
 void CanvasPDF::request_push()

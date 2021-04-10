@@ -28,7 +28,7 @@ void export_pdf(const class Board &brd, const class PDFExportSettings &settings,
 
     PDFExportSettings my_settings(settings);
     my_settings.include_text = false; // need to work out text placement
-    CanvasPDF ca(&painter, font, my_settings);
+    CanvasPDF ca(painter, *font, my_settings);
 
     cb("Exporting Board", 0);
     int64_t border_width = 1_mm;
