@@ -85,6 +85,7 @@ void CanvasPDF::img_draw_text(const Coordf &p, float size, const std::string &rt
     }
     font->SetFontSize(to_pt(size) * 1.6);
     while (std::getline(ss, line, '\n')) {
+        line = TextData::trim(line);
         int64_t line_width = metrics->StringWidthMM(line.c_str()) * 1000;
 
         Placement tf;

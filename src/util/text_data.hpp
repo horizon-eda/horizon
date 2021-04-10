@@ -27,5 +27,7 @@ public:
     int xmin = 100;
     int xmax = 0;
     int xright = 0;
+
+    static std::string trim(const std::string &s);
 };
 } // namespace horizon

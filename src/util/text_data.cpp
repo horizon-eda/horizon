@@ -239,4 +239,24 @@ TextData::TextData(const std::string &str, Font font)
         lines.emplace_back(std::piecewise_construct, std::forward_as_tuple(overbar_start, bar_y),
                            std::forward_as_tuple(x0, bar_y));
 }
+
+std::string TextData::trim(const std::string &s)
+{
+    char last = 0;
+    std::string out;
+    for (const auto c : s) {
+        if (c == '~') {
+            if (last == '~')
+                out.append(1, '~');
+            else
+                ; // eat it
+        }
+        else {
+            out.append(1, c);
+        }
+        last = c;
+    }
+    return out;
+}
+
 } // namespace horizon
