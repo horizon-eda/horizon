@@ -3,6 +3,7 @@
 #include <podofo/podofo.h>
 #include "util/util.hpp"
 #include "schematic/schematic.hpp"
+#include "export_pdf_util.hpp"
 
 namespace horizon {
 
@@ -59,7 +60,17 @@ void export_pdf(const class Schematic &sch, const class PDFExportSettings &setti
         painter.SetColor(0, 0, 0);
         painter.SetTextRenderingMode(PoDoFo::ePdfTextRenderingMode_Invisible);
 
+        for (const auto &[uu, pic] : sheet->pictures) {
+            if (!pic.on_top)
+                render_picture(document, painter, pic);
+        }
+
         ca.update(*sheet);
+
+        for (const auto &[uu, pic] : sheet->pictures) {
+            if (pic.on_top)
+                render_picture(document, painter, pic);
+        }
 
         painter.FinishPage();
 

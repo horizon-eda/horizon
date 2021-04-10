@@ -3,6 +3,7 @@
 #include <podofo/podofo.h>
 #include "util/util.hpp"
 #include "board/board.hpp"
+#include "export_pdf_util.hpp"
 
 namespace horizon {
 
@@ -64,6 +65,10 @@ void export_pdf(const class Board &brd, const class PDFExportSettings &settings,
     if (settings.reverse_layers)
         std::reverse(layers_sorted.begin(), layers_sorted.end());
 
+    for (const auto &[uu, pic] : brd.pictures) {
+        if (!pic.on_top)
+            render_picture(document, painter, pic);
+    }
 
     unsigned int i_layer = 0;
     for (int layer : layers_sorted) {
@@ -73,6 +78,11 @@ void export_pdf(const class Board &brd, const class PDFExportSettings &settings,
         cb("Exporting layer " + format_m_of_n(i_layer, layers_sorted.size()), ((double)i_layer) / layers_sorted.size());
         ca.update(brd);
         i_layer++;
+    }
+
+    for (const auto &[uu, pic] : brd.pictures) {
+        if (pic.on_top)
+            render_picture(document, painter, pic);
     }
 
     painter.FinishPage();

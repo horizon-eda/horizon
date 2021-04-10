@@ -376,6 +376,7 @@ SRC_IMP = \
 	src/export_pdf/canvas_pdf.cpp\
 	src/export_pdf/export_pdf.cpp\
 	src/export_pdf/export_pdf_board.cpp\
+	src/export_pdf/export_pdf_util.cpp\
 	src/imp/keyseq_dialog.cpp\
 	src/canvas/canvas_patch.cpp\
 	src/export_gerber/gerber_writer.cpp\
@@ -838,6 +839,7 @@ SRC_SHARED = $(SRC_COMMON) \
 	src/export_pdf/canvas_pdf.cpp \
 	src/export_pdf/export_pdf.cpp \
 	src/export_pdf/export_pdf_board.cpp \
+	src/export_pdf/export_pdf_util.cpp\
 	src/export_pnp/export_pnp.cpp \
 	src/canvas/canvas.cpp \
 	src/canvas/appearance.cpp \

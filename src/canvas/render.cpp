@@ -1590,6 +1590,8 @@ void Canvas::render(const Picture &pic)
                                   Coordf(1_mm, 1_mm), 0);
         return;
     }
+    if (img_mode)
+        return;
     pictures.emplace_back();
     auto &x = pictures.back();
     x.angle = pic.placement.get_angle_rad();
@@ -1601,8 +1603,6 @@ void Canvas::render(const Picture &pic)
     x.opacity = pic.opacity;
     float w = pic.data->width * pic.px_size;
     float h = pic.data->height * pic.px_size;
-    if (img_mode)
-        return;
     selectables.append_angled(pic.uuid, ObjectType::PICTURE, pic.placement.shift, pic.placement.shift, {w, h},
                               pic.placement.get_angle_rad());
 }
