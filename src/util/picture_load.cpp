@@ -6,6 +6,7 @@
 #include "util/util.hpp"
 #include <algorithm>
 #include <png.h>
+#include "logger/logger.hpp"
 
 namespace horizon {
 
@@ -185,10 +186,20 @@ void pictures_load(const std::list<std::map<UUID, Picture> *> &pictures, const s
             }
             else {
                 auto pic_filename = build_pic_filename(dir, it.second.data_uuid, suffix);
-                if (Glib::file_test(pic_filename, Glib::FILE_TEST_IS_REGULAR)) {
-                    auto data = read_png(pic_filename, it.second.data_uuid);
-                    it.second.data = data;
-                    pictures_loaded.emplace(it.second.data_uuid, data);
+                try {
+                    if (Glib::file_test(pic_filename, Glib::FILE_TEST_IS_REGULAR)) {
+                        auto data = read_png(pic_filename, it.second.data_uuid);
+                        it.second.data = data;
+                        pictures_loaded.emplace(it.second.data_uuid, data);
+                    }
+                }
+                catch (const std::exception &e) {
+                    Logger::log_warning("error loading picture " + (std::string)it.second.data_uuid,
+                                        Logger::Domain::PICTURE, e.what());
+                }
+                catch (...) {
+                    Logger::log_warning("error loading picture " + (std::string)it.second.data_uuid,
+                                        Logger::Domain::PICTURE);
                 }
             }
         }
@@ -260,17 +271,39 @@ void pictures_save(const std::list<const std::map<UUID, Picture> *> &pictures, c
     for (const auto &it_map : pictures) {
         for (const auto &it : *it_map) {
             if (it.second.data) {
-                auto data = it.second.data;
-                pictures_to_delete.erase(it.second.data->uuid);
-                auto pic_filename = build_pic_filename(pic_dir, it.second.data_uuid, suffix);
-                if (!Glib::file_test(pic_filename, Glib::FILE_TEST_IS_REGULAR)) {
-                    write_png_to_file(pic_filename, *data);
+                try {
+                    auto data = it.second.data;
+                    pictures_to_delete.erase(it.second.data->uuid);
+                    auto pic_filename = build_pic_filename(pic_dir, it.second.data_uuid, suffix);
+                    if (!Glib::file_test(pic_filename, Glib::FILE_TEST_IS_REGULAR)) {
+                        write_png_to_file(pic_filename, *data);
+                    }
+                }
+                catch (const std::exception &e) {
+                    Logger::log_warning("error saving picture " + (std::string)it.second.data_uuid,
+                                        Logger::Domain::PICTURE, e.what());
+                }
+                catch (...) {
+                    Logger::log_warning("error saving picture " + (std::string)it.second.data_uuid,
+                                        Logger::Domain::PICTURE);
                 }
             }
         }
     }
     for (const auto &it : pictures_to_delete) {
-        Gio::File::create_for_path(build_pic_filename(pic_dir, it, suffix))->remove();
+        const auto filename = build_pic_filename(pic_dir, it, suffix);
+        try {
+            Gio::File::create_for_path(filename)->remove();
+        }
+        catch (const std::exception &e) {
+            Logger::log_warning("error deleting picture " + filename, Logger::Domain::PICTURE, e.what());
+        }
+        catch (const Gio::Error &e) {
+            Logger::log_warning("error deleting picture " + filename, Logger::Domain::PICTURE, e.what());
+        }
+        catch (...) {
+            Logger::log_warning("error deleting picture " + filename, Logger::Domain::PICTURE);
+        }
     }
 }
 
