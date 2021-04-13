@@ -2177,5 +2177,33 @@
             ]
         },
         "tool": "NONE"
+    },
+    {
+        "action": "NEXT_SHEET",
+        "keys": {
+            "2": [
+                [
+                    {
+                        "key": "Page_Down",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "PREV_SHEET",
+        "keys": {
+            "2": [
+                [
+                    {
+                        "key": "Page_Up",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
     }
 ]

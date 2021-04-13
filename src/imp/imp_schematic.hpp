@@ -52,6 +52,7 @@ private:
     void handle_tool_change(ToolID id) override;
     void handle_move_to_other_sheet(const ActionConnection &conn);
     void handle_highlight_group_tag(const ActionConnection &conn);
+    void handle_next_prev_sheet(const ActionConnection &conn);
     std::string last_pdf_filename;
 
     std::map<UUID, std::pair<float, Coordf>> sheet_views;

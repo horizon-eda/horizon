@@ -67,6 +67,19 @@ void ImpSchematic::handle_remove_sheet(Sheet *sh)
     canvas_update();
 }
 
+void ImpSchematic::handle_next_prev_sheet(const ActionConnection &conn)
+{
+    const auto &sch = *core_schematic.get_schematic();
+    const int sheet_idx_current = core_schematic.get_sheet()->index;
+    const int inc = conn.action_id == ActionID::PREV_SHEET ? -1 : 1;
+    const int sheet_idx_next = sheet_idx_current + inc;
+    auto next_sheet = std::find_if(sch.sheets.begin(), sch.sheets.end(),
+                                   [sheet_idx_next](const auto &x) { return (int)x.second.index == sheet_idx_next; });
+    if (next_sheet != sch.sheets.end()) {
+        sheet_box->select_sheet(next_sheet->second.uuid);
+    }
+}
+
 void ImpSchematic::update_highlights()
 {
     std::map<UUID, std::set<ObjectRef>> highlights_for_sheet;
@@ -319,6 +332,9 @@ void ImpSchematic::construct()
             this->send_json(j);
         }
     });
+
+    connect_action(ActionID::PREV_SHEET, sigc::mem_fun(*this, &ImpSchematic::handle_next_prev_sheet));
+    connect_action(ActionID::NEXT_SHEET, sigc::mem_fun(*this, &ImpSchematic::handle_next_prev_sheet));
 
     if (sockets_connected) {
         connect_action(ActionID::TO_BOARD, [this](const auto &conn) {

@@ -917,6 +917,14 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::TOOL, ToolID::EDIT_CUSTOM_VALUE},
          {"Edit custom value", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::NEXT_SHEET, ToolID::NONE},
+         {"Next sheet", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::PREV_SHEET, ToolID::NONE},
+         {"Previous sheet", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1042,6 +1050,8 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(ROTATE_VIEW_RIGHT),
         ACTION_LUT_ITEM(ROTATE_VIEW_RESET),
         ACTION_LUT_ITEM(ROTATE_VIEW),
+        ACTION_LUT_ITEM(NEXT_SHEET),
+        ACTION_LUT_ITEM(PREV_SHEET),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

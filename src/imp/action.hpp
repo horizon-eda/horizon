@@ -104,6 +104,8 @@ enum class ActionID {
     ROTATE_VIEW_RIGHT,
     ROTATE_VIEW_RESET,
     ROTATE_VIEW,
+    NEXT_SHEET,
+    PREV_SHEET,
 };
 
 using ActionToolID = std::pair<ActionID, ToolID>;
