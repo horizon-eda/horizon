@@ -1139,6 +1139,8 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
         }
     }
 
+    pool_update_n_files_last = 0;
+
     auto basename = file->get_basename();
     if (basename == "pool.json") {
         try {
