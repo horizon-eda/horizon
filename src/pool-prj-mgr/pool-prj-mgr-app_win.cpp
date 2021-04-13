@@ -1051,6 +1051,34 @@ bool PoolProjectManagerAppWindow::check_schema_update(const std::string &base_pa
     return true;
 }
 
+void PoolProjectManagerAppWindow::check_pool_update(const std::string &base_path)
+{
+    Pool my_pool(base_path);
+    for (auto &[bp, uu] : my_pool.get_actually_included_pools(false)) {
+        Pool inc_pool(bp);
+        if (inc_pool.db.get_user_version() == my_pool.db.get_user_version()) {
+            {
+                SQLite::Query q(my_pool.db, "ATTACH ? as inc");
+                q.bind(1, (fs::u8path(bp) / "pool.db").u8string());
+                q.step();
+            }
+            {
+                SQLite::Query q(my_pool.db,
+                                "SELECT a.time > b.time FROM inc.last_updated AS a LEFT JOIN last_updated AS b");
+                if (q.step()) {
+                    if (q.get<int>(0)) {
+                        pool_update();
+                        return;
+                    }
+                }
+            }
+
+            my_pool.db.execute("DETACH inc");
+        }
+    }
+}
+
+
 bool PoolProjectManagerAppWindow::migrate_project(const std::string &path)
 {
     auto prj = Project::new_from_file(path);
@@ -1189,6 +1217,8 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
         project = std::make_unique<Project>(Project::new_from_file(path));
         project_filename = path;
         check_schema_update(project->pool_directory);
+
+        check_pool_update(project->pool_directory);
 
         {
             project_read_only = false;
