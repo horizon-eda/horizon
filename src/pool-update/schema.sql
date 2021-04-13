@@ -1,4 +1,4 @@
-PRAGMA user_version=19; --keep in sync with pool.cpp
+PRAGMA user_version=20; --keep in sync with pool.cpp
 
 DROP TABLE IF EXISTS "units";
 CREATE TABLE "units" (
@@ -166,3 +166,9 @@ CREATE VIEW "all_items_view" AS
 DROP VIEW IF EXISTS "tags_view";
 CREATE VIEW "tags_view" AS
 	SELECT type as type, uuid as uuid, GROUP_CONCAT(tag, ' ') as tags from tags group by tags.uuid, tags.type;
+
+DROP TABLE IF EXISTS "last_updated";
+CREATE TABLE "last_updated" (
+	'time'	DATETIME NOT NULL UNIQUE
+);
+INSERT INTO last_updated VALUES ('2000-01-01');

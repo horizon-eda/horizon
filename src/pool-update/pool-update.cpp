@@ -179,6 +179,12 @@ void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb, 
         else if (parts_updated.size())
             pool_update_parametric(updater.get_pool(), status_cb, parts_updated);
     }
+
+    {
+        SQLite::Query q(updater.get_pool().get_db(), "UPDATE last_updated SET time = datetime()");
+        q.step();
+    }
+
     status_cb(PoolUpdateStatus::INFO, "", "Done");
     status_cb(PoolUpdateStatus::DONE, "", "");
 }
