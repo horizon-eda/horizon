@@ -391,8 +391,7 @@ bool Schematic::place_bipole_on_line(Sheet *sheet, SchematicSymbol *sym)
             auto pin1_pos = sym->placement.transform(pin1.position);
             auto pin2_pos = sym->placement.transform(pin2.position);
             LineNet *line = nullptr;
-            for (auto it : sheet->net_lines) {
-                auto &li = it.second;
+            for (auto &[li_uu, li] : sheet->net_lines) {
                 if ((li.coord_on_line(pin1_pos) || li.from.get_position() == pin1_pos
                      || li.to.get_position() == pin1_pos)
                     && (li.coord_on_line(pin2_pos) || li.from.get_position() == pin2_pos
