@@ -539,16 +539,7 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
                 if (pic) {
                     return ToolResponse::commit();
                 }
-                merge_selected_junctions();
-                for (const auto &it : selection) {
-                    if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-                        auto sym = doc.c->get_schematic_symbol(it.uuid);
-                        doc.c->get_schematic()->autoconnect_symbol(doc.c->get_sheet(), sym);
-                        if (sym->component->connections.size() == 0) {
-                            doc.c->get_schematic()->place_bipole_on_line(doc.c->get_sheet(), sym);
-                        }
-                    }
-                }
+                merge_and_connect();
                 return ToolResponse::next(ToolResponse::Result::COMMIT, tool_id,
                                           std::make_unique<ToolDataPaste>(paste_data));
             }

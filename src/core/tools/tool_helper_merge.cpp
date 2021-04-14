@@ -100,7 +100,7 @@ bool ToolHelperMerge::merge_bus_net(class Net *net, class Bus *bus, class Net *n
     return false;
 }
 
-void ToolHelperMerge::merge_selected_junctions()
+void ToolHelperMerge::merge_and_connect()
 {
     if (!doc.c)
         return;
@@ -141,6 +141,13 @@ void ToolHelperMerge::merge_selected_junctions()
                             }
                     }
             }*/
+        }
+        else if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
+            auto sym = doc.c->get_schematic_symbol(it.uuid);
+            doc.c->get_schematic()->autoconnect_symbol(doc.c->get_sheet(), sym);
+            if (sym->component->connections.size() == 0) {
+                doc.c->get_schematic()->place_bipole_on_line(doc.c->get_sheet(), sym);
+            }
         }
     }
 }
