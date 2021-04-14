@@ -37,7 +37,11 @@ AirwireFilterWindow::AirwireFilterWindow(BaseObjectType *cobject, const Glib::Re
     airwires_button->signal_toggled().connect(
             [this] { airwires_revealer->set_reveal_child(airwires_button->get_active()); });
 
-    search_button->signal_toggled().connect([this] { search_revealer->set_reveal_child(search_button->get_active()); });
+    search_button->signal_toggled().connect([this] {
+        search_revealer->set_reveal_child(search_button->get_active());
+        if (search_button->get_active())
+            search_entry->grab_focus();
+    });
 
     store = Gtk::ListStore::create(list_columns);
     store_filtered = Gtk::TreeModelFilter::create(store);
