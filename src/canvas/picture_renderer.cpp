@@ -98,7 +98,8 @@ void PictureRenderer::cache_picture(std::shared_ptr<const PictureData> d)
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, tex);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, d->width, d->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, d->data.data());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     textures.emplace(std::piecewise_construct, std::forward_as_tuple(d->uuid), std::forward_as_tuple(d, tex));
 }
