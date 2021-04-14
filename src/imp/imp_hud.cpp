@@ -151,7 +151,7 @@ std::string ImpBase::get_hud_text_for_net(const Net *net)
     if (!net)
         return "No net";
 
-    std::string s = "Net: " + net->name + "\n";
+    std::string s = "Net: " + core->get_block()->get_net_name(net->uuid) + "\n";
     s += "Net class " + net->net_class->name + "\n";
     if (net->is_power)
         s += "is power net";
