@@ -112,13 +112,21 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
         }
     }
     std::map<UUID, const UUID> junction_xlat;
+    std::map<UUID, Net *> junction_nets;
     if (j.count("junctions")) {
         const json &o = j["junctions"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             junction_xlat.emplace(it.key(), u);
             auto x = doc.r->insert_junction(u);
-            *x = Junction(u, it.value());
+            const auto &j_ju = it.value();
+            *x = Junction(u, j_ju);
+            if (doc.c && j_ju.count("net")) {
+                const auto net_uu = UUID(j_ju.at("net").get<std::string>());
+                auto &block = *doc.c->get_block();
+                if (block.nets.count(net_uu))
+                    junction_nets.emplace(u, &block.nets.at(net_uu));
+            }
             apply_shift(x->position, cursor_pos_canvas);
             selection.emplace(u, ObjectType::JUNCTION);
         }
@@ -273,12 +281,14 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             }
         }
     }
+    std::map<UUID, Net *> net_line_nets;
     if (j.count("net_lines") && doc.c) {
         const json &o = j["net_lines"];
         auto sheet = doc.c->get_sheet();
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
-            LineNet line(u, it.value());
+            const auto &j_line = it.value();
+            LineNet line(u, j_line);
             auto update_net_line_conn = [&junction_xlat, &symbol_xlat, &bus_ripper_xlat,
                                          sheet](LineNet::Connection &c) {
                 if (c.junc.uuid) {
@@ -298,6 +308,12 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             };
             if (update_net_line_conn(line.from) && update_net_line_conn(line.to)) {
                 sheet->net_lines.emplace(u, line);
+                if (j_line.count("net")) {
+                    const auto net_uu = UUID(j_line.at("net").get<std::string>());
+                    auto &block = *doc.c->get_block();
+                    if (block.nets.count(net_uu))
+                        net_line_nets.emplace(u, &block.nets.at(net_uu));
+                }
                 selection.emplace(u, ObjectType::LINE_NET);
             }
         }
@@ -443,6 +459,17 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
         sch->expand(true);
         for (auto &it : sch->sheets) {
             it.second.warnings.clear();
+        }
+        auto &sheet = *doc.c->get_sheet();
+        for (const auto &[uu, net] : junction_nets) {
+            auto &ju = sheet.junctions.at(uu);
+            if (!ju.net)
+                ju.net = net;
+        }
+        for (const auto &[uu, net] : net_line_nets) {
+            auto &li = sheet.net_lines.at(uu);
+            if (!li.net)
+                li.net = net;
         }
     }
     return ToolResponse();

@@ -11,6 +11,7 @@ public:
 protected:
     void expand_selection() override;
     void serialize(json &j) override;
+    json serialize_junction(const class Junction &ju) override;
 
     IDocumentSchematic &doc;
     IDocument &get_doc() override;

@@ -81,6 +81,16 @@ void ClipboardSchematic::expand_selection()
     }
 }
 
+json ClipboardSchematic::serialize_junction(const class Junction &ju)
+{
+    auto &sch_ju = dynamic_cast<const SchematicJunction &>(ju);
+    json j = sch_ju.serialize();
+    if (sch_ju.net)
+        j["net"] = (std::string)sch_ju.net->uuid;
+    return j;
+}
+
+
 void ClipboardSchematic::serialize(json &j)
 {
     ClipboardBase::serialize(j);
@@ -170,6 +180,7 @@ void ClipboardSchematic::serialize(json &j)
                     if (bus_rippers.count(it_ft->bus_ripper->uuid) == 0) {
                         auto uu = UUID::random();
                         auto &ju = extra_junctions.emplace(uu, uu).first->second;
+                        ju.net = line.net;
                         ju.position = it_ft->get_position();
                         it_ft->connect(&ju);
                     }
@@ -178,14 +189,18 @@ void ClipboardSchematic::serialize(json &j)
                     if (symbols.count(it_ft->symbol->uuid) == 0) {
                         auto uu = UUID::random();
                         auto &ju = extra_junctions.emplace(uu, uu).first->second;
+                        ju.net = line.net;
                         ju.position = it_ft->get_position();
                         it_ft->connect(&ju);
                     }
                 }
             }
-            j["net_lines"][(std::string)it.uuid] = line.serialize();
+            auto o = line.serialize();
+            if (line.net)
+                o["net"] = (std::string)line.net->uuid;
+            j["net_lines"][(std::string)it.uuid] = o;
             for (const auto &[uu, ju] : extra_junctions) {
-                j["junctions"][(std::string)uu] = ju.serialize();
+                j["junctions"][(std::string)uu] = serialize_junction(ju);
             }
         } break;
 

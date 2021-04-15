@@ -16,6 +16,7 @@ public:
 protected:
     virtual void expand_selection();
     virtual void serialize(json &j);
+    virtual json serialize_junction(const class Junction &ju);
 
     virtual class IDocument &get_doc() = 0;
     std::set<SelectableRef> selection;

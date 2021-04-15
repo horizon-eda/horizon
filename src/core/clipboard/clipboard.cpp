@@ -72,6 +72,11 @@ void ClipboardBase::expand_selection()
     selection.insert(new_sel.begin(), new_sel.end());
 }
 
+json ClipboardBase::serialize_junction(const class Junction &ju)
+{
+    return ju.serialize();
+}
+
 void ClipboardBase::serialize(json &j)
 {
     j["texts"] = json::object();
@@ -88,7 +93,7 @@ void ClipboardBase::serialize(json &j)
             break;
 
         case ObjectType::JUNCTION:
-            j["junctions"][(std::string)it.uuid] = get_doc().get_junction(it.uuid)->serialize();
+            j["junctions"][(std::string)it.uuid] = serialize_junction(*get_doc().get_junction(it.uuid));
             break;
 
         case ObjectType::LINE:
