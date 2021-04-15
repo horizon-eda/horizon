@@ -104,9 +104,11 @@ void ToolHelperMerge::merge_and_connect()
 {
     if (!doc.c)
         return;
+    auto &sheet = *doc.c->get_sheet();
     for (const auto &it : selection) {
         if (it.type == ObjectType::JUNCTION) {
-            auto ju = &doc.c->get_sheet()->junctions.at(it.uuid);
+            auto ju = &sheet.junctions.at(it.uuid);
+            bool merged = false;
             for (auto &it_other : doc.c->get_sheet()->junctions) {
                 auto ju_other = &it_other.second;
                 if (!selection.count(SelectableRef(ju_other->uuid, ObjectType::JUNCTION))) { // not in selection
@@ -119,6 +121,29 @@ void ToolHelperMerge::merge_and_connect()
                         auto do_merge = merge_bus_net(net, bus, net_other, bus_other);
                         if (do_merge) {
                             doc.c->get_sheet()->merge_junction(ju, ju_other);
+                            merged = true;
+                        }
+                    }
+                }
+            }
+            if (!merged) { // still not merged, maybe we can connect a symbol pin
+                for (auto &[sym_uu, sym] : sheet.symbols) {
+                    for (auto &[pin_uu, sym_pin] : sym.symbol.pins) {
+                        if (sym.placement.transform(sym_pin.position) == ju->position) {
+                            const auto path = UUIDPath<2>(sym.gate->uuid, pin_uu);
+                            const bool pin_connected = sym.component->connections.count(path);
+                            if (!pin_connected) {
+                                if (ju->net) { // have net
+                                    sym.component->connections.emplace(path, static_cast<Net *>(ju->net));
+                                    sheet.replace_junction(ju, &sym, &sym_pin);
+                                }
+                                else if (!ju->bus) {
+                                    auto new_net = doc.c->get_block()->insert_net();
+                                    sym.component->connections.emplace(path, new_net);
+                                    sheet.replace_junction(ju, &sym, &sym_pin);
+                                    doc.c->get_schematic()->expand(true);
+                                }
+                            }
                         }
                     }
                 }
