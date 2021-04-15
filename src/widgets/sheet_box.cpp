@@ -170,9 +170,12 @@ void SheetBox::name_edited(const Glib::ustring &path, const Glib::ustring &new_t
     auto it = store->get_iter(path);
     if (it) {
         Gtk::TreeModel::Row row = *it;
-        core->get_schematic()->sheets.at(row[list_columns.uuid]).name = new_text;
-        core->set_needs_save();
-        core->rebuild();
+        auto &sh = core->get_schematic()->sheets.at(row[list_columns.uuid]);
+        if (sh.name != new_text) {
+            sh.name = new_text;
+            core->set_needs_save();
+            core->rebuild();
+        }
     }
 }
 
