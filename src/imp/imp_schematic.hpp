@@ -53,7 +53,6 @@ private:
     void handle_move_to_other_sheet(const ActionConnection &conn);
     void handle_highlight_group_tag(const ActionConnection &conn);
     void handle_next_prev_sheet(const ActionConnection &conn);
-    std::string last_pdf_filename;
 
     std::map<UUID, std::pair<float, Coordf>> sheet_views;
     std::map<UUID, std::set<SelectableRef>> sheet_selections;
@@ -70,6 +69,8 @@ private:
     void update_unplaced();
 
     void handle_drag();
+
+    void handle_extra_button(const GdkEventButton *button_event) override;
 
     Glib::RefPtr<Gio::SimpleAction> toggle_snap_to_targets_action;
 

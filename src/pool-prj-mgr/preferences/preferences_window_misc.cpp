@@ -293,6 +293,13 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
             gr->add_row(*r);
         }
         {
+            auto r = Gtk::manage(
+                    new PreferencesRowBool("Switch sheets with navigation buttons",
+                                           "Use back/forward buttons on mouse to select next/previous sheet",
+                                           preferences, preferences.mouse.switch_sheets));
+            gr->add_row(*r);
+        }
+        {
             auto r = Gtk::manage(new PreferencesRowBool(
                     "Keep slope when dragging polygon edge",
                     "Dragging a polgon edge will invoke the \"Drag polygon edge\" rather than the \"Move\" tool",

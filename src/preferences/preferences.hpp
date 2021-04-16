@@ -110,6 +110,7 @@ public:
 class MousePreferences {
 public:
     bool switch_layers = true;
+    bool switch_sheets = true;
     bool drag_polygon_edges = true;
     bool drag_to_move = true;
 

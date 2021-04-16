@@ -1091,6 +1091,26 @@ ToolID ImpSchematic::get_tool_for_drag_move(bool ctrl, const std::set<Selectable
     return ImpBase::get_tool_for_drag_move(ctrl, sel);
 }
 
+void ImpSchematic::handle_extra_button(const GdkEventButton *button_event)
+{
+    if (!preferences.mouse.switch_sheets)
+        return;
+
+    switch (button_event->button) {
+    case 6:
+    case 8:
+        trigger_action(ActionID::NEXT_SHEET);
+        break;
+
+    case 7:
+    case 9:
+        trigger_action(ActionID::PREV_SHEET);
+        break;
+
+    default:;
+    }
+}
+
 void ImpSchematic::expand_selection_for_property_panel(std::set<SelectableRef> &sel_extra,
                                                        const std::set<SelectableRef> &sel)
 {
