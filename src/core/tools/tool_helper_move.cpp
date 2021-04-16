@@ -97,12 +97,13 @@ void ToolHelperMove::move_do(const Coordi &delta)
     }
 }
 
-void ToolHelperMove::move_do_cursor(const Coordi &cc)
+Coordi ToolHelperMove::move_do_cursor(const Coordi &cc)
 {
     auto c = get_coord_restrict(origin, cc);
     auto delta = c - last;
     move_do(delta);
     last = c;
+    return delta;
 }
 
 

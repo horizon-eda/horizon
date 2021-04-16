@@ -54,6 +54,14 @@ private:
     bool is_key = false;
     Coordi key_delta;
 
+    enum class Axis { NONE = 0, X = 1, Y = 2 };
+    friend Axis &operator|=(Axis &a, const Axis &b);
+    friend Axis operator|(Axis a, Axis b);
+    friend Axis operator&(Axis a, Axis b);
+    std::map<UUID, Axis> extra_junctions;
+    void add_extra_junction(const UUID &uu, Axis ax);
+    void move_extra_junctions(const Coordi &delta);
+
     std::set<class Plane *> planes;
 };
 } // namespace horizon

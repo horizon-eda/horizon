@@ -12,7 +12,7 @@ public:
 protected:
     void move_init(const Coordi &c);
     void move_do(const Coordi &delta);
-    void move_do_cursor(const Coordi &c);
+    Coordi move_do_cursor(const Coordi &c);
     void move_mirror_or_rotate(const Coordi &center, bool rotate);
 
     Coordi get_delta() const;

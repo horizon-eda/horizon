@@ -22,6 +22,32 @@ ToolMove::ToolMove(IDocument *c, ToolID tid) : ToolBase(c, tid), ToolHelperMove(
 {
 }
 
+ToolMove::Axis operator|(ToolMove::Axis a, ToolMove::Axis b)
+{
+    return static_cast<ToolMove::Axis>(static_cast<int>(a) | static_cast<int>(b));
+}
+
+ToolMove::Axis &operator|=(ToolMove::Axis &lhs, const ToolMove::Axis &rhs)
+{
+    lhs = lhs | rhs;
+    return lhs;
+}
+
+ToolMove::Axis operator&(ToolMove::Axis a, ToolMove::Axis b)
+{
+    return static_cast<ToolMove::Axis>(static_cast<int>(a) & static_cast<int>(b));
+}
+
+void ToolMove::add_extra_junction(const UUID &uu, Axis ax)
+{
+    if (ax == Axis::NONE)
+        return;
+    if (extra_junctions.count(uu))
+        extra_junctions.at(uu) |= ax;
+    else
+        extra_junctions.emplace(uu, ax);
+}
+
 void ToolMove::expand_selection()
 {
     std::set<SelectableRef> pkgs_fixed;
@@ -99,6 +125,28 @@ void ToolMove::expand_selection()
             for (const auto &itt : sym->texts) {
                 new_sel.emplace(itt->uuid, ObjectType::TEXT);
             }
+            for (const auto &[pin_uu, pin] : sym->symbol.pins) {
+                for (const auto &[line_uu, line] : doc.c->get_sheet()->net_lines) {
+                    if (line.is_connected_to(sym->uuid, pin_uu)) {
+                        for (const auto &it_ft : {line.from, line.to}) {
+                            if (it_ft.is_junc()) {
+                                const auto &ju = *it_ft.junc;
+                                const auto pin_pos = sym->placement.transform(pin.position);
+                                Axis ax = Axis::NONE;
+                                if (pin_pos.x == ju.position.x)
+                                    ax = Axis::X;
+                                else if (pin_pos.y == ju.position.y)
+                                    ax = Axis::Y;
+
+                                if (ju.connected_net_lines.size() == 1) { // dangling end
+                                    ax = Axis::X | Axis::Y;
+                                }
+                                add_extra_junction(ju.uuid, ax);
+                            }
+                        }
+                    }
+                }
+            }
         } break;
         case ObjectType::BOARD_PACKAGE: {
             BoardPackage *pkg = &doc.b->get_board()->packages.at(it.uuid);
@@ -115,6 +163,8 @@ void ToolMove::expand_selection()
         }
     }
     selection.insert(new_sel.begin(), new_sel.end());
+    map_erase_if(extra_junctions,
+                 [this](const auto &x) { return selection.count(SelectableRef(x.first, ObjectType::JUNCTION)); });
     if (pkgs_fixed.size() && imp)
         imp->tool_bar_flash("can't move fixed package");
     for (auto it = selection.begin(); it != selection.end();) {
@@ -335,9 +385,24 @@ void ToolMove::update_airwires()
     }
 }
 
+void ToolMove::move_extra_junctions(const Coordi &delta)
+{
+    for (const auto &[uu, ax] : extra_junctions) {
+        Coordi shift;
+        if ((ax & Axis::X) != Axis::NONE) {
+            shift.x = delta.x;
+        }
+        if ((ax & Axis::Y) != Axis::NONE) {
+            shift.y = delta.y;
+        }
+        doc.r->get_junction(uu)->position += shift;
+    }
+}
+
 void ToolMove::do_move(const Coordi &d)
 {
-    move_do_cursor(d);
+    const auto delta = move_do_cursor(d);
+    move_extra_junctions(delta);
     update_airwires();
     update_tip();
 }
@@ -392,6 +457,7 @@ ToolResponse ToolMove::update(const ToolArgs &args)
                     shift = shift / 10;
                 key_delta += shift;
                 move_do(shift);
+                move_extra_junctions(shift);
                 update_airwires();
                 update_tip();
             }
