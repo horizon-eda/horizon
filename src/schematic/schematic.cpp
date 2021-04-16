@@ -403,59 +403,33 @@ bool Schematic::place_bipole_on_line(Sheet *sheet, SchematicSymbol *sym)
             if (line) {
                 auto from = line->from;
                 auto to = line->to;
-                delete_net_line(sheet, line);
-                line = nullptr;
-                expand(true);
-                from.update_refs(*sheet);
-                to.update_refs(*sheet);
-
-                UUID from_net_segment = from.get_net_segment();
-                UUID to_net_segment = to.get_net_segment();
-                auto ns_info = sheet->analyze_net_segments(false);
-                Net *net_from = nullptr;
-                Net *net_to = nullptr;
-                if (ns_info.count(from_net_segment))
-                    net_from = ns_info.at(from_net_segment).net;
-                else if (from.is_bus_ripper())
-                    net_from = from.bus_ripper->bus_member->net;
-
-                if (ns_info.count(to_net_segment))
-                    net_to = ns_info.at(to_net_segment).net;
-                else if (to.is_bus_ripper())
-                    net_to = to.bus_ripper->bus_member->net;
-
-                // normal pin1-from pin2-to
-                // swapped pin1-to pin2-from
-                auto dst_normal = (pin1_pos - from.get_position()).mag_sq() + (pin2_pos - to.get_position()).mag_sq();
-                auto dst_swapped = (pin2_pos - from.get_position()).mag_sq() + (pin1_pos - to.get_position()).mag_sq();
+                const auto dst_normal =
+                        (pin1_pos - from.get_position()).mag_sq() + (pin2_pos - to.get_position()).mag_sq();
+                const auto dst_swapped =
+                        (pin2_pos - from.get_position()).mag_sq() + (pin1_pos - to.get_position()).mag_sq();
                 SymbolPin *pin_from = &pin1;
                 SymbolPin *pin_to = &pin2;
                 if (dst_swapped < dst_normal) {
                     std::swap(pin_from, pin_to);
                 }
-                auto connect_pin = [this, sheet, sym](SymbolPin &pin, const LineNet::Connection &conn, Net *net) {
-                    bool new_net = !net;
-                    if (!net)
-                        net = block->insert_net();
-
+                auto connect_pin = [this, sheet, sym, line](SymbolPin &pin, const LineNet::Connection &conn) {
                     auto uu = UUID::random();
                     auto &new_line = sheet->net_lines.emplace(uu, uu).first->second;
                     new_line.from = conn;
+                    if (conn.is_pin())
+                        conn.pin->connected_net_lines.emplace(uu, &new_line);
                     new_line.to.connect(sym, &pin);
-                    new_line.net = net;
+                    new_line.net = line->net;
                     sym->component->connections.emplace(std::piecewise_construct,
                                                         std::forward_as_tuple(sym->gate->uuid, pin.uuid),
-                                                        std::forward_as_tuple(net));
-                    if (conn.is_pin() && new_net) {
-                        conn.symbol->component->connections.emplace(
-                                std::piecewise_construct,
-                                std::forward_as_tuple(conn.symbol->gate->uuid, conn.pin->uuid),
-                                std::forward_as_tuple(net));
-                    }
+                                                        std::forward_as_tuple(line->net));
                 };
-                connect_pin(*pin_from, from, net_from);
-                connect_pin(*pin_to, to, net_to);
+                connect_pin(*pin_from, from);
+                connect_pin(*pin_to, to);
+                delete_net_line(sheet, line);
+                line = nullptr;
                 placed = true;
+                expand(true);
             }
         }
     }
