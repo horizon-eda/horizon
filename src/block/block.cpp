@@ -313,6 +313,8 @@ std::map<const Part *, BOMRow> Block::get_BOM(const BOMExportSettings &settings)
                 part = settings.concrete_parts.at(it.second.part->uuid);
             else
                 part = it.second.part;
+            if (part->get_flag(Part::Flag::EXCLUDE_BOM))
+                continue;
             rows[part].refdes.push_back(it.second.refdes);
         }
     }

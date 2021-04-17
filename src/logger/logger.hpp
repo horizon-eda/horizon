@@ -20,7 +20,8 @@ public:
         IMPORT,
         VERSION,
         POOL_UPDATE,
-        PICTURE
+        PICTURE,
+        PART,
     };
 
     Logger();

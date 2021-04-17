@@ -59,6 +59,9 @@ private:
     Gtk::Button *w_orderable_MPNs_add_button = nullptr;
     Gtk::Box *w_orderable_MPNs_box = nullptr;
 
+    Gtk::Label *w_flags_label = nullptr;
+    Gtk::Grid *w_flags_grid = nullptr;
+
     class PinListColumns : public Gtk::TreeModelColumnRecord {
     public:
         PinListColumns()
@@ -111,6 +114,7 @@ private:
     void map_pin(Gtk::TreeModel::iterator it_pin);
     void copy_from_other_part();
     void update_map_buttons();
+    void update_flags_label();
 
     class ParametricEditor *parametric_editor = nullptr;
     void update_parametric_editor();

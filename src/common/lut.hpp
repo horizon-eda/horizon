@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <map>
+#include <optional>
 
 namespace horizon {
 
@@ -25,6 +26,14 @@ public:
     const T lookup(const std::string &s) const
     {
         return fwd.at(s);
+    }
+
+    const std::optional<T> lookup_opt(const std::string &s) const
+    {
+        if (fwd.count(s))
+            return fwd.at(s);
+        else
+            return {};
     }
 
     const T lookup(const std::string &s, T def) const

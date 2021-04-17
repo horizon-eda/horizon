@@ -6,14 +6,34 @@
 #include "nlohmann/json.hpp"
 #include "util/util.hpp"
 #include "pool/pool_parametric.hpp"
+#include "logger/logger.hpp"
 
 namespace horizon {
 
-static const unsigned int app_version = 0;
+static const unsigned int app_version = 1;
 
 unsigned int Part::get_app_version()
 {
     return app_version;
+}
+
+static const LutEnumStr<Part::Flag> flag_lut = {
+        {"base_part", Part::Flag::BASE_PART},
+        {"exclude_bom", Part::Flag::EXCLUDE_BOM},
+        {"exclude_pnp", Part::Flag::EXCLUDE_PNP},
+};
+
+static const LutEnumStr<Part::FlagState> flag_state_lut = {
+        {"set", Part::FlagState::SET},
+        {"clear", Part::FlagState::CLEAR},
+        {"inherit", Part::FlagState::INHERIT},
+};
+
+void init_flags(decltype(Part::flags) &flags)
+{
+    flags.emplace(Part::Flag::BASE_PART, Part::FlagState::CLEAR);
+    flags.emplace(Part::Flag::EXCLUDE_BOM, Part::FlagState::CLEAR);
+    flags.emplace(Part::Flag::EXCLUDE_PNP, Part::FlagState::CLEAR);
 }
 
 Part::Part(const UUID &uu, const json &j, IPool &pool)
@@ -110,6 +130,30 @@ Part::Part(const UUID &uu, const json &j, IPool &pool)
             orderable_MPNs.emplace(std::string(it.key()), it->get<std::string>());
         }
     }
+
+    init_flags(flags);
+
+    if (j.count("flags")) {
+        for (const auto &[flag_s, flag_state_s] : j.at("flags").items()) {
+            const auto flag = flag_lut.lookup_opt(flag_s);
+            const auto flag_state = flag_state_lut.lookup_opt(flag_state_s.get<std::string>());
+            if (!flag) {
+                Logger::log_warning("unknown flag " + flag_s, Logger::Domain::PART);
+                continue;
+            }
+            if (!flag_state) {
+                Logger::log_warning("unknown flag state" + flag_state_s.get<std::string>(), Logger::Domain::PART,
+                                    "flag " + flag_s);
+                continue;
+            }
+            auto flag_state2 = flag_state.value();
+            if (!base && flag_state2 == FlagState::INHERIT) {
+                flag_state2 = FlagState::CLEAR;
+            }
+            flags.at(flag.value()) = flag_state2;
+        }
+    }
+
     if (package->models.count(model) == 0)
         model = package->default_model;
     // if(value.size() == 0) {
@@ -179,6 +223,33 @@ UUID Part::get_model() const
         return model;
 }
 
+bool Part::get_flag(Flag fl) const
+{
+    const auto st = flags.at(fl);
+    if (st == FlagState::INHERIT) {
+        if (base) {
+            return base->get_flag(fl);
+        }
+        else {
+            return false;
+        }
+    }
+    else {
+        return st == FlagState::SET;
+    }
+}
+
+const std::string &Part::get_flag_name(Flag fl)
+{
+    static const std::map<Flag, std::string> flag_names = {
+            {Flag::BASE_PART, "Base part"},
+            {Flag::EXCLUDE_BOM, "Exclude from BOM"},
+            {Flag::EXCLUDE_PNP, "Exclude from Pick&Place"},
+    };
+    return flag_names.at(fl);
+}
+
+
 Part::Part(const UUID &uu) : uuid(uu), version(app_version)
 {
     attributes[Attribute::MPN] = {false, ""};
@@ -186,6 +257,7 @@ Part::Part(const UUID &uu) : uuid(uu), version(app_version)
     attributes[Attribute::VALUE] = {false, ""};
     attributes[Attribute::DATASHEET] = {false, ""};
     attributes[Attribute::DESCRIPTION] = {false, ""};
+    init_flags(flags);
 }
 
 Part Part::new_from_file(const std::string &filename, IPool &pool)
@@ -202,7 +274,10 @@ Part Part::new_from_json(const json &j, IPool &pool)
 json Part::serialize() const
 {
     json j;
-    version.serialize(j);
+    const bool have_flags =
+            std::count_if(flags.begin(), flags.end(), [](const auto &x) { return x.second != FlagState::CLEAR; });
+    if (have_flags)
+        j["version"] = 1;
     j["type"] = "part";
     j["uuid"] = (std::string)uuid;
 
@@ -249,6 +324,12 @@ json Part::serialize() const
         j["orderable_MPNs"] = json::object();
         for (const auto &it : orderable_MPNs) {
             j["orderable_MPNs"][(std::string)it.first] = it.second;
+        }
+    }
+    if (have_flags) {
+        j["flags"] = json::object();
+        for (const auto [fl, st] : flags) {
+            j["flags"][flag_lut.lookup_reverse(fl)] = flag_state_lut.lookup_reverse(st);
         }
     }
     return j;

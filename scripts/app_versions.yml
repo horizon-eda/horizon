@@ -8,3 +8,5 @@ versions:
     1: add custom values on symbols
   project:
     1: replace pool cache with project pool
+  part:
+    1: add flags

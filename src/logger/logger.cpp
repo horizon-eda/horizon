@@ -77,6 +77,8 @@ std::string Logger::domain_to_string(Logger::Domain dom)
         return "Pool update";
     case Logger::Domain::PICTURE:
         return "Picture";
+    case Logger::Domain::PART:
+        return "Part";
     default:
         return "Unspecified";
     }
