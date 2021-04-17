@@ -70,6 +70,11 @@ public:
 
     std::map<UUID, PadMapItem> pad_map;
 
+    enum class FlagState { SET, CLEAR, INHERIT };
+    enum class Flag { EXCLUDE_BOM, EXCLUDE_PNP, BASE_PART };
+    std::map<Flag, FlagState> flags;
+    bool get_flag(Flag fl) const;
+
     FileVersion version;
 
     json serialize() const;

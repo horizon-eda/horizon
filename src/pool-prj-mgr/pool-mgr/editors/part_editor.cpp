@@ -139,6 +139,44 @@ private:
     Gtk::Entry *entry = nullptr;
 };
 
+class FlagEditor : public Gtk::Box, public Changeable {
+public:
+    FlagEditor(Part::FlagState &a_state, bool has_inherit) : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0), state(a_state)
+    {
+        get_style_context()->add_class("linked");
+        static const std::vector<std::pair<Part::FlagState, std::string>> states = {
+                {Part::FlagState::SET, "Yes"},
+                {Part::FlagState::CLEAR, "No"},
+                {Part::FlagState::INHERIT, "Inherit"},
+        };
+        Gtk::RadioButton *group = nullptr;
+        for (const auto &[st, name] : states) {
+            auto bu = Gtk::manage(new Gtk::RadioButton(name));
+            bu->set_mode(false);
+            if (group)
+                bu->join_group(*group);
+            else
+                group = bu;
+            if (st == Part::FlagState::INHERIT && !has_inherit)
+                bu->set_sensitive(false);
+            if (state == st)
+                bu->set_active(true);
+            bu->show();
+            pack_start(*bu, false, false, 0);
+            Part::FlagState st2 = st;
+            bu->signal_toggled().connect([this, bu, st2] {
+                if (bu->get_active()) {
+                    state = st2;
+                    s_signal_changed.emit();
+                }
+            });
+        }
+    }
+
+private:
+    Part::FlagState &state;
+};
+
 PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Part &p, IPool &po,
                        PoolParametric &pp)
     : Gtk::Box(cobject), part(p), pool(po), pool_parametric(pp)
@@ -184,6 +222,8 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("orderable_MPNs_label", w_orderable_MPNs_label);
     x->get_widget("orderable_MPNs_box", w_orderable_MPNs_box);
     x->get_widget("orderable_MPNs_add_button", w_orderable_MPNs_add_button);
+    x->get_widget("flags_grid", w_flags_grid);
+    x->get_widget("flags_label", w_flags_label);
     w_parametric_from_base->hide();
 
     w_entity_label->set_track_visited_links(false);
@@ -449,6 +489,24 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         create_orderable_MPN_editor(it.first);
     }
     update_orderable_MPNs_label();
+
+    {
+        static const std::map<Part::Flag, std::string> flag_names = {
+                {Part::Flag::BASE_PART, "Base part"},
+                {Part::Flag::EXCLUDE_BOM, "Exclude from BOM"},
+                {Part::Flag::EXCLUDE_PNP, "Exclude from Pick&Place"},
+        };
+        int top = 0;
+        for (const auto &[fl, name] : flag_names) {
+            auto ed = Gtk::manage(new FlagEditor(part.flags.at(fl), part.base));
+            ed->signal_changed().connect([this] {
+                set_needs_save();
+                update_flags_label();
+            });
+            grid_attach_label_and_widget(w_flags_grid, name, ed, top);
+        }
+    }
+    update_flags_label();
 }
 class OrderableMPNEditor *PartEditor::create_orderable_MPN_editor(const UUID &uu)
 {
@@ -498,6 +556,30 @@ void PartEditor::update_orderable_MPNs_label()
         s = "<i>no orderable MPNs defined</i>";
     }
     w_orderable_MPNs_label->set_markup(s);
+}
+
+void PartEditor::update_flags_label()
+{
+    std::string s;
+    static const std::map<Part::Flag, std::string> flag_names = {
+            {Part::Flag::BASE_PART, "Base part"},
+            {Part::Flag::EXCLUDE_BOM, "No BOM"},
+            {Part::Flag::EXCLUDE_PNP, "No Pick&Place"},
+    };
+    for (const auto &[fl, name] : flag_names) {
+        if (part.get_flag(fl)) {
+            s += Glib::Markup::escape_text(name);
+            s += ", ";
+        }
+    }
+    if (s.size()) {
+        s.pop_back();
+        s.pop_back();
+    }
+    else {
+        s = "<i>none set</i>";
+    }
+    w_flags_label->set_markup(s);
 }
 
 void PartEditor::map_pin(Gtk::TreeModel::iterator it_pin)

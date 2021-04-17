@@ -1051,7 +1051,8 @@ std::map<const BoardPackage *, PnPRow> Board::get_PnP(const PnPExportSettings &s
 {
     std::map<const BoardPackage *, PnPRow> r;
     for (const auto &it : packages) {
-        if (it.second.component->nopopulate && !settings.include_nopopulate) {
+        if ((it.second.component->nopopulate && !settings.include_nopopulate)
+            || it.second.component->part->get_flag(Part::Flag::EXCLUDE_PNP)) {
             continue;
         }
 
