@@ -153,7 +153,7 @@ void CanvasCairo2::load(const class Symbol &sym, const Placement &placement)
 {
     clear();
     layer_filter = false;
-    fill = false;
+    fill = true;
     min_line_width = 0.1_mm;
     update(sym, placement, false);
 }
