@@ -50,7 +50,7 @@ private:
     Coordi first_pos;
     Coordi second_pos;
     int step = 0;
-    uint64_t decoration_size = 1_mm;
+    uint64_t decoration_size = 1.2_mm;
     int64_t corner_radius = 0;
 
     class Polygon *temp = nullptr;
