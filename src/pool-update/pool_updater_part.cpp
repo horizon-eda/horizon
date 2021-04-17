@@ -61,6 +61,7 @@ bool PoolUpdater::update_part(const std::string &filename)
             q_insert_part->bind("$parametric_table", table);
             q_insert_part->bind("$base", part.base ? part.base->uuid : UUID());
             q_insert_part->bind("$filename", get_path_rel(filename));
+            q_insert_part->bind("$flag_base_part", part.get_flag(Part::Flag::BASE_PART));
             q_insert_part->step();
 
             for (const auto &it_tag : part.get_tags()) {

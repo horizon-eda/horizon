@@ -34,10 +34,10 @@ PoolUpdater::PoolUpdater(const std::string &bp, pool_update_cb_t cb) : status_cb
             pool->db,
             "INSERT INTO parts "
             "(uuid, MPN, manufacturer, entity, package, description, datasheet, filename, pool_uuid, last_pool_uuid, "
-            "parametric_table, base) "
+            "parametric_table, base, flag_base_part) "
             "VALUES "
             "($uuid, $MPN, $manufacturer, $entity, $package, $description, $datasheet, $filename, $pool_uuid, "
-            "$last_pool_uuid, $parametric_table, $base)");
+            "$last_pool_uuid, $parametric_table, $base, $flag_base_part)");
     q_add_tag.emplace(pool->db,
                       "INSERT into tags (tag, uuid, type) "
                       "VALUES ($tag, $uuid, $type)");

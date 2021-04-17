@@ -1,4 +1,4 @@
-PRAGMA user_version=20; --keep in sync with pool.cpp
+PRAGMA user_version=21; --keep in sync with pool.cpp
 
 DROP TABLE IF EXISTS "units";
 CREATE TABLE "units" (
@@ -67,6 +67,7 @@ CREATE TABLE "parts" (
 	'parametric_table'	TEXT NOT NULL,
 	'base'	TEXT NOT NULL,
 	'filename'	TEXT,
+	'flag_base_part' BOOLEAN NOT NULL,
 	'pool_uuid'	TEXT NOT NULL,
 	'last_pool_uuid' TEXT NOT NULL,
 	PRIMARY KEY('uuid')

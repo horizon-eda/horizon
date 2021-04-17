@@ -392,6 +392,7 @@ void PartBrowserWindow::set_can_assign(bool v)
 PoolBrowserPart *PartBrowserWindow::add_search(const UUID &part)
 {
     auto ch = Gtk::manage(new PoolBrowserPart(pool, UUID(), "part_browser"));
+    ch->set_include_base_parts(false);
     if (auto prv = StockInfoProvider::create(pool.get_base_path())) {
         ch->add_stock_info_provider(std::move(prv));
     }

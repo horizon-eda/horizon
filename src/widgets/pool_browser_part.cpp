@@ -14,7 +14,26 @@ PoolBrowserPart::PoolBrowserPart(IPool &p, const UUID &uu, const std::string &in
     focus_widget = MPN_entry;
     manufacturer_entry = create_search_entry("Manufacturer");
     desc_entry = create_search_entry("Description");
-    tag_entry = create_tag_entry("Tags", create_pool_selector());
+
+    auto extra_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 10));
+
+    base_parts_cb = Gtk::manage(new Gtk::CheckButton("Base parts"));
+    base_parts_cb->set_tooltip_text("Include base parts");
+    base_parts_cb->set_active(true);
+    base_parts_cb->show();
+    base_parts_cb->signal_toggled().connect([this] {
+        if (searched_once)
+            search();
+    });
+    extra_box->pack_start(*base_parts_cb, false, false, 0);
+
+    if (auto sel = create_pool_selector()) {
+        extra_box->pack_start(*sel, false, false, 0);
+        sel->show();
+    }
+    extra_box->show();
+
+    tag_entry = create_tag_entry("Tags", extra_box);
 
     install_pool_item_source_tooltip();
 }
@@ -29,6 +48,11 @@ void PoolBrowserPart::set_entity_uuid(const UUID &uu)
 {
     entity_uuid = uu;
     search();
+}
+
+void PoolBrowserPart::set_include_base_parts(bool v)
+{
+    base_parts_cb->set_active(v);
 }
 
 Glib::RefPtr<Gtk::ListStore> PoolBrowserPart::create_list_store()
@@ -98,6 +122,9 @@ void PoolBrowserPart::search()
              "AND parts.manufacturer LIKE $manufacturer "
              "AND parts.description LIKE $desc "
              "AND (parts.entity=$entity or $entity_all) ";
+    if (base_parts_cb->get_active() == false) {
+        query += "AND flag_base_part = 0 ";
+    }
     query += get_pool_selector_query();
     query += sort_controller->get_order_by();
     SQLite::Query q(pool.get_db(), query);
