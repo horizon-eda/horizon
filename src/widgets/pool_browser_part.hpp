@@ -13,6 +13,7 @@ public:
         return ObjectType::PART;
     }
     void add_copy_name_context_menu_item() override;
+    void set_include_base_parts(bool v);
 
 protected:
     Glib::RefPtr<Gtk::ListStore> create_list_store() override;
@@ -52,6 +53,7 @@ private:
     Gtk::Entry *manufacturer_entry = nullptr;
     Gtk::Entry *desc_entry = nullptr;
     class TagEntry *tag_entry = nullptr;
+    Gtk::CheckButton *base_parts_cb = nullptr;
     UUID entity_uuid;
 };
 } // namespace horizon
