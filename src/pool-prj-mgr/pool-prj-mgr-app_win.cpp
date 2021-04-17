@@ -297,6 +297,9 @@ void PoolProjectManagerAppWindow::pool_update(const std::vector<std::string> &fi
     if (pool_updating)
         return;
 
+    if (!(pool || project))
+        return;
+
     if (project) { // if there's an open pool window, delegate pool update to that one
         auto path = Glib::build_filename(project->pool_directory, "pool.json");
         for (auto ws : app.get_windows()) {
