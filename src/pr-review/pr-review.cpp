@@ -643,7 +643,27 @@ int Reviewer::main(int c_argc, char *c_argv[])
                 for (const auto &[uu, MPN] : part.orderable_MPNs) {
                     ofs << " - " << MPN << "\n";
                 }
-                ofs << "\n";
+                ofs << "\n\n";
+            }
+
+            if (std::count_if(part.flags.begin(), part.flags.end(),
+                              [](const auto &x) { return x.second != Part::FlagState::CLEAR; })) {
+                static const std::map<Part::Flag, std::string> flag_names = {
+                        {Part::Flag::BASE_PART, "Base part"},
+                        {Part::Flag::EXCLUDE_BOM, "Exclude from BOM"},
+                        {Part::Flag::EXCLUDE_PNP, "Exclude from Pick&Place"},
+                };
+                ofs << "Flags\n";
+                for (const auto &[fl, name] : flag_names) {
+                    if (part.get_flag(fl)) {
+                        ofs << " - " << name;
+                        if (part.flags.at(fl) == Part::FlagState::INHERIT) {
+                            ofs << " (inherited)";
+                        }
+                        ofs << "\n";
+                    }
+                }
+                ofs << "\n\n";
             }
 
             std::set<std::pair<UUID, UUID>> all_pins;
