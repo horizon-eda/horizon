@@ -56,13 +56,6 @@ static std::string delta_to_string(git_delta_t delta)
     }
 }
 
-static int count_manufactuer(Pool &pool, const std::string &mfr)
-{
-    SQLite::Query q(pool.db, "SELECT COUNT(*) FROM parts WHERE manufacturer = ?");
-    q.bind(1, mfr);
-    q.step();
-    return q.get<int>(0);
-}
 
 static std::string surround_if(const char *prefix, const char *suffix, const std::string &s, bool cond = true)
 {
@@ -92,7 +85,37 @@ private:
 
 static PinDirectionMap pin_direction_map;
 
-static void print_rules_check_result(std::ostream &ofs, const RulesCheckResult &r, const std::string &name = "Checks")
+
+class Reviewer {
+public:
+    int main(int c_argc, char *c_argv[]);
+
+private:
+    void print_rules_check_result(const RulesCheckResult &r, const std::string &name = "Checks");
+    int count_manufactuer(const std::string &mfr);
+    int parse_options(int c_argc, char *c_argv[]);
+
+    std::ofstream ofs;
+    std::optional<Pool> pool;
+
+    std::string images_dir;
+    std::string images_prefix;
+    std::string labels_filename;
+    std::string pool_base_path;
+    std::string output_filename;
+    bool do_pool_update = false;
+};
+
+int Reviewer::count_manufactuer(const std::string &mfr)
+{
+    SQLite::Query q(pool->db, "SELECT COUNT(*) FROM parts WHERE manufacturer = ?");
+    q.bind(1, mfr);
+    q.step();
+    return q.get<int>(0);
+}
+
+
+void Reviewer::print_rules_check_result(const RulesCheckResult &r, const std::string &name)
 {
     if (r.level != RulesCheckErrorLevel::PASS) {
         ofs << name << " didn't pass\n";
@@ -123,47 +146,39 @@ static void print_rules_check_result(std::ostream &ofs, const RulesCheckResult &
     ofs << "\n";
 }
 
-int main(int c_argc, char *c_argv[])
-{
-    Gio::init();
-    PoolManager::init();
-    git_libgit2_init();
 
+int Reviewer::parse_options(int c_argc, char *c_argv[])
+{
     Glib::OptionContext options;
     options.set_summary("horizon pr review");
     options.set_help_enabled();
 
     Glib::OptionGroup group("pr-review", "pr-review");
 
-    std::string output_filename;
     Glib::OptionEntry entry;
     entry.set_long_name("output");
     entry.set_short_name('o');
     entry.set_description("output filename");
     group.add_entry_filename(entry, output_filename);
 
-    bool do_pool_update = false;
     Glib::OptionEntry entry_pool_update;
     entry_pool_update.set_long_name("pool-update");
     entry_pool_update.set_short_name('u');
     entry_pool_update.set_description("update pool before generating review");
     group.add_entry(entry_pool_update, do_pool_update);
 
-    std::string images_dir;
     Glib::OptionEntry entry_images_dir;
     entry_images_dir.set_long_name("img-dir");
     entry_images_dir.set_short_name('i');
     entry_images_dir.set_description("images directory");
     group.add_entry_filename(entry_images_dir, images_dir);
 
-    std::string images_prefix;
     Glib::OptionEntry entry_images_prefix;
     entry_images_prefix.set_long_name("img-prefix");
     entry_images_prefix.set_short_name('p');
     entry_images_prefix.set_description("images prefix");
     group.add_entry_filename(entry_images_prefix, images_prefix);
 
-    std::string labels_filename;
     Glib::OptionEntry entry_labels_filename;
     entry_labels_filename.set_long_name("labels-file");
     entry_labels_filename.set_short_name('l');
@@ -195,13 +210,21 @@ int main(int c_argc, char *c_argv[])
         std::cerr << "image directory not specified" << std::endl;
         return 1;
     }
+    pool_base_path = filenames.at(0);
+    return 0;
+}
 
-    auto ofs = make_ofstream(output_filename);
+int Reviewer::main(int c_argc, char *c_argv[])
+{
+    if (auto r = parse_options(c_argc, c_argv))
+        return r;
+
+
+    ofs = make_ofstream(output_filename);
 
     ofs << "This review is brought to you by the Horizon EDA Poolbot commit [" << Version::commit_hash
         << "](https://github.com/horizon-eda/horizon/commit/" << Version::commit_hash << ").\n\n";
 
-    auto pool_base_path = filenames.at(0);
     if (do_pool_update) {
         std::list<std::pair<std::string, std::string>> errors;
         pool_update(
@@ -225,7 +248,7 @@ int main(int c_argc, char *c_argv[])
     }
 
 
-    Pool pool(pool_base_path);
+    pool.emplace(pool_base_path);
 
 
     autofree_ptr<git_repository> repo(git_repository_free);
@@ -250,15 +273,15 @@ int main(int c_argc, char *c_argv[])
         throw std::runtime_error("error finding master tree");
     }
 
-    pool.db.execute("CREATE TEMP TABLE 'git_files' ('git_filename' TEXT NOT NULL, 'status' INT NOT NULL);");
-    pool.db.execute("BEGIN");
+    pool->db.execute("CREATE TEMP TABLE 'git_files' ('git_filename' TEXT NOT NULL, 'status' INT NOT NULL);");
+    pool->db.execute("BEGIN");
     {
         autofree_ptr<git_diff> diff(git_diff_free);
         git_diff_tree_to_workdir_with_index(&diff.ptr, repo, tree_master, nullptr);
-        git_diff_foreach(diff, &diff_file_cb_c, nullptr, nullptr, nullptr, &pool.db);
+        git_diff_foreach(diff, &diff_file_cb_c, nullptr, nullptr, nullptr, &pool->db);
     }
-    pool.db.execute("COMMIT");
-    pool.db.execute(
+    pool->db.execute("COMMIT");
+    pool->db.execute(
             "CREATE TEMP VIEW git_files_view AS "
             "SELECT type, uuid, name, filename, status FROM git_files INNER JOIN "
             "(SELECT type, uuid, name, filename FROM all_items_view UNION ALL SELECT DISTINCT 'model_3d' AS type, "
@@ -270,7 +293,7 @@ int main(int c_argc, char *c_argv[])
         ofs << "# Items in this PR\n";
         ofs << "| State | Type | Name | Checks | Filename |\n";
         ofs << "| --- | --- | --- | --- | --- |\n";
-        SQLite::Query q(pool.db, "SELECT type, uuid, name, filename, status FROM git_files_view");
+        SQLite::Query q(pool->db, "SELECT type, uuid, name, filename, status FROM git_files_view");
         while (q.step()) {
             const auto type = q.get<ObjectType>(0);
             const auto name = q.get<std::string>(2);
@@ -279,7 +302,7 @@ int main(int c_argc, char *c_argv[])
             if (needs_trim(name))
                 ofs << " " << whitespace_warning;
             ofs << " | ";
-            const auto r = check_item(pool, type, UUID(q.get<std::string>(1)));
+            const auto r = check_item(*pool, type, UUID(q.get<std::string>(1)));
             accumulate_level(overall_result, r.level);
             switch (r.level) {
             case RulesCheckErrorLevel::WARN:
@@ -320,7 +343,7 @@ int main(int c_argc, char *c_argv[])
     }
 
     {
-        SQLite::Query q(pool.db,
+        SQLite::Query q(pool->db,
                         "SELECT git_filename FROM git_files LEFT JOIN "
                         "(SELECT filename FROM all_items_view "
                         "UNION ALL SELECT DISTINCT model_filename as filename FROM models) "
@@ -337,7 +360,7 @@ int main(int c_argc, char *c_argv[])
     }
 
     {
-        SQLite::Query q(pool.db, "SELECT status, git_filename FROM git_files WHERE status != ?");
+        SQLite::Query q(pool->db, "SELECT status, git_filename FROM git_files WHERE status != ?");
         q.bind(1, static_cast<int>(GIT_DELTA_ADDED));
         bool first = true;
         while (q.step()) {
@@ -353,14 +376,14 @@ int main(int c_argc, char *c_argv[])
         ofs << "\n\n";
     }
 
-    pool.db.execute(
+    pool->db.execute(
             "CREATE TEMP VIEW top_parts AS "
             "SELECT git_files_view.uuid AS part_uuid FROM git_files_view "
             "LEFT JOIN parts ON git_files_view.uuid = parts.uuid "
             "LEFT JOIN git_files_view AS gfv ON gfv.uuid = parts.base "
             "WHERE (gfv.uuid IS NULL OR parts.base = '00000000-0000-0000-0000-000000000000') "
             "AND git_files_view.type = 'part'");
-    pool.db.execute(
+    pool->db.execute(
             "CREATE TEMP VIEW parts_tree AS "
             "WITH RECURSIVE where_used(typex, uuidx, level, path) AS ( SELECT 'part', part_uuid, 0, "
             "part_uuid from top_parts UNION "
@@ -376,7 +399,7 @@ int main(int c_argc, char *c_argv[])
             "LEFT JOIN all_items_view "
             "ON where_used.typex = all_items_view.type "
             "AND where_used.uuidx = all_items_view.uuid");
-    pool.db.execute(
+    pool->db.execute(
             "CREATE TEMP VIEW derived_parts_tree AS "
             "WITH RECURSIVE where_used(uuidx, level, root) AS ( SELECT part_uuid, 0, part_uuid "
             "FROM top_parts UNION "
@@ -390,7 +413,7 @@ int main(int c_argc, char *c_argv[])
             "FROM where_used "
             "LEFT JOIN parts ON where_used.uuidx = parts.uuid "
             "ORDER BY root, level");
-    pool.db.execute(
+    pool->db.execute(
             "CREATE TEMP VIEW all_parts_tree AS "
             "SELECT * FROM ("
             "SELECT * FROM parts_tree "
@@ -404,7 +427,7 @@ int main(int c_argc, char *c_argv[])
     {
         ofs << "# Parts overview (excluding derived)\n";
         ofs << "Bold items are from this PR\n";
-        SQLite::Query q(pool.db, "SELECT * FROM all_parts_tree");
+        SQLite::Query q(pool->db, "SELECT * FROM all_parts_tree");
         while (q.step()) {
             const auto type = q.get<ObjectType>(0);
             const auto name = q.get<std::string>(1);
@@ -418,7 +441,7 @@ int main(int c_argc, char *c_argv[])
     }
     {
         bool first = true;
-        SQLite::Query q(pool.db,
+        SQLite::Query q(pool->db,
                         "SELECT git_files_view.type, git_files_view.name FROM git_files_view "
                         "LEFT JOIN all_parts_tree ON git_files_view.uuid = all_parts_tree.uuid "
                         "AND git_files_view.type = all_parts_tree.type "
@@ -440,7 +463,7 @@ int main(int c_argc, char *c_argv[])
     {
         int n_derived = 0;
         {
-            SQLite::Query q(pool.db,
+            SQLite::Query q(pool->db,
                             "SELECT COUNT(*) FROM git_files_view "
                             "LEFT JOIN parts ON git_files_view.uuid = parts.uuid AND git_files_view.type = 'part' "
                             "WHERE parts.base != '00000000-0000-0000-0000-000000000000'");
@@ -453,7 +476,7 @@ int main(int c_argc, char *c_argv[])
             {
                 ofs << "# Derived parts\n";
                 ofs << "Bold items are from this PR\n";
-                SQLite::Query q(pool.db, "SELECT * FROM derived_parts_tree");
+                SQLite::Query q(pool->db, "SELECT * FROM derived_parts_tree");
                 while (q.step()) {
                     const auto name = q.get<std::string>(0);
                     const auto level = q.get<int>(1);
@@ -469,9 +492,9 @@ int main(int c_argc, char *c_argv[])
                 ofs << "Values in italic are inherited\n\n";
                 ofs << "| MPN | Value | Manufacturer | Datasheet | Description | Tags |\n";
                 ofs << "| --- | ----- | ------------ | --------- | ----------- | ---- |\n";
-                SQLite::Query q(pool.db, "SELECT uuid FROM derived_parts_tree");
+                SQLite::Query q(pool->db, "SELECT uuid FROM derived_parts_tree");
                 while (q.step()) {
-                    const auto &part = *pool.get_part(q.get<std::string>(0));
+                    const auto &part = *pool->get_part(q.get<std::string>(0));
 
                     auto get_attr = [&part](Part::Attribute attr) {
                         return surround_if("*", "*", part.get_attribute(attr), part.attributes.at(attr).first);
@@ -483,7 +506,7 @@ int main(int c_argc, char *c_argv[])
                     ofs << "| " << get_attr(Part::Attribute::DATASHEET);
                     ofs << "| " << get_attr(Part::Attribute::DESCRIPTION);
                     {
-                        SQLite::Query qtags(pool.db, "SELECT tags FROM tags_view WHERE type = 'part' AND uuid = ?");
+                        SQLite::Query qtags(pool->db, "SELECT tags FROM tags_view WHERE type = 'part' AND uuid = ?");
                         qtags.bind(1, part.uuid);
                         if (qtags.step()) {
                             ofs << "| " << surround_if("*", "*", qtags.get<std::string>(0), part.inherit_tags);
@@ -499,13 +522,13 @@ int main(int c_argc, char *c_argv[])
     ofs << "# Details\n";
     ofs << "## Parts\n";
     {
-        SQLite::Query q(pool.db, "SELECT uuid FROM derived_parts_tree");
+        SQLite::Query q(pool->db, "SELECT uuid FROM derived_parts_tree");
         while (q.step()) {
-            const auto &part = *pool.get_part(q.get<std::string>(0));
+            const auto &part = *pool->get_part(q.get<std::string>(0));
             ofs << "### " << part.get_MPN() << "\n";
             if (part.base)
                 ofs << "Inerhits from " << part.base->get_MPN() << "\n\n";
-            print_rules_check_result(ofs, check_part(part));
+            print_rules_check_result(check_part(part));
 
             ofs << "| Attribute | Value |\n";
             ofs << "| --- | --- |\n";
@@ -522,7 +545,7 @@ int main(int c_argc, char *c_argv[])
                 if (needs_trim(val))
                     ofs << " " << whitespace_warning;
                 if (attr == Part::Attribute::MANUFACTURER) {
-                    ofs << " (" << count_manufactuer(pool, val) << " other parts)";
+                    ofs << " (" << count_manufactuer(val) << " other parts)";
                 }
                 if (part.attributes.at(attr).first) {
                     ofs << " (inherited)";
@@ -530,7 +553,7 @@ int main(int c_argc, char *c_argv[])
                 ofs << "\n";
             }
             {
-                SQLite::Query qtags(pool.db, "SELECT tags FROM tags_view WHERE type = 'part' AND uuid = ?");
+                SQLite::Query qtags(pool->db, "SELECT tags FROM tags_view WHERE type = 'part' AND uuid = ?");
                 qtags.bind(1, part.uuid);
                 if (qtags.step()) {
                     ofs << "|Tags | " << qtags.get<std::string>(0);
@@ -591,20 +614,20 @@ int main(int c_argc, char *c_argv[])
     }
     ofs << "## Entities\n";
     {
-        SQLite::Query q(pool.db, "SELECT uuid from git_files_view where type = 'entity'");
+        SQLite::Query q(pool->db, "SELECT uuid from git_files_view where type = 'entity'");
         while (q.step()) {
-            const auto &entity = *pool.get_entity(q.get<std::string>(0));
+            const auto &entity = *pool->get_entity(q.get<std::string>(0));
             ofs << "### " << entity.name << "\n";
 
-            print_rules_check_result(ofs, check_entity(entity));
+            print_rules_check_result(check_entity(entity));
 
             ofs << "| Attribute | Value |\n";
             ofs << "| --- | --- |\n";
-            ofs << "|Manufacturer | " << entity.manufacturer << " (" << count_manufactuer(pool, entity.manufacturer)
+            ofs << "|Manufacturer | " << entity.manufacturer << " (" << count_manufactuer(entity.manufacturer)
                 << " other parts)\n";
             ofs << "|Prefix | " << entity.prefix << "\n";
             {
-                SQLite::Query qtags(pool.db, "SELECT tags FROM tags_view WHERE type = 'entity' AND uuid = ?");
+                SQLite::Query qtags(pool->db, "SELECT tags FROM tags_view WHERE type = 'entity' AND uuid = ?");
                 qtags.bind(1, entity.uuid);
                 if (qtags.step()) {
                     ofs << "|Tags | " << qtags.get<std::string>(0) << "\n";
@@ -633,16 +656,16 @@ int main(int c_argc, char *c_argv[])
     }
     ofs << "## Units\n";
     {
-        SQLite::Query q(pool.db, "SELECT DISTINCT uuid from git_files_view where type = 'unit'");
+        SQLite::Query q(pool->db, "SELECT DISTINCT uuid from git_files_view where type = 'unit'");
         while (q.step()) {
-            const auto &unit = *pool.get_unit(q.get<std::string>(0));
+            const auto &unit = *pool->get_unit(q.get<std::string>(0));
             ofs << "### " << unit.name << "\n";
 
-            print_rules_check_result(ofs, check_unit(unit));
+            print_rules_check_result(check_unit(unit));
 
             ofs << "| Attribute | Value |\n";
             ofs << "| --- | --- |\n";
-            ofs << "|Manufacturer | " << unit.manufacturer << " (" << count_manufactuer(pool, unit.manufacturer)
+            ofs << "|Manufacturer | " << unit.manufacturer << " (" << count_manufactuer(unit.manufacturer)
                 << " other parts)\n";
 
             ofs << "\n\n";
@@ -676,11 +699,11 @@ int main(int c_argc, char *c_argv[])
 
             {
                 bool has_sym = false;
-                SQLite::Query q_symbol(pool.db, "SELECT uuid FROM symbols WHERE unit = ?");
+                SQLite::Query q_symbol(pool->db, "SELECT uuid FROM symbols WHERE unit = ?");
                 q_symbol.bind(1, unit.uuid);
                 while (q_symbol.step()) {
                     has_sym = true;
-                    const auto &pool_sym = *pool.get_symbol(q_symbol.get<std::string>(0));
+                    const auto &pool_sym = *pool->get_symbol(q_symbol.get<std::string>(0));
                     Symbol sym = pool_sym;
                     sym.expand();
                     sym.apply_placement(Placement());
@@ -690,7 +713,7 @@ int main(int c_argc, char *c_argv[])
                     }
                     {
                         auto r = sym.rules.check(RuleID::SYMBOL_CHECKS, sym);
-                        print_rules_check_result(ofs, r);
+                        print_rules_check_result(r);
                         ofs << "\n";
                     }
                     for (auto &[uu, txt] : sym.texts) {
@@ -750,20 +773,20 @@ int main(int c_argc, char *c_argv[])
 
     {
         ofs << "## Packages\n";
-        SQLite::Query q(pool.db, "SELECT DISTINCT uuid from git_files_view where type = 'package'");
+        SQLite::Query q(pool->db, "SELECT DISTINCT uuid from git_files_view where type = 'package'");
         while (q.step()) {
-            Package pkg = *pool.get_package(q.get<std::string>(0));
+            Package pkg = *pool->get_package(q.get<std::string>(0));
             pkg.expand();
             ofs << "### " << pkg.name << "\n";
             ofs << "| Attribute | Value |\n";
             ofs << "| --- | --- |\n";
-            ofs << "|Manufacturer | " << pkg.manufacturer << " (" << count_manufactuer(pool, pkg.manufacturer)
+            ofs << "|Manufacturer | " << pkg.manufacturer << " (" << count_manufactuer(pkg.manufacturer)
                 << " other parts)\n";
             if (pkg.alternate_for) {
                 ofs << "|Alt. for | " << pkg.alternate_for->name << "\n";
             }
             {
-                SQLite::Query qtags(pool.db, "SELECT tags FROM tags_view WHERE type = 'package' AND uuid = ?");
+                SQLite::Query qtags(pool->db, "SELECT tags FROM tags_view WHERE type = 'package' AND uuid = ?");
                 qtags.bind(1, pkg.uuid);
                 if (qtags.step()) {
                     ofs << "|Tags | " << qtags.get<std::string>(0) << "\n";
@@ -776,7 +799,7 @@ int main(int c_argc, char *c_argv[])
             }
             {
                 auto r = pkg.rules.check(RuleID::PACKAGE_CHECKS, pkg);
-                print_rules_check_result(ofs, r, "Package checks");
+                print_rules_check_result(r, "Package checks");
                 ofs << "\n";
             }
             {
@@ -784,7 +807,7 @@ int main(int c_argc, char *c_argv[])
                 rule_cl.clearance_silkscreen_cu = 0.2_mm;
                 rule_cl.clearance_silkscreen_pkg = 0.2_mm;
                 auto r = pkg.rules.check(RuleID::CLEARANCE_PACKAGE, pkg);
-                print_rules_check_result(ofs, r, "Clearance checks");
+                print_rules_check_result(r, "Clearance checks");
                 ofs << "\n";
             }
             for (auto &[uu, txt] : pkg.texts) {
@@ -853,7 +876,7 @@ int main(int c_argc, char *c_argv[])
                 fake_package.package = pkg;
                 fake_package.pool_package = &pkg;
 
-                Image3DExporter ex(fake_board, pool, 1024, 1024);
+                Image3DExporter ex(fake_board, *pool, 1024, 1024);
                 ex.view_all();
                 ex.set_show_models(false);
                 ex.set_projection(Canvas3DBase::Projection::ORTHO);
@@ -961,6 +984,19 @@ int main(int c_argc, char *c_argv[])
             }
         }
     }
+    return 0;
+}
+
+
+int main(int c_argc, char *c_argv[])
+{
+    Gio::init();
+    PoolManager::init();
+    git_libgit2_init();
+
+    Reviewer rev;
+    return rev.main(c_argc, c_argv);
+
 
     return 0;
 }
