@@ -592,10 +592,12 @@ int Reviewer::main(int c_argc, char *c_argv[])
     }
 
     ofs << "# Details\n";
-    ofs << "## Parts\n";
     {
         SQLite::Query q(pool->db, "SELECT uuid FROM derived_parts_tree");
+        Once once;
         while (q.step()) {
+            if (once())
+                ofs << "## Parts\n";
             const auto &part = *pool->get_part(q.get<std::string>(0));
             ofs << "### " << part.get_MPN() << "\n";
             if (part.base)
@@ -684,10 +686,13 @@ int Reviewer::main(int c_argc, char *c_argv[])
             }
         }
     }
-    ofs << "## Entities\n";
+
     {
         SQLite::Query q(pool->db, "SELECT uuid from git_files_view where type = 'entity'");
+        Once once;
         while (q.step()) {
+            if (once())
+                ofs << "## Entities\n";
             const auto &entity = *pool->get_entity(q.get<std::string>(0));
             ofs << "### " << entity.name << "\n";
 
@@ -726,10 +731,12 @@ int Reviewer::main(int c_argc, char *c_argv[])
             }
         }
     }
-    ofs << "## Units\n";
     {
         SQLite::Query q(pool->db, "SELECT DISTINCT uuid from git_files_view where type = 'unit'");
+        Once once;
         while (q.step()) {
+            if (once())
+                ofs << "## Units\n";
             const auto &unit = *pool->get_unit(q.get<std::string>(0));
             ofs << "### " << unit.name << "\n";
 
@@ -801,9 +808,11 @@ int Reviewer::main(int c_argc, char *c_argv[])
     }
 
     {
-        ofs << "## Packages\n";
         SQLite::Query q(pool->db, "SELECT DISTINCT uuid from git_files_view where type = 'package'");
+        Once once;
         while (q.step()) {
+            if (once())
+                ofs << "## Packages\n";
             Package pkg = *pool->get_package(q.get<std::string>(0));
             pkg.expand();
             ofs << "### " << pkg.name << "\n";
