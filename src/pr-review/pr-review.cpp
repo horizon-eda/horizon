@@ -392,29 +392,28 @@ int Reviewer::main(int c_argc, char *c_argv[])
             default:;
             }
             ofs << rules_check_error_level_to_string(r.level);
-
             ofs << " | " << q.get<std::string>(3) << "\n";
-            if (labels_filename.size()) {
-                std::string label;
-                switch (overall_result) {
-                case RulesCheckErrorLevel::PASS:
-                    label = "pass";
-                    break;
-                case RulesCheckErrorLevel::WARN:
-                    label = "warn";
-                    break;
-                case RulesCheckErrorLevel::FAIL:
-                    label = "fail";
-                    break;
-                default:;
-                }
-                if (label.size()) {
-                    const json j = {"bot: " + label};
-                    save_json_to_file(labels_filename, j);
-                }
-            }
         }
         ofs << "\n";
+        if (labels_filename.size()) {
+            std::string label;
+            switch (overall_result) {
+            case RulesCheckErrorLevel::PASS:
+                label = "pass";
+                break;
+            case RulesCheckErrorLevel::WARN:
+                label = "warn";
+                break;
+            case RulesCheckErrorLevel::FAIL:
+                label = "fail";
+                break;
+            default:;
+            }
+            if (label.size()) {
+                const json j = {"bot: " + label};
+                save_json_to_file(labels_filename, j);
+            }
+        }
     }
 
     {
