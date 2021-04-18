@@ -85,6 +85,20 @@ private:
 
 static PinDirectionMap pin_direction_map;
 
+class Once {
+public:
+    bool operator()()
+    {
+        if (first) {
+            first = false;
+            return true;
+        }
+        return false;
+    }
+
+private:
+    bool first = true;
+};
 
 class Reviewer {
 public:
@@ -145,7 +159,6 @@ void Reviewer::print_rules_check_result(const RulesCheckResult &r, const std::st
     }
     ofs << "\n";
 }
-
 
 int Reviewer::parse_options(int c_argc, char *c_argv[])
 {
@@ -348,11 +361,10 @@ int Reviewer::main(int c_argc, char *c_argv[])
                         "(SELECT filename FROM all_items_view "
                         "UNION ALL SELECT DISTINCT model_filename as filename FROM models) "
                         "ON filename=git_filename WHERE filename is NULL");
-        bool first = true;
+        Once once;
         while (q.step()) {
-            if (first) {
+            if (once()) {
                 ofs << "# Non-items\n";
-                first = false;
             }
             ofs << " - " << q.get<std::string>(0) << "\n";
         }
@@ -362,13 +374,12 @@ int Reviewer::main(int c_argc, char *c_argv[])
     {
         SQLite::Query q(pool->db, "SELECT status, git_filename FROM git_files WHERE status != ?");
         q.bind(1, static_cast<int>(GIT_DELTA_ADDED));
-        bool first = true;
+        Once once;
         while (q.step()) {
-            if (first) {
+            if (once()) {
                 ofs << "# Non-new files\n";
                 ofs << "| Status | File |\n";
                 ofs << "| --- | --- |\n";
-                first = false;
             }
             ofs << "| " << delta_to_string(static_cast<git_delta_t>(q.get<int>(0))) << " | " << q.get<std::string>(1)
                 << "|\n";
@@ -440,7 +451,6 @@ int Reviewer::main(int c_argc, char *c_argv[])
         }
     }
     {
-        bool first = true;
         SQLite::Query q(pool->db,
                         "SELECT git_files_view.type, git_files_view.name FROM git_files_view "
                         "LEFT JOIN all_parts_tree ON git_files_view.uuid = all_parts_tree.uuid "
@@ -449,12 +459,12 @@ int Reviewer::main(int c_argc, char *c_argv[])
                         "AND git_files_view.type = 'part' "
                         "WHERE all_parts_tree.uuid IS NULL AND derived_parts_tree.uuid IS NULL "
                         "AND git_files_view.type != 'model_3d'");
+        Once once;
         while (q.step()) {
-            if (first)
+            if (once())
                 ofs << "# Items not associated with any part\n";
-            first = false;
-            const auto type = q.get<ObjectType>(0);
 
+            const auto type = q.get<ObjectType>(0);
             ofs << " - " << object_descriptions.at(type).name << " " << q.get<std::string>(1) << "\n";
         }
     }
