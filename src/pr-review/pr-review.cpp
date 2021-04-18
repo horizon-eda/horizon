@@ -108,6 +108,7 @@ private:
     void print_rules_check_result(const RulesCheckResult &r, const std::string &name = "Checks");
     int count_manufactuer(const std::string &mfr);
     int parse_options(int c_argc, char *c_argv[]);
+    void review_symbol(const UUID &uu, const std::string &title_prefix);
 
     std::ofstream ofs;
     std::optional<Pool> pool;
@@ -158,6 +159,67 @@ void Reviewer::print_rules_check_result(const RulesCheckResult &r, const std::st
         }
     }
     ofs << "\n";
+}
+
+void Reviewer::review_symbol(const UUID &sym_uu, const std::string &title_prefix)
+{
+    const auto &pool_sym = *pool->get_symbol(sym_uu);
+    Symbol sym = pool_sym;
+    sym.expand();
+    sym.apply_placement(Placement());
+    ofs << title_prefix << " Symbol: " << sym.name << "\n";
+    if (sym.can_expand) {
+        ofs << "Is expandable\n\n";
+    }
+    {
+        auto r = sym.rules.check(RuleID::SYMBOL_CHECKS, sym);
+        print_rules_check_result(r);
+        ofs << "\n";
+    }
+    for (auto &[uu, txt] : sym.texts) {
+        if (txt.text == "$VALUE") {
+            txt.text += "\nGroup\nTag";
+        }
+    }
+
+    if (sym.text_placements.size() == 0) {
+        CanvasCairo2 ca;
+        ca.load(sym);
+        const std::string img_filename = "sym_" + static_cast<std::string>(sym.uuid) + ".png";
+        ca.get_image_surface(1, 1.25_mm)->write_to_png(Glib::build_filename(images_dir, img_filename));
+        ofs << "![Symbol](" << images_prefix << img_filename << ")\n";
+    }
+    else {
+        ofs << "| Angle | Normal | Mirrored |\n";
+        ofs << "| --- | --- | --- |\n";
+        for (const auto angle : {0, 90, 180, 270}) {
+            ofs << "| " << angle << "° ";
+            for (const auto mirror : {false, true}) {
+                Placement pl;
+                pl.set_angle_deg(angle);
+                pl.mirror = mirror;
+                sym.apply_placement(pl);
+                CanvasCairo2 ca;
+                ca.load(sym, pl);
+                const std::string img_filename = "sym_" + static_cast<std::string>(sym.uuid) + "_"
+                                                 + (mirror ? "m" : "n") + std::to_string(angle) + ".png";
+                ca.get_image_surface(1, 1.25_mm)->write_to_png(Glib::build_filename(images_dir, img_filename));
+                ofs << "| ![Symbol](" << images_prefix << img_filename << ") ";
+            }
+            ofs << "\n";
+        }
+    }
+    sym.apply_placement(Placement());
+    if (sym.can_expand) {
+        ofs << "<details>\n<summary>Expanded by 5</summary>\n\n";
+        sym.apply_expand(pool_sym, 5);
+        CanvasCairo2 ca;
+        ca.load(sym);
+        const std::string img_filename = "sym_" + static_cast<std::string>(sym.uuid) + "_expanded.png";
+        ca.get_image_surface(1, 1.25_mm)->write_to_png(Glib::build_filename(images_dir, img_filename));
+        ofs << "![Symbol](" << images_prefix << img_filename << ")\n";
+        ofs << "</details>\n\n";
+    }
 }
 
 int Reviewer::parse_options(int c_argc, char *c_argv[])
@@ -713,65 +775,7 @@ int Reviewer::main(int c_argc, char *c_argv[])
                 q_symbol.bind(1, unit.uuid);
                 while (q_symbol.step()) {
                     has_sym = true;
-                    const auto &pool_sym = *pool->get_symbol(q_symbol.get<std::string>(0));
-                    Symbol sym = pool_sym;
-                    sym.expand();
-                    sym.apply_placement(Placement());
-                    ofs << "#### Symbol: " << sym.name << "\n";
-                    if (sym.can_expand) {
-                        ofs << "Is expandable\n\n";
-                    }
-                    {
-                        auto r = sym.rules.check(RuleID::SYMBOL_CHECKS, sym);
-                        print_rules_check_result(r);
-                        ofs << "\n";
-                    }
-                    for (auto &[uu, txt] : sym.texts) {
-                        if (txt.text == "$VALUE") {
-                            txt.text += "\nGroup\nTag";
-                        }
-                    }
-
-                    if (sym.text_placements.size() == 0) {
-                        CanvasCairo2 ca;
-                        ca.load(sym);
-                        const std::string img_filename = "sym_" + static_cast<std::string>(sym.uuid) + ".png";
-                        ca.get_image_surface(1, 1.25_mm)->write_to_png(Glib::build_filename(images_dir, img_filename));
-                        ofs << "![Symbol](" << images_prefix << img_filename << ")\n";
-                    }
-                    else {
-                        ofs << "| Angle | Normal | Mirrored |\n";
-                        ofs << "| --- | --- | --- |\n";
-                        for (const auto angle : {0, 90, 180, 270}) {
-                            ofs << "| " << angle << "° ";
-                            for (const auto mirror : {false, true}) {
-                                Placement pl;
-                                pl.set_angle_deg(angle);
-                                pl.mirror = mirror;
-                                sym.apply_placement(pl);
-                                CanvasCairo2 ca;
-                                ca.load(sym, pl);
-                                const std::string img_filename = "sym_" + static_cast<std::string>(sym.uuid) + "_"
-                                                                 + (mirror ? "m" : "n") + std::to_string(angle)
-                                                                 + ".png";
-                                ca.get_image_surface(1, 1.25_mm)
-                                        ->write_to_png(Glib::build_filename(images_dir, img_filename));
-                                ofs << "| ![Symbol](" << images_prefix << img_filename << ") ";
-                            }
-                            ofs << "\n";
-                        }
-                    }
-                    sym.apply_placement(Placement());
-                    if (sym.can_expand) {
-                        ofs << "<details>\n<summary>Expanded by 5</summary>\n\n";
-                        sym.apply_expand(pool_sym, 5);
-                        CanvasCairo2 ca;
-                        ca.load(sym);
-                        const std::string img_filename = "sym_" + static_cast<std::string>(sym.uuid) + "_expanded.png";
-                        ca.get_image_surface(1, 1.25_mm)->write_to_png(Glib::build_filename(images_dir, img_filename));
-                        ofs << "![Symbol](" << images_prefix << img_filename << ")\n";
-                        ofs << "</details>\n\n";
-                    }
+                    review_symbol(q_symbol.get<std::string>(0), "####");
                 }
 
                 if (!has_sym) {
