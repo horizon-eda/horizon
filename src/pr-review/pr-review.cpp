@@ -167,7 +167,7 @@ void Reviewer::review_symbol(const UUID &sym_uu, const std::string &title_prefix
     Symbol sym = pool_sym;
     sym.expand();
     sym.apply_placement(Placement());
-    ofs << title_prefix << " Symbol: " << sym.name << "\n";
+    ofs << title_prefix << " " << sym.name << "\n";
     if (sym.can_expand) {
         ofs << "Is expandable\n\n";
     }
@@ -775,13 +775,28 @@ int Reviewer::main(int c_argc, char *c_argv[])
                 q_symbol.bind(1, unit.uuid);
                 while (q_symbol.step()) {
                     has_sym = true;
-                    review_symbol(q_symbol.get<std::string>(0), "####");
+                    review_symbol(q_symbol.get<std::string>(0), "#### Symbol:");
                 }
 
                 if (!has_sym) {
                     ofs << ":x: Unit has no symbols!\n";
                 }
             }
+        }
+    }
+
+    {
+        SQLite::Query q(pool->db,
+                        "SELECT git_files_view.uuid FROM git_files_view "
+                        "LEFT JOIN symbols ON (symbols.uuid = git_files_view.uuid AND git_files_view.type = 'symbol') "
+                        "LEFT JOIN git_files_view AS gfv2 ON (symbols.unit = gfv2.uuid AND gfv2.type = 'unit') "
+                        "WHERE git_files_view.type = 'symbol' AND gfv2.uuid IS NULL");
+        Once once;
+        while (q.step()) {
+            if (once()) {
+                ofs << "## Symbols\n";
+            }
+            review_symbol(q.get<std::string>(0), "###");
         }
     }
 
