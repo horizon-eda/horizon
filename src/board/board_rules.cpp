@@ -259,6 +259,7 @@ json BoardRules::serialize_or_export(Rule::SerializeMode mode) const
     SERIALIZE(clearance_copper_other);
     SERIALIZE(clearance_copper_keepout);
     SERIALIZE(clearance_same_net);
+    SERIALIZE(layer_pair);
 
 #undef SERIALIZE
 
