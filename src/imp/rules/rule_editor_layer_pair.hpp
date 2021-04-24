@@ -10,6 +10,5 @@ public:
 
 private:
     class RuleLayerPair *rule2;
-    Gtk::ComboBoxText &make_layer_combo(int &v);
 };
 } // namespace horizon

@@ -29,6 +29,7 @@ protected:
     Glib::RefPtr<Gtk::Builder> builder;
     class SpinButtonDim *create_spinbutton(const char *box);
     class RuleMatchEditor *create_rule_match_editor(const char *box, class RuleMatch &match);
+    class LayerComboBox *create_layer_combo(int &layer, bool show_any);
     type_signal_updated s_signal_updated;
 };
 } // namespace horizon

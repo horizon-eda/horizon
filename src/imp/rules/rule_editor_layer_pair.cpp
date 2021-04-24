@@ -1,9 +1,8 @@
 #include "rule_editor_layer_pair.hpp"
 #include "board/rule_layer_pair.hpp"
-#include "document/idocument.hpp"
-#include "common/layer_provider.hpp"
 #include "rule_match_editor.hpp"
 #include "util/gtk_util.hpp"
+#include "widgets/layer_combo_box.hpp"
 
 namespace horizon {
 void RuleEditorLayerPair::populate()
@@ -27,33 +26,17 @@ void RuleEditorLayerPair::populate()
     grid_attach_label_and_widget(grid, "Match", match_editor, top);
 
     {
-        auto &lc = make_layer_combo(rule2->layers.first);
+        auto &lc = *create_layer_combo(rule2->layers.first, false);
         grid_attach_label_and_widget(grid, "Layer 1", &lc, top);
     }
 
     {
-        auto &lc = make_layer_combo(rule2->layers.second);
+        auto &lc = *create_layer_combo(rule2->layers.second, false);
         grid_attach_label_and_widget(grid, "Layer 2", &lc, top);
     }
 
 
     grid->show();
-}
-
-
-Gtk::ComboBoxText &RuleEditorLayerPair::make_layer_combo(int &v)
-{
-    auto layer_combo = Gtk::manage(new Gtk::ComboBoxText());
-    for (const auto &it : core.get_layer_provider().get_layers()) {
-        if (it.second.copper)
-            layer_combo->insert(0, std::to_string(it.first), it.second.name + ": " + std::to_string(it.first));
-    }
-    layer_combo->set_active_id(std::to_string(v));
-    layer_combo->signal_changed().connect([this, layer_combo, &v] {
-        v = std::stoi(layer_combo->get_active_id());
-        s_signal_updated.emit();
-    });
-    return *layer_combo;
 }
 
 

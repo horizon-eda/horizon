@@ -4,6 +4,9 @@
 #include "common/layer_provider.hpp"
 #include "rule_match_editor.hpp"
 #include "widgets/spin_button_dim.hpp"
+#include "widgets/color_box.hpp"
+#include "preferences/preferences_provider.hpp"
+#include "preferences/preferences.hpp"
 
 namespace horizon {
 void RuleEditorTrackWidth::populate()
@@ -34,10 +37,21 @@ void RuleEditorTrackWidth::populate()
                 rule2->widths[i];
             }
 
-            auto label = Gtk::manage(new Gtk::Label(std::to_string(la.index) + ": " + la.name));
-            label->set_halign(Gtk::ALIGN_END);
-            layer_grid->attach(*label, 0, top, 1, 1);
-
+            {
+                auto label = Gtk::manage(new Gtk::Label(la.name));
+                auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5));
+                box->set_halign(Gtk::ALIGN_END);
+                box->pack_start(*label, false, false, 0);
+                auto cb = Gtk::manage(new ColorBox);
+                cb->set_size_request(16, 16);
+                cb->set_valign(Gtk::ALIGN_CENTER);
+                auto &colors = PreferencesProvider::get_prefs().canvas_layer.appearance.layer_colors;
+                if (colors.count(la.index))
+                    cb->set_color(colors.at(la.index));
+                box->pack_start(*cb, false, false, 0);
+                box->show_all();
+                layer_grid->attach(*box, 0, top, 1, 1);
+            }
             auto sp_min = Gtk::manage(new SpinButtonDim());
             sp_min->set_range(0, 100_mm);
             sp_min->set_value(rule2->widths.at(i).min);

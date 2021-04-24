@@ -95,17 +95,6 @@
           </packing>
         </child>
         <child>
-          <object class="GtkComboBoxText" id="layer_combo">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="hexpand">True</property>
-          </object>
-          <packing>
-            <property name="left-attach">2</property>
-            <property name="top-attach">1</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkBox" id="routing_offset_box">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
@@ -144,6 +133,20 @@
           <packing>
             <property name="left-attach">3</property>
             <property name="top-attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="layer_box">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="left-attach">2</property>
+            <property name="top-attach">1</property>
           </packing>
         </child>
         <child>

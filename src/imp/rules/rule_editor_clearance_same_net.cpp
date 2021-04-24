@@ -1,12 +1,11 @@
 #include "rule_editor_clearance_same_net.hpp"
 #include "board/rule_clearance_same_net.hpp"
 #include "common/patch_type_names.hpp"
-#include "document/idocument.hpp"
 #include "rule_match_editor.hpp"
 #include "widgets/parameter_set_editor.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "dialogs/dialogs.hpp"
-#include "common/layer_provider.hpp"
+#include "widgets/layer_combo_box.hpp"
 
 namespace horizon {
 
@@ -46,18 +45,8 @@ void RuleEditorClearanceSameNet::populate()
     match_editor->set_hexpand(true);
     grid->attach(*match_editor, 0, 1, 1, 1);
 
-    auto *layer_combo = Gtk::manage(new Gtk::ComboBoxText());
-    for (const auto &it : core.get_layer_provider().get_layers()) {
-        if (it.second.copper)
-            layer_combo->insert(0, std::to_string(it.first), it.second.name + ": " + std::to_string(it.first));
-    }
-    layer_combo->insert(0, "10000", "Any layer");
+    auto layer_combo = create_layer_combo(rule2->layer, true);
     layer_combo->set_hexpand(true);
-    layer_combo->set_active_id(std::to_string(rule2->layer));
-    layer_combo->signal_changed().connect([this, layer_combo] {
-        rule2->layer = std::stoi(layer_combo->get_active_id());
-        s_signal_updated.emit();
-    });
     grid->attach(*layer_combo, 1, 1, 1, 1);
 
 

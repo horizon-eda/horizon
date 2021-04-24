@@ -58,8 +58,14 @@ void LayerComboBox::prepend(const Layer &layer)
     row[list_columns.name] = layer.name;
     auto &prefs = PreferencesProvider::get_prefs();
     const auto &colors = prefs.canvas_layer.appearance.layer_colors;
-    if (colors.count(layer.index))
-        row[list_columns.color] = rgba_from_color(colors.at(layer.index));
+    Gdk::RGBA rgba;
+    if (colors.count(layer.index) && layer.index != 10000) {
+        rgba = rgba_from_color(colors.at(layer.index));
+    }
+    else {
+        rgba.set_alpha(0);
+    }
+    row[list_columns.color] = rgba;
 }
 
 } // namespace horizon

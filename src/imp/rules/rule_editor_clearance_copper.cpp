@@ -2,13 +2,12 @@
 #include "board/rule_clearance_copper.hpp"
 #include "common/lut.hpp"
 #include "common/patch_type_names.hpp"
-#include "document/idocument.hpp"
-#include "common/layer_provider.hpp"
 #include "dialogs/dialogs.hpp"
 #include "rule_match_editor.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "widgets/help_button.hpp"
 #include "help_texts.hpp"
+#include "widgets/layer_combo_box.hpp"
 
 namespace horizon {
 
@@ -37,19 +36,13 @@ void RuleEditorClearanceCopper::populate()
         match_editor->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
         match_editor->signal_updated().connect([this] { s_signal_updated.emit(); });
     }
-    Gtk::ComboBoxText *layer_combo;
-    builder->get_widget("layer_combo", layer_combo);
-
-    for (const auto &it : core.get_layer_provider().get_layers()) {
-        if (it.second.copper)
-            layer_combo->insert(0, std::to_string(it.first), it.second.name + ": " + std::to_string(it.first));
+    auto layer_combo = create_layer_combo(rule2->layer, true);
+    {
+        Gtk::Box *layer_box;
+        builder->get_widget("layer_box", layer_box);
+        layer_box->pack_start(*layer_combo, true, true, 0);
+        layer_combo->show();
     }
-    layer_combo->insert(0, "10000", "Any layer");
-    layer_combo->set_active_id(std::to_string(rule2->layer));
-    layer_combo->signal_changed().connect([this, layer_combo] {
-        rule2->layer = std::stoi(layer_combo->get_active_id());
-        s_signal_updated.emit();
-    });
 
     auto sp_routing_offset = create_spinbutton("routing_offset_box");
     sp_routing_offset->set_range(0, 10_mm);
