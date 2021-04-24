@@ -486,9 +486,11 @@ void Core::layers_to_meta(PropertyMeta &meta)
 {
     PropertyMetaLayers &m = dynamic_cast<PropertyMetaLayers &>(meta);
     m.layers.clear();
-    for (const auto &it : get_layer_provider().get_layers()) {
+    const auto &prv = get_layer_provider();
+    for (const auto &it : prv.get_layers()) {
         m.layers.emplace(it.first, it.second);
     }
+    m.is_visible = prv.get_layers().size() > 1;
 }
 
 void Core::get_placement(const Placement &placement, class PropertyValue &value, ObjectProperty::ID property)
