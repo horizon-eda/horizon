@@ -7,6 +7,7 @@
 #include "widgets/spin_button_angle.hpp"
 #include "util/util.hpp"
 #include "widgets/text_editor.hpp"
+#include "widgets/layer_combo_box.hpp"
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
@@ -256,7 +257,7 @@ PropertyValue &PropertyEditorNetClass::get_value()
 
 Gtk::Widget *PropertyEditorLayer::create_editor()
 {
-    combo = Gtk::manage(new Gtk::ComboBoxText());
+    combo = Gtk::manage(new LayerComboBox);
     connections.push_back(combo->signal_changed().connect(sigc::mem_fun(*this, &PropertyEditorLayer::changed)));
     return combo;
 }
@@ -267,9 +268,9 @@ void PropertyEditorLayer::reload()
     combo->remove_all();
     for (const auto &it : my_meta.layers) {
         if (!copper_only || it.second.copper)
-            combo->insert(0, std::to_string(it.first), it.second.name);
+            combo->prepend(it.second);
     }
-    combo->set_active_id(std::to_string(value.value));
+    combo->set_active_layer(value.value);
 }
 
 void PropertyEditorLayer::changed()
@@ -279,9 +280,9 @@ void PropertyEditorLayer::changed()
 
 PropertyValue &PropertyEditorLayer::get_value()
 {
-    auto active_id = combo->get_active_id();
-    if (active_id.size())
-        value.value = std::stoi(active_id);
+    const auto active_layer = combo->get_active_layer();
+    if (active_layer != 10000)
+        value.value = active_layer;
     return value;
 }
 

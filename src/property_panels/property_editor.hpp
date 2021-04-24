@@ -188,7 +188,7 @@ protected:
     Gtk::Widget *create_editor() override;
 
 private:
-    Gtk::ComboBoxText *combo = nullptr;
+    class LayerComboBox *combo = nullptr;
     void changed();
     PropertyValueInt value;
     PropertyMetaLayers my_meta;

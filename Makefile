@@ -507,6 +507,7 @@ SRC_IMP = \
 	src/imp/action_icon.cpp\
   	src/util/automatic_prefs.cpp\
 	src/util/treeview_state_store.cpp\
+	src/widgets/layer_combo_box.cpp\
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\
