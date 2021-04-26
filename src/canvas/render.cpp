@@ -962,22 +962,23 @@ void Canvas::render(const Hole &hole, bool interactive)
     transform.accumulate(hole.placement);
     const int64_t r = hole.diameter / 2;
     const int64_t l = std::max((int64_t)hole.length / 2 - r, (int64_t)0);
+    const int layer = get_overlay_layer({BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER});
     if (hole.shape == Hole::Shape::ROUND) {
-        draw_circle(Coordf(), r);
+        draw_circle(Coordf(), r, co, layer);
         if (hole.plated) {
-            draw_circle(Coordf(), r * 0.9);
+            draw_circle(Coordf(), r * 0.9, co, layer);
         }
         float x = hole.diameter / 2 / M_SQRT2;
-        draw_line(Coordi(-x, -x), Coordi(x, x), co);
-        draw_line(Coordi(x, -x), Coordi(-x, x), co);
+        draw_line(Coordi(-x, -x), Coordi(x, x), co, layer);
+        draw_line(Coordi(x, -x), Coordi(-x, x), co, layer);
         if (interactive)
             selectables.append(hole.uuid, ObjectType::HOLE, Coordi(), Coordi(-r, -r), Coordi(r, r));
     }
     else if (hole.shape == Hole::Shape::SLOT) {
-        draw_circle(Coordi(-l, 0), r, co);
-        draw_circle(Coordi(l, 0), r, co);
-        draw_line(Coordi(-l, -r), Coordi(l, -r), co);
-        draw_line(Coordi(-l, r), Coordi(l, r), co);
+        draw_circle(Coordi(-l, 0), r, co, layer);
+        draw_circle(Coordi(l, 0), r, co, layer);
+        draw_line(Coordi(-l, -r), Coordi(l, -r), co, layer);
+        draw_line(Coordi(-l, r), Coordi(l, r), co, layer);
         if (interactive)
             selectables.append(hole.uuid, ObjectType::HOLE, Coordi(), Coordi(-l - r, -r), Coordi(l + r, +r));
     }
