@@ -54,6 +54,7 @@ ImportKiCadPackageWindow::ImportKiCadPackageWindow(BaseObjectType *cobject, cons
     log_view->show();
 
     chooser_widget->signal_selection_changed().connect(sigc::mem_fun(*this, &ImportKiCadPackageWindow::update));
+    chooser_widget->signal_file_activated().connect(sigc::mem_fun(*this, &ImportKiCadPackageWindow::handle_import));
     import_button->signal_clicked().connect(sigc::mem_fun(*this, &ImportKiCadPackageWindow::handle_import));
     import_button->set_sensitive(false);
 
