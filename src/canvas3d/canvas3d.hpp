@@ -58,8 +58,6 @@ public:
         return s_signal_point_select;
     }
 
-    int _animate_step(GdkFrameClock *frame_clock);
-
     ~Canvas3D();
 
 private:
@@ -105,6 +103,9 @@ private:
 
     MSDAnimator zoom_animator;
     float zoom_animation_cam_dist_orig = 1;
+
+    static int zoom_tick_cb(GtkWidget *cwidget, GdkFrameClock *frame_clock, gpointer user_data);
+    int zoom_animate_step(GdkFrameClock *frame_clock);
 
     bool needs_resize = false;
 

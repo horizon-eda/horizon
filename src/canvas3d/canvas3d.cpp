@@ -194,7 +194,7 @@ void Canvas3D::rotate_gesture_update_cb(GdkEventSequence *seq)
     set_cam_elevation(gesture_rotate_cam_elevation_orig + (dy / height) * 180);
 }
 
-int Canvas3D::_animate_step(GdkFrameClock *frame_clock)
+int Canvas3D::zoom_animate_step(GdkFrameClock *frame_clock)
 {
     auto r = zoom_animator.step(gdk_frame_clock_get_frame_time(frame_clock) / 1e6);
     if (!r) { // should stop
@@ -214,11 +214,11 @@ int Canvas3D::_animate_step(GdkFrameClock *frame_clock)
     return G_SOURCE_CONTINUE;
 }
 
-static int tick_cb(GtkWidget *cwidget, GdkFrameClock *frame_clock, gpointer user_data)
+int Canvas3D::zoom_tick_cb(GtkWidget *cwidget, GdkFrameClock *frame_clock, gpointer user_data)
 {
     Gtk::Widget *widget = Glib::wrap(cwidget);
     auto canvas = dynamic_cast<Canvas3D *>(widget);
-    return canvas->_animate_step(frame_clock);
+    return canvas->zoom_animate_step(frame_clock);
 }
 
 
@@ -247,7 +247,7 @@ bool Canvas3D::on_scroll_event(GdkEventScroll *scroll_event)
         if (!zoom_animator.is_running()) {
             zoom_animator.start();
             zoom_animation_cam_dist_orig = cam_distance;
-            gtk_widget_add_tick_callback(GTK_WIDGET(gobj()), &tick_cb, nullptr, nullptr);
+            gtk_widget_add_tick_callback(GTK_WIDGET(gobj()), &zoom_tick_cb, nullptr, nullptr);
         }
         zoom_animator.target += inc;
     }
