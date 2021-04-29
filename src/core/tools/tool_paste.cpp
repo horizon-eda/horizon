@@ -376,11 +376,13 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             x->expand(*brd);
             if (brd->block->nets.count(x->net_set.uuid)) {
                 x->net_set = &brd->block->nets.at(x->net_set.uuid);
+                nets.insert(x->net_set->uuid);
             }
             else {
                 x->net_set = nullptr;
             }
             x->junction = &brd->junctions.at(junction_xlat.at(x->junction.uuid));
+            x->junction->net = x->net_set;
             selection.emplace(u, ObjectType::VIA);
         }
     }
@@ -472,6 +474,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
                 li.net = net;
         }
     }
+    update_airwires();
     return ToolResponse();
 }
 
@@ -559,6 +562,7 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
         if (args.type == ToolEventType::MOVE) {
             move_do_cursor(args.coords);
             update_tip();
+            update_airwires();
             return ToolResponse();
         }
         else if (args.type == ToolEventType::ACTION) {
@@ -585,4 +589,12 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
     update_tip();
     return ToolResponse();
 }
+
+void ToolPaste::update_airwires()
+{
+    if (doc.b && nets.size()) {
+        doc.b->get_board()->update_airwires(true, nets);
+    }
+}
+
 } // namespace horizon

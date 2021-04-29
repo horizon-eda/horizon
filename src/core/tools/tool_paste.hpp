@@ -30,5 +30,7 @@ private:
     class Picture *pic = nullptr;
     ToolResponse begin_paste(const json &j, const Coordi &cursor_pos);
     void update_tip();
+    std::set<UUID> nets;
+    void update_airwires();
 };
 } // namespace horizon
