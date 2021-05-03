@@ -5,7 +5,7 @@ PROGS       = $(addprefix $(BUILDDIR)/horizon-,imp eda)
 all: $(PROGS)
 pymodule: $(BUILDDIR)/horizon.so
 
-.PHONY: all pymodule
+.PHONY: all pymodule install install-man
 
 SRC_COMMON = \
 	src/util/uuid.cpp \
@@ -935,6 +935,7 @@ BINDIR = ${PREFIX}/bin/
 ICONDIR = ${PREFIX}/share/icons/hicolor/
 APPSDIR = ${PREFIX}/share/applications/
 METADIR = ${PREFIX}/share/metainfo/
+MANDIR = ${PREFIX}/share/man/man1
 INSTALL = /usr/bin/install
 
 src/preferences/color_presets.json: $(wildcard src/preferences/color_presets/*)
@@ -1037,6 +1038,10 @@ install: $(BUILDDIR)/horizon-imp $(BUILDDIR)/horizon-eda
 	mkdir -p $(DESTDIR)$(METADIR)
 	$(INSTALL) -m644 org.horizon_eda.HorizonEDA.metainfo.xml $(DESTDIR)$(METADIR)
 
+install-man:
+	mkdir -p $(DESTDIR)$(MANDIR)
+	$(INSTALL) -m 644 man/horizon-eda.1 $(DESTDIR)$(MANDIR)/horizon-eda.1
+	$(INSTALL) -m 644 man/horizon-imp.1 $(DESTDIR)$(MANDIR)/horizon-imp.1
 
 clean: clean_router clean_oce clean_res
 	$(RM) $(OBJ_ALL) $(BUILDDIR)/horizon-imp $(BUILDDIR)/horizon-pool $(BUILDDIR)/horizon-prj $(BUILDDIR)/horizon-pool-mgr $(BUILDDIR)/horizon-prj-mgr $(BUILDDIR)/horizon-pgm-test $(BUILDDIR)/horizon-gen-pkg $(BUILDDIR)/horizon-eda $(OBJ_ALL:.o=.d) $(GENDIR)/resources.cpp $(GENDIR)/version_gen.cpp $(OBJ_COMMON) $(OBJ_COMMON:.o=.d)
