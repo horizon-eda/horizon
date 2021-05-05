@@ -7,6 +7,9 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  LANG: en_US.UTF-8
+
 jobs:
   stylecheck:
     runs-on: ubuntu-18.04
@@ -61,12 +64,18 @@ jobs:
       run: make -j2 CXX=clang LDFLAGS='-lstdc++ -lm -lpthread -lstdc++fs'
 
   build-ubuntu:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
+    container: ubuntu:bionic
     needs: stylecheck
     steps:
     - uses: actions/checkout@v2
+    - name: generate locales
+      run: |
+        apt-get update
+        apt-get install -y locales
+        locale-gen ${{ env.LANG }}
     - name: Install dependencies
-      run: sudo apt-get update -y && sudo apt-get install git build-essential g++-8 libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git -y
+      run: apt-get install git build-essential g++-8 libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git -y
     - name: Build
       run: make -j2 CXX=g++-8 CC=gcc-8 WARNFLAGS="-Wall -Wshadow -Wno-parentheses" 
 
@@ -99,12 +108,18 @@ jobs:
       run: python3 scripts/check_app_versions.py
 
   build-py-ubuntu:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
+    container: ubuntu:bionic
     needs: stylecheck
     steps:
     - uses: actions/checkout@v2
+    - name: generate locales
+      run: |
+        apt-get update
+        apt-get install -y locales
+        locale-gen ${{ env.LANG }}
     - name: Install dependencies
-      run: sudo apt-get update -y && sudo apt-get install git build-essential g++-8 libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git python3-cairo-dev libosmesa6-dev -y
+      run: apt-get install git build-essential g++-8 libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git python3-cairo-dev libosmesa6-dev -y
     - name: Build
       run: make -j2 build/horizon.so CXX=g++-8 CC=gcc-8
     - name: Test python module
