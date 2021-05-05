@@ -57,7 +57,7 @@ void PoolNotebook::handle_kicad_symbol_import_wizard()
 
 void PoolNotebook::construct_entities()
 {
-    auto br = Gtk::manage(new PoolBrowserEntity(pool));
+    auto br = Gtk::manage(new PoolBrowserEntity(pool, "pool_notebook"));
     br->set_show_path(true);
     br->signal_activated().connect([this, br] { handle_edit_entity(br->get_selected()); });
 

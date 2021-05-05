@@ -5,7 +5,7 @@
 namespace horizon {
 class PoolBrowserSymbol : public PoolBrowser {
 public:
-    PoolBrowserSymbol(class IPool &p, const UUID &unit_uuid = UUID());
+    PoolBrowserSymbol(class IPool &p, const UUID &unit_uuid = UUID(), const std::string &instance = "");
     void search() override;
     void set_unit_uuid(const UUID &uu);
     ObjectType get_type() const override

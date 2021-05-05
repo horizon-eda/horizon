@@ -5,7 +5,8 @@
 #include <set>
 
 namespace horizon {
-PoolBrowserEntity::PoolBrowserEntity(IPool &p) : PoolBrowser(p)
+PoolBrowserEntity::PoolBrowserEntity(IPool &p, const std::string &instance)
+    : PoolBrowser(p, TreeViewStateStore::get_prefix(instance, "pool_browser_entity"))
 {
     construct();
     name_entry = create_search_entry("Name");
@@ -21,12 +22,23 @@ Glib::RefPtr<Gtk::ListStore> PoolBrowserEntity::create_list_store()
 
 void PoolBrowserEntity::create_columns()
 {
-    append_column_with_item_source_cr("Entity", list_columns.entity_name);
-    treeview->append_column("Manufacturer", list_columns.entity_manufacturer);
+    {
+        auto col = append_column_with_item_source_cr("Entity", list_columns.entity_name, Pango::ELLIPSIZE_END);
+        col->set_resizable(true);
+        col->set_min_width(150);
+    }
+    {
+        auto col = append_column("Manufacturer", list_columns.entity_manufacturer, Pango::ELLIPSIZE_END);
+        col->set_resizable(true);
+        col->set_min_width(50);
+        install_column_tooltip(*col, list_columns.entity_manufacturer);
+    }
     treeview->append_column("Prefix", list_columns.prefix);
     treeview->append_column("Gates", list_columns.n_gates);
     {
-        auto col = append_column("Tags", list_columns.tags);
+        auto col = append_column("Tags", list_columns.tags, Pango::ELLIPSIZE_END);
+        col->set_resizable(true);
+        col->set_min_width(50);
         install_column_tooltip(*col, list_columns.tags);
     }
     path_column = append_column("Path", list_columns.path, Pango::ELLIPSIZE_START);

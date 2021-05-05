@@ -3,7 +3,8 @@
 #include "util/sqlite.hpp"
 
 namespace horizon {
-PoolBrowserSymbol::PoolBrowserSymbol(IPool &p, const UUID &uu) : PoolBrowser(p), unit_uuid(uu)
+PoolBrowserSymbol::PoolBrowserSymbol(IPool &p, const UUID &uu, const std::string &instance)
+    : PoolBrowser(p, TreeViewStateStore::get_prefix(instance, "pool_browser_package")), unit_uuid(uu)
 {
     construct();
     name_entry = create_search_entry("Name", create_pool_selector());
@@ -18,9 +19,23 @@ Glib::RefPtr<Gtk::ListStore> PoolBrowserSymbol::create_list_store()
 
 void PoolBrowserSymbol::create_columns()
 {
-    append_column_with_item_source_cr("Symbol", list_columns.name);
-    treeview->append_column("Unit", list_columns.unit_name);
-    treeview->append_column("Manufacturer", list_columns.unit_manufacturer);
+    {
+        auto col = append_column_with_item_source_cr("Symbol", list_columns.name, Pango::ELLIPSIZE_END);
+        col->set_resizable(true);
+        col->set_min_width(150);
+    }
+    {
+        auto col = append_column("Unit", list_columns.unit_name, Pango::ELLIPSIZE_END);
+        col->set_resizable(true);
+        col->set_min_width(50);
+    }
+    {
+        auto col = append_column("Manufacturer", list_columns.unit_manufacturer, Pango::ELLIPSIZE_END);
+        col->set_resizable(true);
+        col->set_min_width(50);
+    }
+    path_column = append_column("Path", list_columns.path, Pango::ELLIPSIZE_START);
+    install_column_tooltip(*path_column, list_columns.path);
 }
 
 void PoolBrowserSymbol::add_sort_controller_columns()
@@ -28,8 +43,6 @@ void PoolBrowserSymbol::add_sort_controller_columns()
     sort_controller->add_column(0, "symbols.name");
     sort_controller->add_column(1, "units.name");
     sort_controller->add_column(2, "units.manufacturer");
-    path_column = append_column("Path", list_columns.path, Pango::ELLIPSIZE_START);
-    install_column_tooltip(*path_column, list_columns.path);
 }
 
 void PoolBrowserSymbol::set_unit_uuid(const UUID &uu)

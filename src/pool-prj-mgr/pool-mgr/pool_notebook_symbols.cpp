@@ -76,7 +76,7 @@ void PoolNotebook::handle_duplicate_symbol(const UUID &uu)
 
 void PoolNotebook::construct_symbols()
 {
-    auto br = Gtk::manage(new PoolBrowserSymbol(pool));
+    auto br = Gtk::manage(new PoolBrowserSymbol(pool, UUID(), "pool_notebook"));
     br->set_show_path(true);
     browsers.emplace(ObjectType::SYMBOL, br);
     br->show();
