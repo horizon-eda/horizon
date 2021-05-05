@@ -220,6 +220,7 @@ void ImpSymbol::construct()
         x.add_action(make_action(ToolID::DRAW_LINE_CIRCLE));
         x.add_action(make_action(ToolID::DRAW_ARC));
     }
+    add_action_button_polygon();
     add_action_button(make_action(ToolID::PLACE_TEXT));
     add_action_button(make_action(ToolID::RESIZE_SYMBOL));
 }
