@@ -24,7 +24,7 @@ def chopSVG(icon)
 		#cmd = "#{INKSCAPE} -f #{icon[:file]} -z --vacuum-defs -l #{icon[:file]} > /dev/null 2>&1"
 		#system(cmd)
 		svgcrop = Document.new(File.new(icon[:file], 'r'))
-		svgcrop.root.each_element("//path") do |path|
+		svgcrop.root.each_element("//rect") do |path|
 			if path.attributes['style'].include? 'fill:#1a1a1a;'
 				path.remove
 			end
