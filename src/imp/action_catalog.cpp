@@ -925,6 +925,9 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::PREV_SHEET, ToolID::NONE},
          {"Previous sheet", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::PLACE_DOT},
+         {"Place dot", ActionGroup::SYMBOL, ActionCatalogItem::AVAILABLE_IN_SYMBOL, ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1206,5 +1209,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(DRAG_POLYGON_EDGE),
         TOOL_LUT_ITEM(MEASURE),
         TOOL_LUT_ITEM(EDIT_CUSTOM_VALUE),
+        TOOL_LUT_ITEM(PLACE_DOT),
 };
 } // namespace horizon

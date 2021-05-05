@@ -304,6 +304,7 @@ SRC_IMP = \
 	src/core/tools/tool_drag_polygon_edge.cpp\
 	src/core/tools/tool_measure.cpp\
 	src/core/tools/tool_edit_custom_value.cpp\
+	src/core/tools/tool_place_dot.cpp\
 	src/document/documents.cpp\
 	src/core/clipboard/clipboard.cpp\
 	src/core/clipboard/clipboard_padstack.cpp\

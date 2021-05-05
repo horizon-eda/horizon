@@ -76,6 +76,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-via-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-route-track-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-route-diffpair-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-dot-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-lmb-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-rmb-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/rule-imported-symbolic.svg</file>

@@ -84,6 +84,7 @@
 #include "tools/tool_drag_polygon_edge.hpp"
 #include "tools/tool_measure.hpp"
 #include "tools/tool_edit_custom_value.hpp"
+#include "tools/tool_place_dot.hpp"
 
 namespace horizon {
 
@@ -400,6 +401,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::EDIT_CUSTOM_VALUE:
         return std::make_unique<ToolEditCustomValue>(this, tool_id);
+
+    case ToolID::PLACE_DOT:
+        return std::make_unique<ToolPlaceDot>(this, tool_id);
 
     default:
         return nullptr;

@@ -31,6 +31,7 @@ static const std::map<ActionToolID, const char *> action_icons = {
         {make_action(ToolID::ROUTE_TRACK_INTERACTIVE), "action-route-track-symbolic"},
         {make_action(ToolID::ROUTE_DIFFPAIR_INTERACTIVE), "action-route-diffpair-symbolic"},
         {make_action(ToolID::PLACE_VIA), "action-place-via-symbolic"},
+        {make_action(ToolID::PLACE_DOT), "action-place-dot-symbolic"},
 };
 
 const char *get_action_icon(ActionToolID id)

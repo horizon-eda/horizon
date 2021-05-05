@@ -1689,6 +1689,7 @@ static const char *get_cursor_icon(ToolID id)
     case ToolID::PLACE_BUS_LABEL:
     case ToolID::PLACE_BUS_RIPPER:
     case ToolID::PLACE_VIA:
+    case ToolID::PLACE_DOT:
         return nullptr;
 
     default:

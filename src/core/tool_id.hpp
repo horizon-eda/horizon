@@ -152,5 +152,6 @@ enum class ToolID {
     DRAG_POLYGON_EDGE,
     MEASURE,
     EDIT_CUSTOM_VALUE,
+    PLACE_DOT,
 };
 } // namespace horizon
