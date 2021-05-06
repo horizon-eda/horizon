@@ -75,8 +75,8 @@ EditCustomValueDialog::EditCustomValueDialog(Gtk::Window *parent, SchematicSymbo
         box2->pack_start(*fr, false, false, 0);
         listbox->set_selection_mode(Gtk::SELECTION_NONE);
         listbox->set_activate_on_single_click(true);
-        auto make_insert_button = [listbox, this](const std::string &label, const std::string &ins,
-                                                  const std::string &prefix = "") {
+        auto make_insert_button = [listbox](const std::string &label, const std::string &ins,
+                                            const std::string &prefix = "") {
             auto la = Gtk::manage(new InsertBox(prefix, label, ins));
             listbox->append(*la);
         };

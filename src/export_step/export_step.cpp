@@ -77,14 +77,13 @@ static TopoDS_Shape face_from_countour(const ClipperLib::Path &contour)
 
 class CanvasHole : public Canvas {
 public:
-    CanvasHole(TopTools_ListOfShape &cs, int64_t th) : cutouts(cs), thickness(th)
+    CanvasHole(TopTools_ListOfShape &cs) : cutouts(cs)
     {
         img_mode = true;
     }
 
 private:
     TopTools_ListOfShape &cutouts;
-    int64_t thickness;
     void img_hole(const class Hole &hole) override
     {
         Placement tr = transform;
@@ -427,7 +426,7 @@ void export_step(const std::string &filename, const Board &brd, class IPool &poo
 
     progress_cb("Holes…");
     {
-        CanvasHole canvas_hole(cutouts, total_thickness);
+        CanvasHole canvas_hole(cutouts);
         canvas_hole.update(brd);
     }
 
