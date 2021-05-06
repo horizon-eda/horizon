@@ -817,6 +817,8 @@ else
 	UNAME := $(shell uname)
 	ifeq ($(UNAME), FreeBSD)
 		CXXFLAGS += -D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR
+	else
+		LDFLAGS += -lstdc++fs
 	endif
 	ifeq ($(UNAME), Darwin)
 		# do nothing on mac os
