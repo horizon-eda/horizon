@@ -192,7 +192,7 @@ void ImpPackage::construct_3d()
         models_listbox->set_selection_mode(Gtk::SELECTION_NONE);
         models_listbox->set_header_func(sigc::ptr_fun(header_func_separator));
         models_listbox->set_activate_on_single_click(true);
-        models_listbox->signal_row_activated().connect([this](Gtk::ListBoxRow *row) {
+        models_listbox->signal_row_activated().connect([](Gtk::ListBoxRow *row) {
             auto ed = dynamic_cast<ModelEditor *>(row->get_child());
             ed->make_current();
         });

@@ -412,7 +412,7 @@ bool Schematic::place_bipole_on_line(Sheet *sheet, SchematicSymbol *sym)
                 if (dst_swapped < dst_normal) {
                     std::swap(pin_from, pin_to);
                 }
-                auto connect_pin = [this, sheet, sym, line](SymbolPin &pin, const LineNet::Connection &conn) {
+                auto connect_pin = [sheet, sym, line](SymbolPin &pin, const LineNet::Connection &conn) {
                     auto uu = UUID::random();
                     auto &new_line = sheet->net_lines.emplace(uu, uu).first->second;
                     new_line.from = conn;

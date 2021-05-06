@@ -62,8 +62,6 @@ public:
 
 private:
     PoolStatusProviderBase *prv;
-    enum class Manager { REMOTE, GIT, NONE };
-    Manager manager = Manager::NONE;
     Gtk::Label *label_managed;
     Gtk::Label *label_name;
     Gtk::Label *label_path;
