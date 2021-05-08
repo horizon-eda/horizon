@@ -244,6 +244,7 @@ private:
     void hud_update();
 
     std::map<std::string, Glib::RefPtr<Gio::FileMonitor>> file_monitors;
+    sigc::connection file_monitor_delay_connection;
 
     void handle_file_changed(const Glib::RefPtr<Gio::File> &file1, const Glib::RefPtr<Gio::File> &file2,
                              Gio::FileMonitorEvent ev);

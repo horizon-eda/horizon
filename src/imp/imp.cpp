@@ -1504,7 +1504,13 @@ void ImpBase::set_monitor_items(const ItemSet &items)
     std::set<std::string> filenames;
     std::transform(items.begin(), items.end(), std::inserter(filenames, filenames.begin()),
                    [this](const auto &it) { return pool->get_filename(it.first, it.second); });
-    set_monitor_files(filenames);
+    file_monitor_delay_connection.disconnect();
+    file_monitor_delay_connection = Glib::signal_timeout().connect_seconds(
+            [this, filenames] {
+                set_monitor_files(filenames);
+                return false;
+            },
+            1);
 }
 
 void ImpBase::handle_file_changed(const Glib::RefPtr<Gio::File> &file1, const Glib::RefPtr<Gio::File> &file2,
