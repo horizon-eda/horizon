@@ -87,20 +87,9 @@ ImpBase::ImpBase(const PoolParams &params)
     auto ep_broadcast = Glib::getenv("HORIZON_EP_BROADCAST");
     if (ep_broadcast.size()) {
         sock_broadcast_rx.connect(ep_broadcast);
-        {
-            unsigned int prefix = 0;
-            sock_broadcast_rx.setsockopt(ZMQ_SUBSCRIBE, &prefix, 4);
-            prefix = getpid();
-            sock_broadcast_rx.setsockopt(ZMQ_SUBSCRIBE, &prefix, 4);
-        }
-        Glib::RefPtr<Glib::IOChannel> chan;
-#ifdef G_OS_WIN32
-        SOCKET fd = sock_broadcast_rx.getsockopt<SOCKET>(ZMQ_FD);
-        chan = Glib::IOChannel::create_from_win32_socket(fd);
-#else
-        int fd = sock_broadcast_rx.getsockopt<int>(ZMQ_FD);
-        chan = Glib::IOChannel::create_from_fd(fd);
-#endif
+        zmq_helper::subscribe_int(sock_broadcast_rx, 0);
+        zmq_helper::subscribe_int(sock_broadcast_rx, getpid());
+        auto chan = zmq_helper::io_channel_from_socket(sock_broadcast_rx);
 
         {
             auto pid_p = Glib::getenv("HORIZON_MGR_PID");
@@ -110,7 +99,7 @@ ImpBase::ImpBase(const PoolParams &params)
 
         Glib::signal_io().connect(
                 [this](Glib::IOCondition cond) {
-                    while (sock_broadcast_rx.getsockopt<int>(ZMQ_EVENTS) & ZMQ_POLLIN) {
+                    while (zmq_helper::can_recv(sock_broadcast_rx)) {
                         zmq::message_t msg;
                         if (zmq_helper::recv(sock_broadcast_rx, msg)) {
                             int prefix;
@@ -129,8 +118,7 @@ ImpBase::ImpBase(const PoolParams &params)
     auto ep_project = Glib::getenv("HORIZON_EP_MGR");
     if (ep_project.size()) {
         sock_project.connect(ep_project);
-        sock_project.setsockopt(ZMQ_RCVTIMEO, 5000);
-        sock_project.setsockopt(ZMQ_SNDTIMEO, 5000);
+        zmq_helper::set_timeouts(sock_project, 5000);
     }
     sockets_connected = ep_project.size() && ep_broadcast.size();
 }

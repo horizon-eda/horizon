@@ -31,10 +31,7 @@ PoolProjectManagerApplication::PoolProjectManagerApplication()
       sock_broadcast(zctx, ZMQ_PUB)
 {
     sock_broadcast.bind("tcp://127.0.0.1:*");
-    char ep[1024];
-    size_t sz = sizeof(ep);
-    sock_broadcast.getsockopt(ZMQ_LAST_ENDPOINT, ep, &sz);
-    sock_broadcast_ep = ep;
+    sock_broadcast_ep = zmq_helper::get_last_endpoint(sock_broadcast);
 }
 
 const std::string &PoolProjectManagerApplication::get_ep_broadcast() const

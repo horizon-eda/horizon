@@ -136,25 +136,13 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     view_create_pool.signal_valid_change().connect([this](bool v) { button_create->set_sensitive(v); });
 
     sock_mgr.bind("tcp://127.0.0.1:*");
-    {
-        char ep[1024];
-        size_t sz = sizeof(ep);
-        sock_mgr.getsockopt(ZMQ_LAST_ENDPOINT, ep, &sz);
-        sock_mgr_ep = ep;
-    }
+    sock_mgr_ep = zmq_helper::get_last_endpoint(sock_mgr);
 
-    Glib::RefPtr<Glib::IOChannel> chan;
-#ifdef G_OS_WIN32
-    SOCKET fd = sock_mgr.getsockopt<SOCKET>(ZMQ_FD);
-    chan = Glib::IOChannel::create_from_win32_socket(fd);
-#else
-    int fd = sock_mgr.getsockopt<int>(ZMQ_FD);
-    chan = Glib::IOChannel::create_from_fd(fd);
-#endif
+    auto chan = zmq_helper::io_channel_from_socket(sock_mgr);
 
     Glib::signal_io().connect(sigc::track_obj(
                                       [this](Glib::IOCondition cond) {
-                                          while (sock_mgr.getsockopt<int>(ZMQ_EVENTS) & ZMQ_POLLIN) {
+                                          while (zmq_helper::can_recv(sock_mgr)) {
                                               zmq::message_t msg;
                                               if (zmq_helper::recv(sock_mgr, msg)) {
                                                   char *data = (char *)msg.data();
