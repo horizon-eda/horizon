@@ -142,12 +142,6 @@ static bool operator<(PoolIndex::Level a, PoolIndex::Level b)
 
 void PoolsWindow::update_available()
 {
-    std::optional<UUID> pool_sel;
-    if (auto row = available_listbox->get_selected_row()) {
-        if (auto w = dynamic_cast<AvailablePoolItemEditor *>(row->get_child())) {
-            pool_sel = w->pool_index.uuid;
-        }
-    }
     auto children = available_listbox->get_children();
     for (auto it : children) {
         delete it;
@@ -167,9 +161,6 @@ void PoolsWindow::update_available()
         row->set_activatable(false);
         x->unreference();
         x->download_button->signal_clicked().connect([this, x] { show_download_window(&x->pool_index); });
-        if (pool_sel && *pool_sel == it->uuid) {
-            available_listbox->select_row(*row);
-        }
     }
 }
 
