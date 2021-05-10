@@ -135,6 +135,11 @@ void PoolsWindow::index_fetch_worker()
     index_dispatcher.emit();
 }
 
+static bool operator<(PoolIndex::Level a, PoolIndex::Level b)
+{
+    return static_cast<int>(a) < static_cast<int>(b);
+}
+
 void PoolsWindow::update_available()
 {
     std::optional<UUID> pool_sel;
@@ -147,8 +152,14 @@ void PoolsWindow::update_available()
     for (auto it : children) {
         delete it;
     }
+    std::vector<const PoolIndex *> pools_index_sorted;
+    pools_index_sorted.reserve(pools_index.size());
     for (const auto &[uu, it] : pools_index) {
-        auto x = AvailablePoolItemEditor::create(it);
+        pools_index_sorted.push_back(&it);
+    }
+    std::sort(pools_index_sorted.begin(), pools_index_sorted.end(), [](auto a, auto b) { return a->level < b->level; });
+    for (const auto it : pools_index_sorted) {
+        auto x = AvailablePoolItemEditor::create(*it);
         auto row = Gtk::manage(new Gtk::ListBoxRow);
         row->add(*x);
         row->show_all();
@@ -156,7 +167,7 @@ void PoolsWindow::update_available()
         row->set_activatable(false);
         x->unreference();
         x->download_button->signal_clicked().connect([this, x] { show_download_window(&x->pool_index); });
-        if (pool_sel && *pool_sel == uu) {
+        if (pool_sel && *pool_sel == it->uuid) {
             available_listbox->select_row(*row);
         }
     }
