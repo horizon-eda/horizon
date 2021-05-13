@@ -114,6 +114,21 @@ static std::string pnp_angle_to_string(int x)
     return ss.str();
 }
 
+static std::string pnp_dim_to_string(int64_t x)
+{
+    std::ostringstream ss;
+    ss.imbue(std::locale::classic());
+    ss << std::fixed << std::setprecision(3) << std::internal << (x / 1e6);
+    return ss.str();
+}
+
+static int64_t get_dim(const Placement &pl, PnPColumn col)
+{
+    if (col == PnPColumn::X)
+        return pl.shift.x;
+    else
+        return pl.shift.y;
+}
 
 std::string PnPRow::get_column(PnPColumn col, const PnPExportSettings &settings) const
 {
@@ -152,10 +167,13 @@ std::string PnPRow::get_column(PnPColumn col, const PnPExportSettings &settings)
         return pnp_angle_to_string(placement.get_angle());
 
     case PnPColumn::X:
-        return fmt_pos(settings.position_format, placement.shift.x);
-
-    case PnPColumn::Y:
-        return fmt_pos(settings.position_format, placement.shift.y);
+    case PnPColumn::Y: {
+        const auto d = get_dim(placement, col);
+        if (settings.customize)
+            return fmt_pos(settings.position_format, d);
+        else
+            return pnp_dim_to_string(d);
+    } break;
 
     default:
         return "";
