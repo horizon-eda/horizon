@@ -7,6 +7,7 @@
 #include "symbol.hpp"
 #include "unit.hpp"
 #include "pool_manager.hpp"
+#include "logger/logger.hpp"
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 #include <giomm.h>
@@ -334,7 +335,7 @@ std::map<std::string, UUID> Pool::get_actually_included_pools(bool include_self)
                 }
             }
             else {
-                throw std::runtime_error("pool not found");
+                Logger::log_warning("included pool " + (std::string)pool_uu + " not found");
             }
         }
     }
