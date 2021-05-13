@@ -17,7 +17,7 @@ PoolStatusProviderBase::PoolStatusProviderBase(const std::string &bp) : base_pat
             if (pool_status_thread)
                 pool_status = std::move(pool_status_thread);
         }
-        if (pool_status->status == PoolStatusBase::Status::DONE)
+        if (pool_status->status == PoolStatusBase::Status::DONE && thread.joinable())
             thread.join();
         s_signal_changed.emit();
     });
