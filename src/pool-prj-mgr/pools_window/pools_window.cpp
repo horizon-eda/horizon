@@ -149,6 +149,7 @@ PoolsWindow::PoolsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
                          class PoolProjectManagerApplication &a_app)
     : Gtk::Window(cobject), mgr(PoolManager::get()), app(a_app)
 {
+    set_title("Pools");
     GET_WIDGET(installed_listbox);
     GET_WIDGET(info_box);
     GET_WIDGET(available_listbox);
