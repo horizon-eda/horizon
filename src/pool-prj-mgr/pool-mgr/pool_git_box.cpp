@@ -407,6 +407,11 @@ void PoolGitBox::handle_add_with_deps()
 
         while (q.step()) {
             std::string filename = q.get<std::string>(0);
+            int ignored = 0;
+            if (git_ignore_path_is_ignored(&ignored, repo, filename.c_str()) == 0) {
+                if (ignored)
+                    continue;
+            }
             if (git_index_add_bypath(index, filename.c_str()) != 0) {
                 auto last_error = giterr_last();
                 std::string err_str = last_error->message;
