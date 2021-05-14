@@ -8,6 +8,7 @@
 #include "widgets/project_meta_editor.hpp"
 #include "block/block.hpp"
 #include "pool/pool_cache_status.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 
@@ -115,10 +116,7 @@ PoolProjectManagerViewProject::PoolProjectManagerViewProject(const Glib::RefPtr<
 
     Gtk::Button *open_button;
     builder->get_widget("prj_open_dir_button", open_button);
-    open_button->signal_clicked().connect([this] {
-        auto uri = Gio::File::create_for_path(Glib::path_get_dirname(win.project_filename))->get_uri();
-        Gio::AppInfo::launch_default_for_uri(uri);
-    });
+    open_button->signal_clicked().connect([this] { open_directory(win, win.project_filename); });
 
     Gtk::Button *edit_button;
     builder->get_widget("prj_edit_meta_button", edit_button);

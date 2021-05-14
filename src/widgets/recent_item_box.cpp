@@ -1,4 +1,5 @@
 #include "recent_item_box.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 RecentItemBox::RecentItemBox(const std::string &name, const std::string &pa, const Glib::DateTime &ti)
@@ -38,8 +39,8 @@ RecentItemBox::RecentItemBox(const std::string &name, const std::string &pa, con
     {
         auto item = Gtk::manage(new Gtk::MenuItem("Open in file browser"));
         item->signal_activate().connect([this] {
-            auto uri = Gio::File::create_for_path(Glib::path_get_dirname(path))->get_uri();
-            Gio::AppInfo::launch_default_for_uri(uri);
+            auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
+            open_directory(*top, Glib::path_get_dirname(path));
         });
         item->show();
         menu.append(*item);
