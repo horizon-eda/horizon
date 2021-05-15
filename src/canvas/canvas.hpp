@@ -120,7 +120,7 @@ protected:
     void render(const class Hole &hole, bool interactive = true);
     void render(const class Package &package, bool interactive = true, bool smashed = false,
                 bool omit_silkscreen = false, bool omit_outline = false);
-    void render_pad_overlay(const class Pad &pad);
+    void render_pad_overlay(const class Pad &pad, bool interactive);
     void render(const class Pad &pad);
     enum class OutlineMode { INCLUDE, OMIT };
     void render(const class Board &brd, bool interactive = true, PanelMode mode = PanelMode::INCLUDE,

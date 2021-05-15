@@ -1103,9 +1103,11 @@ void Canvas::render(const Padstack &padstack, bool interactive)
     img_set_padstack(false);
 }
 
-void Canvas::render_pad_overlay(const Pad &pad)
+void Canvas::render_pad_overlay(const Pad &pad, bool interactive)
 {
     if (img_mode)
+        return;
+    if (pad.padstack.type == Padstack::Type::MECHANICAL && !interactive)
         return;
     transform_save();
     transform.accumulate(pad.placement);
@@ -1212,7 +1214,7 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed, bool omi
         auto pkg_uuid = object_refs_current.back().uuid;
         for (const auto &it : pkg.pads) {
             object_ref_push(ObjectType::PAD, it.second.uuid, pkg_uuid);
-            render_pad_overlay(it.second);
+            render_pad_overlay(it.second, interactive);
             render(it.second);
             object_ref_pop();
         }
@@ -1220,7 +1222,7 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed, bool omi
     else {
         for (const auto &it : pkg.pads) {
             object_ref_push(ObjectType::PAD, it.second.uuid);
-            render_pad_overlay(it.second);
+            render_pad_overlay(it.second, interactive);
             render(it.second);
             object_ref_pop();
         }
