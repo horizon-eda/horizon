@@ -38,6 +38,13 @@ BOMExportSettings::BOMExportSettings(const json &j, IPool &pool)
     }
 }
 
+void BOMExportSettings::update_refs(IPool &pool)
+{
+    for (auto &[k, v] : concrete_parts) {
+        v.ptr = pool.get_part(v.uuid);
+    }
+}
+
 BOMExportSettings::BOMExportSettings()
 {
 }

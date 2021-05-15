@@ -3,6 +3,7 @@
 #include "util/uuid.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "bom.hpp"
+#include "util/uuid_ptr.hpp"
 #include <vector>
 
 namespace horizon {
@@ -16,8 +17,9 @@ public:
 
     enum class Format { CSV };
     Format format = Format::CSV;
-    std::map<UUID, UUID> orderable_MPNs;               // part->orderable MPN
-    std::map<UUID, const class Part *> concrete_parts; // part->part
+    std::map<UUID, UUID> orderable_MPNs;                       // part->orderable MPN
+    std::map<UUID, uuid_ptr<const class Part>> concrete_parts; // part->part
+    void update_refs(class IPool &pool);
 
     class CSVSettings {
     public:

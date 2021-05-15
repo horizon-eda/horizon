@@ -662,6 +662,7 @@ void CoreSchematic::reload_pool()
     for (auto &[uu_sheet, sheet] : sch->sheets) {
         keeper.restore(sheet.pictures);
     }
+    bom_export_settings.update_refs(m_pool_caching);
     history_clear();
     rebuild();
 }
