@@ -43,7 +43,11 @@ void PoolNotebook::handle_create_part()
     part.package = package;
     part.entity = entity;
     std::string fn = pool.get_tmp_filename(ObjectType::PART, part.uuid);
-    save_json_to_file(fn, part.serialize());
+    {
+        auto j = part.serialize();
+        j["version"] = Part::get_app_version();
+        save_json_to_file(fn, j);
+    }
     appwin.spawn(PoolProjectManagerProcess::Type::PART, {fn}, PoolProjectManagerAppWindow::SpawnFlags::TEMP);
 }
 
@@ -61,7 +65,11 @@ void PoolNotebook::handle_create_part_from_part(const UUID &uu)
     part.attributes[Part::Attribute::DATASHEET] = {true, base_part->get_datasheet()};
     part.inherit_tags = true;
     std::string fn = pool.get_tmp_filename(ObjectType::PART, part.uuid);
-    save_json_to_file(fn, part.serialize());
+    {
+        auto j = part.serialize();
+        j["version"] = Part::get_app_version();
+        save_json_to_file(fn, j);
+    }
     appwin.spawn(PoolProjectManagerProcess::Type::PART,
                  {fn, Glib::build_filename(pool.get_base_path(), pool.get_rel_filename(ObjectType::PART, uu))},
                  PoolProjectManagerAppWindow::SpawnFlags::TEMP);
