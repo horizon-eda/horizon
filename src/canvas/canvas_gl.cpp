@@ -604,10 +604,10 @@ std::set<SelectableRef> CanvasGL::get_selection_at(const Coordi &c)
     std::list<std::pair<const Selectable &, const SelectableRef &>> sel;
     unsigned int i = 0;
     for (auto &it : selectables.items) {
-        if (it.inside(c, appearance.min_selectable_size / scale)
-            && selection_filter.can_select(selectables.items_ref[i])) {
+        const auto &sr = selectables.items_ref.at(i);
+        if (it.inside(c, appearance.min_selectable_size / scale) && selection_filter.can_select(sr)) {
             // in_selection.insert(selectables.items_ref[i]);
-            sel.emplace_back(it, selectables.items_ref.at(i));
+            sel.emplace_back(it, sr);
         }
         i++;
     }
@@ -618,7 +618,7 @@ std::set<SelectableRef> CanvasGL::get_selection_at(const Coordi &c)
         assert(r != sel.end());
         return {r->second};
     }
-    else if (n_line == 1) { // only one line, select that one
+    else if (n_line == 1 && n_point == 0) { // only one line, select that one
         auto r = std::find_if(sel.begin(), sel.end(), [](const auto &x) { return x.first.is_line(); });
         assert(r != sel.end());
         return {r->second};
