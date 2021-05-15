@@ -26,5 +26,6 @@ private:
     type_signal_load s_signal_load;
 
     WindowStateStore state_store;
+    Gtk::InfoBar *bar = nullptr;
 };
 } // namespace horizon

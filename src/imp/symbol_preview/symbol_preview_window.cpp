@@ -1,5 +1,6 @@
 #include "symbol_preview_window.hpp"
 #include "preview_box.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 SymbolPreviewWindow::SymbolPreviewWindow(Gtk::Window *parent) : Gtk::Window(), state_store(this, "imp-symbol-preview")
@@ -25,7 +26,18 @@ SymbolPreviewWindow::SymbolPreviewWindow(Gtk::Window *parent) : Gtk::Window(), s
     hb->show_all();
 
     auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10));
-    box->property_margin() = 10;
+
+    bar = Gtk::manage(new Gtk::InfoBar());
+    bar->set_message_type(Gtk::MESSAGE_WARNING);
+    {
+        auto la =
+                Gtk::manage(new Gtk::Label("Only use orientation-specific placements for small symbols that are "
+                                           "expected to be used in multiple orientations."));
+        la->show();
+        dynamic_cast<Gtk::Box &>(*bar->get_content_area()).pack_start(*la, false, false, 0);
+    }
+    box->pack_start(*bar, false, false, 0);
+
     {
         auto la = Gtk::manage(new Gtk::Label());
         la->set_markup(
@@ -34,6 +46,8 @@ SymbolPreviewWindow::SymbolPreviewWindow(Gtk::Window *parent) : Gtk::Window(), s
                 "\"Set\" in this window.</i>");
         la->set_line_wrap_mode(Pango::WRAP_WORD);
         la->set_line_wrap(true);
+        la->set_margin_start(10);
+        la->set_margin_end(10);
         box->pack_start(*la, false, false);
     }
 
@@ -41,6 +55,9 @@ SymbolPreviewWindow::SymbolPreviewWindow(Gtk::Window *parent) : Gtk::Window(), s
     auto grid = Gtk::manage(new Gtk::Grid());
     grid->set_row_spacing(10);
     grid->set_column_spacing(10);
+    grid->set_margin_start(10);
+    grid->set_margin_end(10);
+    grid->set_margin_bottom(10);
     grid->set_row_homogeneous(true);
     grid->set_column_homogeneous(true);
 
@@ -64,6 +81,10 @@ SymbolPreviewWindow::SymbolPreviewWindow(Gtk::Window *parent) : Gtk::Window(), s
 
 void SymbolPreviewWindow::update(const class Symbol &sym)
 {
+    if (sym.unit->pins.size() > 4)
+        info_bar_show(bar);
+    else
+        info_bar_hide(bar);
     for (auto &it : previews) {
         it.second->update(sym);
     }
