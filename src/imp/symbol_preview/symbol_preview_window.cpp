@@ -30,9 +30,10 @@ SymbolPreviewWindow::SymbolPreviewWindow(Gtk::Window *parent) : Gtk::Window(), s
     bar = Gtk::manage(new Gtk::InfoBar());
     bar->set_message_type(Gtk::MESSAGE_WARNING);
     {
-        auto la =
-                Gtk::manage(new Gtk::Label("Only use orientation-specific placements for small symbols that are "
-                                           "expected to be used in multiple orientations."));
+        auto la = Gtk::manage(
+                new Gtk::Label("Don't apply orientation-specific texts to this symbol as it has more than 4 pins. Only "
+                               "use orientation-specific placements for small symbols that are "
+                               "expected to be used in multiple orientations."));
         la->show();
         dynamic_cast<Gtk::Box &>(*bar->get_content_area()).pack_start(*la, false, false, 0);
     }
