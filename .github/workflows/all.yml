@@ -9,6 +9,7 @@ on:
 
 env:
   LANG: en_US.UTF-8
+  DEBIAN_FRONTEND: noninteractive
 
 jobs:
   stylecheck:
@@ -64,8 +65,16 @@ jobs:
       run: make -j2 CXX=clang LDFLAGS='-lstdc++ -lm -lpthread -lstdc++fs'
 
   build-ubuntu:
+    strategy:
+      fail-fast: false
+      matrix:
+        release:
+          - bionic
+          - focal
+          - groovy
+          - hirsute
     runs-on: ubuntu-latest
-    container: ubuntu:bionic
+    container: ubuntu:${{ matrix.release }}
     needs: stylecheck
     steps:
     - uses: actions/checkout@v2
