@@ -1,9 +1,15 @@
 #include "zmq_helper.hpp"
 
 #ifdef CPPZMQ_VERSION
+
 #if CPPZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 3, 1)
 #define V431
 #endif
+
+#if CPPZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 7, 0)
+#define V470
+#endif
+
 #endif
 
 namespace horizon::zmq_helper {
@@ -28,7 +34,7 @@ bool send(zmq::socket_t &sock, zmq::message_t &msg)
 
 void subscribe_int(zmq::socket_t &sock, uint32_t value)
 {
-#ifdef V431
+#ifdef V470
     zmq::const_buffer buf(&value, sizeof(value));
     sock.set(zmq::sockopt::subscribe, buf);
 #else
@@ -38,7 +44,7 @@ void subscribe_int(zmq::socket_t &sock, uint32_t value)
 
 Glib::RefPtr<Glib::IOChannel> io_channel_from_socket(zmq::socket_t &sock)
 {
-#ifdef V431
+#ifdef V470
     auto fd = sock.get(zmq::sockopt::fd);
 #else
 #ifdef G_OS_WIN32
@@ -57,7 +63,7 @@ Glib::RefPtr<Glib::IOChannel> io_channel_from_socket(zmq::socket_t &sock)
 
 bool can_recv(zmq::socket_t &sock)
 {
-#ifdef V431
+#ifdef V470
     return sock.get(zmq::sockopt::events) & ZMQ_POLLIN;
 #else
     return sock.getsockopt<int>(ZMQ_EVENTS) & ZMQ_POLLIN;
@@ -66,7 +72,7 @@ bool can_recv(zmq::socket_t &sock)
 
 void set_timeouts(zmq::socket_t &sock, int timeout)
 {
-#ifdef V431
+#ifdef V470
     sock.set(zmq::sockopt::rcvtimeo, timeout);
     sock.set(zmq::sockopt::sndtimeo, timeout);
 #else
@@ -77,7 +83,7 @@ void set_timeouts(zmq::socket_t &sock, int timeout)
 
 std::string get_last_endpoint(const zmq::socket_t &sock)
 {
-#ifdef V431
+#ifdef V470
     return sock.get(zmq::sockopt::last_endpoint);
 #else
     char ep[1024];
