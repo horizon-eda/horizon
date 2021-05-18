@@ -38,19 +38,6 @@ jobs:
     - name: Build
       run: make -j2 build/horizon-pr-review
 
-  build-clang:
-    runs-on: ubuntu-latest
-    container: debian:buster
-    needs: stylecheck
-    steps:
-    - uses: actions/checkout@v2
-    - name: Install dependencies
-      run: apt-get update -y && apt-get install git build-essential clang libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git -y
-    - name: Check version
-      run: python3 check_version.py
-    - name: Build
-      run: make -j2 CXX=clang LDFLAGS='-lstdc++ -lm -lpthread -lstdc++fs'
-
   build:
     strategy:
       fail-fast: false
@@ -72,8 +59,14 @@ jobs:
             cxx: g++
             cc: gcc
           - container: debian:bullseye
+            cxx: clang
+            cc: clang
+          - container: debian:bullseye
             cxx: g++
             cc: gcc
+        target:
+          - all
+          - build/horizon.so
     runs-on: ubuntu-latest
     container: ${{ matrix.os.container }}
     needs: stylecheck
@@ -86,10 +79,19 @@ jobs:
         locale-gen ${{ env.LANG }}
     - name: Install dependencies
       run: apt-get install git build-essential ${{ matrix.os.cxx }} libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git -y
+    - name: Install python dependencies
+      if: ${{ matrix.target == 'build/horizon.so' }}
+      run: apt-get install python3-cairo-dev libosmesa6-dev -y
     - name: Build
-      run: make -j2 CXX=${{ matrix.os.cxx }} CC=${{ matrix.os.cc }} WARNFLAGS="-Wall -Wshadow -Wno-parentheses"
+      run: make -j2 CXX=${{ matrix.os.cxx }} CC=${{ matrix.os.cc }} WARNFLAGS="-Wall -Wshadow -Wno-parentheses" ${{ matrix.target }}
     - name: Check version
       run: python3 check_version.py
+    - name: Test python module
+      if: ${{ matrix.target == 'build/horizon.so' }}
+      run: python3 -c 'import sys; sys.path.append("build"); import horizon'
+    - name: Check app versions
+      if: ${{ matrix.target == 'build/horizon.so' }}
+      run: python3 scripts/check_app_versions.py
 
   build-debug:
     runs-on: ubuntu-latest
@@ -101,38 +103,3 @@ jobs:
       run: apt-get update -y && apt-get install git build-essential libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git -y
     - name: Build
       run: make DEBUG=1 LDFLAGS="-lstdc++fs -lpthread" -j2
-
-  build-py:
-    runs-on: ubuntu-latest
-    container: debian:buster
-    needs: stylecheck
-    steps:
-    - uses: actions/checkout@v2
-    - name: Install dependencies
-      run: apt-get update -y && apt-get install git build-essential libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git python3-cairo-dev libosmesa6-dev -y
-    - name: Install pyyaml for version check
-      run: apt-get install -y python3-yaml
-    - name: Build
-      run: make -j2 build/horizon.so LDFLAGS=-lstdc++fs
-    - name: Test python module
-      run: python3 -c 'import sys; sys.path.append("build"); import horizon'
-    - name: Check app versions
-      run: python3 scripts/check_app_versions.py
-
-  build-py-ubuntu:
-    runs-on: ubuntu-latest
-    container: ubuntu:bionic
-    needs: stylecheck
-    steps:
-    - uses: actions/checkout@v2
-    - name: generate locales
-      run: |
-        apt-get update
-        apt-get install -y locales
-        locale-gen ${{ env.LANG }}
-    - name: Install dependencies
-      run: apt-get install git build-essential g++-8 libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git python3-cairo-dev libosmesa6-dev -y
-    - name: Build
-      run: make -j2 build/horizon.so CXX=g++-8 CC=gcc-8
-    - name: Test python module
-      run: python3 -c 'import sys; sys.path.append("build"); import horizon'
