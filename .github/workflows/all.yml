@@ -27,25 +27,6 @@ jobs:
     - name: Style checker
       run: bash scripts/stylecheck.sh
 
-  build:
-    strategy:
-      fail-fast: false
-      matrix:
-        release:
-          - buster
-          - bullseye
-    runs-on: ubuntu-latest
-    container: debian:${{ matrix.release}}
-    needs: stylecheck
-    steps:
-    - uses: actions/checkout@v2
-    - name: Install dependencies
-      run: apt-get update -y && apt-get install git build-essential libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git -y
-    - name: Check version
-      run: python3 check_version.py
-    - name: Build
-      run: make -j2 LDFLAGS="-lstdc++fs -lpthread"
-
   build-pr-review:
     runs-on: ubuntu-latest
     container: debian:bullseye
@@ -70,25 +51,31 @@ jobs:
     - name: Build
       run: make -j2 CXX=clang LDFLAGS='-lstdc++ -lm -lpthread -lstdc++fs'
 
-  build-ubuntu:
+  build:
     strategy:
       fail-fast: false
       matrix:
         os:
-          - release: bionic
+          - container: ubuntu:bionic
             cxx: g++-8
             cc: gcc-8
-          - release: focal
+          - container: ubuntu:focal
             cxx: g++
             cc: gcc
-          - release: groovy
+          - container: ubuntu:groovy
             cxx: g++
             cc: gcc
-          - release: hirsute
+          - container: ubuntu:hirsute
+            cxx: g++
+            cc: gcc
+          - container: debian:buster
+            cxx: g++
+            cc: gcc
+          - container: debian:bullseye
             cxx: g++
             cc: gcc
     runs-on: ubuntu-latest
-    container: ubuntu:${{ matrix.os.release }}
+    container: ${{ matrix.os.container }}
     needs: stylecheck
     steps:
     - uses: actions/checkout@v2
@@ -98,9 +85,11 @@ jobs:
         apt-get install -y locales
         locale-gen ${{ env.LANG }}
     - name: Install dependencies
-      run: apt-get install git build-essential g++-8 libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git -y
+      run: apt-get install git build-essential ${{ matrix.os.cxx }} libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git -y
     - name: Build
-      run: make -j2 CXX=${{ matrix.os.cxx }} CC=${{ matrix.os.cc }} WARNFLAGS="-Wall -Wshadow -Wno-parentheses" 
+      run: make -j2 CXX=${{ matrix.os.cxx }} CC=${{ matrix.os.cc }} WARNFLAGS="-Wall -Wshadow -Wno-parentheses"
+    - name: Check version
+      run: python3 check_version.py
 
   build-debug:
     runs-on: ubuntu-latest
