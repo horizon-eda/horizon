@@ -801,7 +801,7 @@ WARNFLAGS = -Wall -Wshadow
 PKG_CONFIG_LIBS := $(shell $(PKG_CONFIG) --cflags $(LIBS_ALL))
 CXXFLAGS += $(DEBUGFLAGS) $(DEFINES) $(OPTIMIZE) $(PKG_CONFIG_LIBS) -MP -MD -pthread $(WARNFLAGS) -std=c++17
 CFLAGS = $(filter-out -Wsuggest-override, $(filter-out -std=%,$(CXXFLAGS))) -std=c99
-LDFLAGS += -lm -lpthread
+LDFLAGS += -lm -lpthread -lstdc++
 GLIB_COMPILE_RESOURCES := $(shell $(PKG_CONFIG) --variable=glib_compile_resources gio-2.0)
 
 ifeq ($(DEBUG),1)
