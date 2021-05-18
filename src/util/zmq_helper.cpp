@@ -6,7 +6,13 @@
 #define V431
 #endif
 
-#if CPPZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 7, 0)
+/*
+this should be 4,7,0 but the zmq.hpp packaged by debian claims to be 4.7.0 but doesn't provide zmq::sockopt
+so bump this to 4.7.1 until this is fixed by debian
+see https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=988725
+*/
+
+#if CPPZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 7, 1)
 #define V470
 #endif
 
