@@ -274,6 +274,10 @@ Pool won't be deleted on disk.</property>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="margin-start">10</property>
+                            <property name="margin-end">10</property>
+                            <property name="margin-top">10</property>
+                            <property name="margin-bottom">10</property>
                             <property name="label" translatable="yes">No pools installed</property>
                           </object>
                         </child>
