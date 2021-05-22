@@ -37,7 +37,8 @@ WelcomeWindow::WelcomeWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     banner_area->signal_draw().connect(sigc::mem_fun(*this, &WelcomeWindow::draw_banner));
 
     button_download->signal_clicked().connect([this] {
-        appwin.app.show_pools_window();
+        auto app = &appwin.app;
+        Glib::signal_timeout().connect_once([app] { app->show_pools_window(); }, 200);
         delete this;
     });
 
