@@ -1,7 +1,6 @@
 #include "forced_pool_update_dialog.hpp"
 #include "pool-update/pool-update.hpp"
 #include "logger/logger.hpp"
-#include <thread>
 
 namespace horizon {
 
@@ -34,8 +33,7 @@ ForcedPoolUpdateDialog::ForcedPoolUpdateDialog(const std::string &bp, Gtk::Windo
     box->show_all();
     get_content_area()->pack_start(*box, true, true, 0);
 
-    auto thr = std::thread(&ForcedPoolUpdateDialog::pool_update_thread, this);
-    thr.detach();
+    thread = std::thread(&ForcedPoolUpdateDialog::pool_update_thread, this);
 
     dispatcher.connect([this] {
         decltype(pool_update_status_queue) my_queue;
@@ -98,4 +96,10 @@ void ForcedPoolUpdateDialog::pool_update_thread()
     }
     dispatcher.emit();
 }
+
+ForcedPoolUpdateDialog::~ForcedPoolUpdateDialog()
+{
+    thread.join();
+}
+
 } // namespace horizon
