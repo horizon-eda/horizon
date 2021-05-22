@@ -4,6 +4,7 @@
 #include "parameter/set.hpp"
 #include "util/changeable.hpp"
 #include "util/list_accumulator.hpp"
+#include <optional>
 
 namespace horizon {
 class ParameterSetEditor : public Gtk::Box, public Changeable {

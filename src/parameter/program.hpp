@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <algorithm>
+#include <optional>
 
 namespace horizon {
 // using json = nlohmann::json;
