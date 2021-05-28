@@ -77,6 +77,8 @@ ToolResponse ToolEditPlane::begin(const ToolArgs &args)
     else {
         auto uu = UUID::random();
         plane = &brd->planes.emplace(uu, uu).first->second;
+        plane->settings =
+                dynamic_cast<const BoardRules &>(*doc.b->get_rules()).get_plane_settings(nullptr, poly->layer);
         plane->polygon = poly;
         poly->usage = plane;
     }
@@ -85,6 +87,10 @@ ToolResponse ToolEditPlane::begin(const ToolArgs &args)
     if (r) {
         if (brd->planes.count(plane_uuid)) { // may have been deleted
             nets.insert(plane->net->uuid);
+            if (tool_id == ToolID::ADD_PLANE && plane->from_rules) {
+                plane->settings = dynamic_cast<const BoardRules &>(*doc.b->get_rules())
+                                          .get_plane_settings(plane->net, poly->layer);
+            }
             brd->update_plane(plane);
             brd->update_airwires(false, nets);
         }
