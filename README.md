@@ -5,7 +5,7 @@ Horizon EDA is an **Electronic Design Automation** package supporting an integra
 See [the docs](https://docs.horizon-eda.org/en/latest/feature-overview.html) for an overview
 of horizon's top features.
 
-Wanna chat about the project? Join #horizon on freenode
+Wanna chat about the project? Join #horizon-eda on libera.chat
 
 ![collage](https://horizon-eda.org/screenshots/collage.png)
 
