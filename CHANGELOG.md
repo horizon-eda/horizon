@@ -1,3 +1,216 @@
+# Version 1.4.90 (will become 2.0.0)
+
+## New features
+
+### Project pools
+
+ - Support recursively included pools ([e7922eb](https://github.com/horizon-eda/horizon/commit/e7922ebed3a8aa2d18db4be070f4632c57ff0ff7))
+ - Add project pools ([702b9e6](https://github.com/horizon-eda/horizon/commit/702b9e6154defbe87a9853875c5caf7b64285a2f))
+ - Add pools window ([0a9e467](https://github.com/horizon-eda/horizon/commit/0a9e46795068f1b908b258d6c955be5c76fc55dc))
+ - Pool manager settings tab: support reordering pools ([b284194](https://github.com/horizon-eda/horizon/commit/b28419470006465335c2fd980861dfebfaad01b9))
+ - Pool manager settings tab: show all included pools ([0699f0c](https://github.com/horizon-eda/horizon/commit/0699f0c66870fad1fadda19c27646da861a523ee))
+ - Show show project title in project pool manager ([4e4b522](https://github.com/horizon-eda/horizon/commit/4e4b52226a74c05c9415e5c457baf2893dabfae3))
+ - Pool browsers: add pool filter ([15fd49f](https://github.com/horizon-eda/horizon/commit/15fd49f23a011792e7111bcd1ae52f9502606288))
+ - Automatically update project pool if included pools were updated ([a8301ff](https://github.com/horizon-eda/horizon/commit/a8301ffbd41f3ecdf938e2223b19178db6e07f55))
+ - Item duplication window handles duplicating items from included pool ([1d74fb0](https://github.com/horizon-eda/horizon/commit/1d74fb0a165fb1354b4aabeb6b5d4ddcc01e481d), [04be26b](https://github.com/horizon-eda/horizon/commit/04be26bf5f1637a237541659a1fd4217339ca916), [5241f57](https://github.com/horizon-eda/horizon/commit/5241f57081bb4c316a3e93e93d77ad023d7dcfb8))
+ - Migrate legacy cache-based projects to project pools ([6736135](https://github.com/horizon-eda/horizon/commit/6736135f2f1101d5c2df13913fcfb1ab6d33c31d))
+ - Pool manager: support incrementally updating items from included pools ([cb31616](https://github.com/horizon-eda/horizon/commit/cb31616c142f4df4260b80f5cb9a6d1172eaf433), [bc0bf03](https://github.com/horizon-eda/horizon/commit/bc0bf03fc6e44dde1f1546fe939f29641c241183))
+ - Project pool cache tab: update multiple items at once ([0606c74](https://github.com/horizon-eda/horizon/commit/0606c742cce9d4dded71ff93a7e24b6425e5f50a))
+ - Correctly handle included pools for download and merge operations ([961d7f2](https://github.com/horizon-eda/horizon/commit/961d7f2a07a7fe4d329e185169b6852fbd3db9d6))
+
+### 3D preview
+
+ - Add 3D model alignment ([7ac5480](https://github.com/horizon-eda/horizon/commit/7ac5480ebfc7684272d7f8c3183d362a71eef611))
+ - Add 3D model projection ([7a6586f](https://github.com/horizon-eda/horizon/commit/7a6586f211b86743fb06379cf5cab4abf5bcf235))
+ - Add button for centering 3D models ([bebc51f](https://github.com/horizon-eda/horizon/commit/bebc51f074e364acf94b4eecdcc60848cec0a723))
+ - Clicking on a model selects it ([14a72de](https://github.com/horizon-eda/horizon/commit/14a72de8e991a70b62056739f902dd1bd68e2203))
+
+### Schematic editor
+
+ - Add custom value to symbols ([4404dcf](https://github.com/horizon-eda/horizon/commit/4404dcf6c9bb4f56b82bab1e72b150006ab2328d))
+
+### Editors
+
+ - Show tool icon near cursor ([02c56cc](https://github.com/horizon-eda/horizon/commit/02c56ccb84cd4c2c0ad7e8c42041a5e646995953))
+ - Use tilde in texts to draw an overbar ([1d43914](https://github.com/horizon-eda/horizon/commit/1d43914e520c79e3ea54b353ddd4dbbcc8539299), [01a995b](https://github.com/horizon-eda/horizon/commit/01a995b30b93755036d5159470fe5fc46e2c9855))
+
+### Pool manager
+
+ - Add part flags for excluding from BOM or pick and place export or specifying that the part is a base part ([e2c1442](https://github.com/horizon-eda/horizon/commit/e2c14429d49897e13dd6edbbf7b503ec551495b1))
+
+### Part browser
+
+ - Add Digi-Key API stock info provider ([d437f87](https://github.com/horizon-eda/horizon/commit/d437f87e1356f7e4f6c9f76cde4d40b07e461965), [979a41a](https://github.com/horizon-eda/horizon/commit/979a41a08ff3df28ff47abb5be23482b1c431cfd), [d25ea85](https://github.com/horizon-eda/horizon/commit/d25ea85f6d2bd58ede39cda61a0c77074bda5bbc), [6bfb98a](https://github.com/horizon-eda/horizon/commit/6bfb98a9c52294b297c29e75527884aed6698abe))
+ - Filter by base part flag ([a1b2cfe](https://github.com/horizon-eda/horizon/commit/a1b2cfe4cfb49a5ac62a33aec95947ea62292022))
+
+
+### Symbol editor
+
+ - Place dot tool for placing junctions ([a1c776c](https://github.com/horizon-eda/horizon/commit/a1c776c0a627fae0c17ec71f9a0edfc771191aeb))
+ 
+### Board editor
+
+ - Rules: add net class regex matching ([f2e83ac](https://github.com/horizon-eda/horizon/commit/f2e83ac5c5e80ef598cdaea02bb61b32df0a75b9))
+
+
+## Enhancements
+
+### Editors
+
+ - Show layer colors in property panel and rule editors ([eeeb2d7](https://github.com/horizon-eda/horizon/commit/eeeb2d762ad864053402b2149f6f976b5f274c7e), [ef09509](https://github.com/horizon-eda/horizon/commit/ef09509a679626343afbbed9d29a7b98f085afc4))
+ - Make apply all button in property panel smaller ([9a24e5e](https://github.com/horizon-eda/horizon/commit/9a24e5eac4c32f84ca89537df25156681624c642))
+ - Add option for zooming to cursor using keyboard ([89c3e67](https://github.com/horizon-eda/horizon/commit/89c3e67fc268e9a333b9a505be2d0fb46dd57bb9))
+ - Smooth keyboard zooming as well ([dfd9ab8](https://github.com/horizon-eda/horizon/commit/dfd9ab82ebb06f80dc451789ba0f3d8f83f07d4d))
+ - Add option for disabling drag-to-move ([3ac2d4e](https://github.com/horizon-eda/horizon/commit/3ac2d4e32ffdc1ee152a5e69410e3e823ee10f1d))
+ - Head up display shows polygon vertex position ([1ab69c4](https://github.com/horizon-eda/horizon/commit/1ab69c4e2bc916efe299ecde9fd1f960a4d0d99e))
+ - Rotate arbitrary / scale tool now handles pictures ([dc7526b](https://github.com/horizon-eda/horizon/commit/dc7526ba1b4e97be0b06b1c6bb046c443380b6e8))
+ - Add set increment context menu to all dimension entries ([058c2c7](https://github.com/horizon-eda/horizon/commit/058c2c7854aab38948736754061afd23d6908e53))
+ - Only use multiline text editor in property panel if needed ([d51f606](https://github.com/horizon-eda/horizon/commit/d51f606438157746797715076751477d7c7e02f4))
+ - Hide Layer editor in property panel if there's only one layer ([e1ad213](https://github.com/horizon-eda/horizon/commit/e1ad2133302a11d4f9f66d2013d43f23759faf1e))
+ - PDF export includes pictures ([a45916b](https://github.com/horizon-eda/horizon/commit/a45916bfab65e57e276ed6df219a922c170a1508))
+ - Improve picture appearance by using mipmaps ([f26360d](https://github.com/horizon-eda/horizon/commit/f26360d08143b16d8b9393adcec673a977378927))
+ - Head up display shows more descriptive names for unnamed nets ([1342214](https://github.com/horizon-eda/horizon/commit/13422141bf89eeee6d07d9ac0fc6e9b302e43ef1))
+ - Always focus search entry in pool browsers ([51f347d](https://github.com/horizon-eda/horizon/commit/51f347dab2554b4c087ad38ab0e76229124bf628))
+
+
+### Schematic editor
+
+ - Add part/map symbol tool: remember unit to symbol mapping ([6bbfb8c](https://github.com/horizon-eda/horizon/commit/6bbfb8c820a6c9bdf407416c6c7a056c487aaae9), [30975bd](https://github.com/horizon-eda/horizon/commit/30975bd3055c2b986b14ab8fa426aa03057f1537))
+ - Add next/previous sheet action ([c2f0bce](https://github.com/horizon-eda/horizon/commit/c2f0bcec3095083b74ab1ad9548bb3241ee44781))
+ - Switch sheets using navigation buttons ([6c58a4f](https://github.com/horizon-eda/horizon/commit/6c58a4f99a8d3243379a04e46e43fefc437aee0e))
+ - Keep name on dangling net segments when placing a bipole on a net line ([84308bc](https://github.com/horizon-eda/horizon/commit/84308bc5c396986c418cabc4af8fb0b4165a0711))
+ - Preserve unconnected nets during copy/paste ([78d6780](https://github.com/horizon-eda/horizon/commit/78d6780151b94025d9f1622fc22b12f77397fbc1))
+ - Moving a junction onto a pin connects it ([3103905](https://github.com/horizon-eda/horizon/commit/3103905cc2d040e9ac96474436e92ce752008a5a))
+ - Moving a symbol automatically moves connected lines and junctions ([b8ce4f0](https://github.com/horizon-eda/horizon/commit/b8ce4f0e5ed870c4acbe4405e1ef58795dc92707))
+
+
+### Board editor
+
+ - Explain plane priority ([a354614](https://github.com/horizon-eda/horizon/commit/a354614f488342e435964fdeb884b5024e213798))
+ - STEP export now is significantly faster ([7e0c460](https://github.com/horizon-eda/horizon/commit/7e0c46026365e0488c3ef11108a2843cb8c58f8e))
+ - Add via position properties ([4f00674](https://github.com/horizon-eda/horizon/commit/4f00674dd68cc48907828f84600c6571eadb9a18))
+ - Nets window: focus search entry when showing it ([04a4c4c](https://github.com/horizon-eda/horizon/commit/04a4c4c3eaac71bb97d2392e57299fea4621bf60))
+ - Explain routing offset ([e7fef83](https://github.com/horizon-eda/horizon/commit/e7fef83f5ce223f92bc129039b647d7024bc7271))
+ - Cursor snaps to board holes ([0b3c2af](https://github.com/horizon-eda/horizon/commit/0b3c2afb9d7890a11d8dc6bf635eb6f9d5acf636))
+
+
+### Symbol editor
+
+ - Warn about setting text placements if the symbol has more than 4 pins ([f421c9b](https://github.com/horizon-eda/horizon/commit/f421c9b19223bd140156eac8f8f46bf5ae192277))
+
+### Pool manager
+
+ - Improve sizing for smaller window widths ([2f07c91](https://github.com/horizon-eda/horizon/commit/2f07c91f89d1afee0af1eb527cb09b25d42f9197))
+ - Persistently store positions of tree views and panes ([7201d65](https://github.com/horizon-eda/horizon/commit/7201d6512cb8d418f71f1398e5001f4db3c3c000), [bbc2df4](https://github.com/horizon-eda/horizon/commit/bbc2df4195e384d9c25b810b9348431c1d767378), [f6fac84](https://github.com/horizon-eda/horizon/commit/f6fac84da0793f6d8b449d8d2f5503073c4cbeb0))
+ - Remote tab: show number of items to be merged ([f14240e](https://github.com/horizon-eda/horizon/commit/f14240e6a11e0eb2227478457b7b1a85ac851188))
+ - Remote tab: show check result ([a786965](https://github.com/horizon-eda/horizon/commit/a78696539ee416ed8ce9325985634cfca90aaebe))
+ - Git tab: show check result ([7397a0f](https://github.com/horizon-eda/horizon/commit/7397a0ffb31b8cc67f261563773c3d2e9b2d52d7))
+ - Part wizard: show package preview ([18e1299](https://github.com/horizon-eda/horizon/commit/18e1299469a80a8e48900a276d13ce0a3119bc42))
+ - Add button for KiCad package import ([8cbd93c](https://github.com/horizon-eda/horizon/commit/8cbd93cefe1a006200e4ec53daf3305fcfbc2e57))
+ - Settings tab: double click to open pool ([b86c920](https://github.com/horizon-eda/horizon/commit/b86c9209ad1e435e8037ee71d39ab5d958d48c7f))
+ - Add open in included pool context menu item ([1e9a474](https://github.com/horizon-eda/horizon/commit/1e9a4746f5609c867dfc06a674a6f0e90b1a6824))
+ - Automatically run update if editing included item ([4be36a8](https://github.com/horizon-eda/horizon/commit/4be36a8c74c8d0d77f35a4e90df6a96f2eeb708e))
+ - Add 'move to other pool' context menu ([13f4efb](https://github.com/horizon-eda/horizon/commit/13f4efbc9c6131f792493b7f422aaaccb6c05644))
+
+### Pool/project manager
+
+ - Log errors during forced pool update ([12a5b70](https://github.com/horizon-eda/horizon/commit/12a5b70ef8cbdd124ef13cdad0e2dc471137a7c2))
+
+### Project manager
+
+ - Create `.gitignore` when creating project ([d5a6e1e](https://github.com/horizon-eda/horizon/commit/d5a6e1ed1777110c0e6704bf61587bcb5c43201f))
+ - Don't create pictures directory, it'll be created as needed ([dde3e6a](https://github.com/horizon-eda/horizon/commit/dde3e6a6d6c165649feda95ec23c62ce78ffb0f5))
+ - Reload part browser after pool update ([1921c81](https://github.com/horizon-eda/horizon/commit/1921c816f14add2d2af14069995991c3f4cd6d58))
+
+### Package editor
+
+ - Improve performance of 3D model placement adjustments ([dfb6686](https://github.com/horizon-eda/horizon/commit/dfb6686ad9f7a85006f5f43d3f3d1e005e929eb8))
+ - Show overlay for mechanical pads ([35ea40b](https://github.com/horizon-eda/horizon/commit/35ea40b3586cc16c0e85b4d0df10a7602c33e798))
+ - Change default polygon rectangle decoration size to be in line with pool convention ([4860ae6](https://github.com/horizon-eda/horizon/commit/4860ae683b174db5494d3ec6c6051ce2e354f978))
+
+### 3D Preview
+
+ - Support cursor warping ([4da5e2a](https://github.com/horizon-eda/horizon/commit/4da5e2ab02c9b76fff0b11116fb16e3f18566e34))
+ - Add option for hiding copper ([e4a8876](https://github.com/horizon-eda/horizon/commit/e4a88760630322abf1b7f442edc55948029a0459))
+ - Add axes arrows ([f2eb902](https://github.com/horizon-eda/horizon/commit/f2eb902efc02dacc9993c36737b182b726cfa78a))
+ - Add option for changing silkscreen color ([f126381](https://github.com/horizon-eda/horizon/commit/f126381c22287934f1fbf9a3c86dc5c6de263fab))
+
+### For packagers
+
+ - There now are manpages, use `install-man` for installing ([3e436b4](https://github.com/horizon-eda/horizon/commit/3e436b46c553d558c0dab84068f09c98f93170d1))
+
+## Bugfixes
+
+### Editors
+
+ - Only select line if there are zero points under the cursor ([c143881](https://github.com/horizon-eda/horizon/commit/c143881c8b6334fe7fce2417ebd1e8b262fb6536))
+ - Avoid "pool has changed message" after some tools ([c5b6f5f](https://github.com/horizon-eda/horizon/commit/c5b6f5ff39f1543432d174dfd65c0c19514de54d))
+ - Update cross probe selection when in tool ([ed479ac](https://github.com/horizon-eda/horizon/commit/ed479ac02b7c5d1c705f7eb5a740d8c9a7feb707))
+ - Update colors in layer box when adding layers ([209f879](https://github.com/horizon-eda/horizon/commit/209f8791c40da4ccdf829ad3868623d67500e175))
+ - Always redraw when changing canvas scale/offset ([edfe7ed](https://github.com/horizon-eda/horizon/commit/edfe7ed75de62c20f83597c671b7a15fd6391978))
+ - Wrap text version info bar ([087ce70](https://github.com/horizon-eda/horizon/commit/087ce70cc2edd4ba906351211943cebcb0f40232))
+ - Make enter key work in integer property editors ([31f296d](https://github.com/horizon-eda/horizon/commit/31f296de5a913d030671de5d4a53b27f3960159a))
+ - Store "on top" state of pictures ([86c32cb](https://github.com/horizon-eda/horizon/commit/86c32cb5932a92d51db7b38e9efd47e129d7eb75))
+ - Store opacity of pictures ([7924664](https://github.com/horizon-eda/horizon/commit/7924664cc0622bef179315ccb891aca14777c8f7))
+ - Keep pictures on pool reload in board an schematic ([5f38371](https://github.com/horizon-eda/horizon/commit/5f38371195a1506f41ff4e2b97a7b55222068d5c))
+ - Interactive router: handle overriding routing offset for all clearances ([bf209fe](https://github.com/horizon-eda/horizon/commit/bf209fe984e63c23219f6f777d298713c9bdb30c))
+ - Paste tool: properly handle via nets ([5a6826f](https://github.com/horizon-eda/horizon/commit/5a6826f6ea29eacb08937691488b107866775708))
+ - Proplerly preserve semitransparent area in pictures ([2ad75b1](https://github.com/horizon-eda/horizon/commit/2ad75b1fd6847a35ccdb13a7a0975b983698078e))
+ - Catch errors while loading/saving pictures ([1febfd3](https://github.com/horizon-eda/horizon/commit/1febfd3357e3bce53e06048af8d2deb0630adba0))
+
+
+### Schematic editor
+
+ - Don't crash when reloading pool if there are specific parts set ([ebbda39](https://github.com/horizon-eda/horizon/commit/ebbda390842947d445f062cec9034e5a395330f4))
+ - Only swap gates of selected component ([6c60078](https://github.com/horizon-eda/horizon/commit/6c60078f03c4eb3d86603d28f85cf3da3a1be945))
+ - Don't render junctions connected to lines/arcs ([9621e73](https://github.com/horizon-eda/horizon/commit/9621e73ee0b0f96e6756b9575b01f14e965fb328))
+ - Fix memory corruption when placing a bipole on a net line ([d97b4c6](https://github.com/horizon-eda/horizon/commit/d97b4c66c4722f3cac75a7c7b5a9074aa1fc1e64))
+ - Only set modified flag if sheet name was changed ([d65101c](https://github.com/horizon-eda/horizon/commit/d65101c9b9702af18553e9b3cbd2bab78c37f8dd))
+
+
+### Board editor
+
+ - Pick&place export: don't use custom dimension format if not using custom format ([721bfba](https://github.com/horizon-eda/horizon/commit/721bfba4c32c9a863c806cf195e6120722580d2a))
+ - Diffpair router: don't crash when routing unconnected pin ([57fbd19](https://github.com/horizon-eda/horizon/commit/57fbd193d23d110b78a00663d0f8067f1fdaf9b5))
+ - Account for outline on parts when calculating bbox. ([67a842b](https://github.com/horizon-eda/horizon/commit/67a842b0a425fbc343004280fb8d765e4bd58766))
+ - Fix draw connection line on pins on package origin. ([25a8688](https://github.com/horizon-eda/horizon/commit/25a868855c962d528adc74749dfcd3e7814a06b6))
+ - STEP export: don't export non-populated models ([db49f75](https://github.com/horizon-eda/horizon/commit/db49f75dbfc070c72e35daec2301e3f6fdd86d8d))
+ - Fix arcs in decals ([fb422c9](https://github.com/horizon-eda/horizon/commit/fb422c979dc70c53643c1962700d950c136485d8))
+ - Save layer pair rules ([ce726d8](https://github.com/horizon-eda/horizon/commit/ce726d83a8ecee22e8904a6585800e33bae8d236))
+ - Holes automatically receive all required parameters ([5890dbe](https://github.com/horizon-eda/horizon/commit/5890dbe45b5eeb74d00b4f0c5a5ce07e7d6c8cdd))
+
+
+### Package editor
+
+ - Rules: honor enabled flag ([19869bc](https://github.com/horizon-eda/horizon/commit/19869bc7d595aae6b4ebc46bb761ae6bfb41adea))
+ - Don't crash when a pad has no name ([bce1922](https://github.com/horizon-eda/horizon/commit/bce19221b5ddf19e1b6a9a1554f1e745426507c1))
+
+### Pool manager
+
+ - Git tab: don't add ignored items ([406c8e4](https://github.com/horizon-eda/horizon/commit/406c8e4018adbe3a24b63da0d8ce61aa21a2b9ca))
+ - Remote tab: fix updating pull requests ([7ccfaaa](https://github.com/horizon-eda/horizon/commit/7ccfaaafec6a81d5c95b45c0b1783b05450ca0cd))
+ - Remote tab: include symbols when adding items ([09df02e](https://github.com/horizon-eda/horizon/commit/09df02e0357dd2d87c797cce21d2dbf0f836e4f0))
+ - Remote tab: validate user-provided signature ([0dd63b4](https://github.com/horizon-eda/horizon/commit/0dd63b4d4e90b048b76000318ea58ad93d4cce1f))
+ - Don't try to save read-only documents ([9e16a7d](https://github.com/horizon-eda/horizon/commit/9e16a7d2915a87ed38974f84783ea138331fe25f))
+ - Git tab: make "add with dependencies" work as intended ([0e7cd62](https://github.com/horizon-eda/horizon/commit/0e7cd6282576e03360079eeac8396cd39b60f6f2))
+ - Pool update: ignore missing directories ([4360661](https://github.com/horizon-eda/horizon/commit/43606614907e2ea53930a6c9c24def2ce7177c64))
+ - Pool update: don't update parametric data for skipped parts ([4daba6e](https://github.com/horizon-eda/horizon/commit/4daba6e78acc975bab1a8bc1670084560b2207f6))
+
+
+### Pool/project manager
+
+ - Confirm close dialog: only save selected items if clicking on save ([3c796ae](https://github.com/horizon-eda/horizon/commit/3c796ae61090a3f8d1f809bc3ab6ec0fc6620918))
+ - Add SQLite and other temp files to pool and project .gitignore ([15e3228](https://github.com/horizon-eda/horizon/commit/15e3228b486420bbb063572e0dc79f6c4c3f29f3), [170b44d](https://github.com/horizon-eda/horizon/commit/170b44d23a2505872cbf30dedc8e3a5f4c2f5009))
+
+### Windows-specific
+
+ - Fix opening directories in file browser ([577f300](https://github.com/horizon-eda/horizon/commit/577f300395e6c7aa5b938a6b485ef6ee64469f95))
+
+## Removed features
+
+ - ViaPadstackProvider and `vias` directory in projects is replaced by project pools ([0912085](https://github.com/horizon-eda/horizon/commit/091208558c42c26ae2515c417428f39eb1c53303))
+
+
 # Version 1.4.0
 
 ## New features

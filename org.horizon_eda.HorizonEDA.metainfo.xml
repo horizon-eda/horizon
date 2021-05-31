@@ -39,6 +39,18 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+    <release version="2.0.0" date="2021-06-01">
+      <url>https://github.com/horizon-eda/horizon/releases/tag/v2.0.0</url>
+      <description>
+        <p>New features</p>
+        <ul>
+          <li>Project pools</li>
+          <li>3D model alignment</li>
+          <li>3D model selection</li>
+          <li>3D model projection</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.4.0" date="2021-01-29">
       <url>https://github.com/horizon-eda/horizon/releases/tag/v1.4.0</url>
       <description>
