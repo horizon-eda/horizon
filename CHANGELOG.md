@@ -1,4 +1,4 @@
-# Version 1.4.90 (will become 2.0.0)
+# Version 2.0.0
 
 ## New features
 
@@ -178,7 +178,7 @@
  - Fix arcs in decals ([fb422c9](https://github.com/horizon-eda/horizon/commit/fb422c979dc70c53643c1962700d950c136485d8))
  - Save layer pair rules ([ce726d8](https://github.com/horizon-eda/horizon/commit/ce726d83a8ecee22e8904a6585800e33bae8d236))
  - Holes automatically receive all required parameters ([5890dbe](https://github.com/horizon-eda/horizon/commit/5890dbe45b5eeb74d00b4f0c5a5ce07e7d6c8cdd))
-
+ - New planes use settings from rules ([2885d96](https://github.com/horizon-eda/horizon/commit/2885d961a176840f2be4e59e4312085d94080951))
 
 ### Package editor
 
