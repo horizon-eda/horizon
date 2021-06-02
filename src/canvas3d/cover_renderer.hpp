@@ -1,6 +1,7 @@
 #pragma once
 #include "util/gl_inc.h"
 #include <unordered_map>
+#include <cstddef>
 
 namespace horizon {
 class CoverRenderer {
