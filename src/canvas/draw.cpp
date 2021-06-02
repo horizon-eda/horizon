@@ -62,16 +62,6 @@ void Canvas::draw_box(const Coordf &p, float size, ColorP color, int layer, bool
     draw_line(p + Coordf(-size, -size), p + Coordf(-size, size), color, layer, tr, width);
 }
 
-
-static void c2pi(float &x)
-{
-    while (x < 0)
-        x += 2 * M_PI;
-
-    while (x > 2 * M_PI)
-        x -= 2 * M_PI;
-}
-
 void Canvas::draw_arc(const Coordf &center, float radius, float a0, float a1, ColorP color, int layer)
 {
     if (!img_mode) {
@@ -85,7 +75,7 @@ void Canvas::draw_arc(const Coordf &center, float radius, float a0, float a1, Co
             a0 += transform.get_angle_rad();
         }
 
-        c2pi(a0);
+        a0 = c2pi(a0);
         add_triangle(layer, p0, Coordf(a0, dphi), Coordf(radius, 0), color, TriangleInfo::FLAG_ARC);
         return;
     }
@@ -117,11 +107,10 @@ std::pair<Coordf, Coordf> Canvas::draw_arc2(const Coordf &center, float radius0,
                                             int layer, uint64_t width)
 {
     unsigned int segments = 64;
-    c2pi(a0);
-    c2pi(a1);
+    a0 = c2pi(a0);
+    a1 = c2pi(a1);
 
-    float dphi = a1 - a0;
-    c2pi(dphi);
+    float dphi = c2pi(a1 - a0);
     dphi /= segments;
     std::pair<Coordf, Coordf> bb(center + Coordf::euler(radius0, a0), center + Coordf::euler(radius0, a0));
     float a = a0;
@@ -146,9 +135,8 @@ std::pair<Coordf, Coordf> Canvas::draw_arc2(const Coordf &center, float radius0,
 void Canvas::draw_arc0(const Coordf &center, float radius0, float a0, float a1, ColorP color, int layer, uint64_t width)
 {
 
-    c2pi(a1);
-    float dphi = a1 - a0;
-    c2pi(dphi);
+    a1 = c2pi(a1);
+    float dphi = c2pi(a1 - a0);
 
     Coordf p0 = transform.transform(center);
     if (transform.mirror) {
@@ -159,7 +147,7 @@ void Canvas::draw_arc0(const Coordf &center, float radius0, float a0, float a1, 
         a0 += transform.get_angle_rad();
     }
 
-    c2pi(a0);
+    a0 = c2pi(a0);
     add_triangle(layer, p0, Coordf(a0, dphi), Coordf(radius0, width), color, TriangleInfo::FLAG_ARC);
 }
 

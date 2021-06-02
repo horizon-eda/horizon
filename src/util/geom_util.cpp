@@ -126,4 +126,14 @@ int wrap_angle(int angle)
     return angle;
 }
 
+float c2pi(float x)
+{
+    while (x < 0)
+        x += 2 * M_PI;
+
+    while (x > 2 * M_PI)
+        x -= 2 * M_PI;
+    return x;
+}
+
 } // namespace horizon
