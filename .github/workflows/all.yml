@@ -38,7 +38,7 @@ jobs:
     - name: Build
       run: make -j2 build/horizon-pr-review
 
-  build:
+  build-debian:
     strategy:
       fail-fast: false
       matrix:
@@ -84,6 +84,34 @@ jobs:
       run: apt-get install python3-cairo-dev libosmesa6-dev python3-yaml -y
     - name: Build
       run: make -j2 CXX=${{ matrix.os.cxx }} CC=${{ matrix.os.cc }} WARNFLAGS="-Wall -Wshadow -Wno-parentheses" ${{ matrix.target }}
+    - name: Check version
+      run: python3 check_version.py
+    - name: Test python module
+      if: ${{ matrix.target == 'build/horizon.so' }}
+      run: python3 -c 'import sys; sys.path.append("build"); import horizon'
+    - name: Check app versions
+      if: ${{ matrix.target == 'build/horizon.so' }}
+      run: python3 scripts/check_app_versions.py
+
+  build-arch:
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - all
+          - build/horizon.so
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    needs: stylecheck
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: pacman -Sy --needed --noconfirm zeromq gtkmm3 cairomm librsvg sqlite3 libgit2 curl opencascade boost glm podofo libzip python
+    - name: Install python dependencies
+      if: ${{ matrix.target == 'build/horizon.so' }}
+      run: pacman -S --needed --noconfirm mesa python-cairo python-yaml
+    - name: Build
+      run: make -j2 ${{ matrix.target }}
     - name: Check version
       run: python3 check_version.py
     - name: Test python module
