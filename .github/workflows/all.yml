@@ -38,7 +38,7 @@ jobs:
     - name: Build
       run: make -j2 build/horizon-pr-review
 
-  build:
+  build-debian:
     strategy:
       fail-fast: false
       matrix:
@@ -84,6 +84,50 @@ jobs:
       run: apt-get install python3-cairo-dev libosmesa6-dev python3-yaml -y
     - name: Build
       run: make -j2 CXX=${{ matrix.os.cxx }} CC=${{ matrix.os.cc }} WARNFLAGS="-Wall -Wshadow -Wno-parentheses" ${{ matrix.target }}
+    - name: Check version
+      run: python3 check_version.py
+    - name: Test python module
+      if: ${{ matrix.target == 'build/horizon.so' }}
+      run: python3 -c 'import sys; sys.path.append("build"); import horizon'
+    - name: Check app versions
+      if: ${{ matrix.target == 'build/horizon.so' }}
+      run: python3 scripts/check_app_versions.py
+
+  build-opensuse:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - container: opensuse/tumbleweed:latest
+            cc_pkg: gcc-c++
+            cxx: g++
+            cc: gcc
+            pycairo: python38-pycairo-devel
+          - container: opensuse/leap:15.2
+            cc_pkg: gcc10-c++
+            cxx: g++-10
+            cc: gcc-10
+            pycairo: python3-cairo-devel
+          - container: opensuse/leap:15.3
+            cc_pkg: gcc10-c++
+            cxx: g++-10
+            cc: gcc-10
+            pycairo: python3-cairo-devel
+        target:
+          - all
+          - build/horizon.so
+    runs-on: ubuntu-latest
+    container: ${{ matrix.os.container }}
+    needs: stylecheck
+    steps:
+    - name: Install dependencies
+      run: zypper -n install git make ${{ matrix.os.cc_pkg }} pkg-config cppzmq-devel oce-devel gtkmm3-devel libgit2-devel libuuid-devel sqlite3-devel librsvg-devel cairomm-devel glm-devel boost-devel libcurl-devel libpodofo-devel binutils-gold libzip-devel
+    - uses: actions/checkout@v2
+    - name: Install python dependencies
+      if: ${{ matrix.target == 'build/horizon.so' }}
+      run: zypper -n install libOSMesa-devel python3-PyYAML ${{ matrix.os.pycairo }} python3-devel
+    - name: Build
+      run: make -j2 CXX=${{ matrix.os.cxx }} CC=${{ matrix.os.cc }} ${{ matrix.target }}
     - name: Check version
       run: python3 check_version.py
     - name: Test python module
