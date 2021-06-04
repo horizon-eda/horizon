@@ -3,6 +3,7 @@
 #include <iostream>
 #include "common/common.hpp"
 #include "logger/logger.hpp"
+#include <glm/mat3x3.hpp>
 #ifdef G_OS_WIN32
 #include <windows.h>
 #endif
@@ -69,6 +70,7 @@ static GLuint create_shader_from_resource(int type, const char *resource)
 {
     std::string shader_string = string_from_resource(resource);
     include_shader(shader_string, "triangle-ubo");
+    include_shader(shader_string, "selectable-ubo");
     return create_shader(type, shader_string.c_str());
 }
 
@@ -169,5 +171,18 @@ GLint gl_clamp_samples(GLint samples_req)
     return samples;
 }
 
+void gl_mat3_to_array(std::array<float, 12> &dest, const glm::mat3 &src)
+{
+    for (int r = 0; r < 3; r++) {
+        for (int c = 0; c < 3; c++) {
+            dest[r * 4 + c] = src[r][c];
+        }
+    }
+}
+
+std::array<float, 4> gl_array_from_color(const Color &c)
+{
+    return {c.r, c.g, c.b, 1};
+}
 
 } // namespace horizon

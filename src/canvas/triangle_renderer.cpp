@@ -156,15 +156,6 @@ public:
     int layer_flags;
 };
 
-static void mat3_to_array(std::array<float, 12> &dest, const glm::mat3 &src)
-{
-    for (int r = 0; r < 3; r++) {
-        for (int c = 0; c < 3; c++) {
-            dest[r * 4 + c] = src[r][c];
-        }
-    }
-}
-
 static std::array<float, 4> operator+(const std::array<float, 4> &a, float b)
 {
     return {a.at(0) + b, a.at(1) + b, a.at(2) + b, a.at(3)};
@@ -180,14 +171,9 @@ static std::array<float, 4> operator*(const std::array<float, 4> &a, float b)
     return {a.at(0) * b, a.at(1) * b, a.at(2) * b, a.at(3)};
 }
 
-static std::array<float, 4> array_from_color(const Color &c)
-{
-    return {c.r, c.g, c.b, 1};
-}
-
 std::array<float, 4> TriangleRenderer::apply_highlight(const Color &icolor, HighlightMode mode, int layer) const
 {
-    const std::array<float, 4> color = array_from_color(icolor);
+    const std::array<float, 4> color = gl_array_from_color(icolor);
     if (layer >= 20000 && layer < 30000) { // is annotation
         if (!ca.annotations.at(layer).use_highlight)
             return color;
@@ -200,7 +186,7 @@ std::array<float, 4> TriangleRenderer::apply_highlight(const Color &icolor, High
             if (mode == HighlightMode::ONLY)
                 return color;
             else
-                return array_from_color(ca.appearance.colors.at(ColorP::SHADOW));
+                return gl_array_from_color(ca.appearance.colors.at(ColorP::SHADOW));
         }
     }
     if (!ca.highlight_enabled)
@@ -217,14 +203,14 @@ std::array<float, 4> TriangleRenderer::apply_highlight(const Color &icolor, High
             return color;
         else
             return (color * ca.appearance.highlight_dim)
-                   + (array_from_color(ca.appearance.colors.at(ColorP::BACKGROUND))
+                   + (gl_array_from_color(ca.appearance.colors.at(ColorP::BACKGROUND))
                       * (1 - ca.appearance.highlight_dim));
 
     case CanvasGL::HighlightMode::SHADOW:
         if (mode == HighlightMode::ONLY)
             return color;
         else
-            return array_from_color(ca.appearance.colors.at(ColorP::SHADOW));
+            return gl_array_from_color(ca.appearance.colors.at(ColorP::SHADOW));
     }
     return color;
 }
@@ -238,11 +224,11 @@ void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode, boo
     UBOBuffer buf;
 
     buf.alpha = ca.property_layer_opacity() / 100;
-    mat3_to_array(buf.screenmat, ca.screenmat);
+    gl_mat3_to_array(buf.screenmat, ca.screenmat);
     if (ignore_flip)
-        mat3_to_array(buf.viewmat, ca.viewmat_noflip);
+        gl_mat3_to_array(buf.viewmat, ca.viewmat_noflip);
     else
-        mat3_to_array(buf.viewmat, ca.viewmat);
+        gl_mat3_to_array(buf.viewmat, ca.viewmat);
 
     buf.layer_flags = static_cast<int>(ld.mode);
     buf.scale = ca.scale;
@@ -313,10 +299,10 @@ void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode, boo
                 }
                 auto lc = ca.get_layer_color(layer);
                 buf.colors[static_cast<int>(ColorP::AIRWIRE_ROUTER)] =
-                        array_from_color(ca.appearance.colors.at(ColorP::AIRWIRE_ROUTER));
+                        gl_array_from_color(ca.appearance.colors.at(ColorP::AIRWIRE_ROUTER));
                 buf.colors[static_cast<int>(ColorP::FROM_LAYER)] = apply_highlight(lc, highlight_mode, layer);
                 buf.colors[static_cast<int>(ColorP::LAYER_HIGHLIGHT)] =
-                        array_from_color(lc) + ca.appearance.highlight_lighten;
+                        gl_array_from_color(lc) + ca.appearance.highlight_lighten;
                 for (size_t i = 0; i < std::min(buf.colors2.size(), ca.colors2.size()); i++) {
                     buf.colors2[i] = apply_highlight(ca.colors2[i].to_color(), highlight_mode, layer);
                 }

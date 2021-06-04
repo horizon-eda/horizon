@@ -1,6 +1,8 @@
 #include "util/gl_inc.h"
 #include <string>
 #include <sstream>
+#include <array>
+#include <glm/fwd.hpp>
 
 namespace horizon {
 // GLuint gl_create_shader (int type, char *src);
@@ -11,6 +13,9 @@ void gl_show_error(const std::string &s);
 void gl_color_to_uniform_3f(GLuint loc, const class Color &c);
 void gl_color_to_uniform_4f(GLuint loc, const class Color &c, float alpha = 1);
 GLint gl_clamp_samples(GLint samples);
+
+void gl_mat3_to_array(std::array<float, 12> &dest, const glm::mat3 &src);
+std::array<float, 4> gl_array_from_color(const Color &c);
 
 #define GET_LOC(d, loc)                                                                                                \
     do {                                                                                                               \
