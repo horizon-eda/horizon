@@ -3,10 +3,7 @@ out vec4 outputColor;
 in vec3 color_to_fragment;
 in vec2 dot_to_fragment;
 in vec2 size_to_fragment;
-uniform vec3 color_inner;
-uniform vec3 color_outer;
-uniform vec3 color_always;
-uniform vec3 color_prelight;
+##selectable-ubo
 
 void main() {
   float border = 2;
@@ -18,7 +15,7 @@ void main() {
 
     outputColor = vec4(color_to_fragment ,1); 
     if((!x_inside && mod(dot_to_fragment.y, 20) > 10) || (!y_inside && mod(dot_to_fragment.x, 20) > 10)) {
-        outputColor = vec4(color_inner ,1);
+        outputColor = color_inner;
     }
 
   }

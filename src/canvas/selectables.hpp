@@ -27,6 +27,7 @@ public:
     bool is_line() const;
     bool is_point() const;
     bool is_box() const;
+    bool is_arc() const;
     std::array<Coordf, 4> get_corners() const;
 } __attribute__((packed));
 
@@ -80,6 +81,8 @@ public:
                        bool always = false);
     void append_line(const UUID &uu, ObjectType ot, const Coordf &p0, const Coordf &p1, float width,
                      unsigned int vertex = 0, LayerRange layer = 10000, bool always = false);
+    void append_arc(const UUID &uu, ObjectType ot, const Coordf &center, float r0, float r1, float a0, float a1,
+                    unsigned int vertex = 0, LayerRange layer = 10000, bool always = false);
     void update_preview(const std::set<SelectableRef> &sel);
 
     void group_begin();

@@ -1,14 +1,6 @@
 #version 330
 layout(points) in;
 layout(triangle_strip, max_vertices = 32) out;
-uniform mat3 screenmat;
-uniform mat3 viewmat;
-uniform float scale;
-uniform vec3 color_inner;
-uniform vec3 color_outer;
-uniform vec3 color_always;
-uniform vec3 color_prelight;
-uniform float min_size;
 in vec2 origin_to_geom[1];
 in vec2 box_center_to_geom[1];
 in vec2 box_dim_to_geom[1];
@@ -17,6 +9,8 @@ in uint flags_to_geom[1];
 out vec3 color_to_fragment;
 out vec2 dot_to_fragment;
 out vec2 size_to_fragment;
+
+##selectable-ubo
 
 vec4 t(vec2 p) {
     return vec4((screenmat*viewmat*vec3(p, 1)), 1);
@@ -66,21 +60,18 @@ void main() {
 	}
 	
 	uint flags = flags_to_geom[0];
-	if(flags == uint(0)) {
-		return;
-	}
 	color_to_fragment = vec3(1,0,1);
 	
 	if((flags & uint(4|8))!=uint(0)) { //always or preview
-		color_to_fragment = color_always;
+		color_to_fragment = color_always.rgb;
 		origin_size = 7/scale;
 	}
 	if((flags & uint(1))!=uint(0)) { //selected
-		color_to_fragment = color_outer;
+		color_to_fragment = color_outer.rgb;
 		origin_size = 10/scale;
 	}
 	if((flags & uint(2))!=uint(0)) { //prelight
-		color_to_fragment = color_prelight;
+		color_to_fragment = color_prelight.rgb;
 	}
 	dot_to_fragment = vec2(0,0);
 	
@@ -126,7 +117,7 @@ void main() {
 	EndPrimitive();
 	
 	os*=.5;
-	color_to_fragment = color_inner;
+	color_to_fragment = color_inner.rgb;
 	
 	gl_Position = t(p+vec2(0, os));
 	EmitVertex();

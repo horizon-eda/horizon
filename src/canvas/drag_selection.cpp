@@ -398,6 +398,39 @@ static ClipperLib::IntPoint to_pt(const Coordf &p)
     return ClipperLib::IntPoint(p.x, p.y);
 }
 
+static ClipperLib::Path path_from_sel(const Selectable &sel)
+{
+    ClipperLib::Path path;
+    if (!sel.is_arc()) {
+        path.reserve(4);
+        auto corners = sel.get_corners();
+        for (const auto &c : corners) {
+            path.emplace_back(c.x, c.y);
+        }
+    }
+    else {
+        unsigned int steps = 15;
+        const float a0 = sel.width;
+        const float dphi = sel.height;
+        const float r0 = sel.c_x - 100;
+        const float r1 = sel.c_y + 100;
+        const auto c = Coordf(sel.x, sel.y);
+
+        path.reserve((steps + 1) * 2);
+        for (unsigned int i = 0; i <= steps; i++) {
+            const float a = a0 + (dphi / steps) * i;
+            const auto p = c + Coordf::euler(r0, a);
+            path.emplace_back(p.x, p.y);
+        }
+        for (unsigned int i = 0; i <= steps; i++) {
+            const float a = a0 + (dphi / steps) * (steps - i);
+            const auto p = c + Coordf::euler(r1, a);
+            path.emplace_back(p.x, p.y);
+        }
+    }
+    return path;
+}
+
 void DragSelection::Box::update()
 {
     const auto sel_center = (sel_a + sel_b) / 2;
@@ -443,21 +476,16 @@ void DragSelection::Box::update()
                 fill = true;
             }
             else if (sq == CanvasGL::SelectionQualifier::INCLUDE_BOX) {
-                auto corners = it.get_corners();
-                if (std::all_of(corners.begin(), corners.end(), [in_box](const auto &a) {
-                        return in_box({a.x, a.y});
-                    })) {
+                auto corners = path_from_sel(it);
+                if (std::all_of(corners.begin(), corners.end(),
+                                [in_box](const auto &a) { return in_box(Coordf(a.X, a.Y)); })) {
                     it.set_flag(Selectable::Flag::PRELIGHT, true);
                 }
                 fill = false;
             }
             else if (sq == CanvasGL::SelectionQualifier::TOUCH_BOX) {
                 // possible optimisation: don't use clipper
-                ClipperLib::Path sel(4);
-                auto corners = it.get_corners();
-                for (size_t j = 0; j < 4; j++) {
-                    sel.at(j) = ClipperLib::IntPoint(corners[j].x, corners[j].y);
-                }
+                ClipperLib::Path sel = path_from_sel(it);
 
                 ClipperLib::Clipper clipper;
                 clipper.AddPath(clbox, ClipperLib::ptSubject, true);
@@ -485,11 +513,7 @@ void DragSelection::Line::update()
         it.set_flag(Selectable::Flag::PRELIGHT, false);
         if (ca.selection_filter.can_select(ca.selectables.items_ref[i])) {
             if (ca.selection_tool == CanvasGL::SelectionTool::PAINT) {
-                ClipperLib::Path sel(4);
-                auto corners = it.get_corners();
-                for (size_t j = 0; j < 4; j++) {
-                    sel.at(j) = ClipperLib::IntPoint(corners[j].x, corners[j].y);
-                }
+                ClipperLib::Path sel = path_from_sel(it);
 
                 ClipperLib::Clipper clipper;
                 clipper.AddPath(sel, ClipperLib::ptClip, true);
@@ -512,11 +536,7 @@ void DragSelection::Line::update()
                 }
                 else if (ca.selection_qualifier == CanvasGL::SelectionQualifier::INCLUDE_BOX
                          || ca.selection_qualifier == CanvasGL::SelectionQualifier::TOUCH_BOX) {
-                    ClipperLib::Path sel(4);
-                    auto corners = it.get_corners();
-                    for (size_t j = 0; j < 4; j++) {
-                        sel.at(j) = ClipperLib::IntPoint(corners[j].x, corners[j].y);
-                    }
+                    ClipperLib::Path sel = path_from_sel(it);
 
                     ClipperLib::Clipper clipper;
                     clipper.AddPath(sel, ClipperLib::ptSubject, true);

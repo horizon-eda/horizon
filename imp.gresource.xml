@@ -116,6 +116,8 @@
     <file>canvas/shaders/selectable-vertex.glsl</file>
     <file>canvas/shaders/selectable-fragment.glsl</file>
     <file>canvas/shaders/selectable-geometry.glsl</file>
+    <file>canvas/shaders/selectable-arc-fragment.glsl</file>
+    <file>canvas/shaders/selectable-arc-geometry.glsl</file>
 
     <file>canvas/shaders/selection-vertex.glsl</file>
     <file>canvas/shaders/selection-fragment.glsl</file>
@@ -138,6 +140,7 @@
     <file>canvas/shaders/triangle-arc-fragment.glsl</file>
     <file>canvas/shaders/triangle-arc-geometry.glsl</file>
     <file>canvas/shaders/triangle-ubo.glsl</file>
+    <file>canvas/shaders/selectable-ubo.glsl</file>
 
     <file>canvas/shaders/marker-vertex.glsl</file>
     <file>canvas/shaders/marker-fragment.glsl</file>

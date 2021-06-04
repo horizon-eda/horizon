@@ -1,6 +1,7 @@
 #include "selectables.hpp"
 #include "canvas.hpp"
 #include <assert.h>
+#include "util/geom_util.hpp"
 
 namespace horizon {
 
@@ -12,18 +13,48 @@ Selectable::Selectable(const Coordf &center, const Coordf &box_center, const Coo
 
 bool Selectable::inside(const Coordf &c, float expand) const
 {
-    Coordf d = c - Coordf(c_x, c_y);
-    float a = -angle;
-    float dx = d.x * cos(a) - d.y * sin(a);
-    float dy = d.x * sin(a) + d.y * cos(a);
-    float w = std::max(width, expand) / 2;
-    float h = std::max(height, expand) / 2;
+    if (!is_arc()) {
+        Coordf d = c - Coordf(c_x, c_y);
+        float a = -angle;
+        float dx = d.x * cos(a) - d.y * sin(a);
+        float dy = d.x * sin(a) + d.y * cos(a);
+        float w = std::max(width, expand) / 2;
+        float h = std::max(height, expand) / 2;
 
-    return (dx >= -w) && (dx <= w) && (dy >= -h) && (dy <= h);
+        return (dx >= -w) && (dx <= w) && (dy >= -h) && (dy <= h);
+    }
+    else {
+        Coordf d = c - Coordf(x, y);
+        auto phi = c2pi(atan2f(d.y, d.x));
+        const auto l = sqrt(d.mag_sq());
+        const float r0 = c_x;
+        const float r1 = c_y;
+        const float rm = (r0 + r1) / 2;
+        const float dr = std::max(r1 - r0, expand) / 2;
+        const float r0_ex = rm - dr;
+        const float r1_ex = rm + dr;
+
+        const float a0 = width;
+        const float dphi = height;
+        const float phi0 = c2pi(phi - a0);
+        return l > r0_ex && l < r1_ex && phi0 < dphi;
+    }
 }
 
 float Selectable::area() const
 {
+    if (is_arc()) {
+        const float r0 = c_x;
+        const float r1 = c_y;
+        const float dphi = height;
+        if (r1 != r0) {
+            const float a_total = (r1 * r1 - r0 * r0);
+            return a_total * (dphi / 2);
+        }
+        else {
+            return r0 * dphi;
+        }
+    }
     if (width == 0)
         return height;
     else if (height == 0)
@@ -34,21 +65,27 @@ float Selectable::area() const
 
 bool Selectable::is_line() const
 {
-    return (width == 0) != (height == 0);
+    return !is_arc() && ((width == 0) != (height == 0));
 }
 
 bool Selectable::is_point() const
 {
-    return width == 0 && height == 0;
+    return !is_arc() && (width == 0 && height == 0);
 }
 
 bool Selectable::is_box() const
 {
-    return width > 0 && height > 0;
+    return !is_arc() && (width > 0 && height > 0);
+}
+
+bool Selectable::is_arc() const
+{
+    return isnan(angle);
 }
 
 std::array<Coordf, 4> Selectable::get_corners() const
 {
+    assert(!is_arc());
     std::array<Coordf, 4> r;
     auto w = width + 100;
     auto h = height + 100;
@@ -122,6 +159,18 @@ void Selectables::append_line(const UUID &uu, ObjectType ot, const Coordf &p0, c
     append_angled(uu, ot, center, center, Coordf(box_width, box_height), angle, vertex, layer, always);
 }
 
+void Selectables::append_arc(const UUID &uu, ObjectType ot, const Coordf &center, float r0, float r1, float a0,
+                             float a1, unsigned int vertex, LayerRange layer, bool always)
+{
+    a0 = c2pi(a0);
+    a1 = c2pi(a1);
+    const float dphi = c2pi(a1 - a0);
+    items_map.emplace(std::piecewise_construct, std::forward_as_tuple(uu, ot, vertex, layer),
+                      std::forward_as_tuple(items.size()));
+    items.emplace_back(center, Coordf(r0, r1), Coordf(a0, dphi), NAN, always);
+    items_ref.emplace_back(uu, ot, vertex, layer);
+    items_group.push_back(group_current);
+}
 
 void Selectables::update_preview(const std::set<SelectableRef> &sel)
 {

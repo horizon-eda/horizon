@@ -6,7 +6,7 @@
 
 namespace horizon {
 
-static GLuint create_vao(GLuint program, GLuint &vbo_out)
+static GLuint create_vao(GLuint program, GLuint &vbo_out, GLuint &ebo_out)
 {
     GLuint origin_index = glGetAttribLocation(program, "origin");
     GLuint box_center_index = glGetAttribLocation(program, "box_center");
@@ -14,6 +14,9 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out)
     GLuint angle_index = glGetAttribLocation(program, "angle");
     GLuint flags_index = glGetAttribLocation(program, "flags");
     GLuint vao, buffer;
+
+    glGenBuffers(1, &ebo_out);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_out);
 
     /* we need to create a VAO to store the other buffers */
     glGenVertexArrays(1, &vao);
@@ -58,6 +61,18 @@ SelectablesRenderer::SelectablesRenderer(const CanvasGL &c, const Selectables &s
 {
 }
 
+class UBOBuffer {
+public:
+    std::array<float, 4> color_inner;
+    std::array<float, 4> color_outer;
+    std::array<float, 4> color_always;
+    std::array<float, 4> color_prelight;
+    std::array<float, 12> screenmat;
+    std::array<float, 12> viewmat;
+    float scale;
+    float min_size;
+};
+
 void SelectablesRenderer::realize()
 {
     program = gl_create_program_from_resource(
@@ -67,37 +82,62 @@ void SelectablesRenderer::realize()
             "selectable-fragment.glsl",
             "/org/horizon-eda/horizon/canvas/shaders/"
             "selectable-geometry.glsl");
+    program_arc = gl_create_program_from_resource(
+            "/org/horizon-eda/horizon/canvas/shaders/"
+            "selectable-vertex.glsl",
+            "/org/horizon-eda/horizon/canvas/shaders/"
+            "selectable-arc-fragment.glsl",
+            "/org/horizon-eda/horizon/canvas/shaders/"
+            "selectable-arc-geometry.glsl");
     GL_CHECK_ERROR
-    vao = create_vao(program, vbo);
+    vao = create_vao(program, vbo, ebo);
     GL_CHECK_ERROR
-    GET_LOC(this, screenmat);
-    GET_LOC(this, viewmat);
-    GET_LOC(this, scale);
-    GET_LOC(this, color_always);
-    GET_LOC(this, color_inner);
-    GET_LOC(this, color_outer);
-    GET_LOC(this, color_prelight);
-    GET_LOC(this, min_size);
+
+    glGenBuffers(1, &ubo);
+    unsigned int block_index = glGetUniformBlockIndex(program, "ubo");
+    GLuint binding_point_index = 1;
+    glBindBufferBase(GL_UNIFORM_BUFFER, binding_point_index, ubo);
+    glUniformBlockBinding(program, block_index, binding_point_index);
+    glUniformBlockBinding(program_arc, block_index, binding_point_index);
     GL_CHECK_ERROR
 }
 
 void SelectablesRenderer::render()
 {
-    glUseProgram(program);
-    glBindVertexArray(vao);
-    glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(ca.screenmat));
-    glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca.viewmat));
-    glUniform1f(scale_loc, ca.scale);
-    glUniform1f(min_size_loc, ca.appearance.min_selectable_size);
-    gl_color_to_uniform_3f(color_always_loc, ca.get_color(ColorP::SELECTABLE_ALWAYS));
-    gl_color_to_uniform_3f(color_inner_loc, ca.get_color(ColorP::SELECTABLE_INNER));
-    gl_color_to_uniform_3f(color_outer_loc, ca.get_color(ColorP::SELECTABLE_OUTER));
-    gl_color_to_uniform_3f(color_prelight_loc, ca.get_color(ColorP::SELECTABLE_PRELIGHT));
+    UBOBuffer buf;
+    gl_mat3_to_array(buf.screenmat, ca.screenmat);
+    gl_mat3_to_array(buf.viewmat, ca.viewmat);
+    buf.scale = ca.scale;
+    buf.min_size = ca.appearance.min_selectable_size;
+    buf.color_always = gl_array_from_color(ca.get_color(ColorP::SELECTABLE_ALWAYS));
+    buf.color_inner = gl_array_from_color(ca.get_color(ColorP::SELECTABLE_INNER));
+    buf.color_outer = gl_array_from_color(ca.get_color(ColorP::SELECTABLE_OUTER));
+    buf.color_prelight = gl_array_from_color(ca.get_color(ColorP::SELECTABLE_PRELIGHT));
 
-    glDrawArrays(GL_POINTS, 0, sel.items.size());
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(buf), &buf, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    if (n_arc) {
+        glUseProgram(program_arc);
+
+        // glDrawArrays(GL_POINTS, 0, n_arcs);
+        glDrawElements(GL_POINTS, n_arc, GL_UNSIGNED_INT, (void *)(0 * sizeof(unsigned int)));
+    }
+
+    if (n_box) {
+        glUseProgram(program);
+
+        // glDrawArrays(GL_POINTS, 0, n_arcs);
+        glDrawElements(GL_POINTS, n_box, GL_UNSIGNED_INT, (void *)(n_arc * sizeof(unsigned int)));
+    }
+
 
     glBindVertexArray(0);
     glUseProgram(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void SelectablesRenderer::push()
@@ -110,5 +150,24 @@ void SelectablesRenderer::push()
     std::cout << "---" << std::endl;*/
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Selectable) * sel.items.size(), sel.items.data(), GL_STREAM_DRAW);
+
+    std::vector<unsigned int> elements;
+    elements.reserve(sel.items.size());
+    for (unsigned int i = 0; i < sel.items.size(); i++) {
+        if (sel.items.at(i).is_arc() && sel.items.at(i).flags != 0) {
+            elements.push_back(i);
+        }
+    }
+    n_arc = elements.size();
+    for (unsigned int i = 0; i < sel.items.size(); i++) {
+        if (!sel.items.at(i).is_arc() && sel.items.at(i).flags != 0) {
+            elements.push_back(i);
+        }
+    }
+    n_box = elements.size() - n_arc;
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * elements.size(), elements.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 } // namespace horizon

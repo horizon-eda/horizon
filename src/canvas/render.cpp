@@ -599,13 +599,18 @@ void Canvas::render(const Arc &arc, bool interactive, ColorP co)
     Coordf a(arc.from->position); // ,b,c;
     Coordf b(arc.to->position);   // ,b,c;
     Coordf c = project_onto_perp_bisector(a, b, arc.center->position);
-    float radius0 = sqrt(sq(c.x - a.x) + sq(c.y - a.y));
-    float a0 = atan2f(a.y - c.y, a.x - c.x);
-    float a1 = atan2f(b.y - c.y, b.x - c.x);
-    auto bb = draw_arc2(c, radius0, a0, a1, co, arc.layer, arc.width);
+    const float radius0 = sqrt(sq(c.x - a.x) + sq(c.y - a.y));
+    const float a0 = c2pi(atan2f(a.y - c.y, a.x - c.x));
+    const float a1 = c2pi(atan2f(b.y - c.y, b.x - c.x));
+    const float dphi = c2pi(a1 - a0);
+
+    draw_arc2(c, radius0, a0, a1, co, arc.layer, arc.width);
     Coordf t(radius0, radius0);
-    if (interactive)
-        selectables.append(arc.uuid, ObjectType::ARC, c, bb.first, bb.second, 0, arc.layer);
+    if (interactive) {
+        const float ax = std::min(asin(arc.width / 2 / radius0), static_cast<float>((2 * M_PI - dphi) / 2 - .1e-4));
+        selectables.append_arc(arc.uuid, ObjectType::ARC, c, radius0 - arc.width / 2, radius0 + arc.width / 2, a0 - ax,
+                               a1 + ax, 0, arc.layer);
+    }
 }
 
 void Canvas::render(const SchematicSymbol &sym)
@@ -870,39 +875,35 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
 
     if (interactive) {
         selectables.group_begin();
-        const Polygon::Vertex *v_last = nullptr;
-        {
-            size_t i = 0;
-            for (const auto &it : ipoly.vertices) {
-                if (v_last) {
-                    auto center = (v_last->position + it.position) / 2;
-                    if (v_last->type != Polygon::Vertex::Type::ARC) {
-                        selectables.append_line(poly.uuid, ObjectType::POLYGON_EDGE, v_last->position, it.position, 0,
-                                                i - 1, poly.layer);
+        for (int i = 0; i < static_cast<int>(ipoly.vertices.size()); i++) {
+            const auto &v = ipoly.get_vertex(i);
+            const auto &v_last = ipoly.get_vertex(i - 1);
+            int i_last = i - 1;
+            if (i_last < 0)
+                i_last += ipoly.vertices.size();
+            if (v_last.type != Polygon::Vertex::Type::ARC) {
+                auto center = (v.position + v_last.position) / 2;
+                selectables.append_line(ipoly.uuid, ObjectType::POLYGON_EDGE, v_last.position, v.position, 0, i_last,
+                                        ipoly.layer);
+                targets.emplace_back(ipoly.uuid, ObjectType::POLYGON_EDGE, center, i_last, ipoly.layer);
+            }
+            else {
+                const Coordf b = v.position;
+                const Coordf a = v_last.position;
+                const Coordf c = project_onto_perp_bisector(a, b, v_last.arc_center);
+                const auto r = sqrt((a - c).mag_sq());
+                float a0 = atan2f(a.y - c.y, a.x - c.x);
+                float a1 = atan2f(b.y - c.y, b.x - c.x);
+                if (v_last.arc_reverse)
+                    std::swap(a0, a1);
+                selectables.append_arc(ipoly.uuid, ObjectType::POLYGON_EDGE, c, r, r, a0, a1, i_last, ipoly.layer);
+            }
 
-                        targets.emplace_back(poly.uuid, ObjectType::POLYGON_EDGE, center, i - 1, poly.layer);
-                    }
-                }
-                v_last = &it;
-                i++;
-            }
-            if (ipoly.vertices.back().type != Polygon::Vertex::Type::ARC) {
-                auto center = (ipoly.vertices.front().position + ipoly.vertices.back().position) / 2;
-                targets.emplace_back(poly.uuid, ObjectType::POLYGON_EDGE, center, i - 1, poly.layer);
-                selectables.append_line(poly.uuid, ObjectType::POLYGON_EDGE, poly.vertices.front().position,
-                                        ipoly.vertices.back().position, 0, i - 1, poly.layer);
-            }
-        }
-        {
-            size_t i = 0;
-            for (const auto &it : ipoly.vertices) {
-                selectables.append(poly.uuid, ObjectType::POLYGON_VERTEX, it.position, i, poly.layer);
-                targets.emplace_back(poly.uuid, ObjectType::POLYGON_VERTEX, it.position, i, poly.layer);
-                if (it.type == Polygon::Vertex::Type::ARC) {
-                    selectables.append(poly.uuid, ObjectType::POLYGON_ARC_CENTER, it.arc_center, i, poly.layer);
-                    targets.emplace_back(poly.uuid, ObjectType::POLYGON_ARC_CENTER, it.arc_center, i, poly.layer);
-                }
-                i++;
+            selectables.append(ipoly.uuid, ObjectType::POLYGON_VERTEX, v.position, i, ipoly.layer);
+            targets.emplace_back(ipoly.uuid, ObjectType::POLYGON_VERTEX, v.position, i, ipoly.layer);
+            if (v.type == Polygon::Vertex::Type::ARC) {
+                selectables.append(ipoly.uuid, ObjectType::POLYGON_ARC_CENTER, v.arc_center, i, ipoly.layer);
+                targets.emplace_back(ipoly.uuid, ObjectType::POLYGON_ARC_CENTER, v.arc_center, i, ipoly.layer);
             }
         }
         selectables.group_end();
