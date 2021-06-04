@@ -15,7 +15,7 @@ flat out float a0;
 flat out float a1;
 flat out float border_threshold;
 
-##ubo
+##triangle-ubo
 
 vec4 t(vec2 p) {
     return vec4((screenmat*viewmat*vec3(p, 1)), 1);

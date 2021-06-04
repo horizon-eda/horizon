@@ -48,26 +48,27 @@ static GLuint create_shader(int type, const char *src)
     return shader;
 }
 
-static std::string string_from_resource(const char *resource)
+static std::string string_from_resource(const std::string &resource)
 {
     auto bytes = Gio::Resource::lookup_data_global(resource);
     gsize size;
     return (const char *)bytes->get_data(size);
 }
 
-static void include_shader(std::string &shader_string)
+static void include_shader(std::string &shader_string, const std::string &name)
 {
-    auto index = shader_string.find("##ubo");
+    const std::string key = "##" + name;
+    auto index = shader_string.find(key);
     if (index == std::string::npos)
         return;
-    std::string ubo_str = string_from_resource("/org/horizon-eda/horizon/canvas/shaders/ubo.glsl");
-    shader_string.replace(index, 5, ubo_str);
+    std::string ubo_str = string_from_resource("/org/horizon-eda/horizon/canvas/shaders/" + name + ".glsl");
+    shader_string.replace(index, key.size(), ubo_str);
 }
 
 static GLuint create_shader_from_resource(int type, const char *resource)
 {
     std::string shader_string = string_from_resource(resource);
-    include_shader(shader_string);
+    include_shader(shader_string, "triangle-ubo");
     return create_shader(type, shader_string.c_str());
 }
 

@@ -13,7 +13,7 @@ smooth out vec3 color_to_fragment;
 smooth out vec2 texcoord_to_fragment;
 out float lod_alpha;
 
-##ubo
+##triangle-ubo
 
 int mode = layer_flags;
 

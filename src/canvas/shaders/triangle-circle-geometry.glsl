@@ -13,7 +13,7 @@ smooth out vec3 color_to_fragment;
 smooth out vec2 round_pos_to_fragment;
 flat out float border_threshold;
 
-##ubo
+##triangle-ubo
 
 vec4 t(vec2 p) {
     return vec4((screenmat*viewmat*vec3(p, 1)), 1);

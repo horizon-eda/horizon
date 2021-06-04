@@ -11,7 +11,7 @@ in int color2_to_geom[1];
 in int lod_to_geom[1];
 smooth out vec3 color_to_fragment;
 
-##ubo
+##triangle-ubo
 
 int mode = layer_flags;
 

@@ -137,7 +137,7 @@
     <file>canvas/shaders/triangle-arc0-geometry.glsl</file>
     <file>canvas/shaders/triangle-arc-fragment.glsl</file>
     <file>canvas/shaders/triangle-arc-geometry.glsl</file>
-    <file>canvas/shaders/ubo.glsl</file>
+    <file>canvas/shaders/triangle-ubo.glsl</file>
 
     <file>canvas/shaders/marker-vertex.glsl</file>
     <file>canvas/shaders/marker-fragment.glsl</file>

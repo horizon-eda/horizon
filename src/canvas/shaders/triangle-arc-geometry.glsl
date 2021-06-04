@@ -17,7 +17,7 @@ flat out float border_width;
 flat out float line_width;
 
 
-##ubo
+##triangle-ubo
 
 vec4 t(vec2 p) {
     return vec4((screenmat*viewmat*vec3(p, 1)), 1);

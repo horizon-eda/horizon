@@ -1,5 +1,5 @@
 #version 330
-##ubo
+##triangle-ubo
 
 out vec4 outputColor;
 smooth in vec3 color_to_fragment;

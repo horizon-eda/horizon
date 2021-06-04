@@ -13,7 +13,7 @@ smooth out vec3 color_to_fragment;
 smooth out vec2 round_pos_to_fragment;
 flat out float discard_threshold;
 
-##ubo
+##triangle-ubo
 
 int mode = layer_flags;
 
