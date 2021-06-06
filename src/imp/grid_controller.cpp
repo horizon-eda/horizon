@@ -98,42 +98,72 @@ void GridController::set_origin(const Coordi &c)
     grid_spin_button_origin_y->set_value(c.y);
 }
 
-enum class GridMode { SQUARE, RECTANGULAR };
-
-static const LutEnumStr<GridMode> mode_lut = {
-        {"square", GridMode::SQUARE},
-        {"rect", GridMode::RECTANGULAR},
+static const LutEnumStr<GridSettings::Mode> mode_lut = {
+        {"square", GridSettings::Mode::SQUARE},
+        {"rect", GridSettings::Mode::RECTANGULAR},
 };
 
+GridSettings::GridSettings(const json &j)
+    : mode(mode_lut.lookup(j.at("mode").get<std::string>())),
+      spacing_rect(j.at("spacing_x").get<uint64_t>(), j.at("spacing_y").get<uint64_t>()),
+      spacing_square(j.at("spacing_square").get<uint64_t>()),
+      origin(j.at("origin_x").get<uint64_t>(), j.at("origin_y").get<uint64_t>())
+{
+}
 void GridController::load_from_json(const json &j)
 {
+    GridSettings settings(j);
+    apply_settings(settings);
+}
 
-    auto mode = mode_lut.lookup(j.at("mode"));
-    if (mode == GridMode::SQUARE) {
+json GridController::serialize() const
+{
+    return get_settings().serialize();
+}
+
+json GridSettings::serialize() const
+{
+    json j;
+    j["mode"] = mode_lut.lookup_reverse(mode);
+    j["spacing_square"] = spacing_square;
+    j["spacing_x"] = spacing_rect.x;
+    j["spacing_y"] = spacing_rect.y;
+    j["origin_x"] = origin.x;
+    j["origin_y"] = origin.y;
+    return j;
+}
+
+GridSettings GridController::get_settings() const
+{
+    GridSettings s;
+    s.origin.x = grid_spin_button_origin_x->get_value_as_int();
+    s.origin.y = grid_spin_button_origin_y->get_value_as_int();
+    s.spacing_square = grid_spin_button_square->get_value_as_int();
+    s.spacing_rect.x = grid_spin_button_x->get_value_as_int();
+    s.spacing_rect.y = grid_spin_button_x->get_value_as_int();
+    if (main_window.grid_square_button->get_active()) {
+        s.mode = GridSettings::Mode::SQUARE;
+    }
+    else {
+        s.mode = GridSettings::Mode::RECTANGULAR;
+    }
+    return s;
+}
+
+void GridController::apply_settings(const GridSettings &s)
+{
+    if (s.mode == GridSettings::Mode::SQUARE) {
         main_window.grid_square_button->set_active(true);
     }
     else {
         main_window.grid_rect_button->set_active(true);
     }
-    grid_spin_button_square->set_value(j.at("spacing_square"));
-    grid_spin_button_x->set_value(j.at("spacing_x"));
-    grid_spin_button_y->set_value(j.at("spacing_y"));
-    grid_spin_button_origin_x->set_value(j.at("origin_x"));
-    grid_spin_button_origin_y->set_value(j.at("origin_y"));
+    grid_spin_button_square->set_value(s.spacing_square);
+    grid_spin_button_x->set_value(s.spacing_rect.x);
+    grid_spin_button_y->set_value(s.spacing_rect.y);
+    grid_spin_button_origin_x->set_value(s.origin.x);
+    grid_spin_button_origin_y->set_value(s.origin.y);
     apply();
-}
-
-json GridController::serialize() const
-{
-    json j;
-    j["mode"] = mode_lut.lookup_reverse(main_window.grid_square_button->get_active() ? GridMode::SQUARE
-                                                                                     : GridMode::RECTANGULAR);
-    j["spacing_square"] = grid_spin_button_square->get_value_as_int();
-    j["spacing_x"] = grid_spin_button_x->get_value_as_int();
-    j["spacing_y"] = grid_spin_button_y->get_value_as_int();
-    j["origin_x"] = grid_spin_button_origin_x->get_value_as_int();
-    j["origin_y"] = grid_spin_button_origin_y->get_value_as_int();
-    return j;
 }
 
 } // namespace horizon
