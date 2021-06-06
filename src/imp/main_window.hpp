@@ -44,6 +44,7 @@ public:
     Gtk::Grid *grid_grid = nullptr;
     Gtk::Button *grid_reset_origin_button = nullptr;
 
+    Gtk::Button *grid_window_button = nullptr;
 
     Glib::SignalProxy<bool, const Glib::ustring &> signal_activate_hud_link()
     {

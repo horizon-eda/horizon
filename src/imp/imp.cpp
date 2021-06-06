@@ -34,6 +34,7 @@
 #include "util/zmq_helper.hpp"
 #include "pool/pool_parametric.hpp"
 #include "action_icon.hpp"
+#include "grids_window.hpp"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>
@@ -578,6 +579,10 @@ void ImpBase::run(int argc, char *argv[])
         auto co = canvas->get_cursor_pos();
         grid_controller->set_origin(co);
     });
+
+    grids_window = GridsWindow::create(main_window, *grid_controller);
+    connect_action(ActionID::GRIDS_WINDOW, [this](const auto &c) { grids_window->present(); });
+    main_window->grid_window_button->signal_clicked().connect([this] { grids_window->present(); });
 
     auto save_button = create_action_button(make_action(ActionID::SAVE));
     save_button->show();

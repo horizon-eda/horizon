@@ -956,6 +956,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
 
         {{ActionID::VIEW_3D_BACK, ToolID::NONE},
          {"View back", ActionGroup::VIEW_3D, ActionCatalogItem::AVAILABLE_IN_3D, ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::GRIDS_WINDOW, ToolID::NONE},
+         {"Grids window", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1092,6 +1096,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(VIEW_3D_BOTTOM),
         ACTION_LUT_ITEM(VIEW_3D_LEFT),
         ACTION_LUT_ITEM(VIEW_3D_RIGHT),
+        ACTION_LUT_ITEM(GRIDS_WINDOW),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

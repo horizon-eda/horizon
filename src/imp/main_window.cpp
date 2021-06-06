@@ -53,6 +53,7 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     GET_WIDGET(grid_square_button);
     GET_WIDGET(grid_rect_button);
     GET_WIDGET(grid_grid);
+    GET_WIDGET(grid_window_button);
     GET_WIDGET(grid_reset_origin_button);
     GET_WIDGET(tool_bar_action_tip_label);
     GET_WIDGET(tool_bar_actions_box);

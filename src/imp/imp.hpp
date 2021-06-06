@@ -81,6 +81,7 @@ protected:
     Gtk::Menu *context_menu = nullptr;
     std::unique_ptr<SelectionFilterDialog> selection_filter_dialog;
     std::optional<GridController> grid_controller;
+    class GridsWindow *grids_window = nullptr;
 
     std::unique_ptr<Pool> pool;
     std::unique_ptr<Pool> real_pool_caching;
