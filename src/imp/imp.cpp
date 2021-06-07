@@ -581,8 +581,15 @@ void ImpBase::run(int argc, char *argv[])
     });
 
     grids_window = GridsWindow::create(main_window, *grid_controller);
-    connect_action(ActionID::GRIDS_WINDOW, [this](const auto &c) { grids_window->present(); });
-    main_window->grid_window_button->signal_clicked().connect([this] { grids_window->present(); });
+    connect_action(ActionID::GRIDS_WINDOW, [this](const auto &c) {
+        grids_window->set_select_mode(false);
+        grids_window->present();
+    });
+    connect_action(ActionID::SELECT_GRID, [this](const auto &c) {
+        grids_window->set_select_mode(true);
+        grids_window->present();
+    });
+    main_window->grid_window_button->signal_clicked().connect([this] { trigger_action(ActionID::GRIDS_WINDOW); });
 
     auto save_button = create_action_button(make_action(ActionID::SAVE));
     save_button->show();

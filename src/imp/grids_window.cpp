@@ -23,7 +23,10 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     install_esc_to_close(*this);
 
     GET_WIDGET(treeview);
-
+    GET_WIDGET(button_box);
+    GET_WIDGET(button_ok);
+    GET_WIDGET(button_cancel);
+    GET_WIDGET(headerbar);
 
     store = Gtk::ListStore::create(list_columns);
 
@@ -63,7 +66,7 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
                 label = dim_to_string(s.spacing_square, false);
             }
             else {
-                label == coord_to_string(s.spacing_rect, true);
+                label = coord_to_string(s.spacing_rect, true);
             }
 
             mcr->property_text() = label;
@@ -124,6 +127,14 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
             grid_controller.apply_settings(row[list_columns.settings]);
         }
     });
+    button_ok->signal_clicked().connect([this] {
+        if (auto it = treeview->get_selection()->get_selected()) {
+            Gtk::TreeModel::Row row = *it;
+            grid_controller.apply_settings(row[list_columns.settings]);
+            close();
+        }
+    });
+    button_cancel->signal_clicked().connect([this] { close(); });
 
     Gtk::Button *button_load;
     GET_WIDGET(button_load);
@@ -137,6 +148,8 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     treeview->signal_row_activated().connect([this](const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *col) {
         Gtk::TreeModel::Row row = *store->get_iter(path);
         grid_controller.apply_settings(row[list_columns.settings]);
+        if (select_mode)
+            close();
     });
     treeview->signal_key_press_event().connect([this](GdkEventKey *ev) {
         if (ev->keyval == GDK_KEY_Delete) {
@@ -147,6 +160,35 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         }
         return false;
     });
+
+    set_select_mode(false);
+}
+
+void GridsWindow::set_select_mode(bool m)
+{
+    select_mode = m;
+    headerbar->set_show_close_button(!select_mode);
+    button_ok->set_visible(select_mode);
+    button_cancel->set_visible(select_mode);
+    button_box->set_visible(!select_mode);
+    set_modal(select_mode);
+
+    if (select_mode) {
+        set_title("Select Grid");
+        if (auto it = treeview->get_selection()->get_selected(); !it) {
+            if (store->children().size()) {
+                treeview->get_selection()->select(store->children().begin());
+            }
+        }
+        if (auto it = treeview->get_selection()->get_selected()) {
+            auto path = store->get_path(it);
+            treeview->set_cursor(path, *treeview->get_column(1));
+        }
+    }
+    else {
+        set_title("Grids");
+    }
+    treeview->grab_focus();
 }
 
 

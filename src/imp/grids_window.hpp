@@ -14,13 +14,14 @@ class GridsWindow : public Gtk::Window, public Changeable {
 public:
     static GridsWindow *create(Gtk::Window *p, GridController &b);
     GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, GridController &b);
+    void set_select_mode(bool select_mode);
 
     json serialize();
     void load_from_json(const json &j);
 
 private:
     GridController &grid_controller;
-
+    bool select_mode = false;
 
     class ListColumns : public Gtk::TreeModelColumnRecord {
     public:
@@ -36,6 +37,11 @@ private:
 
     Glib::RefPtr<Gtk::ListStore> store;
     Gtk::TreeView *treeview = nullptr;
+
+    Gtk::Box *button_box = nullptr;
+    Gtk::Button *button_ok = nullptr;
+    Gtk::Button *button_cancel = nullptr;
+    Gtk::HeaderBar *headerbar = nullptr;
 };
 
 } // namespace horizon
