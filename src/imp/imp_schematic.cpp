@@ -16,6 +16,7 @@
 #include "core/tools/tool_map_symbol.hpp"
 #include "widgets/unplaced_box.hpp"
 #include "core/tool_id.hpp"
+#include "actions.hpp"
 #include "widgets/action_button.hpp"
 
 namespace horizon {

@@ -5,6 +5,7 @@
 #include "nlohmann/json.hpp"
 #include "core/tool_id.hpp"
 #include "action_editor.hpp"
+#include "imp/actions.hpp"
 
 namespace horizon {
 class ActionEditor : public ActionEditorBase {

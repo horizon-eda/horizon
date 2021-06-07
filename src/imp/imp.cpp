@@ -27,7 +27,7 @@
 #include <functional>
 #include "nlohmann/json.hpp"
 #include "core/tool_id.hpp"
-#include "imp/action.hpp"
+#include "actions.hpp"
 #include "preferences/preferences_util.hpp"
 #include "widgets/action_button.hpp"
 #include "in_tool_action_catalog.hpp"

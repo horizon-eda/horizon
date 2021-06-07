@@ -1,6 +1,7 @@
 #include "imp.hpp"
 #include "widgets/action_button.hpp"
 #include "core/tool_id.hpp"
+#include "actions.hpp"
 #include "util/util.hpp"
 #include "in_tool_action_catalog.hpp"
 #include "logger/logger.hpp"

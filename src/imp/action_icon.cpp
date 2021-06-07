@@ -1,5 +1,6 @@
 #include "action_icon.hpp"
 #include "core/tool_id.hpp"
+#include "actions.hpp"
 #include <map>
 
 namespace horizon {

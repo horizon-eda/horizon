@@ -4,6 +4,7 @@
 #include <memory>
 #include "nlohmann/json.hpp"
 #include "imp/action_catalog.hpp"
+#include "imp/actions.hpp"
 #include "util/util.hpp"
 #include "util/str_util.hpp"
 #include <glibmm/ustring.h>

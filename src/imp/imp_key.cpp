@@ -2,6 +2,7 @@
 #include "core/tool_id.hpp"
 #include "logger/logger.hpp"
 #include "in_tool_action_catalog.hpp"
+#include "actions.hpp"
 
 namespace horizon {
 

@@ -1,6 +1,6 @@
 #include "action_catalog.hpp"
 #include "core/tool_id.hpp"
-#include "imp/action.hpp"
+#include "actions.hpp"
 
 namespace horizon {
 const std::map<ActionToolID, ActionCatalogItem> action_catalog = {

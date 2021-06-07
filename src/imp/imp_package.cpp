@@ -23,6 +23,7 @@
 #include "widgets/action_button.hpp"
 #include <iomanip>
 #include "core/tool_id.hpp"
+#include "actions.hpp"
 
 namespace horizon {
 ImpPackage::ImpPackage(const std::string &package_filename, const std::string &pool_path)

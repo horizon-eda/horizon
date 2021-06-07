@@ -8,8 +8,6 @@
 namespace horizon {
 using json = nlohmann::json;
 
-enum class ActionID;
-enum class ToolID;
 enum class InToolActionID;
 
 class CanvasPreferences {

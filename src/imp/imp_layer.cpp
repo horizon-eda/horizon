@@ -7,6 +7,7 @@
 #include "util/gtk_util.hpp"
 #include "view_angle_window.hpp"
 #include "widgets/spin_button_angle.hpp"
+#include "actions.hpp"
 #include <iomanip>
 
 namespace horizon {

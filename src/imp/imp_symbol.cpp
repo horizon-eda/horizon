@@ -9,6 +9,7 @@
 #include "widgets/action_button.hpp"
 #include "widgets/help_button.hpp"
 #include "help_texts.hpp"
+#include "actions.hpp"
 
 namespace horizon {
 ImpSymbol::ImpSymbol(const std::string &symbol_filename, const std::string &pool_path)

@@ -9,6 +9,7 @@
 #include "place_model_box.hpp"
 #include "canvas/annotation.hpp"
 #include "import_canvas_3d.hpp"
+#include "imp/actions.hpp"
 
 namespace horizon {
 

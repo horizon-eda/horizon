@@ -1,6 +1,7 @@
 #include "imp.hpp"
 #include "util/util.hpp"
 #include "core/tool_id.hpp"
+#include "actions.hpp"
 
 namespace horizon {
 

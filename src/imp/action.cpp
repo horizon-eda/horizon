@@ -1,4 +1,5 @@
 #include "action.hpp"
+#include "actions.hpp"
 #include "util/str_util.hpp"
 #include <gdkmm.h>
 #include "core/tool_id.hpp"

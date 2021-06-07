@@ -7,6 +7,7 @@
 #include "board/board_layers.hpp"
 #include "core/tool_id.hpp"
 #include "widgets/action_button.hpp"
+#include "actions.hpp"
 
 namespace horizon {
 ImpPadstack::ImpPadstack(const std::string &padstack_filename, const std::string &pool_path)
