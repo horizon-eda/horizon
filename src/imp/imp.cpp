@@ -590,6 +590,8 @@ void ImpBase::run(int argc, char *argv[])
         grids_window->present();
     });
     main_window->grid_window_button->signal_clicked().connect([this] { trigger_action(ActionID::GRIDS_WINDOW); });
+    grids_window->signal_changed().connect(
+            [this] { set_action_sensitive(make_action(ActionID::SELECT_GRID), grids_window->has_grids()); });
 
     auto save_button = create_action_button(make_action(ActionID::SAVE));
     save_button->show();

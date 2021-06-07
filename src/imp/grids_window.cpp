@@ -109,6 +109,7 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
             Gtk::TreeModel::Row row = *store->append();
             row[list_columns.name] = *r;
             row[list_columns.settings] = grid_controller.get_settings();
+            s_signal_changed.emit();
         }
     });
     Gtk::Button *button_remove;
@@ -117,6 +118,7 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         auto paths = treeview->get_selection()->get_selected_rows();
         for (auto it = paths.rbegin(); it != paths.rend(); it++)
             store->erase(store->get_iter(*it));
+        s_signal_changed.emit();
     });
 
     Gtk::Button *button_apply;
@@ -156,6 +158,7 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
             auto paths = treeview->get_selection()->get_selected_rows();
             for (auto it = paths.rbegin(); it != paths.rend(); it++)
                 store->erase(store->get_iter(*it));
+            s_signal_changed.emit();
             return true;
         }
         return false;
@@ -191,6 +194,10 @@ void GridsWindow::set_select_mode(bool m)
     treeview->grab_focus();
 }
 
+bool GridsWindow::has_grids() const
+{
+    return store->children().size();
+}
 
 void GridsWindow::load_from_json(const json &j)
 {
@@ -200,6 +207,7 @@ void GridsWindow::load_from_json(const json &j)
         row[list_columns.name] = it.at("name").get<std::string>();
         row[list_columns.settings] = GridSettings(it);
     }
+    s_signal_changed.emit();
 }
 
 json GridsWindow::serialize()

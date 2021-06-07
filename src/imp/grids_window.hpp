@@ -15,6 +15,7 @@ public:
     static GridsWindow *create(Gtk::Window *p, GridController &b);
     GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, GridController &b);
     void set_select_mode(bool select_mode);
+    bool has_grids() const;
 
     json serialize();
     void load_from_json(const json &j);
