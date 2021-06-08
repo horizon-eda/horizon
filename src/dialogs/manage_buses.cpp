@@ -247,14 +247,16 @@ private:
     {
         auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
         AddSequenceDialog dia(top);
+        dia.w_start_index->set_value(seq_first_index);
+        dia.w_end_index->set_value(seq_last_index);
         if (dia.run() == Gtk::RESPONSE_OK) {
-            int first_index = dia.w_start_index->get_value_as_int();
-            int last_index = dia.w_end_index->get_value_as_int();
+            seq_first_index = dia.w_start_index->get_value_as_int();
+            seq_last_index = dia.w_end_index->get_value_as_int();
             const std::string templ = dia.w_text->get_text();
             const auto dollar_pos = templ.find('$');
             if (dollar_pos == std::string::npos)
                 return;
-            for (int i = first_index; i <= last_index; i++) {
+            for (int i = seq_first_index; i <= seq_last_index; i++) {
                 std::string netname = templ;
                 netname.replace(dollar_pos, 1, std::to_string(i));
 
@@ -270,6 +272,8 @@ private:
             }
         }
     }
+    int seq_first_index = 0;
+    int seq_last_index = 0;
 };
 
 
