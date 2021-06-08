@@ -20,8 +20,10 @@ jobs:
       run: sudo apt-get update -y && sudo apt-get install curl gnupg apt-transport-https -y
     - name: Add clang 9.0 to apt sources
       run: echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main" | sudo tee -a /etc/apt/sources.list
-    - name: Add LLVM apt key
-      run: curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+    - name: Get LLVM apt key
+      run: curl https://apt.llvm.org/llvm-snapshot.gpg.key | tee llvm-snapshot.gpg.key
+    - name: Add  LLVM apt key
+      run: sudo apt-key add llvm-snapshot.gpg.key
     - name: Install dependencies
       run: sudo apt-get update -y && sudo apt-get install git clang-format-9 -y
     - name: Style checker
