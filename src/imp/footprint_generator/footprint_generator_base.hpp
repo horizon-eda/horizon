@@ -5,9 +5,11 @@
 #include <array>
 #include <gtkmm.h>
 #include <set>
-#include <package/pad.hpp>
 
 namespace horizon {
+class Pad;
+class Padstack;
+
 class FootprintGeneratorBase : public Gtk::Box {
 public:
     FootprintGeneratorBase(const char *resource, class IDocumentPackage &c);
@@ -27,7 +29,7 @@ protected:
     class IDocumentPackage &core;
     class Package &package;
 
-    virtual void update_pad_parameters(const Padstack *padstack, Pad &pad, const int64_t pad_width,
+    virtual void update_pad_parameters(const Padstack &padstack, Pad &pad, const int64_t pad_width,
                                        const int64_t pad_height);
 };
 } // namespace horizon

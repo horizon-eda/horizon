@@ -36,16 +36,16 @@ FootprintGeneratorBase::FootprintGeneratorBase(const char *resource, IDocumentPa
     overlay->show();
 }
 
-void FootprintGeneratorBase::update_pad_parameters(const Padstack *padstack, Pad &pad, const int64_t pad_width,
+void FootprintGeneratorBase::update_pad_parameters(const Padstack &padstack, Pad &pad, const int64_t pad_width,
                                                    const int64_t pad_height)
 {
-    if (padstack->parameter_set.count(ParameterID::PAD_DIAMETER)) {
+    if (padstack.parameter_set.count(ParameterID::PAD_DIAMETER)) {
         pad.parameter_set[ParameterID::PAD_DIAMETER] = std::min(pad_width, pad_height);
     }
     else {
         pad.parameter_set[ParameterID::PAD_HEIGHT] = pad_height;
         pad.parameter_set[ParameterID::PAD_WIDTH] = pad_width;
-        if (padstack->parameter_set.count(ParameterID::CORNER_RADIUS)) {
+        if (padstack.parameter_set.count(ParameterID::CORNER_RADIUS)) {
             const auto r = std::min(0.25_mm, std::min(pad_width, pad_height) / 4);
             pad.parameter_set[ParameterID::CORNER_RADIUS] = r;
         }

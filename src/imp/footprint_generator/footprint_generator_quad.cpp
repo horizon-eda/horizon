@@ -104,7 +104,7 @@ bool FootprintGeneratorQuad::generate()
             auto uu = UUID::random();
             auto &pad = package.pads.emplace(uu, Pad(uu, padstack)).first->second;
             pad.placement.shift = {it * spacing_h, y0 - pitch * i};
-            update_pad_parameters(padstack, pad, pad_width, pad_height);
+            update_pad_parameters(*padstack, pad, pad_width, pad_height);
             if (it < 0) {
                 pad.placement.set_angle_deg(270);
                 pad.name = std::to_string(i + 1);
@@ -123,7 +123,7 @@ bool FootprintGeneratorQuad::generate()
             auto uu = UUID::random();
             auto &pad = package.pads.emplace(uu, Pad(uu, padstack)).first->second;
             pad.placement.shift = {x0 + pitch * i, it * spacing_v};
-            update_pad_parameters(padstack, pad, pad_width, pad_height);
+            update_pad_parameters(*padstack, pad, pad_width, pad_height);
             if (it < 0) {
                 pad.placement.set_angle_deg(0);
                 pad.name = std::to_string(i + 1 + pad_count_v);

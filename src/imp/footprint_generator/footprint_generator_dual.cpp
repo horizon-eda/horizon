@@ -142,7 +142,7 @@ bool FootprintGeneratorDual::generate()
 
             auto &pad = package.pads.emplace(uu, Pad(uu, padstack)).first->second;
             pad.placement.shift = {it * spacing, y0 - pitch * i};
-            update_pad_parameters(padstack, pad, pad_width, pad_height);
+            update_pad_parameters(*padstack, pad, pad_width, pad_height);
             if (it < 0)
                 pad.placement.set_angle_deg(270);
             else
