@@ -136,13 +136,7 @@ bool FootprintGeneratorGrid::generate()
             auto &pad = package.pads.emplace(uu, Pad(uu, padstack)).first->second;
             pad.placement.shift.x = pitch_h * x - (pitch_h * (pad_count_h - 1)) / 2;
             pad.placement.shift.y = -pitch_v * y + (pitch_v * (pad_count_v - 1)) / 2;
-            if (padstack->parameter_set.count(ParameterID::PAD_DIAMETER)) {
-                pad.parameter_set[ParameterID::PAD_DIAMETER] = std::min(pad_width, pad_height);
-            }
-            else {
-                pad.parameter_set[ParameterID::PAD_HEIGHT] = pad_height;
-                pad.parameter_set[ParameterID::PAD_WIDTH] = pad_width;
-            }
+            update_pad_parameters(*padstack, pad, pad_width, pad_height);
             pad.name = get_bga_letter(x + 1) + std::to_string(y + 1);
         }
     }
