@@ -75,13 +75,7 @@ bool FootprintGeneratorSingle::generate()
         pad.placement.shift = {0, y0 - pitch * i};
         pad.placement.set_angle_deg(270);
         pad.name = std::to_string(i + 1);
-        if (padstack->parameter_set.count(ParameterID::PAD_DIAMETER)) {
-            pad.parameter_set[ParameterID::PAD_DIAMETER] = std::min(pad_width, pad_height);
-        }
-        else {
-            pad.parameter_set[ParameterID::PAD_HEIGHT] = pad_height;
-            pad.parameter_set[ParameterID::PAD_WIDTH] = pad_width;
-        }
+        update_pad_parameters(padstack, pad, pad_width, pad_height);
     }
     return true;
 }
