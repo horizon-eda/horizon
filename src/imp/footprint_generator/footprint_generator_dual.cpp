@@ -148,13 +148,11 @@ bool FootprintGeneratorDual::generate()
             else {
                 pad.parameter_set[ParameterID::PAD_HEIGHT] = pad_height;
                 pad.parameter_set[ParameterID::PAD_WIDTH] = pad_width;
-
                 if (padstack->parameter_set.count(ParameterID::CORNER_RADIUS)) {
                     const int64_t default_radius = 0.1_mm;
-                    const auto r =  std::min(default_radius, std::min(pad_width/2, pad_height/2));
+                    const auto r = std::min(default_radius, std::min(pad_width / 2, pad_height / 2));
                     pad.parameter_set[ParameterID::CORNER_RADIUS] = r;
                 }
-
             }
             if (it < 0)
                 pad.placement.set_angle_deg(270);
