@@ -29,14 +29,25 @@ bool ToolPlaceBusRipper::begin_attached()
                 {InToolActionID::EDIT, "select member"},
         });
         bus = &doc.c->get_schematic()->block->buses.at(*r);
+        std::map<const Bus::Member *, size_t> bus_rippers;
 
         for (auto &it : bus->members) {
             bus_members.push_back(&it.second);
+            bus_rippers.emplace(&it.second, 0);
         }
         if (bus_members.size() == 0)
             return false;
+        for (const auto &[sheet_uu, sheet] : doc.c->get_schematic()->sheets) {
+            for (const auto &[uu, rip] : sheet.bus_rippers) {
+                if (bus_rippers.count(rip.bus_member.ptr) && rip.bus == bus) {
+                    bus_rippers.at(rip.bus_member.ptr)++;
+                }
+            }
+        }
         std::sort(bus_members.begin(), bus_members.end(),
                   [](auto a, auto b) { return strcmp_natural(a->name, b->name) < 0; });
+        std::stable_sort(bus_members.begin(), bus_members.end(),
+                         [&bus_rippers](auto a, auto b) { return bus_rippers.at(a) < bus_rippers.at(b); });
         return true;
     }
     else {
