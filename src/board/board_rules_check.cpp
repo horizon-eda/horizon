@@ -269,7 +269,8 @@ RulesCheckResult BoardRules::check_clearance_copper(const Board &brd, RulesCheck
                 }
                 else if (layer == it.first.layer && it.first.net != it_other.first.net
                          && it.first.type != PatchType::OTHER && it.first.type != PatchType::TEXT
-                         && it_other.first.type == PatchType::HOLE_PTH) {
+                         && it_other.first.type == PatchType::HOLE_PTH
+                         && (BoardLayers::is_copper(it_other.first.layer) || it_other.first.layer == 10000)) {
                     // ignore layer of plated holes, as it's expected to be different from current layer
                     std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey> k = {it.first, it_other.first};
                     auto k2 = k;
