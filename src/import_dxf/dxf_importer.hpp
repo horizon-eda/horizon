@@ -17,7 +17,7 @@ public:
     std::set<class Line *> lines;
     std::set<class Arc *> arcs;
 
-    enum class UnsupportedType { CIRCLE, ELLIPSE, SPLINE };
+    enum class UnsupportedType { ELLIPSE, SPLINE };
 
     const std::map<UnsupportedType, unsigned int> &get_items_unsupported() const;
 

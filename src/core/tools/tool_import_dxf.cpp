@@ -45,9 +45,6 @@ ToolResponse ToolImportDXF::begin(const ToolArgs &args)
                 for (const auto &it : unsupported) {
                     s += std::to_string(it.second) + " ";
                     switch (it.first) {
-                    case DXFImporter::UnsupportedType::CIRCLE:
-                        s += "Circle";
-                        break;
                     case DXFImporter::UnsupportedType::ELLIPSE:
                         s += "Ellipse";
                         break;
