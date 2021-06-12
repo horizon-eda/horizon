@@ -223,7 +223,8 @@ clearance_cu_worker(std::set<std::pair<CanvasPatch::PatchKey, CanvasPatch::Patch
                         }
                         e.location = acc.get();
                         e.comment = patch_type_names.at(p1.type) + "(" + (net1 ? net1->name : "") + ") near "
-                                    + patch_type_names.at(p2.type) + "(" + (net2 ? net2->name : "") + ")";
+                                    + patch_type_names.at(p2.type) + "(" + (net2 ? net2->name : "") + ") on layer "
+                                    + BoardLayers::get_layer_name(p1.layer);
                         e.error_polygons = {ite};
                     }
                 }
