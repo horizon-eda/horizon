@@ -77,6 +77,24 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
             s += "\nVertex: " + std::to_string(it->vertex);
         sel_erase_type(sel, ObjectType::POLYGON_VERTEX);
     }
+    else if (sel_count_type(sel, ObjectType::POLYGON_VERTEX) == 2) {
+        // Display the delta if two verticies are given
+        s += "\n\n<b> 2 " + object_descriptions.at(ObjectType::POLYGON_VERTEX).get_name_for_n(2) + "</b>\n";
+        auto first = sel_find_one(sel, ObjectType::POLYGON_VERTEX);
+        const auto poly = core->get_polygon(first.uuid);
+        std::vector<const Polygon::Vertex *> vertices;
+        for (const auto &iter : sel) {
+            if (iter.type == ObjectType::POLYGON_VERTEX) {
+                vertices.push_back(&poly->vertices.at(iter.vertex));
+            }
+        }
+        assert(vertices.size() == 2);
+        const auto v1 = vertices.at(0);
+        const auto v2 = vertices.at(1);
+        s += "ΔX:" + dim_to_string(std::abs(v1->position.x - v2->position.x)) + "\n";
+        s += "ΔY:" + dim_to_string(std::abs(v1->position.y - v2->position.y));
+        sel_erase_type(sel, ObjectType::POLYGON_VERTEX);
+    }
 
     if (preferences.hud_debug) {
         if (auto it = sel_find_exactly_one(sel, ObjectType::TEXT)) {
