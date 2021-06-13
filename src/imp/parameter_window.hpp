@@ -5,7 +5,7 @@
 #include "util/changeable.hpp"
 #include <array>
 #include <gtkmm.h>
-#include <gtksourceviewmm.h>
+#include <gtksourceview/gtksource.h>
 #include <set>
 namespace horizon {
 
@@ -36,8 +36,10 @@ private:
     Gtk::InfoBar *bar = nullptr;
     Gtk::Label *bar_label = nullptr;
     Gtk::Box *extra_button_box = nullptr;
-    Gsv::View *view = nullptr;
-    Glib::RefPtr<Gsv::Buffer> buffer;
+    GtkSourceView *sview = nullptr;
+    Gtk::TextView *tview = nullptr;
+    GtkSourceBuffer *sbuffer = nullptr;
+    Glib::RefPtr<Gtk::TextBuffer> tbuffer;
     Gtk::HeaderBar *hb = nullptr;
 
     class ParameterSetEditor *parameter_set_editor = nullptr;

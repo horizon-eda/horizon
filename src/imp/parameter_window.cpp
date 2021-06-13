@@ -36,21 +36,23 @@ ParameterWindow::ParameterWindow(Gtk::Window *p, std::string *ppc, ParameterSet 
         tbox->pack_start(*sep, false, false, 0);
     }
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());
-    view = Gtk::manage(new Gsv::View());
-    buffer = view->get_source_buffer();
-    view->set_top_margin(5);
-    view->set_bottom_margin(5);
-    view->set_left_margin(5);
-    view->set_right_margin(5);
-    buffer->begin_not_undoable_action();
-    buffer->set_text(*ppc);
-    buffer->end_not_undoable_action();
-    view->set_monospace(true);
-    buffer->signal_changed().connect([ppc, this] {
-        *ppc = buffer->get_text();
+    sview = GTK_SOURCE_VIEW(gtk_source_view_new());
+    sbuffer = GTK_SOURCE_BUFFER(gtk_text_view_get_buffer(GTK_TEXT_VIEW(sview)));
+    tview = Glib::wrap(GTK_TEXT_VIEW(sview));
+    tbuffer = Glib::wrap(gtk_text_view_get_buffer(GTK_TEXT_VIEW(sview)));
+    tview->set_top_margin(5);
+    tview->set_bottom_margin(5);
+    tview->set_left_margin(5);
+    tview->set_right_margin(5);
+    gtk_source_buffer_begin_not_undoable_action(sbuffer);
+    tbuffer->set_text(*ppc);
+    gtk_source_buffer_end_not_undoable_action(sbuffer);
+    tview->set_monospace(true);
+    tbuffer->signal_changed().connect([ppc, this] {
+        *ppc = tbuffer->get_text();
         s_signal_changed.emit();
     });
-    sc->add(*view);
+    sc->add(*tview);
     tbox->pack_start(*sc, true, true, 0);
     box->pack_start(*tbox, true, true, 0);
 
@@ -106,7 +108,7 @@ void ParameterWindow::add_button(Gtk::Widget *button)
 
 void ParameterWindow::insert_text(const std::string &text)
 {
-    buffer->insert_at_cursor(text);
+    tbuffer->insert_at_cursor(text);
 }
 
 void ParameterWindow::insert_parameter(ParameterID id)

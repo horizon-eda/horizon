@@ -19,7 +19,6 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
-#include <gtksourceviewmm.h>
 #ifdef G_OS_WIN32
 #include <windows.h>
 #endif
@@ -39,7 +38,6 @@ int main(int argc, char *argv[])
 
     gtk_disable_setlocale();
     Gio::init();
-    Gsv::init();
     horizon::PoolManager::init();
     horizon::AutomaticPreferences::get();
 

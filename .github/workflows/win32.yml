@@ -30,7 +30,7 @@ jobs:
           mingw-w64-x86_64-oce
           mingw-w64-x86_64-podofo
           mingw-w64-x86_64-libzip
-          mingw-w64-x86_64-gtksourceviewmm3
+          mingw-w64-x86_64-gtksourceview4
           zip
           make
           git

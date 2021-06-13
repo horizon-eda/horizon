@@ -793,7 +793,7 @@ LIBS_COMMON = sqlite3 libzip
 ifneq ($(OS),Windows_NT)
 	LIBS_COMMON += uuid
 endif
-LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libgit2 libcurl glm libpng gtksourceviewmm-3.0
+LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libgit2 libcurl glm libpng gtksourceview-4
 
 OPTIMIZE = -fdata-sections -ffunction-sections -O3
 DEBUGFLAGS = -g3
@@ -963,7 +963,7 @@ $(BUILDDIR)/gen/help_texts.hpp: scripts/make_help.py src/help_texts.txt
 
 $(BUILDDIR)/horizon-imp: $(OBJ_COMMON) $(OBJ_ROUTER) $(OBJ_OCE) $(OBJ_IMP)
 	$(ECHO) " $@"
-	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(LDFLAGS_OCE) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 gtksourceviewmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libcurl libpng) -lpodofo -lTKHLR -lTKGeomBase -o $@
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(LDFLAGS_OCE) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 gtksourceview-4 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libcurl libpng) -lpodofo -lTKHLR -lTKGeomBase -o $@
 
 $(BUILDDIR)/horizon-pool: $(OBJ_COMMON) $(OBJ_POOL_UTIL)
 	$(ECHO) " $@"

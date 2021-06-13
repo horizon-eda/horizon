@@ -24,7 +24,7 @@ before_build:
     - bash -c "pacman -Syu --noconfirm --ignore=pacman-mirrors"
     - taskkill /f /fi "MODULES eq msys-2.0.dll"
     - bash -c "pacman -Syu --noconfirm --ignore=pacman-mirrors"
-    - bash -c "pacman -S --noconfirm --needed mingw-w64-%MSYS2_ARCH%-{gcc,gtkmm3,boost,sqlite3,toolchain,zeromq,glm,libgit2,oce,podofo,libzip,gtksourceviewmm3} zip make"
+    - bash -c "pacman -S --noconfirm --needed mingw-w64-%MSYS2_ARCH%-{gcc,gtkmm3,boost,sqlite3,toolchain,zeromq,glm,libgit2,oce,podofo,libzip,gtksourceview4} zip make"
 
 build_script:
     - cd %APPVEYOR_BUILD_FOLDER%
