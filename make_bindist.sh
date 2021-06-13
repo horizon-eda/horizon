@@ -100,6 +100,8 @@ LIBS=(
 	libdeflate.dll\
 	libwebp-7.dll\
 	libjbig-0.dll\
+	libgtksourceviewmm-3.0-0.dll\
+	libgtksourceview-3.0-1.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
 )
