@@ -1,15 +1,23 @@
 #include "tool_smash_package_outline.hpp"
 #include "document/idocument_board.hpp"
 #include "board/board.hpp"
+#include "board/board_layers.hpp"
 #include <iostream>
 
 namespace horizon {
+
+static bool can_smash(const Package &pkg)
+{
+    return std::any_of(pkg.polygons.begin(), pkg.polygons.end(),
+                       [](const auto &x) { return x.second.layer == BoardLayers::L_OUTLINE; });
+}
 
 bool ToolSmashPackageOutline::can_begin()
 {
     for (const auto &it : selection) {
         if (it.type == ObjectType::BOARD_PACKAGE) {
-            return doc.b->get_board()->packages.at(it.uuid).omit_outline == false;
+            const auto &pkg = doc.b->get_board()->packages.at(it.uuid);
+            return can_smash(pkg.package) && pkg.omit_outline == false;
         }
     }
     return false;
