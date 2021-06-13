@@ -375,5 +375,7 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
         default:;
         }
     }
+    if (doc.b && !rotate)
+        doc.b->get_board()->update_junction_connections();
 }
 } // namespace horizon
