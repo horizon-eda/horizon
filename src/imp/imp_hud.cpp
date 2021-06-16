@@ -133,7 +133,7 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
     }
 
     // Display the delta if two items of these types are selected
-    for (const ObjectType type: {ObjectType::HOLE, ObjectType::POLYGON_VERTEX}) {
+    for (const ObjectType type : {ObjectType::HOLE, ObjectType::POLYGON_VERTEX}) {
         if (sel_count_type(sel, type) == 2) {
             s += "\n\n<b> 2 " + object_descriptions.at(type).name_pl + "</b>";
             std::vector<Coordi> positions;
