@@ -216,4 +216,15 @@ bool Track::coord_on_line(const Coordi &p) const
     }
     return false;
 }
+
+bool Track::is_parallel_to(const Track &other) const
+{
+    const auto zero = Coordi();
+    const auto v1 = to.get_position() - from.get_position();
+    const auto v2 = other.to.get_position() - other.from.get_position();
+    if (v1 == zero || v2 == zero)
+        return false; // Direction undefined
+    return v1.cross(v2) == 0;
+}
+
 } // namespace horizon
