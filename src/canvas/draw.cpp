@@ -170,7 +170,9 @@ void Canvas::draw_error(const Coordf &center, float sc, const std::string &text,
     Coordf text_pos{x - 5 * sc, y - 1.5f * sc};
     if (tr)
         text_pos = transform.transform(text_pos);
-    draw_text0(text_pos, 0.25_mm, text, get_flip_view() ? 32768 : 0, get_flip_view(), TextOrigin::BASELINE, c);
+    TextOptions opts;
+    opts.flip = get_flip_view();
+    draw_text(text_pos, 0.25_mm, text, get_flip_view() ? 32768 : 0, TextOrigin::BASELINE, c, 0, opts);
 }
 
 std::tuple<Coordf, Coordf, Coordi> Canvas::draw_flag(const Coordf &position, const std::string &txt, int64_t size,
@@ -194,10 +196,9 @@ std::tuple<Coordf, Coordf, Coordi> Canvas::draw_flag(const Coordf &position, con
     }
 
     double enlarge = size / 4;
-    // auto extents = draw_text0)(position+shift, size, txt, orientation,
-    // TextOrigin::CENTER, Color(0,0,0), false);
+
     auto extents =
-            draw_text0(position + shift, size, txt, orientation_to_angle(orientation), false, TextOrigin::CENTER, c);
+            draw_text(position + shift, size, txt, orientation_to_angle(orientation), TextOrigin::CENTER, c, 0, {});
     extents.first -= Coordf(enlarge, enlarge);
     extents.second += Coordf(enlarge, enlarge);
     img_auto_line = img_mode;

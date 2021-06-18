@@ -237,16 +237,21 @@ void CanvasCairo2::draw_text_box(const Placement &q, float width, float height, 
     else if (mode == TextBoxMode::LOWER)
         text_pos.y = -height / 4;
 
-    auto text_bb = draw_text0(text_pos, 1_mm, s, 0, false, TextOrigin::CENTER, ColorP::FROM_LAYER, 10000, text_width,
-                              false, TextData::Font::COMPLEX_ITALIC);
+    TextOptions opts;
+    opts.width = text_width;
+    opts.font = TextData::Font::COMPLEX_ITALIC;
+    opts.draw = false;
+    const auto text_bb = draw_text(text_pos, 1_mm, s, 0, TextOrigin::CENTER, ColorP::FROM_LAYER, 10000, opts);
     float scale_x = (text_bb.second.x - text_bb.first.x) / (float)(width);
     float scale_y = ((text_bb.second.y - text_bb.first.y)) / (float)(height);
     if (mode != TextBoxMode::FULL)
         scale_y *= 2;
     float sc = std::max(scale_x, scale_y) * 1.5;
     text_pos.x += (width) / 2 - (text_bb.second.x - text_bb.first.x) / (2 * sc);
-    draw_text0(p.transform(text_pos), 1_mm / sc, s, get_flip_view() ? (32768 - p.get_angle()) : p.get_angle(),
-               get_flip_view(), TextOrigin::CENTER, color, layer, text_width, true, TextData::Font::COMPLEX_ITALIC);
+    opts.draw = true;
+    opts.flip = get_flip_view();
+    draw_text(p.transform(text_pos), 1_mm / sc, s, get_flip_view() ? (32768 - p.get_angle()) : p.get_angle(),
+              TextOrigin::CENTER, color, layer, opts);
 };
 
 } // namespace horizon

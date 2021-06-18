@@ -7,12 +7,11 @@
 
 namespace horizon {
 
-std::pair<Coordf, Coordf> Canvas::draw_text0(const Coordf &p, float size, const std::string &rtext, int angle,
-                                             bool flip, TextOrigin origin, ColorP color, int layer, uint64_t width,
-                                             bool draw, TextData::Font font, bool center, bool mirror)
+std::pair<Coordf, Coordf> Canvas::draw_text(const Coordf &p, float size, const std::string &rtext, int angle,
+                                            TextOrigin origin, ColorP color, int layer, const TextOptions &opts)
 {
     if (img_mode)
-        img_draw_text(p, size, rtext, angle, flip, origin, layer, width, font, center, mirror);
+        img_draw_text(p, size, rtext, angle, opts.flip, origin, layer, opts.width, opts.font, opts.center, opts.mirror);
     angle = wrap_angle(angle);
     bool backwards = (angle > 16384) && (angle <= 49152);
     float sc = size / 21;
@@ -36,24 +35,24 @@ std::pair<Coordf, Coordf> Canvas::draw_text0(const Coordf &p, float size, const 
     std::string line;
     unsigned int n_lines = std::count(text.begin(), text.end(), '\n');
     unsigned int i_line = 0;
-    float lineskip = size * 1.35 + width;
-    if (mirror) {
+    float lineskip = size * 1.35 + opts.width;
+    if (opts.mirror) {
         lineskip *= -1;
     }
     begin_group(layer);
     while (std::getline(ss, line, '\n')) {
-        const TextData td{line, font};
+        const TextData td{line, opts.font};
 
         Placement tf;
         tf.shift.x = p.x;
         tf.shift.y = p.y;
 
         Placement tr;
-        if (flip)
+        if (opts.flip)
             tr.set_angle(32768 - angle);
         else
             tr.set_angle(angle);
-        if ((backwards ^ mirror) ^ flip)
+        if ((backwards ^ opts.mirror) ^ opts.flip)
             tf.shift += tr.transform(Coordi(0, -lineskip * (n_lines - i_line)));
         else
             tf.shift += tr.transform(Coordi(0, -lineskip * i_line));
@@ -66,8 +65,8 @@ std::pair<Coordf, Coordf> Canvas::draw_text0(const Coordf &p, float size, const 
         else {
             tf.set_angle(angle);
         }
-        tf.mirror = flip;
-        if (center) {
+        tf.mirror = opts.flip;
+        if (opts.center) {
             if (backwards) {
                 xshift += td.xright / 2;
             }
@@ -92,17 +91,17 @@ std::pair<Coordf, Coordf> Canvas::draw_text0(const Coordf &p, float size, const 
             Coordf p1 = tf.transform(o1);
             a = Coordf::min(a, Coordf::min(p0, p1));
             b = Coordf::max(b, Coordf::max(p0, p1));
-            if (draw) {
-                img_line(Coordi(p0.x, p0.y), Coordi(p1.x, p1.y), width, layer, false);
+            if (opts.draw) {
+                img_line(Coordi(p0.x, p0.y), Coordi(p1.x, p1.y), opts.width, layer, false);
                 if (!img_auto_line)
-                    draw_line(p0, p1, color, layer, false, width);
+                    draw_line(p0, p1, color, layer, false, opts.width);
             }
         }
         i_line++;
     }
     end_group();
 
-    Coordf e(width / 2, width / 2);
+    Coordf e(opts.width / 2, opts.width / 2);
     return {a - e, b + e};
 }
 } // namespace horizon
