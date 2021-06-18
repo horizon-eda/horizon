@@ -968,7 +968,11 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
             }
         }
         s += "Total pads: " + std::to_string(n_pads);
-        sel_erase_type(sel, ObjectType::BOARD_PACKAGE);
+
+        // When n == 2 selection is removed when showing delta below
+        if (n != 2) {
+            sel_erase_type(sel, ObjectType::BOARD_PACKAGE);
+        }
     }
     trim(s);
     if (sel_count_type(sel, ObjectType::POLYGON_VERTEX) == 1 || sel_count_type(sel, ObjectType::POLYGON_EDGE) == 1) {
@@ -988,6 +992,43 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
         }
     }
     trim(s);
+
+    // Display the delta if two items of these types are selected
+    for (const ObjectType type : {ObjectType::BOARD_PACKAGE, ObjectType::BOARD_HOLE, ObjectType::VIA}) {
+        if (sel_count_type(sel, type) == 2) {
+            // Already added for packages
+            if (type != ObjectType::BOARD_PACKAGE) {
+                s += "\n\n<b>2 " + object_descriptions.at(type).name_pl + "</b>";
+            }
+            std::vector<Coordi> positions;
+            const auto &brd = *core_board.get_board();
+            for (const auto &it : sel) {
+                if (it.type == type) {
+                    if (type == ObjectType::BOARD_HOLE) {
+                        const auto &hole = &brd.holes.at(it.uuid);
+                        positions.push_back(hole->placement.shift);
+                    }
+                    else if (type == ObjectType::VIA) {
+                        const auto &via = &brd.vias.at(it.uuid);
+                        positions.push_back(via->junction->position);
+                    }
+                    else if (type == ObjectType::BOARD_PACKAGE) {
+                        const auto &package = &brd.packages.at(it.uuid);
+                        positions.push_back(package->placement.shift);
+                    }
+                    else {
+                        assert(false); // unreachable
+                    }
+                }
+            }
+            assert(positions.size() == 2);
+            const auto delta = positions.at(1) - positions.at(0);
+            s += "\n" + coord_to_string(delta, true);
+            sel_erase_type(sel, type);
+        }
+    }
+    trim(s);
+
     return s;
 }
 
