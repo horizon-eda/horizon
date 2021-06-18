@@ -29,6 +29,7 @@ public:
     uint64_t size = 1.5_mm;
     uint64_t width = 0;
     int layer = 0;
+    bool allow_upside_down = false;
     std::string text_override;
 
     /**

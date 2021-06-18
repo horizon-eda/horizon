@@ -13,7 +13,7 @@ std::pair<Coordf, Coordf> Canvas::draw_text(const Coordf &p, float size, const s
     if (img_mode)
         img_draw_text(p, size, rtext, angle, opts.flip, origin, layer, opts.width, opts.font, opts.center, opts.mirror);
     angle = wrap_angle(angle);
-    bool backwards = (angle > 16384) && (angle <= 49152);
+    bool backwards = (angle > 16384) && (angle <= 49152) && !opts.allow_upside_down;
     float sc = size / 21;
     float yshift = 0;
     switch (origin) {

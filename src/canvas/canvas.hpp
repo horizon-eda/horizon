@@ -166,6 +166,7 @@ protected:
         bool draw = true;
         TextData::Font font = TextData::Font::SIMPLEX;
         bool center = false;
+        bool allow_upside_down = false;
     };
     std::pair<Coordf, Coordf> draw_text(const Coordf &p, float size, const std::string &rtext, int angle,
                                         TextOrigin origin, ColorP color, int layer, const TextOptions &opts);

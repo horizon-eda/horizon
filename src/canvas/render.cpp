@@ -664,6 +664,7 @@ void Canvas::render(const Text &text, bool interactive, ColorP co)
     opts.mirror = transform.mirror;
     opts.font = text.font;
     opts.width = text.width;
+    opts.allow_upside_down = text.allow_upside_down;
 
     const auto extents = draw_text(transform.shift, text.size, text.overridden ? text.text_override : text.text, angle,
                                    text.origin, co, text.layer, opts);

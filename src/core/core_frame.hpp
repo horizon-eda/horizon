@@ -30,6 +30,9 @@ public:
         return frame.version;
     }
 
+    bool get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID property,
+                           class PropertyMeta &meta) override;
+
 private:
     std::map<UUID, Polygon> *get_polygon_map() override;
     std::map<UUID, Junction> *get_junction_map() override;
