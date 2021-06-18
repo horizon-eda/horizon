@@ -131,8 +131,8 @@ void Canvas::render(const PowerSymbol &sym)
         }
 
         if (sym.junction->net->power_symbol_name_visible)
-            draw_text0(sym.junction->position + text_offset, 1.5_mm, sym.junction->net->name, text_angle, false,
-                       TextOrigin::CENTER, c, 0);
+            draw_text(sym.junction->position + text_offset, 1.5_mm, sym.junction->net->name, text_angle,
+                      TextOrigin::CENTER, c, 0, {});
     } break;
 
     case Net::PowerSymbolStyle::DOT:
@@ -183,8 +183,8 @@ void Canvas::render(const PowerSymbol &sym)
         }
 
         if (sym.junction->net->power_symbol_name_visible)
-            draw_text0(sym.junction->position + text_offset, 1.5_mm, sym.junction->net->name, text_angle, false,
-                       TextOrigin::CENTER, c, 0);
+            draw_text(sym.junction->position + text_offset, 1.5_mm, sym.junction->net->name, text_angle,
+                      TextOrigin::CENTER, c, 0, {});
     }
     }
 
@@ -421,21 +421,23 @@ void Canvas::render(const SymbolPin &pin, bool interactive, ColorP co)
                                 && (pin_orientation == Orientation::LEFT || pin_orientation == Orientation::RIGHT));
 
         if (draw_in_line) {
-            draw_text0(p_name, 1.5_mm, pin.name, orientation_to_angle(name_orientation), false, TextOrigin::CENTER,
-                       c_name, 0);
+            draw_text(p_name, 1.5_mm, pin.name, orientation_to_angle(name_orientation), TextOrigin::CENTER, c_name, 0,
+                      {});
         }
         else { // draw perp
             Placement tr;
             tr.set_angle(orientation_to_angle(pin_orientation));
             auto shift = tr.transform(Coordi(-1_mm, 0));
-            draw_text0(p_name + shift, 1.5_mm, pin.name, orientation_to_angle(name_orientation) + 16384, false,
-                       TextOrigin::CENTER, c_name, 0, 0, true, TextData::Font::SIMPLEX, true);
+            TextOptions opts;
+            opts.center = true;
+            draw_text(p_name + shift, 1.5_mm, pin.name, orientation_to_angle(name_orientation) + 16384,
+                      TextOrigin::CENTER, c_name, 0, opts);
         }
     }
     std::pair<Coordf, Coordf> pad_extents;
     if (interactive || pin.pad_visible) {
-        pad_extents = draw_text0(p_pad, 0.75_mm, pin.pad, orientation_to_angle(pad_orientation), false,
-                                 TextOrigin::BASELINE, c_pad, 0);
+        pad_extents = draw_text(p_pad, 0.75_mm, pin.pad, orientation_to_angle(pad_orientation), TextOrigin::BASELINE,
+                                c_pad, 0, {});
     }
 
     transform_save();
@@ -573,7 +575,7 @@ void Canvas::render(const SymbolPin &pin, bool interactive, ColorP co)
 
     case SymbolPin::ConnectorStyle::NC:
         draw_cross(p0, 0.25_mm, c_main, 0, false);
-        draw_text0(p_nc, 1.5_mm, "NC", orientation_to_angle(nc_orientation), false, TextOrigin::CENTER, c_pin, 0);
+        draw_text(p_nc, 1.5_mm, "NC", orientation_to_angle(nc_orientation), TextOrigin::CENTER, c_pin, 0, {});
         break;
 
     case SymbolPin::ConnectorStyle::NONE:
@@ -656,8 +658,15 @@ void Canvas::render(const Text &text, bool interactive, ColorP co)
     img_patch_type(PatchType::TEXT);
     triangle_type_current = TriangleInfo::Type::TEXT;
     object_ref_push(ObjectType::TEXT, text.uuid);
-    auto extents = draw_text0(transform.shift, text.size, text.overridden ? text.text_override : text.text, angle, rev,
-                              text.origin, co, text.layer, text.width, true, text.font, false, transform.mirror);
+
+    TextOptions opts;
+    opts.flip = rev;
+    opts.mirror = transform.mirror;
+    opts.font = text.font;
+    opts.width = text.width;
+
+    const auto extents = draw_text(transform.shift, text.size, text.overridden ? text.text_override : text.text, angle,
+                                   text.origin, co, text.layer, opts);
     triangle_type_current = TriangleInfo::Type::NONE;
     object_ref_pop();
     // img_text_extents(text, extents);
@@ -709,8 +718,8 @@ void Canvas::render(const NetLabel &label)
                            extents.second);
     }
     else {
-        auto extents = draw_text0(label.junction->position, label.size, txt, orientation_to_angle(label.orientation),
-                                  false, TextOrigin::BASELINE, c);
+        const auto extents = draw_text(label.junction->position, label.size, txt,
+                                       orientation_to_angle(label.orientation), TextOrigin::BASELINE, c, 0, {});
         selectables.append(label.uuid, ObjectType::NET_LABEL, label.junction->position + Coordi(0, 1000000),
                            extents.first, extents.second);
     }
@@ -754,8 +763,8 @@ void Canvas::render(const BusRipper &ripper)
     default:
         angle = 0;
     }
-    auto extents = draw_text0(connector_pos + Coordi(0, 0.5_mm), 1.5_mm, ripper.bus_member->name, angle, false,
-                              TextOrigin::BASELINE, c);
+    const auto extents = draw_text(connector_pos + Coordi(0, 0.5_mm), 1.5_mm, ripper.bus_member->name, angle,
+                                   TextOrigin::BASELINE, c, 0, {});
     targets.emplace_back(ripper.uuid, ObjectType::BUS_RIPPER, connector_pos);
     selectables.append(ripper.uuid, ObjectType::BUS_RIPPER, connector_pos, extents.first, extents.second);
 }
@@ -1402,7 +1411,9 @@ void Canvas::render(const class Dimension &dim)
         auto length = sqrt(v.mag_sq());
         auto s = dim_to_string(length, false);
 
-        auto text_bb = draw_text0({0, 0}, dim.label_size, s, 0, false, TextOrigin::CENTER, co, 10000, 0, false);
+        TextOptions opts;
+        opts.draw = false;
+        const auto text_bb = draw_text({0, 0}, dim.label_size, s, 0, TextOrigin::CENTER, co, 10000, opts);
         auto text_width = std::abs(text_bb.second.x - text_bb.first.x);
 
         Coordf text_pos = (q0 + v / 2) - (vn * text_width / 2);
@@ -1438,9 +1449,11 @@ void Canvas::render(const class Dimension &dim)
         transform_restore();
 
         const int angle_i = angle_from_rad(angle);
-        auto real_text_bb = draw_text0(Coordi(text_pos.x, text_pos.y), dim.label_size, s,
-                                       get_flip_view() ? (32768 - angle_i) : angle_i, get_flip_view(),
-                                       TextOrigin::CENTER, co, 10000, 0, true);
+        TextOptions opts2;
+        opts2.flip = get_flip_view();
+        const auto real_text_bb =
+                draw_text(Coordi(text_pos.x, text_pos.y), dim.label_size, s,
+                          get_flip_view() ? (32768 - angle_i) : angle_i, TextOrigin::CENTER, co, 10000, opts2);
 
         selectables.append(dim.uuid, ObjectType::DIMENSION, q0, real_text_bb.first, real_text_bb.second, 2);
         targets.emplace_back(dim.uuid, ObjectType::DIMENSION, Coordi(q0.x, q0.y), 2);

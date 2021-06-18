@@ -158,10 +158,17 @@ protected:
                                         int layer, uint64_t width);
     void draw_arc0(const Coord<float> &center, float radius0, float a0, float a1, ColorP color, int layer,
                    uint64_t width);
-    std::pair<Coordf, Coordf> draw_text0(const Coordf &p, float size, const std::string &rtext, int angle, bool flip,
-                                         TextOrigin origin, ColorP color, int layer = 10000, uint64_t width = 0,
-                                         bool draw = true, TextData::Font font = TextData::Font::SIMPLEX,
-                                         bool center = false, bool mirror = false);
+
+    struct TextOptions {
+        uint64_t width = 0;
+        bool flip = false;
+        bool mirror = false;
+        bool draw = true;
+        TextData::Font font = TextData::Font::SIMPLEX;
+        bool center = false;
+    };
+    std::pair<Coordf, Coordf> draw_text(const Coordf &p, float size, const std::string &rtext, int angle,
+                                        TextOrigin origin, ColorP color, int layer, const TextOptions &opts);
 
     virtual void draw_bitmap_text(const Coordf &p, float scale, const std::string &rtext, int angle, ColorP color,
                                   int layer)
