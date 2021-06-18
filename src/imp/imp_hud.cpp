@@ -133,7 +133,7 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
     }
 
     // Display the delta if two items of these types are selected
-    for (const ObjectType type : {ObjectType::HOLE, ObjectType::POLYGON_VERTEX}) {
+    for (const ObjectType type : {ObjectType::HOLE, ObjectType::POLYGON_VERTEX, ObjectType::JUNCTION}) {
         if (sel_count_type(sel, type) == 2) {
             s += "\n\n<b> 2 " + object_descriptions.at(type).name_pl + "</b>";
             std::vector<Coordi> positions;
@@ -147,6 +147,10 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
                     else if (type == ObjectType::HOLE) {
                         const auto hole = core->get_hole(iter.uuid);
                         positions.push_back(hole->placement.shift);
+                    }
+                    else if (type == ObjectType::JUNCTION) {
+                        const auto junction = core->get_junction(iter.uuid);
+                        positions.push_back(junction->position);
                     }
                     else {
                         assert(false); // unreachable
