@@ -919,12 +919,14 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
              + "</b>\n";
         std::set<int> layers;
         std::set<const Net *> nets;
+        std::vector<const Track *> tracks;
         int64_t length = 0;
         const Track *the_track = nullptr;
         for (const auto &it : sel) {
             if (it.type == ObjectType::TRACK) {
                 const auto &tr = core_board.get_board()->tracks.at(it.uuid);
                 the_track = &tr;
+                tracks.emplace_back(the_track);
                 layers.insert(tr.layer);
                 length += sqrt((tr.from.get_position() - tr.to.get_position()).mag_sq());
                 if (tr.net)
@@ -936,7 +938,21 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
             s += core->get_layer_provider().get_layers().at(layer).name + " ";
         }
         s += "\nTotal length: " + dim_to_string(length, false);
-        if (sel_count_type(sel, ObjectType::TRACK) == 1) {
+
+        if (n == 2) {
+            // Show spacing between 2 parallel tracks
+            const auto t1 = *tracks.at(0);
+            const auto t2 = *tracks.at(1);
+            if (t1.is_parallel_to(t2)) {
+                const Coordd u = t1.to.get_position() - t1.from.get_position();
+                const Coordd v = u / sqrt(u.mag_sq());
+                const Coordd w = t2.from.get_position() - t1.from.get_position();
+                const int64_t offset = v.cross(w);
+                s += "\nSpacing: " + dim_to_string(offset, false);
+            }
+        }
+
+        if (n == 1) {
             s += "\n" + get_hud_text_for_net(the_track->net);
         }
         else {
