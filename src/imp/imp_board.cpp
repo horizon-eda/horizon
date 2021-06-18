@@ -998,7 +998,7 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
         if (sel_count_type(sel, type) == 2) {
             // Already added for packages
             if (type != ObjectType::BOARD_PACKAGE) {
-                s += "\n\n<b> 2 " + object_descriptions.at(type).name_pl + "</b>";
+                s += "\n\n<b>2 " + object_descriptions.at(type).name_pl + "</b>";
             }
             std::vector<Coordi> positions;
             const auto &brd = *core_board.get_board();
