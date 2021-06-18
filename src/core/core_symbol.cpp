@@ -236,7 +236,22 @@ bool CoreSymbol::set_property(ObjectType type, const UUID &uu, ObjectProperty::I
 
 bool CoreSymbol::get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID property, PropertyMeta &meta)
 {
-    return Core::get_property_meta(type, uu, property, meta);
+    if (Core::get_property_meta(type, uu, property, meta))
+        return true;
+    switch (type) {
+    case ObjectType::TEXT:
+        switch (property) {
+        case ObjectProperty::ID::ALLOW_UPSIDE_DOWN:
+            meta.is_visible = false;
+            return true;
+        default:
+            return false;
+        }
+        break;
+    default:
+        return false;
+    }
+    return false;
 }
 
 std::string CoreSymbol::get_display_name(ObjectType type, const UUID &uu)

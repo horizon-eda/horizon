@@ -145,10 +145,11 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                   {ObjectProperty::ID::POSITION_Y, {ObjectProperty::Type::DIM, "Position Y", 5}},
                   {ObjectProperty::ID::ANGLE, {ObjectProperty::Type::ANGLE, "Angle", 6}},
                   {ObjectProperty::ID::MIRROR, {ObjectProperty::Type::BOOL, "Mirror", 7}},
+                  {ObjectProperty::ID::ALLOW_UPSIDE_DOWN, {ObjectProperty::Type::BOOL, "Allow upside-down", 8}},
                   {ObjectProperty::ID::FONT,
                    {ObjectProperty::Type::ENUM,
                     "Font",
-                    8,
+                    9,
                     {
                             {static_cast<int>(TextData::Font::SIMPLEX), "Simplex"},
                             {static_cast<int>(TextData::Font::DUPLEX), "Duplex"},

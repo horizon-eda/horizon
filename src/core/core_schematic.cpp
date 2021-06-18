@@ -520,6 +520,16 @@ bool CoreSchematic::get_property_meta(ObjectType type, const UUID &uu, ObjectPro
         }
         break;
 
+    case ObjectType::TEXT:
+        switch (property) {
+        case ObjectProperty::ID::ALLOW_UPSIDE_DOWN:
+            meta.is_visible = false;
+            return true;
+        default:
+            return false;
+        }
+        break;
+
     default:
         return false;
     }

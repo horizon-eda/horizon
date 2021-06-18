@@ -1,4 +1,5 @@
 #include "core_frame.hpp"
+#include "core_properties.hpp"
 #include "util/util.hpp"
 #include "nlohmann/json.hpp"
 #include <giomm/file.h>
@@ -50,6 +51,26 @@ std::map<UUID, Line> *CoreFrame::get_line_map()
 std::map<UUID, Arc> *CoreFrame::get_arc_map()
 {
     return &frame.arcs;
+}
+
+bool CoreFrame::get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID property, PropertyMeta &meta)
+{
+    if (Core::get_property_meta(type, uu, property, meta))
+        return true;
+    switch (type) {
+    case ObjectType::TEXT:
+        switch (property) {
+        case ObjectProperty::ID::ALLOW_UPSIDE_DOWN:
+            meta.is_visible = false;
+            return true;
+        default:
+            return false;
+        }
+        break;
+    default:
+        return false;
+    }
+    return false;
 }
 
 void CoreFrame::rebuild(bool from_undo)

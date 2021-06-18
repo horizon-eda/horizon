@@ -132,6 +132,10 @@ bool Core::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
             dynamic_cast<PropertyValueInt &>(value).value = static_cast<int>(text->font);
             return true;
 
+        case ObjectProperty::ID::ALLOW_UPSIDE_DOWN:
+            dynamic_cast<PropertyValueBool &>(value).value = text->allow_upside_down;
+            return true;
+
         default:
             return false;
         }
@@ -340,6 +344,10 @@ bool Core::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
 
         case ObjectProperty::ID::FONT:
             text->font = static_cast<TextData::Font>(dynamic_cast<const PropertyValueInt &>(value).value);
+            break;
+
+        case ObjectProperty::ID::ALLOW_UPSIDE_DOWN:
+            text->allow_upside_down = dynamic_cast<const PropertyValueBool &>(value).value;
             break;
 
         default:
