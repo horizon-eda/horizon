@@ -46,8 +46,8 @@ KeyMatchResult key_sequence_match(const KeySequence &keys_current, const KeySequ
 
 class ActionConnection {
 public:
-    ActionConnection(ActionID aid, ToolID tid, std::function<void(const ActionConnection &)> c)
-        : action_id(aid), tool_id(tid), cb(c)
+    ActionConnection(ActionToolID id, std::function<void(const ActionConnection &)> c)
+        : action_id(id.first), tool_id(id.second), cb(c)
     {
     }
 

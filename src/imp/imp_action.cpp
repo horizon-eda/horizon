@@ -259,8 +259,7 @@ ActionConnection &ImpBase::connect_action(ActionID action_id, ToolID tool_id,
         throw std::runtime_error("invalid action");
     }
     auto &act = action_connections
-                        .emplace(std::piecewise_construct, std::forward_as_tuple(key),
-                                 std::forward_as_tuple(action_id, tool_id, cb))
+                        .emplace(std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(key, cb))
                         .first->second;
 
     return act;
