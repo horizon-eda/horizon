@@ -41,6 +41,9 @@ std::string key_sequence_to_string_short(const KeySequence &keys);
 
 std::string key_sequences_to_string(const std::vector<KeySequence> &seqs);
 
+enum class KeyMatchResult { NONE, PREFIX, COMPLETE };
+KeyMatchResult key_sequence_match(const KeySequence &keys_current, const KeySequence &keys_from_action);
+
 class ActionConnection {
 public:
     ActionConnection(ActionID aid, ToolID tid, std::function<void(const ActionConnection &)> c)

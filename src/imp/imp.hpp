@@ -256,8 +256,7 @@ private:
     Gtk::MenuItem *create_context_menu_item(ActionToolID act);
 
     KeySequence keys_current;
-    enum class MatchResult { NONE, PREFIX, COMPLETE };
-    MatchResult keys_match(const KeySequence &keys) const;
+    KeyMatchResult keys_match(const KeySequence &keys) const;
     bool handle_action_key(const GdkEventKey *ev);
     void handle_tool_action(const ActionConnection &conn);
     void handle_select_polygon(const ActionConnection &a);

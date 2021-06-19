@@ -19,16 +19,9 @@ bool ImpBase::handle_key_press(const GdkEventKey *key_event)
     return false;
 }
 
-ImpBase::MatchResult ImpBase::keys_match(const KeySequence &keys) const
+KeyMatchResult ImpBase::keys_match(const KeySequence &keys) const
 {
-    const auto minl = std::min(keys_current.size(), keys.size());
-    const bool match = minl && std::equal(keys_current.begin(), keys_current.begin() + minl, keys.begin());
-    if (!match)
-        return MatchResult::NONE;
-    else if (keys_current.size() == keys.size())
-        return MatchResult::COMPLETE;
-    else
-        return MatchResult::PREFIX;
+    return key_sequence_match(keys_current, keys);
 }
 
 class KeyConflictDialog : public Gtk::MessageDialog {
@@ -132,8 +125,8 @@ bool ImpBase::handle_action_key(const GdkEventKey *ev)
             keys_current.emplace_back(keyval, mod);
         }
         auto in_tool_actions = core->get_tool_actions();
-        std::map<InToolActionID, std::pair<MatchResult, KeySequence>> in_tool_actions_matched;
-        std::map<ActionConnection *, std::pair<MatchResult, KeySequence>> connections_matched;
+        std::map<InToolActionID, std::pair<KeyMatchResult, KeySequence>> in_tool_actions_matched;
+        std::map<ActionConnection *, std::pair<KeyMatchResult, KeySequence>> connections_matched;
         auto selection = canvas->get_selection();
         update_action_sensitivity();
         for (auto &it : action_connections) {
@@ -148,7 +141,7 @@ bool ImpBase::handle_action_key(const GdkEventKey *ev)
                 }
                 if (can_begin) {
                     for (const auto &it2 : it.second.key_sequences) {
-                        if (const auto m = keys_match(it2); m != MatchResult::NONE) {
+                        if (const auto m = keys_match(it2); m != KeyMatchResult::NONE) {
                             connections_matched.emplace(std::piecewise_construct, std::forward_as_tuple(&it.second),
                                                         std::forward_as_tuple(m, it2));
                         }
@@ -160,7 +153,7 @@ bool ImpBase::handle_action_key(const GdkEventKey *ev)
             for (const auto &[action, seqs] : in_tool_key_sequeces_preferences.keys) {
                 if (in_tool_actions.count(action)) {
                     for (const auto &seq : seqs) {
-                        if (const auto m = keys_match(seq); m != MatchResult::NONE)
+                        if (const auto m = keys_match(seq); m != KeyMatchResult::NONE)
                             in_tool_actions_matched.emplace(std::piecewise_construct, std::forward_as_tuple(action),
                                                             std::forward_as_tuple(m, seq));
                     }
@@ -201,14 +194,14 @@ bool ImpBase::handle_action_key(const GdkEventKey *ev)
             bool have_conflict = false;
             for (const auto &[conn, it] : connections_matched) {
                 const auto &[res, seq] = it;
-                if (res == MatchResult::COMPLETE) {
+                if (res == KeyMatchResult::COMPLETE) {
                     have_conflict = true;
                 }
                 conflicts.emplace_back(action_catalog.at(std::make_pair(conn->action_id, conn->tool_id)).name, seq);
             }
             for (const auto &[act, it] : in_tool_actions_matched) {
                 const auto &[res, seq] = it;
-                if (res == MatchResult::COMPLETE) {
+                if (res == KeyMatchResult::COMPLETE) {
                     have_conflict = true;
                 }
                 conflicts.emplace_back(in_tool_action_catalog.at(act).name + " (in-tool action)", seq);

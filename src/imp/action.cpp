@@ -75,6 +75,18 @@ std::string key_sequences_to_string(const std::vector<KeySequence> &seqs)
     return s;
 }
 
+KeyMatchResult key_sequence_match(const KeySequence &keys_current, const KeySequence &keys_from_action)
+{
+    const auto minl = std::min(keys_current.size(), keys_from_action.size());
+    const bool match = minl && std::equal(keys_current.begin(), keys_current.begin() + minl, keys_from_action.begin());
+    if (!match)
+        return KeyMatchResult::NONE;
+    else if (keys_current.size() == keys_from_action.size())
+        return KeyMatchResult::COMPLETE;
+    else
+        return KeyMatchResult::PREFIX;
+}
+
 ActionToolID make_action(ActionID id)
 {
     return {id, ToolID::NONE};
