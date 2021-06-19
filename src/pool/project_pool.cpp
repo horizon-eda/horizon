@@ -27,7 +27,7 @@ void ProjectPool::create_directories(const std::string &base_path)
 
 static std::string prepend_model_filename(const UUID &pool_uuid, const std::string &filename)
 {
-    return Glib::build_filename("3d_models", "cache", (std::string)pool_uuid, filename);
+    return "3d_models/cache" + (std::string)pool_uuid + "/" + filename;
 }
 
 std::map<UUID, std::string> ProjectPool::patch_package(json &j, const UUID &pool_uuid)
