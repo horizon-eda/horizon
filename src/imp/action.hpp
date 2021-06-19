@@ -32,6 +32,7 @@ enum class ActionGroup {
     SEARCH,
     EXPORT_IMPORT,
     TUNING,
+    VIEW_3D,
 };
 
 typedef std::vector<std::pair<unsigned int, GdkModifierType>> KeySequence;

@@ -20,7 +20,7 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Help", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::VIEW_ALL, ToolID::NONE},
-         {"View all", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_IN_TOOL}},
+         {"View all", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE_3D, ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::FLIP_VIEW, ToolID::NONE},
          {"Flip view", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
@@ -850,27 +850,27 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Add text", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::PAN_LEFT, ToolID::NONE},
-         {"Pan left", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+         {"Pan left", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE_3D,
           ActionCatalogItem::FLAGS_NO_POPOVER | ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::PAN_RIGHT, ToolID::NONE},
-         {"Pan right", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+         {"Pan right", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE_3D,
           ActionCatalogItem::FLAGS_NO_POPOVER | ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::PAN_UP, ToolID::NONE},
-         {"Pan up", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+         {"Pan up", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE_3D,
           ActionCatalogItem::FLAGS_NO_POPOVER | ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::PAN_DOWN, ToolID::NONE},
-         {"Pan down", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+         {"Pan down", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE_3D,
           ActionCatalogItem::FLAGS_NO_POPOVER | ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::ZOOM_IN, ToolID::NONE},
-         {"Zoom in", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+         {"Zoom in", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE_3D,
           ActionCatalogItem::FLAGS_NO_POPOVER | ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::ZOOM_OUT, ToolID::NONE},
-         {"Zoom out", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+         {"Zoom out", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE_3D,
           ActionCatalogItem::FLAGS_NO_POPOVER | ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::TOOL, ToolID::PLACE_DECAL},
@@ -896,11 +896,13 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::ROTATE_VIEW_LEFT, ToolID::NONE},
-         {"Rotate view left", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
+         {"Rotate view left", ActionGroup::VIEW,
+          ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD | ActionCatalogItem::AVAILABLE_IN_3D,
           ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::ROTATE_VIEW_RIGHT, ToolID::NONE},
-         {"Rotate view right", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
+         {"Rotate view right", ActionGroup::VIEW,
+          ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD | ActionCatalogItem::AVAILABLE_IN_3D,
           ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::ROTATE_VIEW_RESET, ToolID::NONE},
@@ -928,6 +930,32 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
 
         {{ActionID::TOOL, ToolID::PLACE_DOT},
          {"Place dot", ActionGroup::SYMBOL, ActionCatalogItem::AVAILABLE_IN_SYMBOL, ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::VIEW_3D_PERSP, ToolID::NONE},
+         {"Perspective projection", ActionGroup::VIEW_3D, ActionCatalogItem::AVAILABLE_IN_3D,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::VIEW_3D_ORTHO, ToolID::NONE},
+         {"Orthographic projection", ActionGroup::VIEW_3D, ActionCatalogItem::AVAILABLE_IN_3D,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::VIEW_3D_TOP, ToolID::NONE},
+         {"View top", ActionGroup::VIEW_3D, ActionCatalogItem::AVAILABLE_IN_3D, ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::VIEW_3D_BOTTOM, ToolID::NONE},
+         {"View bottom", ActionGroup::VIEW_3D, ActionCatalogItem::AVAILABLE_IN_3D, ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::VIEW_3D_LEFT, ToolID::NONE},
+         {"View left", ActionGroup::VIEW_3D, ActionCatalogItem::AVAILABLE_IN_3D, ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::VIEW_3D_RIGHT, ToolID::NONE},
+         {"View right", ActionGroup::VIEW_3D, ActionCatalogItem::AVAILABLE_IN_3D, ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::VIEW_3D_FRONT, ToolID::NONE},
+         {"View font", ActionGroup::VIEW_3D, ActionCatalogItem::AVAILABLE_IN_3D, ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::VIEW_3D_BACK, ToolID::NONE},
+         {"View back", ActionGroup::VIEW_3D, ActionCatalogItem::AVAILABLE_IN_3D, ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -950,6 +978,7 @@ const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
         {ActionGroup::EXPORT_IMPORT, "Export / import"},
         {ActionGroup::SEARCH, "Search"},
         {ActionGroup::TUNING, "Tuning"},
+        {ActionGroup::VIEW_3D, "3D Preview"},
 
 };
 
@@ -1055,6 +1084,14 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(ROTATE_VIEW),
         ACTION_LUT_ITEM(NEXT_SHEET),
         ACTION_LUT_ITEM(PREV_SHEET),
+        ACTION_LUT_ITEM(VIEW_3D_PERSP),
+        ACTION_LUT_ITEM(VIEW_3D_ORTHO),
+        ACTION_LUT_ITEM(VIEW_3D_FRONT),
+        ACTION_LUT_ITEM(VIEW_3D_BACK),
+        ACTION_LUT_ITEM(VIEW_3D_TOP),
+        ACTION_LUT_ITEM(VIEW_3D_BOTTOM),
+        ACTION_LUT_ITEM(VIEW_3D_LEFT),
+        ACTION_LUT_ITEM(VIEW_3D_RIGHT),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

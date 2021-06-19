@@ -6,6 +6,8 @@
 #include "pool/part.hpp"
 #include "util/str_util.hpp"
 #include "axes_lollipop.hpp"
+#include "imp/action_catalog.hpp"
+#include "imp/actions.hpp"
 #include "preferences/preferences.hpp"
 
 namespace horizon {
@@ -34,16 +36,22 @@ void View3DWindow::bind_color_button(Gtk::ColorButton *color_button, FnSetColor 
     });
 }
 
-class ViewInfo {
+struct ViewInfo {
 public:
-    ViewInfo(const std::string &i, const std::string &t, double a, double e)
-        : icon(i), tooltip(t), azimuth(a), elevation(e)
-    {
-    }
-    const std::string icon;
-    const std::string tooltip;
-    const float azimuth;
-    const float elevation;
+    ActionID action;
+    std::string icon;
+    std::string tooltip;
+    float azimuth;
+    float elevation;
+};
+
+static const std::vector<ViewInfo> views = {
+        {ActionID::VIEW_3D_FRONT, "front", "Front", 270., 0.},
+        {ActionID::VIEW_3D_BACK, "back", "Back", 90., 0.},
+        {ActionID::VIEW_3D_TOP, "top", "Top", 270., 89.99},
+        {ActionID::VIEW_3D_BOTTOM, "bottom", "Bottom", 270., -89.99},
+        {ActionID::VIEW_3D_RIGHT, "right", "Right", 0., 0.},
+        {ActionID::VIEW_3D_LEFT, "left", "Left", 180., 0.},
 };
 
 View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const class Board &bo,
@@ -74,9 +82,7 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     {
         Gtk::Box *view_buttons_box;
         GET_WIDGET(view_buttons_box);
-        std::vector<ViewInfo> views = {{"front", "Front", 270., 0.}, {"back", "Back", 90., 0.},
-                                       {"top", "Top", 270., 89.99},  {"bottom", "Bottom", 270., -89.99},
-                                       {"right", "Right", 0., 0.},   {"left", "Left", 180., 0.}};
+
         for (const auto &it : views) {
             auto b = Gtk::manage(new Gtk::Button);
             b->set_image_from_icon_name("view-3d-" + it.icon + "-symbolic", Gtk::ICON_SIZE_BUTTON);
@@ -209,9 +215,10 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
         });
     }
 
-    Gtk::RadioButton *proj_persp_rb;
+
     GET_WIDGET(proj_persp_rb);
-    proj_persp_rb->signal_toggled().connect([this, proj_persp_rb] {
+    GET_WIDGET(proj_ortho_rb);
+    proj_persp_rb->signal_toggled().connect([this] {
         canvas->set_projection(proj_persp_rb->get_active() ? Canvas3D::Projection::PERSP : Canvas3D::Projection::ORTHO);
     });
 
@@ -300,6 +307,39 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
                 },
                 *axes_lollipop));
     }
+
+    canvas->signal_key_press_event().connect(sigc::mem_fun(*this, &View3DWindow::handle_action_key));
+    signal_key_press_event().connect([this](GdkEventKey *ev) {
+        if (canvas->has_focus()) {
+            return false; // handled by canvas
+        }
+        else {
+            return handle_action_key(ev);
+        }
+    });
+
+    connect_action(ActionID::VIEW_ALL, [this](const auto &conn) { canvas->view_all(); });
+    connect_action(ActionID::PAN_LEFT, sigc::mem_fun(*this, &View3DWindow::handle_pan_action));
+    connect_action(ActionID::PAN_RIGHT, sigc::mem_fun(*this, &View3DWindow::handle_pan_action));
+    connect_action(ActionID::PAN_UP, sigc::mem_fun(*this, &View3DWindow::handle_pan_action));
+    connect_action(ActionID::PAN_DOWN, sigc::mem_fun(*this, &View3DWindow::handle_pan_action));
+
+    connect_action(ActionID::ZOOM_IN, sigc::mem_fun(*this, &View3DWindow::handle_zoom_action));
+    connect_action(ActionID::ZOOM_OUT, sigc::mem_fun(*this, &View3DWindow::handle_zoom_action));
+
+    connect_action(ActionID::ROTATE_VIEW_LEFT, sigc::mem_fun(*this, &View3DWindow::handle_rotate_action));
+    connect_action(ActionID::ROTATE_VIEW_RIGHT, sigc::mem_fun(*this, &View3DWindow::handle_rotate_action));
+
+    connect_action(ActionID::VIEW_3D_FRONT, sigc::mem_fun(*this, &View3DWindow::handle_view_action));
+    connect_action(ActionID::VIEW_3D_BACK, sigc::mem_fun(*this, &View3DWindow::handle_view_action));
+    connect_action(ActionID::VIEW_3D_BOTTOM, sigc::mem_fun(*this, &View3DWindow::handle_view_action));
+    connect_action(ActionID::VIEW_3D_TOP, sigc::mem_fun(*this, &View3DWindow::handle_view_action));
+    connect_action(ActionID::VIEW_3D_LEFT, sigc::mem_fun(*this, &View3DWindow::handle_view_action));
+    connect_action(ActionID::VIEW_3D_RIGHT, sigc::mem_fun(*this, &View3DWindow::handle_view_action));
+
+    connect_action(ActionID::VIEW_3D_ORTHO, sigc::mem_fun(*this, &View3DWindow::handle_proj_action));
+    connect_action(ActionID::VIEW_3D_PERSP, sigc::mem_fun(*this, &View3DWindow::handle_proj_action));
+
 
     GET_WIDGET(main_box);
 }
@@ -391,11 +431,197 @@ void View3DWindow::hud_set_package(const UUID &uu)
     }
 }
 
+bool View3DWindow::handle_action_key(const GdkEventKey *ev)
+{
+    if (ev->is_modifier)
+        return false;
+    if (ev->keyval == GDK_KEY_Escape) {
+        if (keys_current.size() == 0) {
+            s_signal_present_imp.emit();
+            return true;
+        }
+        else {
+            keys_current.clear();
+            return true;
+        }
+    }
+    else {
+        auto display = get_display()->gobj();
+        auto hw_keycode = ev->hardware_keycode;
+        auto state = static_cast<GdkModifierType>(ev->state);
+        auto group = ev->group;
+        guint keyval;
+        GdkModifierType consumed_modifiers;
+        if (gdk_keymap_translate_keyboard_state(gdk_keymap_get_for_display(display), hw_keycode, state, group, &keyval,
+                                                NULL, NULL, &consumed_modifiers)) {
+            auto mod = static_cast<GdkModifierType>((state & (~consumed_modifiers))
+                                                    & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK));
+            keys_current.emplace_back(keyval, mod);
+        }
+        std::map<ActionConnection *, std::pair<KeyMatchResult, KeySequence>> connections_matched;
+        for (auto &it : action_connections) {
+            auto k = std::make_pair(it.second.action_id, it.second.tool_id);
+            if (action_catalog.at(k).availability & ActionCatalogItem::AVAILABLE_IN_3D) {
+                bool can_begin = true;
+                if (can_begin) {
+                    for (const auto &it2 : it.second.key_sequences) {
+                        if (const auto m = key_sequence_match(keys_current, it2); m != KeyMatchResult::NONE) {
+                            connections_matched.emplace(std::piecewise_construct, std::forward_as_tuple(&it.second),
+                                                        std::forward_as_tuple(m, it2));
+                        }
+                    }
+                }
+            }
+        }
+
+
+        if (connections_matched.size() == 1) {
+            keys_current.clear();
+            auto conn = connections_matched.begin()->first;
+            trigger_action(conn->action_id);
+            return true;
+        }
+
+        else if (connections_matched.size() > 1) { // still ambigous
+            std::list<std::pair<std::string, KeySequence>> conflicts;
+            bool have_conflict = false;
+            for (const auto &[conn, it] : connections_matched) {
+                const auto &[res, seq] = it;
+                if (res == KeyMatchResult::COMPLETE) {
+                    have_conflict = true;
+                }
+                conflicts.emplace_back(action_catalog.at(std::make_pair(conn->action_id, conn->tool_id)).name, seq);
+            }
+            if (have_conflict) {
+                keys_current.clear();
+                return false;
+            }
+            return true;
+        }
+        else if (connections_matched.size() == 0) {
+            keys_current.clear();
+            return false;
+        }
+        else {
+            return false;
+        }
+    }
+    return false;
+}
+
+void View3DWindow::trigger_action(ActionID action)
+{
+    auto conn = action_connections.at(action);
+    conn.cb(conn);
+}
+
+ActionConnection &View3DWindow::connect_action(ActionID action_id, std::function<void(const ActionConnection &)> cb)
+{
+    if (action_connections.count(action_id)) {
+        throw std::runtime_error("duplicate action");
+    }
+    if (action_catalog.count(make_action(action_id)) == 0) {
+        throw std::runtime_error("invalid action");
+    }
+    auto &act = action_connections
+                        .emplace(std::piecewise_construct, std::forward_as_tuple(action_id),
+                                 std::forward_as_tuple(make_action(action_id), cb))
+                        .first->second;
+
+    return act;
+}
 
 void View3DWindow::apply_preferences(const Preferences &prefs)
 {
     canvas->smooth_zoom = prefs.zoom.smooth_zoom_3d;
     canvas->set_appearance(prefs.canvas_layer.appearance);
+    const auto av = ActionCatalogItem::AVAILABLE_IN_3D;
+    for (auto &it : action_connections) {
+        const auto k = make_action(it.first);
+        auto act = action_catalog.at(k);
+        if (!(act.flags & ActionCatalogItem::FLAGS_NO_PREFERENCES) && prefs.key_sequences.keys.count(k)) {
+            const auto &pref = prefs.key_sequences.keys.at(k);
+            const std::vector<KeySequence> *seqs = nullptr;
+            if (pref.count(av) && pref.at(av).size()) {
+                seqs = &pref.at(av);
+            }
+            else if (pref.count(ActionCatalogItem::AVAILABLE_EVERYWHERE)
+                     && pref.at(ActionCatalogItem::AVAILABLE_EVERYWHERE).size()) {
+                seqs = &pref.at(ActionCatalogItem::AVAILABLE_EVERYWHERE);
+            }
+            if (seqs) {
+                it.second.key_sequences = *seqs;
+            }
+            else {
+                it.second.key_sequences.clear();
+            }
+        }
+    }
 }
+
+void View3DWindow::handle_pan_action(const ActionConnection &c)
+{
+    Coordf d;
+    switch (c.action_id) {
+    case ActionID::PAN_DOWN:
+        d.y = 1;
+        break;
+
+    case ActionID::PAN_UP:
+        d.y = -1;
+        break;
+
+    case ActionID::PAN_LEFT:
+        d.x = 1;
+        break;
+
+    case ActionID::PAN_RIGHT:
+        d.x = -1;
+        break;
+    default:
+        return;
+    }
+    d = d * 50;
+    auto center = canvas->get_center();
+    auto shift = canvas->get_center_shift({d.x, d.y});
+    canvas->set_center(center + shift);
+}
+
+void View3DWindow::handle_zoom_action(const ActionConnection &conn)
+{
+    auto inc = 1;
+    if (conn.action_id == ActionID::ZOOM_IN)
+        inc = -1;
+
+    canvas->set_cam_distance(canvas->get_cam_distance() * pow(1.5, inc));
+}
+
+void View3DWindow::handle_rotate_action(const ActionConnection &conn)
+{
+    auto inc = 90;
+    if (conn.action_id == ActionID::ROTATE_VIEW_LEFT)
+        inc = -90;
+    canvas->inc_cam_azimuth(inc);
+}
+
+void View3DWindow::handle_view_action(const ActionConnection &conn)
+{
+    for (const auto &it : views) {
+        if (it.action == conn.action_id) {
+            canvas->set_cam_azimuth(it.azimuth);
+            canvas->set_cam_elevation(it.elevation);
+            return;
+        }
+    }
+}
+
+void View3DWindow::handle_proj_action(const ActionConnection &conn)
+{
+    if (conn.action_id == ActionID::VIEW_3D_ORTHO)
+        proj_ortho_rb->set_active(true);
+    else
+        proj_persp_rb->set_active(true);
+}
+
 
 } // namespace horizon

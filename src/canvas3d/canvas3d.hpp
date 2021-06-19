@@ -40,6 +40,8 @@ public:
 
     void view_all();
 
+    glm::vec2 get_center_shift(const glm::vec2 &shift) const;
+
     typedef sigc::signal<void, unsigned int, unsigned int> type_signal_models_loading;
     type_signal_models_loading signal_models_loading()
     {
@@ -76,7 +78,6 @@ private:
 
     Glib::RefPtr<Gtk::GestureDrag> gesture_drag;
     glm::vec2 gesture_drag_center_orig;
-    glm::vec2 get_center_shift(const glm::vec2 &shift) const;
     void drag_gesture_begin_cb(GdkEventSequence *seq);
     void drag_gesture_update_cb(GdkEventSequence *seq);
 

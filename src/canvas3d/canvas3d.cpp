@@ -60,6 +60,8 @@ Canvas3D::Canvas3D() : i_model_loading(0), stop_model_load_thread(false)
             s_signal_point_select.emit(*pt);
         }
     });
+
+    set_can_focus(true);
 }
 
 glm::vec2 Canvas3D::get_center_shift(const glm::vec2 &shift) const
@@ -91,6 +93,8 @@ void Canvas3D::on_size_allocate(Gtk::Allocation &alloc)
 
 bool Canvas3D::on_button_press_event(GdkEventButton *button_event)
 {
+    grab_focus();
+
     if (button_event->button == 2 || (button_event->button == 1 && (button_event->state & Gdk::SHIFT_MASK))) {
         pan_mode = PanMode::MOVE;
         pointer_pos_orig = {button_event->x, button_event->y};
@@ -107,6 +111,8 @@ bool Canvas3D::on_button_press_event(GdkEventButton *button_event)
 
 bool Canvas3D::on_motion_notify_event(GdkEventMotion *motion_event)
 {
+    grab_focus();
+
     const auto delta = glm::mat2(1, 0, 0, -1) * (glm::vec2(motion_event->x, motion_event->y) - pointer_pos_orig);
     const auto warp_distance = warp_cursor((GdkEvent *)motion_event, *this);
     if (pan_mode == PanMode::ROTATE) {

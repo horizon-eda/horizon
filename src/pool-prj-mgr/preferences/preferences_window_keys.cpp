@@ -123,7 +123,7 @@ static const std::map<ActionCatalogItem::Availability, std::string> availabiliti
         {ActionCatalogItem::AVAILABLE_IN_BOARD, "Board"},     {ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, "Schematic"},
         {ActionCatalogItem::AVAILABLE_IN_SYMBOL, "Symbol"},   {ActionCatalogItem::AVAILABLE_IN_PADSTACK, "Padstack"},
         {ActionCatalogItem::AVAILABLE_IN_PACKAGE, "Package"}, {ActionCatalogItem::AVAILABLE_IN_FRAME, "Frame"},
-        {ActionCatalogItem::AVAILABLE_IN_DECAL, "Decal"}};
+        {ActionCatalogItem::AVAILABLE_IN_DECAL, "Decal"},     {ActionCatalogItem::AVAILABLE_IN_3D, "3D Preview"}};
 
 void KeySequencesPreferencesEditor::update_action_editors()
 {

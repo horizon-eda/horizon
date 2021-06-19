@@ -2205,5 +2205,117 @@
             ]
         },
         "tool": "NONE"
+    },
+    {
+        "action": "VIEW_3D_PERSP",
+        "keys": {
+            "256": [
+                [
+                    {
+                        "key": "p",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "VIEW_3D_ORTHO",
+        "keys": {
+            "256": [
+                [
+                    {
+                        "key": "o",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "VIEW_3D_FRONT",
+        "keys": {
+            "256": [
+                [
+                    {
+                        "key": "1",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "VIEW_3D_BACK",
+        "keys": {
+            "256": [
+                [
+                    {
+                        "key": "2",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "VIEW_3D_TOP",
+        "keys": {
+            "256": [
+                [
+                    {
+                        "key": "3",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "VIEW_3D_BOTTOM",
+        "keys": {
+            "256": [
+                [
+                    {
+                        "key": "4",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "VIEW_3D_LEFT",
+        "keys": {
+            "256": [
+                [
+                    {
+                        "key": "6",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "VIEW_3D_RIGHT",
+        "keys": {
+            "256": [
+                [
+                    {
+                        "key": "5",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
     }
 ]

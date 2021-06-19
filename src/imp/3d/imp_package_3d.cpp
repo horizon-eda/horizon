@@ -135,13 +135,7 @@ void ImpPackage::construct_3d()
     auto canvas_3d = Gtk::manage(new ImportCanvas3D(*this));
     view_3d_window = View3DWindow::create(fake_board, *pool.get(), View3DWindow::Mode::PACKAGE, canvas_3d);
     view_3d_window->signal_request_update().connect(sigc::mem_fun(*this, &ImpPackage::update_fake_board));
-    view_3d_window->signal_key_press_event().connect([this](GdkEventKey *ev) {
-        if (ev->keyval == GDK_KEY_Escape) {
-            main_window->present();
-            return true;
-        }
-        return false;
-    });
+    view_3d_window->signal_present_imp().connect([this] { main_window->present(); });
 
     auto models_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
     {

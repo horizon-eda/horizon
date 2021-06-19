@@ -100,5 +100,13 @@ enum class ActionID {
     ROTATE_VIEW,
     NEXT_SHEET,
     PREV_SHEET,
+    VIEW_3D_PERSP,
+    VIEW_3D_ORTHO,
+    VIEW_3D_FRONT,
+    VIEW_3D_BACK,
+    VIEW_3D_TOP,
+    VIEW_3D_BOTTOM,
+    VIEW_3D_LEFT,
+    VIEW_3D_RIGHT,
 };
 }

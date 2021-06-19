@@ -3,6 +3,7 @@
 #include "common/common.hpp"
 #include "util/changeable.hpp"
 #include "util/uuid.hpp"
+#include "imp/action.hpp"
 #include <gtkmm.h>
 #include <set>
 
@@ -38,6 +39,10 @@ public:
     {
         return s_signal_request_update;
     }
+    type_signal_request_update signal_present_imp()
+    {
+        return s_signal_present_imp;
+    }
 
     typedef sigc::signal<void, UUID> type_signal_package_select;
     type_signal_package_select signal_package_select();
@@ -60,6 +65,9 @@ private:
     Gtk::ComboBoxText *background_color_preset_combo = nullptr;
     bool setting_background_color_from_preset = false;
 
+    Gtk::RadioButton *proj_persp_rb = nullptr;
+    Gtk::RadioButton *proj_ortho_rb = nullptr;
+
     Gtk::Revealer *hud_revealer = nullptr;
     Gtk::Label *hud_label = nullptr;
     void hud_set_package(const UUID &uu);
@@ -69,6 +77,19 @@ private:
 
     WindowStateStore state_store;
 
+    std::map<ActionID, ActionConnection> action_connections;
+    ActionConnection &connect_action(ActionID action_id, std::function<void(const ActionConnection &)> cb);
+    bool handle_action_key(const GdkEventKey *ev);
+    KeySequence keys_current;
+    void trigger_action(ActionID action);
+
+    void handle_pan_action(const ActionConnection &c);
+    void handle_zoom_action(const ActionConnection &c);
+    void handle_rotate_action(const ActionConnection &c);
+    void handle_view_action(const ActionConnection &c);
+    void handle_proj_action(const ActionConnection &c);
+
     type_signal_request_update s_signal_request_update;
+    type_signal_request_update s_signal_present_imp;
 };
 } // namespace horizon

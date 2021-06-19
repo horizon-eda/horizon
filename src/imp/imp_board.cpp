@@ -582,13 +582,7 @@ void ImpBoard::construct()
         core_board.get_colors().substrate = color_from_rgba(view_3d_window->get_substrate_color());
         core_board.set_needs_save();
     });
-    view_3d_window->signal_key_press_event().connect([this](GdkEventKey *ev) {
-        if (ev->keyval == GDK_KEY_Escape) {
-            main_window->present();
-            return true;
-        }
-        return false;
-    });
+    view_3d_window->signal_present_imp().connect([this] { main_window->present(); });
     view_3d_window->signal_package_select().connect([this](const auto &uu) {
         if (!core->tool_is_active() && canvas->get_selection_mode() == CanvasGL::SelectionMode::NORMAL) {
             if (uu)
