@@ -50,7 +50,7 @@ void ImpPackage::canvas_update()
 void ImpPackage::apply_preferences()
 {
     if (view_3d_window)
-        view_3d_window->set_smooth_zoom(preferences.zoom.smooth_zoom_3d);
+        view_3d_window->apply_preferences(preferences);
     ImpLayer::apply_preferences();
 }
 

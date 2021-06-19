@@ -6,6 +6,7 @@
 #include "pool/part.hpp"
 #include "util/str_util.hpp"
 #include "axes_lollipop.hpp"
+#include "preferences/preferences.hpp"
 
 namespace horizon {
 
@@ -308,11 +309,6 @@ void View3DWindow::add_widget(Gtk::Widget *w)
     main_box->pack_start(*w, false, false, 0);
 }
 
-void View3DWindow::set_smooth_zoom(bool smooth)
-{
-    canvas->smooth_zoom = smooth;
-}
-
 void View3DWindow::update(bool clear)
 {
     s_signal_request_update.emit();
@@ -363,11 +359,6 @@ Gdk::RGBA View3DWindow::get_substrate_color()
     return substrate_color_button->get_rgba();
 }
 
-void View3DWindow::set_appearance(const class Appearance &a)
-{
-    canvas->set_appearance(a);
-}
-
 View3DWindow::type_signal_package_select View3DWindow::signal_package_select()
 {
     return canvas->signal_package_select();
@@ -400,5 +391,11 @@ void View3DWindow::hud_set_package(const UUID &uu)
     }
 }
 
+
+void View3DWindow::apply_preferences(const Preferences &prefs)
+{
+    canvas->smooth_zoom = prefs.zoom.smooth_zoom_3d;
+    canvas->set_appearance(prefs.canvas_layer.appearance);
+}
 
 } // namespace horizon

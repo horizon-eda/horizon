@@ -294,8 +294,7 @@ void ImpBoard::update_action_sensitivity()
 void ImpBoard::apply_preferences()
 {
     if (view_3d_window) {
-        view_3d_window->set_smooth_zoom(preferences.zoom.smooth_zoom_3d);
-        view_3d_window->set_appearance(preferences.canvas_layer.appearance);
+        view_3d_window->apply_preferences(preferences);
     }
     canvas->set_highlight_on_top(preferences.board.highlight_on_top);
     canvas->show_text_in_tracks = preferences.board.show_text_in_tracks;

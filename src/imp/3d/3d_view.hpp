@@ -16,7 +16,6 @@ public:
     void update(bool clear = false);
     void set_highlights(const std::set<UUID> &pkgs);
     void add_widget(Gtk::Widget *w);
-    void set_smooth_zoom(bool smooth);
 
     void set_solder_mask_color(const Gdk::RGBA &c);
     Gdk::RGBA get_solder_mask_color();
@@ -27,11 +26,12 @@ public:
     void set_substrate_color(const Gdk::RGBA &c);
     Gdk::RGBA get_substrate_color();
 
-    void set_appearance(const class Appearance &a);
     class Canvas3D &get_canvas()
     {
         return *canvas;
     }
+
+    void apply_preferences(const class Preferences &prefs);
 
     typedef sigc::signal<void> type_signal_request_update;
     type_signal_request_update signal_request_update()
