@@ -116,7 +116,6 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
             s_signal_changed.emit();
         }
     });
-    Gtk::Button *button_remove;
     GET_WIDGET(button_remove);
     button_remove->signal_clicked().connect([this] {
         auto paths = treeview->get_selection()->get_selected_rows();
@@ -129,7 +128,6 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         s_signal_changed.emit();
     });
 
-    Gtk::Button *button_apply;
     GET_WIDGET(button_apply);
     button_apply->signal_clicked().connect([this] {
         if (auto it = treeview->get_selection()->get_selected()) {
@@ -162,6 +160,7 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         }
         return false;
     });
+    treeview->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &GridsWindow::update_buttons));
 
     for (const auto &[uu, gr] : settings.grids) {
         Gtk::TreeModel::Row row = *store->append();
@@ -169,6 +168,14 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     }
 
     set_select_mode(false);
+    update_buttons();
+}
+
+void GridsWindow::update_buttons()
+{
+    const bool s = treeview->get_selection()->count_selected_rows();
+    button_apply->set_sensitive(s);
+    button_remove->set_sensitive(s);
 }
 
 void GridsWindow::set_select_mode(bool m)

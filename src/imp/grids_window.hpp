@@ -46,9 +46,13 @@ private:
     Glib::RefPtr<Gtk::ListStore> store;
     Gtk::TreeView *treeview = nullptr;
 
+    void update_buttons();
+
     Gtk::Box *button_box = nullptr;
     Gtk::Button *button_ok = nullptr;
     Gtk::Button *button_cancel = nullptr;
+    Gtk::Button *button_apply = nullptr;
+    Gtk::Button *button_remove = nullptr;
     Gtk::HeaderBar *headerbar = nullptr;
 };
 
