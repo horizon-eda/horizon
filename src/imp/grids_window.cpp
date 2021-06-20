@@ -146,17 +146,6 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     });
     button_cancel->signal_clicked().connect([this] { close(); });
 
-    Gtk::Button *button_load;
-    GET_WIDGET(button_load);
-    button_load->signal_clicked().connect([this] {
-        if (auto it = treeview->get_selection()->get_selected()) {
-            Gtk::TreeModel::Row row = *it;
-            auto &gr = settings.grids.at(row[list_columns.uuid]);
-            gr.assign(settings.current);
-            row_from_grid(row, gr);
-        }
-    });
-
     treeview->signal_row_activated().connect([this](const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *col) {
         Gtk::TreeModel::Row row = *store->get_iter(path);
         grid_controller.apply_settings(settings.grids.at(row[list_columns.uuid]));
