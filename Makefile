@@ -120,6 +120,7 @@ SRC_COMMON = \
 	src/util/file_version.cpp\
 	src/pool/project_pool.cpp\
 	src/util/fs_util.cpp\
+	src/common/grid_settings.cpp\
 
 
 ifeq ($(OS),Windows_NT)

@@ -51,6 +51,11 @@ public:
         return nullptr;
     }
 
+    class GridSettings *get_grid_settings() override
+    {
+        return nullptr;
+    }
+
     class IPool &get_pool() override
     {
         return m_pool;

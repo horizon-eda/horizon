@@ -6,33 +6,40 @@
 #include <set>
 #include "nlohmann/json.hpp"
 #include "grid_controller.hpp"
+#include "common/grid_settings.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
 
 class GridsWindow : public Gtk::Window, public Changeable {
 public:
-    static GridsWindow *create(Gtk::Window *p, GridController &b);
-    GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, GridController &b);
+    static GridsWindow *create(Gtk::Window *p, GridController &b, GridSettings &settings);
+    GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, GridController &b,
+                GridSettings &settings);
     void set_select_mode(bool select_mode);
     bool has_grids() const;
 
-    json serialize();
-    void load_from_json(const json &j);
-
 private:
     GridController &grid_controller;
+    GridSettings &settings;
+
     bool select_mode = false;
+
+    void row_from_grid(Gtk::TreeModel::Row &row, const GridSettings::Grid &g) const;
 
     class ListColumns : public Gtk::TreeModelColumnRecord {
     public:
         ListColumns()
         {
+            Gtk::TreeModelColumnRecord::add(uuid);
             Gtk::TreeModelColumnRecord::add(name);
-            Gtk::TreeModelColumnRecord::add(settings);
+            Gtk::TreeModelColumnRecord::add(spacing);
+            Gtk::TreeModelColumnRecord::add(origin);
         }
+        Gtk::TreeModelColumn<UUID> uuid;
         Gtk::TreeModelColumn<Glib::ustring> name;
-        Gtk::TreeModelColumn<GridSettings> settings;
+        Gtk::TreeModelColumn<Glib::ustring> spacing;
+        Gtk::TreeModelColumn<Glib::ustring> origin;
     };
     ListColumns list_columns;
 

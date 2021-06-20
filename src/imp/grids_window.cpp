@@ -7,18 +7,45 @@
 #include "util/geom_util.hpp"
 
 namespace horizon {
-GridsWindow *GridsWindow::create(Gtk::Window *p, GridController &c)
+GridsWindow *GridsWindow::create(Gtk::Window *p, GridController &c, GridSettings &settings)
 {
     GridsWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/org/horizon-eda/horizon/imp/grids.ui");
-    x->get_widget_derived("window", w, c);
+    x->get_widget_derived("window", w, c, settings);
     w->set_transient_for(*p);
     return w;
 }
 
-GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, GridController &c)
-    : Gtk::Window(cobject), grid_controller(c)
+void GridsWindow::row_from_grid(Gtk::TreeModel::Row &row, const GridSettings::Grid &g) const
+{
+    row[list_columns.uuid] = g.uuid;
+    row[list_columns.name] = g.name;
+    {
+        std::string label;
+        if (g.mode == GridSettings::Grid::Mode::SQUARE) {
+            label = dim_to_string(g.spacing_square, false);
+        }
+        else {
+            label = coord_to_string(g.spacing_rect, true);
+        }
+        row[list_columns.spacing] = label;
+    }
+    {
+        std::string label;
+        if (g.origin.x || g.origin.y) {
+            label = coord_to_string(g.origin);
+        }
+        else {
+            label = "Zero";
+        }
+        row[list_columns.origin] = label;
+    }
+}
+
+GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, GridController &c,
+                         GridSettings &setg)
+    : Gtk::Window(cobject), grid_controller(c), settings(setg)
 {
     install_esc_to_close(*this);
 
@@ -44,6 +71,7 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
             if (it) {
                 Gtk::TreeModel::Row row = *it;
                 row[list_columns.name] = new_text;
+                settings.grids.at(row[list_columns.uuid]).name = new_text;
             }
         });
     }
@@ -56,21 +84,23 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
             pango_attr_list_insert(attributes_list, attribute_font_features);
             g_object_set(G_OBJECT(cr->gobj()), "attributes", attributes_list, NULL);
         }
-        tvc->set_cell_data_func(*cr, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
-            Gtk::TreeModel::Row row = *it;
-            auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
-            const auto &s = row.get_value(list_columns.settings);
+        tvc->add_attribute(cr->property_text(), list_columns.spacing);
 
-            std::string label;
-            if (s.mode == GridSettings::Mode::SQUARE) {
-                label = dim_to_string(s.spacing_square, false);
-            }
-            else {
-                label = coord_to_string(s.spacing_rect, true);
-            }
+        /* tvc->set_cell_data_func(*cr, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
+             Gtk::TreeModel::Row row = *it;
+             auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
+             const auto &s = row.get_value(list_columns.settings);
 
-            mcr->property_text() = label;
-        });
+             std::string label;
+             if (s.mode == GridSettings::Mode::SQUARE) {
+                 label = dim_to_string(s.spacing_square, false);
+             }
+             else {
+                 label = coord_to_string(s.spacing_rect, true);
+             }
+
+             mcr->property_text() = label;
+         });*/
         treeview->append_column(*tvc);
     }
     {
@@ -82,21 +112,22 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
             pango_attr_list_insert(attributes_list, attribute_font_features);
             g_object_set(G_OBJECT(cr->gobj()), "attributes", attributes_list, NULL);
         }
-        tvc->set_cell_data_func(*cr, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
-            Gtk::TreeModel::Row row = *it;
-            auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
-            const auto &s = row.get_value(list_columns.settings);
+        /*   tvc->set_cell_data_func(*cr, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
+               Gtk::TreeModel::Row row = *it;
+               auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
+               const auto &s = row.get_value(list_columns.settings);
 
-            std::string label;
-            if (s.origin.x || s.origin.y) {
-                label = coord_to_string(s.origin);
-            }
-            else {
-                label = "Zero";
-            }
+               std::string label;
+               if (s.origin.x || s.origin.y) {
+                   label = coord_to_string(s.origin);
+               }
+               else {
+                   label = "Zero";
+               }
 
-            mcr->property_text() = label;
-        });
+               mcr->property_text() = label;
+           });*/
+        tvc->add_attribute(cr->property_text(), list_columns.origin);
         treeview->append_column(*tvc);
     }
 
@@ -106,9 +137,12 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         Dialogs dias;
         dias.set_parent(this);
         if (auto r = dias.ask_datum_string("Grid name", "")) {
+            const auto uu = UUID::random();
+            auto &gr = settings.grids.emplace(uu, uu).first->second;
+            gr.name = *r;
+            gr.assign(settings.current);
             Gtk::TreeModel::Row row = *store->append();
-            row[list_columns.name] = *r;
-            row[list_columns.settings] = grid_controller.get_settings();
+            row_from_grid(row, gr);
             s_signal_changed.emit();
         }
     });
@@ -116,8 +150,12 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     GET_WIDGET(button_remove);
     button_remove->signal_clicked().connect([this] {
         auto paths = treeview->get_selection()->get_selected_rows();
-        for (auto it = paths.rbegin(); it != paths.rend(); it++)
-            store->erase(store->get_iter(*it));
+        for (auto it = paths.rbegin(); it != paths.rend(); it++) {
+            auto iter = store->get_iter(*it);
+            Gtk::TreeModel::Row row = *iter;
+            settings.grids.erase(row[list_columns.uuid]);
+            store->erase(iter);
+        }
         s_signal_changed.emit();
     });
 
@@ -126,13 +164,13 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     button_apply->signal_clicked().connect([this] {
         if (auto it = treeview->get_selection()->get_selected()) {
             Gtk::TreeModel::Row row = *it;
-            grid_controller.apply_settings(row[list_columns.settings]);
+            grid_controller.apply_settings(settings.grids.at(row[list_columns.uuid]));
         }
     });
     button_ok->signal_clicked().connect([this] {
         if (auto it = treeview->get_selection()->get_selected()) {
             Gtk::TreeModel::Row row = *it;
-            grid_controller.apply_settings(row[list_columns.settings]);
+            grid_controller.apply_settings(settings.grids.at(row[list_columns.uuid]));
             close();
         }
     });
@@ -143,13 +181,15 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     button_load->signal_clicked().connect([this] {
         if (auto it = treeview->get_selection()->get_selected()) {
             Gtk::TreeModel::Row row = *it;
-            row[list_columns.settings] = grid_controller.get_settings();
+            auto &gr = settings.grids.at(row[list_columns.uuid]);
+            gr.assign(settings.current);
+            row_from_grid(row, gr);
         }
     });
 
     treeview->signal_row_activated().connect([this](const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *col) {
         Gtk::TreeModel::Row row = *store->get_iter(path);
-        grid_controller.apply_settings(row[list_columns.settings]);
+        grid_controller.apply_settings(settings.grids.at(row[list_columns.uuid]));
         if (select_mode)
             close();
     });
@@ -163,6 +203,11 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         }
         return false;
     });
+
+    for (const auto &[uu, gr] : settings.grids) {
+        Gtk::TreeModel::Row row = *store->append();
+        row_from_grid(row, gr);
+    }
 
     set_select_mode(false);
 }
@@ -196,9 +241,10 @@ void GridsWindow::set_select_mode(bool m)
 
 bool GridsWindow::has_grids() const
 {
-    return store->children().size();
+    return settings.grids.size();
 }
 
+/*
 void GridsWindow::load_from_json(const json &j)
 {
     store->clear();
@@ -221,5 +267,6 @@ json GridsWindow::serialize()
     }
     return j;
 }
+*/
 
 }; // namespace horizon

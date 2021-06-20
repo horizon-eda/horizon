@@ -46,6 +46,10 @@ public:
     {
         return pnp_export_settings;
     }
+    GridSettings *get_grid_settings() override
+    {
+        return &grid_settings;
+    }
 
     BoardColors &get_colors() override
     {
@@ -80,6 +84,7 @@ private:
     PDFExportSettings pdf_export_settings;
     STEPExportSettings step_export_settings;
     PnPExportSettings pnp_export_settings;
+    GridSettings grid_settings;
 
     BoardColors colors;
 

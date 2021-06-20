@@ -22,6 +22,7 @@
 #include <set>
 #include <vector>
 #include "util/file_version.hpp"
+#include "common/grid_settings.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -106,6 +107,7 @@ public:
     ParameterSet parameter_set;
     MyParameterProgram parameter_program;
     PackageRules rules;
+    GridSettings grid_settings;
 
     std::map<UUID, Model> models;
     UUID default_model;

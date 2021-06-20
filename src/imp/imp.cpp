@@ -574,24 +574,49 @@ void ImpBase::run(int argc, char *argv[])
 
     init_search();
 
-    grid_controller.emplace(*main_window, *canvas);
+    if (auto grid_settings = core->get_grid_settings()) {
+        if (!m_meta.is_null()) {
+            if (m_meta.count("grid_settings")) {
+                const auto &s = m_meta.at("grid_settings");
+                auto &cur = grid_settings->current;
+                cur.spacing_square = s.at("spacing_square").get<uint64_t>();
+                cur.origin.x = s.at("origin_x").get<int64_t>();
+                cur.origin.y = s.at("origin_y").get<int64_t>();
+                cur.spacing_rect.x = s.at("spacing_x").get<int64_t>();
+                cur.spacing_rect.y = s.at("spacing_y").get<int64_t>();
+                if (s.at("mode").get<std::string>() == "rect") {
+                    cur.mode = GridSettings::Grid::Mode::RECTANGULAR;
+                }
+                else {
+                    cur.mode = GridSettings::Grid::Mode::SQUARE;
+                }
+            }
+            else {
+                grid_settings->current.spacing_square = m_meta.value("grid_spacing", 1.25_mm);
+            }
+        }
+    }
+
+    grid_controller.emplace(*main_window, *canvas, core->get_grid_settings());
     connect_action(ActionID::SET_GRID_ORIGIN, [this](const auto &c) {
         auto co = canvas->get_cursor_pos();
         grid_controller->set_origin(co);
     });
 
-    grids_window = GridsWindow::create(main_window, *grid_controller);
-    connect_action(ActionID::GRIDS_WINDOW, [this](const auto &c) {
-        grids_window->set_select_mode(false);
-        grids_window->present();
-    });
-    connect_action(ActionID::SELECT_GRID, [this](const auto &c) {
-        grids_window->set_select_mode(true);
-        grids_window->present();
-    });
-    main_window->grid_window_button->signal_clicked().connect([this] { trigger_action(ActionID::GRIDS_WINDOW); });
-    grids_window->signal_changed().connect(
-            [this] { set_action_sensitive(make_action(ActionID::SELECT_GRID), grids_window->has_grids()); });
+    if (auto grid_settings = core->get_grid_settings()) {
+        grids_window = GridsWindow::create(main_window, *grid_controller, *grid_settings);
+        connect_action(ActionID::GRIDS_WINDOW, [this](const auto &c) {
+            grids_window->set_select_mode(false);
+            grids_window->present();
+        });
+        connect_action(ActionID::SELECT_GRID, [this](const auto &c) {
+            grids_window->set_select_mode(true);
+            grids_window->present();
+        });
+        main_window->grid_window_button->signal_clicked().connect([this] { trigger_action(ActionID::GRIDS_WINDOW); });
+        grids_window->signal_changed().connect(
+                [this] { set_action_sensitive(make_action(ActionID::SELECT_GRID), grids_window->has_grids()); });
+    }
 
     auto save_button = create_action_button(make_action(ActionID::SAVE));
     save_button->show();

@@ -51,6 +51,7 @@ public:
     virtual class IPool &get_pool() = 0;
     virtual class IPool &get_pool_caching() = 0;
     virtual class LayerProvider &get_layer_provider() = 0;
+    virtual class GridSettings *get_grid_settings() = 0;
 
     virtual std::string get_display_name(ObjectType type, const UUID &uu) = 0;
     virtual std::string get_display_name(ObjectType type, const UUID &uu, const UUID &sheet) = 0;
