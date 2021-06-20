@@ -72,6 +72,7 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
                 Gtk::TreeModel::Row row = *it;
                 row[list_columns.name] = new_text;
                 settings.grids.at(row[list_columns.uuid]).name = new_text;
+                s_signal_changed.emit();
             }
         });
     }
@@ -85,22 +86,6 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
             g_object_set(G_OBJECT(cr->gobj()), "attributes", attributes_list, NULL);
         }
         tvc->add_attribute(cr->property_text(), list_columns.spacing);
-
-        /* tvc->set_cell_data_func(*cr, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
-             Gtk::TreeModel::Row row = *it;
-             auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
-             const auto &s = row.get_value(list_columns.settings);
-
-             std::string label;
-             if (s.mode == GridSettings::Mode::SQUARE) {
-                 label = dim_to_string(s.spacing_square, false);
-             }
-             else {
-                 label = coord_to_string(s.spacing_rect, true);
-             }
-
-             mcr->property_text() = label;
-         });*/
         treeview->append_column(*tvc);
     }
     {
@@ -112,21 +97,6 @@ GridsWindow::GridsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
             pango_attr_list_insert(attributes_list, attribute_font_features);
             g_object_set(G_OBJECT(cr->gobj()), "attributes", attributes_list, NULL);
         }
-        /*   tvc->set_cell_data_func(*cr, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
-               Gtk::TreeModel::Row row = *it;
-               auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
-               const auto &s = row.get_value(list_columns.settings);
-
-               std::string label;
-               if (s.origin.x || s.origin.y) {
-                   label = coord_to_string(s.origin);
-               }
-               else {
-                   label = "Zero";
-               }
-
-               mcr->property_text() = label;
-           });*/
         tvc->add_attribute(cr->property_text(), list_columns.origin);
         treeview->append_column(*tvc);
     }
@@ -243,30 +213,5 @@ bool GridsWindow::has_grids() const
 {
     return settings.grids.size();
 }
-
-/*
-void GridsWindow::load_from_json(const json &j)
-{
-    store->clear();
-    for (const auto &it : j) {
-        Gtk::TreeModel::Row row = *store->append();
-        row[list_columns.name] = it.at("name").get<std::string>();
-        row[list_columns.settings] = GridSettings(it);
-    }
-    s_signal_changed.emit();
-}
-
-json GridsWindow::serialize()
-{
-    json j = json::array();
-    for (const auto &it : store->children()) {
-        Gtk::TreeModel::Row row = *it;
-        json o = row.get_value(list_columns.settings).serialize();
-        o["name"] = std::string(row.get_value(list_columns.name));
-        j.push_back(o);
-    }
-    return j;
-}
-*/
 
 }; // namespace horizon
