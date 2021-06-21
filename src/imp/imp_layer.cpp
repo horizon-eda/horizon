@@ -8,6 +8,7 @@
 #include "view_angle_window.hpp"
 #include "widgets/spin_button_angle.hpp"
 #include "actions.hpp"
+#include "grids_window.hpp"
 #include <iomanip>
 
 namespace horizon {
@@ -57,11 +58,6 @@ void ImpLayer::construct_layer_box(bool pack)
 
     bool layers_loaded = false;
     if (!m_meta.is_null()) {
-        if (m_meta.count("grid_settings")) {
-            grid_controller->load_from_json(m_meta.at("grid_settings"));
-        }
-        else
-            grid_controller->set_spacing_square(m_meta.value("grid_spacing", 1.25_mm));
         if (m_meta.count("layer_display")) {
             layer_box->load_from_json(m_meta.at("layer_display"));
             layers_loaded = true;
@@ -103,7 +99,6 @@ void ImpLayer::get_save_meta(json &j)
 {
     j["layer_display"] = layer_box->serialize();
     j["grid_spacing"] = grid_controller->get_spacing_square();
-    j["grid_settings"] = grid_controller->serialize();
 }
 
 void ImpLayer::apply_preferences()

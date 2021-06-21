@@ -29,6 +29,10 @@ public:
 
     std::string get_display_name(ObjectType type, const UUID &uu) override;
     class Rules *get_rules() override;
+    GridSettings *get_grid_settings() override
+    {
+        return &grid_settings;
+    }
 
     void rebuild(bool from_undo = false) override;
 
@@ -66,6 +70,7 @@ private:
     std::string m_pictures_dir;
 
     PackageRules rules;
+    GridSettings grid_settings;
 
     class HistoryItem : public Core::HistoryItem {
     public:

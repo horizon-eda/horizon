@@ -105,6 +105,7 @@
     <file>imp/step_export.ui</file>
     <file>imp/pnp_export.ui</file>
     <file>imp/airwire_filter.ui</file>
+    <file>imp/grids.ui</file>
 
     <file>widgets/column_chooser.ui</file>
 

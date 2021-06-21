@@ -269,6 +269,14 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool)
             Logger::log_warning("couldn't load p&p export settings", Logger::Domain::BOARD, e.what());
         }
     }
+    if (j.count("grid_settings")) {
+        try {
+            grid_settings = GridSettings(j.at("grid_settings"));
+        }
+        catch (const std::exception &e) {
+            Logger::log_warning("couldn't load grid settings", Logger::Domain::BOARD, e.what());
+        }
+    }
     fab_output_settings.update_for_board(*this);
     update_pdf_export_settings(pdf_export_settings);
     update_refs(); // fill in smashed texts
@@ -320,10 +328,10 @@ Board::Board(const Board &brd, CopyMode copy_mode)
       junctions(brd.junctions), tracks(brd.tracks), texts(brd.texts), lines(brd.lines), arcs(brd.arcs),
       planes(brd.planes), keepouts(brd.keepouts), dimensions(brd.dimensions), connection_lines(brd.connection_lines),
       included_boards(brd.included_boards), board_panels(brd.board_panels), pictures(brd.pictures), decals(brd.decals),
-      warnings(brd.warnings), rules(brd.rules), fab_output_settings(brd.fab_output_settings), airwires(brd.airwires),
-      stackup(brd.stackup), colors(brd.colors), pdf_export_settings(brd.pdf_export_settings),
-      step_export_settings(brd.step_export_settings), pnp_export_settings(brd.pnp_export_settings),
-      version(brd.version), n_inner_layers(brd.n_inner_layers)
+      warnings(brd.warnings), rules(brd.rules), fab_output_settings(brd.fab_output_settings),
+      grid_settings(brd.grid_settings), airwires(brd.airwires), stackup(brd.stackup), colors(brd.colors),
+      pdf_export_settings(brd.pdf_export_settings), step_export_settings(brd.step_export_settings),
+      pnp_export_settings(brd.pnp_export_settings), version(brd.version), n_inner_layers(brd.n_inner_layers)
 {
     if (copy_mode == CopyMode::DEEP) {
         packages = brd.packages;
@@ -1100,6 +1108,7 @@ json Board::serialize() const
     j["pdf_export_settings"] = pdf_export_settings.serialize_board();
     j["step_export_settings"] = step_export_settings.serialize();
     j["pnp_export_settings"] = pnp_export_settings.serialize();
+    j["grid_settings"] = grid_settings.serialize();
     j["polygons"] = json::object();
     for (const auto &it : polygons) {
         j["polygons"][(std::string)it.first] = it.second.serialize();

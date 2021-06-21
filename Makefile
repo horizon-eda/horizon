@@ -120,6 +120,7 @@ SRC_COMMON = \
 	src/util/file_version.cpp\
 	src/pool/project_pool.cpp\
 	src/util/fs_util.cpp\
+	src/common/grid_settings.cpp\
 
 
 ifeq ($(OS),Windows_NT)
@@ -510,6 +511,7 @@ SRC_IMP = \
 	src/util/treeview_state_store.cpp\
 	src/widgets/layer_combo_box.cpp\
 	src/widgets/color_box.cpp\
+	src/imp/grids_window.cpp\
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\

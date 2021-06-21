@@ -231,6 +231,9 @@ Package::Package(const UUID &uu, const json &j, IPool &pool)
         }
         default_model = j.at("default_model").get<std::string>();
     }
+    if (j.count("grid_settings")) {
+        grid_settings = GridSettings(j.at("grid_settings"));
+    }
     if (j.count("rules")) {
         rules.load_from_json(j.at("rules"));
     }
@@ -260,8 +263,8 @@ Package::Package(const Package &pkg)
     : uuid(pkg.uuid), name(pkg.name), manufacturer(pkg.manufacturer), tags(pkg.tags), junctions(pkg.junctions),
       lines(pkg.lines), arcs(pkg.arcs), texts(pkg.texts), pads(pkg.pads), polygons(pkg.polygons),
       keepouts(pkg.keepouts), dimensions(pkg.dimensions), pictures(pkg.pictures), parameter_set(pkg.parameter_set),
-      parameter_program(pkg.parameter_program), models(pkg.models), default_model(pkg.default_model),
-      alternate_for(pkg.alternate_for), version(pkg.version), warnings(pkg.warnings)
+      parameter_program(pkg.parameter_program), grid_settings(pkg.grid_settings), models(pkg.models),
+      default_model(pkg.default_model), alternate_for(pkg.alternate_for), version(pkg.version), warnings(pkg.warnings)
 {
     update_refs();
 }
@@ -283,6 +286,7 @@ void Package::operator=(Package const &pkg)
     pictures = pkg.pictures;
     parameter_set = pkg.parameter_set;
     parameter_program = pkg.parameter_program;
+    grid_settings = pkg.grid_settings;
     models = pkg.models;
     default_model = pkg.default_model;
     alternate_for = pkg.alternate_for;
@@ -489,6 +493,7 @@ json Package::serialize() const
         }
     }
     j["rules"] = rules.serialize();
+    j["grid_settings"] = grid_settings.serialize();
     return j;
 }
 

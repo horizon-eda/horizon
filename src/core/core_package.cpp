@@ -12,8 +12,8 @@ namespace horizon {
 CorePackage::CorePackage(const std::string &filename, IPool &pool)
     : Core(pool, nullptr), package(Package::new_from_file(filename, pool)), m_filename(filename),
       m_pictures_dir(Glib::build_filename(Glib::path_get_dirname(filename), "pictures")), rules(package.rules),
-      parameter_program_code(package.parameter_program.get_code()), parameter_set(package.parameter_set),
-      models(package.models), default_model(package.default_model)
+      grid_settings(package.grid_settings), parameter_program_code(package.parameter_program.get_code()),
+      parameter_set(package.parameter_set), models(package.models), default_model(package.default_model)
 {
     package.load_pictures(m_pictures_dir);
     rebuild();
@@ -261,6 +261,7 @@ void CorePackage::save(const std::string &suffix)
     package.models = models;
     package.default_model = default_model;
     package.rules = rules;
+    package.grid_settings = grid_settings;
 
     s_signal_save.emit();
 

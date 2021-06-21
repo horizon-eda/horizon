@@ -66,6 +66,10 @@ public:
     {
         return board.colors;
     }
+    horizon::GridSettings *get_grid_settings() override
+    {
+        return &board.grid_settings;
+    }
     const horizon::FileVersion &get_version() const override
     {
         return board.version;

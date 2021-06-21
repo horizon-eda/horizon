@@ -27,6 +27,7 @@
 #include "common/picture.hpp"
 #include "board_decal.hpp"
 #include "util/file_version.hpp"
+#include "common/grid_settings.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -111,6 +112,7 @@ public:
 
     BoardRules rules;
     FabOutputSettings fab_output_settings;
+    GridSettings grid_settings;
 
     std::map<UUID, std::list<Airwire>> airwires;
 

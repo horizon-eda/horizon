@@ -6,7 +6,8 @@
 #include "util/gtk_util.hpp"
 
 namespace horizon {
-GridController::GridController(class MainWindow &win, class CanvasGL &ca) : main_window(win), canvas(ca)
+GridController::GridController(class MainWindow &win, class CanvasGL &ca, GridSettings *setg)
+    : main_window(win), canvas(ca), settings(setg)
 {
 
     auto width_chars = 10;
@@ -54,6 +55,21 @@ GridController::GridController(class MainWindow &win, class CanvasGL &ca) : main
         grid_spin_button_origin_y->set_value(0);
     });
 
+    if (settings) {
+        const auto &s = settings->current;
+        if (s.mode == GridSettings::Grid::Mode::SQUARE) {
+            main_window.grid_square_button->set_active(true);
+        }
+        else {
+            main_window.grid_rect_button->set_active(true);
+        }
+        grid_spin_button_square->set_value(s.spacing_square);
+        grid_spin_button_x->set_value(s.spacing_rect.x);
+        grid_spin_button_y->set_value(s.spacing_rect.y);
+        grid_spin_button_origin_x->set_value(s.origin.x);
+        grid_spin_button_origin_y->set_value(s.origin.y);
+    }
+
     grid_spin_button_square->signal_value_changed().connect(sigc::mem_fun(*this, &GridController::apply));
     grid_spin_button_x->signal_value_changed().connect(sigc::mem_fun(*this, &GridController::apply));
     grid_spin_button_y->signal_value_changed().connect(sigc::mem_fun(*this, &GridController::apply));
@@ -82,14 +98,24 @@ uint64_t GridController::get_spacing_square() const
 
 void GridController::apply()
 {
+    const auto spacing_rect = Coordi(grid_spin_button_x->get_value_as_int(), grid_spin_button_y->get_value_as_int());
+    const auto spacing_square = grid_spin_button_square->get_value_as_int();
     if (main_window.grid_square_button->get_active()) {
-        canvas.set_grid_spacing(grid_spin_button_square->get_value_as_int());
+        canvas.set_grid_spacing(spacing_square);
     }
     else {
-        canvas.set_grid_spacing(grid_spin_button_x->get_value_as_int(), grid_spin_button_y->get_value_as_int());
+        canvas.set_grid_spacing(spacing_rect.x, spacing_rect.y);
     }
-    canvas.set_grid_origin(
-            Coordi(grid_spin_button_origin_x->get_value_as_int(), grid_spin_button_origin_y->get_value_as_int()));
+    const auto origin =
+            Coordi(grid_spin_button_origin_x->get_value_as_int(), grid_spin_button_origin_y->get_value_as_int());
+    canvas.set_grid_origin(origin);
+    if (settings) {
+        settings->current.mode = main_window.grid_square_button->get_active() ? GridSettings::Grid::Mode::SQUARE
+                                                                              : GridSettings::Grid::Mode::RECTANGULAR;
+        settings->current.origin = origin;
+        settings->current.spacing_square = spacing_square;
+        settings->current.spacing_rect = spacing_rect;
+    }
 }
 
 void GridController::set_origin(const Coordi &c)
@@ -98,42 +124,20 @@ void GridController::set_origin(const Coordi &c)
     grid_spin_button_origin_y->set_value(c.y);
 }
 
-enum class GridMode { SQUARE, RECTANGULAR };
-
-static const LutEnumStr<GridMode> mode_lut = {
-        {"square", GridMode::SQUARE},
-        {"rect", GridMode::RECTANGULAR},
-};
-
-void GridController::load_from_json(const json &j)
+void GridController::apply_settings(const GridSettings::Grid &s)
 {
-
-    auto mode = mode_lut.lookup(j.at("mode"));
-    if (mode == GridMode::SQUARE) {
+    if (s.mode == GridSettings::Grid::Mode::SQUARE) {
         main_window.grid_square_button->set_active(true);
     }
     else {
         main_window.grid_rect_button->set_active(true);
     }
-    grid_spin_button_square->set_value(j.at("spacing_square"));
-    grid_spin_button_x->set_value(j.at("spacing_x"));
-    grid_spin_button_y->set_value(j.at("spacing_y"));
-    grid_spin_button_origin_x->set_value(j.at("origin_x"));
-    grid_spin_button_origin_y->set_value(j.at("origin_y"));
+    grid_spin_button_square->set_value(s.spacing_square);
+    grid_spin_button_x->set_value(s.spacing_rect.x);
+    grid_spin_button_y->set_value(s.spacing_rect.y);
+    grid_spin_button_origin_x->set_value(s.origin.x);
+    grid_spin_button_origin_y->set_value(s.origin.y);
     apply();
-}
-
-json GridController::serialize() const
-{
-    json j;
-    j["mode"] = mode_lut.lookup_reverse(main_window.grid_square_button->get_active() ? GridMode::SQUARE
-                                                                                     : GridMode::RECTANGULAR);
-    j["spacing_square"] = grid_spin_button_square->get_value_as_int();
-    j["spacing_x"] = grid_spin_button_x->get_value_as_int();
-    j["spacing_y"] = grid_spin_button_y->get_value_as_int();
-    j["origin_x"] = grid_spin_button_origin_x->get_value_as_int();
-    j["origin_y"] = grid_spin_button_origin_y->get_value_as_int();
-    return j;
 }
 
 } // namespace horizon

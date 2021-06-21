@@ -108,5 +108,7 @@ enum class ActionID {
     VIEW_3D_BOTTOM,
     VIEW_3D_LEFT,
     VIEW_3D_RIGHT,
+    GRIDS_WINDOW,
+    SELECT_GRID,
 };
 }
