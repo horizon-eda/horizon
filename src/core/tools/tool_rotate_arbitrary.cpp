@@ -316,8 +316,8 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
             annotation->draw_line(origin, ref, ColorP::FROM_LAYER, 2);
         }
         else if (state == State::SCALE) {
-            const double vr = sqrt((ref - origin).mag_sq());
-            const double v = sqrt((args.coords - origin).mag_sq());
+            const double vr = (ref - origin).magd();
+            const double v = (args.coords - origin).magd();
             scale = v / vr;
             apply_placements_scale(scale);
             update_airwires(true);
@@ -328,8 +328,7 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
             const auto v0 = ref - origin;
             annotation->clear();
             annotation->draw_line(origin, ref, ColorP::FROM_LAYER, 2);
-            annotation->draw_arc(origin, sqrt(v0.mag_sq()) / 3, atan2(v0.y, v0.x), atan2(v.y, v.x), ColorP::FROM_LAYER,
-                                 2);
+            annotation->draw_arc(origin, v0.magd() / 3, atan2(v0.y, v0.x), atan2(v.y, v.x), ColorP::FROM_LAYER, 2);
             annotation->draw_line(origin, rref, ColorP::FROM_LAYER, 2);
 
 

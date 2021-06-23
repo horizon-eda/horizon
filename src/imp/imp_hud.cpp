@@ -43,7 +43,7 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
             if (it.type == ObjectType::LINE) {
                 const auto li = core->get_line(it.uuid);
                 layers.insert(li->layer);
-                length += sqrt((li->from->position - li->to->position).mag_sq());
+                length += (li->from->position - li->to->position).magd();
             }
         }
         s += "Layers: ";
@@ -59,8 +59,7 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
         s += "\n\n<b>" + object_descriptions.at(ObjectType::POLYGON_EDGE).name + "</b>\n";
         const auto li = core->get_polygon(it->uuid);
         const auto pair = li->get_vertices_for_edge(it->vertex);
-        const int64_t length =
-                sqrt((li->vertices.at(pair.first).position - li->vertices.at(pair.second).position).mag_sq());
+        const int64_t length = (li->vertices.at(pair.first).position - li->vertices.at(pair.second).position).magd();
         s += "Layer: ";
         s += core->get_layer_provider().get_layers().at(li->layer).name + " ";
         s += "\nLength: " + dim_to_string(length, false);

@@ -16,8 +16,7 @@ void Canvas::img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, 
     auto v = p1 - p0;
     Coord<double> vn = v;
     if (vn.mag_sq() > 0) {
-        vn = vn / sqrt(vn.mag_sq());
-        vn *= width / 2;
+        vn = vn.normalize() * (width / 2);
     }
     else {
         vn = {(double)width / 2, 0};

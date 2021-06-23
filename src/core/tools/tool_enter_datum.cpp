@@ -163,7 +163,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
             def = std::abs(p_ref->y - p_var->y);
             break;
         case Dimension::Mode::DISTANCE:
-            def = sqrt((*p_ref - *p_var).mag_sq());
+            def = (*p_ref - *p_var).magd();
             break;
         }
         if (auto r = imp->dialogs.ask_datum("Dimension length", def)) {
@@ -177,9 +177,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
                 break;
 
             case Dimension::Mode::DISTANCE: {
-                Coord<double> v = *p_var - *p_ref;
-                v *= 1 / sqrt(v.mag_sq());
-                v *= *r;
+                const Coordd v = Coordd(*p_var - *p_ref).normalize() * (*r);
                 *p_var = *p_ref + Coordi(v.x, v.y);
             } break;
             }
@@ -195,7 +193,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
                 const auto li = doc.r->get_line(it.uuid);
                 auto p0 = li->from->position;
                 auto p1 = li->to->position;
-                acc.accumulate(sqrt((p0 - p1).mag_sq()));
+                acc.accumulate((p0 - p1).magd());
             }
         }
 
@@ -207,9 +205,9 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
                     Junction *j1 = dynamic_cast<Junction *>(line->from.ptr);
                     Junction *j2 = dynamic_cast<Junction *>(line->to.ptr);
                     Coordi center = (j1->position + j2->position) / 2;
-                    Coord<double> half = j2->position - center;
-                    double halflen = sqrt(half.mag_sq());
-                    double factor = l / halflen;
+                    Coordd half = j2->position - center;
+                    const double halflen = half.mag();
+                    const double factor = l / halflen;
                     half *= factor;
                     Coordi halfi(half.x, half.y);
 
@@ -257,7 +255,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
                 auto v2i = (it.vertex + 1) % poly->vertices.size();
                 auto *v1 = &poly->vertices.at(v1i);
                 auto *v2 = &poly->vertices.at(v2i);
-                acc.accumulate(sqrt((v1->position - v2->position).mag_sq()));
+                acc.accumulate((v1->position - v2->position).magd());
             }
         }
 
@@ -271,9 +269,9 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
                     Polygon::Vertex *v1 = &poly->vertices.at(v1i);
                     Polygon::Vertex *v2 = &poly->vertices.at(v2i);
                     Coordi center = (v1->position + v2->position) / 2;
-                    Coord<double> half = v2->position - center;
-                    double halflen = sqrt(half.mag_sq());
-                    double factor = l / halflen;
+                    Coordd half = v2->position - center;
+                    const double halflen = half.mag();
+                    const double factor = l / halflen;
                     half *= factor;
                     Coordi halfi(half.x, half.y);
 

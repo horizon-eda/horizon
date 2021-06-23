@@ -921,7 +921,7 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
                 the_track = &tr;
                 tracks.emplace_back(the_track);
                 layers.insert(tr.layer);
-                length += sqrt((tr.from.get_position() - tr.to.get_position()).mag_sq());
+                length += (tr.from.get_position() - tr.to.get_position()).magd();
                 if (tr.net)
                     nets.insert(tr.net);
             }
@@ -938,7 +938,7 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
             const auto t2 = *tracks.at(1);
             if (t1.is_parallel_to(t2)) {
                 const Coordd u = t1.to.get_position() - t1.from.get_position();
-                const Coordd v = u / sqrt(u.mag_sq());
+                const Coordd v = u.normalize();
                 const Coordd w = t2.from.get_position() - t1.from.get_position();
                 const int64_t offset = v.cross(w);
                 s += "\nSpacing: " + dim_to_string(offset, false);

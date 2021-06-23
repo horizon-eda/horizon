@@ -70,8 +70,8 @@ ToolResponse ToolRenumberPads::update(const ToolArgs &args)
                     auto head_size = pad_size / 5;
                     auto line_width = 0;
                     for (size_t i = 1; i < pads.size(); i++) {
-                        Coordf v = pads.at(i)->placement.shift - pads.at(i - 1)->placement.shift;
-                        auto vn = v / (sqrt(v.mag_sq()));
+                        const Coordf v = pads.at(i)->placement.shift - pads.at(i - 1)->placement.shift;
+                        const auto vn = v.normalize();
 
                         Coordf ortho(-vn.y, vn.x);
 

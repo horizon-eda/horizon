@@ -208,7 +208,7 @@ void TuningWindow::add_tracks(const std::set<UUID> &tracks_uuid, bool all)
 
 static int64_t get_track_length(const Track &track)
 {
-    return sqrt((track.from.get_position() - track.to.get_position()).mag_sq());
+    return (track.from.get_position() - track.to.get_position()).magd();
 }
 
 void TuningWindow::update()

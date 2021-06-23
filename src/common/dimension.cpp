@@ -49,14 +49,14 @@ int64_t Dimension::project(const Coordi &c) const
         break;
     }
     Coordi w = Coordi(-v.y, v.x);
-    return w.dot(c) / sqrt(w.mag_sq());
+    return w.dot(c) / w.magd();
 }
 
 int64_t Dimension::get_length() const
 {
     switch (mode) {
     case Mode::DISTANCE:
-        return sqrt((p0 - p1).mag_sq());
+        return (p0 - p1).magd();
     case Mode::HORIZONTAL:
         return std::abs(p0.x - p1.x);
     case Mode::VERTICAL:

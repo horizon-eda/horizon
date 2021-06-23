@@ -36,7 +36,7 @@ void ToolMeasure::update_tip()
     actions.emplace_back(InToolActionID::RMB, "cancel");
     std::stringstream ss;
     if (state != State::FROM) {
-        const auto delta = to - from;
+        const Coordd delta = to - from;
         if (delta.y == 0) {
             ss << "ΔX: " << dim_to_string(delta.x, true);
         }
@@ -44,7 +44,7 @@ void ToolMeasure::update_tip()
             ss << "ΔY: " << dim_to_string(delta.y, true);
         }
         else {
-            ss << coord_to_string(delta, true) << " D:" << dim_to_string(sqrt(delta.mag_sq()), false);
+            ss << coord_to_string(delta, true) << " D:" << dim_to_string(delta.mag(), false);
             ss << " α:" << angle_to_string(angle_from_rad(atan2(delta.y, delta.x)), false);
         }
     }
@@ -78,7 +78,7 @@ ToolResponse ToolMeasure::update(const ToolArgs &args)
             annotation->clear();
             {
                 const auto v = Coordf(to - from);
-                const auto l = sqrt(v.mag_sq());
+                const auto l = v.mag();
                 const auto vn = (v / l).rotate(M_PI / 2);
                 const auto m = vn * l / 20;
                 annotation->draw_line(from, to, ColorP::FROM_LAYER, 2);

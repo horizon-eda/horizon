@@ -376,7 +376,7 @@ std::pair<Coordf, Coordf> Canvas::get_bbox(bool visible_only) const
                 }
                 else if (it_info.flags & TriangleInfo::FLAG_BUTT) { // line
                     const Coordf v = points.at(1) - points.at(0);
-                    const Coordf vn = Coordf(-v.y, v.x) / sqrt(v.mag_sq());
+                    const Coordf vn = Coordf(-v.y, v.x).normalize();
                     const Coordf w = vn * (it2.x2 / 2);
                     acc.accumulate(points.at(0) - w);
                     acc.accumulate(points.at(1) - w);
@@ -392,7 +392,7 @@ std::pair<Coordf, Coordf> Canvas::get_bbox(bool visible_only) const
         }
     }
     const auto [a, b] = acc.get_or_0();
-    if (sqrt((b - a).mag_sq()) < .1_mm)
+    if ((b - a).mag() < .1_mm)
         return std::make_pair(Coordf(-5_mm, -5_mm), Coordf(5_mm, 5_mm));
     else
         return std::make_pair(a, b);

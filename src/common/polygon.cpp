@@ -50,11 +50,6 @@ UUID Polygon::get_uuid() const
     return uuid;
 }
 
-static int64_t sq(int64_t x)
-{
-    return x * x;
-}
-
 Polygon Polygon::remove_arcs(unsigned int precision) const
 {
     Polygon out(uuid);
@@ -75,11 +70,11 @@ Polygon Polygon::remove_arcs(unsigned int precision) const
             if (it_next == vertices.cend()) {
                 it_next = vertices.cbegin();
             }
-            Coordd a(it->position);
-            Coordd b(it_next->position);
-            Coordd c = project_onto_perp_bisector(a, b, it->arc_center);
-            double radius0 = sqrt(sq(c.x - a.x) + sq(c.y - a.y));
-            double radius1 = sqrt(sq(c.x - b.x) + sq(c.y - b.y));
+            const Coordd a(it->position);
+            const Coordd b(it_next->position);
+            const Coordd c = project_onto_perp_bisector(a, b, it->arc_center);
+            double radius0 = (a - c).mag();
+            double radius1 = (b - c).mag();
             Color co(1, 1, 0);
             double a0 = atan2(a.y - c.y, a.x - c.x);
             double a1 = atan2(b.y - c.y, b.x - c.x);

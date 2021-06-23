@@ -280,8 +280,8 @@ void Canvas::render(const Track &track, bool interactive)
         && track.to.is_junc() && (!show_text_in_vias || (!track.from.junc->has_via && !track.to.junc->has_via))) {
         auto overlay_layer = get_overlay_layer(track.layer, true);
         set_lod_size(width);
-        auto vec = (track.from.get_position() - track.to.get_position());
-        auto length = sqrt(vec.mag_sq());
+        const auto vec = (track.from.get_position() - track.to.get_position());
+        const auto length = vec.magd();
         Placement p;
         p.set_angle_rad(get_view_angle());
         if (get_flip_view())
@@ -591,17 +591,12 @@ void Canvas::render(const SymbolPin &pin, bool interactive, ColorP co)
     img_auto_line = false;
 }
 
-static int64_t sq(int64_t x)
-{
-    return x * x;
-}
-
 void Canvas::render(const Arc &arc, bool interactive, ColorP co)
 {
     Coordf a(arc.from->position); // ,b,c;
     Coordf b(arc.to->position);   // ,b,c;
     Coordf c = project_onto_perp_bisector(a, b, arc.center->position);
-    const float radius0 = sqrt(sq(c.x - a.x) + sq(c.y - a.y));
+    const float radius0 = (c - a).mag();
     const float a0 = c2pi(atan2f(a.y - c.y, a.x - c.x));
     const float a1 = c2pi(atan2f(b.y - c.y, b.x - c.x));
     const float dphi = c2pi(a1 - a0);
@@ -847,7 +842,7 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
         if (poly_is_rect(poly)) {
             const Coordf p0 = (poly.get_vertex(0).position + poly.get_vertex(1).position) / 2;
             const Coordf p1 = (poly.get_vertex(2).position + poly.get_vertex(3).position) / 2;
-            const float width = sqrt((poly.get_vertex(0).position - poly.get_vertex(1).position).mag_sq());
+            const float width = (poly.get_vertex(0).position - poly.get_vertex(1).position).magd();
             add_triangle(poly.layer, transform.transform(p0), transform.transform(p1), Coordf(width, 1), co,
                          TriangleInfo::FLAG_BUTT);
         }
@@ -901,7 +896,7 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
                 const Coordf b = v.position;
                 const Coordf a = v_last.position;
                 const Coordf c = project_onto_perp_bisector(a, b, v_last.arc_center);
-                const auto r = sqrt((a - c).mag_sq());
+                const auto r = (a - c).mag();
                 float a0 = atan2f(a.y - c.y, a.x - c.x);
                 float a1 = atan2f(b.y - c.y, b.x - c.x);
                 if (v_last.arc_reverse)
@@ -1385,8 +1380,8 @@ void Canvas::render(const class Dimension &dim)
         p1 = Coordd(p0.x, p1.y);
     }
 
-    Coordd v = p1 - p0;
-    auto vn = v / sqrt(v.mag_sq());
+    const Coordd v = p1 - p0;
+    const auto vn = v.normalize();
     Coordd w = Coordd(-v.y, v.x);
     if (dim.mode == Dimension::Mode::HORIZONTAL) {
         w.y = std::abs(w.y);
@@ -1394,7 +1389,7 @@ void Canvas::render(const class Dimension &dim)
     else if (dim.mode == Dimension::Mode::VERTICAL) {
         w.x = std::abs(w.x);
     }
-    auto wn = w / sqrt(w.mag_sq());
+    const auto wn = w.normalize();
 
     ColorP co = ColorP::DIMENSION;
 
@@ -1409,7 +1404,7 @@ void Canvas::render(const class Dimension &dim)
         draw_line(dim.p1, p1 + wn * (dim.label_distance + sgn(dim.label_distance) * (int64_t)dim.label_size / 2), co,
                   10000, true, 0);
 
-        auto length = sqrt(v.mag_sq());
+        auto length = v.mag();
         auto s = dim_to_string(length, false);
 
         TextOptions opts;

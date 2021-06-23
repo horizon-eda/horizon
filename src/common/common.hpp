@@ -163,15 +163,17 @@ public:
      * @param phi angle in radians
      * @returns coordinate specified by \p r and \p phi
      */
-    static Coord<float> euler(float r, float phi)
+    static Coord<T> euler(float r, float phi)
     {
-        return Coord<float>(r * cos(phi), r * sin(phi));
+        static_assert(std::is_floating_point_v<T>);
+        return {r * cos(phi), r * sin(phi)};
     }
 
-    Coord<float> rotate(float a) const
+    Coord<T> rotate(T a) const
     {
-        const float x2 = x * cos(a) - y * sin(a);
-        const float y2 = x * sin(a) + y * cos(a);
+        static_assert(std::is_floating_point_v<T>);
+        const T x2 = x * cos(a) - y * sin(a);
+        const T y2 = x * sin(a) + y * cos(a);
         return {x2, y2};
     }
 
@@ -195,6 +197,24 @@ public:
     T mag_sq() const
     {
         return x * x + y * y;
+    }
+
+    T mag() const
+    {
+        static_assert(std::is_floating_point_v<T>);
+        return sqrt(mag_sq());
+    }
+
+    Coord<T> normalize() const
+    {
+        static_assert(std::is_floating_point_v<T>);
+        return *this / mag();
+    }
+
+    double magd() const
+    {
+        static_assert(std::is_integral_v<T>);
+        return sqrt(mag_sq());
     }
 
     bool in_range(const Coord<T> &a, const Coord<T> &b) const

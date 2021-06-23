@@ -24,11 +24,6 @@ int ToolRoundOffVertex::wrap_index(int i) const
     return i;
 }
 
-static Coordd normalize(const Coordd &c)
-{
-    return c / (sqrt(c.mag_sq()));
-}
-
 static Coordi to_coordi(const Coordd &c)
 {
     return Coordi(c.x, c.y);
@@ -55,12 +50,12 @@ ToolResponse ToolRoundOffVertex::begin(const ToolArgs &args)
     selection.clear();
 
     p0 = poly->vertices.at(vertex_idx).position;
-    vn = normalize(Coordd(poly->vertices.at(v_next).position) - p0);
-    vp = normalize(Coordd(poly->vertices.at(v_prev).position) - p0);
-    vh = normalize(vn + vp);
+    vn = (Coordd(poly->vertices.at(v_next).position) - p0).normalize();
+    vp = (Coordd(poly->vertices.at(v_prev).position) - p0).normalize();
+    vh = (vn + vp).normalize();
 
-    delta_max = sqrt(std::min((poly->vertices.at(v_next).position - poly->vertices.at(vertex_idx).position).mag_sq(),
-                              (poly->vertices.at(v_prev).position - poly->vertices.at(vertex_idx).position).mag_sq()));
+    delta_max = std::min((poly->vertices.at(v_next).position - poly->vertices.at(vertex_idx).position).magd(),
+                         (poly->vertices.at(v_prev).position - poly->vertices.at(vertex_idx).position).magd());
     alpha = acos(vh.dot(vp));
     if (isnan(alpha) || (alpha > .99 * (M_PI / 2))) {
         imp->tool_bar_flash("can't round off collinear edges");
@@ -118,7 +113,7 @@ void ToolRoundOffVertex::update_poly(double r)
 void ToolRoundOffVertex::update_cursor(const Coordi &c)
 {
     auto vm = Coordd(c) - p0;
-    auto u = std::max(sqrt(vm.mag_sq()) * vh.dot(normalize(vm)), 0.);
+    auto u = std::max(vm.mag() * vh.dot(vm.normalize()), 0.);
     auto r = u * sin(alpha);
     r = std::min(r_max, r);
     radius_current = r;
