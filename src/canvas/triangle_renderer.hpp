@@ -3,6 +3,7 @@
 #include "util/gl_inc.h"
 #include <map>
 #include <vector>
+#include <tuple>
 #include "util/vector_pair.hpp"
 
 namespace horizon {
@@ -19,7 +20,34 @@ private:
     const CanvasGL &ca;
     enum class Type { TRIANGLE, LINE, LINE0, LINE_BUTT, GLYPH, CIRCLE, ARC, ARC0 };
     const std::map<int, vector_pair<Triangle, TriangleInfo>> &triangles;
-    std::map<int, std::map<std::pair<Type, bool>, std::pair<size_t, size_t>>> layer_offsets;
+
+    struct BatchKey {
+        Type type;
+        bool highlight;
+
+    private:
+        auto tie() const
+        {
+            return std::tie(type, highlight);
+        }
+
+    public:
+        bool operator<(const BatchKey &other) const
+        {
+            return tie() < other.tie();
+        }
+        bool operator==(const BatchKey &other) const
+        {
+            return tie() == other.tie();
+        }
+    };
+
+    struct Span {
+        size_t offset;
+        size_t count;
+    };
+
+    std::map<int, std::map<BatchKey, Span>> layer_offsets;
     size_t n_tris = 0;
 
     GLuint program_line0;

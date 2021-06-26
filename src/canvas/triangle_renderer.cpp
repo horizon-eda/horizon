@@ -242,9 +242,9 @@ void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode, boo
         glStencilFunc(GL_ALWAYS, stencil, 0xff);
 
     if (layer_offsets.count(layer)) {
-        for (const auto &it : layer_offsets.at(layer)) {
+        for (const auto &[key, span] : layer_offsets.at(layer)) {
             bool skip = false;
-            switch (it.first.first) {
+            switch (key.type) {
             case Type::TRIANGLE:
                 glUseProgram(program_triangle);
                 if (ld.mode == LayerDisplay::Mode::OUTLINE)
@@ -281,12 +281,12 @@ void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode, boo
             }
             switch (highlight_mode) {
             case HighlightMode::ONLY: // only highlighted, skip not highlighted
-                if (!it.first.second) {
+                if (!key.highlight) {
                     skip = true;
                 }
                 break;
             case HighlightMode::SKIP: // only not highlighted, skip highlighted
-                if (it.first.second) {
+                if (key.highlight) {
                     skip = true;
                 }
                 break;
@@ -311,8 +311,7 @@ void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode, boo
                 glBufferData(GL_UNIFORM_BUFFER, sizeof(buf), &buf, GL_DYNAMIC_DRAW);
                 glBindBuffer(GL_UNIFORM_BUFFER, 0);
                 GL_CHECK_ERROR
-                glDrawElements(GL_POINTS, it.second.second, GL_UNSIGNED_INT,
-                               (void *)(it.second.first * sizeof(unsigned int)));
+                glDrawElements(GL_POINTS, span.count, GL_UNSIGNED_INT, (void *)(span.offset * sizeof(unsigned int)));
             }
         }
     }
@@ -427,7 +426,7 @@ void TriangleRenderer::push()
     for (const auto &[layer, tris] : triangles) {
         const auto &ld = ca.get_layer_display(layer);
         glBufferSubData(GL_ARRAY_BUFFER, ofs * sizeof(Triangle), tris.size() * sizeof(Triangle), tris.first.data());
-        std::map<std::pair<Type, bool>, std::vector<unsigned int>> type_indices;
+        std::map<BatchKey, std::vector<unsigned int>> type_indices;
         unsigned int i = 0;
         for (const auto &[tri, tri_info] : tris) {
             const bool hidden = tri_info.flags & TriangleInfo::FLAG_HIDDEN;
@@ -462,16 +461,17 @@ void TriangleRenderer::push()
                 else {
                     throw std::runtime_error("unknown triangle type");
                 }
-                type_indices[std::make_pair(ty, (tri_info.flags & TriangleInfo::FLAG_HIGHLIGHT)
-                                                        || (tri.color == static_cast<int>(ColorP::LAYER_HIGHLIGHT)))]
-                        .push_back(i + ofs);
+                const bool highlight = (tri_info.flags & TriangleInfo::FLAG_HIGHLIGHT)
+                                       || (tri.color == static_cast<int>(ColorP::LAYER_HIGHLIGHT));
+                const BatchKey key{ty, highlight};
+                type_indices[key].push_back(i + ofs);
             }
             i++;
         }
-        for (const auto &it2 : type_indices) {
+        for (const auto &[key, elems] : type_indices) {
             auto el_offset = elements.size();
-            elements.insert(elements.end(), it2.second.begin(), it2.second.end());
-            layer_offsets[layer][it2.first] = std::make_pair(el_offset, it2.second.size());
+            elements.insert(elements.end(), elems.begin(), elems.end());
+            layer_offsets[layer][key] = {el_offset, elems.size()};
         }
         ofs += tris.size();
     }
