@@ -27,6 +27,7 @@ before_build:
     - bash -c "pacman -Syu --noconfirm --ignore=pacman-mirrors"
     - bash -c "pacman -S --noconfirm --needed mingw-w64-%MSYS2_ARCH%-{gcc,ccache,gtkmm3,boost,sqlite3,zeromq,glm,libgit2,oce,podofo,libzip} zip make"
     - bash -c "mkdir -p ~/.ccache && echo 'max_size = 1.0G' > ~/.ccache/ccache.conf"
+    - bash -c "ccache -s"
 
 build_script:
     - cd %APPVEYOR_BUILD_FOLDER%
@@ -34,6 +35,7 @@ build_script:
     - dir
     - bash -c "cd $APPVEYOR_BUILD_FOLDER && make -j2 CXX=\"ccache g++\" CC=\"ccache gcc\" WARNFLAGS=\"-Wall -Wshadow -Wno-attributes\" && ./make_bindist.sh"
     - ps: "if( $Env:APPVEYOR_REPO_TAG -eq \"true\" ) {cd $Env:APPVEYOR_BUILD_FOLDER/wix; dir; ./install.bat}"
+    - bash -c "ccache -s"
 
 artifacts:
     - path: dist/horizon-*.zip
