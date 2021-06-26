@@ -163,7 +163,7 @@ public:
      * @param phi angle in radians
      * @returns coordinate specified by \p r and \p phi
      */
-    static Coord<T> euler(float r, float phi)
+    static Coord<T> euler(T r, T phi)
     {
         static_assert(std::is_floating_point_v<T>);
         return {r * cos(phi), r * sin(phi)};
@@ -175,6 +175,12 @@ public:
         const T x2 = x * cos(a) - y * sin(a);
         const T y2 = x * sin(a) + y * cos(a);
         return {x2, y2};
+    }
+
+    Coord<int64_t> to_coordi() const
+    {
+        static_assert(std::is_floating_point_v<T>);
+        return Coord<int64_t>(x, y);
     }
 
     /**

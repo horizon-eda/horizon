@@ -24,11 +24,6 @@ int ToolRoundOffVertex::wrap_index(int i) const
     return i;
 }
 
-static Coordi to_coordi(const Coordd &c)
-{
-    return Coordi(c.x, c.y);
-}
-
 ToolResponse ToolRoundOffVertex::begin(const ToolArgs &args)
 {
     int vertex_idx = 0;
@@ -105,9 +100,9 @@ void ToolRoundOffVertex::update_poly(double r)
     r = std::min(r_max, r);
     auto delta = r / tan(alpha);
     auto u = r / sin(alpha);
-    vxp->position = to_coordi(p0 + vp * delta);
-    vxp->arc_center = to_coordi(p0 + vh * u);
-    vxn->position = to_coordi(p0 + vn * delta);
+    vxp->position = (p0 + vp * delta).to_coordi();
+    vxp->arc_center = (p0 + vh * u).to_coordi();
+    vxn->position = (p0 + vn * delta).to_coordi();
 }
 
 void ToolRoundOffVertex::update_cursor(const Coordi &c)
