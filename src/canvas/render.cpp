@@ -1109,6 +1109,8 @@ void Canvas::render(const Padstack &padstack, bool interactive)
     img_set_padstack(false);
 }
 
+//foo
+
 void Canvas::render_pad_overlay(const Pad &pad, bool interactive)
 {
     if (img_mode)
