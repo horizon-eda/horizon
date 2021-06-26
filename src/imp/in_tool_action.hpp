@@ -75,6 +75,9 @@ enum class InToolActionID {
 
     // add vertex
     FLIP_DIRECTION,
+
+    // draw arc
+    ARC_MODE,
 };
 
 } // namespace horizon

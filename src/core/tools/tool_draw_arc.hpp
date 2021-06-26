@@ -15,18 +15,25 @@ public:
     {
         using I = InToolActionID;
         return {
-                I::LMB, I::CANCEL, I::RMB, I::ENTER_WIDTH, I::FLIP_ARC,
+                I::LMB, I::CANCEL, I::RMB, I::ENTER_WIDTH, I::FLIP_ARC, I::ARC_MODE,
         };
     }
+    ~ToolDrawArc();
 
 private:
-    enum class DrawArcState { FROM, TO, CENTER };
-    DrawArcState state = DrawArcState::FROM;
+    enum class State { FROM, TO, CENTER, CENTER_START, RADIUS, START_ANGLE, END_ANGLE };
+    State state;
     class Junction *temp_junc = 0;
     Junction *from_junc = 0;
     Junction *to_junc = 0;
     class Arc *temp_arc = 0;
-    Junction *make_junction(const Coordi &coords);
+    Junction *make_junction(const Coordd &coords);
     void update_tip();
+    double radius = 0;
+    double start_angle = 0;
+    void set_radius_angle(double r, double a, double b);
+    void update_end_angle(const Coordi &c);
+    bool flipped = false;
+    class CanvasAnnotation *annotation = nullptr;
 };
 } // namespace horizon
