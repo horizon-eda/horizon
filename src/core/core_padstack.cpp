@@ -31,6 +31,8 @@ bool CorePadstack::has_object_type(ObjectType ty) const
     return false;
 }
 
+//haha
+
 bool CorePadstack::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, PropertyValue &value)
 {
     if (Core::get_property(type, uu, property, value))
