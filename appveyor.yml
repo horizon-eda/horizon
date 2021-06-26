@@ -26,7 +26,7 @@ before_build:
     - taskkill /f /fi "MODULES eq msys-2.0.dll"
     - bash -c "pacman -Syu --noconfirm --ignore=pacman-mirrors"
     - bash -c "pacman -S --noconfirm --needed mingw-w64-%MSYS2_ARCH%-{gcc,ccache,gtkmm3,boost,sqlite3,zeromq,glm,libgit2,oce,podofo,libzip} zip make"
-    - bash -c "mkdir -p ~/.ccache && echo 'max_size = 2.0G' > ~/.ccache/ccache.conf"
+    - bash -c "mkdir -p ~/.ccache && echo 'max_size = 4.0G' > ~/.ccache/ccache.conf"
     - bash -c "ccache -s"
 
 build_script:
