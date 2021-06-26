@@ -28,6 +28,7 @@ before_build:
     - bash -c "pacman -S --noconfirm --needed mingw-w64-%MSYS2_ARCH%-{gcc,ccache,gtkmm3,boost,sqlite3,zeromq,glm,libgit2,oce,podofo,libzip} zip make"
     - bash -c "mkdir -p ~/.ccache && echo 'max_size = 4.0G' > ~/.ccache/ccache.conf"
     - bash -c "ccache -s"
+    - bash -c "ccache -z"
 
 build_script:
     - cd %APPVEYOR_BUILD_FOLDER%
