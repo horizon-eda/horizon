@@ -1,5 +1,6 @@
 #include "tool.hpp"
 #include "tool_id.hpp"
+#include "imp/in_tool_action.hpp"
 
 namespace horizon {
 
@@ -24,6 +25,10 @@ ToolResponse::ToolResponse() : next_tool(ToolID::NONE)
 }
 
 ToolResponse::ToolResponse(ToolResponse::Result r) : next_tool(ToolID::NONE), result(r)
+{
+}
+
+ToolArgs::ToolArgs() : action(InToolActionID::NONE)
 {
 }
 

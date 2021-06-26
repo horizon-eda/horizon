@@ -1,19 +1,14 @@
 #pragma once
 #include <string>
-#include "imp/in_tool_action.hpp"
 
 namespace horizon {
+enum class InToolActionID;
+
 class ActionLabelInfo {
 public:
-    ActionLabelInfo(InToolActionID a1) : action1(a1), action2(InToolActionID::NONE)
-    {
-    }
-    ActionLabelInfo(InToolActionID a1, const std::string &s) : action1(a1), action2(InToolActionID::NONE), label(s)
-    {
-    }
-    ActionLabelInfo(InToolActionID a1, InToolActionID a2, const std::string &s) : action1(a1), action2(a2), label(s)
-    {
-    }
+    ActionLabelInfo(InToolActionID a1);
+    ActionLabelInfo(InToolActionID a1, const std::string &s);
+    ActionLabelInfo(InToolActionID a1, InToolActionID a2, const std::string &s);
 
     InToolActionID action1;
     InToolActionID action2;

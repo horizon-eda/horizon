@@ -512,6 +512,7 @@ SRC_IMP = \
 	src/widgets/layer_combo_box.cpp\
 	src/widgets/color_box.cpp\
 	src/imp/grids_window.cpp\
+	src/util/action_label.cpp\
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\

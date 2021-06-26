@@ -6,7 +6,7 @@
 #include <deque>
 #include <memory>
 #include <sigc++/sigc++.h>
-#include "tool.hpp"
+#include "tool_pub.hpp"
 #include "document/document.hpp"
 #include "util/placement.hpp"
 

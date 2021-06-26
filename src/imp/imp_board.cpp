@@ -24,6 +24,7 @@
 #include "widgets/action_button.hpp"
 #include "parts_window.hpp"
 #include "actions.hpp"
+#include "in_tool_action.hpp"
 
 namespace horizon {
 ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename,
