@@ -9,6 +9,7 @@ layout (std140) uniform layer_setup
 	vec2 offset;
 	float min_line_width;
 	uint layer_mode;
+	uint stencil_mode;
 };
 
 #define LAYER_MODE_OUTLINE (0U)

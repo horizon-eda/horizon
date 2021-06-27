@@ -11,11 +11,16 @@ void main() {
     discard;
   float my_alpha = alpha;
   if(length(round_pos_to_fragment) > border_threshold && layer_mode != LAYER_MODE_FILL_ONLY) {
+    if(stencil_mode == 1U)
+      discard;
     my_alpha = 1;
   }
   else { //filled area
     if(get_discard(gl_FragCoord.xy)) {
-      discard;
+      if(stencil_mode == 1U)
+        my_alpha = 0;
+      else
+        discard;
     }
   }
   outputColor = vec4(color_to_fragment, my_alpha);

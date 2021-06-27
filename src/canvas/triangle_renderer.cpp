@@ -154,6 +154,7 @@ public:
     std::array<float, 2> offset;
     float min_line_width;
     unsigned int layer_mode;
+    unsigned int stencil_mode;
 };
 
 static std::array<float, 4> operator+(const std::array<float, 4> &a, float b)
@@ -215,12 +216,10 @@ std::array<float, 4> TriangleRenderer::apply_highlight(const Color &icolor, High
     return color;
 }
 
-
-void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode, bool ignore_flip)
+void TriangleRenderer::render_layer_batch(int layer, HighlightMode highlight_mode, bool ignore_flip, const Batch &batch,
+                                          bool use_stencil, bool stencil_mode)
 {
     const auto &ld = ca.get_layer_display(layer);
-
-    GL_CHECK_ERROR
     UBOBuffer buf;
 
     buf.alpha = ca.property_layer_opacity() / 100;
@@ -235,84 +234,112 @@ void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode, boo
     buf.offset[0] = ca.offset.x;
     buf.offset[1] = ca.offset.y;
     buf.min_line_width = ca.appearance.min_line_width;
+    buf.stencil_mode = stencil_mode;
 
-    if (ld.mode == LayerDisplay::Mode::FILL_ONLY)
-        glStencilFunc(GL_GREATER, stencil, 0xff);
-    else
-        glStencilFunc(GL_ALWAYS, stencil, 0xff);
+    for (const auto &[key, span] : batch) {
+        bool skip = false;
+        switch (key.type) {
+        case Type::TRIANGLE:
+            glUseProgram(program_triangle);
+            if (ld.mode == LayerDisplay::Mode::OUTLINE)
+                skip = true;
+            break;
 
+        case Type::LINE0:
+            glUseProgram(program_line0);
+            break;
+
+        case Type::LINE_BUTT:
+            glUseProgram(program_line_butt);
+            break;
+
+        case Type::LINE:
+            glUseProgram(program_line);
+            break;
+
+        case Type::GLYPH:
+            glUseProgram(program_glyph);
+            break;
+
+        case Type::CIRCLE:
+            glUseProgram(program_circle);
+            break;
+
+        case Type::ARC0:
+            glUseProgram(program_arc0);
+            break;
+
+        case Type::ARC:
+            glUseProgram(program_arc);
+            break;
+        }
+        switch (highlight_mode) {
+        case HighlightMode::ONLY: // only highlighted, skip not highlighted
+            if (!key.highlight) {
+                skip = true;
+            }
+            break;
+        case HighlightMode::SKIP: // only not highlighted, skip highlighted
+            if (key.highlight) {
+                skip = true;
+            }
+            break;
+        }
+        if (!skip) {
+            for (size_t i = 0; i < buf.colors.size(); i++) {
+                auto k = static_cast<ColorP>(i);
+                if (ca.appearance.colors.count(k))
+                    buf.colors[i] = apply_highlight(ca.appearance.colors.at(k), highlight_mode, layer);
+            }
+            auto lc = ca.get_layer_color(layer);
+            buf.colors[static_cast<int>(ColorP::AIRWIRE_ROUTER)] =
+                    gl_array_from_color(ca.appearance.colors.at(ColorP::AIRWIRE_ROUTER));
+            buf.colors[static_cast<int>(ColorP::FROM_LAYER)] = apply_highlight(lc, highlight_mode, layer);
+            buf.colors[static_cast<int>(ColorP::LAYER_HIGHLIGHT)] =
+                    gl_array_from_color(lc) + ca.appearance.highlight_lighten;
+            for (size_t i = 0; i < std::min(buf.colors2.size(), ca.colors2.size()); i++) {
+                buf.colors2[i] = apply_highlight(ca.colors2[i].to_color(), highlight_mode, layer);
+            }
+
+            if (ld.mode == LayerDisplay::Mode::FILL_ONLY || (key.stencil && use_stencil))
+                glStencilFunc(GL_GREATER, stencil, 0xff);
+            else
+                glStencilFunc(GL_ALWAYS, stencil, 0xff);
+
+
+            glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+            glBufferData(GL_UNIFORM_BUFFER, sizeof(buf), &buf, GL_DYNAMIC_DRAW);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+            GL_CHECK_ERROR
+            glDrawElements(GL_POINTS, span.count, GL_UNSIGNED_INT, (void *)(span.offset * sizeof(unsigned int)));
+        }
+    }
+}
+
+void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode, bool ignore_flip)
+{
+    GL_CHECK_ERROR
     if (layer_offsets.count(layer)) {
-        for (const auto &[key, span] : layer_offsets.at(layer)) {
-            bool skip = false;
-            switch (key.type) {
-            case Type::TRIANGLE:
-                glUseProgram(program_triangle);
-                if (ld.mode == LayerDisplay::Mode::OUTLINE)
-                    skip = true;
-                break;
+        const auto &ld = ca.get_layer_display(layer);
 
-            case Type::LINE0:
-                glUseProgram(program_line0);
-                break;
+        const auto &batches = layer_offsets.at(layer);
+        Batch batch_stencil, batch_no_stencil;
+        for (const auto &[key, span] : batches) {
+            if (key.stencil)
+                batch_stencil.emplace_back(key, span);
+            else
+                batch_no_stencil.emplace_back(key, span);
+        }
+        if (ld.mode == LayerDisplay::Mode::FILL_ONLY) {
+            render_layer_batch(layer, highlight_mode, ignore_flip, batch_stencil, false, false);
+            render_layer_batch(layer, highlight_mode, ignore_flip, batch_no_stencil, false, false);
+        }
+        else {
+            // draw stencil first
+            render_layer_batch(layer, highlight_mode, ignore_flip, batch_stencil, true, true);
+            render_layer_batch(layer, highlight_mode, ignore_flip, batch_stencil, true, false);
 
-            case Type::LINE_BUTT:
-                glUseProgram(program_line_butt);
-                break;
-
-            case Type::LINE:
-                glUseProgram(program_line);
-                break;
-
-            case Type::GLYPH:
-                glUseProgram(program_glyph);
-                break;
-
-            case Type::CIRCLE:
-                glUseProgram(program_circle);
-                break;
-
-            case Type::ARC0:
-                glUseProgram(program_arc0);
-                break;
-
-            case Type::ARC:
-                glUseProgram(program_arc);
-                break;
-            }
-            switch (highlight_mode) {
-            case HighlightMode::ONLY: // only highlighted, skip not highlighted
-                if (!key.highlight) {
-                    skip = true;
-                }
-                break;
-            case HighlightMode::SKIP: // only not highlighted, skip highlighted
-                if (key.highlight) {
-                    skip = true;
-                }
-                break;
-            }
-            if (!skip) {
-                for (size_t i = 0; i < buf.colors.size(); i++) {
-                    auto k = static_cast<ColorP>(i);
-                    if (ca.appearance.colors.count(k))
-                        buf.colors[i] = apply_highlight(ca.appearance.colors.at(k), highlight_mode, layer);
-                }
-                auto lc = ca.get_layer_color(layer);
-                buf.colors[static_cast<int>(ColorP::AIRWIRE_ROUTER)] =
-                        gl_array_from_color(ca.appearance.colors.at(ColorP::AIRWIRE_ROUTER));
-                buf.colors[static_cast<int>(ColorP::FROM_LAYER)] = apply_highlight(lc, highlight_mode, layer);
-                buf.colors[static_cast<int>(ColorP::LAYER_HIGHLIGHT)] =
-                        gl_array_from_color(lc) + ca.appearance.highlight_lighten;
-                for (size_t i = 0; i < std::min(buf.colors2.size(), ca.colors2.size()); i++) {
-                    buf.colors2[i] = apply_highlight(ca.colors2[i].to_color(), highlight_mode, layer);
-                }
-
-                glBindBuffer(GL_UNIFORM_BUFFER, ubo);
-                glBufferData(GL_UNIFORM_BUFFER, sizeof(buf), &buf, GL_DYNAMIC_DRAW);
-                glBindBuffer(GL_UNIFORM_BUFFER, 0);
-                GL_CHECK_ERROR
-                glDrawElements(GL_POINTS, span.count, GL_UNSIGNED_INT, (void *)(span.offset * sizeof(unsigned int)));
-            }
+            render_layer_batch(layer, highlight_mode, ignore_flip, batch_no_stencil, false, false);
         }
     }
     // glDrawArrays(GL_POINTS, layer_offsets[layer], triangles[layer].size());
@@ -463,7 +490,8 @@ void TriangleRenderer::push()
                 }
                 const bool highlight = (tri_info.flags & TriangleInfo::FLAG_HIGHLIGHT)
                                        || (tri.color == static_cast<int>(ColorP::LAYER_HIGHLIGHT));
-                const BatchKey key{ty, highlight};
+                const bool do_stencil = tri_info.type == TriangleInfo::Type::PAD;
+                const BatchKey key{ty, highlight, do_stencil};
                 type_indices[key].push_back(i + ofs);
             }
             i++;

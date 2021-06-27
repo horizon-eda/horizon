@@ -26,7 +26,7 @@ public:
 
 class TriangleInfo {
 public:
-    enum class Type : uint8_t { NONE, TEXT, GRAPHICS, PLANE_OUTLINE, PLANE_FILL, POLYGON };
+    enum class Type : uint8_t { NONE, TEXT, GRAPHICS, PLANE_OUTLINE, PLANE_FILL, POLYGON, PAD };
 
     TriangleInfo(Type ty, uint8_t flg) : type(ty), flags(flg)
     {

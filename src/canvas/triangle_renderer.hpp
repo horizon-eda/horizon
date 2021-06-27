@@ -24,11 +24,12 @@ private:
     struct BatchKey {
         Type type;
         bool highlight;
+        bool stencil;
 
     private:
         auto tie() const
         {
-            return std::tie(type, highlight);
+            return std::tie(type, highlight, stencil);
         }
 
     public:
@@ -66,6 +67,9 @@ private:
 
     enum class HighlightMode { SKIP, ONLY };
     void render_layer(int layer, HighlightMode highlight_mode, bool ignore_flip = false);
+    using Batch = std::vector<decltype(layer_offsets)::mapped_type::value_type>;
+    void render_layer_batch(int layer, HighlightMode highlight_mode, bool ignore_flip, const Batch &batch,
+                            bool use_stencil, bool stencil_mode);
     void render_annotations(bool top);
     std::array<float, 4> apply_highlight(const class Color &color, HighlightMode mode, int layer) const;
     int stencil = 0;

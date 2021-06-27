@@ -837,7 +837,8 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
         object_ref_pop();
     }
     else { // normal polygon
-        triangle_type_current = TriangleInfo::Type::POLYGON;
+        if (triangle_type_current == TriangleInfo::Type::NONE)
+            triangle_type_current = TriangleInfo::Type::POLYGON;
         begin_group(poly.layer);
         if (poly_is_rect(poly)) {
             const Coordf p0 = (poly.get_vertex(0).position + poly.get_vertex(1).position) / 2;
@@ -875,7 +876,8 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
             }
         }
         end_group();
-        triangle_type_current = TriangleInfo::Type::NONE;
+        if (triangle_type_current == TriangleInfo::Type::POLYGON)
+            triangle_type_current = TriangleInfo::Type::NONE;
     }
 
     if (interactive) {
@@ -1002,7 +1004,9 @@ void Canvas::render(const Pad &pad)
         img_patch_type(PatchType::PAD_TH);
     else
         img_patch_type(PatchType::PAD);
+    triangle_type_current = TriangleInfo::Type::PAD;
     render(pad.padstack, false);
+    triangle_type_current = TriangleInfo::Type::NONE;
     img_patch_type(PatchType::OTHER);
     img_net(nullptr);
     transform_restore();
