@@ -2,7 +2,9 @@ name: Build Windows binaries
 
 on:
   push:
-    branches: [ '*' ]
+    branches:
+      - '*'
+      - '!appveyor-*'
     tags: [ '*' ]
   pull_request:
     branches: [ master ]
