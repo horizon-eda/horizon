@@ -1,6 +1,5 @@
 #include "action_button.hpp"
 #include "imp/action_catalog.hpp"
-#include "core/tool_id.hpp"
 #include "imp/action.hpp"
 #include "imp/action_icon.hpp"
 #include <iostream>

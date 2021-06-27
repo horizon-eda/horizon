@@ -1,7 +1,6 @@
 #pragma once
 #include <gtkmm.h>
 #include <map>
-#include "core/tool_id.hpp"
 #include "imp/action.hpp"
 
 namespace horizon {
