@@ -13,7 +13,7 @@ void main() {
     discard;
 
   float my_alpha = 1;
-  if(layer_flags == 3) { //force alpha for stencil mode
+  if(layer_mode == LAYER_MODE_FILL_ONLY) { //force alpha for stencil mode
     my_alpha = alpha;
   }
 

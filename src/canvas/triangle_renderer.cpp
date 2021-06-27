@@ -153,7 +153,7 @@ public:
     float scale;
     std::array<float, 2> offset;
     float min_line_width;
-    int layer_flags;
+    unsigned int layer_mode;
 };
 
 static std::array<float, 4> operator+(const std::array<float, 4> &a, float b)
@@ -230,7 +230,7 @@ void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode, boo
     else
         gl_mat3_to_array(buf.viewmat, ca.viewmat);
 
-    buf.layer_flags = static_cast<int>(ld.mode);
+    buf.layer_mode = static_cast<unsigned int>(ld.mode);
     buf.scale = ca.scale;
     buf.offset[0] = ca.offset.x;
     buf.offset[1] = ca.offset.y;

@@ -15,8 +15,6 @@ out float lod_alpha;
 
 ##triangle-ubo
 
-int mode = layer_flags;
-
 vec4 t(vec2 p) {
     return vec4((screenmat*viewmat*vec3(p, 1)), 1);
 }

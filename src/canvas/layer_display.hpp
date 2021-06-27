@@ -4,7 +4,8 @@
 namespace horizon {
 class LayerDisplay {
 public:
-    enum class Mode { OUTLINE, HATCH, FILL, FILL_ONLY, N_MODES };
+    // also used in shaders
+    enum class Mode { OUTLINE = 0, HATCH = 1, FILL = 2, FILL_ONLY = 3, N_MODES };
     LayerDisplay(bool vi, Mode mo) : visible(vi), mode(mo)
     {
     }

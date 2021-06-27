@@ -13,16 +13,8 @@ smooth out vec3 color_to_fragment;
 
 ##triangle-ubo
 
-int mode = layer_flags;
-
 vec4 t(vec2 p) {
     return vec4((screenmat*viewmat*vec3(p, 1)), 1);
-}
-
-float t2(vec2 p) {
-	if(mode==1) //HATCH
-		return scale*p.x -scale*p.y;
-	return 0.0;
 }
 
 vec2 p2r(float phi, float l) {

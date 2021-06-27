@@ -18,7 +18,7 @@ void main() {
     discard;
 
   float my_alpha = alpha;
-  if(layer_flags == 3) { //force alpha for stencil mode
+  if(layer_mode == LAYER_MODE_FILL_ONLY) { //force alpha for fill only mode
     my_alpha = alpha;
   }
 
@@ -33,11 +33,11 @@ void main() {
   bool disc = false;
 
   float len = length(round_pos_to_fragment);
-  if(((len < (1-line_width+border_width)) || (len > (1-border_width))) && layer_flags != 3) {
+  if(((len < (1-line_width+border_width)) || (len > (1-border_width))) && layer_mode != LAYER_MODE_FILL_ONLY) {
     my_alpha = 1;
   }
   else {
-    if(get_striper_discard(gl_FragCoord.xy) || layer_flags == 0) { //HATCH
+    if(get_discard(gl_FragCoord.xy)) {
       disc = true;
     }
   }
@@ -51,14 +51,14 @@ void main() {
     vec2 p1 = p2r(a0+a1, 1-line_width/2) - round_pos_to_fragment;
     if(length(p0) < line_width/2) {
       if(length(p0) > line_width/2-border_width) {
-        if(layer_flags != 3)
+        if(layer_mode != LAYER_MODE_FILL_ONLY)
           my_alpha = 1;
         disc = false;
       }
     }
     else if(length(p1) < line_width/2) {
       if(length(p1) > line_width/2-border_width) {
-        if(layer_flags != 3)
+        if(layer_mode != LAYER_MODE_FILL_ONLY)
           my_alpha = 1;
         disc = false;
       }

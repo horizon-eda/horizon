@@ -8,14 +8,23 @@ layout (std140) uniform layer_setup
 	float scale;
 	vec2 offset;
 	float min_line_width;
-	int layer_flags;
+	uint layer_mode;
 };
+
+#define LAYER_MODE_OUTLINE (0U)
+#define LAYER_MODE_HATCH (1U)
+#define LAYER_MODE_FILL (2U)
+#define LAYER_MODE_FILL_ONLY (3U)
 
 #define PI 3.1415926535897932384626433832795
 
-bool get_striper_discard(vec2 fc) {
-	if(layer_flags != 1)
+bool get_discard(vec2 fc) {
+	if(layer_mode == LAYER_MODE_OUTLINE)
+		return true;
+
+	if(layer_mode != LAYER_MODE_HATCH)
 		return false;
+
 	vec2 f = fc - offset*vec2(1,-1);
 	float striper = f.x - f.y;
 	return mod(striper,20)>10;
