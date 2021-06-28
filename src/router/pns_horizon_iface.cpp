@@ -1026,6 +1026,9 @@ void PNS_HORIZON_IFACE::Commit()
               || ju->connected_tracks.size())) {
             for (auto &it : ju->connected_connection_lines)
                 board->connection_lines.erase(it);
+            for (auto &[net, airwires] : board->airwires) {
+                airwires.remove_if([ju](const auto &aw) { return aw.from.junc == ju || aw.to.junc == ju; });
+            }
             board->junctions.erase(ju->uuid);
         }
     }
