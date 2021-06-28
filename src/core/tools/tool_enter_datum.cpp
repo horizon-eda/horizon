@@ -37,7 +37,6 @@ static bool sel_only_has_types(const std::set<SelectableRef> &sel, const std::se
 
 ToolEnterDatum::Mode ToolEnterDatum::get_mode() const
 {
-    const auto types = types_from_sel(selection);
     if (sel_find_exactly_one(selection, ObjectType::TEXT))
         return Mode::TEXT;
     if (sel_find_exactly_one(selection, ObjectType::DIMENSION))
@@ -54,6 +53,8 @@ ToolEnterDatum::Mode ToolEnterDatum::get_mode() const
         return Mode::JUNCTION;
     if (sel_only_has_types(selection, {ObjectType::LINE, ObjectType::JUNCTION}))
         return Mode::LINE;
+    if (sel_only_has_types(selection, {ObjectType::TRACK, ObjectType::JUNCTION}))
+        return Mode::TRACK;
     if (sel_only_has_types(selection, {ObjectType::POLYGON_EDGE, ObjectType::POLYGON_VERTEX}))
         return Mode::POLYGON_EDGE;
     return Mode::INVALID;
@@ -202,8 +203,8 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
             for (const auto &it : selection) {
                 if (it.type == ObjectType::LINE) {
                     Line *line = doc.r->get_line(it.uuid);
-                    Junction *j1 = dynamic_cast<Junction *>(line->from.ptr);
-                    Junction *j2 = dynamic_cast<Junction *>(line->to.ptr);
+                    Junction *j1 = line->from.ptr;
+                    Junction *j2 = line->to.ptr;
                     Coordi center = (j1->position + j2->position) / 2;
                     Coordd half = j2->position - center;
                     const double halflen = half.mag();
@@ -236,6 +237,78 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
                     else if (!has_v1 && !has_v2) {
                         j1->position = center - halfi;
                         j2->position = center + halfi;
+                    }
+                }
+            }
+            return ToolResponse::commit();
+        }
+
+    } break;
+
+    case Mode::TRACK: {
+        Accumulator<int64_t> acc;
+
+        for (const auto &it : selection) {
+            if (it.type == ObjectType::TRACK) {
+                const auto &tr = doc.b->get_board()->tracks.at(it.uuid);
+                if (tr.from.is_junc() || tr.to.is_junc()) {
+                    auto p0 = tr.from.get_position();
+                    auto p1 = tr.to.get_position();
+                    acc.accumulate((p0 - p1).magd());
+                }
+            }
+        }
+
+        if (auto r = imp->dialogs.ask_datum("Track length", acc.get())) {
+            double l = *r / 2.0;
+            for (const auto &it : selection) {
+                if (it.type == ObjectType::TRACK) {
+                    auto &tr = doc.b->get_board()->tracks.at(it.uuid);
+                    if (tr.from.is_junc() || tr.to.is_junc()) {
+                        Junction *j1 = tr.from.junc;
+                        Junction *j2 = tr.to.junc;
+                        Coordi center = (tr.from.get_position() + tr.to.get_position()) / 2;
+                        Coordd half = tr.to.get_position() - center;
+                        const double halflen = half.mag();
+                        const double factor = l / halflen;
+                        half *= factor;
+                        Coordi halfi(half.x, half.y);
+
+                        bool has_v1 =
+                                std::find_if(selection.cbegin(), selection.cend(),
+                                             [j1](const auto a) {
+                                                 return j1 && a.type == ObjectType::JUNCTION && a.uuid == j1->uuid;
+                                             })
+                                != selection.cend();
+                        bool has_v2 =
+                                std::find_if(selection.cbegin(), selection.cend(),
+                                             [j2](const auto a) {
+                                                 return j2 && a.type == ObjectType::JUNCTION && a.uuid == j2->uuid;
+                                             })
+                                != selection.cend();
+                        if (has_v1 && has_v2) {
+                            // nop
+                        }
+                        else if (has_v1 && !has_v2 && j1) {
+                            // keep v2, move only v1
+                            j1->position = tr.to.get_position() - halfi * 2;
+                        }
+                        else if (!has_v1 && has_v2 && j2) {
+                            // keep v1, move only v2
+                            j2->position = tr.from.get_position() + halfi * 2;
+                        }
+                        else if (!has_v1 && !has_v2) {
+                            if (j1 && j2) {
+                                j1->position = center - halfi;
+                                j2->position = center + halfi;
+                            }
+                            else if (j1) {
+                                j1->position = tr.to.get_position() - halfi * 2;
+                            }
+                            else if (j2) {
+                                j2->position = tr.from.get_position() + halfi * 2;
+                            }
+                        }
                     }
                 }
             }

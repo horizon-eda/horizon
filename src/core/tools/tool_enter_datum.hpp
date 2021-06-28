@@ -16,7 +16,7 @@ public:
     }
 
 private:
-    enum class Mode { INVALID, POLYGON_EDGE, POLYGON_VERTEX, TEXT, NET, PAD, DIMENSION, LINE, JUNCTION };
+    enum class Mode { INVALID, POLYGON_EDGE, POLYGON_VERTEX, TEXT, NET, PAD, DIMENSION, LINE, TRACK, JUNCTION };
     Mode get_mode() const;
 };
 } // namespace horizon
