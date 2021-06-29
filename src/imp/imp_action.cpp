@@ -211,6 +211,10 @@ bool ImpBase::trigger_action(const ActionToolID &action)
     if (core->tool_is_active() && !(action_catalog.at(action).flags & ActionCatalogItem::FLAGS_IN_TOOL)) {
         return false;
     }
+    if (keys_current.size()) {
+        keys_current.clear();
+        main_window->tool_hint_label->set_text(">");
+    }
     auto conn = action_connections.at(action);
     conn.cb(conn);
     return true;

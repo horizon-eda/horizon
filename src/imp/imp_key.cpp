@@ -90,6 +90,15 @@ bool ImpBase::handle_action_key(const GdkEventKey *ev)
             canvas->set_selection_mode(CanvasGL::SelectionMode::HOVER);
             canvas->set_selection({});
             set_search_mode(false);
+
+            main_window->tool_hint_label->set_text(">");
+            if (keys_current.size() == 0) {
+                return false;
+            }
+            else {
+                keys_current.clear();
+                return true;
+            }
         }
         else {
             ToolArgs args;
@@ -99,15 +108,6 @@ bool ImpBase::handle_action_key(const GdkEventKey *ev)
             args.action = InToolActionID::CANCEL;
             ToolResponse r = core->tool_update(args);
             tool_process(r);
-            return true;
-        }
-
-        if (keys_current.size() == 0) {
-            return false;
-        }
-        else {
-            keys_current.clear();
-            main_window->tool_hint_label->set_text(key_sequence_to_string(keys_current));
             return true;
         }
     }
