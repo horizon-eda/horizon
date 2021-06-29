@@ -5,22 +5,30 @@
 #include "core/tool_id.hpp"
 
 namespace horizon {
+
+std::string key_sequence_item_to_string(const KeySequenceItem &it)
+{
+    const auto &[val, mod] = it;
+    std::string txt;
+    std::string keyname(gdk_keyval_name(val));
+    if (mod & Gdk::CONTROL_MASK) {
+        txt += "Ctrl+";
+    }
+    if (mod & Gdk::SHIFT_MASK) {
+        txt += "Shift+";
+    }
+    if (mod & Gdk::MOD1_MASK) {
+        txt += "Alt+";
+    }
+    txt += keyname;
+    return txt;
+}
+
 std::string key_sequence_to_string(const KeySequence &keys)
 {
     std::string txt;
     for (const auto &it : keys) {
-        std::string keyname(gdk_keyval_name(it.first));
-        auto mod = it.second;
-        if (mod & Gdk::CONTROL_MASK) {
-            txt += "Ctrl+";
-        }
-        if (mod & Gdk::SHIFT_MASK) {
-            txt += "Shift+";
-        }
-        if (mod & Gdk::MOD1_MASK) {
-            txt += "Alt+";
-        }
-        txt += keyname;
+        txt += key_sequence_item_to_string(it);
         txt += " ";
     }
     rtrim(txt);

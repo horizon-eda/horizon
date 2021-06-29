@@ -35,8 +35,10 @@ enum class ActionGroup {
     VIEW_3D,
 };
 
-typedef std::vector<std::pair<unsigned int, GdkModifierType>> KeySequence;
+using KeySequenceItem = std::pair<unsigned int, GdkModifierType>;
+using KeySequence = std::vector<KeySequenceItem>;
 
+std::string key_sequence_item_to_string(const KeySequenceItem &it);
 std::string key_sequence_to_string(const KeySequence &keys);
 std::string key_sequence_to_string_short(const KeySequence &keys);
 
