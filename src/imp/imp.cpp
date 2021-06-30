@@ -1252,6 +1252,8 @@ bool ImpBase::handle_click(const GdkEventButton *button_event)
     if (button_event->button != 2)
         set_search_mode(false);
 
+    main_window->key_hint_set_visible(false);
+
     bool need_menu = false;
     if (core->tool_is_active() && button_event->button != 2 && !(button_event->state & Gdk::SHIFT_MASK)
         && button_event->type != GDK_2BUTTON_PRESS && button_event->type != GDK_3BUTTON_PRESS) {

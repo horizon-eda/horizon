@@ -141,3 +141,12 @@
   border-bottom:0px;
   border-radius:0px;
 }
+
+.imp-key-hint-slider {
+  background-color: @theme_base_color;
+  border-color: @borders;
+  border-width: 1px 1px 0px 1px;
+  border-style: solid;
+  border-radius: 3px 3px 0px 0px;
+  padding-top: 3px;
+}

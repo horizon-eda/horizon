@@ -3,14 +3,49 @@
 #include "logger/logger.hpp"
 #include "in_tool_action_catalog.hpp"
 #include "actions.hpp"
+#include "util/str_util.hpp"
 
 namespace horizon {
+
+
+class KeyLabel : public Gtk::Box {
+public:
+    KeyLabel(Glib::RefPtr<Gtk::SizeGroup> sg, const std::string &key_markup, ActionToolID act)
+        : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8), action(act)
+    {
+        {
+            auto la = Gtk::manage(new Gtk::Label);
+            la->set_xalign(0);
+            la->set_markup(key_markup);
+            la->show();
+            pack_start(*la, false, false, 0);
+            sg->add_widget(*la);
+        }
+        {
+            auto la = Gtk::manage(new Gtk::Label);
+            la->set_xalign(0);
+            la->set_text(action_catalog.at(action).name);
+            la->show();
+            pack_start(*la, true, true, 0);
+        }
+        property_margin() = 2;
+    }
+
+    const ActionToolID action;
+};
 
 void ImpBase::init_key()
 {
     canvas->signal_key_press_event().connect(sigc::mem_fun(*this, &ImpBase::handle_key_press));
     key_sequence_dialog = std::make_unique<KeySequenceDialog>(this->main_window);
     connect_action(ActionID::HELP, [this](const auto &a) { key_sequence_dialog->show(); });
+    main_window->key_hint_box->signal_row_activated().connect([this](auto row) {
+        if (auto la = dynamic_cast<KeyLabel *>(row->get_child())) {
+            trigger_action(la->action);
+            keys_current.clear();
+            main_window->key_hint_set_visible(false);
+        }
+    });
 }
 
 bool ImpBase::handle_key_press(const GdkEventKey *key_event)
@@ -96,6 +131,7 @@ bool ImpBase::handle_action_key(const GdkEventKey *ev)
                 return false;
             }
             else {
+                main_window->key_hint_set_visible(false);
                 keys_current.clear();
                 return true;
             }
@@ -168,6 +204,7 @@ bool ImpBase::handle_action_key(const GdkEventKey *ev)
         else if (connections_matched.size() == 1) {
             main_window->tool_hint_label->set_text(key_sequence_to_string(keys_current));
             keys_current.clear();
+            main_window->key_hint_set_visible(false);
             auto conn = connections_matched.begin()->first;
             if (!trigger_action({conn->action_id, conn->tool_id})) {
                 main_window->tool_hint_label->set_text(">");
@@ -216,12 +253,36 @@ bool ImpBase::handle_action_key(const GdkEventKey *ev)
                 return false;
             }
 
+            for (auto ch : main_window->key_hint_box->get_children()) {
+                delete ch;
+            }
+
+            for (const auto &[conn, it] : connections_matched) {
+                const auto &[res, seq] = it;
+                std::string seq_label;
+                for (size_t i = 0; i < seq.size(); i++) {
+                    seq_label += Glib::Markup::escape_text(key_sequence_item_to_string(seq.at(i))) + " ";
+                    if (i + 1 == keys_current.size()) {
+                        seq_label += "<b>";
+                    }
+                }
+                rtrim(seq_label);
+                seq_label += "</b>";
+
+                auto la = Gtk::manage(
+                        new KeyLabel(main_window->key_hint_size_group, seq_label, {conn->action_id, conn->tool_id}));
+                main_window->key_hint_box->append(*la);
+                la->show();
+            }
+            main_window->key_hint_set_visible(true);
+
             main_window->tool_hint_label->set_text(key_sequence_to_string(keys_current) + "?");
             return true;
         }
         else if (connections_matched.size() == 0 || in_tool_actions_matched.size() == 0) {
             main_window->tool_hint_label->set_text("Unknown key sequence");
             keys_current.clear();
+            main_window->key_hint_set_visible(false);
             return false;
         }
         else {

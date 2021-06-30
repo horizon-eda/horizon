@@ -61,6 +61,10 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     GET_WIDGET(version_info_bar);
     GET_WIDGET(version_label);
 
+    GET_WIDGET(key_hint_box);
+    GET_WIDGET(key_hint_revealer);
+    key_hint_size_group = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
+
     set_version_info("");
 
     grid_options_button->signal_clicked().connect([this] {
@@ -103,13 +107,11 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         pango_attr_list_insert(attributes_list, attribute_font_features);
     }
 
-    {
-        Gtk::EventBox *gl_container = nullptr;
-        GET_WIDGET(gl_container);
-        canvas = Gtk::manage(new CanvasGL());
-        gl_container->add(*canvas);
-        canvas->show();
-    }
+    GET_WIDGET(gl_container);
+    canvas = Gtk::manage(new CanvasGL());
+    gl_container->add(*canvas);
+    canvas->show();
+
     tool_bar_set_visible(false);
     hud->set_reveal_child(false);
     set_use_action_bar(false);
@@ -263,6 +265,33 @@ void MainWindow::set_version_info(const std::string &s)
     }
     else {
         info_bar_hide(version_info_bar);
+    }
+}
+
+void MainWindow::update_key_hint_position()
+{
+    int dest_x, dest_y;
+    if (tool_hint_label->translate_coordinates(*gl_container, 0, 0, dest_x, dest_y)) {
+        key_hint_revealer->set_margin_start(dest_x - 5); // compensate for various borders and margins
+    }
+}
+
+void MainWindow::key_hint_set_visible(bool show)
+{
+    key_hint_connection.disconnect();
+    if (show) {
+        if (!key_hint_revealer->get_reveal_child()) {
+            update_key_hint_position();
+            key_hint_connection = Glib::signal_timeout().connect(
+                    [this] {
+                        key_hint_revealer->set_reveal_child(true);
+                        return false;
+                    },
+                    500);
+        }
+    }
+    else {
+        key_hint_revealer->set_reveal_child(false);
     }
 }
 

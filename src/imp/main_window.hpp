@@ -46,6 +46,10 @@ public:
 
     Gtk::Button *grid_window_button = nullptr;
 
+    Gtk::ListBox *key_hint_box = nullptr;
+    Glib::RefPtr<Gtk::SizeGroup> key_hint_size_group;
+    void key_hint_set_visible(bool v);
+
     Glib::SignalProxy<bool, const Glib::ustring &> signal_activate_hud_link()
     {
         return hud_label->signal_activate_link();
@@ -74,6 +78,8 @@ public:
 
     // virtual ~MainWindow();
 private:
+    Gtk::EventBox *gl_container = nullptr;
+
     Gtk::Revealer *tool_bar = nullptr;
     Gtk::Label *tool_bar_name_label = nullptr;
     Gtk::Label *tool_bar_tip_label = nullptr;
@@ -108,5 +114,9 @@ private:
     Gtk::Label *version_label = nullptr;
 
     bool tool_bar_use_actions = false;
+
+    Gtk::Revealer *key_hint_revealer = nullptr;
+    sigc::connection key_hint_connection;
+    void update_key_hint_position();
 };
 } // namespace horizon
