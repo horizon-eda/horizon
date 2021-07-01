@@ -9,7 +9,6 @@
 
 namespace horizon {
 
-
 CanvasPDF::CanvasPDF(PoDoFo::PdfPainterMM &p, PoDoFo::PdfFont &f, const PDFExportSettings &s)
     : Canvas::Canvas(), painter(p), font(f), settings(s), metrics(font.GetFontMetrics())
 {
@@ -142,18 +141,42 @@ void CanvasPDF::img_polygon(const Polygon &ipoly, bool tr)
     painter.SetColor(color.r, color.g, color.b);
     painter.SetStrokingColor(color.r, color.g, color.b);
     painter.SetStrokeWidthMM(to_um(settings.min_line_width));
-    auto poly = ipoly.remove_arcs(64);
-    if (poly.usage == nullptr) { // regular patch
-        bool first = true;
-        for (const auto &it : poly.vertices) {
+    if (ipoly.usage == nullptr) { // regular patch
+        const Polygon::Vertex *last = nullptr;
+        for (const auto &it : ipoly.vertices) {
             Coordi p = it.position;
             if (tr)
                 p = transform.transform(p);
-            if (first)
+            if (last == nullptr) {
                 painter.MoveToMM(to_um(p.x), to_um(p.y));
-            else
+            }
+            else if (last->type == Polygon::Vertex::Type::LINE) {
                 painter.LineToMM(to_um(p.x), to_um(p.y));
-            first = false;
+            }
+            else if (last->type == Polygon::Vertex::Type::ARC) {
+                // Finish arc
+                Coordi start = last->position;
+                Coordi c = last->arc_center;
+                if (tr) {
+                    c = transform.transform(c);
+                    start = transform.transform(start);
+                }
+                const auto r = ((Coordd) start - (Coordd) c).mag();
+                if (start == p) {
+                    painter.Circle(to_pt(c.x), to_pt(c.y), to_pt(r));
+                }
+                else {
+                    double a0 = atan2(start.y - c.y, start.x - c.x);
+                    double a1 = atan2(p.y - c.y, p.x - c.x);
+                    if (a0 > a1)
+                        std::swap(a0, a1);
+                    painter.Arc(to_pt(p.x), to_pt(p.y), to_pt(r), a0, a1);
+                }
+            }
+            else {
+                assert(false); // Unreachable
+            }
+            last = &it;
         }
         painter.ClosePath();
         if (fill)
