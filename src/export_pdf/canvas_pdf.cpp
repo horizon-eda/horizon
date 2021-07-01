@@ -9,6 +9,7 @@
 
 namespace horizon {
 
+
 CanvasPDF::CanvasPDF(PoDoFo::PdfPainterMM &p, PoDoFo::PdfFont &f, const PDFExportSettings &s)
     : Canvas::Canvas(), painter(p), font(f), settings(s), metrics(font.GetFontMetrics())
 {
@@ -155,13 +156,14 @@ void CanvasPDF::img_polygon(const Polygon &ipoly, bool tr)
             }
             else if (last->type == Polygon::Vertex::Type::ARC) {
                 // Finish arc
-                Coordi start = last->position;
-                Coordi c = last->arc_center;
+                Coordd start = last->position;
+                Coordd c = last->arc_center;
+
                 if (tr) {
                     c = transform.transform(c);
                     start = transform.transform(start);
                 }
-                const auto r = ((Coordd) start - (Coordd) c).mag();
+                const auto r = (start - c).mag();
                 if (start == p) {
                     painter.Circle(to_pt(c.x), to_pt(c.y), to_pt(r));
                 }
