@@ -143,44 +143,7 @@ void CanvasPDF::img_polygon(const Polygon &ipoly, bool tr)
     painter.SetStrokingColor(color.r, color.g, color.b);
     painter.SetStrokeWidthMM(to_um(settings.min_line_width));
     if (ipoly.usage == nullptr) { // regular patch
-        const Polygon::Vertex *last = nullptr;
-        for (const auto &it : ipoly.vertices) {
-            Coordi p = it.position;
-            if (tr)
-                p = transform.transform(p);
-            if (last == nullptr) {
-                painter.MoveToMM(to_um(p.x), to_um(p.y));
-            }
-            else if (last->type == Polygon::Vertex::Type::LINE) {
-                painter.LineToMM(to_um(p.x), to_um(p.y));
-            }
-            else if (last->type == Polygon::Vertex::Type::ARC) {
-                // Finish arc
-                Coordd start = last->position;
-                Coordd c = last->arc_center;
-
-                if (tr) {
-                    c = transform.transform(c);
-                    start = transform.transform(start);
-                }
-                const auto r = (start - c).mag();
-                if (start == p) {
-                    painter.Circle(to_pt(c.x), to_pt(c.y), to_pt(r));
-                }
-                else {
-                    double a0 = atan2(start.y - c.y, start.x - c.x);
-                    double a1 = atan2(p.y - c.y, p.x - c.x);
-                    if (a0 > a1)
-                        std::swap(a0, a1);
-                    painter.Arc(to_pt(p.x), to_pt(p.y), to_pt(r), a0, a1);
-                }
-            }
-            else {
-                assert(false); // Unreachable
-            }
-            last = &it;
-        }
-        painter.ClosePath();
+        draw_polygon(ipoly, tr);
         if (fill)
             painter.Fill();
         else
@@ -226,23 +189,88 @@ void CanvasPDF::img_hole(const Hole &hole)
     if (settings.set_holes_size) {
         hole2.diameter = settings.holes_diameter;
     }
-    auto poly = hole2.to_polygon().remove_arcs(64);
-    bool first = true;
-    for (const auto &it : poly.vertices) {
-        Coordi p = it.position;
-        p = transform.transform(p);
-        if (first)
-            painter.MoveToMM(to_um(p.x), to_um(p.y));
-        else
-            painter.LineToMM(to_um(p.x), to_um(p.y));
-        first = false;
-    }
-    painter.ClosePath();
+    draw_polygon(hole2.to_polygon(), true);
     if (fill)
         painter.Fill(true);
     else
         painter.Stroke();
     painter.Restore();
+}
+
+void CanvasPDF::draw_polygon(const Polygon &ipoly, bool tr)
+{
+    assert(ipoly.usage == nullptr);
+    bool first = true;
+    for (auto it = ipoly.vertices.cbegin(); it < ipoly.vertices.cend(); it++) {
+        Coordd p = it->position;
+        if (tr)
+            p = transform.transform(p);
+        auto it_next = it + 1;
+        if (it_next == ipoly.vertices.cend()) {
+            it_next = ipoly.vertices.cbegin();
+        }
+        if (first) {
+            painter.MoveToMM(to_um(p.x), to_um(p.y));
+        }
+        if (it->type == Polygon::Vertex::Type::LINE) {
+            painter.LineToMM(to_um(p.x), to_um(p.y));
+        }
+        else if (it->type == Polygon::Vertex::Type::ARC) {
+            // Finish arc
+            Coordd end = it_next->position;
+            Coordd c = it->arc_center;
+
+            painter.LineToMM(to_um(p.x), to_um(p.y));
+
+            if (tr) {
+                c = transform.transform(c);
+                end = transform.transform(end);
+            }
+            const auto r = (end - c).mag();
+            if (p == end) {
+                // Circle always starts and ends at 3 o-clock
+                painter.Circle(to_pt(c.x), to_pt(c.y), to_pt(r));
+            }
+            else {
+                // The Arc function forces a0 and a1 to be between 0 and 360
+                // with 12 oclock being 0 and rotating clockwise as deg increases.
+                // atan2 starts with 0 at 3 o-clock and is cw for y-positive and
+                // ccw for y-negative. This shifts atan2 to match the arc arguments
+                // Note: atan2 args x and y are swapped on purpose
+                const Coordd start = p;
+                const double deg = 180/M_PI;
+                double a0 = std::fmod(atan2(start.x - c.x, start.y - c.y)*deg + 360, 360);
+                double a1 = std::fmod(atan2(end.x - c.x, end.y - c.y)*deg+ 360, 360);
+
+                // Arc only goes clockwise and requires a0 < a1
+                const auto cw = it->arc_reverse;
+                if (cw) {
+                    if (a0 < a1) {
+                        // No change
+                    } else {
+                        // Eg a1 = 0 and a0 = 90 --> So make a1 360
+                        a1 += 360;
+                    }
+                } else {
+                    if (a0 < a1) {
+                        // Eg a0 = 0 and a0 = 90 but going CCW so we want to
+                        // have a0=90 to a1=360, so swap and add 360
+                        std::swap(a0, a1);
+                        a1 += 360;
+                    } else {
+                        // Eg a0 = 0 and a0 = 90 but going CCW so we want to
+                        // have a0=0 to a1=90 just swap
+                        std::swap(a0, a1);
+                    }
+                }
+
+                painter.Arc(to_pt(c.x), to_pt(c.y), to_pt(r), a0, a1);
+            }
+            painter.MoveToMM(to_um(end.x), to_um(end.y));
+        }
+        first = false;
+    }
+    painter.ClosePath();
 }
 
 void CanvasPDF::request_push()
