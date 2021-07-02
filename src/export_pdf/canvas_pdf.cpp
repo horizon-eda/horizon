@@ -252,26 +252,29 @@ void CanvasPDF::draw_polygon(const Polygon &ipoly, bool tr)
                 // ccw for y-negative. This shifts atan2 to match the arc arguments
                 // Note: atan2 args x and y are swapped on purpose
                 const Coordd start = p;
-                const double deg = 180/M_PI;
-                double a0 = std::fmod(atan2(start.x - c.x, start.y - c.y)*deg + 360, 360);
-                double a1 = std::fmod(atan2(end.x - c.x, end.y - c.y)*deg+ 360, 360);
+                const double deg = 180 / M_PI;
+                double a0 = std::fmod(atan2(start.x - c.x, start.y - c.y) * deg + 360, 360);
+                double a1 = std::fmod(atan2(end.x - c.x, end.y - c.y) * deg + 360, 360);
 
                 // Arc only goes clockwise and requires a0 < a1
                 const auto cw = it->arc_reverse;
                 if (cw) {
                     if (a0 < a1) {
                         // No change
-                    } else {
+                    }
+                    else {
                         // Eg a1 = 0 and a0 = 90 --> So make a1 360
                         a1 += 360;
                     }
-                } else {
+                }
+                else {
                     if (a0 < a1) {
                         // Eg a0 = 0 and a0 = 90 but going CCW so we want to
                         // have a0=90 to a1=360, so swap and add 360
                         std::swap(a0, a1);
                         a1 += 360;
-                    } else {
+                    }
+                    else {
                         // Eg a0 = 0 and a0 = 90 but going CCW so we want to
                         // have a0=0 to a1=90 just swap
                         std::swap(a0, a1);
