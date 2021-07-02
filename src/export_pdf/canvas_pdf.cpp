@@ -275,7 +275,7 @@ void CanvasPDF::draw_polygon(const Polygon &ipoly, bool tr)
                         a1 += 360;
                     }
                     else {
-                        // Eg a0 = 0 and a0 = 90 but going CCW so we want to
+                        // Eg a0 = 90 and a0 = 0 but going CCW so we want to
                         // have a0=0 to a1=90 just swap
                         std::swap(a0, a1);
                     }
