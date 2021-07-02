@@ -269,14 +269,14 @@ void CanvasPDF::draw_polygon(const Polygon &ipoly, bool tr)
                 }
                 else {
                     if (a0 < a1) {
-                        // Eg a0 = 0 and a0 = 90 but going CCW so we want to
-                        // have a0=90 to a1=360, so swap and add 360
+                        // Eg a0 = 0 and a1 = 90 but going CCW so we want to
+                        // have a0 = 90 to a1 = 360, so swap and add 360
                         std::swap(a0, a1);
                         a1 += 360;
                     }
                     else {
-                        // Eg a0 = 90 and a0 = 0 but going CCW so we want to
-                        // have a0=0 to a1=90 just swap
+                        // Eg a0 = 90 and a1 = 0 but going CCW so we want to
+                        // have a0 = 0 to a1 = 90 just swap
                         std::swap(a0, a1);
                     }
                 }
