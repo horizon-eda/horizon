@@ -201,6 +201,7 @@ void CanvasPDF::draw_polygon(const Polygon &ipoly, bool tr)
 {
     assert(ipoly.usage == nullptr);
     bool first = true;
+    bool last = false;
     for (auto it = ipoly.vertices.cbegin(); it < ipoly.vertices.cend(); it++) {
         Coordd p = it->position;
         if (tr)
@@ -208,19 +209,30 @@ void CanvasPDF::draw_polygon(const Polygon &ipoly, bool tr)
         auto it_next = it + 1;
         if (it_next == ipoly.vertices.cend()) {
             it_next = ipoly.vertices.cbegin();
+            last = true;
         }
-        if (first) {
+        if (first)
             painter.MoveToMM(to_um(p.x), to_um(p.y));
-        }
         if (it->type == Polygon::Vertex::Type::LINE) {
-            painter.LineToMM(to_um(p.x), to_um(p.y));
+            if (!first)
+                painter.LineToMM(to_um(p.x), to_um(p.y));
+
+            if (last) {
+                // Using the Move to with arcs/circles seems to jack up the
+                // close path command so manually close it
+                Coordd end = it_next->position;
+                if (tr)
+                    end = transform.transform(end);
+                painter.LineToMM(to_um(end.x), to_um(end.y));
+            }
         }
         else if (it->type == Polygon::Vertex::Type::ARC) {
             // Finish arc
             Coordd end = it_next->position;
             Coordd c = it->arc_center;
 
-            painter.LineToMM(to_um(p.x), to_um(p.y));
+            if (!first)
+                painter.LineToMM(to_um(p.x), to_um(p.y));
 
             if (tr) {
                 c = transform.transform(c);
@@ -228,8 +240,10 @@ void CanvasPDF::draw_polygon(const Polygon &ipoly, bool tr)
             }
             const auto r = (end - c).mag();
             if (p == end) {
-                // Circle always starts and ends at 3 o-clock
                 painter.Circle(to_pt(c.x), to_pt(c.y), to_pt(r));
+                // Circle always starts and ends at 3 o-clock
+                // so move to proper end point
+                painter.MoveToMM(to_um(end.x), to_um(end.y));
             }
             else {
                 // The Arc function forces a0 and a1 to be between 0 and 360
@@ -263,14 +277,14 @@ void CanvasPDF::draw_polygon(const Polygon &ipoly, bool tr)
                         std::swap(a0, a1);
                     }
                 }
-
                 painter.Arc(to_pt(c.x), to_pt(c.y), to_pt(r), a0, a1);
+
+                // Since its sometimes swapped reverse
+                painter.MoveToMM(to_um(end.x), to_um(end.y));
             }
-            painter.MoveToMM(to_um(end.x), to_um(end.y));
         }
         first = false;
     }
-    painter.ClosePath();
 }
 
 void CanvasPDF::request_push()
