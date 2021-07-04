@@ -153,5 +153,6 @@ enum class ToolID {
     MEASURE,
     EDIT_CUSTOM_VALUE,
     PLACE_DOT,
+    SET_TRACK_WIDTH,
 };
 } // namespace horizon

@@ -85,6 +85,7 @@
 #include "tools/tool_measure.hpp"
 #include "tools/tool_edit_custom_value.hpp"
 #include "tools/tool_place_dot.hpp"
+#include "tools/tool_set_track_width.hpp"
 
 namespace horizon {
 
@@ -404,6 +405,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::PLACE_DOT:
         return std::make_unique<ToolPlaceDot>(this, tool_id);
+
+    case ToolID::SET_TRACK_WIDTH:
+        return std::make_unique<ToolSetTrackWidth>(this, tool_id);
 
     default:
         return nullptr;
