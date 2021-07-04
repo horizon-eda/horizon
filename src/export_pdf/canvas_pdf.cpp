@@ -197,11 +197,85 @@ void CanvasPDF::img_hole(const Hole &hole)
     painter.Restore();
 }
 
+// Ported from of PoDoFo::PdfPainter::InternalArc. c is the arc center
+// angles must be in radians, c and r must be in a PDF "pt" unit.
+static void pdf_arc_segment(PoDoFo::PdfPainter &painter, const Coordd c, const double r,
+                            const double a0, const double a1, const bool cw)
+{
+    assert(std::abs(a1 - a0) <= M_PI/2); // A bezier can only approximate an arc of <= 90 deg
+    double delta_angle = (M_PI - static_cast<double>(a0 + a1)) / 2.0f;
+    if (!cw)
+        delta_angle = 2*M_PI - delta_angle;
+    const double new_angle = (static_cast<double>(a1 - a0)/ 2.0f);
+    std::printf("    segment a0=%f a1=%f da=%f na=%f cw=%i\n",
+                a0*180/M_PI, a1*180/M_PI, delta_angle*180/M_PI,
+                new_angle*180/M_PI, cw);
+    const Coordd r0 = Coordd(cos(new_angle) * r, sin(new_angle) * r);
+    const Coordd r2 = Coordd(
+        (r * 4.0f - r0.x) / 3.0f,
+        ((r * 1.0f - r0.y) * (r0.x - r * 3.0f)) / (3.0f* r0.y)
+    );
+    const Coordd r1 = Coordd(r2.x, -r2.y);
+    const Coordd r3 = Coordd(r0.x, -r0.y);
+    const Coordd a = Coordd(sin(delta_angle), cos(delta_angle));
+    const Coordd c1 = Coordd(r1.cross(a), r1.dot(a)) + c;
+    const Coordd c2 = Coordd(r2.cross(a), r2.dot(a)) + c;
+    const Coordd c3 = Coordd(r3.cross(a), r3.dot(a)) + c;
+    painter.CubicBezierTo(c1.x, c1.y, c2.x, c2.y, c3.x, c3.y);
+}
+
+static void pdf_arc(PoDoFo::PdfPainter &painter, const Coordd start, const Coordd c,
+                    const Coordd end, const bool cw)
+{
+    const auto r = to_pt((start - c).mag());
+    const auto ctr = Coordd(to_pt(c.x), to_pt(c.y)) ;
+    double a0 = atan2(start.y - c.y, start.x - c.x);
+    double a1 = atan2(end.y - c.y, end.x - c.x);
+    std::printf("Arc start=%s\n    center=%s\n    end=%s\n    a0=%f a1=%f\n",
+                coord_to_string(start).c_str(),
+                coord_to_string(c).c_str(),
+                coord_to_string(end).c_str(),
+                a0*180/M_PI, a1*180/M_PI);
+
+    if (a0 < 0)
+        a0 += 2*M_PI;
+    if (a1 < 0)
+        a1 += 2*M_PI;
+
+    if (cw) {
+        if (a0 >= a1) { // Circle or large arc
+            a1 += 2*M_PI;
+        }
+        assert(a0 < a1);
+    }
+    else {
+        if (a0 >= a1) { // Circle or large arc
+            a1 += 2*M_PI;
+        }
+        assert(a1 > a0);
+    }
+    while (std::abs(a0 - a1) > M_PI/2) {
+        if (cw) {
+            const auto a = a0 + M_PI/2;
+            pdf_arc_segment(painter, ctr, r, a0, a, cw);
+            a0 = a;
+        } else {
+            const auto a = a1 - M_PI/2;
+            pdf_arc_segment(painter, ctr, r, a, a1, cw);
+            a1 = a;
+        }
+    }
+    if (a0 != a1) {
+        pdf_arc_segment(painter, ctr, r, a0, a1, cw);
+    }
+}
+
+
+
 void CanvasPDF::draw_polygon(const Polygon &ipoly, bool tr)
 {
     assert(ipoly.usage == nullptr);
     bool first = true;
-    bool last = false;
     for (auto it = ipoly.vertices.cbegin(); it < ipoly.vertices.cend(); it++) {
         Coordd p = it->position;
         if (tr)
@@ -209,22 +283,13 @@ void CanvasPDF::draw_polygon(const Polygon &ipoly, bool tr)
         auto it_next = it + 1;
         if (it_next == ipoly.vertices.cend()) {
             it_next = ipoly.vertices.cbegin();
-            last = true;
         }
-        if (first)
+        if (first) {
             painter.MoveToMM(to_um(p.x), to_um(p.y));
+        }
         if (it->type == Polygon::Vertex::Type::LINE) {
             if (!first)
                 painter.LineToMM(to_um(p.x), to_um(p.y));
-
-            if (last) {
-                // Using the Move to with arcs/circles seems to jack up the
-                // close path command so manually close it
-                Coordd end = it_next->position;
-                if (tr)
-                    end = transform.transform(end);
-                painter.LineToMM(to_um(end.x), to_um(end.y));
-            }
         }
         else if (it->type == Polygon::Vertex::Type::ARC) {
             // Finish arc
@@ -238,56 +303,12 @@ void CanvasPDF::draw_polygon(const Polygon &ipoly, bool tr)
                 c = transform.transform(c);
                 end = transform.transform(end);
             }
-            const auto r = (end - c).mag();
-            if (p == end) {
-                painter.Circle(to_pt(c.x), to_pt(c.y), to_pt(r));
-                // Circle always starts and ends at 3 o-clock
-                // so move to proper end point
-                painter.MoveToMM(to_um(end.x), to_um(end.y));
-            }
-            else {
-                // The Arc function forces a0 and a1 to be between 0 and 360
-                // with 12 oclock being 0 and rotating clockwise as deg increases.
-                // atan2 starts with 0 at 3 o-clock and is cw for y-positive and
-                // ccw for y-negative. This shifts atan2 to match the arc arguments
-                // Note: atan2 args x and y are swapped on purpose
-                const Coordd start = p;
-                const double deg = 180 / M_PI;
-                double a0 = std::fmod(atan2(start.x - c.x, start.y - c.y) * deg + 360, 360);
-                double a1 = std::fmod(atan2(end.x - c.x, end.y - c.y) * deg + 360, 360);
-
-                // Arc only goes clockwise and requires a0 < a1
-                const auto cw = it->arc_reverse;
-                if (cw) {
-                    if (a0 < a1) {
-                        // No change
-                    }
-                    else {
-                        // Eg a1 = 0 and a0 = 90 --> So make a1 360
-                        a1 += 360;
-                    }
-                }
-                else {
-                    if (a0 < a1) {
-                        // Eg a0 = 0 and a1 = 90 but going CCW so we want to
-                        // have a0 = 90 to a1 = 360, so swap and add 360
-                        std::swap(a0, a1);
-                        a1 += 360;
-                    }
-                    else {
-                        // Eg a0 = 90 and a1 = 0 but going CCW so we want to
-                        // have a0 = 0 to a1 = 90 just swap
-                        std::swap(a0, a1);
-                    }
-                }
-                painter.Arc(to_pt(c.x), to_pt(c.y), to_pt(r), a0, a1);
-
-                // Since its sometimes swapped reverse
-                painter.MoveToMM(to_um(end.x), to_um(end.y));
-            }
+            pdf_arc(painter, p, c, end, it->arc_reverse);
         }
         first = false;
     }
+
+    painter.ClosePath();
 }
 
 void CanvasPDF::request_push()
