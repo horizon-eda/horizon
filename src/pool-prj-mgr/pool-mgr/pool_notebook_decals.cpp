@@ -1,5 +1,4 @@
 #include "pool_notebook.hpp"
-#include "editors/editor_window.hpp"
 #include "util/util.hpp"
 #include "nlohmann/json.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
@@ -25,7 +24,7 @@ void PoolNotebook::handle_create_decal()
     chooser->set_current_folder(Glib::build_filename(base_path, "decals"));
 
     if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-        std::string fn = EditorWindow::fix_filename(chooser->get_filename());
+        std::string fn = append_dot_json(chooser->get_filename());
         Decal dec(horizon::UUID::random());
         save_json_to_file(fn, dec.serialize());
         pool_update({fn});

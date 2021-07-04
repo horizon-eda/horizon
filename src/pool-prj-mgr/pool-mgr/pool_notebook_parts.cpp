@@ -1,5 +1,4 @@
 #include "pool_notebook.hpp"
-#include "editors/editor_window.hpp"
 #include "util/util.hpp"
 #include "create_part_dialog.hpp"
 #include "nlohmann/json.hpp"

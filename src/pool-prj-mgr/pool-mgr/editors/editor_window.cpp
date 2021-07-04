@@ -346,7 +346,7 @@ void EditorWindow::save()
         if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
             if (iface)
                 iface->save();
-            std::string fn = fix_filename(chooser->get_filename());
+            std::string fn = append_dot_json(chooser->get_filename());
             s_signal_filename_changed.emit(fn);
             store->save_as(fn);
             s_signal_saved.emit(store->filename);
@@ -356,15 +356,6 @@ void EditorWindow::save()
     }
     if (info_bar)
         info_bar_hide(info_bar);
-}
-
-std::string EditorWindow::fix_filename(std::string s)
-{
-    trim(s);
-    if (!endswith(s, ".json")) {
-        s += ".json";
-    }
-    return s;
 }
 
 std::string EditorWindow::get_filename() const

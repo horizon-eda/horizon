@@ -5,8 +5,6 @@
 #include "kicad_symbol_import_wizard.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "pool/pool.hpp"
-#include "pool-prj-mgr/pool-mgr/editors/editor_window.hpp"
-
 
 namespace horizon {
 

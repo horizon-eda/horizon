@@ -1,5 +1,4 @@
 #include "pool_notebook.hpp"
-#include "editors/editor_window.hpp"
 #include "duplicate/duplicate_unit.hpp"
 #include "util/util.hpp"
 #include "dialogs/pool_browser_dialog.hpp"
@@ -36,7 +35,7 @@ void PoolNotebook::handle_create_symbol()
         chooser->set_current_name(basename);
 
         if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-            std::string fn = EditorWindow::fix_filename(chooser->get_filename());
+            std::string fn = append_dot_json(chooser->get_filename());
             Symbol sym(horizon::UUID::random());
             auto unit = pool.get_unit(unit_uuid);
             sym.name = unit->name;
@@ -64,7 +63,7 @@ void PoolNotebook::handle_duplicate_symbol(const UUID &uu)
     chooser->set_current_name(DuplicateUnitWidget::insert_filename(sym_basename, "-copy"));
 
     if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-        std::string fn = EditorWindow::fix_filename(chooser->get_filename());
+        std::string fn = append_dot_json(chooser->get_filename());
         Symbol sym(*pool.get_symbol(uu));
         sym.name += " (Copy)";
         sym.uuid = UUID::random();

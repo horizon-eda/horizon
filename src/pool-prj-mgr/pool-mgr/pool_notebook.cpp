@@ -22,7 +22,6 @@
 #include "util/win32_undef.hpp"
 #include "util/fs_util.hpp"
 #include "duplicate/duplicate_unit.hpp"
-#include "editors/editor_window.hpp"
 #include "move_window.hpp"
 
 namespace horizon {
@@ -144,7 +143,7 @@ void PoolNotebook::handle_duplicate_item(ObjectType ty, const UUID &uu)
     chooser->set_current_name(DuplicateUnitWidget::insert_filename(it_basename, "-copy"));
 
     if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-        std::string fn = EditorWindow::fix_filename(chooser->get_filename());
+        std::string fn = append_dot_json(chooser->get_filename());
         switch (ty) {
         case ObjectType::DECAL: {
             Decal dec(*pool.get_decal(uu));

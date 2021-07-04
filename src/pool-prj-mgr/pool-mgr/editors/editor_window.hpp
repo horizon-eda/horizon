@@ -32,7 +32,6 @@ public:
                  bool is_temp);
     void reload();
     bool get_need_update() const;
-    static std::string fix_filename(std::string s);
     void save();
     void force_close();
     bool get_needs_save() const;

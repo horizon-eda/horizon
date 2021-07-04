@@ -13,6 +13,7 @@
 #include "alphanum/alphanum.hpp"
 #include <gdk/gdkkeysyms.h>
 #include "imp/in_tool_action.hpp"
+#include "str_util.hpp"
 
 namespace horizon {
 
@@ -540,6 +541,17 @@ void ensure_parent_dir(const std::string &path)
     if (!Glib::file_test(parent, Glib::FILE_TEST_IS_DIR)) {
         Gio::File::create_for_path(parent)->make_directory_with_parents();
     }
+}
+
+
+std::string append_dot_json(const std::string &s)
+{
+    std::string r = s;
+    trim(r);
+    if (!endswith(r, ".json")) {
+        return r + ".json";
+    }
+    return r;
 }
 
 } // namespace horizon
