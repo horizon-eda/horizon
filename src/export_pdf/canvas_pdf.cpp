@@ -210,10 +210,6 @@ static Coordd pdf_arc_segment(PoDoFo::PdfPainter &painter, const Coordd c, const
 
     // Shift to bisect at x axis
     const auto theta = (a0 + a1) / 2;
-
-    // At 180 there is a nonlinearity so force the direction
-    // const auto s = sin(theta) > 0;//cw ? 1: -1;
-    // const auto phi = std::abs(da/2)*s;
     const auto phi = da / 2;
 
     // Compute points of unit circle for given delta angle
