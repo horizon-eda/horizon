@@ -197,32 +197,28 @@ void CanvasPDF::img_hole(const Hole &hole)
     painter.Restore();
 }
 
-// c0 is the start, c is the arc center.
+// c is the arc center.
 // angles must be in radians, c and r must be in a PDF "pt" unit.
-// See How to determine the control points of a Bézier curve that approximates a
-// small circular arc by Richard ADeVeneza, Nov 2004
+// See "How to determine the control points of a Bézier curve that approximates a
+// small circular arc" by Richard ADeVeneza, Nov 2004
 // https://www.tinaja.com/glib/bezcirc2.pdf
-static Coordd pdf_arc_segment(PoDoFo::PdfPainter &painter,
-                              const Coordd c0, const Coordd c,
-                              const double r,
-                              double a0, double a1,
-                              const bool cw, const bool debug)
+static Coordd pdf_arc_segment(PoDoFo::PdfPainter &painter, const Coordd c, const double r, double a0, double a1)
 {
     const auto da = a0 - a1;
     assert(da != 0);
-    assert(std::abs(da) <= M_PI/2);
+    assert(std::abs(da) <= M_PI / 2);
 
     // Shift to bisect at x axis
-    const auto theta = (a0+a1)/2;
+    const auto theta = (a0 + a1) / 2;
 
     // At 180 there is a nonlinearity so force the direction
-    //const auto s = sin(theta) > 0;//cw ? 1: -1;
-    //const auto phi = std::abs(da/2)*s;
-    const auto phi = da/2;
+    // const auto s = sin(theta) > 0;//cw ? 1: -1;
+    // const auto phi = std::abs(da/2)*s;
+    const auto phi = da / 2;
 
     // Compute points of unit circle for given delta angle
     const auto p0 = Coordd(cos(phi), sin(phi));
-    const auto p1 = Coordd((4-p0.x)/3, (1-p0.x)*(3-p0.x)/(3*p0.y));
+    const auto p1 = Coordd((4 - p0.x) / 3, (1 - p0.x) * (3 - p0.x) / (3 * p0.y));
     const auto p2 = Coordd(p1.x, -p1.y);
     const auto p3 = Coordd(p0.x, -p0.y);
 
@@ -231,66 +227,41 @@ static Coordd pdf_arc_segment(PoDoFo::PdfPainter &painter,
     const auto c2 = p2.rotate(theta) * r + c;
     const auto c3 = p3.rotate(theta) * r + c;
 
-    // Sanity check
-    if (debug) {// and {
-        const double deg = 180/M_PI;
-        std::printf(
-            "    segment: c=(%f, %f) from a0=%f to a1=%f da=%f theta=%f phi=%f\n",
-            c.x, c.y, a0*deg, a1*deg, da*deg, theta*deg, phi*deg
-        );
-        if ((c0 - c3).mag() < 0.001)
-            std::printf("   ^^ bad\n");
-    }
-
     painter.CubicBezierTo(c1.x, c1.y, c2.x, c2.y, c3.x, c3.y);
     return c3; // end point
 }
 
-static void pdf_arc(PoDoFo::PdfPainter &painter, const Coordd start, const Coordd c,
-                    const Coordd end, bool cw)
+static void pdf_arc(PoDoFo::PdfPainter &painter, const Coordd start, const Coordd c, const Coordd end, bool cw)
 {
     const auto r = to_pt((start - c).mag());
     const auto ctr = Coordd(to_pt(c.x), to_pt(c.y));
 
-    // Get angles between 0 and 2*M_PI relative to the x axis
-    double a0 = std::fmod(atan2(start.y - c.y, start.x - c.x)+2*M_PI, 2*M_PI);
-    double a1 = std::fmod(atan2(end.y - c.y, end.x - c.x)+2*M_PI, 2*M_PI);
-    bool debug = true;
+    // Get angles relative to the x axis
+    double a0 = atan2(start.y - c.y, start.x - c.x);
+    double a1 = atan2(end.y - c.y, end.x - c.x);
 
-    if (a0 != a1) {
-        std::printf("\n\n\nArc start=(%f, %f) center=(%f, %f) end=(%f, %f) a0=%f a1=%f cw=%i\n",
-                to_pt(start.x), to_pt(start.y),
-                ctr.x, ctr.y,
-                to_pt(end.x), to_pt(end.y),
-                a0*180/M_PI, a1*180/M_PI, cw);
-        debug = true;
-    } else {
-        std::printf("Circle start=(%f, %f) center=(%f, %f) end=(%f, %f) a0=%f a1=%f\n",
-                to_pt(start.x), to_pt(start.y),
-                ctr.x, ctr.y,
-                to_pt(end.x), to_pt(end.y), a0*180/M_PI, a1*180/M_PI);
+    // Circle or large arc
+    if (cw && a0 <= a1) {
+        a0 += 2 * M_PI;
+    }
+    else if (!cw && a0 >= a1) {
+        a0 -= 2 * M_PI;
     }
 
-    if (a0 == a1) { // Circle
-        a1 += 2*M_PI;
+    const double da = (cw) ? -M_PI / 2 : M_PI / 2;
+    if (cw) {
+        assert(a0 > a1);
     }
-    else if (a0 == -a1) {
-        std::printf("  Reverse???\n");
-        //cw = !cw;
-        a1 += 2*M_PI;
+    else {
+        assert(a0 < a1);
     }
-    else if (a0 > a1) { // Circle
-        a1 += 2*M_PI;
-    }
-    assert(a0 <= a1); // Will not converge
-    Coordd last = Coordd(to_pt(start.x), to_pt(start.y));
-    double &current_angle = (cw) ? a1 : a0;
-    double &stop_angle = (cw) ? a0 : a1;
-    while (std::abs(a1 - a0) > 0) {
-        const auto a = (cw) ? std::max(current_angle - M_PI/2, stop_angle):
-                              std::min(current_angle + M_PI/2, stop_angle);
-        last = pdf_arc_segment(painter, last, ctr, r, current_angle, a, cw, debug);
-        current_angle = a;
+    double e = a1 - a0;
+    while (std::abs(e) > 0) {
+        const auto d = (cw) ? std::max(e, da) : std::min(e, da);
+        const auto a = a0 + d;
+        pdf_arc_segment(painter, ctr, r, a0, a);
+        a0 = a;
+        e = a1 - a0;
     }
 }
 
