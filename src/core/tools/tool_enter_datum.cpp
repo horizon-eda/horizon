@@ -32,7 +32,7 @@ static bool sel_only_has_types(const std::set<SelectableRef> &sel, const std::se
     std::set<ObjectType> remainder;
     std::set_difference(types_present.begin(), types_present.end(), types.begin(), types.end(),
                         std::inserter(remainder, remainder.begin()));
-    return remainder.size() == 0;
+    return (remainder.size() == 0) && (sel.size() > 0);
 }
 
 ToolEnterDatum::Mode ToolEnterDatum::get_mode() const
