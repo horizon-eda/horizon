@@ -14,6 +14,7 @@ before_build:
     - echo %APPVEYOR_REPO_TAG%
     - bash -c "echo 'Server = https://mirror.selfnet.de/msys2/mingw/i686/' > /etc/pacman.d/mirrorlist.mingw32"
     - bash -c "echo 'Server = https://mirror.selfnet.de/msys2/mingw/x86_64/' > /etc/pacman.d/mirrorlist.mingw64"
+    - bash -c "echo 'Server = https://mirror.selfnet.de/msys2/mingw/$repo/' > /etc/pacman.d/mirrorlist.mingw"
     - bash -c "echo 'Server = https://mirror.selfnet.de/msys2/msys/$arch/' > /etc/pacman.d/mirrorlist.msys"
     - bash -c "echo 'Server = https://mirror.selfnet.de/msys2/mingw/ucrt64/' > /etc/pacman.d/mirrorlist.ucrt64"
     - bash -c "echo 'Server = https://mirror.selfnet.de/msys2/mingw/clang64/' > /etc/pacman.d/mirrorlist.clang64"
