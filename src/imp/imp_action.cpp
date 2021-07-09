@@ -214,7 +214,7 @@ bool ImpBase::trigger_action(const ActionToolID &action)
     main_window->key_hint_set_visible(false);
     if (keys_current.size()) {
         keys_current.clear();
-        main_window->tool_hint_label->set_text(">");
+        reset_tool_hint_label();
     }
     auto conn = action_connections.at(action);
     conn.cb(conn);

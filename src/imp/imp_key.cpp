@@ -126,7 +126,7 @@ bool ImpBase::handle_action_key(const GdkEventKey *ev)
             canvas->set_selection({});
             set_search_mode(false);
 
-            main_window->tool_hint_label->set_text(">");
+            reset_tool_hint_label();
             if (keys_current.size() == 0) {
                 return false;
             }
@@ -207,7 +207,7 @@ bool ImpBase::handle_action_key(const GdkEventKey *ev)
             main_window->key_hint_set_visible(false);
             auto conn = connections_matched.begin()->first;
             if (!trigger_action({conn->action_id, conn->tool_id})) {
-                main_window->tool_hint_label->set_text(">");
+                reset_tool_hint_label();
                 return false;
             }
             return true;

@@ -875,6 +875,8 @@ void ImpBase::run(int argc, char *argv[])
     }
     update_view_hints();
 
+    reset_tool_hint_label();
+
     check_version();
 
     {
@@ -1242,6 +1244,19 @@ void ImpBase::create_context_menu(Gtk::Menu *parent, const std::set<SelectableRe
         delete sep;
 }
 
+void ImpBase::reset_tool_hint_label()
+{
+    const auto act = make_action(ActionID::POPOVER);
+    if (action_connections.count(act)) {
+        if (action_connections.at(act).key_sequences.size()) {
+            const auto keys = key_sequence_to_string(action_connections.at(act).key_sequences.front());
+            main_window->tool_hint_label->set_text("> " + keys + " for menu");
+            return;
+        }
+    }
+    main_window->tool_hint_label->set_text(">");
+}
+
 bool ImpBase::handle_click(const GdkEventButton *button_event)
 {
     if (button_event->button > 3) {
@@ -1383,7 +1398,7 @@ void ImpBase::tool_process(ToolResponse &resp)
 {
     if (!core->tool_is_active()) {
         imp_interface->dialogs.close_nonmodal();
-        main_window->tool_hint_label->set_text(">");
+        reset_tool_hint_label();
         canvas->set_cursor_external(false);
         canvas->snap_filter.clear();
         no_update = false;

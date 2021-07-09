@@ -234,6 +234,7 @@ protected:
 
     virtual ToolID get_tool_for_drag_move(bool ctrl, const std::set<SelectableRef> &sel) const;
     void force_end_tool();
+    void reset_tool_hint_label();
 
 private:
     void fix_cursor_pos();
