@@ -8,6 +8,7 @@
 #include "logger/logger.hpp"
 #include "util/picture_load.hpp"
 #include "pool/ipool.hpp"
+#include "util/str_util.hpp"
 
 namespace horizon {
 
@@ -734,10 +735,12 @@ void Schematic::expand(bool careful)
         }
     }
     std::map<std::string, std::set<const Net *>> net_names;
-    for (const auto &it : block->nets) {
-        if (it.second.is_named()) {
-            net_names[it.second.name];
-            net_names[it.second.name].insert(&it.second);
+    for (const auto &[uu, net] : block->nets) {
+        if (net.is_named()) {
+            std::string net_name = net.name;
+            trim(net_name);
+            const std::string net_name_casefold = Glib::ustring(net_name).casefold();
+            net_names[net_name_casefold].insert(&net);
         }
     }
     std::set<const Net *> nets_duplicate;
