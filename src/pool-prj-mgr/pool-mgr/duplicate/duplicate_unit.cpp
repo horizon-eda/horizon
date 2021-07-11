@@ -11,7 +11,7 @@
 
 namespace horizon {
 
-class DuplicateSymbolWidget : public Gtk::Box {
+class DuplicateSymbolWidget : public Gtk::Box, public Changeable {
     friend class DuplicateUnitWidget;
 
 public:
@@ -39,6 +39,7 @@ public:
                 explain_label->set_text("This symbol won't be created for the new unit");
             }
             grid->set_visible(cb->get_active());
+            s_signal_changed.emit();
         });
 
         pack_start(*cb, false, false, 0);
@@ -59,6 +60,7 @@ public:
         location_entry->set_append_json(true);
         location_entry->set_rel_filename(
                 DuplicateUnitWidget::insert_filename(pool.get_rel_filename(ObjectType::SYMBOL, sym.uuid), "-copy"));
+        location_entry->signal_changed().connect([this] { s_signal_changed.emit(); });
         grid_attach_label_and_widget(grid, "Filename", location_entry, top);
 
         grid->show_all();
@@ -83,6 +85,14 @@ public:
         else {
             return "";
         }
+    }
+
+    bool check_valid()
+    {
+        if (!grid->get_visible())
+            return true;
+
+        return location_entry->check_ends_json();
     }
 
 private:
@@ -131,6 +141,7 @@ DuplicateUnitWidget::DuplicateUnitWidget(Pool &p, const UUID &unit_uuid, bool op
                     c->set_visible(cb->get_active());
                 }
             }
+            s_signal_changed.emit();
         });
         pack_start(*cb, false, false, 0);
         pack_start(*explain_label, false, false, 0);
@@ -152,6 +163,7 @@ DuplicateUnitWidget::DuplicateUnitWidget(Pool &p, const UUID &unit_uuid, bool op
     location_entry = Gtk::manage(new LocationEntry(pool.get_base_path()));
     location_entry->set_append_json(true);
     location_entry->set_rel_filename(insert_filename(pool.get_rel_filename(ObjectType::UNIT, unit.uuid), "-copy"));
+    location_entry->signal_changed().connect([this] { s_signal_changed.emit(); });
     grid_attach_label_and_widget(grid, "Filename", location_entry, top);
 
     grid->show_all();
@@ -162,6 +174,7 @@ DuplicateUnitWidget::DuplicateUnitWidget(Pool &p, const UUID &unit_uuid, bool op
     q.bind(1, unit.uuid);
     while (q.step()) {
         auto ws = Gtk::manage(new DuplicateSymbolWidget(pool, UUID(q.get<std::string>(0))));
+        ws->signal_changed().connect([this] { s_signal_changed.emit(); });
         pack_start(*ws, false, false, 0);
         ws->show();
         ws->set_margin_start(10);
@@ -211,4 +224,19 @@ std::string DuplicateUnitWidget::insert_filename(const std::string &fn, const st
         return fn;
     }
 }
+
+bool DuplicateUnitWidget::check_valid()
+{
+    if (!grid->get_visible())
+        return true;
+    bool valid = true;
+    valid = location_entry->check_ends_json() && valid;
+    for (auto ch : get_children()) {
+        if (auto c = dynamic_cast<DuplicateSymbolWidget *>(ch)) {
+            valid = c->check_valid() && valid;
+        }
+    }
+    return valid;
+}
+
 } // namespace horizon

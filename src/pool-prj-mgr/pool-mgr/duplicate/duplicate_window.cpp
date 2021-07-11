@@ -11,7 +11,7 @@ DuplicateWindow::DuplicateWindow(class Pool &p, ObjectType ty, const UUID &uu) :
     auto hb = Gtk::manage(new Gtk::HeaderBar());
     set_titlebar(*hb);
 
-    auto duplicate_button = Gtk::manage(new Gtk::Button("Duplicate"));
+    duplicate_button = Gtk::manage(new Gtk::Button("Duplicate"));
     hb->pack_start(*duplicate_button);
 
     hb->show_all();
@@ -49,11 +49,18 @@ DuplicateWindow::DuplicateWindow(class Pool &p, ObjectType ty, const UUID &uu) :
         duplicate_widget = w;
     }
     duplicate_button->signal_clicked().connect(sigc::mem_fun(*this, &DuplicateWindow::handle_duplicate));
+    duplicate_widget->signal_changed().connect([this] { check_valid(); });
+    check_valid();
 }
 
 std::vector<std::string> DuplicateWindow::get_filenames() const
 {
     return filenames;
+}
+
+void DuplicateWindow::check_valid()
+{
+    duplicate_button->set_sensitive(duplicate_widget->check_valid());
 }
 
 void DuplicateWindow::handle_duplicate()

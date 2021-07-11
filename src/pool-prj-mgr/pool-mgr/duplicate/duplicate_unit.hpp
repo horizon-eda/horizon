@@ -9,6 +9,7 @@ public:
     DuplicateUnitWidget(class Pool &p, const UUID &unit_uuid, bool optional = false);
     UUID duplicate(std::vector<std::string> *filenames) override;
     UUID get_uuid() const;
+    bool check_valid() override;
 
     static std::string insert_filename(const std::string &fn, const std::string &ins);
 

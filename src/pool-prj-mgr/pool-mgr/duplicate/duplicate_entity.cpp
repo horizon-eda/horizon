@@ -47,6 +47,7 @@ DuplicateEntityWidget::DuplicateEntityWidget(Pool &p, const UUID &entity_uuid, G
                     c->set_visible(cb->get_active());
                 }
             }
+            s_signal_changed.emit();
         });
         pack_start(*cb, false, false, 0);
         pack_start(*explain_label, false, false, 0);
@@ -69,6 +70,7 @@ DuplicateEntityWidget::DuplicateEntityWidget(Pool &p, const UUID &entity_uuid, G
     location_entry->set_append_json(true);
     location_entry->set_rel_filename(
             DuplicateUnitWidget::insert_filename(pool.get_rel_filename(ObjectType::ENTITY, entity.uuid), "-copy"));
+    location_entry->signal_changed().connect([this] { s_signal_changed.emit(); });
     grid_attach_label_and_widget(grid, "Filename", location_entry, top);
 
     grid->show_all();
@@ -86,6 +88,7 @@ DuplicateEntityWidget::DuplicateEntityWidget(Pool &p, const UUID &entity_uuid, G
 
     for (const auto &uu : units) {
         auto wu = Gtk::manage(new DuplicateUnitWidget(pool, uu, true));
+        wu->signal_changed().connect([this] { s_signal_changed.emit(); });
         unit_box->pack_start(*wu, false, false, 0);
         wu->show();
         wu->set_margin_start(10);
@@ -131,4 +134,19 @@ UUID DuplicateEntityWidget::duplicate(std::vector<std::string> *filenames)
         return entity.uuid;
     }
 }
+
+bool DuplicateEntityWidget::check_valid()
+{
+    if (!grid->get_visible())
+        return true;
+    bool valid = true;
+    valid = location_entry->check_ends_json() && valid;
+    for (auto ch : unit_box->get_children()) {
+        if (auto c = dynamic_cast<DuplicateUnitWidget *>(ch)) {
+            valid = c->check_valid() && valid;
+        }
+    }
+    return valid;
+}
+
 } // namespace horizon

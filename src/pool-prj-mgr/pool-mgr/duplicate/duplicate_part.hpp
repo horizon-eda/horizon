@@ -11,6 +11,7 @@ public:
 
     static UUID duplicate_package(class Pool &pool, const UUID &uu, const std::string &new_dir,
                                   const std::string &new_name, std::vector<std::string> *filenames = nullptr);
+    bool check_valid() override;
 
 private:
     class Pool &pool;

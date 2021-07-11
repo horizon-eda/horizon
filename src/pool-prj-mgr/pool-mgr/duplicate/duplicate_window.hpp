@@ -17,6 +17,8 @@ private:
     class DuplicateBase *duplicate_widget = nullptr;
     bool duplicated = false;
     void handle_duplicate();
+    void check_valid();
+    Gtk::Button *duplicate_button = nullptr;
     std::vector<std::string> filenames;
 };
 } // namespace horizon

@@ -10,6 +10,7 @@ public:
 
     UUID duplicate(std::vector<std::string> *filenames) override;
     UUID get_uuid() const;
+    bool check_valid() override;
 
 private:
     class Pool &pool;

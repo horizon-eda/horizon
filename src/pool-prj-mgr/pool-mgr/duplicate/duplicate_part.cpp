@@ -13,7 +13,7 @@
 #include "util/pool_completion.hpp"
 
 namespace horizon {
-class DuplicatePackageWidget : public Gtk::Box {
+class DuplicatePackageWidget : public Gtk::Box, public Changeable {
 public:
     DuplicatePackageWidget(Pool &p, const UUID &pkg_uuid)
         : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10), pool(p), pkg(*pool.get_package(pkg_uuid))
@@ -59,6 +59,7 @@ public:
         location_entry = Gtk::manage(new LocationEntry(pool.get_base_path()));
         location_entry->set_rel_filename(Glib::path_get_dirname(pool.get_rel_filename(ObjectType::PACKAGE, pkg.uuid))
                                          + "-copy");
+        location_entry->signal_changed().connect([this] { s_signal_changed.emit(); });
         grid_attach_label_and_widget(grid, "Filename", location_entry, top);
 
         grid->show_all();
@@ -76,6 +77,14 @@ public:
         else {
             return pkg.uuid;
         }
+    }
+
+    bool check_valid()
+    {
+        if (!grid->get_visible())
+            return true;
+
+        return true;
     }
 
 private:
@@ -116,6 +125,7 @@ DuplicatePartWidget::DuplicatePartWidget(Pool &p, const UUID &part_uuid, Gtk::Bo
     location_entry->set_append_json(true);
     location_entry->set_rel_filename(
             DuplicateUnitWidget::insert_filename(pool.get_rel_filename(ObjectType::PART, part.uuid), "-copy"));
+    location_entry->signal_changed().connect([this] { s_signal_changed.emit(); });
     grid_attach_label_and_widget(grid, "Filename", location_entry, top);
 
     grid->show_all();
@@ -124,10 +134,12 @@ DuplicatePartWidget::DuplicatePartWidget(Pool &p, const UUID &part_uuid, Gtk::Bo
     pack_start(*grid, false, false, 0);
 
     dpw = Gtk::manage(new DuplicatePackageWidget(pool, part.package->uuid));
+    dpw->signal_changed().connect([this] { s_signal_changed.emit(); });
     pack_start(*dpw, false, false, 0);
     dpw->show();
 
     dew = Gtk::manage(new DuplicateEntityWidget(pool, part.entity->uuid, ubox, true));
+    dew->signal_changed().connect([this] { s_signal_changed.emit(); });
     pack_start(*dew, false, false, 0);
     dew->show();
 }
@@ -191,4 +203,14 @@ UUID DuplicatePartWidget::duplicate_package(Pool &pool, const UUID &uu, const st
     save_json_to_file(new_pkg_filename, pkg_json);
     return pkg.uuid;
 }
+
+bool DuplicatePartWidget::check_valid()
+{
+    bool valid = true;
+    valid = location_entry->check_ends_json() && valid;
+    valid = dpw->check_valid() && valid;
+    valid = dew->check_valid() && valid;
+    return valid;
+}
+
 } // namespace horizon
