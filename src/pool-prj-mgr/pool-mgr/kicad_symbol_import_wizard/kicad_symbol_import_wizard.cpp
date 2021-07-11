@@ -147,7 +147,7 @@ KiCadSymbolImportWizard::KiCadSymbolImportWizard(BaseObjectType *cobject, const 
 
         Gtk::MessageDialog md(*this, "Really close?", false /* use_markup */, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE);
         md.set_secondary_text(
-                "By closing the part wizard, all changes to the new part will "
+                "By closing the wizard, all changes to the new items will "
                 "be lost");
         md.add_button("Close and discard changes", 1);
         md.add_button("Keep open", Gtk::RESPONSE_CANCEL);
