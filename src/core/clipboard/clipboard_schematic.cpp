@@ -11,14 +11,13 @@ void ClipboardSchematic::expand_selection()
 {
     ClipboardBase::expand_selection();
 
-    const auto &sh = *doc.get_sheet();
-    const auto &bl = *doc.get_top_block();
+    const auto &bl = *doc.get_current_block();
     {
         std::set<SelectableRef> new_sel;
         for (const auto &it : selection) {
             switch (it.type) {
             case ObjectType::SCHEMATIC_SYMBOL: {
-                auto &sym = sh.symbols.at(it.uuid);
+                auto &sym = doc.get_sheet()->symbols.at(it.uuid);
                 new_sel.emplace(sym.component->uuid, ObjectType::COMPONENT);
                 for (const auto &it_txt : sym.texts) {
                     new_sel.emplace(it_txt->uuid, ObjectType::TEXT);
@@ -26,7 +25,7 @@ void ClipboardSchematic::expand_selection()
             } break;
 
             case ObjectType::LINE_NET: {
-                auto &line = sh.net_lines.at(it.uuid);
+                auto &line = doc.get_sheet()->net_lines.at(it.uuid);
                 for (auto &it_ft : {line.from, line.to}) {
                     if (it_ft.is_junc()) {
                         new_sel.emplace(it_ft.junc.uuid, ObjectType::JUNCTION);
@@ -39,24 +38,24 @@ void ClipboardSchematic::expand_selection()
             } break;
 
             case ObjectType::NET_LABEL: {
-                auto &la = sh.net_labels.at(it.uuid);
+                auto &la = doc.get_sheet()->net_labels.at(it.uuid);
                 new_sel.emplace(la.junction->uuid, ObjectType::JUNCTION);
             } break;
 
             case ObjectType::POWER_SYMBOL: {
-                auto &ps = sh.power_symbols.at(it.uuid);
+                auto &ps = doc.get_sheet()->power_symbols.at(it.uuid);
                 new_sel.emplace(ps.net->uuid, ObjectType::NET);
                 new_sel.emplace(ps.junction->uuid, ObjectType::JUNCTION);
             } break;
 
             case ObjectType::BUS_LABEL: {
-                const auto &la = sh.bus_labels.at(it.uuid);
+                const auto &la = doc.get_sheet()->bus_labels.at(it.uuid);
                 new_sel.emplace(la.junction->uuid, ObjectType::JUNCTION);
                 new_sel.emplace(la.bus->uuid, ObjectType::BUS);
             } break;
 
             case ObjectType::BUS_RIPPER: {
-                const auto &rip = sh.bus_rippers.at(it.uuid);
+                const auto &rip = doc.get_sheet()->bus_rippers.at(it.uuid);
                 new_sel.emplace(rip.junction->uuid, ObjectType::JUNCTION);
                 new_sel.emplace(rip.bus->uuid, ObjectType::BUS);
             } break;
@@ -83,11 +82,15 @@ void ClipboardSchematic::expand_selection()
 
 json ClipboardSchematic::serialize_junction(const class Junction &ju)
 {
-    auto &sch_ju = dynamic_cast<const SchematicJunction &>(ju);
-    json j = sch_ju.serialize();
-    if (sch_ju.net)
-        j["net"] = (std::string)sch_ju.net->uuid;
-    return j;
+    if (auto sch_ju = dynamic_cast<const SchematicJunction *>(&ju)) {
+        json j = sch_ju->serialize();
+        if (sch_ju->net)
+            j["net"] = (std::string)sch_ju->net->uuid;
+        return j;
+    }
+    else {
+        return ClipboardBase::serialize_junction(ju);
+    }
 }
 
 
@@ -104,8 +107,7 @@ void ClipboardSchematic::serialize(json &j)
     j["bus_labels"] = json::object();
     j["bus_rippers"] = json::object();
 
-    const auto &sh = *doc.get_sheet();
-    const auto &bl = *doc.get_top_block();
+    const auto &bl = *doc.get_current_block();
 
     std::set<UUID> nets;
     std::map<UUID, const LineNet *> net_lines;
@@ -118,15 +120,15 @@ void ClipboardSchematic::serialize(json &j)
             break;
 
         case ObjectType::LINE_NET:
-            net_lines.emplace(it.uuid, &sh.net_lines.at(it.uuid));
+            net_lines.emplace(it.uuid, &doc.get_sheet()->net_lines.at(it.uuid));
             break;
 
         case ObjectType::SCHEMATIC_SYMBOL:
-            symbols.emplace(it.uuid, &sh.symbols.at(it.uuid));
+            symbols.emplace(it.uuid, &doc.get_sheet()->symbols.at(it.uuid));
             break;
 
         case ObjectType::BUS_RIPPER:
-            bus_rippers.emplace(it.uuid, &sh.bus_rippers.at(it.uuid));
+            bus_rippers.emplace(it.uuid, &doc.get_sheet()->bus_rippers.at(it.uuid));
             break;
 
         default:;
@@ -162,7 +164,7 @@ void ClipboardSchematic::serialize(json &j)
         } break;
 
         case ObjectType::SCHEMATIC_SYMBOL:
-            j["symbols"][(std::string)it.uuid] = sh.symbols.at(it.uuid).serialize();
+            j["symbols"][(std::string)it.uuid] = doc.get_sheet()->symbols.at(it.uuid).serialize();
             break;
 
         case ObjectType::NET: {
@@ -173,7 +175,7 @@ void ClipboardSchematic::serialize(json &j)
         } break;
 
         case ObjectType::LINE_NET: {
-            auto line = sh.net_lines.at(it.uuid);
+            auto line = doc.get_sheet()->net_lines.at(it.uuid);
             std::map<UUID, SchematicJunction> extra_junctions;
             for (auto &it_ft : {&line.from, &line.to}) {
                 if (it_ft->is_bus_ripper()) {
@@ -205,19 +207,19 @@ void ClipboardSchematic::serialize(json &j)
         } break;
 
         case ObjectType::NET_LABEL:
-            j["net_labels"][(std::string)it.uuid] = sh.net_labels.at(it.uuid).serialize();
+            j["net_labels"][(std::string)it.uuid] = doc.get_sheet()->net_labels.at(it.uuid).serialize();
             break;
 
         case ObjectType::POWER_SYMBOL:
-            j["power_symbols"][(std::string)it.uuid] = sh.power_symbols.at(it.uuid).serialize();
+            j["power_symbols"][(std::string)it.uuid] = doc.get_sheet()->power_symbols.at(it.uuid).serialize();
             break;
 
         case ObjectType::BUS_LABEL:
-            j["bus_labels"][(std::string)it.uuid] = sh.bus_labels.at(it.uuid).serialize();
+            j["bus_labels"][(std::string)it.uuid] = doc.get_sheet()->bus_labels.at(it.uuid).serialize();
             break;
 
         case ObjectType::BUS_RIPPER:
-            j["bus_rippers"][(std::string)it.uuid] = sh.bus_rippers.at(it.uuid).serialize();
+            j["bus_rippers"][(std::string)it.uuid] = doc.get_sheet()->bus_rippers.at(it.uuid).serialize();
             break;
 
         default:;

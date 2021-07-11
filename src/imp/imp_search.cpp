@@ -147,7 +147,8 @@ void ImpBase::update_search_markers()
     auto &dom = canvas->markers.get_domain(MarkerDomain::SEARCH);
     dom.clear();
     for (const auto &it : search_results) {
-        dom.emplace_back(it.location, get_canvas_preferences().appearance.colors.at(ColorP::SEARCH), it.sheet);
+        dom.emplace_back(it.location, get_canvas_preferences().appearance.colors.at(ColorP::SEARCH),
+                         uuid_vec_append(it.instance_path, it.sheet));
         dom.back().size = MarkerRef::Size::SMALL;
     }
     canvas->update_markers();

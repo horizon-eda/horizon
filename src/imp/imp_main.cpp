@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 
     std::unique_ptr<horizon::ImpBase> imp = nullptr;
     if (mode_sch) {
-        imp.reset(new horizon::ImpSchematic(filenames.at(0), filenames.at(1), filenames.at(2), {pool_base_path}));
+        imp.reset(new horizon::ImpSchematic(filenames.at(0), filenames.at(1), {pool_base_path}));
     }
     else if (mode_symbol) {
         imp.reset(new horizon::ImpSymbol(filenames.at(0), pool_base_path));

@@ -17,6 +17,7 @@
 #include "frame/frame.hpp"
 #include "common/picture.hpp"
 #include "schematic_junction.hpp"
+#include "schematic_block_symbol.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -38,7 +39,7 @@ public:
 
 class Sheet : public ObjectProvider, public LayerProvider {
 public:
-    Sheet(const UUID &uu, const json &, Block &Block, class IPool &pool);
+    Sheet(const UUID &uu, const json &, Block &Block, class IPool &pool, class IBlockSymbolAndSchematicProvider &prv);
     Sheet(const UUID &uu);
     UUID uuid;
     std::string name;
@@ -55,13 +56,17 @@ public:
     std::map<UUID, Line> lines;
     std::map<UUID, Arc> arcs;
     std::map<UUID, Picture> pictures;
+    std::map<UUID, SchematicBlockSymbol> block_symbols;
     std::map<std::string, std::string> title_block_values;
     std::vector<Warning> warnings;
 
+    bool can_be_removed() const;
+
     LineNet *split_line_net(LineNet *it, SchematicJunction *ju);
     void merge_net_lines(SchematicJunction &ju);
-    void expand_symbols(const class Schematic &sch);
-    void expand_symbol(const UUID &sym_uuid, const Schematic &sch);
+    void expand_symbols(const class Schematic &sch, const BlockInstanceMapping *inst_map);
+    void expand_symbol(const UUID &sym_uuid, const Schematic &sch, const BlockInstanceMapping *inst_map = nullptr);
+    void expand_block_symbol(const UUID &sym_uuid, const Schematic &sch);
     void simplify_net_lines();
     void fix_junctions();
     void delete_duplicate_net_lines();
@@ -69,7 +74,7 @@ public:
     void delete_dependants();
     void propagate_net_segments();
     std::map<UUID, NetSegmentInfo> analyze_net_segments(bool place_warnings = false);
-    std::set<UUIDPath<3>> get_pins_connected_to_net_segment(const UUID &uu_segment);
+    Block::NetPinsAndPorts get_pins_connected_to_net_segment(const UUID &uu_segment);
     void update_junction_connections();
     void update_bus_ripper_connections();
 
@@ -78,6 +83,9 @@ public:
 
     void merge_junction(SchematicJunction *j,
                         SchematicJunction *into); // merge junction j into "into" j will be deleted
+
+    std::vector<SchematicBlockSymbol *> get_block_symbols_sorted();
+    std::vector<const SchematicBlockSymbol *> get_block_symbols_sorted() const;
 
     // void replace_junction(Junction *j, PowerSymbol *sym);
     // void replace_power_symbol(PowerSymbol *sym, Junction *j);
@@ -92,6 +100,8 @@ public:
     json serialize() const;
 
 private:
-    void expand_symbol_without_net_lines(const UUID &sym_uuid, const Schematic &sch);
+    void expand_symbol_without_net_lines(const UUID &sym_uuid, const Schematic &sch,
+                                         const BlockInstanceMapping *inst_map);
+    void expand_block_symbol_without_net_lines(const UUID &sym_uuid, const Schematic &sch);
 };
 } // namespace horizon

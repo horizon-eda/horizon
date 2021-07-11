@@ -187,6 +187,7 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                   {ObjectProperty::ID::SIZE, {ObjectProperty::Type::LENGTH, "Size", 2}},
                   {ObjectProperty::ID::OFFSHEET_REFS, {ObjectProperty::Type::BOOL, "Offsheet refs", 1}},
                   {ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Net name", 0}},
+                  {ObjectProperty::ID::IS_PORT, {ObjectProperty::Type::BOOL, "Show port", 3}},
           }}},
         {ObjectType::POLYGON,
          {"Polygon",
@@ -334,6 +335,15 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
 
           }}},
         {ObjectType::PROJECT, {"Project", "Projects", {}}},
+        {ObjectType::BLOCK_SYMBOL_PORT, {"Port", "Ports", {}}},
+        {ObjectType::SCHEMATIC_BLOCK_SYMBOL, {"Block symbol", "Block symbol", {}}},
+        {ObjectType::BLOCK_INSTANCE,
+         {"Instance",
+          "Instances",
+          {
+                  {ObjectProperty::ID::REFDES, {ObjectProperty::Type::STRING, "Ref. desig.", 0}},
+                  {ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Block", 1}},
+          }}},
 
 };
 } // namespace horizon

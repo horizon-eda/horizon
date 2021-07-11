@@ -293,7 +293,8 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
                     row_err[tree_columns.running] = false;
 
                     if (it_err.has_location) {
-                        dom.emplace_back(it_err.location, rules_check_error_level_to_color(it_err.level), it_err.sheet);
+                        dom.emplace_back(it_err.location, rules_check_error_level_to_color(it_err.level),
+                                         UUIDVec{it_err.sheet});
                     }
 
                     for (const auto &path : it_err.error_polygons) {

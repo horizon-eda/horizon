@@ -32,6 +32,7 @@ public:
     uint64_t size = 1.5_mm;
     std::set<unsigned int> on_sheets;
     bool offsheet_refs = true;
+    bool show_port = false;
 
     json serialize() const;
 };

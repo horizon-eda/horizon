@@ -9,78 +9,138 @@
 #include "pool/ipool.hpp"
 #include "util/str_util.hpp"
 #include "util/picture_load.hpp"
+#include "logger/logger.hpp"
+#include <filesystem>
 
 namespace horizon {
-CoreSchematic::CoreSchematic(const std::string &schematic_filename, const std::string &block_filename,
-                             const std::string &pictures_dir, IPool &pool, IPool &pool_caching)
-    : Core(pool, &pool_caching), block(Block::new_from_file(block_filename, pool_caching)),
-      project_meta_loaded_from_block(block->project_meta.size()),
-      sch(Schematic::new_from_file(schematic_filename, *block, pool_caching)), rules(sch->rules),
-      bom_export_settings(block->bom_export_settings), pdf_export_settings(sch->pdf_export_settings),
-      m_schematic_filename(schematic_filename), m_block_filename(block_filename), m_pictures_dir(pictures_dir)
+namespace fs = std::filesystem;
+
+
+CoreSchematic::CoreSchematic(const std::string &blocks_filename, const std::string &pictures_dir, IPool &pool,
+                             IPool &pool_caching)
+    : Core(pool, &pool_caching), blocks(BlocksSchematic::new_from_file(blocks_filename, pool_caching)),
+      rules(get_top_schematic()->rules), bom_export_settings(get_top_block()->bom_export_settings),
+      pdf_export_settings(get_top_schematic()->pdf_export_settings), m_blocks_filename(blocks_filename),
+      m_pictures_dir(pictures_dir)
 {
+    block_uuid = blocks->top_block;
+    auto sch = get_current_schematic();
     auto x = std::find_if(sch->sheets.cbegin(), sch->sheets.cend(), [](const auto &a) { return a.second.index == 1; });
     assert(x != sch->sheets.cend());
     sheet_uuid = x->first;
-    sch->load_pictures(m_pictures_dir);
+    for (auto &[uu, block] : blocks->blocks) {
+        block.schematic.load_pictures(m_pictures_dir);
+    }
     rebuild();
 }
 
 Junction *CoreSchematic::get_junction(const UUID &uu)
 {
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    return &sheet.junctions.at(uu);
+    if (get_block_symbol_mode())
+        return &get_block_symbol().junctions.at(uu);
+    else
+        return &get_sheet()->junctions.at(uu);
 }
+
+const Schematic *CoreSchematic::get_current_schematic() const
+{
+    return &blocks->blocks.at(block_uuid).schematic;
+}
+
 Schematic *CoreSchematic::get_current_schematic()
 {
-    return &*sch;
+    return const_cast<Schematic *>(static_cast<const CoreSchematic *>(this)->get_current_schematic());
+}
+
+const Schematic *CoreSchematic::get_top_schematic() const
+{
+    return &blocks->get_top_block().schematic;
+}
+
+Schematic *CoreSchematic::get_top_schematic()
+{
+    return const_cast<Schematic *>(static_cast<const CoreSchematic *>(this)->get_top_schematic());
+}
+
+
+Block *CoreSchematic::get_current_block()
+{
+    return &blocks->blocks.at(block_uuid).block;
 }
 
 Block *CoreSchematic::get_top_block()
 {
-    return get_current_schematic()->block;
+    return &blocks->get_top_block().block;
 }
 
 LayerProvider &CoreSchematic::get_layer_provider()
 {
-    return *get_sheet();
+    if (get_block_symbol_mode())
+        return get_block_symbol();
+    else
+        return *get_sheet();
 }
 
 Sheet *CoreSchematic::get_sheet()
 {
-    return &sch->sheets.at(sheet_uuid);
+    if (get_block_symbol_mode())
+        throw std::runtime_error("in block symbol mode");
+
+    return &get_current_schematic()->sheets.at(sheet_uuid);
 }
 
 const Sheet *CoreSchematic::get_sheet() const
 {
-    return &sch->sheets.at(sheet_uuid);
+    if (get_block_symbol_mode())
+        throw std::runtime_error("in block symbol mode");
+
+    return &get_current_schematic()->sheets.at(sheet_uuid);
 }
 
+BlockSymbol &CoreSchematic::get_block_symbol()
+{
+    if (!get_block_symbol_mode())
+        throw std::runtime_error("not block symbol mode");
+
+    return blocks->blocks.at(block_uuid).symbol;
+}
 
 Junction *CoreSchematic::insert_junction(const UUID &uu)
 {
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    auto x = sheet.junctions.emplace(std::make_pair(uu, uu));
-    return &(x.first->second);
+    if (get_block_symbol_mode())
+        return &get_block_symbol().junctions.emplace(std::make_pair(uu, uu)).first->second;
+    else
+        return &get_sheet()->junctions.emplace(std::make_pair(uu, uu)).first->second;
 }
 
 void CoreSchematic::delete_junction(const UUID &uu)
 {
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    sheet.junctions.erase(uu);
+    if (get_block_symbol_mode())
+        get_block_symbol().junctions.erase(uu);
+    else
+        get_sheet()->junctions.erase(uu);
 }
 
 std::map<UUID, Line> *CoreSchematic::get_line_map()
 {
-    return &get_sheet()->lines;
+    if (get_block_symbol_mode())
+        return &get_block_symbol().lines;
+    else
+        return &get_sheet()->lines;
 }
 std::map<UUID, Arc> *CoreSchematic::get_arc_map()
 {
-    return &get_sheet()->arcs;
+    if (get_block_symbol_mode())
+        return &get_block_symbol().arcs;
+    else
+        return &get_sheet()->arcs;
 }
 std::map<UUID, Text> *CoreSchematic::get_text_map()
 {
-    return &get_sheet()->texts;
+    if (get_block_symbol_mode())
+        return &get_block_symbol().texts;
+    else
+        return &get_sheet()->texts;
 }
 std::map<UUID, Picture> *CoreSchematic::get_picture_map()
 {
@@ -89,24 +149,37 @@ std::map<UUID, Picture> *CoreSchematic::get_picture_map()
 
 bool CoreSchematic::has_object_type(ObjectType ty) const
 {
-    switch (ty) {
-    case ObjectType::JUNCTION:
-    case ObjectType::SCHEMATIC_SYMBOL:
-    case ObjectType::BUS_LABEL:
-    case ObjectType::BUS_RIPPER:
-    case ObjectType::NET_LABEL:
-    case ObjectType::LINE_NET:
-    case ObjectType::POWER_SYMBOL:
-    case ObjectType::TEXT:
-    case ObjectType::LINE:
-    case ObjectType::ARC:
-    case ObjectType::PICTURE:
-        return true;
-        break;
-    default:;
+    if (get_block_symbol_mode()) {
+        switch (ty) {
+        case ObjectType::JUNCTION:
+        case ObjectType::TEXT:
+        case ObjectType::LINE:
+        case ObjectType::ARC:
+            return true;
+            break;
+        default:
+            return false;
+        }
     }
-
-    return false;
+    else {
+        switch (ty) {
+        case ObjectType::JUNCTION:
+        case ObjectType::SCHEMATIC_SYMBOL:
+        case ObjectType::BUS_LABEL:
+        case ObjectType::BUS_RIPPER:
+        case ObjectType::NET_LABEL:
+        case ObjectType::LINE_NET:
+        case ObjectType::POWER_SYMBOL:
+        case ObjectType::TEXT:
+        case ObjectType::LINE:
+        case ObjectType::ARC:
+        case ObjectType::PICTURE:
+            return true;
+            break;
+        default:
+            return false;
+        }
+    }
 }
 
 Rules *CoreSchematic::get_rules()
@@ -118,23 +191,23 @@ bool CoreSchematic::get_property(ObjectType type, const UUID &uu, ObjectProperty
 {
     if (Core::get_property(type, uu, property, value))
         return true;
-    auto &sheet = sch->sheets.at(sheet_uuid);
+    auto &sheet = *get_sheet();
     switch (type) {
     case ObjectType::NET: {
-        auto net = &block->nets.at(uu);
+        auto &net = get_current_block()->nets.at(uu);
         switch (property) {
         case ObjectProperty::ID::NAME:
-            dynamic_cast<PropertyValueString &>(value).value = net->name;
+            dynamic_cast<PropertyValueString &>(value).value = net.name;
             return true;
 
         case ObjectProperty::ID::NET_CLASS:
-            dynamic_cast<PropertyValueUUID &>(value).value = net->net_class->uuid;
+            dynamic_cast<PropertyValueUUID &>(value).value = net.net_class->uuid;
             return true;
 
         case ObjectProperty::ID::DIFFPAIR: {
             std::string s;
-            if (net->diffpair) {
-                s = (net->diffpair_master ? "Master: " : "Slave: ") + net->diffpair->name;
+            if (net.diffpair) {
+                s = (net.diffpair_master ? "Master: " : "Slave: ") + net.diffpair->name;
             }
             else {
                 s = "None";
@@ -144,7 +217,7 @@ bool CoreSchematic::get_property(ObjectType type, const UUID &uu, ObjectProperty
         }
 
         case ObjectProperty::ID::IS_POWER:
-            dynamic_cast<PropertyValueBool &>(value).value = net->is_power;
+            dynamic_cast<PropertyValueBool &>(value).value = net.is_power;
             return true;
 
         default:
@@ -170,43 +243,78 @@ bool CoreSchematic::get_property(ObjectType type, const UUID &uu, ObjectProperty
             dynamic_cast<PropertyValueInt &>(value).value = label->size;
             return true;
 
+        case ObjectProperty::ID::IS_PORT:
+            dynamic_cast<PropertyValueBool &>(value).value = label->show_port;
+            return true;
+
         default:
             return false;
         }
     } break;
 
     case ObjectType::COMPONENT: {
-        auto comp = &block->components.at(uu);
+        const auto comp = &get_current_block()->components.at(uu);
+        const auto inst = get_block_instance_mapping();
+        BlockInstanceMapping::ComponentInfo *info = nullptr;
+        if (inst && inst->components.count(comp->uuid))
+            info = &inst->components.at(comp->uuid);
         switch (property) {
         case ObjectProperty::ID::REFDES:
-            dynamic_cast<PropertyValueString &>(value).value = comp->refdes;
+            if (!in_hierarchy())
+                dynamic_cast<PropertyValueString &>(value).value = comp->entity->prefix + "?";
+            if (info)
+                dynamic_cast<PropertyValueString &>(value).value = info->refdes;
+            else
+                dynamic_cast<PropertyValueString &>(value).value = comp->refdes;
             return true;
 
         case ObjectProperty::ID::VALUE:
-            if (block->components.at(uu).part)
+            if (get_current_block()->components.at(uu).part)
                 dynamic_cast<PropertyValueString &>(value).value = comp->part->get_value();
             else
                 dynamic_cast<PropertyValueString &>(value).value = comp->value;
             return true;
 
         case ObjectProperty::ID::MPN:
-            if (block->components.at(uu).part)
+            if (get_current_block()->components.at(uu).part)
                 dynamic_cast<PropertyValueString &>(value).value = comp->part->get_MPN();
             else
                 dynamic_cast<PropertyValueString &>(value).value = "<no part>";
             return true;
 
         case ObjectProperty::ID::NOPOPULATE:
-            if (block->components.at(uu).part)
-                dynamic_cast<PropertyValueBool &>(value).value = comp->nopopulate;
-            else
+            if (get_current_block()->components.at(uu).part) {
+                if (info)
+                    dynamic_cast<PropertyValueBool &>(value).value = info->nopopulate;
+                else
+                    dynamic_cast<PropertyValueBool &>(value).value = comp->nopopulate;
+            }
+            else {
                 dynamic_cast<PropertyValueBool &>(value).value = false;
+            }
             return true;
 
         default:
             return false;
         }
     } break;
+
+    case ObjectType::BLOCK_INSTANCE: {
+        auto &inst = get_current_block()->block_instances.at(uu);
+        switch (property) {
+        case ObjectProperty::ID::REFDES:
+            dynamic_cast<PropertyValueString &>(value).value = inst.refdes;
+            return true;
+
+        case ObjectProperty::ID::NAME:
+            dynamic_cast<PropertyValueString &>(value).value = inst.block->name;
+            return true;
+
+        default:
+            return false;
+        }
+    } break;
+
 
     case ObjectType::SCHEMATIC_SYMBOL: {
         auto sym = &sheet.symbols.at(uu);
@@ -250,13 +358,20 @@ bool CoreSchematic::set_property(ObjectType type, const UUID &uu, ObjectProperty
 {
     if (Core::set_property(type, uu, property, value))
         return true;
-    auto &sheet = sch->sheets.at(sheet_uuid);
+    auto &sheet = *get_sheet();
     switch (type) {
     case ObjectType::COMPONENT: {
-        auto comp = &block->components.at(uu);
+        auto comp = &get_current_block()->components.at(uu);
+        const auto inst = get_block_instance_mapping();
+        BlockInstanceMapping::ComponentInfo *info = nullptr;
+        if (inst)
+            info = &inst->components[comp->uuid];
         switch (property) {
         case ObjectProperty::ID::REFDES:
-            comp->refdes = dynamic_cast<const PropertyValueString &>(value).value;
+            if (info)
+                info->refdes = dynamic_cast<const PropertyValueString &>(value).value;
+            else
+                comp->refdes = dynamic_cast<const PropertyValueString &>(value).value;
             break;
 
         case ObjectProperty::ID::VALUE:
@@ -266,7 +381,22 @@ bool CoreSchematic::set_property(ObjectType type, const UUID &uu, ObjectProperty
             break;
 
         case ObjectProperty::ID::NOPOPULATE:
-            comp->nopopulate = dynamic_cast<const PropertyValueBool &>(value).value;
+            if (info)
+                info->nopopulate = dynamic_cast<const PropertyValueBool &>(value).value;
+            else
+                comp->nopopulate = dynamic_cast<const PropertyValueBool &>(value).value;
+            break;
+
+        default:
+            return false;
+        }
+    } break;
+
+    case ObjectType::BLOCK_INSTANCE: {
+        auto &inst = get_current_block()->block_instances.at(uu);
+        switch (property) {
+        case ObjectProperty::ID::REFDES:
+            inst.refdes = dynamic_cast<const PropertyValueString &>(value).value;
             break;
 
         default:
@@ -275,20 +405,20 @@ bool CoreSchematic::set_property(ObjectType type, const UUID &uu, ObjectProperty
     } break;
 
     case ObjectType::NET: {
-        auto net = &block->nets.at(uu);
+        auto &net = get_current_block()->nets.at(uu);
         switch (property) {
         case ObjectProperty::ID::NAME:
-            net->name = dynamic_cast<const PropertyValueString &>(value).value;
+            net.name = dynamic_cast<const PropertyValueString &>(value).value;
             break;
 
         case ObjectProperty::ID::NET_CLASS: {
-            net->net_class = &block->net_classes.at(dynamic_cast<const PropertyValueUUID &>(value).value);
+            net.net_class = &get_current_block()->net_classes.at(dynamic_cast<const PropertyValueUUID &>(value).value);
         } break;
 
         case ObjectProperty::ID::IS_POWER:
-            if (block->nets.at(uu).is_power_forced)
+            if (net.is_power_forced)
                 return false;
-            block->nets.at(uu).is_power = dynamic_cast<const PropertyValueBool &>(value).value;
+            net.is_power = dynamic_cast<const PropertyValueBool &>(value).value;
             break;
 
         default:
@@ -338,6 +468,10 @@ bool CoreSchematic::set_property(ObjectType type, const UUID &uu, ObjectProperty
             label->size = dynamic_cast<const PropertyValueInt &>(value).value;
             break;
 
+        case ObjectProperty::ID::IS_PORT:
+            label->show_port = dynamic_cast<const PropertyValueBool &>(value).value;
+            break;
+
         default:
             return false;
         }
@@ -357,18 +491,17 @@ bool CoreSchematic::get_property_meta(ObjectType type, const UUID &uu, ObjectPro
 {
     if (Core::get_property_meta(type, uu, property, meta))
         return true;
-    auto &sheet = sch->sheets.at(sheet_uuid);
     switch (type) {
     case ObjectType::NET:
         switch (property) {
         case ObjectProperty::ID::IS_POWER:
-            meta.is_settable = !block->nets.at(uu).is_power_forced;
+            meta.is_settable = !get_current_block()->nets.at(uu).is_power_forced;
             return true;
 
         case ObjectProperty::ID::NET_CLASS: {
             PropertyMetaNetClasses &m = dynamic_cast<PropertyMetaNetClasses &>(meta);
             m.net_classes.clear();
-            for (const auto &it : block->net_classes) {
+            for (const auto &it : get_current_block()->net_classes) {
                 m.net_classes.emplace(it.first, it.second.name);
             }
             return true;
@@ -381,8 +514,13 @@ bool CoreSchematic::get_property_meta(ObjectType type, const UUID &uu, ObjectPro
 
     case ObjectType::COMPONENT:
         switch (property) {
+        case ObjectProperty::ID::REFDES:
+        case ObjectProperty::ID::NOPOPULATE:
+            meta.is_settable = in_hierarchy();
+            return true;
+
         case ObjectProperty::ID::VALUE:
-            meta.is_settable = block->components.at(uu).part == nullptr;
+            meta.is_settable = get_current_block()->components.at(uu).part == nullptr;
             return true;
 
         default:
@@ -393,7 +531,7 @@ bool CoreSchematic::get_property_meta(ObjectType type, const UUID &uu, ObjectPro
     case ObjectType::SCHEMATIC_SYMBOL:
         switch (property) {
         case ObjectProperty::ID::EXPAND:
-            meta.is_settable = sheet.symbols.at(uu).pool_symbol->can_expand;
+            meta.is_settable = get_sheet()->symbols.at(uu).pool_symbol->can_expand;
             return true;
 
         default:
@@ -406,6 +544,25 @@ bool CoreSchematic::get_property_meta(ObjectType type, const UUID &uu, ObjectPro
         case ObjectProperty::ID::ALLOW_UPSIDE_DOWN:
             meta.is_visible = false;
             return true;
+        default:
+            return false;
+        }
+        break;
+
+    case ObjectType::NET_LABEL:
+        switch (property) {
+        case ObjectProperty::ID::IS_PORT:
+            if (current_block_is_top()) {
+                meta.is_visible = false;
+                return true;
+            }
+
+            if (get_sheet()->net_labels.at(uu).junction->net)
+                meta.is_settable = get_sheet()->net_labels.at(uu).junction->net->is_port;
+            else
+                meta.is_settable = false;
+            return true;
+
         default:
             return false;
         }
@@ -424,40 +581,57 @@ std::string CoreSchematic::get_display_name(ObjectType type, const UUID &uu)
 
 std::string CoreSchematic::get_display_name(ObjectType type, const UUID &uu, const UUID &sh)
 {
-    auto &sheet = sch->sheets.at(sh);
     switch (type) {
     case ObjectType::NET:
-        return block->nets.at(uu).name;
+        return get_current_block()->nets.at(uu).name;
 
     case ObjectType::LINE_NET: {
-        const auto &li = sheet.net_lines.at(uu);
+        const auto &li = get_current_schematic()->sheets.at(sh).net_lines.at(uu);
         return li.net ? li.net->name : "";
     }
 
     case ObjectType::JUNCTION: {
-        const auto &ju = sheet.junctions.at(uu);
-        return ju.net ? ju.net->name : "";
+        if (sh) {
+            const auto &ju = get_current_schematic()->sheets.at(sh).junctions.at(uu);
+            return ju.net ? ju.net->name : "";
+        }
+        else {
+            return Core::get_display_name(type, uu);
+        }
     }
 
     case ObjectType::NET_LABEL: {
-        const auto &la = sheet.net_labels.at(uu);
+        const auto &la = get_current_schematic()->sheets.at(sh).net_labels.at(uu);
         return la.junction->net ? la.junction->net->name : "";
     }
 
-    case ObjectType::SCHEMATIC_SYMBOL:
-        return sheet.symbols.at(uu).component->refdes + sheet.symbols.at(uu).gate->suffix;
+    case ObjectType::SCHEMATIC_SYMBOL: {
+        const auto &sym = get_current_schematic()->sheets.at(sh).symbols.at(uu);
+        return sym.component->refdes + sym.gate->suffix;
+    }
+
+    case ObjectType::SCHEMATIC_BLOCK_SYMBOL: {
+        const auto &sym = get_current_schematic()->sheets.at(sh).block_symbols.at(uu);
+        return sym.block_instance->refdes;
+    }
 
     case ObjectType::COMPONENT:
-        return block->components.at(uu).refdes;
+        return get_current_block()->components.at(uu).refdes;
+
+    case ObjectType::BLOCK_INSTANCE:
+        return get_current_block()->block_instances.at(uu).refdes;
 
     case ObjectType::POWER_SYMBOL:
-        return sheet.power_symbols.at(uu).net->name;
+        return get_current_schematic()->sheets.at(sh).power_symbols.at(uu).net->name;
 
     case ObjectType::BUS_RIPPER:
-        return sheet.bus_rippers.at(uu).bus_member->net->name;
+        return get_current_schematic()->sheets.at(sh).bus_rippers.at(uu).bus_member->net->name;
 
     case ObjectType::TEXT:
-        return sheet.texts.at(uu).text;
+        if (sh)
+            return get_current_schematic()->sheets.at(sh).texts.at(uu).text;
+        else
+            return Core::get_display_name(type, uu);
 
     default:
         return Core::get_display_name(type, uu);
@@ -467,6 +641,7 @@ std::string CoreSchematic::get_display_name(ObjectType type, const UUID &uu, con
 void CoreSchematic::add_sheet()
 {
     auto uu = UUID::random();
+    auto sch = get_current_schematic();
     auto sheet_max = std::max_element(sch->sheets.begin(), sch->sheets.end(),
                                       [](const auto &p1, const auto &p2) { return p1.second.index < p2.second.index; });
     auto *sheet = &sch->sheets.emplace(uu, uu).first->second;
@@ -478,9 +653,10 @@ void CoreSchematic::add_sheet()
 
 void CoreSchematic::delete_sheet(const UUID &uu)
 {
+    auto sch = get_current_schematic();
     if (sch->sheets.size() <= 1)
         return;
-    if (sch->sheets.at(uu).symbols.size() > 0) // only delete empty sheets
+    if (!sch->sheets.at(uu).can_be_removed()) // only delete empty sheets
         return;
     auto deleted_index = sch->sheets.at(uu).index;
     sch->sheets.erase(uu);
@@ -498,6 +674,7 @@ void CoreSchematic::delete_sheet(const UUID &uu)
 
 void CoreSchematic::set_sheet(const UUID &uu)
 {
+    auto sch = get_current_schematic();
     if (tool_is_active())
         return;
     if (sch->sheets.count(uu) == 0)
@@ -505,10 +682,145 @@ void CoreSchematic::set_sheet(const UUID &uu)
     sheet_uuid = uu;
 }
 
+void CoreSchematic::set_block(const UUID &uu)
+{
+    if (tool_is_active())
+        return;
+    if (blocks->blocks.count(uu) == 0)
+        return;
+    instance_path.clear();
+    block_uuid = uu;
+}
+
+void CoreSchematic::set_block_symbol_mode()
+{
+    if (tool_is_active())
+        return;
+    sheet_uuid = UUID();
+}
+
+bool CoreSchematic::get_block_symbol_mode() const
+{
+    return sheet_uuid == UUID();
+}
+
+const UUID &CoreSchematic::get_current_block_uuid() const
+{
+    return block_uuid;
+}
+
+const UUID &CoreSchematic::get_top_block_uuid() const
+{
+    return blocks->top_block;
+}
+
+const BlocksSchematic &CoreSchematic::get_blocks() const
+{
+    return *blocks;
+}
+
+BlocksSchematic &CoreSchematic::get_blocks()
+{
+    return *blocks;
+}
+
+bool CoreSchematic::current_block_is_top() const
+{
+    return block_uuid == blocks->top_block;
+}
+
+void CoreSchematic::set_instance_path(const UUIDVec &path)
+{
+    if (tool_is_active())
+        return;
+    if (path.size() && !get_top_block()->block_instance_mappings.count(path)) {
+        Logger::log_critical("instance mapping not found", Logger::Domain::SCHEMATIC, uuid_vec_to_string(path));
+        return;
+    }
+    if (path.size() && get_top_block()->block_instance_mappings.at(path).block != block_uuid)
+        return;
+    instance_path = path;
+    blocks->blocks.at(block_uuid).schematic.expand(false, this);
+}
+
+bool CoreSchematic::in_hierarchy() const
+{
+    return current_block_is_top() || instance_path.size();
+}
+
+const UUIDVec &CoreSchematic::get_instance_path() const
+{
+    return instance_path;
+}
+
+const BlockInstanceMapping *CoreSchematic::get_block_instance_mapping() const
+{
+    if (instance_path.size()) {
+        auto &map = blocks->get_top_block().block.block_instance_mappings.at(instance_path);
+        assert(map.block == block_uuid);
+        return &map;
+    }
+    else
+        return nullptr;
+}
+
+BlockInstanceMapping *CoreSchematic::get_block_instance_mapping()
+{
+    return const_cast<BlockInstanceMapping *>(static_cast<const CoreSchematic *>(this)->get_block_instance_mapping());
+}
+
+unsigned int CoreSchematic::get_sheet_index(const class UUID &sheet) const
+{
+    if (in_hierarchy()) {
+        return blocks->get_top_block().schematic.sheet_mapping.sheet_numbers.at(uuid_vec_append(instance_path, sheet));
+    }
+    else {
+        return get_current_schematic()->sheets.at(sheet).index;
+    }
+}
+
+unsigned int CoreSchematic::get_sheet_index_for_path(const class UUID &sheet, const UUIDVec &path) const
+{
+    return blocks->get_top_block().schematic.sheet_mapping.sheet_numbers.at(uuid_vec_append(path, sheet));
+}
+
+unsigned int CoreSchematic::get_sheet_total() const
+{
+    if (in_hierarchy())
+        return blocks->get_top_block().schematic.sheet_mapping.sheet_total;
+    else
+        return get_current_schematic()->sheets.size();
+}
+
+Schematic &CoreSchematic::get_schematic_for_instance_path(const UUIDVec &path)
+{
+    Block *block = get_top_block();
+    for (const auto &uu : path) {
+        block = block->block_instances.at(uu).block;
+    }
+    return blocks->blocks.at(block->uuid).schematic;
+}
+
 void CoreSchematic::rebuild(bool from_undo)
 {
     clock_t begin = clock();
-    sch->expand();
+    auto &top_block = blocks->get_top_block();
+
+    top_block.block.create_instance_mappings();
+    get_top_schematic()->update_sheet_mapping();
+    for (auto &[uu, block] : blocks->blocks) {
+        if (uu == top_block.uuid)
+            continue;
+
+        top_block.block.update_non_top(block.block);
+    }
+    for (auto &[uu, block] : blocks->blocks) {
+        IInstanceMappingProvider *prv = nullptr;
+        if (uu == block_uuid)
+            prv = this;
+        block.schematic.expand(false, prv);
+        block.symbol.expand();
+    }
     Core::rebuild(from_undo);
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
@@ -517,45 +829,59 @@ void CoreSchematic::rebuild(bool from_undo)
 
 const Sheet &CoreSchematic::get_canvas_data()
 {
-    return sch->sheets.at(sheet_uuid);
+    return *get_sheet();
+}
+
+const BlockSymbol &CoreSchematic::get_canvas_data_block_symbol()
+{
+    return get_block_symbol();
 }
 
 void CoreSchematic::history_push()
 {
-    history.push_back(std::make_unique<CoreSchematic::HistoryItem>(*block, *sch));
-    auto x = dynamic_cast<CoreSchematic::HistoryItem *>(history.back().get());
-    x->sch.block = &x->block;
-    x->sch.update_refs();
+    history.push_back(std::make_unique<CoreSchematic::HistoryItem>(*blocks));
 }
 
 void CoreSchematic::history_load(unsigned int i)
 {
     const auto &x = dynamic_cast<CoreSchematic::HistoryItem &>(*history.at(history_current));
-    sch.emplace(x.sch);
-    block.emplace(x.block);
-    sch->block = &*block;
-    sch->update_refs();
+    blocks.emplace(x.blocks);
     s_signal_rebuilt.emit();
 }
 
 void CoreSchematic::reload_pool()
 {
+    /*
     PictureKeeper keeper;
-    for (const auto &[uu_sheet, sheet] : sch->sheets) {
-        keeper.save(sheet.pictures);
+    for (const auto &[uu_block, block] : blocks->blocks) {
+        for (const auto &[uu_sheet, sheet] : block.schematic->sheets) {
+            keeper.save(sheet.pictures);
+        }
     }
-    const auto sch_j = sch->serialize();
-    const auto block_j = block->serialize();
+    struct SerializedBlock {
+        SerializedBlock(const BlocksSchematic::BlockItemSchematic &b):
+        schematic(b.schematic.serialize(), block(b.block.serialize()), symbol(b.symbol.serialize()){}
+
+        json schematic;
+        json block;
+        json symbol;
+    };
+    std::map<UUID, SerializedBlock> blocks_serialized;
+    for (const auto &[uu_block, block] : blocks->blocks) {
+        blocks_serialized.emplace(uu_block, block);
+    }
     m_pool.clear();
     m_pool_caching.clear();
     block.emplace(block->uuid, block_j, m_pool_caching);
     sch.emplace(sch->uuid, sch_j, *block, m_pool_caching);
-    for (auto &[uu_sheet, sheet] : sch->sheets) {
-        keeper.restore(sheet.pictures);
+    for (const auto &[uu_block, block] : blocks->blocks) {
+        for (auto &[uu_sheet, sheet] : block.schematic) {
+            keeper.restore(sheet.pictures);
+        }
     }
     bom_export_settings.update_refs(m_pool_caching);
     history_clear();
-    rebuild();
+    rebuild();*/
 }
 
 std::pair<Coordi, Coordi> CoreSchematic::get_bbox()
@@ -565,26 +891,46 @@ std::pair<Coordi, Coordi> CoreSchematic::get_bbox()
 
 const std::string &CoreSchematic::get_filename() const
 {
-    return m_schematic_filename;
+    return m_blocks_filename;
 }
 
 void CoreSchematic::save(const std::string &suffix)
 {
-    sch->rules = rules;
-    block->bom_export_settings = bom_export_settings;
-    sch->pdf_export_settings = pdf_export_settings;
-    save_json_to_file(m_schematic_filename + suffix, sch->serialize());
-    save_json_to_file(m_block_filename + suffix, block->serialize());
-    sch->save_pictures(m_pictures_dir);
+    auto &top = blocks->get_top_block();
+    top.schematic.rules = rules;
+    top.block.bom_export_settings = bom_export_settings;
+    top.schematic.pdf_export_settings = pdf_export_settings;
+    save_json_to_file(m_blocks_filename, blocks->serialize());
+
+    for (auto &[uu, block] : blocks->blocks) {
+        const auto sch_filename = fs::u8path(blocks->base_path) / fs::u8path(block.schematic_filename + suffix);
+        ensure_parent_dir(sch_filename);
+        save_json_to_file(sch_filename, block.schematic.serialize());
+
+        const auto block_filename = fs::u8path(blocks->base_path) / fs::u8path(block.block_filename + suffix);
+        ensure_parent_dir(block_filename);
+        save_json_to_file(block_filename, block.block.serialize());
+
+        if (block.symbol_filename.size()) {
+            const auto sym_filename = fs::u8path(blocks->base_path) / fs::u8path(block.symbol_filename + suffix);
+            ensure_parent_dir(sym_filename);
+            save_json_to_file(sym_filename, block.symbol.serialize());
+        }
+
+        block.schematic.save_pictures(m_pictures_dir);
+    }
 }
 
 
 void CoreSchematic::delete_autosave()
 {
+    /*
     if (Glib::file_test(m_schematic_filename + autosave_suffix, Glib::FILE_TEST_IS_REGULAR))
         Gio::File::create_for_path(m_schematic_filename + autosave_suffix)->remove();
     if (Glib::file_test(m_block_filename + autosave_suffix, Glib::FILE_TEST_IS_REGULAR))
         Gio::File::create_for_path(m_block_filename + autosave_suffix)->remove();
+        */
+    // TBD
 }
 
 } // namespace horizon

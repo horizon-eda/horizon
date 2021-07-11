@@ -242,7 +242,7 @@ void PDFExportWindow::export_thread(PDFExportSettings s)
 {
     try {
         if (auto core_sch = dynamic_cast<IDocumentSchematic *>(&core)) {
-            export_pdf(*core_sch->get_current_schematic(), s, [this](std::string st, double p) {
+            export_pdf(*core_sch->get_top_schematic(), s, [this](std::string st, double p) {
                 status_dispatcher.set_status(StatusDispatcher::Status::BUSY, st, p);
             });
             status_dispatcher.set_status(StatusDispatcher::Status::DONE, "Done", 1);

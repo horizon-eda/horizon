@@ -968,6 +968,30 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::TOOL, ToolID::SET_TRACK_WIDTH},
          {"Set track width", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::MANAGE_PORTS},
+         {"Manage ports", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::MAP_PORT},
+         {"Map port", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::ADD_BLOCK_INSTANCE},
+         {"Place block", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::PUSH_INTO_BLOCK, ToolID::NONE},
+         {"Push", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_SPECIFIC}},
+
+        {{ActionID::POP_OUT_OF_BLOCK, ToolID::NONE},
+         {"Pop to parent block", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::EDIT_BLOCK_SYMBOL, ToolID::NONE},
+         {"Edit block symbol", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_SPECIFIC}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1106,6 +1130,9 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(VIEW_3D_RIGHT),
         ACTION_LUT_ITEM(GRIDS_WINDOW),
         ACTION_LUT_ITEM(SELECT_GRID),
+        ACTION_LUT_ITEM(PUSH_INTO_BLOCK),
+        ACTION_LUT_ITEM(POP_OUT_OF_BLOCK),
+        ACTION_LUT_ITEM(EDIT_BLOCK_SYMBOL),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \
@@ -1262,5 +1289,8 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(EDIT_CUSTOM_VALUE),
         TOOL_LUT_ITEM(PLACE_DOT),
         TOOL_LUT_ITEM(SET_TRACK_WIDTH),
+        TOOL_LUT_ITEM(MANAGE_PORTS),
+        TOOL_LUT_ITEM(MAP_PORT),
+        TOOL_LUT_ITEM(ADD_BLOCK_INSTANCE),
 };
 } // namespace horizon

@@ -51,6 +51,7 @@ void ToolDrawLineNet::restart(const Coordi &c)
     temp_line_head = nullptr;
     temp_line_mid = nullptr;
     component_floating = nullptr;
+    block_instance_floating = nullptr;
     net_label = nullptr;
     set_snap_filter();
     update_tip();
@@ -150,6 +151,8 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
             SchematicJunction *ju = nullptr;
             SchematicSymbol *sym = nullptr;
             uuid_ptr<SymbolPin> pin = nullptr;
+            SchematicBlockSymbol *block_sym = nullptr;
+            uuid_ptr<BlockSymbolPort> port = nullptr;
             BusRipper *rip = nullptr;
             Net *net = nullptr;
             Bus *bus = nullptr;
@@ -193,6 +196,40 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                         connpath_floating = connpath;
                     }
                 }
+                else if (args.target.type == ObjectType::BLOCK_SYMBOL_PORT) {
+                    block_sym = &doc.c->get_sheet()->block_symbols.at(args.target.path.at(0));
+                    port = &block_sym->symbol.ports.at(args.target.path.at(1));
+                    port_start = port;
+                    const UUID net_port = args.target.path.at(1);
+
+                    const auto orientation = port->get_orientation_for_placement(block_sym->placement);
+                    switch (orientation) {
+                    case Orientation::UP:
+                    case Orientation::DOWN:
+                        bend_mode = BendMode::YX;
+                        break;
+
+                    case Orientation::LEFT:
+                    case Orientation::RIGHT:
+                        bend_mode = BendMode::XY;
+                        break;
+                    }
+
+                    if (block_sym->block_instance->connections.count(net_port)) { // port is connected
+                        Connection &conn = block_sym->block_instance->connections.at(net_port);
+                        if (conn.net == nullptr) {
+                            imp->tool_bar_flash("can't connect to NC port");
+                            return ToolResponse();
+                        }
+                        net = conn.net;
+                    }
+                    else { // pin needs net
+                        net = doc.c->get_current_schematic()->block->insert_net();
+                        block_sym->block_instance->connections.emplace(net_port, net);
+                        block_instance_floating = block_sym->block_instance;
+                        net_port_floating = net_port;
+                    }
+                }
                 else if (args.target.type == ObjectType::BUS_RIPPER) {
                     rip = &doc.c->get_sheet()->bus_rippers.at(args.target.path.at(0));
                     net = rip->bus_member->net;
@@ -223,6 +260,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
             }
             else { // already have net line
                 component_floating = nullptr;
+                block_instance_floating = nullptr;
                 if (args.target.type == ObjectType::JUNCTION) {
                     ju = &doc.c->get_sheet()->junctions.at(args.target.path.at(0));
                     auto do_merge = merge_bus_net(temp_line_head->net, temp_line_head->bus, ju->net, ju->bus);
@@ -269,6 +307,43 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                         sym->component->connections.emplace(connpath, net);
                     }
                     temp_line_head->to.connect(sym, pin);
+                    doc.r->delete_junction(temp_junc_head->uuid);
+                    restart(args.coords);
+                    return ToolResponse();
+                }
+                else if (args.target.type == ObjectType::BLOCK_SYMBOL_PORT) {
+                    block_sym = &doc.c->get_sheet()->block_symbols.at(args.target.path.at(0));
+                    port = &block_sym->symbol.ports.at(args.target.path.at(1));
+                    if (port == port_start) // do noting
+                        return ToolResponse();
+                    const UUID net_port = args.target.path.at(1);
+                    if (temp_line_head->bus) { // can't connect bus to port
+                        return ToolResponse();
+                    }
+                    if (block_sym->block_instance->connections.count(net_port)) { // port is connected
+                        Connection &conn = block_sym->block_instance->connections.at(net_port);
+                        if (conn.net == nullptr) {
+                            imp->tool_bar_flash("can't connect to NC pin");
+                            return ToolResponse();
+                        }
+                        if (temp_line_head->net && (temp_line_head->net->uuid != conn.net->uuid)) { // has net
+                            if (merge_nets(conn.net, temp_line_head->net)) {
+                                return ToolResponse();
+                            }
+                            port = &block_sym->symbol.ports.at(args.target.path.at(1)); // update port after merge,
+                                                                                        // since merge replaces ports
+                        }
+                    }
+                    else { // port needs net
+                        if (temp_junc_head->net) {
+                            net = temp_junc_head->net;
+                        }
+                        else {
+                            net = doc.c->get_current_schematic()->block->insert_net();
+                        }
+                        block_sym->block_instance->connections.emplace(net_port, net);
+                    }
+                    temp_line_head->to.connect(block_sym, port);
                     doc.r->delete_junction(temp_junc_head->uuid);
                     restart(args.coords);
                     return ToolResponse();
@@ -346,6 +421,9 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
             else if (sym) {
                 temp_line_mid->from.connect(sym, pin);
             }
+            else if (block_sym) {
+                temp_line_mid->from.connect(block_sym, port);
+            }
             else if (rip) {
                 temp_line_mid->from.connect(rip);
             }
@@ -366,8 +444,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                 doc.c->get_sheet()->net_lines.erase(temp_line_head->uuid);
                 doc.c->get_sheet()->net_lines.erase(temp_line_mid->uuid);
                 doc.r->delete_junction(temp_junc_mid->uuid);
-                if (component_floating)
-                    component_floating->connections.erase(connpath_floating);
+                cleanup_floating();
                 restart(args.coords);
                 return ToolResponse();
             }
@@ -382,8 +459,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                 doc.c->get_sheet()->net_lines.erase(temp_line_head->uuid);
                 doc.c->get_sheet()->net_lines.erase(temp_line_mid->uuid);
                 doc.r->delete_junction(temp_junc_mid->uuid);
-                if (component_floating)
-                    component_floating->connections.erase(connpath_floating);
+                cleanup_floating();
             }
             doc.r->delete_junction(temp_junc_head->uuid);
             return ToolResponse::commit();
@@ -476,4 +552,13 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
     update_tip();
     return ToolResponse();
 }
+
+void ToolDrawLineNet::cleanup_floating()
+{
+    if (component_floating)
+        component_floating->connections.erase(connpath_floating);
+    if (block_instance_floating)
+        block_instance_floating->connections.erase(net_port_floating);
+}
+
 } // namespace horizon

@@ -27,6 +27,7 @@
 #include "util/zmq_helper.hpp"
 #include "pool-update/pool-update.hpp"
 #include "pool_update_error_dialog.hpp"
+#include "blocks/blocks.hpp"
 #include <filesystem>
 
 #ifdef G_OS_WIN32
@@ -375,7 +376,7 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::find_top_schematic_proce
 {
     if (!project)
         return nullptr;
-    return find_process(project->get_top_block().schematic_filename);
+    return find_process(project->blocks_filename);
 }
 
 PoolProjectManagerProcess *PoolProjectManagerAppWindow::find_board_process()
@@ -768,8 +769,7 @@ static std::optional<std::string> peek_name(const std::string &path)
         }
         else {
             auto prj = Project::new_from_file(path);
-            auto block_filename = prj.get_top_block().block_filename;
-            auto meta = Block::peek_project_meta(block_filename);
+            auto meta = BlocksBase::peek_project_meta(prj.blocks_filename);
             if (meta.count("project_title"))
                 name = meta.at("project_title");
             if (!name.size())
@@ -1541,65 +1541,69 @@ bool PoolProjectManagerAppWindow::cleanup_pool_cache(Gtk::Window *parent)
     }
     ItemSet items_needed;
 
-    ProjectPool project_pool(project->pool_directory, false);
-    auto block = Block::new_from_file(project->get_top_block().block_filename, project_pool);
-    auto sch = Schematic::new_from_file(project->get_top_block().schematic_filename, block, project_pool);
-    sch.expand();
-    auto board = Board::new_from_file(project->board_filename, block, project_pool);
-    board.expand();
+    return false;
+    // TBD
+    /*
+        ProjectPool project_pool(project->pool_directory, false);
+        auto block = Block::new_from_file(project->get_top_block().block_filename, project_pool);
+        auto sch = Schematic::new_from_file(project->get_top_block().schematic_filename, block, project_pool);
+        sch.expand();
+        auto board = Board::new_from_file(project->board_filename, block, project_pool);
+        board.expand();
 
-    {
-        auto items = block.get_pool_items_used();
-        items_needed.insert(items.begin(), items.end());
-    }
-    {
-        auto items = sch.get_pool_items_used();
-        items_needed.insert(items.begin(), items.end());
-    }
-    {
-        auto items = board.get_pool_items_used();
-        items_needed.insert(items.begin(), items.end());
-    }
-
-    std::set<std::string> models_needed;
-    for (const auto &[uu, pkg] : board.packages) {
-        auto model = pkg.package.get_model(pkg.model);
-        if (model) {
-            models_needed.emplace(model->filename);
+        {
+            auto items = block.get_pool_items_used();
+            items_needed.insert(items.begin(), items.end());
         }
-    }
-
-    const auto model_cache_dir = fs::u8path("3d_models") / "cache";
-    std::set<std::string> models_cached;
-    for (auto &p : fs::recursive_directory_iterator(fs::u8path(project_pool.get_base_path()) / model_cache_dir)) {
-        if (p.is_regular_file())
-            models_cached.emplace(fs::relative(p, fs::u8path(project_pool.get_base_path())).u8string());
-    }
-
-    std::map<std::pair<ObjectType, UUID>, std::string> items_cached;
-    auto status = PoolCacheStatus::from_project_pool(project_pool);
-    for (const auto &item : status.items) {
-        if (item.type != ObjectType::MODEL_3D) {
-            items_cached.emplace(std::piecewise_construct, std::forward_as_tuple(item.type, item.uuid),
-                                 std::forward_as_tuple(item.filename_cached));
+        {
+            auto items = sch.get_pool_items_used();
+            items_needed.insert(items.begin(), items.end());
         }
-    }
-
-    std::set<std::string> files_to_delete;
-    for (const auto &it : items_cached) {
-        if (items_needed.count(it.first) == 0) {
-            files_to_delete.insert(it.second);
+        {
+            auto items = board.get_pool_items_used();
+            items_needed.insert(items.begin(), items.end());
         }
-    }
-    std::set<std::string> models_to_delete;
-    for (const auto &it : models_cached) {
-        if (models_needed.count(it) == 0) {
-            models_to_delete.insert((fs::u8path(project_pool.get_base_path()) / it).u8string());
-        }
-    }
 
-    PoolCacheCleanupDialog dia(parent, files_to_delete, models_to_delete, project_pool);
-    return dia.run() == Gtk::RESPONSE_OK;
+        std::set<std::string> models_needed;
+        for (const auto &[uu, pkg] : board.packages) {
+            auto model = pkg.package.get_model(pkg.model);
+            if (model) {
+                models_needed.emplace(model->filename);
+            }
+        }
+
+        const auto model_cache_dir = fs::u8path("3d_models") / "cache";
+        std::set<std::string> models_cached;
+        for (auto &p : fs::recursive_directory_iterator(fs::u8path(project_pool.get_base_path()) / model_cache_dir)) {
+            if (p.is_regular_file())
+                models_cached.emplace(fs::relative(p, fs::u8path(project_pool.get_base_path())).u8string());
+        }
+
+        std::map<std::pair<ObjectType, UUID>, std::string> items_cached;
+        auto status = PoolCacheStatus::from_project_pool(project_pool);
+        for (const auto &item : status.items) {
+            if (item.type != ObjectType::MODEL_3D) {
+                items_cached.emplace(std::piecewise_construct, std::forward_as_tuple(item.type, item.uuid),
+                                     std::forward_as_tuple(item.filename_cached));
+            }
+        }
+
+        std::set<std::string> files_to_delete;
+        for (const auto &it : items_cached) {
+            if (items_needed.count(it.first) == 0) {
+                files_to_delete.insert(it.second);
+            }
+        }
+        std::set<std::string> models_to_delete;
+        for (const auto &it : models_cached) {
+            if (models_needed.count(it) == 0) {
+                models_to_delete.insert((fs::u8path(project_pool.get_base_path()) / it).u8string());
+            }
+        }
+
+        PoolCacheCleanupDialog dia(parent, files_to_delete, models_to_delete, project_pool);
+        return dia.run() == Gtk::RESPONSE_OK;
+        */
 }
 
 void PoolProjectManagerAppWindow::update_pool_cache_status_now()

@@ -16,6 +16,7 @@
 #include <deque>
 #include <list>
 #include "picture.hpp"
+#include "pool/unit.hpp"
 #include "util/vector_pair.hpp"
 
 namespace horizon {
@@ -38,6 +39,7 @@ public:
     void update(const class Board &brd, PanelMode mode = PanelMode::INCLUDE);
     void update(const class Frame &fr, bool edit = true);
     void update(const class Decal &dec, bool edit = true);
+    void update(const class BlockSymbol &sym, bool edit = true);
 
     ObjectRef add_line(const std::deque<Coordi> &pts, int64_t width, ColorP color, int layer);
     void remove_obj(const ObjectRef &r);
@@ -136,6 +138,9 @@ protected:
     void render(const class Picture &pic);
     void render(const class Decal &decal, bool interactive = true);
     void render(const class BoardDecal &decal);
+    void render(const class BlockSymbol &sym, bool on_sheet = false);
+    void render(const class BlockSymbolPort &port, bool interactive = true);
+    void render(const class SchematicBlockSymbol &sym);
 
     bool needs_push = true;
     virtual void request_push() = 0;
@@ -255,5 +260,7 @@ private:
     int group_layer = 0;
     vector_pair<Triangle, TriangleInfo> *group_tris = nullptr;
     size_t group_size = 0;
+
+    void draw_direction(Pin::Direction dir, ColorP color);
 };
 } // namespace horizon

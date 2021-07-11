@@ -10,6 +10,7 @@ pymodule: $(BUILDDIR)/horizon.so
 SRC_COMMON = \
 	src/util/uuid.cpp \
 	src/util/uuid_path.cpp\
+	src/util/uuid_vec.cpp\
 	src/util/sqlite.cpp\
 	src/util/str_util.cpp\
 	src/pool/pool_manager.cpp \
@@ -28,6 +29,7 @@ SRC_COMMON = \
 	src/block/block.cpp\
 	src/pool/entity.cpp\
 	src/block/component.cpp\
+	src/block/block_instance.cpp\
 	src/block/bom.cpp\
 	src/block/bom_export_settings.cpp\
 	src/schematic/schematic.cpp\
@@ -39,6 +41,7 @@ SRC_COMMON = \
 	src/schematic/bus_label.cpp\
 	src/schematic/bus_ripper.cpp\
 	src/schematic/schematic_symbol.cpp\
+	src/schematic/schematic_block_symbol.cpp\
 	src/schematic/power_symbol.cpp\
 	src/schematic/schematic_rules.cpp\
 	src/schematic/rule_single_pin_net.cpp\
@@ -122,6 +125,9 @@ SRC_COMMON = \
 	src/util/fs_util.cpp\
 	src/common/grid_settings.cpp\
 	src/util/dependency_graph.cpp\
+	src/blocks/blocks.cpp\
+	src/blocks/blocks_schematic.cpp\
+	src/block_symbol/block_symbol.cpp\
 
 
 ifeq ($(OS),Windows_NT)
@@ -308,6 +314,8 @@ SRC_IMP = \
 	src/core/tools/tool_edit_custom_value.cpp\
 	src/core/tools/tool_place_dot.cpp\
 	src/core/tools/tool_set_track_width.cpp\
+	src/core/tools/tool_map_port.cpp\
+	src/core/tools/tool_add_block_instance.cpp\
 	src/document/documents.cpp\
 	src/core/clipboard/clipboard.cpp\
 	src/core/clipboard/clipboard_padstack.cpp\
@@ -349,6 +357,8 @@ SRC_IMP = \
 	src/dialogs/enter_datum_scale_window.cpp\
 	src/dialogs/router_settings_window.cpp\
 	src/dialogs/edit_custom_value.cpp\
+	src/dialogs/manage_ports.cpp\
+	src/dialogs/select_block.cpp\
 	src/util/sort_controller.cpp\
 	src/core/core_symbol.cpp\
 	src/core/core_schematic.cpp\

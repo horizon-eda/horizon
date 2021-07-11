@@ -110,5 +110,8 @@ enum class ActionID {
     VIEW_3D_RIGHT,
     GRIDS_WINDOW,
     SELECT_GRID,
+    PUSH_INTO_BLOCK,
+    POP_OUT_OF_BLOCK,
+    EDIT_BLOCK_SYMBOL,
 };
 }

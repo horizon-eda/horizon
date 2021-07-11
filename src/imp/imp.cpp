@@ -512,7 +512,6 @@ void ImpBase::run(int argc, char *argv[])
 
     connect_action(ActionID::VIEW_ALL, [this](const auto &a) {
         auto bbox = canvas->get_bbox();
-        std::cout << coord_to_string(bbox.first) << " " << coord_to_string(bbox.second) << std::endl;
         canvas->zoom_to_bbox(bbox.first, bbox.second);
     });
 
@@ -1603,7 +1602,8 @@ ActionToolID ImpBase::get_doubleclick_action(ObjectType type, const UUID &uu)
     }
 }
 
-std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpBase::get_selection_filter_info() const
+std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpBase::
+get_selection_filter_info() const
 {
     std::map<ObjectType, ImpBase::SelectionFilterInfo> r;
     for (const auto &it : object_descriptions) {

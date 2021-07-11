@@ -31,8 +31,10 @@ private:
     unsigned int update_nets();
 
 public:
-    Schematic(const UUID &uu, const json &, Block &block, class IPool &pool);
-    static Schematic new_from_file(const std::string &filename, Block &block, IPool &pool);
+    Schematic(const UUID &uu, const json &, Block &block, class IPool &pool,
+              class IBlockSymbolAndSchematicProvider &prv);
+    static Schematic new_from_file(const std::string &filename, Block &block, IPool &pool,
+                                   class IBlockSymbolAndSchematicProvider &prv);
     Schematic(const UUID &uu, Block &block);
     static unsigned int get_app_version();
 
@@ -41,7 +43,7 @@ public:
      * \param carful when true, superfluous things will get cleaned up. Don't do
      * this when you may hold pointers to these.
      */
-    void expand(bool careful = false);
+    void expand(bool careful = false, const class IInstanceMappingProvider *inst_map = nullptr);
 
     Schematic(const Schematic &sch);
     void operator=(const Schematic &sch) = delete;
@@ -83,6 +85,8 @@ public:
 
     void swap_gates(const UUID &comp, const UUID &g1, const UUID &g2);
 
+    void disconnect_block_symbol(Sheet *sheet, SchematicBlockSymbol *sym);
+
     std::map<UUIDPath<2>, std::string> get_unplaced_gates() const;
 
     static Glib::RefPtr<Glib::Regex> get_sheetref_regex();
@@ -114,6 +118,20 @@ public:
     Annotation annotation;
     void annotate();
 
+    class SheetMapping {
+    public:
+        std::map<UUIDVec, unsigned int> sheet_numbers;
+        unsigned int sheet_total;
+        void update(const Schematic &sch);
+
+    private:
+        void update(const Schematic &sch, const UUIDVec &instance_path);
+        unsigned int index;
+    };
+    SheetMapping sheet_mapping;
+
+    void update_sheet_mapping();
+
     PDFExportSettings pdf_export_settings;
 
     FileVersion version;
@@ -126,5 +144,8 @@ public:
 
     std::vector<Sheet *> get_sheets_sorted();
     std::vector<const Sheet *> get_sheets_sorted() const;
+
+private:
+    void expand_frames(const IInstanceMappingProvider *inst_map);
 };
 } // namespace horizon

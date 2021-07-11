@@ -14,12 +14,14 @@ void SearcherSchematic::sort_search_results_schematic(std::list<Searcher::Search
                                                       const Searcher::SearchQuery &q)
 {
     results.sort([this, q](const auto &a, const auto &b) {
-        int index_a = doc.get_current_schematic()->sheets.at(a.sheet).index;
-        int index_b = doc.get_current_schematic()->sheets.at(b.sheet).index;
+        int index_a =
+                doc.get_top_schematic()->sheet_mapping.sheet_numbers.at(uuid_vec_append(a.instance_path, a.sheet));
+        int index_b =
+                doc.get_top_schematic()->sheet_mapping.sheet_numbers.at(uuid_vec_append(b.instance_path, b.sheet));
 
-        if (a.sheet == doc.get_sheet()->uuid)
+        if (a.sheet == doc.get_sheet()->uuid && a.instance_path == doc.get_instance_path())
             index_a = -1;
-        if (b.sheet == doc.get_sheet()->uuid)
+        if (b.sheet == doc.get_sheet()->uuid && b.instance_path == doc.get_instance_path())
             index_b = -1;
 
         if (index_a > index_b)
@@ -56,20 +58,57 @@ void SearcherSchematic::sort_search_results_schematic(std::list<Searcher::Search
     });
 }
 
+using WalkCB = std::function<void(const Sheet &, unsigned int, const Schematic &, const UUIDVec &)>;
+
+struct WalkContext {
+    WalkCB cb;
+    const Schematic &top;
+};
+
+static void walk_sheets_rec(const Schematic &sch, const UUIDVec &instance_path, WalkContext &ctx)
+{
+    for (auto sheet : sch.get_sheets_sorted()) {
+        const auto sheet_index = ctx.top.sheet_mapping.sheet_numbers.at(uuid_vec_append(instance_path, sheet->uuid));
+        ctx.cb(*sheet, sheet_index, sch, instance_path);
+        for (auto sym : sheet->get_block_symbols_sorted()) {
+            walk_sheets_rec(*sym->schematic, uuid_vec_append(instance_path, sym->block_instance->uuid), ctx);
+        }
+    }
+}
+
+static void walk_sheets(const Schematic &sch, WalkCB cb)
+{
+    WalkContext ctx{cb, sch};
+    walk_sheets_rec(sch, {}, ctx);
+}
+
+static const std::string &get_refdes(const Component &comp, const UUIDVec &instance_path, const Block &top_block)
+{
+    if (instance_path.size()) {
+        return top_block.block_instance_mappings.at(instance_path).components.at(comp.uuid).refdes;
+    }
+    else {
+        return comp.refdes;
+    }
+}
+
 std::list<Searcher::SearchResult> SearcherSchematic::search(const Searcher::SearchQuery &q)
 {
     std::list<SearchResult> results;
     if (!q.is_valid())
         return results;
-    for (const auto &it_sheet : doc.get_current_schematic()->sheets) {
-        const auto &sheet = it_sheet.second;
+
+    const auto &top = *doc.get_top_schematic();
+    walk_sheets(top, [&results, &q, &top](const Sheet &sheet, unsigned int sheet_index, const Schematic &sch,
+                                          const UUIDVec &instance_path) {
         if (q.types.count(Type::SYMBOL_REFDES)) {
-            for (const auto &it : sheet.symbols) {
-                if (q.matches(it.second.component->refdes)) {
-                    results.emplace_back(Type::SYMBOL_REFDES, it.first);
+            for (const auto &[uu, sym] : sheet.symbols) {
+                if (q.matches(get_refdes(*sym.component, instance_path, *top.block))) {
+                    results.emplace_back(Type::SYMBOL_REFDES, uu);
                     auto &x = results.back();
-                    x.location = it.second.placement.shift;
+                    x.location = sym.placement.shift;
                     x.sheet = sheet.uuid;
+                    x.instance_path = instance_path;
                     x.selectable = true;
                 }
             }
@@ -82,6 +121,7 @@ std::list<Searcher::SearchResult> SearcherSchematic::search(const Searcher::Sear
                         auto &x = results.back();
                         x.location = it.second.placement.transform(it_pin.second.position);
                         x.sheet = sheet.uuid;
+                        x.instance_path = instance_path;
                         x.selectable = false;
                     }
                 }
@@ -94,6 +134,7 @@ std::list<Searcher::SearchResult> SearcherSchematic::search(const Searcher::Sear
                     auto &x = results.back();
                     x.location = it.second.placement.shift;
                     x.sheet = sheet.uuid;
+                    x.instance_path = instance_path;
                     x.selectable = true;
                 }
             }
@@ -105,6 +146,7 @@ std::list<Searcher::SearchResult> SearcherSchematic::search(const Searcher::Sear
                     auto &x = results.back();
                     x.location = it.second.junction->position;
                     x.sheet = sheet.uuid;
+                    x.instance_path = instance_path;
                     x.selectable = true;
                 }
             }
@@ -116,6 +158,7 @@ std::list<Searcher::SearchResult> SearcherSchematic::search(const Searcher::Sear
                     auto &x = results.back();
                     x.location = it.second.get_connector_pos();
                     x.sheet = sheet.uuid;
+                    x.instance_path = instance_path;
                     x.selectable = true;
                 }
             }
@@ -127,6 +170,7 @@ std::list<Searcher::SearchResult> SearcherSchematic::search(const Searcher::Sear
                     auto &x = results.back();
                     x.location = it.second.junction->position;
                     x.sheet = sheet.uuid;
+                    x.instance_path = instance_path;
                     x.selectable = true;
                 }
             }
@@ -138,11 +182,12 @@ std::list<Searcher::SearchResult> SearcherSchematic::search(const Searcher::Sear
                     auto &x = results.back();
                     x.location = it.second.placement.shift;
                     x.sheet = sheet.uuid;
+                    x.instance_path = instance_path;
                     x.selectable = true;
                 }
             }
         }
-    }
+    });
     sort_search_results_schematic(results, q);
 
     return results;
@@ -157,13 +202,38 @@ std::set<Searcher::Type> SearcherSchematic::get_types() const
 
 std::string SearcherSchematic::get_display_name(const Searcher::SearchResult &r)
 {
-    if (r.type == Type::SYMBOL_PIN) {
-        auto sym_name = doc.get_display_name(ObjectType::SCHEMATIC_SYMBOL, r.path.at(0), r.sheet);
-        const auto &sym = doc.get_current_schematic()->sheets.at(r.sheet).symbols.at(r.path.at(0));
-        return sym_name + "." + sym.gate->unit->pins.at(r.path.at(1)).primary_name;
+    const auto &sch = doc.get_schematic_for_instance_path(r.instance_path);
+    const auto &sheet = sch.sheets.at(r.sheet);
+    const auto uu = r.path.at(0);
+    switch (r.type) {
+    case Type::SYMBOL_REFDES:
+    case Type::SYMBOL_MPN: {
+        const auto &sym = sheet.symbols.at(uu);
+        return get_refdes(*sym.component, r.instance_path, *doc.get_top_block()) + sym.gate->suffix;
     }
-    else {
-        return doc.get_display_name(get_type_info(r.type).object_type, r.path.at(0), r.sheet);
+
+    case Type::SYMBOL_PIN: {
+        const auto &sym = sheet.symbols.at(uu);
+        return get_refdes(*sym.component, r.instance_path, *doc.get_top_block()) + sym.gate->suffix
+               + sym.gate->unit->pins.at(r.path.at(1)).primary_name;
+    }
+
+    case Type::TEXT:
+        return sheet.texts.at(uu).text;
+
+    case Type::NET_LABEL: {
+        auto &ju = *sheet.net_labels.at(uu).junction;
+        return ju.net ? ju.net->name : "";
+    }
+
+    case Type::BUS_RIPPER:
+        return sheet.bus_rippers.at(uu).bus_member->net->name;
+
+    case Type::POWER_SYMBOL:
+        return sheet.power_symbols.at(uu).net->name;
+
+    default:
+        return "???";
     }
 }
 

@@ -9,6 +9,8 @@
 #include "schematic/schematic.hpp"
 #include "document/idocument_symbol.hpp"
 #include "pool/symbol.hpp"
+#include "document/idocument_block_symbol.hpp"
+#include "block_symbol/block_symbol.hpp"
 #include "board/board_layers.hpp"
 #include "imp/imp_interface.hpp"
 
@@ -49,8 +51,14 @@ void ToolHelperMove::move_do(const Coordi &delta)
         case ObjectType::SYMBOL_PIN:
             doc.y->get_symbol_pin(it.uuid).position += delta;
             break;
+        case ObjectType::BLOCK_SYMBOL_PORT:
+            doc.o->get_block_symbol().ports.at(it.uuid).position += delta;
+            break;
         case ObjectType::SCHEMATIC_SYMBOL:
             doc.c->get_sheet()->symbols.at(it.uuid).placement.shift += delta;
+            break;
+        case ObjectType::SCHEMATIC_BLOCK_SYMBOL:
+            doc.c->get_sheet()->block_symbols.at(it.uuid).placement.shift += delta;
             break;
         case ObjectType::BOARD_PACKAGE:
             doc.b->get_board()->packages.at(it.uuid).placement.shift += delta;
@@ -216,6 +224,12 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
             pin.orientation = transform_orientation(pin.orientation, rotate);
         } break;
 
+        case ObjectType::BLOCK_SYMBOL_PORT: {
+            auto &port = doc.o->get_block_symbol().ports.at(it.uuid);
+            transform(port.position, center, rotate);
+            port.orientation = transform_orientation(port.orientation, rotate);
+        } break;
+
         case ObjectType::BUS_RIPPER: {
             auto &ri = doc.c->get_sheet()->bus_rippers.at(it.uuid);
             if (rotate) {
@@ -273,6 +287,22 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
             }
             sym.symbol.apply_placement(sym.placement);
 
+        } break;
+
+        case ObjectType::SCHEMATIC_BLOCK_SYMBOL: {
+            auto &sym = doc.c->get_sheet()->block_symbols.at(it.uuid);
+            transform(sym.placement.shift, center, rotate);
+            if (rotate) {
+                if (sym.placement.mirror) {
+                    sym.placement.inc_angle_deg(90);
+                }
+                else {
+                    sym.placement.inc_angle_deg(-90);
+                }
+            }
+            else {
+                sym.placement.mirror = !sym.placement.mirror;
+            }
         } break;
 
         case ObjectType::TRACK: {

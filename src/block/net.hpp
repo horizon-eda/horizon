@@ -30,6 +30,9 @@ public:
     uuid_ptr<Net> diffpair;
     bool diffpair_master = false;
 
+    bool is_port = false;
+    Pin::Direction port_direction = Pin::Direction::BIDIRECTIONAL;
+
     // not saved
     bool is_power_forced = false;
     bool is_bussed = false;

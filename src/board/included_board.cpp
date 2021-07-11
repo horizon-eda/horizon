@@ -43,10 +43,12 @@ void IncludedBoard::reload()
     reset();
 
     try {
-        pool = std::make_unique<ProjectPool>(prj.pool_directory, false);
+        // TBD
+        /*pool = std::make_unique<ProjectPool>(prj.pool_directory, false);
         block = std::make_unique<Block>(horizon::Block::new_from_file(prj.get_top_block().block_filename, *pool));
         board = std::make_unique<Board>(horizon::Board::new_from_file(prj.board_filename, *block, *pool));
         board->expand();
+        */
     }
     catch (...) {
         reset();

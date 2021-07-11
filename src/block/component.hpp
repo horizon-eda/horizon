@@ -52,6 +52,11 @@ public:
     UUID tag;
     bool nopopulate = false;
 
+    enum class NopopulateFromInstance { SET, CLEAR, UNSET };
+    NopopulateFromInstance nopopulate_from_instance = NopopulateFromInstance::UNSET;
+
+    bool get_nopopulate() const;
+
     /**
      * which Nins are connected to which Net
      * the UUIDPath consists of Gate and Pin UUID

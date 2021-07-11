@@ -9,6 +9,7 @@
 #include "util/picture_load.hpp"
 #include "pool/ipool.hpp"
 #include "util/str_util.hpp"
+#include "iinstancce_mapping_provider.hpp"
 
 namespace horizon {
 
@@ -55,7 +56,7 @@ unsigned int Schematic::get_app_version()
     return app_version;
 }
 
-Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, IPool &pool)
+Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, IPool &pool, IBlockSymbolAndSchematicProvider &prv)
     : uuid(uu), block(&iblock), name(j.at("name").get<std::string>()),
       group_tag_visible(j.value("group_tag_visible", false)), annotation(j.value("annotation", json())),
       version(app_version, j)
@@ -64,7 +65,7 @@ Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, IPool &pool)
         const json &o = j["sheets"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            sheets.emplace(std::make_pair(u, Sheet(u, it.value(), *block, pool)));
+            sheets.emplace(std::make_pair(u, Sheet(u, it.value(), *block, pool, prv)));
         }
     }
     if (j.count("rules")) {
@@ -88,10 +89,11 @@ Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, IPool &pool)
     update_refs();
 }
 
-Schematic Schematic::new_from_file(const std::string &filename, Block &block, IPool &pool)
+Schematic Schematic::new_from_file(const std::string &filename, Block &block, IPool &pool,
+                                   IBlockSymbolAndSchematicProvider &prv)
 {
     auto j = load_json_from_file(filename);
-    return Schematic(UUID(j.at("uuid").get<std::string>()), j, block, pool);
+    return Schematic(UUID(j.at("uuid").get<std::string>()), j, block, pool, prv);
 }
 
 Schematic::Schematic(const UUID &uu, Block &bl) : uuid(uu), block(&bl), version(app_version)
@@ -239,6 +241,33 @@ void Schematic::disconnect_symbol(Sheet *sheet, SchematicSymbol *sym)
     }
 }
 
+void Schematic::disconnect_block_symbol(Sheet *sheet, SchematicBlockSymbol *sym)
+{
+    assert(sheet == &sheets.at(sheet->uuid));
+    assert(sym == &sheet->block_symbols.at(sym->uuid));
+    std::map<const BlockSymbolPort *, SchematicJunction *> port_junctions;
+    for (auto &[uu_line, line] : sheet->net_lines) {
+        for (auto it_ft : {&line.to, &line.from}) {
+            if (it_ft->block_symbol == sym) {
+                SchematicJunction *j = nullptr;
+                if (port_junctions.count(it_ft->port)) {
+                    j = port_junctions.at(it_ft->port);
+                }
+                else {
+                    auto uu = UUID::random();
+                    j = port_junctions.emplace(it_ft->port, &sheet->junctions.emplace(uu, uu).first->second)
+                                .first->second;
+                }
+                auto c = it_ft->get_position();
+                j->position = c;
+                it_ft->connect(j);
+            }
+        }
+        sym->block_instance->connections.clear();
+    }
+}
+
+
 void Schematic::smash_symbol(Sheet *sheet, SchematicSymbol *sym)
 {
     assert(sheet == &sheets.at(sheet->uuid));
@@ -295,6 +324,13 @@ bool Schematic::delete_net_line(Sheet *sheet, LineNet *line)
                 UUIDPath<2> conn_path(it_ft.symbol->gate.uuid, it_ft.pin->uuid);
                 if (it_ft.symbol->component->connections.count(conn_path) && it_ft.pin->connection_count <= 1) {
                     it_ft.symbol->component->connections.erase(conn_path);
+                }
+            }
+            else if (it_ft.is_port()) {
+                const auto net_port = it_ft.port->uuid;
+                if (it_ft.block_symbol->block_instance->connections.count(net_port)
+                    && it_ft.port->connection_count <= 1) {
+                    it_ft.block_symbol->block_instance->connections.erase(net_port);
                 }
             }
         }
@@ -434,8 +470,14 @@ bool Schematic::place_bipole_on_line(Sheet *sheet, SchematicSymbol *sym)
     return placed;
 }
 
-void Schematic::expand(bool careful)
+void Schematic::expand(bool careful, const IInstanceMappingProvider *inst_map_prv)
 {
+    const BlockInstanceMapping *inst_map = nullptr;
+    if (inst_map_prv) {
+        if ((inst_map = inst_map_prv->get_block_instance_mapping()))
+            assert(inst_map->block == block->uuid);
+    }
+
     for (auto &it_net : block->nets) {
         it_net.second.is_power_forced = false;
         it_net.second.is_bussed = false;
@@ -460,6 +502,23 @@ void Schematic::expand(bool careful)
     if (!careful) {
         block->vacuum_nets();
         block->vacuum_group_tag_names();
+    }
+    for (auto &[uu, comp] : block->components) {
+        using N = Component::NopopulateFromInstance;
+        if (inst_map) {
+            if (inst_map->components.count(uu)) {
+                if (inst_map->components.at(uu).nopopulate)
+                    comp.nopopulate_from_instance = N::SET;
+                else
+                    comp.nopopulate_from_instance = N::CLEAR;
+            }
+            else {
+                comp.nopopulate_from_instance = N::CLEAR;
+            }
+        }
+        else {
+            comp.nopopulate_from_instance = N::UNSET;
+        }
     }
 
     block->update_diffpairs();
@@ -521,7 +580,7 @@ void Schematic::expand(bool careful)
                         texts.end());
         }
         if (!careful)
-            sheet.expand_symbols(*this);
+            sheet.expand_symbols(*this, inst_map);
     }
 
 
@@ -632,6 +691,38 @@ void Schematic::expand(bool careful)
                 }
             }
         }
+        for (auto &[uu_sym, schsym] : sheet.block_symbols) {
+            const auto &inst = *schsym.block_instance;
+            for (const auto &[net_port, conn] : inst.connections) {
+                if (schsym.symbol.ports.count(net_port)) {
+                    auto &symport = schsym.symbol.ports.at(net_port);
+                    if (conn.net) {
+                        symport.connector_style = BlockSymbolPort::ConnectorStyle::NONE;
+                        if (symport.net_segment) {
+                            auto &ns = net_segments.at(symport.net_segment);
+                            if (ns.is_bus()) {
+                                throw std::runtime_error("illegal bus-pin connection");
+                            }
+                            if (ns.net == nullptr) {
+                                ns.net = conn.net;
+                            }
+                            if (ns.net != conn.net) {
+                                throw std::runtime_error("illegal connection");
+                            }
+                        }
+                    }
+                    else {
+                        // symport.connector_style = BlockSymbolPort::ConnectorStyle::NC;
+                    }
+                }
+                else {
+                    Logger::log_critical("Port " + conn.net->name + " not found on block symbol "
+                                                 + schsym.block_instance->refdes + " but is connected to net "
+                                                 + block->get_net_name(conn.net->uuid),
+                                         Logger::Domain::SCHEMATIC);
+                }
+            }
+        }
         for (auto &it_line : sheet.net_lines) {
             it_line.second.net = net_segments.at(it_line.second.net_segment).net;
             it_line.second.bus = net_segments.at(it_line.second.net_segment).bus;
@@ -688,7 +779,7 @@ void Schematic::expand(bool careful)
                 for (auto &it_line : sheet.net_lines) {
                     LineNet &line = it_line.second;
                     if (line.coord_on_line(pin_pos)) {
-                        if (!line.is_connected_to(it_sym.first, it_pin.first)) {
+                        if (!line.is_connected_to_symbol(it_sym.first, it_pin.first)) {
                             sheet.warnings.emplace_back(pin_pos, "Pin on Line");
                         }
                     }
@@ -778,28 +869,7 @@ void Schematic::expand(bool careful)
         }
     }
 
-    for (auto &it_sheet : sheets) {
-        Sheet &sheet = it_sheet.second;
-        if (sheet.pool_frame) {
-            std::map<std::string, std::string> values = block->project_meta;
-            for (const auto &it_v : sheet.title_block_values) {
-                values[it_v.first] = it_v.second;
-            }
-            sheet.frame = *sheet.pool_frame;
-            for (auto &it_text : sheet.frame.texts) {
-                auto &txt = it_text.second.text;
-                replace_substr(txt, "$sheet_idx", std::to_string(sheet.index));
-                replace_substr(txt, "$sheet_total", std::to_string(sheets.size()));
-                replace_substr(txt, "$sheet_title", sheet.name);
-                for (const auto &it_v : values) {
-                    replace_substr(txt, "$" + it_v.first, it_v.second);
-                }
-            }
-        }
-        else {
-            sheet.frame = Frame(UUID());
-        }
-    }
+    expand_frames(inst_map_prv);
 
     if (!careful) {
         for (auto &it_sheet : sheets) {
@@ -829,45 +899,82 @@ void Schematic::expand(bool careful)
     }
 }
 
-void Schematic::annotate()
+void Schematic::expand_frames(const class IInstanceMappingProvider *inst_map)
 {
-    if (!annotation.keep) {
-        for (auto &it : block->components) {
-            it.second.refdes = "?";
+    const unsigned int sheet_total = inst_map ? inst_map->get_sheet_total() : sheets.size();
+
+    for (auto &[uu, sheet] : sheets) {
+        if (sheet.pool_frame) {
+            const unsigned int sheet_idx = inst_map ? inst_map->get_sheet_index(uu) : sheet.index;
+
+            std::map<std::string, std::string> values = block->project_meta;
+            for (const auto &it_v : sheet.title_block_values) {
+                values[it_v.first] = it_v.second;
+            }
+            sheet.frame = *sheet.pool_frame;
+            for (auto &it_text : sheet.frame.texts) {
+                auto &txt = it_text.second.text;
+
+                replace_substr(txt, "$sheet_idx", std::to_string(sheet_idx));
+                replace_substr(txt, "$sheet_total", std::to_string(sheet_total));
+                replace_substr(txt, "$sheet_title", sheet.name);
+                for (const auto &it_v : values) {
+                    replace_substr(txt, "$" + it_v.first, it_v.second);
+                }
+            }
+        }
+        else {
+            sheet.frame = Frame(UUID());
+        }
+    }
+}
+
+struct AnnotationContext {
+    Schematic &top;
+    std::map<std::string, std::vector<unsigned int>> refdes;
+};
+
+static void set_refdes(const std::string &rd, Component &comp, const UUIDVec &instance_path, Block &top_block)
+{
+    if (instance_path.size()) {
+        top_block.block_instance_mappings.at(instance_path).components[comp.uuid].refdes = rd;
+    }
+    else {
+        comp.refdes = rd;
+    }
+}
+
+static void visit_schematic_for_annotation(Schematic &sch, const UUIDVec &instance_path, AnnotationContext &ctx)
+{
+    auto &annotation = ctx.top.annotation;
+    using Annotation = Schematic::Annotation;
+    if (!ctx.top.annotation.keep) {
+        for (auto &[uu, comp] : sch.block->components) {
+            set_refdes("?", comp, instance_path, *ctx.top.block);
         }
     }
 
-    std::map<std::string, std::vector<unsigned int>> refdes;
-    for (const auto &it : block->components) {
-        refdes[it.second.entity->prefix];
+    for (const auto &[uu, comp] : sch.block->components) {
+        ctx.refdes[comp.entity->prefix];
     }
 
-
-    std::vector<Sheet *> sheets_sorted;
-    sheets_sorted.reserve(sheets.size());
-    std::transform(sheets.begin(), sheets.end(), std::back_inserter(sheets_sorted), [](auto &a) { return &a.second; });
-    std::sort(sheets_sorted.begin(), sheets_sorted.end(),
-              [](const auto a, const auto b) { return a->index < b->index; });
-
-
-    unsigned int sheet_offset = 0;
-    unsigned int sheet_incr = 0;
-
-    for (auto sheet : sheets_sorted) {
+    for (auto sheet : sch.get_sheets_sorted()) {
+        const auto sheet_index = ctx.top.sheet_mapping.sheet_numbers.at(uuid_vec_append(instance_path, sheet->uuid));
+        unsigned int sheet_offset = 0;
+        unsigned int sheet_incr = 0;
         if (annotation.mode != Annotation::Mode::SEQUENTIAL) {
-            for (auto &it : refdes) {
+            for (auto &it : ctx.refdes) {
                 it.second.clear();
             }
             if (annotation.mode == Annotation::Mode::SHEET_100) {
-                sheet_offset = 100 * sheet->index;
+                sheet_offset = 100 * sheet_index;
                 sheet_incr = 100;
             }
             else if (annotation.mode == Annotation::Mode::SHEET_1000) {
-                sheet_offset = 1000 * sheet->index;
+                sheet_offset = 1000 * sheet_index;
                 sheet_incr = 1000;
             }
         }
-
 
         std::vector<SchematicSymbol *> symbols;
         symbols.reserve(sheet->symbols.size());
@@ -889,7 +996,7 @@ void Schematic::annotate()
         }
 
         for (const auto sym : symbols) {
-            auto &v = refdes[sym->component->entity->prefix];
+            auto &v = ctx.refdes[sym->component->entity->prefix];
             if (sym->component->refdes.find('?') == std::string::npos) { // already annotated
                 auto ss = sym->component->refdes.substr(sym->component->entity->prefix.size());
                 int si = -1;
@@ -908,7 +1015,7 @@ void Schematic::annotate()
         }
 
         for (const auto sym : symbols) {
-            auto &v = refdes[sym->component->entity->prefix];
+            auto &v = ctx.refdes[sym->component->entity->prefix];
             if (sym->component->refdes.find('?') != std::string::npos) { // needs annotatation
                 unsigned int n = 1 + sheet_offset;
                 if (v.size() != 0) {
@@ -929,19 +1036,27 @@ void Schematic::annotate()
                         n = v.back() + 1;
                     }
                 }
-                if (sheet_incr && n / sheet_incr != sheet->index) {
+                if (sheet_incr && n / sheet_incr != sheet_index) {
                     n = sheet_offset + 1;
                 }
                 v.push_back(n);
-                sym->component->refdes = sym->component->entity->prefix + std::to_string(n);
+                set_refdes(sym->component->entity->prefix + std::to_string(n), *sym->component, instance_path,
+                           *ctx.top.block);
             }
             std::sort(v.begin(), v.end());
         }
 
-        // for(auto &it_sym: it_sheet.second.symbols) {
-        //
-        //}
+        for (auto sym : sheet->get_block_symbols_sorted()) {
+            visit_schematic_for_annotation(*sym->schematic, uuid_vec_append(instance_path, sym->block_instance->uuid),
+                                           ctx);
+        }
     }
+}
+
+void Schematic::annotate()
+{
+    AnnotationContext ctx{*this, {}};
+    visit_schematic_for_annotation(*this, {}, ctx);
 }
 
 std::map<UUIDPath<2>, std::string> Schematic::get_unplaced_gates() const
@@ -1001,7 +1116,7 @@ Glib::RefPtr<Glib::Regex> Schematic::get_sheetref_regex()
 
 Schematic::Schematic(const Schematic &sch)
     : uuid(sch.uuid), block(sch.block), name(sch.name), sheets(sch.sheets), rules(sch.rules),
-      group_tag_visible(sch.group_tag_visible), annotation(sch.annotation),
+      group_tag_visible(sch.group_tag_visible), annotation(sch.annotation), sheet_mapping(sch.sheet_mapping),
       pdf_export_settings(sch.pdf_export_settings), version(sch.version)
 {
     update_refs();
@@ -1018,6 +1133,9 @@ void Schematic::update_refs()
             for (auto &it_text : schsym.texts) {
                 it_text.update(sheet.texts);
             }
+        }
+        for (auto &[uu, sym] : sheet.block_symbols) {
+            sym.block_instance.update(block->block_instances);
         }
         for (auto &it_line : sheet.net_lines) {
             LineNet &line = it_line.second;
@@ -1129,6 +1247,31 @@ std::vector<Sheet *> Schematic::get_sheets_sorted()
 std::vector<const Sheet *> Schematic::get_sheets_sorted() const
 {
     return sort_sheets<const Sheet>(*this);
+}
+
+
+void Schematic::SheetMapping::update(const Schematic &sch, const UUIDVec &instance_path)
+{
+    for (const auto sh : sch.get_sheets_sorted()) {
+        sheet_numbers.emplace(uuid_vec_append(instance_path, sh->uuid), index);
+        index++;
+        for (const auto sym : sh->get_block_symbols_sorted()) {
+            update(*sym->schematic, uuid_vec_append(instance_path, sym->block_instance->uuid));
+        }
+    }
+}
+
+void Schematic::SheetMapping::update(const Schematic &sch)
+{
+    index = 1;
+    sheet_numbers.clear();
+    update(sch, {});
+    sheet_total = index - 1;
+}
+
+void Schematic::update_sheet_mapping()
+{
+    sheet_mapping.update(*this);
 }
 
 } // namespace horizon

@@ -10,7 +10,7 @@
 
 namespace horizon {
 
-Sheet::Sheet(const UUID &uu, const json &j, Block &block, IPool &pool)
+Sheet::Sheet(const UUID &uu, const json &j, Block &block, IPool &pool, IBlockSymbolAndSchematicProvider &prv)
     : uuid(uu), name(j.at("name").get<std::string>()), index(j.at("index").get<unsigned int>()), frame(UUID())
 {
     Logger::log_info("loading sheet " + name, Logger::Domain::SCHEMATIC);
@@ -35,6 +35,14 @@ Sheet::Sheet(const UUID &uu, const json &j, Block &block, IPool &pool)
             auto u = UUID(it.key());
             load_and_log(symbols, ObjectType::SCHEMATIC_SYMBOL, std::forward_as_tuple(u, it.value(), pool, &block),
                          Logger::Domain::SCHEMATIC);
+        }
+    }
+    if (j.count("block_symbols")) {
+        const json &o = j["block_symbols"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            load_and_log(block_symbols, ObjectType::SCHEMATIC_BLOCK_SYMBOL,
+                         std::forward_as_tuple(u, it.value(), prv, block), Logger::Domain::SCHEMATIC);
         }
     }
     {
@@ -106,6 +114,7 @@ Sheet::Sheet(const UUID &uu, const json &j, Block &block, IPool &pool)
                          Logger::Domain::SCHEMATIC);
         }
     }
+
     if (j.count("title_block_values")) {
         const json &o = j["title_block_values"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -163,7 +172,8 @@ void Sheet::merge_net_lines(SchematicJunction &ju)
     }
 }
 
-void Sheet::expand_symbol_without_net_lines(const UUID &sym_uuid, const Schematic &sch)
+void Sheet::expand_symbol_without_net_lines(const UUID &sym_uuid, const Schematic &sch,
+                                            const BlockInstanceMapping *inst_map)
 {
     auto &schsym = symbols.at(sym_uuid);
     if (schsym.symbol.unit->uuid != schsym.gate->unit->uuid) {
@@ -208,7 +218,7 @@ void Sheet::expand_symbol_without_net_lines(const UUID &sym_uuid, const Schemati
         }
     }
     for (auto &it_text : schsym.symbol.texts) {
-        it_text.second.text = schsym.replace_text(it_text.second.text, nullptr, sch);
+        it_text.second.text = schsym.replace_text(it_text.second.text, nullptr, sch, inst_map);
     }
 
     for (auto &it_text : schsym.texts) {
@@ -216,10 +226,27 @@ void Sheet::expand_symbol_without_net_lines(const UUID &sym_uuid, const Schemati
     }
 }
 
-void Sheet::expand_symbols(const class Schematic &sch)
+void Sheet::expand_block_symbol_without_net_lines(const UUID &sym_uuid, const Schematic &sch)
+{
+    auto &schsym = block_symbols.at(sym_uuid);
+    schsym.symbol = *schsym.prv_symbol;
+    // schsym.symbol.block = schsym.block_instance->block;
+    schsym.symbol.expand();
+    for (auto &it_text : schsym.symbol.texts) {
+        it_text.second.text = schsym.replace_text(it_text.second.text, nullptr, sch);
+    }
+    for (auto &it_text : schsym.texts) {
+        it_text->text_override = schsym.replace_text(it_text->text, &it_text->overridden, sch);
+    }
+}
+
+void Sheet::expand_symbols(const class Schematic &sch, const BlockInstanceMapping *inst_map)
 {
     for (auto &it_sym : symbols) {
-        expand_symbol_without_net_lines(it_sym.first, sch);
+        expand_symbol_without_net_lines(it_sym.first, sch, inst_map);
+    }
+    for (auto &it_sym : block_symbols) {
+        expand_block_symbol_without_net_lines(it_sym.first, sch);
     }
     for (auto &it_line : net_lines) {
         LineNet &line = it_line.second;
@@ -227,9 +254,18 @@ void Sheet::expand_symbols(const class Schematic &sch)
     }
 }
 
-void Sheet::expand_symbol(const UUID &sym_uuid, const Schematic &sch)
+void Sheet::expand_symbol(const UUID &sym_uuid, const Schematic &sch, const BlockInstanceMapping *inst_map)
 {
-    expand_symbol_without_net_lines(sym_uuid, sch);
+    expand_symbol_without_net_lines(sym_uuid, sch, inst_map);
+    for (auto &it_line : net_lines) {
+        LineNet &line = it_line.second;
+        line.update_refs(*this);
+    }
+}
+
+void Sheet::expand_block_symbol(const UUID &sym_uuid, const Schematic &sch)
+{
+    expand_block_symbol_without_net_lines(sym_uuid, sch);
     for (auto &it_line : net_lines) {
         LineNet &line = it_line.second;
         line.update_refs(*this);
@@ -400,6 +436,12 @@ void Sheet::propagate_net_segments()
             it_pin.second.connection_count = 0;
         }
     }
+    for (auto &[uu_sym, sym] : block_symbols) {
+        for (auto &[uu_port, port] : sym.symbol.ports) {
+            port.net_segment = UUID();
+            port.connection_count = 0;
+        }
+    }
     unsigned int run = 1;
     while (run) {
         run = 0;
@@ -428,6 +470,11 @@ void Sheet::propagate_net_segments()
                             it_ft.pin->connection_count++;
                             n_assigned++;
                         }
+                        else if (it_ft.is_port() && !it_ft.port->net_segment) {
+                            it_ft.port->net_segment = it.second.net_segment;
+                            it_ft.port->connection_count++;
+                            n_assigned++;
+                        }
                         else if (it_ft.is_bus_ripper() && !it_ft.bus_ripper->net_segment) {
                             it_ft.bus_ripper->net_segment = it.second.net_segment;
                             n_assigned++;
@@ -443,6 +490,11 @@ void Sheet::propagate_net_segments()
                         else if (it_ft.is_pin() && it_ft.pin->net_segment) {
                             it.second.net_segment = it_ft.pin->net_segment;
                             it_ft.pin->connection_count++;
+                            n_assigned++;
+                        }
+                        else if (it_ft.is_port() && it_ft.port->net_segment) {
+                            it.second.net_segment = it_ft.port->net_segment;
+                            it_ft.port->connection_count++;
                             n_assigned++;
                         }
                         else if (it_ft.is_bus_ripper() && it_ft.bus_ripper->net_segment) {
@@ -549,15 +601,22 @@ std::map<UUID, NetSegmentInfo> Sheet::analyze_net_segments(bool place_warnings)
     return net_segments;
 }
 
-std::set<UUIDPath<3>> Sheet::get_pins_connected_to_net_segment(const UUID &uu_segment)
+Block::NetPinsAndPorts Sheet::get_pins_connected_to_net_segment(const UUID &uu_segment)
 {
-    std::set<UUIDPath<3>> r;
+    Block::NetPinsAndPorts r;
     if (!uu_segment)
         return r;
     for (const auto &it_sym : symbols) {
         for (const auto &it_pin : it_sym.second.symbol.pins) {
             if (it_pin.second.net_segment == uu_segment) {
-                r.emplace(it_sym.second.component->uuid, it_sym.second.gate->uuid, it_pin.first);
+                r.pins.emplace(it_sym.second.component->uuid, it_sym.second.gate->uuid, it_pin.first);
+            }
+        }
+    }
+    for (const auto &[uu_sym, sym] : block_symbols) {
+        for (const auto &[uu_port, port] : sym.symbol.ports) {
+            if (port.net_segment == uu_segment) {
+                r.ports.emplace(sym.block_instance->uuid, uu_port);
             }
         }
     }
@@ -641,6 +700,34 @@ Junction *Sheet::get_junction(const UUID &uu)
     return &junctions.at(uu);
 }
 
+bool Sheet::can_be_removed() const
+{
+    return symbols.size() == 0 && block_symbols.size() == 0;
+}
+
+template <typename T, typename U> static std::vector<T *> sort_symbols(U &sh)
+{
+    std::vector<T *> symbols;
+    symbols.reserve(sh.block_symbols.size());
+    for (auto &[uu, it] : sh.block_symbols) {
+        symbols.push_back(&it);
+    }
+    std::sort(symbols.begin(), symbols.end(),
+              [](auto a, auto b) { return strcmp_natural(a->block_instance->refdes, b->block_instance->refdes) < 0; });
+    return symbols;
+}
+
+std::vector<SchematicBlockSymbol *> Sheet::get_block_symbols_sorted()
+{
+    return sort_symbols<SchematicBlockSymbol>(*this);
+}
+
+std::vector<const SchematicBlockSymbol *> Sheet::get_block_symbols_sorted() const
+{
+    return sort_symbols<const SchematicBlockSymbol>(*this);
+}
+
+
 /*void Sheet::connect(SchematicSymbol *sym, SymbolPin *pin, PowerSymbol
 *power_sym) {
         auto uu = UUID::random();
@@ -712,7 +799,10 @@ json Sheet::serialize() const
             j["pictures"][(std::string)it.first] = it.second.serialize();
         }
     }
-
+    j["block_symbols"] = json::object();
+    for (const auto &it : block_symbols) {
+        j["block_symbols"][(std::string)it.first] = it.second.serialize();
+    }
     return j;
 }
 } // namespace horizon

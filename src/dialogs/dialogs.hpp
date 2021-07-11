@@ -35,6 +35,7 @@ public:
     std::optional<UUID> select_group_tag(const class Block &block, bool tag_mode, const UUID &current);
     std::optional<UUID> select_included_board(const class Board &brd);
     std::optional<UUID> select_decal(class IPool &pool);
+    std::optional<UUID> select_block(const class BlocksSchematic &blocks);
 
     unsigned int ask_net_merge(class Net &net, class Net &into);
     bool manage_buses(class Block &b);
@@ -47,7 +48,7 @@ public:
     bool edit_plane(class Plane &plane, class Board &brd);
     bool edit_keepout(class Keepout &keepout, class IDocument &c, bool add_mode);
     bool edit_stackup(class IDocumentBoard &brd);
-    bool edit_schematic_properties(class Schematic &s, class IPool &pool, class IPool &pool_caching);
+    bool edit_schematic_properties(class IDocumentSchematic &s);
     bool edit_frame_properties(class Frame &fr);
     std::optional<int64_t> ask_datum(const std::string &label, int64_t def = 0);
     std::optional<Coordi> ask_datum_coord(const std::string &label, Coordi def = Coordi());
@@ -62,6 +63,7 @@ public:
     std::optional<std::string> ask_dxf_filename();
     std::optional<std::string> ask_kicad_package_filename();
     std::optional<std::string> ask_picture_filename();
+    bool manage_ports(class Block &block);
 
     class SymbolPinNamesWindow *show_symbol_pin_names_window(class SchematicSymbol &symbol);
     class RenumberPadsWindow *show_renumber_pads_window(class Package &pkg, const std::set<UUID> &pads);

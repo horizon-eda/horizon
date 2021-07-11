@@ -20,10 +20,10 @@
 #include "widgets/action_button.hpp"
 
 namespace horizon {
-ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename,
-                           const std::string &pictures_dir, const PoolParams &pool_params)
-    : ImpBase(pool_params), core_schematic(schematic_filename, block_filename, pictures_dir, *pool, *pool_caching),
-      project_dir(Glib::path_get_dirname(schematic_filename)), searcher(core_schematic)
+ImpSchematic::ImpSchematic(const std::string &blocks_filename, const std::string &pictures_dir,
+                           const PoolParams &pool_params)
+    : ImpBase(pool_params), core_schematic(blocks_filename, pictures_dir, *pool, *pool_caching),
+      project_dir(Glib::path_get_dirname(blocks_filename)), searcher(core_schematic)
 {
     core = &core_schematic;
     core_schematic.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpSchematic::handle_tool_change));
@@ -32,41 +32,61 @@ ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::str
 
 void ImpSchematic::canvas_update()
 {
-    canvas->update(core_schematic.get_canvas_data());
-    warnings_box->update(core_schematic.get_sheet()->warnings);
-    update_highlights();
-}
-
-void ImpSchematic::handle_select_sheet(Sheet *sh)
-{
-    if (sh == core_schematic.get_sheet())
-        return;
-
-    auto v = canvas->get_scale_and_offset();
-    sheet_views[core_schematic.get_sheet()->uuid] = v;
-    sheet_selections[core_schematic.get_sheet()->uuid] = canvas->get_selection();
-    auto highlights_saved = highlights;
-    core_schematic.set_sheet(sh->uuid);
-    canvas->markers.set_sheet_filter(sh->uuid);
-    canvas_update();
-    if (sheet_views.count(sh->uuid)) {
-        auto v2 = sheet_views.at(sh->uuid);
-        canvas->set_scale_and_offset(v2.first, v2.second);
-    }
-    if (sheet_selections.count(sh->uuid)) {
-        canvas->set_selection(sheet_selections.at(sh->uuid));
+    if (core_schematic.get_block_symbol_mode()) {
+        canvas->update(core_schematic.get_canvas_data_block_symbol());
     }
     else {
-        canvas->set_selection({});
+        canvas->update(core_schematic.get_canvas_data());
+        warnings_box->update(core_schematic.get_sheet()->warnings);
+        update_highlights();
     }
-    highlights = highlights_saved;
-    update_highlights();
 }
 
-void ImpSchematic::handle_remove_sheet(Sheet *sh)
+void ImpSchematic::handle_select_sheet(const UUID &sheet, const UUID &block, const UUIDVec &instance_path)
 {
-    core_schematic.delete_sheet(sh->uuid);
+    if (sheet == current_sheet && block == core_schematic.get_current_block_uuid()
+        && instance_path == core_schematic.get_instance_path())
+        return;
+
+    {
+        auto [sc, offset] = canvas->get_scale_and_offset();
+        view_infos[{current_sheet, core_schematic.get_current_block_uuid()}] =
+                ViewInfo{sc, offset, canvas->get_selection()};
+    }
+    auto highlights_saved = highlights;
+
+    core_schematic.set_block(block);
+    if (sheet) { // actual sheet
+        core_schematic.set_sheet(sheet);
+        core_schematic.set_instance_path(instance_path);
+        canvas->markers.set_sheet_filter(uuid_vec_append(instance_path, sheet));
+    }
+    else {
+        core_schematic.set_block_symbol_mode();
+    }
+    update_unplaced();
     canvas_update();
+    update_action_sensitivity();
+
+    if (const auto k = std::make_pair(sheet, block); view_infos.count(k)) {
+        const auto &inf = view_infos.at(k);
+        canvas->set_scale_and_offset(inf.scale, inf.offset);
+        canvas->set_selection(inf.selection);
+    }
+    else {
+        auto bbox = canvas->get_bbox();
+        canvas->zoom_to_bbox(bbox.first, bbox.second);
+
+        canvas->set_selection({});
+    }
+
+    highlights = highlights_saved;
+    update_highlights();
+
+    for (auto b : action_buttons_schematic) {
+        b->set_visible(sheet);
+    }
+    current_sheet = sheet;
 }
 
 void ImpSchematic::handle_next_prev_sheet(const ActionConnection &conn)
@@ -80,10 +100,17 @@ void ImpSchematic::handle_next_prev_sheet(const ActionConnection &conn)
     if (next_sheet != sch.sheets.end()) {
         sheet_box->select_sheet(next_sheet->second.uuid);
     }
+    else if (conn.action_id == ActionID::PREV_SHEET && core_schematic.get_instance_path().size()) {
+        trigger_action(ActionID::POP_OUT_OF_BLOCK);
+    }
 }
 
 void ImpSchematic::update_highlights()
 {
+    if (core_schematic.get_block_symbol_mode()) {
+        canvas->set_highlight_enabled(false);
+        return;
+    }
     std::map<UUID, std::set<ObjectRef>> highlights_for_sheet;
     auto sch = core_schematic.get_current_schematic();
     for (const auto &it_sheet : sch->sheets) {
@@ -209,6 +236,8 @@ bool ImpSchematic::handle_broadcast(const json &j)
 
 void ImpSchematic::handle_selection_cross_probe()
 {
+    if (core_schematic.get_block_symbol_mode())
+        return;
     json j;
     j["op"] = "schematic-select";
     j["selection"] = nullptr;
@@ -274,14 +303,10 @@ void ImpSchematic::construct()
 {
     state_store = std::make_unique<WindowStateStore>(main_window, "imp-schematic");
 
-    sheet_box = Gtk::manage(new SheetBox(&core_schematic));
+    sheet_box = Gtk::manage(new SheetBox(core_schematic));
     sheet_box->show_all();
-    sheet_box->signal_add_sheet().connect([this] {
-        core_schematic.add_sheet();
-        std::cout << "add sheet" << std::endl;
-    });
-    sheet_box->signal_remove_sheet().connect(sigc::mem_fun(*this, &ImpSchematic::handle_remove_sheet));
     sheet_box->signal_select_sheet().connect(sigc::mem_fun(*this, &ImpSchematic::handle_select_sheet));
+    sheet_box->signal_edit_more().connect([this] { trigger_action(ToolID::EDIT_SCHEMATIC_PROPERTIES); });
     main_window->left_panel->pack_start(*sheet_box, false, false, 0);
 
     hamburger_menu->append("Annotate", "win.annotate");
@@ -449,8 +474,8 @@ void ImpSchematic::construct()
     connect_action(ActionID::HIGHLIGHT_GROUP, sigc::mem_fun(*this, &ImpSchematic::handle_highlight_group_tag));
     connect_action(ActionID::HIGHLIGHT_TAG, sigc::mem_fun(*this, &ImpSchematic::handle_highlight_group_tag));
 
-    bom_export_window = BOMExportWindow::create(main_window, *core_schematic.get_top_block(),
-                                                *core_schematic.get_bom_export_settings(), *pool.get(), project_dir);
+    bom_export_window = BOMExportWindow::create(main_window, core_schematic, *core_schematic.get_bom_export_settings(),
+                                                *pool.get(), project_dir);
 
     connect_action(ActionID::BOM_EXPORT_WINDOW, [this](const auto &c) { bom_export_window->present(); });
     connect_action(ActionID::EXPORT_BOM, [this](const auto &c) {
@@ -475,8 +500,17 @@ void ImpSchematic::construct()
     unplaced_box->show();
     main_window->left_panel->pack_end(*unplaced_box, true, true, 0);
     unplaced_box->signal_place().connect([this](const auto &items) {
-        auto d = std::make_unique<ToolMapSymbol::ToolDataMapSymbol>(items);
-        this->tool_begin(ToolID::MAP_SYMBOL, false, {}, std::move(d));
+        if (core_schematic.get_block_symbol_mode()) {
+            std::set<SelectableRef> sel;
+            for (const auto &it : items) {
+                sel.emplace(it.at(0), ObjectType::BLOCK_SYMBOL_PORT);
+            }
+            this->tool_begin(ToolID::MAP_PORT, true, sel);
+        }
+        else {
+            auto d = std::make_unique<ToolMapSymbol::ToolDataMapSymbol>(items);
+            this->tool_begin(ToolID::MAP_SYMBOL, false, {}, std::move(d));
+        }
     });
     core_schematic.signal_rebuilt().connect(sigc::mem_fun(*this, &ImpSchematic::update_unplaced));
     update_unplaced();
@@ -537,14 +571,47 @@ void ImpSchematic::construct()
             },
             false);
 
-    add_action_button(make_action(ActionID::PLACE_PART));
-    add_action_button(make_action(ToolID::DRAW_NET));
+    connect_action(ActionID::PUSH_INTO_BLOCK, [this](const auto &a) {
+        auto &x = sel_find_one(canvas->get_selection(), ObjectType::SCHEMATIC_BLOCK_SYMBOL);
+        sheet_box->go_to_instance(
+                uuid_vec_append(core_schematic.get_instance_path(),
+                                core_schematic.get_sheet()->block_symbols.at(x.uuid).block_instance->uuid));
+    });
+
+    connect_action(ActionID::EDIT_BLOCK_SYMBOL, [this](const auto &a) {
+        auto &x = sel_find_one(canvas->get_selection(), ObjectType::SCHEMATIC_BLOCK_SYMBOL);
+        sheet_box->go_to_block_symbol(core_schematic.get_sheet()->block_symbols.at(x.uuid).block_instance->block->uuid);
+    });
+
+    connect_action(ActionID::POP_OUT_OF_BLOCK, [this](const auto &a) {
+        UUIDVec path = core_schematic.get_instance_path();
+        if (path.size() == 0)
+            return;
+        const auto inst = path.back();
+        path.pop_back();
+        const Block *block = core_schematic.get_top_block();
+        for (const auto &uu : path) {
+            block = block->block_instances.at(uu).block;
+        }
+
+        for (const auto &[uu, sheet] : core_schematic.get_blocks().get_schematic(block->uuid).sheets) {
+            for (const auto &[uu_sym, sym] : sheet.block_symbols) {
+                if (sym.block_instance->uuid == inst) {
+                    sheet_box->go_to_instance(path, uu);
+                    return;
+                }
+            }
+        }
+    });
+
+    add_action_button_schematic(make_action(ActionID::PLACE_PART));
+    add_action_button_schematic(make_action(ToolID::DRAW_NET));
     {
-        auto &b = add_action_button(make_action(ToolID::PLACE_NET_LABEL));
+        auto &b = add_action_button_schematic(make_action(ToolID::PLACE_NET_LABEL));
         b.add_action(make_action(ToolID::PLACE_BUS_LABEL));
         b.add_action(make_action(ToolID::PLACE_BUS_RIPPER));
     }
-    add_action_button(make_action(ToolID::PLACE_POWER_SYMBOL));
+    add_action_button_schematic(make_action(ToolID::PLACE_POWER_SYMBOL));
     add_action_button_line();
     add_action_button(make_action(ToolID::PLACE_TEXT));
 
@@ -552,6 +619,13 @@ void ImpSchematic::construct()
 
     if (!core_schematic.get_project_meta_loaded_from_block())
         core_schematic.set_needs_save();
+}
+
+ActionButton &ImpSchematic::add_action_button_schematic(ActionToolID id)
+{
+    auto &b = add_action_button(id);
+    action_buttons_schematic.push_back(&b);
+    return b;
 }
 
 void ImpSchematic::update_action_sensitivity()
@@ -606,9 +680,15 @@ void ImpSchematic::update_action_sensitivity()
         }
     }
 
+    set_action_sensitive(make_action(ActionID::NEXT_SHEET), !core_schematic.get_block_symbol_mode());
+    set_action_sensitive(make_action(ActionID::PREV_SHEET), !core_schematic.get_block_symbol_mode());
+
     set_action_sensitive(make_action(ActionID::HIGHLIGHT_GROUP), can_higlight_group);
     set_action_sensitive(make_action(ActionID::HIGHLIGHT_TAG), can_higlight_tag);
-
+    bool have_block_sym = sel_count_type(sel, ObjectType::SCHEMATIC_BLOCK_SYMBOL) == 1;
+    set_action_sensitive(make_action(ActionID::PUSH_INTO_BLOCK), have_block_sym && core_schematic.in_hierarchy());
+    set_action_sensitive(make_action(ActionID::EDIT_BLOCK_SYMBOL), have_block_sym);
+    set_action_sensitive(make_action(ActionID::POP_OUT_OF_BLOCK), core_schematic.get_instance_path().size());
     ImpBase::update_action_sensitivity();
 }
 
@@ -720,7 +800,8 @@ void ImpSchematic::handle_maybe_drag(bool ctrl)
     }
 
     auto target = canvas->get_current_target();
-    if (target.type == ObjectType::SYMBOL_PIN || target.type == ObjectType::JUNCTION) {
+    if (target.type == ObjectType::SYMBOL_PIN || target.type == ObjectType::BLOCK_SYMBOL_PORT
+        || target.type == ObjectType::JUNCTION) {
         std::cout << "click pin" << std::endl;
         canvas->inhibit_drag_selection();
         target_drag_begin = target;
@@ -764,6 +845,12 @@ void ImpSchematic::handle_drag()
         auto orientation = pin.get_orientation_for_placement(sym.placement);
         start = drag_does_start(delta, orientation);
     }
+    else if (target_drag_begin.type == ObjectType::BLOCK_SYMBOL_PORT) {
+        const auto &sym = core_schematic.get_sheet()->block_symbols.at(target_drag_begin.path.at(0));
+        const auto &port = sym.symbol.ports.at(target_drag_begin.path.at(1));
+        auto orientation = port.get_orientation_for_placement(sym.placement);
+        start = drag_does_start(delta, orientation);
+    }
     else if (target_drag_begin.type == ObjectType::JUNCTION) {
         start = delta.mag_sq() > (50 * 50);
     }
@@ -793,8 +880,8 @@ void ImpSchematic::handle_drag()
 
 void ImpSchematic::search_center(const Searcher::SearchResult &res)
 {
-    if (res.sheet != core_schematic.get_sheet()->uuid) {
-        sheet_box->select_sheet(res.sheet);
+    if (res.sheet != core_schematic.get_sheet()->uuid || res.instance_path != core_schematic.get_instance_path()) {
+        sheet_box->go_to_instance(res.instance_path, res.sheet);
     }
     ImpBase::search_center(res);
 }
@@ -1064,6 +1151,9 @@ ActionToolID ImpSchematic::get_doubleclick_action(ObjectType type, const UUID &u
     case ObjectType::LINE_NET:
         return make_action(ToolID::ENTER_DATUM);
         break;
+    case ObjectType::SCHEMATIC_BLOCK_SYMBOL:
+        return make_action(ActionID::PUSH_INTO_BLOCK);
+        break;
     default:
         return {ActionID::NONE, ToolID::NONE};
     }
@@ -1071,7 +1161,23 @@ ActionToolID ImpSchematic::get_doubleclick_action(ObjectType type, const UUID &u
 
 void ImpSchematic::update_unplaced()
 {
-    unplaced_box->update(core_schematic.get_current_schematic()->get_unplaced_gates());
+    if (core_schematic.get_block_symbol_mode()) {
+        std::map<UUIDPath<2>, std::string> ports;
+        const auto &block = *core_schematic.get_current_block();
+        for (const auto &[uu, net] : block.nets) {
+            if (net.is_port)
+                ports.emplace(std::piecewise_construct, std::forward_as_tuple(uu),
+                              std::forward_as_tuple(block.get_net_name(uu)));
+        }
+
+        for (auto &[uu, pin] : core_schematic.get_block_symbol().ports) {
+            ports.erase(uu);
+        }
+        unplaced_box->update(ports);
+    }
+    else {
+        unplaced_box->update(core_schematic.get_current_schematic()->get_unplaced_gates());
+    }
 }
 
 ToolID ImpSchematic::get_tool_for_drag_move(bool ctrl, const std::set<SelectableRef> &sel) const
@@ -1110,11 +1216,17 @@ void ImpSchematic::handle_extra_button(const GdkEventButton *button_event)
 void ImpSchematic::expand_selection_for_property_panel(std::set<SelectableRef> &sel_extra,
                                                        const std::set<SelectableRef> &sel)
 {
+    if (core_schematic.get_block_symbol_mode())
+        return;
     const auto &sheet = *core_schematic.get_sheet();
     for (const auto &it : sel) {
         switch (it.type) {
         case ObjectType::SCHEMATIC_SYMBOL:
             sel_extra.emplace(core_schematic.get_sheet()->symbols.at(it.uuid).component->uuid, ObjectType::COMPONENT);
+            break;
+        case ObjectType::SCHEMATIC_BLOCK_SYMBOL:
+            sel_extra.emplace(core_schematic.get_sheet()->block_symbols.at(it.uuid).block_instance->uuid,
+                              ObjectType::BLOCK_INSTANCE);
             break;
         case ObjectType::JUNCTION:
             if (sheet.junctions.at(it.uuid).net) {

@@ -9,6 +9,7 @@
 #include "board/board.hpp"
 #include "nlohmann/json.hpp"
 #include "pool/project_pool.hpp"
+#include "blocks/blocks_schematic.hpp"
 
 namespace horizon {
 
@@ -37,7 +38,7 @@ unsigned int Project::get_app_version()
 }
 
 Project::Project(const UUID &uu, const json &j, const std::string &base)
-    : base_path(base), uuid(uu),
+    : base_path(base), uuid(uu), blocks_filename(Glib::build_filename(base, j.value("blocks_filename", "blocks.json"))),
       pictures_directory(Glib::build_filename(base, j.value("pictures_directory", "pictures"))),
       board_filename(Glib::build_filename(base, j.at("board_filename"))),
       pool_directory(Glib::build_filename(base, j.value("pool_directory", "pool"))), version(app_version, j),
@@ -60,7 +61,7 @@ Project::Project(const UUID &uu, const json &j, const std::string &base)
             json block_j = load_json_from_file(block_filename);
 
             UUID block_uuid = block_j.at("uuid").get<std::string>();
-            blocks.emplace(block_uuid, ProjectBlock(block_uuid, block_filename, schematic_filename, is_top));
+            blocks_old.emplace(block_uuid, ProjectBlock(block_uuid, block_filename, schematic_filename, is_top));
         }
     }
 }
@@ -73,17 +74,6 @@ Project Project::new_from_file(const std::string &filename)
 
 Project::Project(const UUID &uu) : uuid(uu), version(app_version)
 {
-}
-
-const ProjectBlock &Project::get_top_block() const
-{
-    auto top_block = std::find_if(blocks.begin(), blocks.end(), [](const auto &a) { return a.second.is_top; });
-    return top_block->second;
-}
-
-ProjectBlock &Project::get_top_block()
-{
-    return const_cast<ProjectBlock &>(const_cast<const Project *>(this)->get_top_block());
 }
 
 std::string Project::create(const std::map<std::string, std::string> &meta, const UUID &pool_uuid,
@@ -99,19 +89,18 @@ std::string Project::create(const std::map<std::string, std::string> &meta, cons
         }
     }
 
-    blocks.clear();
-    auto block_filename = Glib::build_filename(base_path, "top_block.json");
-    auto schematic_filename = Glib::build_filename(base_path, "top_sch.json");
-    auto &name = meta.at("project_name");
+    const auto &name = meta.at("project_name");
 
-    Block block(UUID::random());
-    block.project_meta = meta;
-    save_json_to_file(block_filename, block.serialize());
+    BlocksSchematic blocks;
+    blocks.base_path = base_path;
+    auto &top_block = blocks.get_top_block();
 
-    Schematic schematic(UUID::random(), block);
-    save_json_to_file(schematic_filename, schematic.serialize());
-
-    blocks.emplace(block.uuid, ProjectBlock(block.uuid, block_filename, schematic_filename, true));
+    top_block.block.project_meta = meta;
+    save_json_to_file(Glib::build_filename(blocks.base_path, top_block.block_filename), top_block.block.serialize());
+    save_json_to_file(Glib::build_filename(blocks.base_path, top_block.schematic_filename),
+                      top_block.schematic.serialize());
+    blocks_filename = Glib::build_filename(base_path, "blocks.json");
+    save_json_to_file(blocks_filename, blocks.serialize());
 
     pictures_directory = Glib::build_filename(base_path, "pictures");
     pool_cache_directory_old = Glib::build_filename(base_path, "cache");
@@ -128,7 +117,7 @@ std::string Project::create(const std::map<std::string, std::string> &meta, cons
         ProjectPool::create_directories(pool_directory);
     }
 
-    Board board(UUID::random(), block);
+    Board board(UUID::random(), top_block.block);
     if (default_via) {
         auto rule_via = dynamic_cast<RuleVia *>(board.rules.add_rule(RuleID::VIA));
         rule_via->padstack = default_via;
@@ -172,9 +161,10 @@ json Project::serialize() const
     j["board_filename"] = get_filename_rel(board_filename);
     j["pool_cache_directory"] = get_filename_rel(pool_cache_directory_old);
     j["pool_directory"] = get_filename_rel(pool_directory);
+    j["blocks_filename"] = get_filename_rel(blocks_filename);
     {
         json k;
-        for (const auto &it : blocks) {
+        for (const auto &it : blocks_old) {
             json l;
             l["is_top"] = it.second.is_top;
             l["block_filename"] = get_filename_rel(it.second.block_filename);
