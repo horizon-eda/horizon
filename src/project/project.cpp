@@ -10,6 +10,8 @@
 #include "nlohmann/json.hpp"
 #include "pool/project_pool.hpp"
 #include "util/str_util.hpp"
+#include "blocks/blocks_schematic.hpp"
+#include "logger/logger.hpp"
 
 namespace horizon {
 
@@ -30,7 +32,7 @@ static void mkdir_if_not_exists(const std::string &dir, bool keep)
     }
 }
 
-static const unsigned int app_version = 1;
+static const unsigned int app_version = 2;
 
 unsigned int Project::get_app_version()
 {
@@ -38,7 +40,7 @@ unsigned int Project::get_app_version()
 }
 
 Project::Project(const UUID &uu, const json &j, const std::string &base)
-    : base_path(base), uuid(uu),
+    : base_path(base), uuid(uu), blocks_filename(Glib::build_filename(base, j.value("blocks_filename", "blocks.json"))),
       pictures_directory(Glib::build_filename(base, j.value("pictures_directory", "pictures"))),
       board_filename(Glib::build_filename(base, j.at("board_filename"))),
       pool_directory(Glib::build_filename(base, j.value("pool_directory", "pool"))), version(app_version, j),
@@ -61,7 +63,7 @@ Project::Project(const UUID &uu, const json &j, const std::string &base)
             json block_j = load_json_from_file(block_filename);
 
             UUID block_uuid = block_j.at("uuid").get<std::string>();
-            blocks.emplace(block_uuid, ProjectBlock(block_uuid, block_filename, schematic_filename, is_top));
+            blocks_old.emplace(block_uuid, ProjectBlock(block_uuid, block_filename, schematic_filename, is_top));
         }
     }
 }
@@ -76,15 +78,22 @@ Project::Project(const UUID &uu) : uuid(uu), version(app_version)
 {
 }
 
-const ProjectBlock &Project::get_top_block() const
+std::string Project::peek_title() const
 {
-    auto top_block = std::find_if(blocks.begin(), blocks.end(), [](const auto &a) { return a.second.is_top; });
-    return top_block->second;
-}
+    if (Glib::file_test(blocks_filename, Glib::FILE_TEST_IS_REGULAR)) {
+        auto meta = BlocksBase::peek_project_meta(blocks_filename);
+        if (meta.count("project_title"))
+            return meta.at("project_title");
+    }
+    for (const auto &[uu, block] : blocks_old) {
+        if (block.is_top && Glib::file_test(block.block_filename, Glib::FILE_TEST_IS_REGULAR)) {
+            auto meta = Block::peek_project_meta(block.block_filename);
+            if (meta.count("project_title"))
+                return meta.at("project_title");
+        }
+    }
 
-ProjectBlock &Project::get_top_block()
-{
-    return const_cast<ProjectBlock &>(const_cast<const Project *>(this)->get_top_block());
+    return title_old;
 }
 
 static const std::vector<std::string> gitignore_lines = {
@@ -104,19 +113,22 @@ std::string Project::create(const std::map<std::string, std::string> &meta, cons
         }
     }
 
-    blocks.clear();
-    auto block_filename = Glib::build_filename(base_path, "top_block.json");
-    auto schematic_filename = Glib::build_filename(base_path, "top_sch.json");
-    auto &name = meta.at("project_name");
+    const auto &name = meta.at("project_name");
 
-    Block block(UUID::random());
-    block.project_meta = meta;
-    save_json_to_file(block_filename, block.serialize());
+    BlocksSchematic blocks;
+    blocks.base_path = base_path;
+    auto &top_block = blocks.get_top_block();
 
-    Schematic schematic(UUID::random(), block);
-    save_json_to_file(schematic_filename, schematic.serialize());
+    top_block.block.project_meta = meta;
+    const auto top_block_filename = Glib::build_filename(blocks.base_path, top_block.block_filename);
+    const auto top_sch_filename = Glib::build_filename(blocks.base_path, top_block.schematic_filename);
+    save_json_to_file(top_block_filename, top_block.block.serialize());
+    save_json_to_file(top_sch_filename, top_block.schematic.serialize());
+    blocks_filename = Glib::build_filename(base_path, "blocks.json");
+    save_json_to_file(blocks_filename, blocks.serialize());
 
-    blocks.emplace(block.uuid, ProjectBlock(block.uuid, block_filename, schematic_filename, true));
+    blocks_old.emplace(std::piecewise_construct, std::forward_as_tuple(top_block.uuid),
+                       std::forward_as_tuple(top_block.uuid, top_block_filename, top_sch_filename, true));
 
     pictures_directory = Glib::build_filename(base_path, "pictures");
     pool_cache_directory_old = Glib::build_filename(base_path, "cache");
@@ -133,7 +145,7 @@ std::string Project::create(const std::map<std::string, std::string> &meta, cons
         ProjectPool::create_directories(pool_directory);
     }
 
-    Board board(UUID::random(), block);
+    Board board(UUID::random(), top_block.block);
     if (default_via) {
         auto rule_via = dynamic_cast<RuleVia *>(board.rules.add_rule(RuleID::VIA));
         rule_via->padstack = default_via;
@@ -154,6 +166,45 @@ std::string Project::create(const std::map<std::string, std::string> &meta, cons
     }
 
     return prj_filename;
+}
+
+class MyBlocks : public BlocksBase {
+public:
+    using BlocksBase::BlocksBase;
+
+    class MyBlockItem : public BlockItemInfo {
+    public:
+        MyBlockItem(const UUID &uu, const std::string &b, const std::string &c) : BlockItemInfo(uu, b, "", c)
+        {
+        }
+    };
+
+    std::map<UUID, MyBlockItem> blocks;
+
+    json serialize() const
+    {
+        json j = serialize_base();
+        for (const auto &[uu, it] : blocks) {
+            j["blocks"][(std::string)uu] = it.serialize();
+        }
+        return j;
+    }
+};
+
+void Project::create_blocks()
+{
+    if (version.get_file() >= 2) {
+        Logger::log_warning("create_blocks called for file version >= 2", Logger::Domain::PROJECT);
+    }
+    MyBlocks blocks;
+    for (const auto &[uu, pb] : blocks_old) {
+        blocks.blocks.emplace(std::piecewise_construct, std::forward_as_tuple(uu),
+                              std::forward_as_tuple(uu, get_filename_rel(pb.block_filename),
+                                                    get_filename_rel(pb.schematic_filename)));
+        if (pb.is_top)
+            blocks.top_block = uu;
+    }
+    save_json_to_file(blocks_filename, blocks.serialize());
 }
 
 static std::set<std::string> missing_lines_from_gitignore(const std::string &filename)
@@ -208,9 +259,10 @@ json Project::serialize() const
     j["board_filename"] = get_filename_rel(board_filename);
     j["pool_cache_directory"] = get_filename_rel(pool_cache_directory_old);
     j["pool_directory"] = get_filename_rel(pool_directory);
+    j["blocks_filename"] = get_filename_rel(blocks_filename);
     {
         json k;
-        for (const auto &it : blocks) {
+        for (const auto &it : blocks_old) {
             json l;
             l["is_top"] = it.second.is_top;
             l["block_filename"] = get_filename_rel(it.second.block_filename);

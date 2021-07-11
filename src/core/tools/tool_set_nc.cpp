@@ -73,8 +73,32 @@ ToolResponse ToolSetNotConnected::update(const ToolArgs &args)
                     }
                 }
             }
+            else if (args.target.type == ObjectType::BLOCK_SYMBOL_PORT) {
+                auto &sym = doc.c->get_sheet()->block_symbols.at(args.target.path.at(0));
+                auto &port = sym.symbol.ports.at(args.target.path.at(1));
+                if (sym.block_instance->connections.count(port.uuid) == 0) { // port is not connected
+                    if (mode == Mode::TOGGLE || mode == Mode::SET) {
+                        sym.block_instance->connections.emplace(port.uuid, nullptr);
+                        sym.symbol.ports.at(port.uuid).connector_style =
+                                BlockSymbolPort::ConnectorStyle::NC; // for preview
+                    }
+                }
+                else {
+                    auto &conn = sym.block_instance->connections.at(port.uuid);
+                    if (conn.net == nullptr) {
+                        if (mode == Mode::TOGGLE || mode == Mode::CLEAR) {
+                            sym.block_instance->connections.erase(port.uuid);
+                            sym.symbol.ports.at(port.uuid).connector_style =
+                                    BlockSymbolPort::ConnectorStyle::BOX; // for preview
+                        }
+                    }
+                    else {
+                        imp->tool_bar_flash("Port is connected to net");
+                    }
+                }
+            }
             else {
-                imp->tool_bar_flash("Please click on a pin");
+                imp->tool_bar_flash("Please click on a pin or port");
             }
             break;
 

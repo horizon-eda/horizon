@@ -74,7 +74,7 @@ void Markers::update()
     ca.request_push(CanvasGL::PF_MARKER);
 }
 
-void Markers::set_sheet_filter(const UUID &uu)
+void Markers::set_sheet_filter(const UUIDVec &uu)
 {
     sheet_filter = uu;
     update();
@@ -118,7 +118,7 @@ void MarkerRenderer::update()
     for (const auto &dom : markers_ref.domains) {
         if (markers_ref.domains_visible.at(i)) {
             for (const auto &mkr : dom) {
-                if (mkr.sheet == ca.markers.sheet_filter || mkr.sheet == UUID()) {
+                if (mkr.sheet == ca.markers.sheet_filter || mkr.sheet.size() == 0) {
                     uint8_t flags = 0;
                     if (mkr.size == MarkerRef::Size::SMALL)
                         flags = 1;

@@ -8,6 +8,8 @@
 #include "document/idocument_schematic.hpp"
 #include "schematic/schematic.hpp"
 #include "document/idocument_symbol.hpp"
+#include "document/idocument_block_symbol.hpp"
+#include "block_symbol/block_symbol.hpp"
 #include "pool/symbol.hpp"
 #include "imp/imp_interface.hpp"
 #include "util/accumulator.hpp"
@@ -127,7 +129,7 @@ void ToolMove::expand_selection()
             }
             for (const auto &[pin_uu, pin] : sym.symbol.pins) {
                 for (const auto &[line_uu, line] : doc.c->get_sheet()->net_lines) {
-                    if (line.is_connected_to(sym.uuid, pin_uu)) {
+                    if (line.is_connected_to_symbol(sym.uuid, pin_uu)) {
                         for (const auto &it_ft : {line.from, line.to}) {
                             if (it_ft.is_junc()) {
                                 const auto &ju = *it_ft.junc;
@@ -148,6 +150,34 @@ void ToolMove::expand_selection()
                 }
             }
         } break;
+
+
+        case ObjectType::SCHEMATIC_BLOCK_SYMBOL: {
+            auto &sym = doc.c->get_sheet()->block_symbols.at(it.uuid);
+            for (const auto &[pin_uu, port] : sym.symbol.ports) {
+                for (const auto &[line_uu, line] : doc.c->get_sheet()->net_lines) {
+                    if (line.is_connected_to_block_symbol(sym.uuid, pin_uu)) {
+                        for (const auto &it_ft : {line.from, line.to}) {
+                            if (it_ft.is_junc()) {
+                                const auto &ju = *it_ft.junc;
+                                const auto port_pos = sym.placement.transform(port.position);
+                                Axis ax = Axis::NONE;
+                                if (port_pos.x == ju.position.x)
+                                    ax = Axis::X;
+                                else if (port_pos.y == ju.position.y)
+                                    ax = Axis::Y;
+
+                                if (ju.connected_net_lines.size() == 1) { // dangling end
+                                    ax = Axis::X | Axis::Y;
+                                }
+                                add_extra_junction(ju.uuid, ax);
+                            }
+                        }
+                    }
+                }
+            }
+        } break;
+
         case ObjectType::BOARD_PACKAGE: {
             BoardPackage *pkg = &doc.b->get_board()->packages.at(it.uuid);
             if (pkg->fixed) {
@@ -209,8 +239,14 @@ Coordi ToolMove::get_selection_center()
         case ObjectType::SYMBOL_PIN:
             accu.accumulate(doc.y->get_symbol_pin(it.uuid).position);
             break;
+        case ObjectType::BLOCK_SYMBOL_PORT:
+            accu.accumulate(doc.o->get_block_symbol().ports.at(it.uuid).position);
+            break;
         case ObjectType::SCHEMATIC_SYMBOL:
             accu.accumulate(doc.c->get_sheet()->symbols.at(it.uuid).placement.shift);
+            break;
+        case ObjectType::SCHEMATIC_BLOCK_SYMBOL:
+            accu.accumulate(doc.c->get_sheet()->block_symbols.at(it.uuid).placement.shift);
             break;
         case ObjectType::BOARD_PACKAGE:
             accu.accumulate(doc.b->get_board()->packages.at(it.uuid).placement.shift);

@@ -157,8 +157,20 @@ bool ImpBoard::handle_broadcast(const json &j)
             const json &o = j["objects"];
             for (auto it = o.cbegin(); it != o.cend(); ++it) {
                 auto type = static_cast<ObjectType>(it.value().at("type").get<int>());
-                UUID uu(it.value().at("uuid").get<std::string>());
-                highlights.emplace(type, uu);
+                if (type == ObjectType::NET) {
+                    const auto path = uuid_vec_from_string(it.value().at("uuid").get<std::string>());
+                    for (const auto &[uu, net] : core_board.get_top_block()->nets) {
+                        if (std::any_of(net.hrefs.begin(), net.hrefs.end(),
+                                        [&path](const auto &x) { return x == path; })) {
+                            highlights.emplace(type, uu);
+                            break;
+                        }
+                    }
+                }
+                else {
+                    UUID uu(it.value().at("uuid").get<std::string>());
+                    highlights.emplace(type, uu);
+                }
             }
             update_highlights();
         }
@@ -241,7 +253,17 @@ void ImpBoard::handle_selection_cross_probe()
 
         if (type != ObjectType::INVALID) {
             k["type"] = static_cast<int>(type);
-            k["uuid"] = (std::string)uu;
+            if (type == ObjectType::COMPONENT) {
+                k["uuid"] = (std::string)uu;
+            }
+            else if (type == ObjectType::NET) {
+                const auto &net = board->block->nets.at(uu);
+                std::vector<std::string> hrefs;
+                for (const auto &path : net.hrefs) {
+                    hrefs.push_back(uuid_vec_to_string(path));
+                }
+                k["uuid"] = hrefs;
+            }
             j["selection"].push_back(k);
         }
     }
@@ -605,7 +627,8 @@ void ImpBoard::construct()
     tuning_window->set_transient_for(*main_window);
     imp_interface->signal_request_length_tuning_ref().connect([this] { return tuning_window->get_ref_length(); });
 
-    rules_window->signal_goto().connect([this](Coordi location, UUID sheet) { canvas->center_and_zoom(location); });
+    rules_window->signal_goto().connect(
+            [this](Coordi location, UUID sheet, UUIDVec instance_path) { canvas->center_and_zoom(location); });
 
     connect_action(ActionID::VIEW_3D, [this](const auto &a) {
         view_3d_window->update();

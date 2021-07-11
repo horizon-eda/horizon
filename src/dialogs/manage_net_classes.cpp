@@ -17,12 +17,14 @@ public:
         delete_button->set_sensitive(block.net_class_default != &nc);
         pack_start(*delete_button, false, false, 0);
         delete_button->signal_clicked().connect([this] {
-            for (auto &it_net : block.nets) {
-                if (it_net.second.net_class == &net_class) {
-                    it_net.second.net_class = block.net_class_default;
+            for (auto b : block.get_all_blocks_and_top()) {
+                for (auto &[uu, net] : b->nets) {
+                    if (net.net_class->uuid == net_class.uuid) {
+                        net.net_class = b->net_class_default;
+                    }
                 }
+                b->net_classes.erase(net_class.uuid);
             }
-            block.net_classes.erase(net_class.uuid);
             delete this->get_parent();
         });
 

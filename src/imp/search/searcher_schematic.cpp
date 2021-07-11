@@ -14,12 +14,14 @@ void SearcherSchematic::sort_search_results_schematic(std::list<Searcher::Search
                                                       const Searcher::SearchQuery &q)
 {
     results.sort([this, q](const auto &a, const auto &b) {
-        int index_a = doc.get_current_schematic()->sheets.at(a.sheet).index;
-        int index_b = doc.get_current_schematic()->sheets.at(b.sheet).index;
+        int index_a =
+                doc.get_top_schematic()->sheet_mapping.sheet_numbers.at(uuid_vec_append(a.instance_path, a.sheet));
+        int index_b =
+                doc.get_top_schematic()->sheet_mapping.sheet_numbers.at(uuid_vec_append(b.instance_path, b.sheet));
 
-        if (a.sheet == doc.get_sheet()->uuid)
+        if (a.sheet == doc.get_sheet()->uuid && a.instance_path == doc.get_instance_path())
             index_a = -1;
-        if (b.sheet == doc.get_sheet()->uuid)
+        if (b.sheet == doc.get_sheet()->uuid && b.instance_path == doc.get_instance_path())
             index_b = -1;
 
         if (index_a > index_b)
@@ -61,88 +63,99 @@ std::list<Searcher::SearchResult> SearcherSchematic::search(const Searcher::Sear
     std::list<SearchResult> results;
     if (!q.is_valid())
         return results;
-    for (const auto &it_sheet : doc.get_current_schematic()->sheets) {
-        const auto &sheet = it_sheet.second;
+
+    if (doc.get_block_symbol_mode())
+        return results;
+
+    const auto &top = *doc.get_top_schematic();
+    for (const auto &it : top.get_all_sheets()) {
         if (q.types.count(Type::SYMBOL_REFDES)) {
-            for (const auto &it : sheet.symbols) {
-                if (q.matches(it.second.component->refdes)) {
-                    results.emplace_back(Type::SYMBOL_REFDES, it.first);
+            for (const auto &[uu, sym] : it.sheet.symbols) {
+                if (q.matches(top.block->get_component_info(*sym.component, it.instance_path).refdes)) {
+                    results.emplace_back(Type::SYMBOL_REFDES, uu);
                     auto &x = results.back();
-                    x.location = it.second.placement.shift;
-                    x.sheet = sheet.uuid;
+                    x.location = sym.placement.shift;
+                    x.sheet = it.sheet.uuid;
+                    x.instance_path = it.instance_path;
                     x.selectable = true;
                 }
             }
         }
         if (q.types.count(Type::SYMBOL_PIN)) {
-            for (const auto &it : sheet.symbols) {
-                for (const auto &it_pin : it.second.symbol.pins) {
-                    if (q.matches(it_pin.second.name)) {
-                        results.emplace_back(Type::SYMBOL_PIN, it.first, it_pin.first);
+            for (const auto &[uu_sym, sym] : it.sheet.symbols) {
+                for (const auto &[uu_pin, pin] : sym.symbol.pins) {
+                    if (q.matches(pin.name)) {
+                        results.emplace_back(Type::SYMBOL_PIN, uu_sym, uu_pin);
                         auto &x = results.back();
-                        x.location = it.second.placement.transform(it_pin.second.position);
-                        x.sheet = sheet.uuid;
+                        x.location = sym.placement.transform(pin.position);
+                        x.sheet = it.sheet.uuid;
+                        x.instance_path = it.instance_path;
                         x.selectable = false;
                     }
                 }
             }
         }
         if (q.types.count(Type::SYMBOL_MPN)) {
-            for (const auto &it : sheet.symbols) {
-                if (it.second.component->part && q.matches(it.second.component->part->get_MPN())) {
-                    results.emplace_back(Type::SYMBOL_MPN, it.first);
+            for (const auto &[uu, sym] : it.sheet.symbols) {
+                if (sym.component->part && q.matches(sym.component->part->get_MPN())) {
+                    results.emplace_back(Type::SYMBOL_MPN, uu);
                     auto &x = results.back();
-                    x.location = it.second.placement.shift;
-                    x.sheet = sheet.uuid;
+                    x.location = sym.placement.shift;
+                    x.sheet = it.sheet.uuid;
+                    x.instance_path = it.instance_path;
                     x.selectable = true;
                 }
             }
         }
         if (q.types.count(Type::NET_LABEL)) {
-            for (const auto &it : sheet.net_labels) {
-                if (it.second.junction->net && q.matches(it.second.junction->net->name)) {
-                    results.emplace_back(Type::NET_LABEL, it.first);
+            for (const auto &[uu, label] : it.sheet.net_labels) {
+                if (label.junction->net && q.matches(label.junction->net->name)) {
+                    results.emplace_back(Type::NET_LABEL, uu);
                     auto &x = results.back();
-                    x.location = it.second.junction->position;
-                    x.sheet = sheet.uuid;
+                    x.location = label.junction->position;
+                    x.sheet = it.sheet.uuid;
+                    x.instance_path = it.instance_path;
                     x.selectable = true;
                 }
             }
         }
         if (q.types.count(Type::BUS_RIPPER)) {
-            for (const auto &it : sheet.bus_rippers) {
-                if (it.second.bus_member->net && q.matches(it.second.bus_member->net->name)) {
-                    results.emplace_back(Type::BUS_RIPPER, it.first);
+            for (const auto &[uu, rip] : it.sheet.bus_rippers) {
+                if (rip.bus_member->net && q.matches(rip.bus_member->net->name)) {
+                    results.emplace_back(Type::BUS_RIPPER, uu);
                     auto &x = results.back();
-                    x.location = it.second.get_connector_pos();
-                    x.sheet = sheet.uuid;
+                    x.location = rip.get_connector_pos();
+                    x.sheet = it.sheet.uuid;
+                    x.instance_path = it.instance_path;
                     x.selectable = true;
                 }
             }
         }
         if (q.types.count(Type::POWER_SYMBOL)) {
-            for (const auto &it : sheet.power_symbols) {
-                if (it.second.junction->net && q.matches(it.second.junction->net->name)) {
-                    results.emplace_back(Type::POWER_SYMBOL, it.first);
+            for (const auto &[uu, sym] : it.sheet.power_symbols) {
+                if (sym.junction->net && q.matches(sym.junction->net->name)) {
+                    results.emplace_back(Type::POWER_SYMBOL, uu);
                     auto &x = results.back();
-                    x.location = it.second.junction->position;
-                    x.sheet = sheet.uuid;
+                    x.location = sym.junction->position;
+                    x.sheet = it.sheet.uuid;
+                    x.instance_path = it.instance_path;
                     x.selectable = true;
                 }
             }
         }
         if (q.types.count(Type::TEXT)) {
-            for (const auto &it : sheet.texts) {
-                if (q.matches(it.second.text)) {
-                    results.emplace_back(Type::TEXT, it.first);
+            for (const auto &[uu, text] : it.sheet.texts) {
+                if (q.matches(text.text)) {
+                    results.emplace_back(Type::TEXT, uu);
                     auto &x = results.back();
-                    x.location = it.second.placement.shift;
-                    x.sheet = sheet.uuid;
+                    x.location = text.placement.shift;
+                    x.sheet = it.sheet.uuid;
+                    x.instance_path = it.instance_path;
                     x.selectable = true;
                 }
             }
         }
-    }
+    };
     sort_search_results_schematic(results, q);
 
     return results;
@@ -157,13 +170,41 @@ std::set<Searcher::Type> SearcherSchematic::get_types() const
 
 std::string SearcherSchematic::get_display_name(const Searcher::SearchResult &r)
 {
-    if (r.type == Type::SYMBOL_PIN) {
-        auto sym_name = doc.get_display_name(ObjectType::SCHEMATIC_SYMBOL, r.path.at(0), r.sheet);
-        const auto &sym = doc.get_current_schematic()->sheets.at(r.sheet).symbols.at(r.path.at(0));
-        return sym_name + "." + sym.gate->unit->pins.at(r.path.at(1)).primary_name;
+    if (doc.get_block_symbol_mode())
+        return "";
+
+    const auto &sch = doc.get_schematic_for_instance_path(r.instance_path);
+    const auto &sheet = sch.sheets.at(r.sheet);
+    const auto uu = r.path.at(0);
+    switch (r.type) {
+    case Type::SYMBOL_REFDES:
+    case Type::SYMBOL_MPN: {
+        const auto &sym = sheet.symbols.at(uu);
+        return doc.get_top_block()->get_component_info(*sym.component, r.instance_path).refdes + sym.gate->suffix;
     }
-    else {
-        return doc.get_display_name(get_type_info(r.type).object_type, r.path.at(0), r.sheet);
+
+    case Type::SYMBOL_PIN: {
+        const auto &sym = sheet.symbols.at(uu);
+        return doc.get_top_block()->get_component_info(*sym.component, r.instance_path).refdes + sym.gate->suffix
+               + sym.gate->unit->pins.at(r.path.at(1)).primary_name;
+    }
+
+    case Type::TEXT:
+        return sheet.texts.at(uu).text;
+
+    case Type::NET_LABEL: {
+        auto &ju = *sheet.net_labels.at(uu).junction;
+        return ju.net ? ju.net->name : "";
+    }
+
+    case Type::BUS_RIPPER:
+        return sheet.bus_rippers.at(uu).bus_member->net->name;
+
+    case Type::POWER_SYMBOL:
+        return sheet.power_symbols.at(uu).net->name;
+
+    default:
+        return "???";
     }
 }
 

@@ -211,6 +211,8 @@ bool ImpBase::trigger_action(const ActionToolID &action)
     if (core->tool_is_active() && !(action_catalog.at(action).flags & ActionCatalogItem::FLAGS_IN_TOOL)) {
         return false;
     }
+    if (!get_action_sensitive(action))
+        return false;
     main_window->key_hint_set_visible(false);
     if (keys_current.size()) {
         keys_current.clear();

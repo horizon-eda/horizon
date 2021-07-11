@@ -16,10 +16,15 @@ bool ToolManageBuses::can_begin()
     case ToolID::MANAGE_BUSES:
     case ToolID::ANNOTATE:
     case ToolID::MANAGE_NET_CLASSES:
-    case ToolID::EDIT_SCHEMATIC_PROPERTIES:
     case ToolID::MANAGE_POWER_NETS:
     case ToolID::TOGGLE_GROUP_TAG_VISIBLE:
         return doc.c;
+
+    case ToolID::EDIT_SCHEMATIC_PROPERTIES:
+        return doc.co;
+
+    case ToolID::MANAGE_PORTS:
+        return doc.o || (doc.c && !doc.c->current_block_is_top());
 
     case ToolID::EDIT_STACKUP:
     case ToolID::MANAGE_INCLUDED_BOARDS:
@@ -38,20 +43,19 @@ ToolResponse ToolManageBuses::begin(const ToolArgs &args)
     bool r = false;
 
     if (tool_id == ToolID::MANAGE_BUSES) {
-        auto sch = doc.c->get_current_schematic();
+        auto sch = doc.c->get_top_schematic();
         r = imp->dialogs.manage_buses(*sch->block);
     }
     else if (tool_id == ToolID::ANNOTATE) {
-        auto sch = doc.c->get_current_schematic();
+        auto sch = doc.c->get_top_schematic();
         r = imp->dialogs.annotate(*sch);
     }
     else if (tool_id == ToolID::MANAGE_NET_CLASSES) {
-        auto sch = doc.c->get_current_schematic();
+        auto sch = doc.c->get_top_schematic();
         r = imp->dialogs.manage_net_classes(*sch->block);
     }
     else if (tool_id == ToolID::EDIT_SCHEMATIC_PROPERTIES) {
-        r = imp->dialogs.edit_schematic_properties(*doc.c->get_current_schematic(), doc.c->get_pool(),
-                                                   doc.c->get_pool_caching());
+        r = imp->dialogs.edit_schematic_properties(*doc.co);
     }
     else if (tool_id == ToolID::EDIT_STACKUP) {
         r = imp->dialogs.edit_stackup(*doc.b);
@@ -69,6 +73,9 @@ ToolResponse ToolManageBuses::begin(const ToolArgs &args)
     }
     else if (tool_id == ToolID::MANAGE_INCLUDED_BOARDS) {
         r = imp->dialogs.manage_included_boards(*doc.b->get_board());
+    }
+    else if (tool_id == ToolID::MANAGE_PORTS) {
+        r = imp->dialogs.manage_ports(*doc.co->get_current_block());
     }
     if (r) {
         return ToolResponse::commit();

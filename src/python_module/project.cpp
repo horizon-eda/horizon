@@ -12,8 +12,7 @@ static PyObject *PyProject_open_top_schematic(PyObject *pself)
     auto self = reinterpret_cast<PyProject *>(pself);
     SchematicWrapper *schematic = nullptr;
     try {
-        auto top_block = self->project->project.get_top_block();
-        schematic = new SchematicWrapper(self->project->project, top_block.uuid);
+        schematic = new SchematicWrapper(self->project->project);
     }
     catch (const std::exception &e) {
         PyErr_SetString(PyExc_IOError, e.what());

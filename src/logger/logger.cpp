@@ -79,6 +79,10 @@ std::string Logger::domain_to_string(Logger::Domain dom)
         return "Picture";
     case Logger::Domain::PART:
         return "Part";
+    case Logger::Domain::PROJECT:
+        return "Project";
+    case Logger::Domain::BLOCKS:
+        return "Blocks";
     default:
         return "Unspecified";
     }

@@ -154,5 +154,8 @@ enum class ToolID {
     EDIT_CUSTOM_VALUE,
     PLACE_DOT,
     SET_TRACK_WIDTH,
+    MANAGE_PORTS,
+    MAP_PORT,
+    ADD_BLOCK_INSTANCE
 };
 } // namespace horizon

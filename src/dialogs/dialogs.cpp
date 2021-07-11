@@ -40,6 +40,8 @@
 #include <glibmm.h>
 #include "pool/ipool.hpp"
 #include "widgets/net_selector.hpp"
+#include "manage_ports.hpp"
+#include "select_block.hpp"
 
 namespace horizon {
 void Dialogs::set_parent(Gtk::Window *w)
@@ -195,6 +197,19 @@ std::optional<UUID> Dialogs::select_included_board(const Board &brd)
     }
 }
 
+std::optional<UUID> Dialogs::select_block(const BlocksSchematic &blocks)
+{
+    SelectBlockDialog dia(parent, blocks);
+    auto r = dia.run();
+    if (r == Gtk::RESPONSE_OK && dia.valid) {
+        return dia.selected_uuid;
+    }
+    else {
+        return {};
+    }
+}
+
+
 bool Dialogs::edit_shapes(std::set<Shape *> shapes)
 {
     ShapeDialog dia(parent, shapes);
@@ -255,9 +270,9 @@ bool Dialogs::edit_board_hole(std::set<class BoardHole *> &holes, IPool &pool, I
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::edit_schematic_properties(class Schematic &sch, class IPool &pool, class IPool &pool_caching)
+bool Dialogs::edit_schematic_properties(class IDocumentSchematicBlockSymbol &doc)
 {
-    SchematicPropertiesDialog dia(parent, sch, pool, pool_caching);
+    SchematicPropertiesDialog dia(parent, doc);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
@@ -482,6 +497,12 @@ std::optional<std::string> Dialogs::ask_picture_filename()
     else {
         return {};
     }
+}
+
+bool Dialogs::manage_ports(Block &b)
+{
+    ManagePortsDialog dia(parent, b);
+    return dia.run() == Gtk::RESPONSE_OK;
 }
 
 class SymbolPinNamesWindow *Dialogs::show_symbol_pin_names_window(class SchematicSymbol &symbol)

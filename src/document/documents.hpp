@@ -16,6 +16,8 @@ public:
     class IDocument *r;
     class IDocumentSchematic *c;
     class IDocumentSymbol *y;
+    class IDocumentBlockSymbol *o;
+    class IDocumentSchematicBlockSymbol *co;
     class IDocumentPadstack *a;
     class IDocumentPackage *k;
     class IDocumentBoard *b;

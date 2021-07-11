@@ -16,6 +16,7 @@
 #include <gtkmm.h>
 #include "core/tool_id.hpp"
 #include "util/picture_util.hpp"
+#include "blocks/blocks_schematic.hpp"
 
 namespace horizon {
 
@@ -123,7 +124,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             *x = Junction(u, j_ju);
             if (doc.c && j_ju.count("net")) {
                 const auto net_uu = UUID(j_ju.at("net").get<std::string>());
-                auto &block = *doc.c->get_top_block();
+                auto &block = *doc.c->get_current_block();
                 if (block.nets.count(net_uu))
                     junction_nets.emplace(u, &block.nets.at(net_uu));
             }
@@ -201,9 +202,9 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
         }
     }
     std::map<UUID, const UUID> net_xlat;
-    if (j.count("nets") && doc.r->get_top_block()) {
+    if (j.count("nets") && doc.c && doc.c->get_current_block()) {
         const json &o = j["nets"];
-        auto block = doc.r->get_top_block();
+        auto block = doc.c->get_current_block();
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             Net net_from_json(it.key(), it.value());
             std::string net_name = net_from_json.name;
@@ -263,11 +264,56 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
         }
     }
 
+    std::map<UUID, const UUID> inst_xlat;
+    if (j.count("block_instances") && doc.c) {
+        auto block = doc.c->get_current_schematic()->block;
+        auto &blocks = doc.c->get_blocks();
+        for (const auto &[key, value] : j.at("block_instances").items()) {
+            const auto block_uu = BlockInstance::peek_block_uuid(value);
+            if (blocks.blocks.count(block_uu)) {
+                if (doc.c->get_top_block()->can_add_block_instance(doc.c->get_current_block()->uuid, block_uu)) {
+                    auto u = UUID::random();
+                    inst_xlat.emplace(key, u);
+                    BlockInstance inst(u, value, doc.c->get_blocks());
+                    for (auto &it_conn : inst.connections) {
+                        it_conn.second.net = &block->nets.at(net_xlat.at(it_conn.second.net.uuid));
+                    }
+                    block->block_instances.emplace(u, inst);
+                }
+                else {
+                    imp->tool_bar_flash("can't paste this block here");
+                }
+            }
+        }
+    }
+
+    std::map<UUID, const UUID> block_symbol_xlat;
+    if (j.count("block_symbols") && doc.c) {
+        auto sheet = doc.c->get_sheet();
+        auto block = doc.c->get_current_schematic()->block;
+        for (const auto &[key, value] : j.at("block_symbols").items()) {
+            const auto inst_uu = SchematicBlockSymbol::peek_block_instance_uuid(value);
+            if (inst_xlat.count(inst_uu)) {
+                auto &inst = block->block_instances.at(inst_xlat.at(inst_uu));
+                auto u = UUID::random();
+                block_symbol_xlat.emplace(key, u);
+                SchematicBlockSymbol sym(u, doc.c->get_blocks().get_block_symbol(inst.block->uuid), inst);
+                sym.schematic = &doc.c->get_blocks().get_schematic(inst.block->uuid);
+                sym.placement = Placement(value.at("placement"));
+                auto &x = sheet->block_symbols.emplace(u, sym).first->second;
+                sheet->expand_block_symbol(u, *doc.c->get_current_schematic());
+                doc.c->get_top_schematic()->update_sheet_mapping();
+                x.placement.shift += shift;
+                selection.emplace(u, ObjectType::SCHEMATIC_BLOCK_SYMBOL);
+            }
+        }
+    }
+
     std::map<UUID, const UUID> bus_ripper_xlat;
     if (j.count("bus_rippers") && doc.c) {
         const json &o = j["bus_rippers"];
         auto sheet = doc.c->get_sheet();
-        auto block = doc.c->get_top_block();
+        auto block = doc.c->get_current_block();
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             BusRipper rip(u, it.value());
@@ -289,7 +335,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             auto u = UUID::random();
             const auto &j_line = it.value();
             LineNet line(u, j_line);
-            auto update_net_line_conn = [&junction_xlat, &symbol_xlat, &bus_ripper_xlat,
+            auto update_net_line_conn = [&junction_xlat, &symbol_xlat, &block_symbol_xlat, &bus_ripper_xlat,
                                          sheet](LineNet::Connection &c) {
                 if (c.junc.uuid) {
                     c.junc = &sheet->junctions.at(junction_xlat.at(c.junc.uuid));
@@ -297,6 +343,15 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
                 else if (c.symbol.uuid) {
                     c.symbol = &sheet->symbols.at(symbol_xlat.at(c.symbol.uuid));
                     c.pin = &c.symbol->symbol.pins.at(c.pin.uuid);
+                }
+                else if (c.block_symbol.uuid) {
+                    if (block_symbol_xlat.count(c.block_symbol.uuid)) {
+                        c.block_symbol = &sheet->block_symbols.at(block_symbol_xlat.at(c.block_symbol.uuid));
+                        c.port = &c.block_symbol->symbol.ports.at(c.port.uuid);
+                    }
+                    else {
+                        return false;
+                    }
                 }
                 else if (c.bus_ripper.uuid) {
                     if (bus_ripper_xlat.count(c.bus_ripper.uuid))
@@ -310,7 +365,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
                 sheet->net_lines.emplace(u, line);
                 if (j_line.count("net")) {
                     const auto net_uu = UUID(j_line.at("net").get<std::string>());
-                    auto &block = *doc.c->get_top_block();
+                    auto &block = *doc.c->get_current_block();
                     if (block.nets.count(net_uu))
                         net_line_nets.emplace(u, &block.nets.at(net_uu));
                 }
@@ -331,7 +386,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
     if (j.count("bus_labels") && doc.c) {
         const json &o = j["bus_labels"];
         auto sheet = doc.c->get_sheet();
-        auto block = doc.c->get_top_block();
+        auto block = doc.c->get_current_block();
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             BusLabel la(u, it.value());

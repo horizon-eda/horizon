@@ -47,6 +47,12 @@ private:
     UUIDPath<2> connpath_floating;
     class SymbolPin *pin_start = nullptr;
 
+    class BlockInstance *block_instance_floating = nullptr;
+    UUID net_port_floating;
+    class BlockSymbolPort *port_start = nullptr;
+
+    void cleanup_floating();
+
     SchematicJunction *make_temp_junc(const Coordi &c);
     void apply_settings() override;
     void set_snap_filter();

@@ -6,7 +6,7 @@
 #include "nlohmann/json.hpp"
 #include "part_browser/part_browser_window.hpp"
 #include "widgets/project_meta_editor.hpp"
-#include "block/block.hpp"
+#include "blocks/blocks.hpp"
 #include "pool/pool_cache_status.hpp"
 #include "util/gtk_util.hpp"
 
@@ -146,21 +146,15 @@ PoolProjectManagerViewProject::PoolProjectManagerViewProject(const Glib::RefPtr<
 void PoolProjectManagerViewProject::open_top_schematic()
 {
     auto prj = win.project.get();
-    auto top_block = prj->get_top_block();
-    std::vector<std::string> args = {top_block.schematic_filename, top_block.block_filename, prj->pictures_directory};
+    std::vector<std::string> args = {prj->blocks_filename, prj->pictures_directory};
     win.spawn(PoolProjectManagerProcess::Type::IMP_SCHEMATIC, args);
 }
 
 void PoolProjectManagerViewProject::open_board()
 {
     auto prj = win.project.get();
-    auto top_block =
-            std::find_if(prj->blocks.begin(), prj->blocks.end(), [](const auto &a) { return a.second.is_top; });
-    if (top_block != prj->blocks.end()) {
-        std::vector<std::string> args = {prj->board_filename, top_block->second.block_filename,
-                                         prj->pictures_directory};
-        win.spawn(PoolProjectManagerProcess::Type::IMP_BOARD, args);
-    }
+    std::vector<std::string> args = {prj->board_filename, prj->blocks_filename, prj->pictures_directory};
+    win.spawn(PoolProjectManagerProcess::Type::IMP_BOARD, args);
 }
 
 void PoolProjectManagerViewProject::handle_button_part_browser()
@@ -176,8 +170,7 @@ void PoolProjectManagerViewProject::handle_button_project_pool()
 
 bool PoolProjectManagerViewProject::update_meta()
 {
-    auto top_block_filename = win.project->get_top_block().block_filename;
-    auto meta = Block::peek_project_meta(top_block_filename);
+    auto meta = BlocksBase::peek_project_meta(win.project->blocks_filename);
     std::string title;
     std::string author;
     if (meta.count("project_title"))

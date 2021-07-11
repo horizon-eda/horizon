@@ -38,7 +38,7 @@ public:
         auto delete_button = Gtk::manage(new Gtk::Button());
         delete_button->set_margin_start(4);
         delete_button->set_image_from_icon_name("list-remove-symbolic", Gtk::ICON_SIZE_BUTTON);
-        delete_button->set_sensitive(net.n_pins_connected == 0 && net.is_power_forced == false);
+        delete_button->set_sensitive(block.can_delete_power_net(net.uuid));
         pack_start(*delete_button, false, false, 0);
         delete_button->signal_clicked().connect([this] {
             block.nets.erase(net.uuid);

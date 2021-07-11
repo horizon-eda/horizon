@@ -10,6 +10,7 @@
 #include "preferences/preferences_provider.hpp"
 #include "preferences/preferences.hpp"
 #include "util/stock_info_provider.hpp"
+#include "document/idocument_schematic.hpp"
 
 namespace horizon {
 
@@ -43,9 +44,9 @@ std::string BOMExportWindow::MyAdapter::get_column_name(int col) const
     return bom_column_names.at(static_cast<BOMColumn>(col));
 }
 
-BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Block &blo,
+BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IDocumentSchematic &adoc,
                                  BOMExportSettings &s, IPool &p, const std::string &project_dir)
-    : Gtk::Window(cobject), block(blo), settings(s), pool(p), pool_parametric(pool.get_base_path()),
+    : Gtk::Window(cobject), doc(adoc), settings(s), pool(p), pool_parametric(pool.get_base_path()),
       state_store(this, "imp-bom-export"), adapter(settings.csv_settings.columns)
 {
 
@@ -197,7 +198,7 @@ void BOMExportWindow::flash(const std::string &s)
 void BOMExportWindow::generate()
 {
     try {
-        export_BOM(export_filechooser.get_filename_abs(), block, settings);
+        export_BOM(export_filechooser.get_filename_abs(), *doc.get_top_block(), settings);
         flash("BOM written to " + settings.output_filename);
     }
     catch (const std::exception &e) {
@@ -211,7 +212,7 @@ void BOMExportWindow::generate()
 
 void BOMExportWindow::update_preview()
 {
-    auto rows = block.get_BOM(settings);
+    auto rows = doc.get_top_block()->get_BOM(settings);
     std::vector<BOMRow> bom;
     std::transform(rows.begin(), rows.end(), std::back_inserter(bom), [](const auto &it) { return it.second; });
     std::sort(bom.begin(), bom.end(), [this](const auto &a, const auto &b) {
@@ -317,7 +318,7 @@ void BOMExportWindow::update_orderable_MPNs()
     }
     BOMExportSettings my_settings(settings);
     my_settings.include_nopopulate = true;
-    auto rows = block.get_BOM(my_settings);
+    auto rows = doc.get_top_block()->get_BOM(my_settings);
     for (const auto &row : rows) {
         auto part = row.first;
         if (part->orderable_MPNs.size()) {
@@ -335,19 +336,21 @@ void BOMExportWindow::update()
     meta_parts_tv->unset_model();
     meta_parts_store->clear();
     std::map<const Part *, unsigned int> parts;
-    for (const auto &it : block.components) {
-        if (it.second.part) {
-            parts[it.second.part]++;
+    for (const auto &it : doc.get_top_block()->get_instantiated_blocks_and_top()) {
+        for (const auto &[uu, comp] : it.block.components) {
+            if (comp.part) {
+                parts[comp.part]++;
+            }
         }
     }
-    for (const auto &it : parts) {
-        if (it.first->parametric.count("table")) {
+    for (const auto &[part, qty] : parts) {
+        if (part->parametric.count("table")) {
             Gtk::TreeModel::Row row = *meta_parts_store->append();
-            row[meta_parts_list_columns.MPN] = it.first->get_MPN();
-            row[meta_parts_list_columns.value] = it.first->get_value();
-            row[meta_parts_list_columns.manufacturer] = it.first->get_manufacturer();
-            row[meta_parts_list_columns.uuid] = it.first->uuid;
-            row[meta_parts_list_columns.qty] = it.second;
+            row[meta_parts_list_columns.MPN] = part->get_MPN();
+            row[meta_parts_list_columns.value] = part->get_value();
+            row[meta_parts_list_columns.manufacturer] = part->get_manufacturer();
+            row[meta_parts_list_columns.uuid] = part->uuid;
+            row[meta_parts_list_columns.qty] = qty;
         }
     }
     meta_parts_tv->set_model(meta_parts_store);
@@ -429,13 +432,13 @@ void BOMExportWindow::update_export_button()
     widget_set_insensitive_tooltip(*export_button, txt);
 }
 
-BOMExportWindow *BOMExportWindow::create(Gtk::Window *p, Block &b, BOMExportSettings &s, IPool &pool,
+BOMExportWindow *BOMExportWindow::create(Gtk::Window *p, IDocumentSchematic &d, BOMExportSettings &s, IPool &pool,
                                          const std::string &project_dir)
 {
     BOMExportWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/org/horizon-eda/horizon/imp/bom_export.ui");
-    x->get_widget_derived("window", w, b, s, pool, project_dir);
+    x->get_widget_derived("window", w, d, s, pool, project_dir);
 
     w->set_transient_for(*p);
 

@@ -7,6 +7,7 @@
 #include "project/project.hpp"
 #include "schematic/schematic.hpp"
 #include "board/board.hpp"
+#include "blocks/blocks.hpp"
 
 using namespace horizon;
 
@@ -45,6 +46,9 @@ static unsigned int get_app_version(ObjectType type)
 
     case ObjectType::SCHEMATIC:
         return Schematic::get_app_version();
+
+    case ObjectType::BLOCKS:
+        return BlocksBase::get_app_version();
 
     default:
         throw std::runtime_error("no version for type " + object_type_lut.lookup_reverse(type));

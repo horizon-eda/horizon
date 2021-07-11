@@ -1,27 +1,37 @@
 #pragma once
-#include "block/block.hpp"
+#include "blocks/blocks_schematic.hpp"
 #include "core.hpp"
-#include "schematic/schematic.hpp"
 #include "document/idocument_schematic.hpp"
+#include "document/idocument_block_symbol.hpp"
+#include "schematic/iinstancce_mapping_provider.hpp"
 #include <memory>
 #include <optional>
 
 namespace horizon {
-class CoreSchematic : public Core, public virtual IDocumentSchematic {
+class CoreSchematic : public Core,
+                      public virtual IDocumentSchematic,
+                      public virtual IDocumentBlockSymbol,
+                      public IInstanceMappingProvider {
 public:
-    CoreSchematic(const std::string &schematic_filename, const std::string &block_filename,
-                  const std::string &pictures_dir, IPool &pool, IPool &pool_caching);
+    CoreSchematic(const std::string &blocks_filename, const std::string &pictures_dir, IPool &pool,
+                  IPool &pool_caching);
     bool has_object_type(ObjectType ty) const override;
 
     Schematic *get_current_schematic() override;
+    const Schematic *get_current_schematic() const;
+    Schematic *get_top_schematic() override;
+    const Schematic *get_top_schematic() const;
     Sheet *get_sheet() override;
     const Sheet *get_sheet() const;
+
+    BlockSymbol &get_block_symbol() override;
 
     Junction *get_junction(const UUID &uu) override;
     Junction *insert_junction(const UUID &uu) override;
     void delete_junction(const UUID &uu) override;
 
     class Block *get_top_block() override;
+    class Block *get_current_block() override;
     class LayerProvider &get_layer_provider() override;
 
     bool set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property,
@@ -53,14 +63,34 @@ public:
 
     void set_sheet(const UUID &uu);
     const Sheet &get_canvas_data();
+    const BlockSymbol &get_canvas_data_block_symbol();
     std::pair<Coordi, Coordi> get_bbox() override;
 
-    const std::string &get_filename() const override;
+    void set_block(const UUID &uu);
+    const UUID &get_current_block_uuid() const;
+    const UUID &get_top_block_uuid() const;
 
-    bool get_project_meta_loaded_from_block() const
-    {
-        return project_meta_loaded_from_block;
-    };
+    void set_block_symbol_mode();
+    bool get_block_symbol_mode() const override;
+
+    const BlocksSchematic &get_blocks() const;
+    BlocksSchematic &get_blocks() override;
+    bool current_block_is_top() const override;
+
+    void set_instance_path(const UUIDVec &path);
+    const UUIDVec &get_instance_path() const override;
+    bool in_hierarchy() const override;
+
+    const BlockInstanceMapping *get_block_instance_mapping() const override;
+    BlockInstanceMapping *get_block_instance_mapping();
+
+    unsigned int get_sheet_index(const class UUID &sheet) const override;
+    unsigned int get_sheet_total() const override;
+    unsigned int get_sheet_index_for_path(const class UUID &sheet, const UUIDVec &path) const;
+
+    Schematic &get_schematic_for_instance_path(const UUIDVec &path) override;
+
+    const std::string &get_filename() const override;
 
     ObjectType get_object_type() const override
     {
@@ -69,7 +99,7 @@ public:
 
     const FileVersion &get_version() const override
     {
-        return sch->version;
+        return get_top_schematic()->version;
     }
 
     void reload_pool() override;
@@ -80,9 +110,7 @@ private:
     std::map<UUID, Text> *get_text_map() override;
     std::map<UUID, Picture> *get_picture_map() override;
 
-    std::optional<Block> block;
-    const bool project_meta_loaded_from_block;
-    std::optional<Schematic> sch;
+    std::optional<BlocksSchematic> blocks;
 
     SchematicRules rules;
 
@@ -90,21 +118,23 @@ private:
     PDFExportSettings pdf_export_settings;
 
     UUID sheet_uuid;
-    std::string m_schematic_filename;
-    std::string m_block_filename;
+    UUID block_uuid;
+    UUIDVec instance_path;
+
+    std::string m_blocks_filename;
     std::string m_pictures_dir;
 
     class HistoryItem : public Core::HistoryItem {
     public:
-        HistoryItem(const Block &b, const Schematic &s) : block(b), sch(s)
+        HistoryItem(const BlocksSchematic &bl) : blocks(bl)
         {
         }
-        Block block;
-        Schematic sch;
+        BlocksSchematic blocks;
     };
     void history_push() override;
     void history_load(unsigned int i) override;
     void save(const std::string &suffix) override;
     void delete_autosave() override;
+    void fix_current_block();
 };
 } // namespace horizon

@@ -34,7 +34,8 @@ public:
     void apply_expand();
     void apply_pin_names();
 
-    std::string replace_text(const std::string &t, bool *replaced, const class Schematic &sch) const;
+    std::string replace_text(const std::string &t, bool *replaced, const class Schematic &sch,
+                             const class BlockInstanceMapping *inst_map = nullptr) const;
     std::string get_custom_value() const;
 
     std::string custom_value;

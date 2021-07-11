@@ -4,6 +4,7 @@
 #include "nlohmann/json_fwd.hpp"
 #include "rule.hpp"
 #include "util/uuid.hpp"
+#include "util/uuid_vec.hpp"
 #include <deque>
 #include <set>
 #include <functional>
@@ -23,6 +24,7 @@ public:
 
     RulesCheckErrorLevel level = RulesCheckErrorLevel::NOT_RUN;
     UUID sheet;
+    UUIDVec instance_path;
     Coordi location;
     std::string comment;
     bool has_location = false;

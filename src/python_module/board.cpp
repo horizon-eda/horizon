@@ -9,7 +9,7 @@
 #include "document/document_board.hpp"
 #include "rules/cache.hpp"
 #include <podofo/podofo.h>
-#include "block/block.hpp"
+#include "blocks/blocks.hpp"
 #include "board/board.hpp"
 #include "project/project.hpp"
 #include "pool/project_pool.hpp"
@@ -81,8 +81,15 @@ class BoardWrapper *create_board_wrapper(const horizon::Project &prj)
     return new BoardWrapper(prj);
 }
 
+
+static horizon::Block get_flattend_block(const std::string &blocks_filename, horizon::IPool &pool)
+{
+    auto blocks = horizon::Blocks::new_from_file(blocks_filename, pool);
+    return blocks.get_top_block().block.flatten();
+}
+
 BoardWrapper::BoardWrapper(const horizon::Project &prj)
-    : pool(prj.pool_directory, false), block(horizon::Block::new_from_file(prj.get_top_block().block_filename, pool)),
+    : pool(prj.pool_directory, false), block(get_flattend_block(prj.blocks_filename, pool)),
       board(horizon::Board::new_from_file(prj.board_filename, block, pool))
 {
     board.expand();
@@ -302,7 +309,7 @@ static PyObject *PyBoard_run_checks(PyObject *pself, PyObject *args)
         horizon::BoardRules rules;
         rules.load_from_json(rules_json);
 
-        horizon::RulesCheckCache cache(self->board);
+        horizon::RulesCheckCache cache(*self->board);
         json j;
         for (auto id : ids) {
             auto r = self->board->board.rules.check(id, self->board->board, cache, &dummy_callback);

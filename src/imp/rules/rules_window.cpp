@@ -270,7 +270,8 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
                 if (it) {
                     Gtk::TreeModel::Row row = *it;
                     if (row[tree_columns.has_location]) {
-                        s_signal_goto.emit(row[tree_columns.location], row[tree_columns.sheet]);
+                        s_signal_goto.emit(row[tree_columns.location], row[tree_columns.sheet],
+                                           row[tree_columns.instance_path]);
                     }
                 }
             });
@@ -290,10 +291,12 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
                     row_err[tree_columns.has_location] = it_err.has_location;
                     row_err[tree_columns.location] = it_err.location;
                     row_err[tree_columns.sheet] = it_err.sheet;
+                    row_err[tree_columns.instance_path] = it_err.instance_path;
                     row_err[tree_columns.running] = false;
 
                     if (it_err.has_location) {
-                        dom.emplace_back(it_err.location, rules_check_error_level_to_color(it_err.level), it_err.sheet);
+                        dom.emplace_back(it_err.location, rules_check_error_level_to_color(it_err.level),
+                                         uuid_vec_append(it_err.instance_path, it_err.sheet));
                     }
 
                     for (const auto &path : it_err.error_polygons) {

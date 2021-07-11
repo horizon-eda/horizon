@@ -1,6 +1,7 @@
 #pragma once
 #include "common/common.hpp"
 #include "util/uuid_path.hpp"
+#include "util/uuid_vec.hpp"
 #include <set>
 #include <list>
 
@@ -66,6 +67,7 @@ public:
         UUIDPath<2> path;
         Coordi location;
         UUID sheet;
+        UUIDVec instance_path;
         bool selectable = false;
     };
 

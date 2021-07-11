@@ -18,6 +18,10 @@ int ToolHelperMerge::merge_nets(Net *net, Net *into)
             imp->tool_bar_flash("can't merge bussed nets");
             return 1; // can't merge bussed nets
         }
+        else if (net->is_port || into->is_port) {
+            imp->tool_bar_flash("can't merge port and bussed net");
+            return 1; // don't merge power and bus
+        }
         else if (!net->is_bussed && into->is_bussed) {
             // merging non-bussed net into bussed net is fine
         }
@@ -30,10 +34,26 @@ int ToolHelperMerge::merge_nets(Net *net, Net *into)
             imp->tool_bar_flash("can't merge power nets");
             return 1;
         }
+        else if (net->is_port || into->is_port) {
+            imp->tool_bar_flash("can't merge port and power net");
+            return 1; // don't merge power and bus
+        }
         else if (!net->is_power && into->is_power) {
             // merging non-power net into power net is fine
         }
         else if (net->is_power && !into->is_power) {
+            std::swap(net, into);
+        }
+    }
+    else if (net->is_port || into->is_port) {
+        if (net->is_port && into->is_port) {
+            imp->tool_bar_flash("can't merge port nets");
+            return 1;
+        }
+        else if (!net->is_port && into->is_port) {
+            // merging non-port net into port net is fine
+        }
+        else if (net->is_port && !into->is_port) {
             std::swap(net, into);
         }
     }
@@ -136,36 +156,43 @@ void ToolHelperMerge::merge_and_connect()
                                 if (ju->net) { // have net
                                     sym.component->connections.emplace(path, static_cast<Net *>(ju->net));
                                     sheet.replace_junction(ju, &sym, &sym_pin);
+                                    merged = true;
                                 }
                                 else if (!ju->bus) {
-                                    auto new_net = doc.c->get_top_block()->insert_net();
+                                    auto new_net = doc.c->get_current_block()->insert_net();
                                     sym.component->connections.emplace(path, new_net);
                                     sheet.replace_junction(ju, &sym, &sym_pin);
                                     doc.c->get_current_schematic()->expand(true);
+                                    merged = true;
                                 }
                             }
                         }
                     }
                 }
             }
-            // doesn't work well enough for now...
-            /*for(auto &it_other: doc.c->get_sheet()->net_lines) {
-                    auto line = &it_other.second;
-                    if(!selection.count(SelectableRef(line->uuid,
-            ObjectType::LINE_NET))) {  //not in selection
-                            if(line->coord_on_line(ju->position)) { //need to
-            split line
-                                    std::cout << "maybe split net line"
-            <<std::endl;
-                                    auto do_merge = merge_bus_net(ju->net,
-            ju->bus, line->net, line->bus);
-                                    if(do_merge) {
-                                            doc.c->get_sheet()->split_line_net(line,
-            ju);
-                                    }
+            if (!merged) { // still not merged, maybe we can connect a block symbol port
+                for (auto &[sym_uu, sym] : sheet.block_symbols) {
+                    for (auto &[port_uuz, sym_port] : sym.symbol.ports) {
+                        if (sym.placement.transform(sym_port.position) == ju->position) {
+                            const bool pin_connected = sym.block_instance->connections.count(sym_port.net);
+                            if (!pin_connected) {
+                                if (ju->net) { // have net
+                                    sym.block_instance->connections.emplace(sym_port.net, static_cast<Net *>(ju->net));
+                                    sheet.replace_junction(ju, &sym, &sym_port);
+                                    merged = true;
+                                }
+                                else if (!ju->bus) {
+                                    auto new_net = doc.c->get_current_block()->insert_net();
+                                    sym.block_instance->connections.emplace(sym_port.net, new_net);
+                                    sheet.replace_junction(ju, &sym, &sym_port);
+                                    doc.c->get_current_schematic()->expand(true);
+                                    merged = true;
+                                }
                             }
+                        }
                     }
-            }*/
+                }
+            }
         }
         else if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
             auto &sym = doc.c->get_sheet()->symbols.at(it.uuid);
@@ -173,6 +200,10 @@ void ToolHelperMerge::merge_and_connect()
             if (sym.component->connections.size() == 0) {
                 doc.c->get_current_schematic()->place_bipole_on_line(doc.c->get_sheet(), &sym);
             }
+        }
+        else if (it.type == ObjectType::SCHEMATIC_BLOCK_SYMBOL) {
+            auto &sym = doc.c->get_sheet()->block_symbols.at(it.uuid);
+            doc.c->get_current_schematic()->autoconnect_block_symbol(doc.c->get_sheet(), &sym);
         }
     }
 }

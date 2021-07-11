@@ -5,6 +5,7 @@
 #include "schematic.hpp"
 #include "pool/ipool.hpp"
 #include "util/util.hpp"
+#include "block/block_instance.hpp"
 
 namespace horizon {
 
@@ -123,7 +124,8 @@ std::string SchematicSymbol::get_custom_value() const
     });
 }
 
-std::string SchematicSymbol::replace_text(const std::string &t, bool *replaced, const Schematic &sch) const
+std::string SchematicSymbol::replace_text(const std::string &t, bool *replaced, const Schematic &sch,
+                                          const BlockInstanceMapping *inst_map) const
 {
     if (replaced)
         *replaced = false;
@@ -132,7 +134,18 @@ std::string SchematicSymbol::replace_text(const std::string &t, bool *replaced, 
     if (t == "$REFDES" || t == "$RD") {
         if (replaced)
             *replaced = true;
-        r = component->refdes + gate->suffix;
+        if (inst_map) {
+            if (inst_map->components.count(component->uuid)) {
+                r = inst_map->components.at(component->uuid).refdes;
+            }
+            else {
+                r = component->entity->prefix + "?";
+            }
+        }
+        else {
+            r = component->refdes;
+        }
+        r += gate->suffix;
     }
     else if (is_value && custom_value.size()) {
         if (replaced)

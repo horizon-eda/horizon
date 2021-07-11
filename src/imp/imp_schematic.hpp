@@ -7,8 +7,7 @@ namespace horizon {
 class ImpSchematic : public ImpBase {
 
 public:
-    ImpSchematic(const std::string &schematic_filename, const std::string &block_filename,
-                 const std::string &pictures_dir, const PoolParams &params);
+    ImpSchematic(const std::string &blocks_filename, const std::string &pictures_dir, const PoolParams &params);
 
 protected:
     void construct() override;
@@ -16,6 +15,7 @@ protected:
     void handle_maybe_drag(bool ctrl) override;
     void update_action_sensitivity() override;
     void update_highlights() override;
+    void clear_highlights() override;
 
     ActionCatalogItem::Availability get_editor_type_for_action() const override
     {
@@ -37,6 +37,7 @@ protected:
 
     void update_monitor() override;
 
+    std::map<ObjectType, ImpBase::SelectionFilterInfo> get_selection_filter_info() const override;
 
 private:
     void canvas_update() override;
@@ -46,17 +47,21 @@ private:
 
     int handle_ask_net_merge(class Net *net, class Net *into);
     int handle_ask_delete_component(class Component *comp);
-    void handle_select_sheet(Sheet *sh);
-    void handle_remove_sheet(Sheet *sh);
+    void handle_select_sheet(const UUID &sheet, const UUID &block, const UUIDVec &instance_path);
     void handle_core_rebuilt();
     void handle_tool_change(ToolID id) override;
     void handle_move_to_other_sheet(const ActionConnection &conn);
     void handle_highlight_group_tag(const ActionConnection &conn);
     void handle_next_prev_sheet(const ActionConnection &conn);
 
-    std::map<UUID, std::pair<float, Coordf>> sheet_views;
-    std::map<UUID, std::set<SelectableRef>> sheet_selections;
+    struct ViewInfo {
+        float scale;
+        Coordf offset;
+        std::set<SelectableRef> selection;
+    };
+    std::map<std::pair<UUID, UUID>, ViewInfo> view_infos;
     class SheetBox *sheet_box;
+    UUID current_sheet;
     void handle_selection_cross_probe() override;
     bool cross_probing_enabled = false;
 
@@ -77,5 +82,21 @@ private:
     int get_board_pid();
 
     UUID net_from_selectable(const SelectableRef &sr);
+
+    std::vector<class ActionButton *> action_buttons_schematic;
+    ActionButton &add_action_button_schematic(ActionToolID id);
+
+    struct HighlightItem {
+        ObjectType type;
+        UUID uuid;
+        UUIDVec instance_path;
+    };
+
+    std::vector<HighlightItem> highlights_hierarchical;
+
+    void update_instance_path_bar();
+    UUIDVec instance_path_for_bar;
+
+    const Block &get_block_for_group_tag_names() override;
 };
 } // namespace horizon

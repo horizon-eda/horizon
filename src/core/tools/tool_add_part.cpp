@@ -24,7 +24,7 @@ bool ToolAddPart::can_begin()
 UUID ToolAddPart::create_tag()
 {
     auto uu = UUID::random();
-    auto block = doc.c->get_top_block();
+    auto block = doc.c->get_current_block();
     block->tag_names[uu] = std::to_string(block->tag_names.size());
     return uu;
 }
@@ -130,7 +130,7 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
                 auto old_symbol = sym_current;
                 sym_current = map_symbol(comp, gates.front());
                 if (!sym_current) {
-                    doc.c->get_top_block()->components.erase(comp->uuid);
+                    doc.c->get_current_block()->components.erase(comp->uuid);
                     return ToolResponse::commit();
                 }
                 sym_current->placement = old_symbol->placement;
@@ -160,7 +160,7 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
         case InToolActionID::RMB:
         case InToolActionID::CANCEL:
             if (current_gate == 0) { // also delete the component
-                doc.c->get_top_block()->components.erase(comp->uuid);
+                doc.c->get_current_block()->components.erase(comp->uuid);
             }
             doc.c->get_sheet()->symbols.erase(sym_current->uuid);
             sym_current = nullptr;

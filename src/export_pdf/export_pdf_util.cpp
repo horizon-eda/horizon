@@ -4,9 +4,11 @@
 
 namespace horizon {
 
-void render_picture(PoDoFo::PdfDocument &doc, PoDoFo::PdfPainterMM &painter, const Picture &pic)
+void render_picture(PoDoFo::PdfDocument &doc, PoDoFo::PdfPainterMM &painter, const Picture &pic, const Placement &tr)
 {
     PoDoFo::PdfImage img(&doc);
+    Placement pl = tr;
+    pl.accumulate(pic.placement);
 
     {
         std::vector<char> picdata;
@@ -38,10 +40,10 @@ void render_picture(PoDoFo::PdfDocument &doc, PoDoFo::PdfPainterMM &painter, con
     img.SetImageSoftmask(&img_mask);
 
     painter.Save();
-    const auto fangle = pic.placement.get_angle_rad();
-    painter.SetTransformationMatrix(cos(fangle), sin(fangle), -sin(fangle), cos(fangle),
-                                    to_pt((double)pic.placement.shift.x), to_pt((double)pic.placement.shift.y));
+    const auto fangle = pl.get_angle_rad();
 
+    painter.SetTransformationMatrix(cos(fangle), sin(fangle), -sin(fangle), cos(fangle), to_pt((double)pl.shift.x),
+                                    to_pt((double)pl.shift.y));
     const int64_t w = pic.data->width * pic.px_size;
     const int64_t h = pic.data->height * pic.px_size;
     const auto p = Coordd(w, h) / -2;

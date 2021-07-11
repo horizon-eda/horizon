@@ -9,9 +9,22 @@
 
 namespace horizon {
 
-Block::Block(const UUID &uu, const json &j, IPool &pool) : uuid(uu), name(j.at("name").get<std::string>())
+const size_t Block::max_instance_path_len = 10;
+
+bool Block::instance_path_too_long(const UUIDVec &path, const char *funcname)
 {
-    Logger::log_info("loading block " + (std::string)uuid, Logger::Domain::BLOCK);
+    if (path.size() > max_instance_path_len) {
+        Logger::log_critical("instance path exceeeds max. length of " + std::to_string(max_instance_path_len),
+                             Logger::Domain::BLOCK, funcname);
+        return true;
+    }
+    return false;
+}
+
+Block::Block(const UUID &uu, const json &j, IPool &pool, class IBlockProvider &prv)
+    : uuid(uu), name(j.at("name").get<std::string>())
+{
+    Logger::log_info("loading block " + name, Logger::Domain::BLOCK, (std::string)uuid);
     if (j.count("net_classes")) {
         const json &o = j["net_classes"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -52,6 +65,22 @@ Block::Block(const UUID &uu, const json &j, IPool &pool) : uuid(uu), name(j.at("
             auto u = UUID(it.key());
             load_and_log(components, ObjectType::COMPONENT, std::forward_as_tuple(u, it.value(), pool, this),
                          Logger::Domain::BLOCK);
+        }
+    }
+    if (j.count("block_instances")) {
+        const json &o = j["block_instances"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            load_and_log(block_instances, ObjectType::BLOCK_INSTANCE, std::forward_as_tuple(u, it.value(), prv, this),
+                         Logger::Domain::BLOCK);
+        }
+    }
+    if (j.count("block_instance_mappings")) {
+        const json &o = j["block_instance_mappings"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = uuid_vec_from_string(it.key());
+            block_instance_mappings.emplace(std::piecewise_construct, std::forward_as_tuple(u),
+                                            std::forward_as_tuple(it.value()));
         }
     }
     if (j.count("group_names")) {
@@ -115,10 +144,10 @@ Block::Block(const UUID &uu) : uuid(uu)
     net_class_default = &net_classes.begin()->second;
 }
 
-Block Block::new_from_file(const std::string &filename, IPool &obj)
+Block Block::new_from_file(const std::string &filename, IPool &obj, class IBlockProvider &prv)
 {
     auto j = load_json_from_file(filename);
-    return Block(UUID(j.at("uuid").get<std::string>()), j, obj);
+    return Block(UUID(j.at("uuid").get<std::string>()), j, obj, prv);
 }
 
 Net *Block::get_net(const UUID &uu)
@@ -147,6 +176,13 @@ void Block::merge_nets(Net *net, Net *into)
             }
         }
     }
+    for (auto &it_inst : block_instances) {
+        for (auto &it_conn : it_inst.second.connections) {
+            if (it_conn.second.net == net) {
+                it_conn.second.net = into;
+            }
+        }
+    }
     nets.erase(net->uuid);
 }
 
@@ -154,6 +190,11 @@ void Block::update_refs()
 {
     for (auto &it_comp : components) {
         for (auto &it_conn : it_comp.second.connections) {
+            it_conn.second.net.update(nets);
+        }
+    }
+    for (auto &it_inst : block_instances) {
+        for (auto &it_conn : it_inst.second.connections) {
             it_conn.second.net.update(nets);
         }
     }
@@ -171,7 +212,7 @@ void Block::vacuum_nets()
 {
     std::set<UUID> nets_erase;
     for (const auto &it : nets) {
-        if (!it.second.is_power) { // don't vacuum power nets
+        if (!it.second.is_power && !it.second.is_port) { // don't vacuum power nets and ports
             nets_erase.emplace(it.first);
         }
     }
@@ -182,6 +223,11 @@ void Block::vacuum_nets()
     }
     for (const auto &it_comp : components) {
         for (const auto &it_conn : it_comp.second.connections) {
+            nets_erase.erase(it_conn.second.net.uuid);
+        }
+    }
+    for (const auto &it_inst : block_instances) {
+        for (const auto &it_conn : it_inst.second.connections) {
             nets_erase.erase(it_conn.second.net.uuid);
         }
     }
@@ -218,12 +264,20 @@ void Block::update_connection_count()
                 it_conn.second.net->n_pins_connected++;
         }
     }
+    for (const auto &it_inst : block_instances) {
+        for (const auto &it_conn : it_inst.second.connections) {
+            if (it_conn.second.net)
+                it_conn.second.net->n_pins_connected++;
+        }
+    }
 }
 
 Block::Block(const Block &block)
     : uuid(block.uuid), name(block.name), nets(block.nets), buses(block.buses), components(block.components),
-      net_classes(block.net_classes), net_class_default(block.net_class_default), group_names(block.group_names),
-      tag_names(block.tag_names), project_meta(block.project_meta), bom_export_settings(block.bom_export_settings)
+      block_instances(block.block_instances), net_classes(block.net_classes),
+      net_class_default(block.net_class_default), block_instance_mappings(block.block_instance_mappings),
+      group_names(block.group_names), tag_names(block.tag_names), project_meta(block.project_meta),
+      bom_export_settings(block.bom_export_settings)
 {
     update_refs();
 }
@@ -235,8 +289,10 @@ void Block::operator=(const Block &block)
     nets = block.nets;
     buses = block.buses;
     components = block.components;
+    block_instances = block.block_instances;
     net_classes = block.net_classes;
     net_class_default = block.net_class_default;
+    block_instance_mappings = block.block_instance_mappings;
     group_names = block.group_names;
     tag_names = block.tag_names;
     project_meta = block.project_meta;
@@ -244,7 +300,7 @@ void Block::operator=(const Block &block)
     update_refs();
 }
 
-json Block::serialize()
+json Block::serialize() const
 {
     json j;
     j["name"] = name;
@@ -257,6 +313,14 @@ json Block::serialize()
     j["components"] = json::object();
     for (const auto &it : components) {
         j["components"][(std::string)it.first] = it.second.serialize();
+    }
+    j["block_instances"] = json::object();
+    for (const auto &it : block_instances) {
+        j["block_instances"][(std::string)it.first] = it.second.serialize();
+    }
+    j["block_instance_mappings"] = json::object();
+    for (const auto &it : block_instance_mappings) {
+        j["block_instance_mappings"][uuid_vec_to_string(it.first)] = it.second.serialize();
     }
     j["buses"] = json::object();
     for (const auto &it : buses) {
@@ -280,15 +344,15 @@ json Block::serialize()
     return j;
 }
 
-Net *Block::extract_pins(const std::set<UUIDPath<3>> &pins, Net *net)
+Net *Block::extract_pins(const NetPinsAndPorts &pins, Net *net)
 {
-    if (pins.size() == 0) {
+    if (pins.pins.size() == 0 && pins.ports.size() == 0) {
         return nullptr;
     }
     if (net == nullptr) {
         net = insert_net();
     }
-    for (const auto &it : pins) {
+    for (const auto &it : pins.pins) {
         Component &comp = components.at(it.at(0));
         UUIDPath<2> conn_path(it.at(1), it.at(2));
         if (comp.connections.count(conn_path)) {
@@ -296,28 +360,82 @@ Net *Block::extract_pins(const std::set<UUIDPath<3>> &pins, Net *net)
             comp.connections.at(conn_path).net = net;
         }
     }
+    for (const auto &it : pins.ports) {
+        auto &inst = block_instances.at(it.at(0));
+        const auto net_port = it.at(1);
+        if (inst.connections.count(net_port)) {
+            // the connection may have been deleted
+            inst.connections.at(net_port).net = net;
+        }
+    }
 
     return net;
 }
 
-std::map<const Part *, BOMRow> Block::get_BOM(const BOMExportSettings &settings) const
+BlockInstanceMapping::ComponentInfo Block::get_component_info(const Component &comp, const UUIDVec &instance_path) const
 {
-    std::map<const Part *, BOMRow> rows;
-    for (const auto &it : components) {
-        if (it.second.nopopulate && !settings.include_nopopulate) {
-            continue;
-        }
-        if (it.second.part) {
-            const Part *part;
-            if (settings.concrete_parts.count(it.second.part->uuid))
-                part = settings.concrete_parts.at(it.second.part->uuid);
-            else
-                part = it.second.part;
-            if (part->get_flag(Part::Flag::EXCLUDE_BOM))
+    if (instance_path.size()) {
+        auto &comps = block_instance_mappings.at(instance_path).components;
+        if (comps.count(comp.uuid))
+            return comps.at(comp.uuid);
+    }
+
+    BlockInstanceMapping::ComponentInfo info;
+    info.refdes = comp.refdes;
+    info.nopopulate = comp.nopopulate;
+    return info;
+}
+
+std::string Block::get_refdes(const Component &comp, const UUIDVec &instance_path) const
+{
+    return get_component_info(comp, instance_path).refdes;
+}
+
+
+void Block::set_refdes(Component &comp, const UUIDVec &instance_path, const std::string &rd)
+{
+    if (instance_path.size()) {
+        block_instance_mappings.at(instance_path).components[comp.uuid].refdes = rd;
+    }
+    else {
+        comp.refdes = rd;
+    }
+}
+
+void Block::set_nopopulate(Component &comp, const UUIDVec &instance_path, bool np)
+{
+    if (instance_path.size()) {
+        block_instance_mappings.at(instance_path).components[comp.uuid].nopopulate = np;
+    }
+    else {
+        comp.nopopulate = np;
+    }
+}
+
+using BOMRows = std::map<const Part *, BOMRow>;
+
+BOMRows Block::get_BOM(const BOMExportSettings &settings) const
+{
+    BOMRows rows;
+    for (const auto &[block, instance_path] : get_instantiated_blocks_and_top()) {
+        for (const auto &[uu, comp] : block.components) {
+            const auto comp_info = get_component_info(comp, instance_path);
+            if (comp_info.nopopulate && !settings.include_nopopulate) {
                 continue;
-            rows[part].refdes.push_back(it.second.refdes);
+            }
+            if (comp.part) {
+                const Part *part;
+                if (settings.concrete_parts.count(comp.part->uuid))
+                    part = settings.concrete_parts.at(comp.part->uuid);
+                else
+                    part = comp.part;
+                if (part->get_flag(Part::Flag::EXCLUDE_BOM))
+                    continue;
+                rows[part].refdes.push_back(comp_info.refdes);
+            }
         }
     }
+
     for (auto &it : rows) {
         if (settings.orderable_MPNs.count(it.first->uuid)
             && it.first->orderable_MPNs.count(settings.orderable_MPNs.at(it.first->uuid)))
@@ -369,6 +487,19 @@ std::map<std::string, std::string> Block::peek_project_meta(const std::string &f
     }
     return {};
 }
+
+std::set<UUID> Block::peek_instantiated_blocks(const std::string &filename)
+{
+    std::set<UUID> blocks;
+    auto j = load_json_from_file(filename);
+    if (j.count("block_instances")) {
+        for (const auto &[key, value] : j.at("block_instances").items()) {
+            blocks.emplace(value.at("block").get<std::string>());
+        }
+    }
+    return blocks;
+}
+
 
 std::string Block::get_net_name(const UUID &uu) const
 {
@@ -452,5 +583,352 @@ ItemSet Block::get_pool_items_used() const
     }
     return items_needed;
 }
+
+UUID Block::get_uuid() const
+{
+    return uuid;
+}
+
+bool Block::can_delete_power_net(const UUID &uu) const
+{
+    const auto all_blocks = get_all_blocks_and_top();
+    const bool can_delete = std::all_of(all_blocks.begin(), all_blocks.end(), [uu](auto b) {
+        if (b->nets.count(uu)) {
+            auto &bn = b->nets.at(uu);
+            return bn.n_pins_connected == 0 && !bn.is_power_forced;
+        }
+        else {
+            return true;
+        }
+    });
+    return can_delete;
+}
+
+
+void Block::update_non_top(Block &other) const
+{
+    other.project_meta = project_meta;
+
+    {
+        for (const auto &[uu, nc] : net_classes) {
+            auto &nc_other = other.net_classes.emplace(uu, uu).first->second;
+            nc_other.name = nc.name;
+        }
+        std::vector<UUID> nc_delete;
+        for (const auto &[uu, nc] : other.net_classes) {
+            if (!net_classes.count(uu)) {
+                nc_delete.push_back(uu);
+            }
+        }
+        for (const auto &uu : nc_delete) {
+            if (std::any_of(other.nets.begin(), other.nets.end(),
+                            [&uu](auto &x) { return x.second.net_class->uuid == uu; })) {
+                // net class still in use
+                Logger::log_warning("Net class " + other.net_classes.at(uu).name + " still in use in block "
+                                            + other.name,
+                                    Logger::Domain::BLOCK);
+            }
+            else {
+                other.net_classes.erase(uu);
+            }
+        }
+    }
+
+    {
+        for (const auto &[uu, net] : nets) {
+            if (net.is_power) {
+                auto &net_other = other.nets.emplace(uu, uu).first->second;
+                net_other.is_power = true;
+                net_other.power_symbol_style = net.power_symbol_style;
+                net_other.power_symbol_name_visible = net.power_symbol_name_visible;
+                net_other.name = net.name;
+                net_other.net_class = &other.net_classes.at(net.net_class->uuid);
+            }
+        }
+        std::vector<UUID> nets_delete;
+        for (const auto &[uu, net] : other.nets) {
+            if (net.is_power) {
+                if (!nets.count(uu)) {
+                    nets_delete.push_back(uu);
+                }
+            }
+        }
+        for (const auto &uu : nets_delete) {
+            if (other.can_delete_power_net(uu)) {
+                other.nets.erase(uu);
+            }
+            else {
+                // net still in use
+                Logger::log_warning("Power net " + other.nets.at(uu).name + " still in use in block " + other.name,
+                                    Logger::Domain::BLOCK);
+            }
+        }
+    }
+}
+
+
+template <bool c> using WalkCB = std::function<void(make_const_ref_t<c, Block>, const UUIDVec &)>;
+
+template <bool c> struct WalkContext {
+    WalkCB<c> cb;
+    const Block &top;
+    const bool inc_top;
+};
+
+template <bool c>
+static void walk_blocks_rec(make_const_ref_t<c, Block> block, const UUIDVec &instance_path, WalkContext<c> &ctx)
+{
+    if (Block::instance_path_too_long(instance_path, __FUNCTION__))
+        return;
+    if (ctx.inc_top || instance_path.size())
+        ctx.cb(block, instance_path);
+    for (auto &[uu, inst] : block.block_instances) {
+        walk_blocks_rec(*inst.block, uuid_vec_append(instance_path, uu), ctx);
+    }
+}
+
+template <bool c> static void walk_blocks(make_const_ref_t<c, Block> top, WalkCB<c> cb, bool inc_top)
+{
+    WalkContext<c> ctx{cb, top, inc_top};
+    walk_blocks_rec<c>(top, {}, ctx);
+}
+
+std::vector<Block::BlockItem<true>> Block::get_instantiated_blocks(bool inc_top) const
+{
+    std::vector<Block::BlockItem<true>> items;
+    walk_blocks<true>(
+            *this,
+            [&items](const Block &block, const UUIDVec &instance_path) { items.emplace_back(block, instance_path); },
+            inc_top);
+    return items;
+}
+
+std::vector<Block::BlockItem<false>> Block::get_instantiated_blocks(bool inc_top)
+{
+    std::vector<Block::BlockItem<false>> items;
+    walk_blocks<false>(
+            *this, [&items](Block &block, const UUIDVec &instance_path) { items.emplace_back(block, instance_path); },
+            inc_top);
+    return items;
+}
+
+std::vector<Block::BlockItem<true>> Block::get_instantiated_blocks() const
+{
+    return get_instantiated_blocks(false);
+}
+
+
+std::vector<Block::BlockItem<false>> Block::get_instantiated_blocks()
+{
+    return get_instantiated_blocks(false);
+}
+
+
+std::vector<Block::BlockItem<true>> Block::get_instantiated_blocks_and_top() const
+{
+    return get_instantiated_blocks(true);
+}
+
+
+std::vector<Block::BlockItem<false>> Block::get_instantiated_blocks_and_top()
+{
+    return get_instantiated_blocks(true);
+}
+
+std::set<Block *> Block::get_all_blocks()
+{
+    std::set<Block *> blocks;
+    for (auto &it : get_instantiated_blocks()) {
+        blocks.insert(&it.block);
+    }
+    return blocks;
+}
+
+std::set<Block *> Block::get_all_blocks_and_top()
+{
+    std::set<Block *> blocks;
+    for (auto &it : get_instantiated_blocks_and_top()) {
+        blocks.insert(&it.block);
+    }
+    return blocks;
+}
+
+std::set<const Block *> Block::get_all_blocks() const
+{
+    std::set<const Block *> blocks;
+    for (auto &it : get_instantiated_blocks()) {
+        blocks.insert(&it.block);
+    }
+    return blocks;
+}
+
+std::set<const Block *> Block::get_all_blocks_and_top() const
+{
+    std::set<const Block *> blocks;
+    for (auto &it : get_instantiated_blocks_and_top()) {
+        blocks.insert(&it.block);
+    }
+    return blocks;
+}
+
+void Block::create_instance_mappings()
+{
+    for (const auto &[block, instance_path] : get_instantiated_blocks()) {
+        block_instance_mappings.emplace(instance_path, block);
+    };
+}
+
+static std::set<UUID> get_blocks_along_instance_path(const Block &top, const UUIDVec &instance_path)
+{
+    std::set<UUID> blocks;
+    blocks.insert(top.uuid);
+    const Block *block = &top;
+    for (const auto &uu : instance_path) {
+        block = block->block_instances.at(uu).block;
+        blocks.insert(block->uuid);
+    }
+    return blocks;
+}
+
+static std::set<UUID> get_parent_blocks(const Block &top, const UUID &current)
+{
+    std::set<UUID> blocks;
+    for (const auto &it : top.get_instantiated_blocks_and_top()) {
+        if (it.block.uuid == current) {
+            const auto x = get_blocks_along_instance_path(top, it.instance_path);
+            blocks.insert(x.begin(), x.end());
+        }
+    }
+    return blocks;
+}
+
+bool Block::can_add_block_instance(const UUID &where, const UUID &block_inst) const
+{
+    if (where == block_inst)
+        return false;
+    const auto blocks = get_parent_blocks(*this, where);
+    return blocks.count(block_inst) == 0;
+}
+
+struct FlattenContext {
+    Block &flat;
+    const Block &top;
+    std::map<UUIDVec, UUID> net_map;
+    std::set<UUIDVec> nc_nets;
+};
+
+
+static void update_net_map_for_instance(const BlockInstance &inst, const UUIDVec &instance_path, FlattenContext &ctx)
+{
+    for (const auto &[port, conn] : inst.connections) {
+        const auto inst_net = uuid_vec_append(uuid_vec_append(instance_path, inst.uuid), port);
+        if (conn.net) {
+            const auto flat_uu = ctx.net_map.at(uuid_vec_append(instance_path, conn.net->uuid));
+            auto x = ctx.net_map.emplace(inst_net, flat_uu);
+            assert(x.second);
+            assert(ctx.flat.nets.count(flat_uu));
+        }
+        else {
+            ctx.nc_nets.insert(inst_net);
+        }
+    }
+}
+
+static std::string instance_path_to_string(const UUIDVec &instance_path, const Block &top)
+{
+    std::string r;
+    const Block *block = &top;
+    for (const auto &uu : instance_path) {
+        if (r.size())
+            r += "/";
+        const auto &inst = block->block_instances.at(uu);
+        r += inst.refdes;
+        block = inst.block;
+    }
+    return r;
+}
+
+static void visit_block_for_flatten(const Block &block, const UUIDVec &instance_path, FlattenContext &ctx)
+{
+    if (Block::instance_path_too_long(instance_path, __FUNCTION__))
+        return;
+    for (const auto &[uu, net] : block.nets) {
+        const auto v = uuid_vec_append(instance_path, uu);
+        if (net.is_power) {
+            ctx.net_map.emplace(v, uu);
+        }
+        else {
+            const auto flat_uu = uuid_vec_flatten(v);
+            if (ctx.net_map.emplace(v, flat_uu).second) {
+                auto &flat_net = ctx.flat.nets.emplace(flat_uu, flat_uu).first->second;
+                flat_net.net_class = ctx.flat.net_class_default;
+                flat_net.name = instance_path_to_string(instance_path, ctx.top) + "/" + block.get_net_name(uu);
+                if (ctx.flat.net_classes.count(net.net_class->uuid)) {
+                    flat_net.net_class = &ctx.flat.net_classes.at(net.net_class->uuid);
+                }
+                else {
+                    Logger::log_warning("net class not found in flattend netlist", Logger::Domain::BLOCK);
+                }
+            }
+        }
+    }
+    for (const auto &[uu, comp] : block.components) {
+        const auto href = uuid_vec_append(instance_path, uu);
+        const auto flat_uu = uuid_vec_flatten(href);
+        auto &flat_comp = ctx.flat.components.emplace(flat_uu, flat_uu).first->second;
+        flat_comp.entity = comp.entity;
+        flat_comp.part = comp.part;
+        const auto comp_info = ctx.top.get_component_info(comp, instance_path);
+        flat_comp.refdes = comp_info.refdes;
+        flat_comp.value = comp.value;
+        flat_comp.group = uuid_vec_flatten(uuid_vec_append(instance_path, comp.group));
+        flat_comp.tag = comp.tag;
+        flat_comp.nopopulate = comp_info.nopopulate;
+        flat_comp.href = href;
+        for (const auto &[k, conn] : comp.connections) {
+            Net *net = nullptr;
+            if (conn.net)
+                net = &ctx.flat.nets.at(ctx.net_map.at(uuid_vec_append(instance_path, conn.net->uuid)));
+            flat_comp.connections.emplace(k, net);
+        }
+    }
+    for (const auto &[uu, name] : block.group_names) {
+        ctx.flat.group_names.emplace(uuid_vec_flatten(uuid_vec_append(instance_path, uu)),
+                                     instance_path_to_string(instance_path, ctx.top) + "/" + name);
+    }
+    for (const auto &[uu, name] : block.tag_names) {
+        ctx.flat.tag_names.emplace(uu, instance_path_to_string(instance_path, ctx.top) + "/" + name);
+    }
+    for (const auto &[uu, inst] : block.block_instances) {
+        update_net_map_for_instance(inst, instance_path, ctx);
+        visit_block_for_flatten(*inst.block, uuid_vec_append(instance_path, uu), ctx);
+    }
+}
+
+Block Block::flatten() const
+{
+    Block flat = *this;
+    flat.block_instances.clear();
+    flat.block_instance_mappings.clear();
+    for (auto &[uu, comp] : flat.components) {
+        comp.href = {uu};
+    }
+    FlattenContext ctx{flat, *this};
+    for (const auto &[uu, net] : nets) {
+        ctx.net_map.emplace(UUIDVec{uu}, uu);
+    }
+    for (const auto &[uu, inst] : block_instances) {
+        update_net_map_for_instance(inst, {}, ctx);
+        visit_block_for_flatten(*inst.block, {inst.uuid}, ctx);
+    }
+    for (const auto &[path, uu] : ctx.net_map) {
+        flat.nets.at(uu).hrefs.push_back(path);
+    }
+    for (const auto &net : ctx.nc_nets) {
+        flat.nets.at(ctx.net_map.at(net)).is_nc = true;
+    }
+    return flat;
+}
+
 
 } // namespace horizon

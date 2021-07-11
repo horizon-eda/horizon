@@ -50,6 +50,14 @@ public:
     Glib::RefPtr<Gtk::SizeGroup> key_hint_size_group;
     void key_hint_set_visible(bool v);
 
+    Gtk::Revealer *instance_path_revealer = nullptr;
+    Gtk::Button *parent_block_button = nullptr;
+    Gtk::Box *instance_path_box = nullptr;
+    Gtk::Button *block_symbol_button = nullptr;
+    Gtk::Button *ports_button = nullptr;
+    Gtk::Stack *hierarchy_stack = nullptr;
+    Gtk::Label *out_of_hierarchy_label = nullptr;
+
     Glib::SignalProxy<bool, const Glib::ustring &> signal_activate_hud_link()
     {
         return hud_label->signal_activate_link();

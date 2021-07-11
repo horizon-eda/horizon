@@ -27,33 +27,37 @@ const CanvasPatch &RulesCheckCacheBoardImage::get_canvas() const
 RulesCheckCacheNetPins::RulesCheckCacheNetPins(IDocument &c)
 {
     auto &core = dynamic_cast<IDocumentSchematic &>(c);
-    auto &block = *core.get_top_block();
-    for (auto &it : block.nets) {
-        net_pins[&it.second];
+    const auto block = core.get_top_block()->flatten();
+    for (auto &[uu, net] : block.nets) {
+        net_pins[uu].name = net.name;
+        net_pins[uu].is_nc = net.is_nc;
     }
-    for (auto &it : block.components) {
-        for (auto &it_conn : it.second.connections) {
-            if (it_conn.second.net) {
-                const auto &connpath = it_conn.first;
-                auto gate = &it.second.entity->gates.at(connpath.at(0));
+    for (auto &[comp_uu, comp] : block.components) {
+        for (auto &[connpath, conn] : comp.connections) {
+            if (conn.net) {
+                auto gate = &comp.entity->gates.at(connpath.at(0));
                 auto pin = &gate->unit->pins.at(connpath.at(1));
                 UUID sheet_uuid;
+                UUIDVec instance_path;
                 Coordi location;
-                for (const auto &it_sheet : core.get_current_schematic()->sheets) {
+                for (const auto &it : core.get_top_schematic()->get_all_sheets()) {
                     bool found = false;
-                    for (const auto &it_sym : it_sheet.second.symbols) {
-                        if (it_sym.second.component == &it.second && it_sym.second.gate == gate) {
+                    for (const auto &[uu_sym, sym] : it.sheet.symbols) {
+                        const auto sym_comp_uu =
+                                uuid_vec_flatten(uuid_vec_append(it.instance_path, sym.component->uuid));
+                        if (sym_comp_uu == comp_uu && sym.gate == gate) {
                             found = true;
-                            sheet_uuid = it_sheet.first;
-                            location = it_sym.second.placement.transform(
-                                    it_sym.second.pool_symbol->pins.at(pin->uuid).position);
+                            sheet_uuid = it.sheet.uuid;
+                            instance_path = it.instance_path;
+                            location = sym.placement.transform(sym.pool_symbol->pins.at(pin->uuid).position);
                             break;
                         }
                     }
                     if (found)
                         break;
                 }
-                net_pins.at(it_conn.second.net.ptr).push_back({it.second, *gate, *pin, sheet_uuid, location});
+                net_pins.at(conn.net->uuid)
+                        .pins.push_back({comp.href.back(), *gate, *pin, sheet_uuid, instance_path, location});
             }
         }
     }
