@@ -20,6 +20,7 @@ RuleExportBox::RuleExportBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     Gtk::Box *file_name_box;
     GET_WIDGET(file_name_box);
     location_entry = Gtk::manage(new LocationEntry(""));
+    location_entry->set_append_json(true);
     file_name_box->pack_start(*location_entry, true, true, 0);
     location_entry->show();
 

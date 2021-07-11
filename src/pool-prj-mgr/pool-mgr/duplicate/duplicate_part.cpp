@@ -113,6 +113,7 @@ DuplicatePartWidget::DuplicatePartWidget(Pool &p, const UUID &part_uuid, Gtk::Bo
     grid_attach_label_and_widget(grid, "Manufacturer", manufacturer_entry, top);
 
     location_entry = Gtk::manage(new LocationEntry(pool.get_base_path()));
+    location_entry->set_append_json(true);
     location_entry->set_rel_filename(
             DuplicateUnitWidget::insert_filename(pool.get_rel_filename(ObjectType::PART, part.uuid), "-copy"));
     grid_attach_label_and_widget(grid, "Filename", location_entry, top);

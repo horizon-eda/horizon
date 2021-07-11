@@ -21,6 +21,7 @@ LocationEntry *PartWizard::pack_location_entry(const Glib::RefPtr<Gtk::Builder> 
                                                Gtk::Button **button_other)
 {
     auto en = Gtk::manage(new LocationEntry(pool_base_path));
+    en->set_append_json(true);
     if (button_other) {
         *button_other = Gtk::manage(new Gtk::Button());
         en->pack_start(**button_other, false, false);

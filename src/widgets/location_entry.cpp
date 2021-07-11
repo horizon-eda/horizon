@@ -77,9 +77,12 @@ void LocationEntry::handle_button()
     if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         auto filename = chooser->get_filename();
         if (relative_to.size()) {
-            auto rel = get_rel_filename(filename);
+            const auto rel = get_rel_filename(filename);
             if (rel.size()) {
-                entry->set_text(rel);
+                if (autoappend_json)
+                    entry->set_text(append_dot_json(rel));
+                else
+                    entry->set_text(rel);
             }
             else {
                 Gtk::MessageDialog md(*dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW)),
@@ -112,6 +115,12 @@ bool LocationEntry::check_ends_json(bool *v)
             *v = true;
     }
     return r;
+}
+
+void LocationEntry::set_append_json(bool s)
+{
+    autoappend_json = s;
+    check_ends_json();
 }
 
 } // namespace horizon

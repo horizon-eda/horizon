@@ -56,6 +56,8 @@ public:
         }
 
         entry = Gtk::manage(new LocationEntry);
+        if (type != ObjectType::MODEL_3D)
+            entry->set_append_json(true);
         entry->show();
         entry->set_rel_filename(filename);
         parent.sg_dest->add_widget(*entry);

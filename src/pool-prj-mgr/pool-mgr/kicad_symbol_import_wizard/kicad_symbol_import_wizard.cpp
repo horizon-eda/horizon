@@ -522,6 +522,7 @@ LocationEntry *KiCadSymbolImportWizard::pack_location_entry(const Glib::RefPtr<G
                                                             Gtk::Button **button_other)
 {
     auto en = Gtk::manage(new LocationEntry(pool.get_base_path()));
+    en->set_append_json(true);
     if (button_other) {
         *button_other = Gtk::manage(new Gtk::Button());
         en->pack_start(**button_other, false, false);

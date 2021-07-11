@@ -66,6 +66,7 @@ DuplicateEntityWidget::DuplicateEntityWidget(Pool &p, const UUID &entity_uuid, G
     grid_attach_label_and_widget(grid, "Name", name_entry, top);
 
     location_entry = Gtk::manage(new LocationEntry(pool.get_base_path()));
+    location_entry->set_append_json(true);
     location_entry->set_rel_filename(
             DuplicateUnitWidget::insert_filename(pool.get_rel_filename(ObjectType::ENTITY, entity.uuid), "-copy"));
     grid_attach_label_and_widget(grid, "Filename", location_entry, top);

@@ -19,11 +19,13 @@ public:
     }
 
     bool check_ends_json(bool *v = nullptr);
+    void set_append_json(bool s);
 
 private:
     std::string relative_to;
     std::string get_rel_filename(const std::string &s) const;
     Gtk::Entry *entry = nullptr;
+    bool autoappend_json = false;
     void handle_button();
 
     type_signal_changed s_signal_changed;
