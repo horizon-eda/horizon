@@ -31,14 +31,14 @@ Junction *CoreSchematic::get_junction(const UUID &uu)
     auto &sheet = sch->sheets.at(sheet_uuid);
     return &sheet.junctions.at(uu);
 }
-Schematic *CoreSchematic::get_schematic()
+Schematic *CoreSchematic::get_current_schematic()
 {
     return &*sch;
 }
 
 Block *CoreSchematic::get_top_block()
 {
-    return get_schematic()->block;
+    return get_current_schematic()->block;
 }
 
 LayerProvider &CoreSchematic::get_layer_provider()

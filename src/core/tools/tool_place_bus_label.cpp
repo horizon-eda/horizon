@@ -14,14 +14,14 @@ bool ToolPlaceBusLabel::can_begin()
 
 bool ToolPlaceBusLabel::begin_attached()
 {
-    if (auto r = imp->dialogs.select_bus(*doc.c->get_schematic()->block)) {
+    if (auto r = imp->dialogs.select_bus(*doc.c->get_current_schematic()->block)) {
         imp->tool_bar_set_actions({
                 {InToolActionID::LMB},
                 {InToolActionID::RMB},
                 {InToolActionID::ROTATE},
                 {InToolActionID::MIRROR},
         });
-        bus = &doc.c->get_schematic()->block->buses.at(*r);
+        bus = &doc.c->get_current_schematic()->block->buses.at(*r);
         return true;
     }
     else {

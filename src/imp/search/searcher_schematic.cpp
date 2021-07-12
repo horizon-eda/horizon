@@ -14,8 +14,8 @@ void SearcherSchematic::sort_search_results_schematic(std::list<Searcher::Search
                                                       const Searcher::SearchQuery &q)
 {
     results.sort([this, q](const auto &a, const auto &b) {
-        int index_a = doc.get_schematic()->sheets.at(a.sheet).index;
-        int index_b = doc.get_schematic()->sheets.at(b.sheet).index;
+        int index_a = doc.get_current_schematic()->sheets.at(a.sheet).index;
+        int index_b = doc.get_current_schematic()->sheets.at(b.sheet).index;
 
         if (a.sheet == doc.get_sheet()->uuid)
             index_a = -1;
@@ -61,7 +61,7 @@ std::list<Searcher::SearchResult> SearcherSchematic::search(const Searcher::Sear
     std::list<SearchResult> results;
     if (!q.is_valid())
         return results;
-    for (const auto &it_sheet : doc.get_schematic()->sheets) {
+    for (const auto &it_sheet : doc.get_current_schematic()->sheets) {
         const auto &sheet = it_sheet.second;
         if (q.types.count(Type::SYMBOL_REFDES)) {
             for (const auto &it : sheet.symbols) {
@@ -159,7 +159,7 @@ std::string SearcherSchematic::get_display_name(const Searcher::SearchResult &r)
 {
     if (r.type == Type::SYMBOL_PIN) {
         auto sym_name = doc.get_display_name(ObjectType::SCHEMATIC_SYMBOL, r.path.at(0), r.sheet);
-        const auto &sym = doc.get_schematic()->sheets.at(r.sheet).symbols.at(r.path.at(0));
+        const auto &sym = doc.get_current_schematic()->sheets.at(r.sheet).symbols.at(r.path.at(0));
         return sym_name + "." + sym.gate->unit->pins.at(r.path.at(1)).primary_name;
     }
     else {

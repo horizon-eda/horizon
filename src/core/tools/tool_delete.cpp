@@ -66,7 +66,7 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
         }
         else if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
             auto &sym = doc.c->get_sheet()->symbols.at(it.uuid);
-            doc.c->get_schematic()->disconnect_symbol(doc.c->get_sheet(), &sym);
+            doc.c->get_current_schematic()->disconnect_symbol(doc.c->get_sheet(), &sym);
             for (const auto &it_text : sym.texts) {
                 delete_extra.emplace(it_text->uuid, ObjectType::TEXT);
             }
@@ -95,7 +95,7 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
     for (const auto &it : delete_extra) {
         if (it.type == ObjectType::LINE_NET) { // need to erase net lines before symbols
             LineNet *line = &doc.c->get_sheet()->net_lines.at(it.uuid);
-            doc.c->get_schematic()->delete_net_line(doc.c->get_sheet(), line);
+            doc.c->get_current_schematic()->delete_net_line(doc.c->get_sheet(), line);
         }
         else if (it.type == ObjectType::POWER_SYMBOL) { // need to erase power
                                                         // symbols before
@@ -113,7 +113,7 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
             auto &nsinfo = ns.at(j->net_segment);
             if (!nsinfo.has_power_sym) {
                 auto pins = sheet->get_pins_connected_to_net_segment(j->net_segment);
-                doc.c->get_schematic()->block->extract_pins(pins);
+                doc.c->get_current_schematic()->block->extract_pins(pins);
             }
         }
         else if (it.type == ObjectType::BUS_RIPPER) { // need to erase bus
@@ -133,7 +133,7 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
                 auto &nsinfo = ns.at(j.net_segment);
                 if (!nsinfo.has_label) {
                     auto pins = sheet.get_pins_connected_to_net_segment(j.net_segment);
-                    doc.c->get_schematic()->block->extract_pins(pins);
+                    doc.c->get_current_schematic()->block->extract_pins(pins);
                 }
             }
 
@@ -265,7 +265,7 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
             auto &schsym = doc.c->get_sheet()->symbols.at(it.uuid);
             Component *comp = schsym.component.ptr;
             doc.c->get_sheet()->symbols.erase(it.uuid);
-            Schematic *sch = doc.c->get_schematic();
+            Schematic *sch = doc.c->get_current_schematic();
             bool found = false;
             for (auto &it_sheet : sch->sheets) {
                 for (auto &it_sym : it_sheet.second.symbols) {

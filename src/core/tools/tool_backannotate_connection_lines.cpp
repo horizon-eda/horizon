@@ -33,7 +33,7 @@ bool ToolBackannotateConnectionLines::can_begin()
 
 Net *ToolBackannotateConnectionLines::create_net_stub(Component *comp, const UUIDPath<2> &connpath, Net *net)
 {
-    auto sch = doc.c->get_schematic();
+    auto sch = doc.c->get_current_schematic();
     if (comp->connections.count(connpath))
         return nullptr;
     SchematicSymbol *sym = nullptr;

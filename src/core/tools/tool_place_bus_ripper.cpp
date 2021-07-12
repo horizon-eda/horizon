@@ -20,7 +20,7 @@ bool ToolPlaceBusRipper::can_begin()
 
 bool ToolPlaceBusRipper::begin_attached()
 {
-    if (auto r = imp->dialogs.select_bus(*doc.c->get_schematic()->block)) {
+    if (auto r = imp->dialogs.select_bus(*doc.c->get_current_schematic()->block)) {
         imp->tool_bar_set_actions({
                 {InToolActionID::LMB},
                 {InToolActionID::RMB},
@@ -28,7 +28,7 @@ bool ToolPlaceBusRipper::begin_attached()
                 {InToolActionID::MIRROR},
                 {InToolActionID::EDIT, "select member"},
         });
-        bus = &doc.c->get_schematic()->block->buses.at(*r);
+        bus = &doc.c->get_current_schematic()->block->buses.at(*r);
         std::map<const Bus::Member *, size_t> bus_rippers;
 
         for (auto &it : bus->members) {
@@ -37,7 +37,7 @@ bool ToolPlaceBusRipper::begin_attached()
         }
         if (bus_members.size() == 0)
             return false;
-        for (const auto &[sheet_uu, sheet] : doc.c->get_schematic()->sheets) {
+        for (const auto &[sheet_uu, sheet] : doc.c->get_current_schematic()->sheets) {
             for (const auto &[uu, rip] : sheet.bus_rippers) {
                 if (bus_rippers.count(rip.bus_member.ptr) && rip.bus == bus) {
                     bus_rippers.at(rip.bus_member.ptr)++;
@@ -123,7 +123,7 @@ bool ToolPlaceBusRipper::update_attached(const ToolArgs &args)
             return true;
 
         case InToolActionID::EDIT:
-            if (auto r = imp->dialogs.select_bus_member(*doc.c->get_schematic()->block, bus->uuid)) {
+            if (auto r = imp->dialogs.select_bus_member(*doc.c->get_current_schematic()->block, bus->uuid)) {
                 Bus::Member *bus_member = &bus->members.at(*r);
 
                 auto p = std::find(bus_members.begin(), bus_members.end(), bus_member);

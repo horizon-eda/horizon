@@ -38,19 +38,19 @@ ToolResponse ToolManageBuses::begin(const ToolArgs &args)
     bool r = false;
 
     if (tool_id == ToolID::MANAGE_BUSES) {
-        auto sch = doc.c->get_schematic();
+        auto sch = doc.c->get_current_schematic();
         r = imp->dialogs.manage_buses(*sch->block);
     }
     else if (tool_id == ToolID::ANNOTATE) {
-        auto sch = doc.c->get_schematic();
+        auto sch = doc.c->get_current_schematic();
         r = imp->dialogs.annotate(*sch);
     }
     else if (tool_id == ToolID::MANAGE_NET_CLASSES) {
-        auto sch = doc.c->get_schematic();
+        auto sch = doc.c->get_current_schematic();
         r = imp->dialogs.manage_net_classes(*sch->block);
     }
     else if (tool_id == ToolID::EDIT_SCHEMATIC_PROPERTIES) {
-        r = imp->dialogs.edit_schematic_properties(*doc.c->get_schematic(), doc.c->get_pool(),
+        r = imp->dialogs.edit_schematic_properties(*doc.c->get_current_schematic(), doc.c->get_pool(),
                                                    doc.c->get_pool_caching());
     }
     else if (tool_id == ToolID::EDIT_STACKUP) {
@@ -63,7 +63,7 @@ ToolResponse ToolManageBuses::begin(const ToolArgs &args)
         r = imp->dialogs.edit_frame_properties(doc.f->get_frame());
     }
     else if (tool_id == ToolID::TOGGLE_GROUP_TAG_VISIBLE) {
-        auto sch = doc.c->get_schematic();
+        auto sch = doc.c->get_current_schematic();
         sch->group_tag_visible = !sch->group_tag_visible;
         r = true;
     }

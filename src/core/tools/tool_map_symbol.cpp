@@ -20,7 +20,7 @@ bool ToolMapSymbol::can_begin()
 ToolResponse ToolMapSymbol::begin(const ToolArgs &args)
 {
     std::cout << "tool map sym\n";
-    const auto sch = doc.c->get_schematic();
+    const auto sch = doc.c->get_current_schematic();
 
     if (auto data = dynamic_cast<const ToolDataMapSymbol *>(args.data.get())) {
         std::copy(data->gates.begin(), data->gates.end(), std::back_inserter(gates_from_data));
@@ -85,9 +85,9 @@ ToolResponse ToolMapSymbol::update(const ToolArgs &args)
     else if (args.type == ToolEventType::ACTION) {
         switch (args.action) {
         case InToolActionID::LMB: {
-            doc.c->get_schematic()->autoconnect_symbol(doc.c->get_sheet(), sym_current);
+            doc.c->get_current_schematic()->autoconnect_symbol(doc.c->get_sheet(), sym_current);
             if (sym_current->component->connections.size() == 0) {
-                doc.c->get_schematic()->place_bipole_on_line(doc.c->get_sheet(), sym_current);
+                doc.c->get_current_schematic()->place_bipole_on_line(doc.c->get_sheet(), sym_current);
             }
             UUIDPath<2> selected_gate;
             if (data_mode == false) {
@@ -115,7 +115,7 @@ ToolResponse ToolMapSymbol::update(const ToolArgs &args)
                 }
                 selected_gate = gates_from_data.front();
             }
-            Schematic *sch = doc.c->get_schematic();
+            Schematic *sch = doc.c->get_current_schematic();
 
             Component *comp = &sch->block->components.at(selected_gate.at(0));
             const Gate *gate = &comp->entity->gates.at(selected_gate.at(1));
