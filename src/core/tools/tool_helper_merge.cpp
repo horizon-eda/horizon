@@ -55,8 +55,8 @@ int ToolHelperMerge::merge_nets(Net *net, Net *into)
     }
 
     imp->tool_bar_flash("merged net \"" + net->name + "\" into net \"" + into->name + "\"");
-    doc.c->get_schematic()->block->merge_nets(net, into); // net will be erased
-    doc.c->get_schematic()->expand_connectivity(true);    // be careful
+    doc.c->get_current_schematic()->block->merge_nets(net, into); // net will be erased
+    doc.c->get_current_schematic()->expand_connectivity(true);    // be careful
 
     std::cout << "merging nets" << std::endl;
     return 0; // merged, 1: error
@@ -141,7 +141,7 @@ void ToolHelperMerge::merge_and_connect()
                                     auto new_net = doc.c->get_top_block()->insert_net();
                                     sym.component->connections.emplace(path, new_net);
                                     sheet.replace_junction(ju, &sym, &sym_pin);
-                                    doc.c->get_schematic()->expand(true);
+                                    doc.c->get_current_schematic()->expand(true);
                                 }
                             }
                         }
@@ -169,9 +169,9 @@ void ToolHelperMerge::merge_and_connect()
         }
         else if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
             auto &sym = doc.c->get_sheet()->symbols.at(it.uuid);
-            doc.c->get_schematic()->autoconnect_symbol(doc.c->get_sheet(), &sym);
+            doc.c->get_current_schematic()->autoconnect_symbol(doc.c->get_sheet(), &sym);
             if (sym.component->connections.size() == 0) {
-                doc.c->get_schematic()->place_bipole_on_line(doc.c->get_sheet(), &sym);
+                doc.c->get_current_schematic()->place_bipole_on_line(doc.c->get_sheet(), &sym);
             }
         }
     }

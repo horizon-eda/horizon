@@ -58,8 +58,8 @@ ToolResponse ToolSwapNets::begin(const ToolArgs &args)
     auto pins1 = doc.c->get_sheet()->get_pins_connected_to_net_segment(ns1);
     auto pins2 = doc.c->get_sheet()->get_pins_connected_to_net_segment(ns2);
 
-    doc.c->get_schematic()->block->extract_pins(pins1, nsi2.net);
-    doc.c->get_schematic()->block->extract_pins(pins2, nsi1.net);
+    doc.c->get_current_schematic()->block->extract_pins(pins1, nsi2.net);
+    doc.c->get_current_schematic()->block->extract_pins(pins2, nsi1.net);
 
     return ToolResponse::commit();
 }

@@ -43,7 +43,7 @@ void ToolDrawLineNet::set_snap_filter()
 
 void ToolDrawLineNet::restart(const Coordi &c)
 {
-    doc.c->get_schematic()->expand_connectivity(); // gets rid of warning=s...
+    doc.c->get_current_schematic()->expand_connectivity(); // gets rid of warning=s...
     const auto uu = UUID::random();
     temp_junc_head = &doc.c->get_sheet()->junctions.emplace(uu, uu).first->second;
     temp_junc_head->position = c;
@@ -187,7 +187,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                         net = conn.net;
                     }
                     else { // pin needs net
-                        net = doc.c->get_schematic()->block->insert_net();
+                        net = doc.c->get_current_schematic()->block->insert_net();
                         sym->component->connections.emplace(connpath, net);
                         component_floating = sym->component;
                         connpath_floating = connpath;
@@ -264,7 +264,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                             net = temp_junc_head->net;
                         }
                         else {
-                            net = doc.c->get_schematic()->block->insert_net();
+                            net = doc.c->get_current_schematic()->block->insert_net();
                         }
                         sym->component->connections.emplace(connpath, net);
                     }

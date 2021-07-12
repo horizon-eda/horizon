@@ -77,9 +77,9 @@ ToolResponse ToolMoveNetSegment::begin(const ToolArgs &args)
         if (nsinfo.has_power_sym || nsinfo.net->is_bussed) {
             return ToolResponse::end();
         }
-        Net *net = doc.c->get_schematic()->block->insert_net();
+        Net *net = doc.c->get_current_schematic()->block->insert_net();
         auto pins = doc.c->get_sheet()->get_pins_connected_to_net_segment(net_segment);
-        doc.c->get_schematic()->block->extract_pins(pins, net);
+        doc.c->get_current_schematic()->block->extract_pins(pins, net);
         return ToolResponse::commit();
     }
     if (tool_id == ToolID::MOVE_NET_SEGMENT) {
@@ -87,10 +87,11 @@ ToolResponse ToolMoveNetSegment::begin(const ToolArgs &args)
             return ToolResponse::end();
         }
 
-        if (auto r = imp->dialogs.select_net(*doc.c->get_schematic()->block, nsinfo.net->is_power, nsinfo.net->uuid)) {
-            Net *net = &doc.c->get_schematic()->block->nets.at(*r);
+        if (auto r = imp->dialogs.select_net(*doc.c->get_current_schematic()->block, nsinfo.net->is_power,
+                                             nsinfo.net->uuid)) {
+            Net *net = &doc.c->get_current_schematic()->block->nets.at(*r);
             auto pins = doc.c->get_sheet()->get_pins_connected_to_net_segment(net_segment);
-            doc.c->get_schematic()->block->extract_pins(pins, net);
+            doc.c->get_current_schematic()->block->extract_pins(pins, net);
             if (nsinfo.net->is_power) {
                 for (auto &it : doc.c->get_sheet()->power_symbols) {
                     if (it.second.junction->net_segment == net_segment) {

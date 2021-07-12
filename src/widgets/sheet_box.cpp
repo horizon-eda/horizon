@@ -120,7 +120,7 @@ void SheetBox::sheet_move(int dir)
     auto it = view->get_selection()->get_selected();
     if (it) {
         Gtk::TreeModel::Row row = *it;
-        auto sch = core->get_schematic();
+        auto sch = core->get_current_schematic();
         auto &sheets = sch->sheets;
         auto *sheet = &sch->sheets.at(row[list_columns.uuid]);
         if (dir < 0 && sheet->index == 1)
@@ -141,7 +141,7 @@ void SheetBox::remove_clicked()
     auto it = view->get_selection()->get_selected();
     if (it) {
         Gtk::TreeModel::Row row = *it;
-        signal_remove_sheet().emit(&core->get_schematic()->sheets.at(row[list_columns.uuid]));
+        signal_remove_sheet().emit(&core->get_current_schematic()->sheets.at(row[list_columns.uuid]));
     }
     else {
         signal_remove_sheet().emit(nullptr);
@@ -153,8 +153,8 @@ void SheetBox::selection_changed()
     auto it = view->get_selection()->get_selected();
     if (it) {
         Gtk::TreeModel::Row row = *it;
-        if (core->get_schematic()->sheets.count(row[list_columns.uuid])) {
-            auto &sheets = core->get_schematic()->sheets;
+        if (core->get_current_schematic()->sheets.count(row[list_columns.uuid])) {
+            auto &sheets = core->get_current_schematic()->sheets;
             auto sh = &sheets.at(row[list_columns.uuid]);
             signal_select_sheet().emit(sh);
             auto s = sh->symbols.size() == 0;
@@ -170,7 +170,7 @@ void SheetBox::name_edited(const Glib::ustring &path, const Glib::ustring &new_t
     auto it = store->get_iter(path);
     if (it) {
         Gtk::TreeModel::Row row = *it;
-        auto &sh = core->get_schematic()->sheets.at(row[list_columns.uuid]);
+        auto &sh = core->get_current_schematic()->sheets.at(row[list_columns.uuid]);
         if (sh.name != new_text) {
             sh.name = new_text;
             core->set_needs_save();
@@ -193,13 +193,13 @@ void SheetBox::update_highlights(const UUID &uu, bool v)
 void SheetBox::update()
 {
     auto uuid_from_core = core->get_sheet()->uuid;
-    auto s = core->get_schematic()->sheets.size() > 1;
+    auto s = core->get_current_schematic()->sheets.size() > 1;
     remove_button->set_sensitive(s);
 
     Gtk::TreeModel::Row row;
     store->freeze_notify();
     store->clear();
-    for (const auto &it : core->get_schematic()->sheets) {
+    for (const auto &it : core->get_current_schematic()->sheets) {
         row = *(store->append());
         row[list_columns.name] = it.second.name;
         row[list_columns.uuid] = it.first;

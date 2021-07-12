@@ -14,8 +14,8 @@ bool ToolPlacePowerSymbol::can_begin()
 
 bool ToolPlacePowerSymbol::begin_attached()
 {
-    if (auto r = imp->dialogs.select_net(*doc.c->get_schematic()->block, true)) {
-        net = &doc.c->get_schematic()->block->nets.at(*r);
+    if (auto r = imp->dialogs.select_net(*doc.c->get_current_schematic()->block, true)) {
+        net = &doc.c->get_current_schematic()->block->nets.at(*r);
         imp->tool_bar_set_actions({
                 {InToolActionID::LMB},
                 {InToolActionID::RMB},
@@ -61,7 +61,7 @@ bool ToolPlacePowerSymbol::junction_placed()
     if (ToolPlaceJunctionSchematic::junction_placed())
         return true;
 
-    doc.c->get_schematic()->expand_connectivity(true);
+    doc.c->get_current_schematic()->expand_connectivity(true);
     return false;
 }
 
@@ -85,7 +85,7 @@ bool ToolPlacePowerSymbol::do_merge(Net *other)
         return false;
     }
     else if (!other->is_power && other != net) {
-        doc.c->get_schematic()->block->merge_nets(other, net);
+        doc.c->get_current_schematic()->block->merge_nets(other, net);
         imp->tool_bar_flash("merged net \"" + other->name + "\" into power net\"" + net->name + "\"");
         return true;
     }
@@ -120,7 +120,7 @@ bool ToolPlacePowerSymbol::update_attached(const ToolArgs &args)
                     j->net = net;
                 }
                 sym->junction = j;
-                doc.c->get_schematic()->expand_connectivity(true);
+                doc.c->get_current_schematic()->expand_connectivity(true);
                 create_attached();
                 return true;
             }

@@ -32,7 +32,7 @@ UUID ToolAddPart::create_tag()
 ToolResponse ToolAddPart::begin(const ToolArgs &args)
 {
     std::cout << "tool add part\n";
-    Schematic *sch = doc.c->get_schematic();
+    Schematic *sch = doc.c->get_current_schematic();
 
     if (tool_id == ToolID::ADD_PART) {
         UUID part_uuid;
@@ -111,16 +111,16 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
     else if (args.type == ToolEventType::ACTION) {
         switch (args.action) {
         case InToolActionID::LMB:
-            doc.c->get_schematic()->autoconnect_symbol(doc.c->get_sheet(), sym_current);
+            doc.c->get_current_schematic()->autoconnect_symbol(doc.c->get_sheet(), sym_current);
             if (sym_current->component->connections.size() == 0) {
-                doc.c->get_schematic()->place_bipole_on_line(doc.c->get_sheet(), sym_current);
+                doc.c->get_current_schematic()->place_bipole_on_line(doc.c->get_sheet(), sym_current);
             }
             if (current_gate + 1 == gates.size()) { // last gate
                 current_gate = 0;
                 // add next component
                 auto last_comp = comp;
                 auto uu = UUID::random();
-                Schematic *sch = doc.c->get_schematic();
+                Schematic *sch = doc.c->get_current_schematic();
                 comp = &sch->block->components.emplace(uu, uu).first->second;
                 comp->entity = last_comp->entity;
                 comp->part = last_comp->part;

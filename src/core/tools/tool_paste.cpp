@@ -231,7 +231,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
     std::map<UUID, const UUID> component_xlat;
     if (j.count("components") && doc.c) {
         const json &o = j["components"];
-        auto block = doc.c->get_schematic()->block;
+        auto block = doc.c->get_current_schematic()->block;
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             component_xlat.emplace(it.key(), u);
@@ -246,7 +246,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
     if (j.count("symbols") && doc.c) {
         const json &o = j["symbols"];
         auto sheet = doc.c->get_sheet();
-        auto block = doc.c->get_schematic()->block;
+        auto block = doc.c->get_current_schematic()->block;
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             symbol_xlat.emplace(it.key(), u);
@@ -257,7 +257,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             for (auto &it_txt : x->texts) {
                 it_txt = doc.r->get_text(text_xlat.at(it_txt.uuid));
             }
-            sheet->expand_symbol(u, *doc.c->get_schematic());
+            sheet->expand_symbol(u, *doc.c->get_current_schematic());
             x->placement.shift += shift;
             selection.emplace(u, ObjectType::SCHEMATIC_SYMBOL);
         }
@@ -346,7 +346,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
     if (j.count("power_symbols") && doc.c) {
         const json &o = j["power_symbols"];
         auto sheet = doc.c->get_sheet();
-        auto block = doc.c->get_schematic()->block;
+        auto block = doc.c->get_current_schematic()->block;
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             auto x = &doc.c->get_sheet()->power_symbols.emplace(u, PowerSymbol(u, it.value())).first->second;
@@ -457,7 +457,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
     move_init(cursor_pos_canvas);
     update_tip();
     if (doc.c) {
-        auto sch = doc.c->get_schematic();
+        auto sch = doc.c->get_current_schematic();
         sch->expand_connectivity(true);
         for (auto &it : sch->sheets) {
             it.second.warnings.clear();
