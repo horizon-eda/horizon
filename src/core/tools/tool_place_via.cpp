@@ -16,8 +16,8 @@ bool ToolPlaceVia::can_begin()
 bool ToolPlaceVia::begin_attached()
 {
     rules = dynamic_cast<BoardRules *>(doc.b->get_rules());
-    if (auto r = imp->dialogs.select_net(*doc.b->get_block(), false)) {
-        net = doc.b->get_block()->get_net(*r);
+    if (auto r = imp->dialogs.select_net(*doc.b->get_top_block(), false)) {
+        net = doc.b->get_top_block()->get_net(*r);
         nets.insert(net->uuid);
         auto ps_uu = rules->get_via_padstack_uuid(net);
         if (!ps_uu) {
@@ -95,8 +95,8 @@ bool ToolPlaceVia::update_attached(const ToolArgs &args)
 
         case InToolActionID::EDIT:
             if (via) {
-                if (auto r = imp->dialogs.select_net(*doc.b->get_block(), false)) {
-                    net = doc.b->get_block()->get_net(*r);
+                if (auto r = imp->dialogs.select_net(*doc.b->get_top_block(), false)) {
+                    net = doc.b->get_top_block()->get_net(*r);
                     nets.insert(net->uuid);
                     via->net_set = net;
                     via->parameter_set = rules->get_via_parameter_set(net);

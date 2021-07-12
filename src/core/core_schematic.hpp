@@ -21,7 +21,7 @@ public:
     Junction *insert_junction(const UUID &uu) override;
     void delete_junction(const UUID &uu) override;
 
-    class Block *get_block() override;
+    class Block *get_top_block() override;
     class LayerProvider &get_layer_provider() override;
 
     bool set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property,

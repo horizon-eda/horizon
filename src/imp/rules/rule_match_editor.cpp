@@ -27,7 +27,7 @@ RuleMatchEditor::RuleMatchEditor(RuleMatch &ma, class IDocument &c)
 
     sel_stack = Gtk::manage(new Gtk::Stack());
     sel_stack->set_homogeneous(true);
-    Block &block = *core.get_block();
+    Block &block = *core.get_top_block();
 
     net_button = Gtk::manage(new NetButton(block));
     net_button->set_net(match.net);
@@ -37,9 +37,9 @@ RuleMatchEditor::RuleMatchEditor(RuleMatch &ma, class IDocument &c)
     });
     sel_stack->add(*net_button, std::to_string(static_cast<int>(RuleMatch::Mode::NET)));
 
-    net_class_button = Gtk::manage(new NetClassButton(*core.get_block()));
+    net_class_button = Gtk::manage(new NetClassButton(*core.get_top_block()));
     if (!match.net_class) {
-        match.net_class = core.get_block()->net_class_default->uuid;
+        match.net_class = core.get_top_block()->net_class_default->uuid;
     }
     net_class_button->set_net_class(match.net_class);
     net_class_button->signal_net_class_changed().connect([this](const UUID &uu) {

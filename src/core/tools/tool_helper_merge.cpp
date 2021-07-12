@@ -138,7 +138,7 @@ void ToolHelperMerge::merge_and_connect()
                                     sheet.replace_junction(ju, &sym, &sym_pin);
                                 }
                                 else if (!ju->bus) {
-                                    auto new_net = doc.c->get_block()->insert_net();
+                                    auto new_net = doc.c->get_top_block()->insert_net();
                                     sym.component->connections.emplace(path, new_net);
                                     sheet.replace_junction(ju, &sym, &sym_pin);
                                     doc.c->get_schematic()->expand(true);

@@ -60,7 +60,7 @@ private:
     Rules &rules;
     class CanvasAnnotation *annotation = nullptr;
 
-    class Block *get_block();
+    class Block *get_top_block();
     type_signal_goto s_signal_goto;
     type_signal_canvas_update s_signal_canvas_update;
     RuleID rule_id_current = RuleID::NONE;

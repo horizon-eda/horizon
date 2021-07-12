@@ -12,7 +12,7 @@ public:
     CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &pictures_dir,
               IPool &pool, IPool &pool_caching);
 
-    class Block *get_block() override;
+    class Block *get_top_block() override;
     class LayerProvider &get_layer_provider() override;
 
     bool set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property,

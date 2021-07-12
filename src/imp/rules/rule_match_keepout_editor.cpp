@@ -24,7 +24,7 @@ RuleMatchKeepoutEditor::RuleMatchKeepoutEditor(RuleMatchKeepout &ma, class IDocu
 
     sel_stack = Gtk::manage(new Gtk::Stack());
     sel_stack->set_homogeneous(true);
-    Block *block = core.get_block();
+    Block *block = core.get_top_block();
     assert(block);
 
     keepout_class_entry = Gtk::manage(new Gtk::Entry());
