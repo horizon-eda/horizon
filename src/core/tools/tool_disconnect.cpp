@@ -25,7 +25,7 @@ ToolResponse ToolDisconnect::begin(const ToolArgs &args)
     std::cout << "tool disconnect\n";
     for (const auto &it : args.selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-            doc.c->get_schematic()->disconnect_symbol(doc.c->get_sheet(), &doc.c->get_sheet()->symbols.at(it.uuid));
+            doc.c->get_current_schematic()->disconnect_symbol(doc.c->get_sheet(), &doc.c->get_sheet()->symbols.at(it.uuid));
         }
         else if (it.type == ObjectType::BOARD_PACKAGE) {
             doc.b->get_board()->disconnect_package(&doc.b->get_board()->packages.at(it.uuid));

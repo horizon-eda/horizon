@@ -13,7 +13,7 @@ public:
                   const std::string &pictures_dir, IPool &pool, IPool &pool_caching);
     bool has_object_type(ObjectType ty) const override;
 
-    Schematic *get_schematic() override;
+    Schematic *get_current_schematic() override;
     Sheet *get_sheet() override;
     const Sheet *get_sheet() const;
 

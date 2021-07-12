@@ -31,9 +31,9 @@ ToolResponse ToolSmash::begin(const ToolArgs &args)
     for (const auto &it : args.selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
             if (tool_id == ToolID::SMASH)
-                doc.c->get_schematic()->smash_symbol(doc.c->get_sheet(), &doc.c->get_sheet()->symbols.at(it.uuid));
+                doc.c->get_current_schematic()->smash_symbol(doc.c->get_sheet(), &doc.c->get_sheet()->symbols.at(it.uuid));
             else
-                doc.c->get_schematic()->unsmash_symbol(doc.c->get_sheet(), &doc.c->get_sheet()->symbols.at(it.uuid));
+                doc.c->get_current_schematic()->unsmash_symbol(doc.c->get_sheet(), &doc.c->get_sheet()->symbols.at(it.uuid));
         }
         if (it.type == ObjectType::BOARD_PACKAGE) {
             if (tool_id == ToolID::SMASH)

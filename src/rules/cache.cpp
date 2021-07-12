@@ -40,7 +40,7 @@ RulesCheckCacheNetPins::RulesCheckCacheNetPins(IDocument *c)
                 auto pin = &gate->unit->pins.at(connpath.at(1));
                 UUID sheet_uuid;
                 Coordi location;
-                for (const auto &it_sheet : core->get_schematic()->sheets) {
+                for (const auto &it_sheet : core->get_current_schematic()->sheets) {
                     bool found = false;
                     for (const auto &it_sym : it_sheet.second.symbols) {
                         if (it_sym.second.component == &it.second && it_sym.second.gate == gate) {

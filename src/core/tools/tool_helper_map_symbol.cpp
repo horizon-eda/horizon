@@ -70,7 +70,7 @@ SchematicSymbol *ToolHelperMapSymbol::map_symbol(Component *comp, const Gate *ga
     auto sz = bb.second - bb.first;
     imp->get_canvas()->ensure_min_size(sz.x * 1.5, sz.y * 1.5);
 
-    doc.c->get_sheet()->expand_symbol(schsym.uuid, *doc.c->get_schematic());
+    doc.c->get_sheet()->expand_symbol(schsym.uuid, *doc.c->get_current_schematic());
 
     return &schsym;
 }
@@ -87,7 +87,7 @@ void ToolHelperMapSymbol::change_symbol(SchematicSymbol *schsym)
         else {
             settings.selected_symbols[gate->unit->uuid] = new_sym->uuid;
             schsym->pool_symbol = new_sym;
-            doc.c->get_sheet()->expand_symbol(schsym->uuid, *doc.c->get_schematic());
+            doc.c->get_sheet()->expand_symbol(schsym->uuid, *doc.c->get_current_schematic());
         }
     }
 }

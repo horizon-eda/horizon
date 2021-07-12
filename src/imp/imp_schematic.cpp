@@ -71,7 +71,7 @@ void ImpSchematic::handle_remove_sheet(Sheet *sh)
 
 void ImpSchematic::handle_next_prev_sheet(const ActionConnection &conn)
 {
-    const auto &sch = *core_schematic.get_schematic();
+    const auto &sch = *core_schematic.get_current_schematic();
     const int sheet_idx_current = core_schematic.get_sheet()->index;
     const int inc = conn.action_id == ActionID::PREV_SHEET ? -1 : 1;
     const int sheet_idx_next = sheet_idx_current + inc;
@@ -85,7 +85,7 @@ void ImpSchematic::handle_next_prev_sheet(const ActionConnection &conn)
 void ImpSchematic::update_highlights()
 {
     std::map<UUID, std::set<ObjectRef>> highlights_for_sheet;
-    auto sch = core_schematic.get_schematic();
+    auto sch = core_schematic.get_current_schematic();
     for (const auto &it_sheet : sch->sheets) {
         auto sheet = &it_sheet.second;
         for (const auto &it : highlights) {
@@ -503,7 +503,7 @@ void ImpSchematic::construct()
 
 
     rules_window->signal_goto().connect([this](Coordi location, UUID sheet) {
-        auto sch = core_schematic.get_schematic();
+        auto sch = core_schematic.get_current_schematic();
         if (sch->sheets.count(sheet)) {
             sheet_box->select_sheet(sheet);
             canvas->center_and_zoom(location);
@@ -527,7 +527,7 @@ void ImpSchematic::construct()
                 if (url.find("s:") == 0) {
                     std::string sheet = url.substr(2);
                     auto uuid = UUID(sheet);
-                    auto sch = core_schematic.get_schematic();
+                    auto sch = core_schematic.get_current_schematic();
                     if (sch->sheets.count(uuid)) {
                         sheet_box->select_sheet(uuid);
                     }
@@ -659,13 +659,13 @@ std::string ImpSchematic::get_hud_text(std::set<SelectableRef> &sel)
         const auto text = core->get_text(it->uuid);
         const auto txt = Glib::ustring(text->text);
         Glib::MatchInfo ma;
-        if (core_schematic.get_schematic()->get_sheetref_regex()->match(txt, ma)) {
+        if (core_schematic.get_current_schematic()->get_sheetref_regex()->match(txt, ma)) {
             s += "\n\n<b>Text with sheet references</b>\n";
             do {
                 auto uuid = ma.fetch(1);
                 std::string url = "s:" + uuid;
-                if (core_schematic.get_schematic()->sheets.count(UUID(uuid))) {
-                    s += make_link_markup(url, core_schematic.get_schematic()->sheets.at(UUID(uuid)).name);
+                if (core_schematic.get_current_schematic()->sheets.count(UUID(uuid))) {
+                    s += make_link_markup(url, core_schematic.get_current_schematic()->sheets.at(UUID(uuid)).name);
                 }
                 else {
                     s += "Unknown Sheet";
@@ -700,7 +700,7 @@ void ImpSchematic::handle_highlight_group_tag(const ActionConnection &a)
         if (!uu)
             return;
         highlights.clear();
-        for (const auto &it_sheet : core_schematic.get_schematic()->sheets) {
+        for (const auto &it_sheet : core_schematic.get_current_schematic()->sheets) {
             for (const auto &it_sym : it_sheet.second.symbols) {
                 if ((tag_mode && (it_sym.second.component->tag == uu))
                     || (!tag_mode && (it_sym.second.component->group == uu))) {
@@ -987,10 +987,10 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
     auto old_sheet = core_schematic.get_sheet();
     Sheet *new_sheet = nullptr;
     {
-        SelectSheetDialog dia(core_schematic.get_schematic(), old_sheet);
+        SelectSheetDialog dia(core_schematic.get_current_schematic(), old_sheet);
         dia.set_transient_for(*main_window);
         if (dia.run() == Gtk::RESPONSE_OK) {
-            new_sheet = &core_schematic.get_schematic()->sheets.at(dia.selected_sheet);
+            new_sheet = &core_schematic.get_current_schematic()->sheets.at(dia.selected_sheet);
         }
     }
     if (!new_sheet)
@@ -1045,7 +1045,7 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
         default:;
         }
     }
-    core_schematic.get_schematic()->update_refs();
+    core_schematic.get_current_schematic()->update_refs();
 
     core_schematic.set_needs_save();
     core_schematic.rebuild();
@@ -1071,7 +1071,7 @@ ActionToolID ImpSchematic::get_doubleclick_action(ObjectType type, const UUID &u
 
 void ImpSchematic::update_unplaced()
 {
-    unplaced_box->update(core_schematic.get_schematic()->get_unplaced_gates());
+    unplaced_box->update(core_schematic.get_current_schematic()->get_unplaced_gates());
 }
 
 ToolID ImpSchematic::get_tool_for_drag_move(bool ctrl, const std::set<SelectableRef> &sel) const
@@ -1148,7 +1148,7 @@ void ImpSchematic::update_monitor()
 {
     ItemSet mon_items = core_schematic.get_top_block()->get_pool_items_used();
     {
-        ItemSet items = core_schematic.get_schematic()->get_pool_items_used();
+        ItemSet items = core_schematic.get_current_schematic()->get_pool_items_used();
         mon_items.insert(items.begin(), items.end());
     }
     set_monitor_items(mon_items);

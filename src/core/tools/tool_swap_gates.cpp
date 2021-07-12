@@ -39,7 +39,8 @@ ToolResponse ToolSwapGates::begin(const ToolArgs &args)
 {
 
     auto syms = get_symbols();
-    doc.c->get_schematic()->swap_gates(syms.first->component->uuid, syms.first->gate->uuid, syms.second->gate->uuid);
+    doc.c->get_current_schematic()->swap_gates(syms.first->component->uuid, syms.first->gate->uuid,
+                                               syms.second->gate->uuid);
     return ToolResponse::commit();
 }
 
