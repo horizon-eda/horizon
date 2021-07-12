@@ -23,7 +23,7 @@ bool ToolSetGroup::can_begin()
     if (!doc.c)
         return false;
     auto comps = get_components();
-    auto block = doc.c->get_block();
+    auto block = doc.c->get_top_block();
     switch (tool_id) {
     case ToolID::SET_GROUP:
         return comps.size() > 0 && block->group_names.size();
@@ -49,7 +49,7 @@ bool ToolSetGroup::can_begin()
 ToolResponse ToolSetGroup::begin(const ToolArgs &args)
 {
     auto comps = get_components();
-    auto &block = *doc.c->get_block();
+    auto &block = *doc.c->get_top_block();
     switch (tool_id) {
     case ToolID::SET_GROUP:
     case ToolID::SET_NEW_GROUP:

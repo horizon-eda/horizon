@@ -27,7 +27,7 @@ const CanvasPatch &RulesCheckCacheBoardImage::get_canvas() const
 RulesCheckCacheNetPins::RulesCheckCacheNetPins(IDocument &c)
 {
     auto &core = dynamic_cast<IDocumentSchematic &>(c);
-    auto &block = *core.get_block();
+    auto &block = *core.get_top_block();
     for (auto &it : block.nets) {
         net_pins[&it.second];
     }

@@ -36,7 +36,7 @@ Schematic *CoreSchematic::get_schematic()
     return &*sch;
 }
 
-Block *CoreSchematic::get_block()
+Block *CoreSchematic::get_top_block()
 {
     return get_schematic()->block;
 }

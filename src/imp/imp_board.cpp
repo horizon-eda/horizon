@@ -649,8 +649,8 @@ void ImpBoard::construct()
         highlights.clear();
         for (const auto &it : canvas->get_selection()) {
             if (auto uu = net_from_selectable(it)) {
-                const auto &net_sel = core_board.get_block()->nets.at(uu);
-                for (const auto &[net_uu, net] : core_board.get_block()->nets) {
+                const auto &net_sel = core_board.get_top_block()->nets.at(uu);
+                for (const auto &[net_uu, net] : core_board.get_top_block()->nets) {
                     if (net.net_class == net_sel.net_class)
                         highlights.emplace(ObjectType::NET, net_uu);
                 }
@@ -1313,7 +1313,7 @@ void ImpBoard::update_net_colors()
 
 void ImpBoard::update_monitor()
 {
-    ItemSet mon_items = core_board.get_block()->get_pool_items_used();
+    ItemSet mon_items = core_board.get_top_block()->get_pool_items_used();
     {
         ItemSet items = core_board.get_board()->get_pool_items_used();
         mon_items.insert(items.begin(), items.end());
