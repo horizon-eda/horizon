@@ -869,7 +869,7 @@ void ImpBase::run(int argc, char *argv[])
     });
     core->signal_modified().connect([this] { needs_autosave = true; });
 
-    if (core->get_block()) {
+    if (core->get_top_block()) {
         core->signal_rebuilt().connect(sigc::mem_fun(*this, &ImpBase::set_window_title_from_block));
         set_window_title_from_block();
     }
@@ -1645,8 +1645,8 @@ void ImpBase::set_window_title(const std::string &s)
 void ImpBase::set_window_title_from_block()
 {
     std::string title;
-    if (core->get_block()->project_meta.count("project_title"))
-        title = core->get_block()->project_meta.at("project_title");
+    if (core->get_top_block()->project_meta.count("project_title"))
+        title = core->get_top_block()->project_meta.at("project_title");
 
     set_window_title(title);
 }

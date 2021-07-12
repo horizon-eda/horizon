@@ -41,7 +41,7 @@ enum class ToolID;
  */
 class Core : public virtual Document {
 public:
-    class Block *get_block() override
+    class Block *get_top_block() override
     {
         return nullptr;
     }

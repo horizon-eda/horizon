@@ -186,7 +186,7 @@ bool ImpSchematic::handle_broadcast(const json &j)
                 std::pair<ToolBackannotateConnectionLines::ToolDataBackannotate::Item,
                           ToolBackannotateConnectionLines::ToolDataBackannotate::Item>
                         item;
-                auto &block = *core_schematic.get_block();
+                auto &block = *core_schematic.get_top_block();
                 item.first.from_json(block, v.at("from"));
                 item.second.from_json(block, v.at("to"));
                 if (item.first.is_valid() && item.second.is_valid())
@@ -436,8 +436,8 @@ void ImpSchematic::construct()
         highlights.clear();
         for (const auto &it : canvas->get_selection()) {
             if (auto uu = net_from_selectable(it)) {
-                const auto &net_sel = core_schematic.get_block()->nets.at(uu);
-                for (const auto &[net_uu, net] : core_schematic.get_block()->nets) {
+                const auto &net_sel = core_schematic.get_top_block()->nets.at(uu);
+                for (const auto &[net_uu, net] : core_schematic.get_top_block()->nets) {
                     if (net.net_class == net_sel.net_class)
                         highlights.emplace(ObjectType::NET, net_uu);
                 }
@@ -449,7 +449,7 @@ void ImpSchematic::construct()
     connect_action(ActionID::HIGHLIGHT_GROUP, sigc::mem_fun(*this, &ImpSchematic::handle_highlight_group_tag));
     connect_action(ActionID::HIGHLIGHT_TAG, sigc::mem_fun(*this, &ImpSchematic::handle_highlight_group_tag));
 
-    bom_export_window = BOMExportWindow::create(main_window, *core_schematic.get_block(),
+    bom_export_window = BOMExportWindow::create(main_window, *core_schematic.get_top_block(),
                                                 *core_schematic.get_bom_export_settings(), *pool.get(), project_dir);
 
     connect_action(ActionID::BOM_EXPORT_WINDOW, [this](const auto &c) { bom_export_window->present(); });
@@ -1146,7 +1146,7 @@ void ImpSchematic::expand_selection_for_property_panel(std::set<SelectableRef> &
 
 void ImpSchematic::update_monitor()
 {
-    ItemSet mon_items = core_schematic.get_block()->get_pool_items_used();
+    ItemSet mon_items = core_schematic.get_top_block()->get_pool_items_used();
     {
         ItemSet items = core_schematic.get_schematic()->get_pool_items_used();
         mon_items.insert(items.begin(), items.end());

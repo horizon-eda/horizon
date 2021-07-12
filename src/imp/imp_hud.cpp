@@ -124,7 +124,7 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
             if (auto ju_b = dynamic_cast<BoardJunction *>(ju))
                 net = ju_b->net;
             if (net)
-                s += "Net: " + core->get_block()->get_net_name(net->uuid);
+                s += "Net: " + core->get_top_block()->get_net_name(net->uuid);
             else
                 s += "No net";
             sel_erase_type(sel, ObjectType::JUNCTION);
@@ -182,7 +182,7 @@ std::string ImpBase::get_hud_text_for_net(const Net *net)
     if (!net)
         return "No net";
 
-    std::string s = "Net: " + core->get_block()->get_net_name(net->uuid) + "\n";
+    std::string s = "Net: " + core->get_top_block()->get_net_name(net->uuid) + "\n";
     s += "Net class " + net->net_class->name + "\n";
     if (net->is_power)
         s += "is power net";
@@ -209,7 +209,7 @@ std::string ImpBase::get_hud_text_for_component(const Component *comp)
             s += "<a href=\"" + Glib::Markup::escape_text(part->get_datasheet()) + "\" title=\""
                  + Glib::Markup::escape_text(Glib::Markup::escape_text(part->get_datasheet())) + "\">Datasheet</a>\n";
 
-        const auto block = core->get_block();
+        const auto block = core->get_top_block();
         if (comp->group)
             s += "Group: " + Glib::Markup::escape_text(block->get_group_name(comp->group)) + "\n";
         if (comp->tag)

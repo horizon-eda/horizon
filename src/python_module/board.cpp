@@ -26,7 +26,7 @@ public:
     {
         return &board;
     }
-    horizon::Block *get_block() override
+    horizon::Block *get_top_block() override
     {
         return &block;
     }

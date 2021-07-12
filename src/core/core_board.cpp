@@ -618,7 +618,7 @@ const Board *CoreBoard::get_board() const
     return &*brd;
 }
 
-Block *CoreBoard::get_block()
+Block *CoreBoard::get_top_block()
 {
     return get_board()->block;
 }

@@ -57,7 +57,7 @@ ToolResponse ToolManageBuses::begin(const ToolArgs &args)
         r = imp->dialogs.edit_stackup(*doc.b);
     }
     else if (tool_id == ToolID::MANAGE_POWER_NETS) {
-        r = imp->dialogs.manage_power_nets(*doc.c->get_block());
+        r = imp->dialogs.manage_power_nets(*doc.c->get_top_block());
     }
     else if (tool_id == ToolID::EDIT_FRAME_PROPERTIES) {
         r = imp->dialogs.edit_frame_properties(doc.f->get_frame());

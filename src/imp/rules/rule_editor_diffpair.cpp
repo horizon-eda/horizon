@@ -36,14 +36,14 @@ void RuleEditorDiffpair::populate()
         grid->attach(*la, 1, 0, 1, 1);
     }
 
-    auto net_class_button = Gtk::manage(new NetClassButton(*core.get_block()));
+    auto net_class_button = Gtk::manage(new NetClassButton(*core.get_top_block()));
     net_class_button->set_net_class(rule2->net_class);
     net_class_button->signal_net_class_changed().connect([this](const UUID &net_class) {
         rule2->net_class = net_class;
         s_signal_updated.emit();
     });
     if (!rule2->net_class)
-        net_class_button->set_net_class(core.get_block()->net_class_default->uuid);
+        net_class_button->set_net_class(core.get_top_block()->net_class_default->uuid);
     grid->attach(*net_class_button, 0, 1, 1, 1);
 
     auto layer_combo = create_layer_combo(rule2->layer, true);

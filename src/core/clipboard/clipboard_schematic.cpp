@@ -12,7 +12,7 @@ void ClipboardSchematic::expand_selection()
     ClipboardBase::expand_selection();
 
     const auto &sh = *doc.get_sheet();
-    const auto &bl = *doc.get_block();
+    const auto &bl = *doc.get_top_block();
     {
         std::set<SelectableRef> new_sel;
         for (const auto &it : selection) {
@@ -105,7 +105,7 @@ void ClipboardSchematic::serialize(json &j)
     j["bus_rippers"] = json::object();
 
     const auto &sh = *doc.get_sheet();
-    const auto &bl = *doc.get_block();
+    const auto &bl = *doc.get_top_block();
 
     std::set<UUID> nets;
     std::map<UUID, const LineNet *> net_lines;

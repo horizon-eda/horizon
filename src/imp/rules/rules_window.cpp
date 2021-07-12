@@ -621,9 +621,9 @@ RuleEditor *RulesWindow::create_editor(Rule &r)
     return e;
 }
 
-Block *RulesWindow::get_block()
+Block *RulesWindow::get_top_block()
 {
-    return core.get_block();
+    return core.get_top_block();
 }
 
 void RulesWindow::update_rule_instances(RuleID id)
@@ -639,7 +639,7 @@ void RulesWindow::update_rule_instances(RuleID id)
     }
     for (const auto &it : inst) {
         auto la = Gtk::manage(
-                new RuleLabel(sg_order, it.second->get_brief(get_block()), id, it.first, it.second->get_order()));
+                new RuleLabel(sg_order, it.second->get_brief(get_top_block()), id, it.first, it.second->get_order()));
         la->set_sensitive(it.second->enabled);
         la->set_imported(it.second->imported);
         la->show();
@@ -660,7 +660,7 @@ void RulesWindow::update_rule_instance_labels()
     for (auto ch : lb_multi->get_children()) {
         auto la = dynamic_cast<RuleLabel *>(dynamic_cast<Gtk::ListBoxRow *>(ch)->get_child());
         auto rule = rules.get_rule(la->id, la->uuid);
-        la->set_text(rule->get_brief(get_block()));
+        la->set_text(rule->get_brief(get_top_block()));
         la->set_sensitive(rule->enabled);
         la->set_order(rule->get_order());
         la->set_imported(rule->imported);

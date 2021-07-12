@@ -46,7 +46,7 @@ public:
     virtual std::vector<Arc *> get_arcs() = 0;
     virtual std::vector<Keepout *> get_keepouts() = 0;
 
-    virtual class Block *get_block() = 0;
+    virtual class Block *get_top_block() = 0;
     virtual class Rules *get_rules() = 0;
     virtual class IPool &get_pool() = 0;
     virtual class IPool &get_pool_caching() = 0;

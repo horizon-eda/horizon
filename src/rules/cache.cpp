@@ -28,7 +28,7 @@ RulesCheckCacheNetPins::RulesCheckCacheNetPins(IDocument *c)
 {
     auto core = dynamic_cast<IDocumentSchematic *>(c);
     assert(core);
-    auto block = core->get_block();
+    auto block = core->get_top_block();
     for (auto &it : block->nets) {
         net_pins[&it.second];
     }
