@@ -831,13 +831,7 @@ SelectSheetDialog::SelectSheetDialog(const Schematic *s, const Sheet *skip)
     lb->set_header_func(sigc::ptr_fun(header_func_separator));
     sc->add(*lb);
 
-    std::vector<const Sheet *> sheets;
-    for (const auto &it : sch->sheets) {
-        sheets.push_back(&it.second);
-    }
-    std::sort(sheets.begin(), sheets.end(), [](auto a, auto b) { return a->index < b->index; });
-
-    for (const auto it : sheets) {
+    for (const auto it : s->get_sheets_sorted()) {
         if (it != skip) {
             auto la = Gtk::manage(new MyLabel(std::to_string(it->index) + " " + it->name, it->uuid));
             lb->append(*la);

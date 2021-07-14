@@ -123,5 +123,8 @@ public:
     void load_pictures(const std::string &dir);
 
     ItemSet get_pool_items_used() const;
+
+    std::vector<Sheet *> get_sheets_sorted();
+    std::vector<const Sheet *> get_sheets_sorted() const;
 };
 } // namespace horizon
