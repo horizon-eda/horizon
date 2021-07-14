@@ -32,13 +32,6 @@ void export_pdf(const class Schematic &sch, const class PDFExportSettings &setti
     }
     info->SetTitle(title);
 
-    std::vector<const Sheet *> sheets;
-    for (const auto &it : sch.sheets) {
-        sheets.push_back(&it.second);
-    }
-    std::sort(sheets.begin(), sheets.end(), [](auto a, auto b) { return a->index < b->index; });
-
-
     auto font = document.CreateFont("Helvetica");
 
 #if PODOFO_VERSION_MAJOR != 0 || PODOFO_VERSION_MINOR != 9 || PODOFO_VERSION_PATCH != 5
@@ -50,6 +43,8 @@ void export_pdf(const class Schematic &sch, const class PDFExportSettings &setti
 
     CanvasPDF ca(painter, *font, settings);
     ca.use_layer_colors = false;
+
+    auto sheets = sch.get_sheets_sorted();
     for (const auto sheet : sheets) {
         cb("Exporting sheet " + format_m_of_n(sheet->index, sheets.size()), ((double)sheet->index) / sheets.size());
 
