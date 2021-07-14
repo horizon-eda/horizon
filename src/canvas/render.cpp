@@ -1193,7 +1193,8 @@ static LayerRange get_layer_for_padstack_type(Padstack::Type type)
     }
 }
 
-void Canvas::render(const Package &pkg, bool interactive, bool smashed, bool omit_silkscreen, bool omit_outline)
+void Canvas::render(const Package &pkg, bool interactive, bool smashed, bool omit_silkscreen, bool omit_outline,
+                    bool on_panel)
 {
     if (interactive) {
         for (const auto &it : pkg.junctions) {
@@ -1221,12 +1222,19 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed, bool omi
         render(it.second, interactive);
     }
     if (object_refs_current.size() && object_refs_current.back().type == ObjectType::BOARD_PACKAGE) {
+        // rendering as a board package, not on a panel
         auto pkg_uuid = object_refs_current.back().uuid;
         for (const auto &it : pkg.pads) {
             object_ref_push(ObjectType::PAD, it.second.uuid, pkg_uuid);
             render_pad_overlay(it.second, interactive);
             render(it.second);
             object_ref_pop();
+        }
+    }
+    else if (on_panel) {
+        for (const auto &it : pkg.pads) {
+            render_pad_overlay(it.second, interactive);
+            render(it.second);
         }
     }
     else {
@@ -1289,7 +1297,7 @@ void Canvas::render(const BoardPackage &pkg, bool interactive)
     if (interactive)
         object_ref_push(ObjectType::BOARD_PACKAGE, pkg.uuid);
 
-    render(pkg.package, false, pkg.smashed, pkg.omit_silkscreen, pkg.omit_outline);
+    render(pkg.package, false, pkg.smashed, pkg.omit_silkscreen, pkg.omit_outline, !interactive);
 
     if (interactive)
         object_ref_pop();
