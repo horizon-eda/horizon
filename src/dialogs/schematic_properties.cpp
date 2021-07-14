@@ -108,12 +108,7 @@ SchematicPropertiesDialog::SchematicPropertiesDialog(Gtk::Window *parent, Schema
         stack->add(*ed, "global", "Global");
     }
 
-    std::vector<Sheet *> sheets;
-    for (auto &it : sch.sheets) {
-        sheets.push_back(&it.second);
-    }
-    std::sort(sheets.begin(), sheets.end(), [](auto a, auto b) { return a->index < b->index; });
-    for (auto &it : sheets) {
+    for (auto &it : sch.get_sheets_sorted()) {
         auto ed = Gtk::manage(new SheetEditor(*it, sch, pool, pool_caching));
         stack->add(*ed, (std::string)it->uuid, "Sheet " + it->name);
     }

@@ -1119,4 +1119,24 @@ ItemSet Schematic::get_pool_items_used() const
     return items_needed;
 }
 
+template <typename T, typename U> static std::vector<T *> sort_sheets(U &sch)
+{
+    std::vector<T *> sheets;
+    for (auto &[uu, it] : sch.sheets) {
+        sheets.push_back(&it);
+    }
+    std::sort(sheets.begin(), sheets.end(), [](auto a, auto b) { return a->index < b->index; });
+    return sheets;
+}
+
+std::vector<Sheet *> Schematic::get_sheets_sorted()
+{
+    return sort_sheets<Sheet>(*this);
+}
+
+std::vector<const Sheet *> Schematic::get_sheets_sorted() const
+{
+    return sort_sheets<const Sheet>(*this);
+}
+
 } // namespace horizon
