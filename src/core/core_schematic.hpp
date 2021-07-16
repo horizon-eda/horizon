@@ -13,30 +13,13 @@ public:
                   const std::string &pictures_dir, IPool &pool, IPool &pool_caching);
     bool has_object_type(ObjectType ty) const override;
 
-    Junction *get_junction(const UUID &uu) override;
-    Line *get_line(const UUID &uu) override;
-    Arc *get_arc(const UUID &uu) override;
     Schematic *get_schematic() override;
     Sheet *get_sheet() override;
     const Sheet *get_sheet() const;
-    Text *get_text(const UUID &uu) override;
 
+    Junction *get_junction(const UUID &uu) override;
     Junction *insert_junction(const UUID &uu) override;
     void delete_junction(const UUID &uu) override;
-    Line *insert_line(const UUID &uu) override;
-    void delete_line(const UUID &uu) override;
-    Arc *insert_arc(const UUID &uu) override;
-    void delete_arc(const UUID &uu) override;
-
-    Text *insert_text(const UUID &uu) override;
-    void delete_text(const UUID &uu) override;
-
-    class Picture *insert_picture(const UUID &uu) override;
-    class Picture *get_picture(const UUID &uu) override;
-    void delete_picture(const UUID &uu) override;
-
-    std::vector<Line *> get_lines() override;
-    std::vector<Arc *> get_arcs() override;
 
     class Block *get_block() override;
     class LayerProvider &get_layer_provider() override;
@@ -92,6 +75,11 @@ public:
     void reload_pool() override;
 
 private:
+    std::map<UUID, Line> *get_line_map() override;
+    std::map<UUID, Arc> *get_arc_map() override;
+    std::map<UUID, Text> *get_text_map() override;
+    std::map<UUID, Picture> *get_picture_map() override;
+
     std::optional<Block> block;
     const bool project_meta_loaded_from_block;
     std::optional<Schematic> sch;
