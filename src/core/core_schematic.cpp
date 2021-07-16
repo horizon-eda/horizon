@@ -31,12 +31,6 @@ Junction *CoreSchematic::get_junction(const UUID &uu)
     auto &sheet = sch->sheets.at(sheet_uuid);
     return &sheet.junctions.at(uu);
 }
-
-Text *CoreSchematic::get_text(const UUID &uu)
-{
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    return &sheet.texts.at(uu);
-}
 Schematic *CoreSchematic::get_schematic()
 {
     return &*sch;
@@ -62,16 +56,6 @@ const Sheet *CoreSchematic::get_sheet() const
     return &sch->sheets.at(sheet_uuid);
 }
 
-Line *CoreSchematic::get_line(const UUID &uu)
-{
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    return &sheet.lines.at(uu);
-}
-Arc *CoreSchematic::get_arc(const UUID &uu)
-{
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    return &sheet.arcs.at(uu);
-}
 
 Junction *CoreSchematic::insert_junction(const UUID &uu)
 {
@@ -86,77 +70,21 @@ void CoreSchematic::delete_junction(const UUID &uu)
     sheet.junctions.erase(uu);
 }
 
-Line *CoreSchematic::insert_line(const UUID &uu)
+std::map<UUID, Line> *CoreSchematic::get_line_map()
 {
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    auto x = sheet.lines.emplace(std::make_pair(uu, uu));
-    return &(x.first->second);
+    return &get_sheet()->lines;
 }
-void CoreSchematic::delete_line(const UUID &uu)
+std::map<UUID, Arc> *CoreSchematic::get_arc_map()
 {
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    sheet.lines.erase(uu);
+    return &get_sheet()->arcs;
 }
-
-Arc *CoreSchematic::insert_arc(const UUID &uu)
+std::map<UUID, Text> *CoreSchematic::get_text_map()
 {
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    auto x = sheet.arcs.emplace(std::make_pair(uu, uu));
-    return &(x.first->second);
+    return &get_sheet()->texts;
 }
-void CoreSchematic::delete_arc(const UUID &uu)
+std::map<UUID, Picture> *CoreSchematic::get_picture_map()
 {
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    sheet.arcs.erase(uu);
-}
-
-std::vector<Line *> CoreSchematic::get_lines()
-{
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    std::vector<Line *> r;
-    for (auto &it : sheet.lines) {
-        r.push_back(&it.second);
-    }
-    return r;
-}
-
-std::vector<Arc *> CoreSchematic::get_arcs()
-{
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    std::vector<Arc *> r;
-    for (auto &it : sheet.arcs) {
-        r.push_back(&it.second);
-    }
-    return r;
-}
-
-void CoreSchematic::delete_text(const UUID &uu)
-{
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    sheet.texts.erase(uu);
-}
-Text *CoreSchematic::insert_text(const UUID &uu)
-{
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    auto x = sheet.texts.emplace(std::make_pair(uu, uu));
-    return &(x.first->second);
-}
-
-Picture *CoreSchematic::get_picture(const UUID &uu)
-{
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    return &sheet.pictures.at(uu);
-}
-void CoreSchematic::delete_picture(const UUID &uu)
-{
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    sheet.pictures.erase(uu);
-}
-Picture *CoreSchematic::insert_picture(const UUID &uu)
-{
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    auto x = sheet.pictures.emplace(std::make_pair(uu, uu));
-    return &(x.first->second);
+    return &get_sheet()->pictures;
 }
 
 bool CoreSchematic::has_object_type(ObjectType ty) const
