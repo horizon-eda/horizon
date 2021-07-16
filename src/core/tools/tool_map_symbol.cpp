@@ -131,7 +131,7 @@ ToolResponse ToolMapSymbol::update(const ToolArgs &args)
         } break;
 
         case InToolActionID::RMB:
-            doc.c->delete_schematic_symbol(sym_current->uuid);
+            doc.c->get_sheet()->symbols.erase(sym_current->uuid);
             sym_current = nullptr;
             return ToolResponse::commit();
             break;

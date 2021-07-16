@@ -11,9 +11,9 @@ std::pair<SchematicSymbol *, SchematicSymbol *> ToolExchangeGates::get_symbols()
     std::pair<SchematicSymbol *, SchematicSymbol *> r(nullptr, nullptr);
     if ((sel_count_type(selection, ObjectType::SCHEMATIC_SYMBOL) == 2) && selection.size() == 2) {
         auto it = selection.begin();
-        r.first = doc.c->get_schematic_symbol(it->uuid);
+        r.first = &doc.c->get_sheet()->symbols.at(it->uuid);
         it++;
-        r.second = doc.c->get_schematic_symbol(it->uuid);
+        r.second = &doc.c->get_sheet()->symbols.at(it->uuid);
         if (r.first->component != r.second->component && (r.first->gate->unit->uuid == r.second->gate->unit->uuid))
             return r;
         else

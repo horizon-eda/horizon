@@ -50,21 +50,21 @@ ToolResponse ToolSetNotConnected::update(const ToolArgs &args)
         switch (args.action) {
         case InToolActionID::LMB:
             if (args.target.type == ObjectType::SYMBOL_PIN) {
-                auto sym = doc.c->get_schematic_symbol(args.target.path.at(0));
-                auto pin = &sym->symbol.pins.at(args.target.path.at(1));
-                UUIDPath<2> connpath(sym->gate->uuid, args.target.path.at(1));
-                if (sym->component->connections.count(connpath) == 0) { // pin is not connected
+                auto &sym = doc.c->get_sheet()->symbols.at(args.target.path.at(0));
+                auto &pin = sym.symbol.pins.at(args.target.path.at(1));
+                UUIDPath<2> connpath(sym.gate->uuid, args.target.path.at(1));
+                if (sym.component->connections.count(connpath) == 0) { // pin is not connected
                     if (mode == Mode::TOGGLE || mode == Mode::SET) {
-                        sym->component->connections.emplace(connpath, nullptr);
-                        sym->symbol.pins.at(pin->uuid).connector_style = SymbolPin::ConnectorStyle::NC; // for preview
+                        sym.component->connections.emplace(connpath, nullptr);
+                        sym.symbol.pins.at(pin.uuid).connector_style = SymbolPin::ConnectorStyle::NC; // for preview
                     }
                 }
                 else {
-                    auto &conn = sym->component->connections.at(connpath);
+                    auto &conn = sym.component->connections.at(connpath);
                     if (conn.net == nullptr) {
                         if (mode == Mode::TOGGLE || mode == Mode::CLEAR) {
-                            sym->component->connections.erase(connpath);
-                            sym->symbol.pins.at(pin->uuid).connector_style =
+                            sym.component->connections.erase(connpath);
+                            sym.symbol.pins.at(pin.uuid).connector_style =
                                     SymbolPin::ConnectorStyle::BOX; // for preview
                         }
                     }

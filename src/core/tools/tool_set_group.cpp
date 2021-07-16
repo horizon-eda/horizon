@@ -12,7 +12,7 @@ std::set<Component *> ToolSetGroup::get_components()
     std::set<Component *> components;
     for (const auto &it : selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-            components.insert(doc.c->get_schematic_symbol(it.uuid)->component);
+            components.insert(doc.c->get_sheet()->symbols.at(it.uuid).component);
         }
     }
     return components;

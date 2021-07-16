@@ -102,11 +102,11 @@ bool ToolPlaceBusRipper::update_attached(const ToolArgs &args)
                 create_attached();
             }
             else {
-                for (auto it : doc.c->get_net_lines()) {
-                    if (it->coord_on_line(temp->position)) {
+                for (auto &[uu, it] : doc.c->get_sheet()->net_lines) {
+                    if (it.coord_on_line(temp->position)) {
                         std::cout << "on line" << std::endl;
-                        if (it->bus == bus) {
-                            doc.c->get_sheet()->split_line_net(it, temp);
+                        if (it.bus == bus) {
+                            doc.c->get_sheet()->split_line_net(&it, temp);
                             junctions_placed.push_front(temp);
                             create_junction(args.coords);
                             create_attached();

@@ -31,11 +31,7 @@ Junction *CoreSchematic::get_junction(const UUID &uu)
     auto &sheet = sch->sheets.at(sheet_uuid);
     return &sheet.junctions.at(uu);
 }
-SchematicSymbol *CoreSchematic::get_schematic_symbol(const UUID &uu)
-{
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    return &sheet.symbols.at(uu);
-}
+
 Text *CoreSchematic::get_text(const UUID &uu)
 {
     auto &sheet = sch->sheets.at(sheet_uuid);
@@ -84,34 +80,10 @@ Junction *CoreSchematic::insert_junction(const UUID &uu)
     return &(x.first->second);
 }
 
-LineNet *CoreSchematic::insert_line_net(const UUID &uu)
-{
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    auto x = sheet.net_lines.emplace(std::make_pair(uu, uu));
-    return &(x.first->second);
-}
-
 void CoreSchematic::delete_junction(const UUID &uu)
 {
     auto &sheet = sch->sheets.at(sheet_uuid);
     sheet.junctions.erase(uu);
-}
-void CoreSchematic::delete_line_net(const UUID &uu)
-{
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    sheet.net_lines.erase(uu);
-}
-void CoreSchematic::delete_schematic_symbol(const UUID &uu)
-{
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    sheet.symbols.erase(uu);
-}
-SchematicSymbol *CoreSchematic::insert_schematic_symbol(const UUID &uu, const Symbol *sym)
-{
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    auto x = sheet.symbols.emplace(std::make_pair(uu, SchematicSymbol{uu, sym}));
-    return &(x.first->second);
-    return nullptr;
 }
 
 Line *CoreSchematic::insert_line(const UUID &uu)
@@ -136,25 +108,6 @@ void CoreSchematic::delete_arc(const UUID &uu)
 {
     auto &sheet = sch->sheets.at(sheet_uuid);
     sheet.arcs.erase(uu);
-}
-
-std::vector<LineNet *> CoreSchematic::get_net_lines()
-{
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    std::vector<LineNet *> r;
-    for (auto &it : sheet.net_lines) {
-        r.push_back(&it.second);
-    }
-    return r;
-}
-std::vector<NetLabel *> CoreSchematic::get_net_labels()
-{
-    auto &sheet = sch->sheets.at(sheet_uuid);
-    std::vector<NetLabel *> r;
-    for (auto &it : sheet.net_labels) {
-        r.push_back(&it.second);
-    }
-    return r;
 }
 
 std::vector<Line *> CoreSchematic::get_lines()

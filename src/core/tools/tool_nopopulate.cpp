@@ -10,8 +10,8 @@ bool ToolNoPopulate::can_begin()
 {
     for (const auto &it : selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-            auto sym = doc.c->get_schematic_symbol(it.uuid);
-            if (sym->component->nopopulate == (tool_id == ToolID::POPULATE))
+            auto &sym = doc.c->get_sheet()->symbols.at(it.uuid);
+            if (sym.component->nopopulate == (tool_id == ToolID::POPULATE))
                 return true;
         }
     }
@@ -22,8 +22,8 @@ ToolResponse ToolNoPopulate::begin(const ToolArgs &args)
 {
     for (const auto &it : args.selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-            auto sym = doc.c->get_schematic_symbol(it.uuid);
-            sym->component->nopopulate = (tool_id == ToolID::NOPOPULATE);
+            auto &sym = doc.c->get_sheet()->symbols.at(it.uuid);
+            sym.component->nopopulate = (tool_id == ToolID::NOPOPULATE);
         }
     }
     return ToolResponse::commit();

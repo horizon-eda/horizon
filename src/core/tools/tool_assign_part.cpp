@@ -18,15 +18,15 @@ const Entity *ToolAssignPart::get_entity()
     const Entity *entity = nullptr;
     for (const auto &it : selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-            auto sym = doc.c->get_schematic_symbol(it.uuid);
+            auto &sym = doc.c->get_sheet()->symbols.at(it.uuid);
             if (entity) {
-                if (entity != sym->component->entity) {
+                if (entity != sym.component->entity) {
                     return nullptr;
                 }
             }
             else {
-                entity = sym->component->entity;
-                comp = sym->component;
+                entity = sym.component->entity;
+                comp = sym.component;
             }
         }
     }
@@ -59,9 +59,9 @@ ToolResponse ToolAssignPart::begin(const ToolArgs &args)
 
         for (const auto &it : args.selection) {
             if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-                auto sym = doc.c->get_schematic_symbol(it.uuid);
-                if (sym->component->entity == entity) {
-                    sym->component->part = part;
+                auto &sym = doc.c->get_sheet()->symbols.at(it.uuid);
+                if (sym.component->entity == entity) {
+                    sym.component->part = part;
                 }
             }
         }

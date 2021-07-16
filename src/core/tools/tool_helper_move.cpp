@@ -50,7 +50,7 @@ void ToolHelperMove::move_do(const Coordi &delta)
             doc.y->get_symbol_pin(it.uuid).position += delta;
             break;
         case ObjectType::SCHEMATIC_SYMBOL:
-            doc.c->get_schematic_symbol(it.uuid)->placement.shift += delta;
+            doc.c->get_sheet()->symbols.at(it.uuid).placement.shift += delta;
             break;
         case ObjectType::BOARD_PACKAGE:
             doc.b->get_board()->packages.at(it.uuid).placement.shift += delta;
@@ -258,20 +258,20 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
         } break;
 
         case ObjectType::SCHEMATIC_SYMBOL: {
-            SchematicSymbol *sym = doc.c->get_schematic_symbol(it.uuid);
-            transform(sym->placement.shift, center, rotate);
+            auto &sym = doc.c->get_sheet()->symbols.at(it.uuid);
+            transform(sym.placement.shift, center, rotate);
             if (rotate) {
-                if (sym->placement.mirror) {
-                    sym->placement.inc_angle_deg(90);
+                if (sym.placement.mirror) {
+                    sym.placement.inc_angle_deg(90);
                 }
                 else {
-                    sym->placement.inc_angle_deg(-90);
+                    sym.placement.inc_angle_deg(-90);
                 }
             }
             else {
-                sym->placement.mirror = !sym->placement.mirror;
+                sym.placement.mirror = !sym.placement.mirror;
             }
-            sym->symbol.apply_placement(sym->placement);
+            sym.symbol.apply_placement(sym.placement);
 
         } break;
 

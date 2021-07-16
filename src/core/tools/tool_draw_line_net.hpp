@@ -50,5 +50,6 @@ private:
     SchematicJunction *make_temp_junc(const Coordi &c);
     void apply_settings() override;
     void set_snap_filter();
+    LineNet *insert_line_net();
 };
 } // namespace horizon
