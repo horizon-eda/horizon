@@ -121,17 +121,17 @@ void ToolMove::expand_selection()
         } break;
 
         case ObjectType::SCHEMATIC_SYMBOL: {
-            auto sym = doc.c->get_schematic_symbol(it.uuid);
-            for (const auto &itt : sym->texts) {
+            auto &sym = doc.c->get_sheet()->symbols.at(it.uuid);
+            for (const auto &itt : sym.texts) {
                 new_sel.emplace(itt->uuid, ObjectType::TEXT);
             }
-            for (const auto &[pin_uu, pin] : sym->symbol.pins) {
+            for (const auto &[pin_uu, pin] : sym.symbol.pins) {
                 for (const auto &[line_uu, line] : doc.c->get_sheet()->net_lines) {
-                    if (line.is_connected_to(sym->uuid, pin_uu)) {
+                    if (line.is_connected_to(sym.uuid, pin_uu)) {
                         for (const auto &it_ft : {line.from, line.to}) {
                             if (it_ft.is_junc()) {
                                 const auto &ju = *it_ft.junc;
-                                const auto pin_pos = sym->placement.transform(pin.position);
+                                const auto pin_pos = sym.placement.transform(pin.position);
                                 Axis ax = Axis::NONE;
                                 if (pin_pos.x == ju.position.x)
                                     ax = Axis::X;
@@ -210,7 +210,7 @@ Coordi ToolMove::get_selection_center()
             accu.accumulate(doc.y->get_symbol_pin(it.uuid).position);
             break;
         case ObjectType::SCHEMATIC_SYMBOL:
-            accu.accumulate(doc.c->get_schematic_symbol(it.uuid)->placement.shift);
+            accu.accumulate(doc.c->get_sheet()->symbols.at(it.uuid).placement.shift);
             break;
         case ObjectType::BOARD_PACKAGE:
             accu.accumulate(doc.b->get_board()->packages.at(it.uuid).placement.shift);

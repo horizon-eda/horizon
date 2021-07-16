@@ -16,7 +16,6 @@ public:
     Junction *get_junction(const UUID &uu) override;
     Line *get_line(const UUID &uu) override;
     Arc *get_arc(const UUID &uu) override;
-    SchematicSymbol *get_schematic_symbol(const UUID &uu) override;
     Schematic *get_schematic() override;
     Sheet *get_sheet() override;
     const Sheet *get_sheet() const;
@@ -28,11 +27,6 @@ public:
     void delete_line(const UUID &uu) override;
     Arc *insert_arc(const UUID &uu) override;
     void delete_arc(const UUID &uu) override;
-    SchematicSymbol *insert_schematic_symbol(const UUID &uu, const Symbol *sym) override;
-    void delete_schematic_symbol(const UUID &uu) override;
-
-    LineNet *insert_line_net(const UUID &uu) override;
-    void delete_line_net(const UUID &uu) override;
 
     Text *insert_text(const UUID &uu) override;
     void delete_text(const UUID &uu) override;
@@ -43,8 +37,6 @@ public:
 
     std::vector<Line *> get_lines() override;
     std::vector<Arc *> get_arcs() override;
-    std::vector<LineNet *> get_net_lines() override;
-    std::vector<NetLabel *> get_net_labels() override;
 
     class Block *get_block() override;
     class LayerProvider &get_layer_provider() override;

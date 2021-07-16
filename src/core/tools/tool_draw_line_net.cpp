@@ -131,6 +131,14 @@ void ToolDrawLineNet::apply_settings()
     }
 }
 
+LineNet *ToolDrawLineNet::insert_line_net()
+{
+    auto uu = UUID::random();
+    return &doc.c->get_sheet()
+                    ->net_lines.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu))
+                    .first->second;
+}
+
 ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {
@@ -152,7 +160,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                     bus = ju->bus;
                 }
                 else if (args.target.type == ObjectType::SYMBOL_PIN) {
-                    sym = doc.c->get_schematic_symbol(args.target.path.at(0));
+                    sym = &doc.c->get_sheet()->symbols.at(args.target.path.at(0));
                     pin = &sym->symbol.pins.at(args.target.path.at(1));
                     pin_start = pin;
                     UUIDPath<2> connpath(sym->gate->uuid, args.target.path.at(1));
@@ -191,11 +199,11 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                 }
                 else { // unknown or no target
                     ju = make_temp_junc(args.coords);
-                    for (auto it : doc.c->get_net_lines()) {
-                        if (it->coord_on_line(temp_junc_head->position)) {
-                            if (it != temp_line_head && it != temp_line_mid) {
+                    for (auto &[uu, it] : doc.c->get_sheet()->net_lines) {
+                        if (it.coord_on_line(temp_junc_head->position)) {
+                            if (&it != temp_line_head && &it != temp_line_mid) {
                                 imp->tool_bar_flash("split net line");
-                                auto li = doc.c->get_sheet()->split_line_net(it, ju);
+                                auto li = doc.c->get_sheet()->split_line_net(&it, ju);
                                 net = li->net;
                                 bus = li->bus;
                                 ju->net = li->net;
@@ -229,7 +237,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                     }
                 }
                 else if (args.target.type == ObjectType::SYMBOL_PIN) {
-                    sym = doc.c->get_schematic_symbol(args.target.path.at(0));
+                    sym = &doc.c->get_sheet()->symbols.at(args.target.path.at(0));
                     pin = &sym->symbol.pins.at(args.target.path.at(1));
                     if (pin == pin_start) // do noting
                         return ToolResponse();
@@ -294,17 +302,16 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                     }
 
                     ju = temp_junc_head;
-                    for (auto it : doc.c->get_net_lines()) {
-                        if (it->coord_on_line(temp_junc_head->position)) {
-                            if (it != temp_line_head && it != temp_line_mid) {
+                    for (auto &[uu, it] : doc.c->get_sheet()->net_lines) {
+                        if (it.coord_on_line(temp_junc_head->position)) {
+                            if (&it != temp_line_head && &it != temp_line_mid) {
                                 imp->tool_bar_flash("split net line");
-                                net = it->net;
-                                bus = it->bus;
+                                net = it.net;
+                                bus = it.bus;
 
-                                auto do_merge =
-                                        merge_bus_net(temp_line_head->net, temp_line_head->bus, it->net, it->bus);
+                                auto do_merge = merge_bus_net(temp_line_head->net, temp_line_head->bus, it.net, it.bus);
                                 if (do_merge) {
-                                    doc.c->get_sheet()->split_line_net(it, ju);
+                                    doc.c->get_sheet()->split_line_net(&it, ju);
                                     restart(args.coords);
                                     return ToolResponse();
                                 }
@@ -328,7 +335,9 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                     set_snap_filter();
                 }
             }
-            temp_line_mid = doc.c->insert_line_net(UUID::random());
+
+
+            temp_line_mid = insert_line_net();
             temp_line_mid->net = net;
             temp_line_mid->bus = bus;
             if (ju) {
@@ -345,7 +354,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
             }
             temp_line_mid->to.connect(temp_junc_mid);
 
-            temp_line_head = doc.c->insert_line_net(UUID::random());
+            temp_line_head = insert_line_net();
             temp_line_head->net = net;
             temp_line_head->bus = bus;
             temp_line_head->from.connect(temp_junc_mid);
@@ -354,8 +363,8 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
 
         case InToolActionID::RMB:
             if (temp_line_head) {
-                doc.c->delete_line_net(temp_line_head->uuid);
-                doc.c->delete_line_net(temp_line_mid->uuid);
+                doc.c->get_sheet()->net_lines.erase(temp_line_head->uuid);
+                doc.c->get_sheet()->net_lines.erase(temp_line_mid->uuid);
                 doc.r->delete_junction(temp_junc_mid->uuid);
                 if (component_floating)
                     component_floating->connections.erase(connpath_floating);
@@ -370,8 +379,8 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
 
         case InToolActionID::CANCEL:
             if (temp_line_head) {
-                doc.c->delete_line_net(temp_line_head->uuid);
-                doc.c->delete_line_net(temp_line_mid->uuid);
+                doc.c->get_sheet()->net_lines.erase(temp_line_head->uuid);
+                doc.c->get_sheet()->net_lines.erase(temp_line_mid->uuid);
                 doc.r->delete_junction(temp_junc_mid->uuid);
                 if (component_floating)
                     component_floating->connections.erase(connpath_floating);
@@ -389,13 +398,13 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
             temp_junc_head->net = ju->net;
             temp_junc_head->bus = ju->bus;
 
-            temp_line_mid = doc.c->insert_line_net(UUID::random());
+            temp_line_mid = insert_line_net();
             temp_line_mid->net = ju->net;
             temp_line_mid->bus = ju->bus;
             temp_line_mid->from.connect(ju);
             temp_line_mid->to.connect(temp_junc_mid);
 
-            temp_line_head = doc.c->insert_line_net(UUID::random());
+            temp_line_head = insert_line_net();
             temp_line_head->net = ju->net;
             temp_line_head->bus = ju->bus;
             temp_line_head->from.connect(temp_junc_mid);

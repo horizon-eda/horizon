@@ -59,16 +59,20 @@ SchematicSymbol *ToolHelperMapSymbol::map_symbol(Component *comp, const Gate *ga
         sym = get_symbol_for_unit(gate->unit->uuid, nullptr, sym_default);
     if (!sym)
         return nullptr;
-    SchematicSymbol *schsym = doc.c->insert_schematic_symbol(UUID::random(), sym);
-    schsym->component = comp;
-    schsym->gate = gate;
-    auto bb = schsym->symbol.get_bbox(true);
+    const auto uu = UUID::random();
+    auto &schsym = doc.c->get_sheet()
+                           ->symbols
+                           .emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, sym))
+                           .first->second;
+    schsym.component = comp;
+    schsym.gate = gate;
+    auto bb = schsym.symbol.get_bbox(true);
     auto sz = bb.second - bb.first;
     imp->get_canvas()->ensure_min_size(sz.x * 1.5, sz.y * 1.5);
 
-    doc.c->get_sheet()->expand_symbol(schsym->uuid, *doc.c->get_schematic());
+    doc.c->get_sheet()->expand_symbol(schsym.uuid, *doc.c->get_schematic());
 
-    return schsym;
+    return &schsym;
 }
 
 void ToolHelperMapSymbol::change_symbol(SchematicSymbol *schsym)

@@ -74,18 +74,18 @@ bool ToolPlaceNetLabel::update_attached(const ToolArgs &args)
                 return true;
             }
             else if (args.target.type == ObjectType::SYMBOL_PIN) {
-                SchematicSymbol *schsym = doc.c->get_schematic_symbol(args.target.path.at(0));
-                SymbolPin *pin = &schsym->symbol.pins.at(args.target.path.at(1));
-                UUIDPath<2> connpath(schsym->gate->uuid, args.target.path.at(1));
-                if (schsym->component->connections.count(connpath) == 0) {
+                auto &schsym = doc.c->get_sheet()->symbols.at(args.target.path.at(0));
+                auto &pin = schsym.symbol.pins.at(args.target.path.at(1));
+                UUIDPath<2> connpath(schsym.gate->uuid, args.target.path.at(1));
+                if (schsym.component->connections.count(connpath) == 0) {
                     // sympin not connected
                     auto uu = UUID::random();
                     auto *line = &doc.c->get_sheet()->net_lines.emplace(uu, uu).first->second;
                     line->net = doc.c->get_schematic()->block->insert_net();
-                    line->from.connect(schsym, pin);
+                    line->from.connect(&schsym, &pin);
                     line->to.connect(temp);
-                    schsym->component->connections.emplace(UUIDPath<2>(schsym->gate->uuid, pin->uuid),
-                                                           static_cast<Net *>(line->net));
+                    schsym.component->connections.emplace(UUIDPath<2>(schsym.gate->uuid, pin.uuid),
+                                                          static_cast<Net *>(line->net));
 
                     temp->net = line->net;
                     switch (la->orientation) {
