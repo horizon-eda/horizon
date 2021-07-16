@@ -599,7 +599,7 @@ void ImpSchematic::update_action_sensitivity()
     if (sel.size() == 1 && (*sel.begin()).type == ObjectType::SCHEMATIC_SYMBOL) {
         auto uu = (*sel.begin()).uuid;
         if (core_schematic.get_sheet()->symbols.count(uu)) {
-            auto comp = core_schematic.get_schematic_symbol(uu)->component;
+            auto comp = core_schematic.get_sheet()->symbols.at(uu).component;
             can_higlight_group = comp->group;
             can_higlight_tag = comp->tag;
         }
@@ -694,7 +694,7 @@ void ImpSchematic::handle_highlight_group_tag(const ActionConnection &a)
     bool tag_mode = a.action_id == ActionID::HIGHLIGHT_TAG;
     auto sel = canvas->get_selection();
     if (sel.size() == 1 && (*sel.begin()).type == ObjectType::SCHEMATIC_SYMBOL) {
-        auto comp = core_schematic.get_schematic_symbol((*sel.begin()).uuid)->component;
+        auto comp = core_schematic.get_sheet()->symbols.at((*sel.begin()).uuid).component;
         UUID uu = tag_mode ? comp->tag : comp->group;
         if (!uu)
             return;
@@ -758,9 +758,9 @@ void ImpSchematic::handle_drag()
     bool start = false;
 
     if (target_drag_begin.type == ObjectType::SYMBOL_PIN) {
-        const auto sym = core_schematic.get_schematic_symbol(target_drag_begin.path.at(0));
-        const auto &pin = sym->symbol.pins.at(target_drag_begin.path.at(1));
-        auto orientation = pin.get_orientation_for_placement(sym->placement);
+        const auto &sym = core_schematic.get_sheet()->symbols.at(target_drag_begin.path.at(0));
+        const auto &pin = sym.symbol.pins.at(target_drag_begin.path.at(1));
+        auto orientation = pin.get_orientation_for_placement(sym.placement);
         start = drag_does_start(delta, orientation);
     }
     else if (target_drag_begin.type == ObjectType::JUNCTION) {
@@ -904,8 +904,8 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
             } break;
 
             case ObjectType::SCHEMATIC_SYMBOL: {
-                auto sym = core_schematic.get_schematic_symbol(it.uuid);
-                for (const auto &itt : sym->texts) {
+                auto &sym = core_schematic.get_sheet()->symbols.at(it.uuid);
+                for (const auto &itt : sym.texts) {
                     new_sel.emplace(itt->uuid, ObjectType::TEXT);
                 }
             } break;
@@ -1113,7 +1113,7 @@ void ImpSchematic::expand_selection_for_property_panel(std::set<SelectableRef> &
     for (const auto &it : sel) {
         switch (it.type) {
         case ObjectType::SCHEMATIC_SYMBOL:
-            sel_extra.emplace(core_schematic.get_schematic_symbol(it.uuid)->component->uuid, ObjectType::COMPONENT);
+            sel_extra.emplace(core_schematic.get_sheet()->symbols.at(it.uuid).component->uuid, ObjectType::COMPONENT);
             break;
         case ObjectType::JUNCTION:
             if (sheet.junctions.at(it.uuid).net) {

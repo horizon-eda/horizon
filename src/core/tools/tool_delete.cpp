@@ -35,14 +35,14 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
                 }
             }
             if (doc.c) {
-                for (const auto line : doc.c->get_net_lines()) {
-                    if (line->to.junc.uuid == it.uuid || line->from.junc.uuid == it.uuid) {
-                        delete_extra.emplace(line->uuid, ObjectType::LINE_NET);
+                for (const auto &[uu, line] : doc.c->get_sheet()->net_lines) {
+                    if (line.to.junc.uuid == it.uuid || line.from.junc.uuid == it.uuid) {
+                        delete_extra.emplace(line.uuid, ObjectType::LINE_NET);
                     }
                 }
-                for (const auto label : doc.c->get_net_labels()) {
-                    if (label->junction.uuid == it.uuid) {
-                        delete_extra.emplace(label->uuid, ObjectType::NET_LABEL);
+                for (const auto &[uu, label] : doc.c->get_sheet()->net_labels) {
+                    if (label.junction.uuid == it.uuid) {
+                        delete_extra.emplace(label.uuid, ObjectType::NET_LABEL);
                     }
                 }
                 for (const auto &it_rip : doc.c->get_sheet()->bus_rippers) {
@@ -65,9 +65,9 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
             }
         }
         else if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-            auto sym = doc.c->get_schematic_symbol(it.uuid);
-            doc.c->get_schematic()->disconnect_symbol(doc.c->get_sheet(), sym);
-            for (const auto &it_text : sym->texts) {
+            auto &sym = doc.c->get_sheet()->symbols.at(it.uuid);
+            doc.c->get_schematic()->disconnect_symbol(doc.c->get_sheet(), &sym);
+            for (const auto &it_text : sym.texts) {
                 delete_extra.emplace(it_text->uuid, ObjectType::TEXT);
             }
         }
@@ -262,9 +262,9 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
             doc.r->delete_picture(it.uuid);
             break;
         case ObjectType::SCHEMATIC_SYMBOL: {
-            SchematicSymbol *schsym = doc.c->get_schematic_symbol(it.uuid);
-            Component *comp = schsym->component.ptr;
-            doc.c->delete_schematic_symbol(it.uuid);
+            auto &schsym = doc.c->get_sheet()->symbols.at(it.uuid);
+            Component *comp = schsym.component.ptr;
+            doc.c->get_sheet()->symbols.erase(it.uuid);
             Schematic *sch = doc.c->get_schematic();
             bool found = false;
             for (auto &it_sheet : sch->sheets) {

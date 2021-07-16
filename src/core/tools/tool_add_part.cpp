@@ -162,7 +162,7 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
             if (current_gate == 0) { // also delete the component
                 doc.c->get_block()->components.erase(comp->uuid);
             }
-            doc.c->delete_schematic_symbol(sym_current->uuid);
+            doc.c->get_sheet()->symbols.erase(sym_current->uuid);
             sym_current = nullptr;
             return ToolResponse::commit();
             break;
