@@ -1,9 +1,9 @@
-#include "map_symbol.hpp"
-#include <iostream>
+#include "map_uuid_path.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 
-void MapSymbolDialog::ok_clicked()
+void MapUUIDPathDialog::ok_clicked()
 {
     auto it = view->get_selection()->get_selected();
     if (it) {
@@ -14,19 +14,18 @@ void MapSymbolDialog::ok_clicked()
     }
 }
 
-void MapSymbolDialog::row_activated(const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *column)
+void MapUUIDPathDialog::row_activated(const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *column)
 {
     auto it = store->get_iter(path);
     if (it) {
         Gtk::TreeModel::Row row = *it;
-        std::cout << "act " << row[list_columns.name] << std::endl;
         selection_valid = true;
         selected_uuid_path = row[list_columns.uuid_path];
         response(Gtk::ResponseType::RESPONSE_OK);
     }
 }
 
-MapSymbolDialog::MapSymbolDialog(Gtk::Window *parent, const std::map<UUIDPath<2>, std::string> &gates)
+MapUUIDPathDialog::MapUUIDPathDialog(Gtk::Window *parent, const std::map<UUIDPath<2>, std::string> &items)
     : Gtk::Dialog("Map Symbol", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR)
 {
     Gtk::Button *button_ok = add_button("OK", Gtk::ResponseType::RESPONSE_OK);
@@ -34,20 +33,30 @@ MapSymbolDialog::MapSymbolDialog(Gtk::Window *parent, const std::map<UUIDPath<2>
     set_default_response(Gtk::ResponseType::RESPONSE_OK);
     set_default_size(300, 300);
 
-    button_ok->signal_clicked().connect(sigc::mem_fun(*this, &MapSymbolDialog::ok_clicked));
+    button_ok->signal_clicked().connect(sigc::mem_fun(*this, &MapUUIDPathDialog::ok_clicked));
 
     store = Gtk::ListStore::create(list_columns);
+    store->set_sort_func(list_columns.name,
+                         [this](const Gtk::TreeModel::iterator &ia, const Gtk::TreeModel::iterator &ib) {
+                             Gtk::TreeModel::Row ra = *ia;
+                             Gtk::TreeModel::Row rb = *ib;
+                             Glib::ustring a = ra[list_columns.name];
+                             Glib::ustring b = rb[list_columns.name];
+                             return strcmp_natural(a, b);
+                         });
+    store->set_sort_column(list_columns.name, Gtk::SORT_ASCENDING);
     Gtk::TreeModel::Row row;
-    for (const auto &it : gates) {
+    for (const auto &[uu, name] : items) {
         row = *(store->append());
-        row[list_columns.uuid_path] = it.first;
-        row[list_columns.name] = it.second;
+        row[list_columns.uuid_path] = uu;
+        row[list_columns.name] = name;
     }
 
     view = Gtk::manage(new Gtk::TreeView(store));
-    view->append_column("Gate", list_columns.name);
+    view->append_column("", list_columns.name);
+    view->set_headers_visible(false);
     view->get_selection()->set_mode(Gtk::SelectionMode::SELECTION_BROWSE);
-    view->signal_row_activated().connect(sigc::mem_fun(*this, &MapSymbolDialog::row_activated));
+    view->signal_row_activated().connect(sigc::mem_fun(*this, &MapUUIDPathDialog::row_activated));
 
 
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());

@@ -1,6 +1,5 @@
 #include "dialogs.hpp"
-#include "map_pin.hpp"
-#include "map_symbol.hpp"
+#include "map_uuid_path.hpp"
 #include "map_package.hpp"
 #include "pool_browser_dialog.hpp"
 #include "widgets/pool_browser_part.hpp"
@@ -53,20 +52,11 @@ void Dialogs::set_interface(ImpInterface *intf)
     interface = intf;
 }
 
-std::optional<UUID> Dialogs::map_pin(const std::vector<std::pair<const Pin *, bool>> &pins)
+std::optional<UUIDPath<2>> Dialogs::map_uuid_path(const std::string &title,
+                                                  const std::map<UUIDPath<2>, std::string> &items)
 {
-    MapPinDialog dia(parent, pins);
-    auto r = dia.run();
-    if (r == Gtk::RESPONSE_OK && dia.selection_valid) {
-        return dia.selected_uuid;
-    }
-    else {
-        return {};
-    }
-}
-std::optional<UUIDPath<2>> Dialogs::map_symbol(const std::map<UUIDPath<2>, std::string> &gates)
-{
-    MapSymbolDialog dia(parent, gates);
+    MapUUIDPathDialog dia(parent, items);
+    dia.set_title(title);
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK && dia.selection_valid) {
         return dia.selected_uuid_path;
