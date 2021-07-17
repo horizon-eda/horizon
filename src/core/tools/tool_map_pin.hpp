@@ -19,6 +19,7 @@ public:
 
 private:
     std::vector<std::pair<const class Pin *, bool>> pins;
+    std::optional<UUID> map_pin_dialog();
     unsigned int pin_index = 0;
     class SymbolPin *pin = nullptr;
     SymbolPin *pin_last = nullptr;

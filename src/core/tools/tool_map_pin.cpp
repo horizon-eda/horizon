@@ -63,7 +63,7 @@ ToolResponse ToolMapPin::begin(const ToolArgs &args)
 
     UUID selected_pin;
     if (pins_unplaced > 1 && from_sidebar == false) {
-        if (auto r = imp->dialogs.map_pin(pins)) {
+        if (auto r = map_pin_dialog()) {
             selected_pin = *r;
         }
         else {
@@ -200,7 +200,7 @@ ToolResponse ToolMapPin::update(const ToolArgs &args)
             break;
 
         case InToolActionID::EDIT: {
-            if (auto r = imp->dialogs.map_pin(pins)) {
+            if (auto r = map_pin_dialog()) {
                 UUID selected_pin = *r;
                 doc.y->get_symbol().pins.erase(pin->uuid);
 
@@ -229,6 +229,20 @@ ToolResponse ToolMapPin::update(const ToolArgs &args)
     }
     update_tip();
     return ToolResponse();
+}
+
+std::optional<UUID> ToolMapPin::map_pin_dialog()
+{
+    std::map<UUIDPath<2>, std::string> items_for_dialog;
+    for (const auto &[it, mapped] : pins) {
+        if (!mapped)
+            items_for_dialog.emplace(std::piecewise_construct, std::forward_as_tuple(it->uuid),
+                                     std::forward_as_tuple(it->primary_name));
+    }
+    if (auto r = imp->dialogs.map_uuid_path("Map Pin", items_for_dialog))
+        return r->at(0);
+    else
+        return {};
 }
 
 ToolMapPin::~ToolMapPin()

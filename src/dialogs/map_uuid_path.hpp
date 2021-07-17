@@ -8,9 +8,9 @@
 namespace horizon {
 
 
-class MapSymbolDialog : public Gtk::Dialog {
+class MapUUIDPathDialog : public Gtk::Dialog {
 public:
-    MapSymbolDialog(Gtk::Window *parent, const std::map<UUIDPath<2>, std::string> &gates);
+    MapUUIDPathDialog(Gtk::Window *parent, const std::map<UUIDPath<2>, std::string> &items);
     UUIDPath<2> selected_uuid_path;
     bool selection_valid = false;
     // virtual ~MainWindow();

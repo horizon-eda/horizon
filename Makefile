@@ -313,8 +313,7 @@ SRC_IMP = \
 	src/core/clipboard/clipboard_package.cpp\
 	src/core/clipboard/clipboard_schematic.cpp\
 	src/core/clipboard/clipboard_board.cpp\
-	src/dialogs/map_pin.cpp\
-	src/dialogs/map_symbol.cpp\
+	src/dialogs/map_uuid_path.cpp\
 	src/dialogs/map_package.cpp\
 	src/dialogs/ask_net_merge.cpp\
 	src/dialogs/select_net.cpp\
