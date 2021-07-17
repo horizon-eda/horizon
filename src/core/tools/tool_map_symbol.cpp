@@ -36,7 +36,7 @@ ToolResponse ToolMapSymbol::begin(const ToolArgs &args)
         }
 
         if (gates_out.size() > 1) {
-            if (auto r = imp->dialogs.map_symbol(gates_out)) {
+            if (auto r = imp->dialogs.map_uuid_path("Map Symbol", gates_out)) {
                 selected_gate = *r;
             }
             else {
@@ -100,7 +100,7 @@ ToolResponse ToolMapSymbol::update(const ToolArgs &args)
                     selected_gate = gates_out.begin()->first;
                 }
                 else {
-                    if (auto r = imp->dialogs.map_symbol(gates_out)) {
+                    if (auto r = imp->dialogs.map_uuid_path("Map Symbol", gates_out)) {
                         selected_gate = *r;
                     }
                     else {
