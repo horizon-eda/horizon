@@ -581,7 +581,7 @@ void Canvas::render(const SymbolPin &pin, bool interactive, ColorP co)
     case SymbolPin::ConnectorStyle::NONE:
         break;
     }
-    if (pin.connected_net_lines.size() > 1) {
+    if (pin.connection_count > 1) {
         draw_line(p0, p0 + Coordi(0, 10), c_main, 0, false, 0.75_mm);
     }
     draw_line(p0, p1, c_main, 0, false);

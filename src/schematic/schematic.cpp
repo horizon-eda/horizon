@@ -293,12 +293,9 @@ bool Schematic::delete_net_line(Sheet *sheet, LineNet *line)
         for (auto &it_ft : {line->from, line->to}) {
             if (it_ft.is_pin()) {
                 UUIDPath<2> conn_path(it_ft.symbol->gate.uuid, it_ft.pin->uuid);
-                if (it_ft.symbol->component->connections.count(conn_path)
-                    && it_ft.pin->connected_net_lines.size() <= 1) {
+                if (it_ft.symbol->component->connections.count(conn_path) && it_ft.pin->connection_count <= 1) {
                     it_ft.symbol->component->connections.erase(conn_path);
                 }
-                // prevents error in update_refs
-                it_ft.pin->connected_net_lines.erase(line->uuid);
             }
         }
     }
@@ -418,7 +415,7 @@ bool Schematic::place_bipole_on_line(Sheet *sheet, SchematicSymbol *sym)
                     auto &new_line = sheet->net_lines.emplace(uu, uu).first->second;
                     new_line.from = conn;
                     if (conn.is_pin())
-                        conn.pin->connected_net_lines.emplace(uu, &new_line);
+                        conn.pin->connection_count++;
                     new_line.to.connect(sym, &pin);
                     new_line.net = line->net;
                     sym->component->connections.emplace(std::piecewise_construct,
@@ -1018,11 +1015,6 @@ void Schematic::update_refs()
             SchematicSymbol &schsym = it_sym.second;
             schsym.component.update(block->components);
             schsym.gate.update(schsym.component->entity->gates);
-            for (auto &it_pin : schsym.symbol.pins) {
-                for (auto &it_conn : it_pin.second.connected_net_lines) {
-                    it_conn.second = &sheet.net_lines.at(it_conn.first);
-                }
-            }
             for (auto &it_text : schsym.texts) {
                 it_text.update(sheet.texts);
             }
