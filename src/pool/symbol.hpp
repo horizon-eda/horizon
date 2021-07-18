@@ -60,7 +60,7 @@ public:
     std::string name;
     std::string pad;
     ConnectorStyle connector_style = ConnectorStyle::BOX;
-    std::map<UUID, class LineNet *> connected_net_lines;
+    unsigned int connection_count = 0;
     UUID net_segment;
     Pin::Direction direction = Pin::Direction::BIDIRECTIONAL;
 
