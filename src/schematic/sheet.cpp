@@ -397,7 +397,7 @@ void Sheet::propagate_net_segments()
     for (auto &it : symbols) {
         for (auto &it_pin : it.second.symbol.pins) {
             it_pin.second.net_segment = UUID();
-            it_pin.second.connected_net_lines.clear();
+            it_pin.second.connection_count = 0;
         }
     }
     unsigned int run = 1;
@@ -425,7 +425,7 @@ void Sheet::propagate_net_segments()
                         }
                         else if (it_ft.is_pin() && !it_ft.pin->net_segment) {
                             it_ft.pin->net_segment = it.second.net_segment;
-                            it_ft.pin->connected_net_lines.emplace(it.first, &it.second);
+                            it_ft.pin->connection_count++;
                             n_assigned++;
                         }
                         else if (it_ft.is_bus_ripper() && !it_ft.bus_ripper->net_segment) {
@@ -442,7 +442,7 @@ void Sheet::propagate_net_segments()
                         }
                         else if (it_ft.is_pin() && it_ft.pin->net_segment) {
                             it.second.net_segment = it_ft.pin->net_segment;
-                            it_ft.pin->connected_net_lines.emplace(it.first, &it.second);
+                            it_ft.pin->connection_count++;
                             n_assigned++;
                         }
                         else if (it_ft.is_bus_ripper() && it_ft.bus_ripper->net_segment) {
