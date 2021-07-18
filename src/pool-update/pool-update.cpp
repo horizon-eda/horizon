@@ -5,6 +5,7 @@
 #include "pool/pool_info.hpp"
 #include "logger/logger.hpp"
 #include "util/util.hpp"
+#include "util/dependency_graph.hpp"
 
 namespace horizon {
 
@@ -14,47 +15,26 @@ static void status_cb_nop(PoolUpdateStatus st, const std::string msg, const std:
 {
 }
 
-class PoolDependencyNode {
-public:
-    PoolDependencyNode(const PoolInfo &info);
-    const UUID uuid;
-    const std::vector<UUID> dependencies;
-    unsigned int level = 0;
-    unsigned int order = 0;
-    bool operator<(const PoolDependencyNode &other) const
-    {
-        return std::make_pair(level, order) < std::make_pair(other.level, other.order);
-    }
-};
 
-PoolDependencyNode::PoolDependencyNode(const PoolInfo &info) : uuid(info.uuid), dependencies(info.pools_included)
-{
-}
-
-
-class PoolDependencyGraph {
+class PoolDependencyGraph : public DependencyGraph {
 public:
     PoolDependencyGraph(const PoolInfo &p);
-    std::vector<UUID> get_sorted();
-    const std::set<UUID> &get_not_found() const;
     void dump(const std::string &filename) const;
 
 private:
     void add_pool(const PoolInfo &pool_info);
-    std::map<UUID, PoolDependencyNode> nodes;
-    const UUID root_uuid;
-    void visit(PoolDependencyNode &node, unsigned int level);
-    std::set<UUID> not_found;
 };
 
-PoolDependencyGraph::PoolDependencyGraph(const PoolInfo &info) : root_uuid(info.uuid)
+PoolDependencyGraph::PoolDependencyGraph(const PoolInfo &info) : DependencyGraph(info.uuid)
 {
     add_pool(info);
 }
 
 void PoolDependencyGraph::add_pool(const PoolInfo &info)
 {
-    if (nodes.emplace(info.uuid, info).second) {
+    if (nodes.emplace(std::piecewise_construct, std::forward_as_tuple(info.uuid),
+                      std::forward_as_tuple(info.uuid, info.pools_included))
+                .second) {
         for (const auto &dep : info.pools_included) {
             if (auto other_pool = PoolManager::get().get_by_uuid(dep)) {
                 add_pool(*other_pool);
@@ -62,47 +42,6 @@ void PoolDependencyGraph::add_pool(const PoolInfo &info)
         }
     }
 }
-
-void PoolDependencyGraph::visit(PoolDependencyNode &node, unsigned int level)
-{
-    if (level > node.level)
-        node.level = level;
-    unsigned int order = 0;
-    for (const auto &dep : node.dependencies) {
-        if (nodes.count(dep)) {
-            auto &n = nodes.at(dep);
-            n.order = order;
-            visit(n, level + 1);
-            order++;
-        }
-        else {
-            not_found.insert(dep);
-        }
-    }
-}
-
-std::vector<UUID> PoolDependencyGraph::get_sorted()
-{
-    visit(nodes.at(root_uuid), 0);
-    std::vector<const PoolDependencyNode *> nodes_sorted;
-    nodes_sorted.reserve(nodes.size());
-    for (const auto &[uu, node] : nodes) {
-        nodes_sorted.push_back(&node);
-    }
-    std::sort(nodes_sorted.begin(), nodes_sorted.end(), [](const auto a, const auto b) { return *b < *a; });
-    std::vector<UUID> out;
-    out.reserve(nodes_sorted.size());
-    for (const auto it : nodes_sorted) {
-        out.emplace_back(it->uuid);
-    }
-    return out;
-}
-
-const std::set<UUID> &PoolDependencyGraph::get_not_found() const
-{
-    return not_found;
-}
-
 
 void PoolDependencyGraph::dump(const std::string &filename) const
 {

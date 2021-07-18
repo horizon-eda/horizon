@@ -121,6 +121,7 @@ SRC_COMMON = \
 	src/pool/project_pool.cpp\
 	src/util/fs_util.cpp\
 	src/common/grid_settings.cpp\
+	src/util/dependency_graph.cpp\
 
 
 ifeq ($(OS),Windows_NT)
