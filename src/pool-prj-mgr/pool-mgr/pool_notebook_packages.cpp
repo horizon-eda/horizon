@@ -31,8 +31,6 @@ void PoolNotebook::handle_create_package()
         chooser->set_current_folder(Glib::build_filename(base_path, "packages"));
         if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
             std::string fn = chooser->get_filename();
-            std::cout << "pkg " << fn << std::endl;
-
             Glib::Dir dir(fn);
             int n = 0;
             for (const auto &it : dir) {

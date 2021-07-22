@@ -1,5 +1,6 @@
 #include "uuid.hpp"
 #include <string.h>
+#include <stdexcept>
 
 namespace horizon {
 

@@ -84,7 +84,6 @@ void PoolUpdaterParametric::update()
             qs += ",";
         }
         qs += "PRIMARY KEY('uuid'))";
-        std::cout << qs << std::endl;
         SQLite::Query q(pool_parametric.db, qs);
         q.step();
     }
