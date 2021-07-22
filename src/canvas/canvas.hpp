@@ -240,8 +240,6 @@ protected:
     int work_layer = 0;
     std::map<int, LayerDisplay> layer_display;
 
-    UUID sheet_current_uuid;
-
     TriangleInfo::Type triangle_type_current = TriangleInfo::Type::NONE;
 
     std::map<std::pair<LayerRange, bool>, int> overlay_layers; // layer, ignore_flip -> overlay layer
