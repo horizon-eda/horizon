@@ -361,17 +361,10 @@ void PoolGitBox::update_diff()
 
 void PoolGitBox::update_status()
 {
-    clock_t begin = clock();
-
     status_treeview->unset_model();
     status_store->clear();
     store_from_db(View::STATUS);
     status_treeview->set_model(status_store);
-
-
-    clock_t end = clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-    std::cout << "update took " << elapsed_secs << std::endl;
 }
 
 void PoolGitBox::handle_add_with_deps()
@@ -489,10 +482,8 @@ void PoolGitBox::handle_pr()
     if (regex_url->match(remote_url, ma)) {
         auto gh_owner = ma.fetch(1);
         auto gh_repo = ma.fetch(2);
-        std::cout << gh_owner << " " << gh_repo << std::endl;
         GitHubClient client;
         auto pr = client.get_pull_request(gh_owner, gh_repo, pr_id);
-        std::cout << std::setw(4) << pr << std::endl;
 
         std::string pr_url = pr.at("head").at("repo").at("git_url");
         std::string pr_ref = pr.at("head").at("ref");
@@ -536,7 +527,6 @@ void PoolGitBox::handle_pr()
         if (git_commit_lookup(&pr_commit.ptr, repo, pr_oid) != 0) {
             throw std::runtime_error("commit lookup");
         }
-        std::cout << git_commit_message(pr_commit) << std::endl;
         {
             autofree_ptr<git_reference> pr_branch_orig(git_reference_free);
             if (git_branch_create(&pr_branch_orig.ptr, repo, (pr_remote_name + "-orig").c_str(), pr_commit, true)
@@ -555,7 +545,6 @@ void PoolGitBox::handle_pr()
         if (git_commit_lookup(&master_commit.ptr, repo, oid) != 0) {
             throw std::runtime_error("commit lookup");
         }
-        std::cout << git_commit_message(master_commit) << std::endl;
 
         {
 
@@ -698,12 +687,10 @@ void PoolGitBox::handle_back_to_master(bool delete_pr)
 
     if (delete_pr) {
         {
-            std::cout << branch_name_u << std::endl;
             const auto regex_branch = Glib::Regex::create(R"(^pr-(\d+)-\w+$)");
             Glib::MatchInfo ma;
             if (regex_branch->match(branch_name_u, ma)) {
                 const std::string pr_id = ma.fetch(1);
-                std::cout << pr_id << std::endl;
                 const std::string pr_branch_name_orig = "pr-" + pr_id + "-orig";
                 const std::string pr_branch_name_merged = "pr-" + pr_id + "-merged";
                 const std::string pr_remote_name = "pr-" + pr_id;
