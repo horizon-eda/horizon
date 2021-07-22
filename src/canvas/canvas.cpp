@@ -62,7 +62,6 @@ void Canvas::clear()
             it.second.clear();
     }
     targets.clear();
-    sheet_current_uuid = UUID();
     for (auto &it : object_refs) {
         it.second.clear();
     }
@@ -211,7 +210,6 @@ void Canvas::update(const Sheet &sheet)
 {
     clear();
     layer_provider = &sheet;
-    sheet_current_uuid = sheet.uuid;
     update_markers();
     render(sheet);
     request_push();

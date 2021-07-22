@@ -47,6 +47,7 @@ void ImpSchematic::handle_select_sheet(Sheet *sh)
     sheet_selections[core_schematic.get_sheet()->uuid] = canvas->get_selection();
     auto highlights_saved = highlights;
     core_schematic.set_sheet(sh->uuid);
+    canvas->markers.set_sheet_filter(sh->uuid);
     canvas_update();
     if (sheet_views.count(sh->uuid)) {
         auto v2 = sheet_views.at(sh->uuid);
