@@ -8,6 +8,7 @@
 #include "preferences/preferences.hpp"
 #include <list>
 #include <iomanip>
+#include <iostream>
 
 namespace horizon {
 

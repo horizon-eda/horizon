@@ -5,7 +5,7 @@
 #include <uuid/uuid.h>
 #endif
 
-#include <iostream>
+#include <string>
 
 namespace horizon {
 /**

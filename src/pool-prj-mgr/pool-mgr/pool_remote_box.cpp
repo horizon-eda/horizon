@@ -783,7 +783,6 @@ void PoolRemoteBox::refresh_prs_thread()
         pr_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Refreshing");
         GitHubClient client;
         pull_requests = client.get_pull_requests(gh_owner, gh_repo);
-        std::cout << "get prs" << std::endl;
         /*pull_requests = json::array();
         {
                 json j;
@@ -941,7 +940,6 @@ git_oid PoolRemoteBox::items_to_tree(git_repository *repo)
     files_merge.insert(models_merge.begin(), models_merge.end());
 
     for (std::string filename : files_merge) {
-        std::cout << "merge " << filename << std::endl;
         std::string filename_src = Glib::build_filename(notebook.base_path, filename);
         std::string filename_dest = Glib::build_filename(notebook.remote_repo, filename);
         std::string dirname_dest = Glib::path_get_dirname(filename_dest);

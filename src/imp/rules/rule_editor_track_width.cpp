@@ -32,7 +32,6 @@ void RuleEditorTrackWidth::populate()
         auto &la = it->second;
         auto i = it->first;
         if (la.copper) {
-            std::cout << "have cu layer " << la.name << std::endl;
             if (rule2->widths.count(i) == 0) {
                 rule2->widths[i];
             }

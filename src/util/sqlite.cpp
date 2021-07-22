@@ -4,6 +4,7 @@
 #include "util/util.hpp"
 #include "util/uuid.hpp"
 #include "common/common.hpp"
+#include <iostream>
 
 namespace horizon::SQLite {
 

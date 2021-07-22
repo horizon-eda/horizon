@@ -458,9 +458,6 @@ void PoolStatusProviderPoolManager::check_update()
         dispatcher.emit();
         pool_update(remote_path.u8string());
     }
-    else {
-        std::cout << "up to date" << std::endl;
-    }
 }
 
 const PoolStatusBase &PoolStatusProviderBase::get()

@@ -67,7 +67,6 @@ PadEditor::PadEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &
 
     combo_gate_entry = dynamic_cast<Gtk::Entry *>(combo_gate->get_child());
     combo_gate_entry->signal_changed().connect([this, propagate] {
-        std::cout << "ch " << combo_gate_entry->get_text() << std::endl;
         parent->update_gate_names();
         parent->update_pin_warnings();
         propagate([this](PadEditor *ed) { ed->combo_gate_entry->set_text(combo_gate_entry->get_text()); });

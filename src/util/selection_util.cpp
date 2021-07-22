@@ -1,5 +1,6 @@
 #include "selection_util.hpp"
 #include <assert.h>
+#include <stdexcept>
 
 namespace horizon {
 size_t sel_count_type(const std::set<SelectableRef> &sel, ObjectType type)
