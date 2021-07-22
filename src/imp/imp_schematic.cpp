@@ -47,6 +47,7 @@ void ImpSchematic::handle_select_sheet(Sheet *sh)
     sheet_selections[core_schematic.get_sheet()->uuid] = canvas->get_selection();
     auto highlights_saved = highlights;
     core_schematic.set_sheet(sh->uuid);
+    canvas->markers.set_sheet_filter(sh->uuid);
     canvas_update();
     if (sheet_views.count(sh->uuid)) {
         auto v2 = sheet_views.at(sh->uuid);
@@ -282,6 +283,8 @@ void ImpSchematic::construct()
     sheet_box->signal_remove_sheet().connect(sigc::mem_fun(*this, &ImpSchematic::handle_remove_sheet));
     sheet_box->signal_select_sheet().connect(sigc::mem_fun(*this, &ImpSchematic::handle_select_sheet));
     main_window->left_panel->pack_start(*sheet_box, false, false, 0);
+    canvas->markers.set_sheet_filter(core_schematic.get_sheet()->uuid);
+
 
     hamburger_menu->append("Annotate", "win.annotate");
     add_tool_action(ToolID::ANNOTATE, "annotate");
