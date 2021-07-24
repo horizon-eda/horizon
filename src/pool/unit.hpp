@@ -2,9 +2,7 @@
 #include "nlohmann/json_fwd.hpp"
 #include "util/uuid.hpp"
 #include "common/lut.hpp"
-#include <fstream>
 #include <map>
-#include <set>
 #include <vector>
 #include "util/file_version.hpp"
 

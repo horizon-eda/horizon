@@ -1,5 +1,4 @@
 #pragma once
-#include "block/net.hpp"
 #include "common/polygon.hpp"
 #include "clipper/clipper.hpp"
 

@@ -8,6 +8,7 @@
 #include <fstream>
 #include <map>
 #include <vector>
+#include <set>
 
 namespace horizon {
 using json = nlohmann::json;
