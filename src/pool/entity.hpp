@@ -3,9 +3,8 @@
 #include "nlohmann/json_fwd.hpp"
 #include "unit.hpp"
 #include "util/uuid.hpp"
-#include <fstream>
 #include <map>
-#include <vector>
+#include <set>
 #include "util/file_version.hpp"
 
 namespace horizon {

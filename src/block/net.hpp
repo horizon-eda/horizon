@@ -1,13 +1,7 @@
 #pragma once
 #include "nlohmann/json_fwd.hpp"
-#include "pool/unit.hpp"
 #include "util/uuid.hpp"
 #include "util/uuid_ptr.hpp"
-#include <fstream>
-#include <map>
-#include <vector>
-
-#include "net_class.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -26,7 +20,7 @@ public:
     PowerSymbolStyle power_symbol_style = PowerSymbolStyle::GND;
     bool power_symbol_name_visible = true;
 
-    uuid_ptr<NetClass> net_class;
+    uuid_ptr<class NetClass> net_class;
     uuid_ptr<Net> diffpair;
     bool diffpair_master = false;
 

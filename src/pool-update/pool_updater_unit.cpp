@@ -1,4 +1,5 @@
 #include "pool_updater.hpp"
+#include "pool/unit.hpp"
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 #include "util/util.hpp"

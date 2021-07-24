@@ -1,7 +1,6 @@
 #pragma once
 #include "nlohmann/json_fwd.hpp"
 #include "util/uuid.hpp"
-#include <stdint.h>
 
 namespace horizon {
 using json = nlohmann::json;
