@@ -10,7 +10,6 @@ public:
              const PoolParams &params);
 
     const std::map<int, Layer> &get_layers();
-    void update_highlights() override;
 
     std::map<ObjectType, SelectionFilterInfo> get_selection_filter_info() const override;
 
@@ -22,6 +21,7 @@ protected:
     void handle_maybe_drag(bool ctrl) override;
     void update_action_sensitivity() override;
     void apply_preferences() override;
+    void update_highlights() override;
 
     ActionCatalogItem::Availability get_editor_type_for_action() const override
     {

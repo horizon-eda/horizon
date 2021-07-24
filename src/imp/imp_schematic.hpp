@@ -9,13 +9,13 @@ class ImpSchematic : public ImpBase {
 public:
     ImpSchematic(const std::string &schematic_filename, const std::string &block_filename,
                  const std::string &pictures_dir, const PoolParams &params);
-    void update_highlights() override;
 
 protected:
     void construct() override;
     bool handle_broadcast(const json &j) override;
     void handle_maybe_drag(bool ctrl) override;
     void update_action_sensitivity() override;
+    void update_highlights() override;
 
     ActionCatalogItem::Availability get_editor_type_for_action() const override
     {

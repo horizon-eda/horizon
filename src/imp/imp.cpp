@@ -958,7 +958,7 @@ void ImpBase::handle_drag()
     auto pos = canvas->get_cursor_pos_win();
     auto delta = pos - cursor_pos_drag_begin;
     if (delta.mag_sq() > (50 * 50)) {
-        highlights.clear();
+        clear_highlights();
         update_highlights();
         ToolArgs args;
         args.coords = cursor_pos_grid_drag_begin;
@@ -1052,7 +1052,7 @@ void ImpBase::tool_begin(ToolID id, bool override_selection, const std::set<Sele
         Logger::log_critical("can't begin tool while tool is active", Logger::Domain::IMP);
         return;
     }
-    highlights.clear();
+    clear_highlights();
     update_highlights();
     ToolArgs args;
     args.data = std::move(data);
@@ -1402,7 +1402,7 @@ void ImpBase::tool_process(ToolResponse &resp)
         canvas->set_cursor_external(false);
         canvas->snap_filter.clear();
         no_update = false;
-        highlights.clear();
+        clear_highlights();
         update_highlights();
     }
     if (!no_update) {
@@ -1420,7 +1420,7 @@ void ImpBase::tool_process(ToolResponse &resp)
         }
     }
     if (resp.next_tool != ToolID::NONE) {
-        highlights.clear();
+        clear_highlights();
         update_highlights();
         ToolArgs args;
         args.coords = canvas->get_cursor_pos();
@@ -1429,6 +1429,11 @@ void ImpBase::tool_process(ToolResponse &resp)
         ToolResponse r = core->tool_begin(resp.next_tool, args, imp_interface.get());
         tool_process(r);
     }
+}
+
+void ImpBase::clear_highlights()
+{
+    highlights.clear();
 }
 
 void ImpBase::expand_selection_for_property_panel(std::set<SelectableRef> &sel_extra,
@@ -1441,7 +1446,7 @@ void ImpBase::handle_selection_changed(void)
     // std::cout << "Selection changed\n";
     // std::cout << "---" << std::endl;
     if (!core->tool_is_active()) {
-        highlights.clear();
+        clear_highlights();
         update_highlights();
         update_property_panels();
     }
