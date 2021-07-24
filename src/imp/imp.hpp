@@ -46,9 +46,6 @@ public:
     }
     void set_read_only(bool v);
 
-    std::set<ObjectRef> highlights;
-    virtual void update_highlights(){};
-
     class SelectionFilterInfo {
     public:
         enum class Flag {
@@ -235,6 +232,13 @@ protected:
     virtual ToolID get_tool_for_drag_move(bool ctrl, const std::set<SelectableRef> &sel) const;
     void force_end_tool();
     void reset_tool_hint_label();
+
+    std::set<ObjectRef> highlights;
+
+    virtual void update_highlights()
+    {
+    }
+    virtual void clear_highlights();
 
 private:
     void fix_cursor_pos();
