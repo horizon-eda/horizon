@@ -22,6 +22,7 @@ protected:
     void create_attached() override;
     void delete_attached() override;
     bool begin_attached() override;
+    bool junction_placed() override;
     bool update_attached(const ToolArgs &args) override;
     bool check_line(LineNet *li) override;
     class PowerSymbol *sym = nullptr;

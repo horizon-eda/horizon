@@ -434,7 +434,7 @@ bool Schematic::place_bipole_on_line(Sheet *sheet, SchematicSymbol *sym)
     return placed;
 }
 
-void Schematic::expand(bool careful)
+void Schematic::expand_connectivity(bool careful)
 {
     for (auto &it_net : block->nets) {
         it_net.second.is_power_forced = false;
@@ -462,6 +462,7 @@ void Schematic::expand(bool careful)
         block->vacuum_group_tag_names();
     }
 
+
     block->update_diffpairs();
 
     block->update_connection_count(); // also sets has_bus_rippers to false
@@ -480,53 +481,9 @@ void Schematic::expand(bool careful)
         }
     }
 
-    // collect gates
-    if (!careful) {
-        std::set<UUIDPath<2>> gates;
-        for (const auto &it_component : block->components) {
-            for (const auto &it_gate : it_component.second.entity->gates) {
-                gates.emplace(it_component.first, it_gate.first);
-            }
-        }
-
-        for (auto &it_sheet : sheets) {
-            Sheet &sheet = it_sheet.second;
-            sheet.warnings.clear();
-
-            std::vector<UUID> keys;
-            keys.reserve(sheet.symbols.size());
-            for (const auto &it : sheet.symbols) {
-                keys.push_back(it.first);
-            }
-            for (const auto &uu : keys) {
-                const auto &sym = sheet.symbols.at(uu);
-                if (gates.count({sym.component->uuid, sym.gate->uuid})) {
-                    // all fine
-                    gates.erase({sym.component->uuid, sym.gate->uuid});
-                }
-                else { // duplicate symbol
-                    sheet.symbols.erase(uu);
-                }
-            }
-        }
-    }
-
-
     for (auto &it_sheet : sheets) {
         Sheet &sheet = it_sheet.second;
-        for (auto &it_sym : sheet.symbols) {
-            auto &texts = it_sym.second.texts;
-            texts.erase(std::remove_if(texts.begin(), texts.end(),
-                                       [&sheet](const auto &a) { return sheet.texts.count(a.uuid) == 0; }),
-                        texts.end());
-        }
-        if (!careful)
-            sheet.expand_symbols(*this);
-    }
-
-
-    for (auto &it_sheet : sheets) {
-        Sheet &sheet = it_sheet.second;
+        sheet.warnings.clear();
 
         for (auto &it_junc : sheet.junctions) {
             it_junc.second.net = nullptr;
@@ -657,14 +614,14 @@ void Schematic::expand(bool careful)
             sheet.update_junction_connections();
         }
         sheet.propagate_net_segments();
-        sheet.analyze_net_segments(true);
+        const auto nsinfo = sheet.analyze_net_segments();
+        sheet.place_warnings(nsinfo);
     }
     update_refs();
 
     for (auto &[uu, sheet] : sheets) {
         sheet.update_bus_ripper_connections();
     }
-
 
     // warn juncs
     for (auto &it_sheet : sheets) {
@@ -731,6 +688,62 @@ void Schematic::expand(bool careful)
             }
         }
     }
+}
+
+void Schematic::expand(bool careful)
+{
+    for (auto &it_sheet : sheets) {
+        Sheet &sheet = it_sheet.second;
+        for (auto &it : sheet.texts) {
+            it.second.overridden = false;
+        }
+    }
+
+    // collect gates
+    if (!careful) {
+        std::set<UUIDPath<2>> gates;
+        for (const auto &it_component : block->components) {
+            for (const auto &it_gate : it_component.second.entity->gates) {
+                gates.emplace(it_component.first, it_gate.first);
+            }
+        }
+
+        for (auto &it_sheet : sheets) {
+            Sheet &sheet = it_sheet.second;
+            std::vector<UUID> keys;
+            keys.reserve(sheet.symbols.size());
+            for (const auto &it : sheet.symbols) {
+                keys.push_back(it.first);
+            }
+            for (const auto &uu : keys) {
+                const auto &sym = sheet.symbols.at(uu);
+                if (gates.count({sym.component->uuid, sym.gate->uuid})) {
+                    // all fine
+                    gates.erase({sym.component->uuid, sym.gate->uuid});
+                }
+                else { // duplicate symbol
+                    sheet.symbols.erase(uu);
+                }
+            }
+        }
+    }
+
+
+    for (auto &it_sheet : sheets) {
+        Sheet &sheet = it_sheet.second;
+        for (auto &it_sym : sheet.symbols) {
+            auto &texts = it_sym.second.texts;
+            texts.erase(std::remove_if(texts.begin(), texts.end(),
+                                       [&sheet](const auto &a) { return sheet.texts.count(a.uuid) == 0; }),
+                        texts.end());
+        }
+        if (!careful)
+            sheet.expand_symbols(*this);
+    }
+
+    expand_connectivity(careful);
+
+
     std::map<std::string, std::set<const Net *>> net_names;
     for (const auto &[uu, net] : block->nets) {
         if (net.is_named()) {

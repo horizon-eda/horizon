@@ -56,7 +56,7 @@ int ToolHelperMerge::merge_nets(Net *net, Net *into)
 
     imp->tool_bar_flash("merged net \"" + net->name + "\" into net \"" + into->name + "\"");
     doc.c->get_schematic()->block->merge_nets(net, into); // net will be erased
-    doc.c->get_schematic()->expand(true);                 // be careful
+    doc.c->get_schematic()->expand_connectivity(true);    // be careful
 
     std::cout << "merging nets" << std::endl;
     return 0; // merged, 1: error
