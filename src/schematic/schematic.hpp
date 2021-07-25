@@ -42,6 +42,7 @@ public:
      * this when you may hold pointers to these.
      */
     void expand(bool careful = false);
+    void expand_connectivity(bool carful = false);
 
     Schematic(const Schematic &sch);
     void operator=(const Schematic &sch) = delete;

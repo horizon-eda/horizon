@@ -43,7 +43,7 @@ void ToolDrawLineNet::set_snap_filter()
 
 void ToolDrawLineNet::restart(const Coordi &c)
 {
-    doc.c->get_schematic()->expand(); // gets rid of warning=s...
+    doc.c->get_schematic()->expand_connectivity(); // gets rid of warning=s...
     const auto uu = UUID::random();
     temp_junc_head = &doc.c->get_sheet()->junctions.emplace(uu, uu).first->second;
     temp_junc_head->position = c;

@@ -56,6 +56,16 @@ void ToolPlacePowerSymbol::create_attached()
     temp->net = net;
 }
 
+bool ToolPlacePowerSymbol::junction_placed()
+{
+    if (ToolPlaceJunctionSchematic::junction_placed())
+        return true;
+
+    doc.c->get_schematic()->expand_connectivity(true);
+    return false;
+}
+
+
 void ToolPlacePowerSymbol::delete_attached()
 {
     if (sym) {
@@ -77,7 +87,6 @@ bool ToolPlacePowerSymbol::do_merge(Net *other)
     else if (!other->is_power && other != net) {
         doc.c->get_schematic()->block->merge_nets(other, net);
         imp->tool_bar_flash("merged net \"" + other->name + "\" into power net\"" + net->name + "\"");
-        doc.c->get_schematic()->expand(true);
         return true;
     }
     else if (other->is_power && other == net) {
@@ -111,6 +120,7 @@ bool ToolPlacePowerSymbol::update_attached(const ToolArgs &args)
                     j->net = net;
                 }
                 sym->junction = j;
+                doc.c->get_schematic()->expand_connectivity(true);
                 create_attached();
                 return true;
             }

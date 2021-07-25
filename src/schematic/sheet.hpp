@@ -68,7 +68,8 @@ public:
     void vacuum_junctions();
     void delete_dependants();
     void propagate_net_segments();
-    std::map<UUID, NetSegmentInfo> analyze_net_segments(bool place_warnings = false);
+    std::map<UUID, NetSegmentInfo> analyze_net_segments();
+    void place_warnings(const std::map<UUID, NetSegmentInfo> &nsinfo);
     std::set<UUIDPath<3>> get_pins_connected_to_net_segment(const UUID &uu_segment);
     void update_junction_connections();
     void update_bus_ripper_connections();

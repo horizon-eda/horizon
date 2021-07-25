@@ -478,7 +478,7 @@ bool NetSegmentInfo::is_bus() const
     return false;
 }
 
-std::map<UUID, NetSegmentInfo> Sheet::analyze_net_segments(bool place_warnings)
+std::map<UUID, NetSegmentInfo> Sheet::analyze_net_segments()
 {
     std::map<UUID, NetSegmentInfo> net_segments;
     for (auto &it : net_lines) {
@@ -506,9 +506,11 @@ std::map<UUID, NetSegmentInfo> Sheet::analyze_net_segments(bool place_warnings)
         }
     }
 
-    if (!place_warnings)
-        return net_segments;
+    return net_segments;
+}
 
+void Sheet::place_warnings(const std::map<UUID, NetSegmentInfo> &net_segments)
+{
     for (const auto &it : net_segments) {
         if (!it.second.has_label) {
             // std::cout<< "ns no label" << (std::string)it.second.net <<
@@ -546,7 +548,6 @@ std::map<UUID, NetSegmentInfo> Sheet::analyze_net_segments(bool place_warnings)
             warnings.emplace_back(it.second.from.get_position(), "Zero length line");
         }
     }
-    return net_segments;
 }
 
 std::set<UUIDPath<3>> Sheet::get_pins_connected_to_net_segment(const UUID &uu_segment)
