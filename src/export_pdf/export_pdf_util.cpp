@@ -39,12 +39,12 @@ void render_picture(PoDoFo::PdfDocument &doc, PoDoFo::PdfPainterMM &painter, con
 
     painter.Save();
     const auto fangle = pic.placement.get_angle_rad();
+    painter.SetTransformationMatrix(cos(fangle), sin(fangle), -sin(fangle), cos(fangle),
+                                    to_pt((double)pic.placement.shift.x), to_pt((double)pic.placement.shift.y));
 
-    painter.SetTransformationMatrix(cos(fangle), sin(fangle), -sin(fangle), cos(fangle), to_pt(pic.placement.shift.x),
-                                    to_pt(pic.placement.shift.y));
     const int64_t w = pic.data->width * pic.px_size;
     const int64_t h = pic.data->height * pic.px_size;
-    const Coordi p = Coordi(w, h) / -2;
+    const auto p = Coordd(w, h) / -2;
     const double sz = pic.px_size / (1e3 / CONVERSION_CONSTANT);
     painter.DrawImageMM(to_um(p.x), to_um(p.y), &img, sz, sz);
     painter.Restore();
