@@ -88,9 +88,9 @@ void ToolHelperMapSymbol::change_symbol(SchematicSymbol *schsym)
     }
 }
 
-ToolID ToolHelperMapSymbol::get_tool_id_for_settings() const
+std::map<ToolID, ToolSettings *> ToolHelperMapSymbol::get_all_settings()
 {
-    return ToolID::MAP_SYMBOL;
+    return {{ToolID::MAP_SYMBOL, &settings}};
 }
 
 json ToolHelperMapSymbol::Settings::serialize() const

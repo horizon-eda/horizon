@@ -5,9 +5,9 @@
 
 namespace horizon {
 
-ToolID ToolHelperLineWidthSetting::get_tool_id_for_settings() const
+std::map<ToolID, ToolSettings *> ToolHelperLineWidthSetting::get_all_settings()
 {
-    return ToolID::DRAW_LINE;
+    return {{ToolID::DRAW_LINE, &settings}};
 }
 
 void ToolHelperLineWidthSetting::Settings::load_from_json(const json &j)

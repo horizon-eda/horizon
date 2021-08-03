@@ -13,12 +13,7 @@ public:
         uint64_t width = 0;
     };
 
-    ToolSettings *get_settings() override
-    {
-        return &settings;
-    }
-
-    ToolID get_tool_id_for_settings() const override;
+    std::map<ToolID, ToolSettings *> get_all_settings() override;
 
 protected:
     void ask_line_width();

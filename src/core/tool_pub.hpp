@@ -96,16 +96,17 @@ public:
     ToolBase(class IDocument *c, ToolID tid);
     void set_imp_interface(class ImpInterface *i);
     void set_transient();
-    virtual ToolID get_tool_id_for_settings() const
-    {
-        return tool_id;
-    }
-    virtual ToolSettings *get_settings()
-    {
-        return nullptr;
-    }
+
     virtual void apply_settings()
     {
+    }
+
+    virtual std::map<ToolID, ToolSettings *> get_all_settings()
+    {
+        if (auto s = get_settings())
+            return {{tool_id, s}};
+        else
+            return {};
     }
 
     virtual std::set<InToolActionID> get_actions() const
@@ -149,9 +150,14 @@ public:
     }
 
 protected:
+    virtual ToolSettings *get_settings()
+    {
+        return nullptr;
+    }
+
     Documents doc;
     class ImpInterface *imp = nullptr;
-    ToolID tool_id;
+    const ToolID tool_id;
     bool is_transient = false;
 };
 } // namespace horizon

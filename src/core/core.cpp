@@ -23,15 +23,14 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
     update_rules(); // write rules to board, so tool has the current rules
     try {
         tool = create_tool(tool_id);
-        {
-            if (auto settings = tool->get_settings()) {
-                auto tid = tool->get_tool_id_for_settings();
-                auto j = s_signal_load_tool_settings.emit(tid);
-                if (j != nullptr)
-                    settings->load_from_json(j);
-                tool->apply_settings();
-            }
+
+        for (auto [tid, settings] : tool->get_all_settings()) {
+            auto j = s_signal_load_tool_settings.emit(tid);
+            if (j != nullptr)
+                settings->load_from_json(j);
+            tool->apply_settings();
         }
+
         tool->set_imp_interface(imp);
         if (!args.keep_selection) {
             tool->selection.clear();
@@ -75,10 +74,9 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
 void Core::maybe_end_tool(const ToolResponse &r)
 {
     if (r.result != ToolResponse::Result::NOP) { // end tool
-        auto tid = tool->get_tool_id_for_settings();
-        auto settings = tool->get_settings();
-        if (settings)
+        for (auto [tid, settings] : tool->get_all_settings()) {
             s_signal_save_tool_settings.emit(tid, settings->serialize());
+        }
         tool_selection = tool->selection;
         tool.reset();
         s_signal_tool_changed.emit(ToolID::NONE);

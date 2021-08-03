@@ -5,9 +5,9 @@
 
 namespace horizon {
 
-ToolID ToolHelperDrawNetSetting::get_tool_id_for_settings() const
+std::map<ToolID, ToolSettings *> ToolHelperDrawNetSetting::get_all_settings()
 {
-    return ToolID::DRAW_NET;
+    return {{ToolID::DRAW_NET, &settings}};
 }
 
 void ToolHelperDrawNetSetting::Settings::load_from_json(const json &j)

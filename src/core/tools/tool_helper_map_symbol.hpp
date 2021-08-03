@@ -13,12 +13,7 @@ public:
         std::map<UUID, UUID> selected_symbols;
     };
 
-    ToolSettings *get_settings() override
-    {
-        return &settings;
-    }
-
-    ToolID get_tool_id_for_settings() const override;
+    std::map<ToolID, ToolSettings *> get_all_settings() override;
 
 protected:
     class SchematicSymbol *map_symbol(class Component *c, const class Gate *g, const UUID &sym_default = UUID());
