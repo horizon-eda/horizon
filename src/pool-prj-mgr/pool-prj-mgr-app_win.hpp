@@ -8,7 +8,6 @@
 #include "util/editor_process.hpp"
 #include "util/window_state_store.hpp"
 #include "pool-prj-mgr-process.hpp"
-#include "project/project.hpp"
 #include "prj-mgr/prj-mgr_views.hpp"
 #include "pool-mgr/view_create_pool.hpp"
 #include "common/common.hpp"
@@ -126,7 +125,7 @@ private:
     Gtk::InfoBar *info_bar_version = nullptr;
     Gtk::Label *version_label = nullptr;
 
-    std::unique_ptr<Project> project = nullptr;
+    std::unique_ptr<class Project> project;
     std::string project_filename;
     bool project_needs_save = false;
     void save_project();

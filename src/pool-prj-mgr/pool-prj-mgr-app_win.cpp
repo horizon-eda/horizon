@@ -27,6 +27,7 @@
 #include "util/zmq_helper.hpp"
 #include "pool-update/pool-update.hpp"
 #include "pool_update_error_dialog.hpp"
+#include "project/project.hpp"
 #include <filesystem>
 
 #ifdef G_OS_WIN32

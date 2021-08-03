@@ -1,5 +1,4 @@
 #pragma once
-#include "project/project.hpp"
 #include <gtkmm.h>
 #include <memory>
 #include <zmq.hpp>
