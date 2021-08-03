@@ -8,23 +8,6 @@
 
 namespace horizon {
 
-static const LutEnumStr<ToolDrawPolygonRectangle::Settings::Mode> mode_lut = {
-        {"center", ToolDrawPolygonRectangle::Settings::Mode::CENTER},
-        {"corner", ToolDrawPolygonRectangle::Settings::Mode::CORNER},
-};
-
-void ToolDrawPolygonRectangle::Settings::load_from_json(const json &j)
-{
-    mode = mode_lut.lookup(j.at("mode"));
-}
-
-json ToolDrawPolygonRectangle::Settings::serialize() const
-{
-    json j;
-    j["mode"] = mode_lut.lookup_reverse(mode);
-    return j;
-}
-
 bool ToolDrawPolygonRectangle::can_begin()
 {
     return doc.r->has_object_type(ObjectType::POLYGON);
@@ -44,7 +27,7 @@ void ToolDrawPolygonRectangle::update_polygon()
     if (step == 1) {
         Coordi p0, p1;
         Coordi min_size(corner_radius * 2 + 100, corner_radius * 2 + 100);
-        if (settings.mode == Settings::Mode::CORNER) {
+        if (settings.mode == Mode::CORNER) {
             p0 = Coordi::min(first_pos, second_pos);
             p1 = Coordi::max(Coordi::max(first_pos, second_pos), p0 + min_size);
         }
@@ -187,7 +170,7 @@ void ToolDrawPolygonRectangle::update_tip()
     std::vector<ActionLabelInfo> actions;
     actions.reserve(8);
 
-    if (settings.mode == Settings::Mode::CENTER) {
+    if (settings.mode == Mode::CENTER) {
         if (step == 0) {
             actions.emplace_back(InToolActionID::LMB, "place center");
         }
@@ -214,7 +197,7 @@ void ToolDrawPolygonRectangle::update_tip()
     }
 
     imp->tool_bar_set_actions(actions);
-    if (settings.mode == Settings::Mode::CENTER) {
+    if (settings.mode == Mode::CENTER) {
         imp->tool_bar_set_tip("from center");
     }
     else {
@@ -249,7 +232,7 @@ ToolResponse ToolDrawPolygonRectangle::update(const ToolArgs &args)
             return ToolResponse::revert();
 
         case InToolActionID::RECTANGLE_MODE:
-            settings.mode = settings.mode == Settings::Mode::CENTER ? Settings::Mode::CORNER : Settings::Mode::CENTER;
+            settings.cycle_mode();
             update_polygon();
             break;
 

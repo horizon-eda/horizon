@@ -307,6 +307,7 @@ SRC_IMP = \
 	src/core/tools/tool_edit_custom_value.cpp\
 	src/core/tools/tool_place_dot.cpp\
 	src/core/tools/tool_set_track_width.cpp\
+	src/core/tools/tool_settings_rectangle_mode.cpp\
 	src/document/documents.cpp\
 	src/core/clipboard/clipboard.cpp\
 	src/core/clipboard/clipboard_padstack.cpp\

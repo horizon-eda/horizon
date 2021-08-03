@@ -1,5 +1,6 @@
 #pragma once
 #include "core/tool.hpp"
+#include "tool_settings_rectangle_mode.hpp"
 
 namespace horizon {
 
@@ -9,14 +10,6 @@ public:
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;
-
-    class Settings : public ToolSettings {
-    public:
-        json serialize() const override;
-        void load_from_json(const json &j) override;
-        enum class Mode { CENTER, CORNER };
-        Mode mode = Mode::CENTER;
-    };
 
     ToolSettings *get_settings() override
     {
@@ -41,7 +34,8 @@ public:
     }
 
 private:
-    Settings settings;
+    ToolSettingsRectangleMode settings;
+    using Mode = ToolSettingsRectangleMode::Mode;
 
     enum class Decoration { NONE, CHAMFER, NOTCH };
 
