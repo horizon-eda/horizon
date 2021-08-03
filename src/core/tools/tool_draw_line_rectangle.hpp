@@ -1,6 +1,7 @@
 #pragma once
 #include "core/tool.hpp"
 #include "tool_helper_line_width_setting.hpp"
+#include "tool_settings_rectangle_mode.hpp"
 
 namespace horizon {
 
@@ -19,11 +20,13 @@ public:
         };
     }
 
+    std::map<ToolID, ToolSettings *> get_all_settings() override;
+
 private:
     std::set<class Line *> lines;
-    enum class Mode { CENTER, CORNER };
+    ToolSettingsRectangleMode settings_rect;
+    using Mode = ToolSettingsRectangleMode::Mode;
 
-    Mode mode = Mode::CENTER;
     Coordi first_pos;
     Coordi second_pos;
     int step = 0;

@@ -1,18 +1,25 @@
 #include "tool_draw_line_rectangle.hpp"
 #include "common/polygon.hpp"
 #include "imp/imp_interface.hpp"
-#include <iostream>
-#include <sstream>
+#include "core/tool_id.hpp"
 #include "common/line.hpp"
 #include "document/idocument.hpp"
 
 namespace horizon {
+
+std::map<ToolID, ToolSettings *> ToolDrawLineRectangle::get_all_settings()
+{
+    return {{ToolID::DRAW_LINE, &settings}, {ToolID::DRAW_POLYGON_RECTANGLE, &settings_rect}};
+}
 
 void ToolDrawLineRectangle::apply_settings()
 {
     for (auto &li : lines) {
         li->width = settings.width;
     }
+    update_junctions();
+    if (imp)
+        update_tip();
 }
 
 bool ToolDrawLineRectangle::can_begin()
@@ -24,7 +31,7 @@ void ToolDrawLineRectangle::update_junctions()
 {
     if (step == 1) {
         Coordi p0t, p1t;
-        if (mode == Mode::CORNER) {
+        if (settings_rect.mode == Mode::CORNER) {
             p0t = first_pos;
             p1t = second_pos;
         }
@@ -45,8 +52,6 @@ void ToolDrawLineRectangle::update_junctions()
 
 ToolResponse ToolDrawLineRectangle::begin(const ToolArgs &args)
 {
-    std::cout << "tool draw line\n";
-
     std::set<SnapFilter> sf;
     for (int i = 0; i < 4; i++) {
         junctions[i] = doc.r->insert_junction(UUID::random());
@@ -72,7 +77,7 @@ void ToolDrawLineRectangle::update_tip()
     std::vector<ActionLabelInfo> actions;
     actions.reserve(8);
 
-    if (mode == Mode::CENTER) {
+    if (settings_rect.mode == Mode::CENTER) {
         if (step == 0) {
             actions.emplace_back(InToolActionID::LMB, "place center");
         }
@@ -93,7 +98,7 @@ void ToolDrawLineRectangle::update_tip()
     actions.emplace_back(InToolActionID::ENTER_WIDTH, "line width");
     imp->tool_bar_set_actions(actions);
 
-    if (mode == Mode::CENTER) {
+    if (settings_rect.mode == Mode::CENTER) {
         imp->tool_bar_set_tip("from center");
     }
     else {
@@ -130,7 +135,7 @@ ToolResponse ToolDrawLineRectangle::update(const ToolArgs &args)
             return ToolResponse::revert();
 
         case InToolActionID::RECTANGLE_MODE:
-            mode = mode == Mode::CENTER ? Mode::CORNER : Mode::CENTER;
+            settings_rect.cycle_mode();
             update_junctions();
             break;
 
