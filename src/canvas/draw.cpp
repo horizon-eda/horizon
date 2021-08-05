@@ -157,22 +157,23 @@ void Canvas::draw_error(const Coordf &center, float sc, const std::string &text,
     float y = center.y;
     y -= 3 * sc;
     auto c = ColorP::ERROR;
-    draw_line({x - 5 * sc, y}, {x + 5 * sc, y}, c, 10000, tr);
-    draw_line({x - 5 * sc, y}, {x, y + 0.8660f * 10 * sc}, c, 10000, tr);
-    draw_line({x + 5 * sc, y}, {x, y + 0.8660f * 10 * sc}, c, 10000, tr);
-    draw_line({x, y + 0.5f * sc}, {x + 1 * sc, y + 1.5f * sc}, c, 10000, tr);
-    draw_line({x, y + 0.5f * sc}, {x - 1 * sc, y + 1.5f * sc}, c, 10000, tr);
-    draw_line({x, y + 2.5f * sc}, {x + 1 * sc, y + 1.5f * sc}, c, 10000, tr);
-    draw_line({x, y + 2.5f * sc}, {x - 1 * sc, y + 1.5f * sc}, c, 10000, tr);
-    draw_line({x, y + 3 * sc}, {x + 1 * sc, y + 6 * sc}, c, 10000, tr);
-    draw_line({x, y + 3 * sc}, {x - 1 * sc, y + 6 * sc}, c, 10000, tr);
-    draw_line({x - 1 * sc, y + 6 * sc}, {x + 1 * sc, y + 6 * sc}, c, 10000, tr);
+    const int layer = 10000;
+    draw_line({x - 5 * sc, y}, {x + 5 * sc, y}, c, layer, tr);
+    draw_line({x - 5 * sc, y}, {x, y + 0.8660f * 10 * sc}, c, layer, tr);
+    draw_line({x + 5 * sc, y}, {x, y + 0.8660f * 10 * sc}, c, layer, tr);
+    draw_line({x, y + 0.5f * sc}, {x + 1 * sc, y + 1.5f * sc}, c, layer, tr);
+    draw_line({x, y + 0.5f * sc}, {x - 1 * sc, y + 1.5f * sc}, c, layer, tr);
+    draw_line({x, y + 2.5f * sc}, {x + 1 * sc, y + 1.5f * sc}, c, layer, tr);
+    draw_line({x, y + 2.5f * sc}, {x - 1 * sc, y + 1.5f * sc}, c, layer, tr);
+    draw_line({x, y + 3 * sc}, {x + 1 * sc, y + 6 * sc}, c, layer, tr);
+    draw_line({x, y + 3 * sc}, {x - 1 * sc, y + 6 * sc}, c, layer, tr);
+    draw_line({x - 1 * sc, y + 6 * sc}, {x + 1 * sc, y + 6 * sc}, c, layer, tr);
     Coordf text_pos{x - 5 * sc, y - 1.5f * sc};
     if (tr)
         text_pos = transform.transform(text_pos);
     TextOptions opts;
     opts.flip = get_flip_view();
-    draw_text(text_pos, 0.25_mm, text, get_flip_view() ? 32768 : 0, TextOrigin::BASELINE, c, 0, opts);
+    draw_text(text_pos, 0.25_mm, text, get_flip_view() ? 32768 : 0, TextOrigin::BASELINE, c, layer, opts);
 }
 
 std::tuple<Coordf, Coordf, Coordi> Canvas::draw_flag(const Coordf &position, const std::string &txt, int64_t size,
