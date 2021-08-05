@@ -93,6 +93,7 @@ private:
                                                     check_status_cb_t status_cb) const;
     RulesCheckResult check_clearance_same_net(const class Board &b, class RulesCheckCache &cache,
                                               check_status_cb_t status_cb) const;
+    RulesCheckResult check_plane_priorities(const class Board &b) const;
 
     json serialize_or_export(Rule::SerializeMode mode) const;
 };

@@ -5,6 +5,7 @@
 #include "rules/cache.hpp"
 #include "util/accumulator.hpp"
 #include "util/geom_util.hpp"
+#include "util/polygon_arc_removal_proxy.hpp"
 #include <thread>
 #include <future>
 #include <sstream>
@@ -774,6 +775,72 @@ RulesCheckResult BoardRules::check_clearance_same_net(const Board &brd, RulesChe
     return r;
 }
 
+RulesCheckResult BoardRules::check_plane_priorities(const Board &brd) const
+{
+    RulesCheckResult r;
+    r.level = RulesCheckErrorLevel::PASS;
+
+
+    std::map<std::pair<int, int>, std::vector<const Polygon *>> polys_by_priority_and_layer;
+    for (const auto &[uu, poly] : brd.polygons) {
+        if (auto plane = dynamic_cast<const Plane *>(poly.usage.ptr)) {
+            const auto key = std::make_pair(plane->priority, poly.layer);
+            polys_by_priority_and_layer[key].push_back(&poly);
+        }
+    }
+
+    for (const auto &[key, polys] : polys_by_priority_and_layer) {
+        const auto [prio, layer] = key;
+        struct Path {
+            Path(ClipperLib::Path &&p, const Plane &pl) : path(p), plane(pl)
+            {
+            }
+            ClipperLib::Path path;
+            const Plane &plane;
+        };
+        std::vector<Path> paths;
+        for (const auto ipoly : polys) {
+            const PolygonArcRemovalProxy arc_removal_proxy{*ipoly, 64};
+            const auto &poly = arc_removal_proxy.get();
+            ClipperLib::Path path;
+            path.reserve(poly.vertices.size());
+            for (const auto &v : poly.vertices) {
+                path.emplace_back(v.position.x, v.position.y);
+            }
+            paths.emplace_back(std::move(path), dynamic_cast<const Plane &>(*ipoly->usage));
+        }
+        const auto n = paths.size();
+        for (size_t i = 0; i < n; i++) {
+            for (size_t j = 0; j < n; j++) {
+                if (i < j) {
+                    ClipperLib::Clipper clipper;
+                    clipper.AddPath(paths.at(i).path, ClipperLib::ptClip, true);
+                    clipper.AddPath(paths.at(j).path, ClipperLib::ptSubject, true);
+                    ClipperLib::Paths errors;
+                    clipper.Execute(ClipperLib::ctIntersection, errors);
+                    for (const auto &ite : errors) {
+                        r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
+                        auto &e = r.errors.back();
+                        e.has_location = true;
+                        Accumulator<Coordi> acc;
+                        for (const auto &ite2 : ite) {
+                            acc.accumulate({ite2.X, ite2.Y});
+                        }
+                        e.location = acc.get();
+                        e.comment = "Plane outline " + get_net_name(paths.at(i).plane.net) + " overlaps plane outline "
+                                    + get_net_name(paths.at(j).plane.net) + " of priority " + std::to_string(prio)
+                                    + " on layer " + brd.get_layers().at(layer).name;
+                        e.error_polygons = {ite};
+                    }
+                }
+            }
+        }
+    }
+
+    r.update();
+    return r;
+}
+
 
 RulesCheckResult BoardRules::check(RuleID id, const Board &brd, RulesCheckCache &cache,
                                    check_status_cb_t status_cb) const
@@ -799,6 +866,9 @@ RulesCheckResult BoardRules::check(RuleID id, const Board &brd, RulesCheckCache 
 
     case RuleID::CLEARANCE_SAME_NET:
         return BoardRules::check_clearance_same_net(brd, cache, status_cb);
+
+    case RuleID::PLANE:
+        return BoardRules::check_plane_priorities(brd);
 
     default:
         return RulesCheckResult();

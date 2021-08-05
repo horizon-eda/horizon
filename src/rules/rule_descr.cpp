@@ -22,7 +22,7 @@ const std::map<RuleID, RD> rule_descriptions = {
         {RuleID::CLEARANCE_COPPER_OTHER,
          {"Clearance Copper - Other", RD::IS_MULTI | RD::CAN_CHECK | RD::NEEDS_MATCH_ALL}},
 
-        {RuleID::PLANE, {"Planes", RD::IS_MULTI | RD::CAN_APPLY | RD::NEEDS_MATCH_ALL}},
+        {RuleID::PLANE, {"Planes", RD::IS_MULTI | RD::CAN_APPLY | RD::NEEDS_MATCH_ALL | RD::CAN_CHECK}},
 
         {RuleID::DIFFPAIR, {"Diffpair", RD::IS_MULTI}},
 
