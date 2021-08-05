@@ -767,6 +767,8 @@ void Canvas::render(const BusRipper &ripper)
 
 void Canvas::render(const Warning &warn)
 {
+    if (img_mode)
+        return;
     draw_error(warn.position, 2e5, warn.text);
 }
 
