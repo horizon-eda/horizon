@@ -91,6 +91,19 @@ std::string DocumentBoard::get_display_name(ObjectType type, const UUID &uu)
         return ju->net ? ju->net->name : "";
     }
 
+    case ObjectType::POLYGON:
+    case ObjectType::POLYGON_EDGE:
+    case ObjectType::POLYGON_VERTEX:
+    case ObjectType::POLYGON_ARC_CENTER: {
+        auto &poly = *get_polygon(uu);
+        if (auto plane = dynamic_cast<const Plane *>(poly.usage.ptr)) {
+            return "Plane: " + plane->net->name;
+        }
+        else {
+            return Document::get_display_name(type, uu);
+        }
+    }
+
     default:
         return Document::get_display_name(type, uu);
     }
