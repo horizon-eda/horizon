@@ -22,7 +22,7 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
         box->pack_start(*sp, true, true, 0);
         sp->show();
         HelpButton::pack_into(*box, HelpTexts::PLANE_PRIORITY);
-        grid_attach_label_and_widget(this, "Priority", box, top);
+        grid_attach_label_and_widget(this, "Fill order", box, top);
     }
 
 

@@ -995,7 +995,7 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
         if (poly) {
             if (auto plane = dynamic_cast<const Plane *>(poly->usage.ptr)) {
                 s += "\n\n<b>Plane " + plane->net->name + "</b>\n";
-                s += "Priority: " + std::to_string(plane->priority) + "\n";
+                s += "Fill order: " + std::to_string(plane->priority) + "\n";
                 s += "Layer: ";
                 s += core_board.get_layer_provider().get_layers().at(poly->layer).name + "\n";
             }
