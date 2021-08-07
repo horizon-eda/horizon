@@ -4,7 +4,7 @@
 #include "schematic/schematic.hpp"
 
 namespace horizon {
-RulesCheckCache::RulesCheckCache(IDocument *c) : core(c)
+RulesCheckCache::RulesCheckCache(IDocument &c) : core(c)
 {
 }
 
@@ -13,26 +13,25 @@ void RulesCheckCache::clear()
     cache.clear();
 }
 
-RulesCheckCacheBoardImage::RulesCheckCacheBoardImage(IDocument *c)
+RulesCheckCacheBoardImage::RulesCheckCacheBoardImage(IDocument &c)
 {
-    auto core = dynamic_cast<IDocumentBoard *>(c);
-    canvas.update(*core->get_board(), Canvas::PanelMode::SKIP);
+    auto &core = dynamic_cast<IDocumentBoard &>(c);
+    canvas.update(*core.get_board(), Canvas::PanelMode::SKIP);
 }
 
-const CanvasPatch *RulesCheckCacheBoardImage::get_canvas() const
+const CanvasPatch &RulesCheckCacheBoardImage::get_canvas() const
 {
-    return &canvas;
+    return canvas;
 }
 
-RulesCheckCacheNetPins::RulesCheckCacheNetPins(IDocument *c)
+RulesCheckCacheNetPins::RulesCheckCacheNetPins(IDocument &c)
 {
-    auto core = dynamic_cast<IDocumentSchematic *>(c);
-    assert(core);
-    auto block = core->get_block();
-    for (auto &it : block->nets) {
+    auto &core = dynamic_cast<IDocumentSchematic &>(c);
+    auto &block = *core.get_block();
+    for (auto &it : block.nets) {
         net_pins[&it.second];
     }
-    for (auto &it : block->components) {
+    for (auto &it : block.components) {
         for (auto &it_conn : it.second.connections) {
             if (it_conn.second.net) {
                 const auto &connpath = it_conn.first;
@@ -40,7 +39,7 @@ RulesCheckCacheNetPins::RulesCheckCacheNetPins(IDocument *c)
                 auto pin = &gate->unit->pins.at(connpath.at(1));
                 UUID sheet_uuid;
                 Coordi location;
-                for (const auto &it_sheet : core->get_schematic()->sheets) {
+                for (const auto &it_sheet : core.get_schematic()->sheets) {
                     bool found = false;
                     for (const auto &it_sym : it_sheet.second.symbols) {
                         if (it_sym.second.component == &it.second && it_sym.second.gate == gate) {
@@ -54,20 +53,18 @@ RulesCheckCacheNetPins::RulesCheckCacheNetPins(IDocument *c)
                     if (found)
                         break;
                 }
-                net_pins.at(it_conn.second.net.ptr).emplace_back(&it.second, gate, pin, sheet_uuid, location);
+                net_pins.at(it_conn.second.net.ptr).push_back({it.second, *gate, *pin, sheet_uuid, location});
             }
         }
     }
 }
 
-const std::map<class Net *,
-               std::deque<std::tuple<class Component *, const class Gate *, const class Pin *, UUID, Coordi>>> &
-RulesCheckCacheNetPins::get_net_pins() const
+const RulesCheckCacheNetPins::NetPins &RulesCheckCacheNetPins::get_net_pins() const
 {
     return net_pins;
 }
 
-RulesCheckCacheBase *RulesCheckCache::get_cache(RulesCheckCacheID id)
+RulesCheckCacheBase &RulesCheckCache::get_cache(RulesCheckCacheID id)
 {
     if (!cache.count(id)) {
         std::lock_guard<std::mutex> guard(mutex);
@@ -82,6 +79,6 @@ RulesCheckCacheBase *RulesCheckCache::get_cache(RulesCheckCacheID id)
             break;
         }
     }
-    return cache.at(id).get();
+    return *cache.at(id);
 }
 } // namespace horizon

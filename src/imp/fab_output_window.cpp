@@ -174,7 +174,7 @@ void FabOutputWindow::generate()
     if (!generate_button->get_sensitive())
         return;
 
-    RulesCheckCache cache(&core);
+    RulesCheckCache cache(core);
     const auto r = rules_check(*core.get_rules(), RuleID::PREFLIGHT_CHECKS, core, cache, &cb_nop);
     const auto r_plane = rules_check(*core.get_rules(), RuleID::PLANE, core, cache, &cb_nop);
     if (r.level != RulesCheckErrorLevel::PASS || r_plane.level != RulesCheckErrorLevel::PASS) {
