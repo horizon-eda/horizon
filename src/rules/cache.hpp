@@ -20,8 +20,8 @@ public:
 
 class RulesCheckCacheBoardImage : public RulesCheckCacheBase {
 public:
-    RulesCheckCacheBoardImage(class IDocument *c);
-    const CanvasPatch *get_canvas() const;
+    RulesCheckCacheBoardImage(class IDocument &c);
+    const CanvasPatch &get_canvas() const;
 
 private:
     CanvasPatch canvas;
@@ -29,26 +29,30 @@ private:
 
 class RulesCheckCacheNetPins : public RulesCheckCacheBase {
 public:
-    RulesCheckCacheNetPins(class IDocument *c);
-    const std::map<class Net *,
-                   std::deque<std::tuple<class Component *, const class Gate *, const class Pin *, UUID, Coordi>>> &
-    get_net_pins() const;
+    RulesCheckCacheNetPins(class IDocument &c);
+    struct NetPin {
+        const class Component &comp;
+        const class Gate &gate;
+        const class Pin &pin;
+        UUID sheet;
+        Coordi location;
+    };
+    using NetPins = std::map<const class Net *, std::vector<NetPin>>;
+    const NetPins &get_net_pins() const;
 
 private:
-    std::map<class Net *,
-             std::deque<std::tuple<class Component *, const class Gate *, const class Pin *, UUID, Coordi>>>
-            net_pins;
+    NetPins net_pins;
 };
 
 class RulesCheckCache {
 public:
-    RulesCheckCache(class IDocument *c);
-    RulesCheckCacheBase *get_cache(RulesCheckCacheID id);
+    RulesCheckCache(class IDocument &c);
+    RulesCheckCacheBase &get_cache(RulesCheckCacheID id);
     void clear();
 
 private:
     std::map<RulesCheckCacheID, std::unique_ptr<RulesCheckCacheBase>> cache;
-    class IDocument *core;
+    class IDocument &core;
     std::mutex mutex;
 };
 } // namespace horizon

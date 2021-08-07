@@ -8,19 +8,19 @@ RulesCheckResult SchematicRules::check_single_pin_net(const class Schematic &sch
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
-    auto &rule = dynamic_cast<const RuleSinglePinNet &>(*get_rule(RuleID::SINGLE_PIN_NET));
-    auto &c = dynamic_cast<RulesCheckCacheNetPins &>(*cache.get_cache(RulesCheckCacheID::NET_PINS));
+    auto &rule = rule_single_pin_net;
+    auto &c = dynamic_cast<RulesCheckCacheNetPins &>(cache.get_cache(RulesCheckCacheID::NET_PINS));
 
-    for (const auto &it : c.get_net_pins()) {
-        if (rule.include_unnamed || it.first->is_named()) {
-            if (it.second.size() == 1) {
+    for (const auto &[net, pins] : c.get_net_pins()) {
+        if (rule.include_unnamed || net->is_named()) {
+            if (pins.size() == 1) {
                 r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
                 auto &x = r.errors.back();
-                auto &conn = it.second.at(0);
-                x.comment = "Net \"" + it.first->name + "\" only connected to " + std::get<0>(conn)->refdes
-                            + std::get<1>(conn)->suffix + "." + std::get<2>(conn)->primary_name;
-                x.sheet = std::get<3>(conn);
-                x.location = std::get<4>(conn);
+                auto &conn = pins.at(0);
+                x.comment = "Net \"" + net->name + "\" only connected to " + conn.comp.refdes + conn.gate.suffix + "."
+                            + conn.pin.primary_name;
+                x.sheet = conn.sheet;
+                x.location = conn.location;
                 x.has_location = true;
             }
         }

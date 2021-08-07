@@ -469,7 +469,7 @@ void RulesWindow::run_checks()
     check_result_store->clear();
     auto &dom = canvas.markers.get_domain(MarkerDomain::CHECK);
     dom.clear();
-    cache.reset(new RulesCheckCache(&core));
+    cache.reset(new RulesCheckCache(core));
     annotation->clear();
     run_store.clear();
     pulse_connection = Glib::signal_timeout().connect(sigc::track_obj(
