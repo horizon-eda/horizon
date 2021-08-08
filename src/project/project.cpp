@@ -9,6 +9,7 @@
 #include "board/board.hpp"
 #include "nlohmann/json.hpp"
 #include "pool/project_pool.hpp"
+#include "util/str_util.hpp"
 
 namespace horizon {
 
@@ -86,6 +87,10 @@ ProjectBlock &Project::get_top_block()
     return const_cast<ProjectBlock &>(const_cast<const Project *>(this)->get_top_block());
 }
 
+static const std::vector<std::string> gitignore_lines = {
+        "pool/*.db", "pool/*.db-*", "*.imp_meta", "*.autosave", "*.bak",
+};
+
 std::string Project::create(const std::map<std::string, std::string> &meta, const UUID &pool_uuid,
                             const UUID &default_via)
 {
@@ -143,14 +148,45 @@ std::string Project::create(const std::map<std::string, std::string> &meta, cons
 
     {
         auto ofs = make_ofstream(Glib::build_filename(base_path, ".gitignore"));
-        ofs << "pool/*.db\n"
-               "pool/*.db-*\n"
-               "*.imp_meta\n"
-               "*.autosave\n"
-               "*.bak";
+        for (const auto &li : gitignore_lines) {
+            ofs << li << "\n";
+        }
     }
 
     return prj_filename;
+}
+
+static std::set<std::string> missing_lines_from_gitignore(const std::string &filename)
+{
+    auto ifs = make_ifstream(filename);
+    if (!ifs.is_open())
+        return {};
+
+    std::set<std::string> missing_lines;
+    missing_lines.insert(gitignore_lines.begin(), gitignore_lines.end());
+
+    std::string line;
+    while (std::getline(ifs, line)) {
+        trim(line);
+        missing_lines.erase(line);
+    }
+    return missing_lines;
+}
+
+bool Project::gitignore_needs_fixing(const std::string &filename)
+{
+    return missing_lines_from_gitignore(filename).size();
+}
+
+void Project::fix_gitignore(const std::string &filename)
+{
+    auto lines = missing_lines_from_gitignore(filename);
+    auto ofs = make_ofstream(filename, std::ios_base::in | std::ios_base::ate);
+    if (!ofs.is_open())
+        return;
+    for (const auto &li : lines) {
+        ofs << li << "\n";
+    }
 }
 
 std::string Project::get_filename_rel(const std::string &p) const

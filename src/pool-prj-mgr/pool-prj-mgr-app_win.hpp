@@ -125,6 +125,8 @@ private:
     Gtk::InfoBar *info_bar_version = nullptr;
     Gtk::Label *version_label = nullptr;
 
+    Gtk::InfoBar *info_bar_gitignore = nullptr;
+
     std::unique_ptr<class Project> project;
     std::string project_filename;
     bool project_needs_save = false;
@@ -206,6 +208,8 @@ private:
     void set_pool_update_progress(float progress);
 
     std::string get_pool_base_path() const;
+
+    std::string get_gitignore_filename() const;
 
 public:
     zmq::context_t &zctx;

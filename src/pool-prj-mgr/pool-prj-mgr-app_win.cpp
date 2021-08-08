@@ -70,6 +70,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     builder->get_widget("info_bar_pool_doc", info_bar_pool_doc);
     builder->get_widget("info_bar_version", info_bar_version);
     builder->get_widget("version_label", version_label);
+    builder->get_widget("info_bar_gitignore", info_bar_gitignore);
 
     set_view_mode(ViewMode::OPEN);
 
@@ -127,6 +128,16 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
         }
     });
     info_bar_hide(info_bar_pool_doc);
+
+    info_bar_hide(info_bar_gitignore);
+    info_bar_gitignore->signal_response().connect([this](int resp) {
+        if (resp == Gtk::RESPONSE_OK) {
+            if (project) {
+                Project::fix_gitignore(get_gitignore_filename());
+            }
+        }
+        info_bar_hide(info_bar_gitignore);
+    });
 
     show_output_button->signal_clicked().connect([this] {
         output_window->present();
@@ -913,6 +924,7 @@ bool PoolProjectManagerAppWindow::really_close_pool_or_project()
             return false;
         }
         app.recent_items[project_filename] = Glib::DateTime::create_now_local();
+        info_bar_hide(info_bar_gitignore);
         project.reset();
         cleanup();
         set_view_mode(ViewMode::OPEN);
@@ -1229,6 +1241,10 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
             }
         }
 
+        if (Project::gitignore_needs_fixing(get_gitignore_filename())) {
+            info_bar_show(info_bar_gitignore);
+        }
+
         view_project.label_project_directory->set_text(Glib::path_get_dirname(project_filename));
 
         view_project.reset_pool_cache_status();
@@ -1479,6 +1495,11 @@ std::string PoolProjectManagerAppWindow::get_filename() const
         return project_filename;
     else
         return "";
+}
+
+std::string PoolProjectManagerAppWindow::get_gitignore_filename() const
+{
+    return (fs::u8path(project_filename).parent_path() / ".gitignore").u8string();
 }
 
 PoolProjectManagerAppWindow::ClosePolicy PoolProjectManagerAppWindow::get_close_policy()

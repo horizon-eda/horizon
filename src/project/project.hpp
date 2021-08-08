@@ -34,6 +34,9 @@ public:
 
     std::string create(const std::map<std::string, std::string> &meta, const UUID &pool_uuid, const UUID &default_via);
 
+    static bool gitignore_needs_fixing(const std::string &filename);
+    static void fix_gitignore(const std::string &filename);
+
     std::string base_path;
     UUID uuid;
     std::map<UUID, ProjectBlock> blocks;
