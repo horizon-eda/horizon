@@ -14,6 +14,7 @@
 #include <gdk/gdkkeysyms.h>
 #include "imp/in_tool_action.hpp"
 #include "str_util.hpp"
+#include "placement.hpp"
 
 namespace horizon {
 
@@ -552,6 +553,49 @@ std::string append_dot_json(const std::string &s)
         return r + ".json";
     }
     return r;
+}
+
+Orientation get_pin_orientation_for_placement(Orientation pin_orientation, const class Placement &placement)
+{
+    static const std::map<Orientation, Orientation> omap_90 = {
+            {Orientation::LEFT, Orientation::DOWN},
+            {Orientation::UP, Orientation::LEFT},
+            {Orientation::RIGHT, Orientation::UP},
+            {Orientation::DOWN, Orientation::RIGHT},
+    };
+    static const std::map<Orientation, Orientation> omap_180 = {
+            {Orientation::LEFT, Orientation::RIGHT},
+            {Orientation::UP, Orientation::DOWN},
+            {Orientation::RIGHT, Orientation::LEFT},
+            {Orientation::DOWN, Orientation::UP},
+    };
+    static const std::map<Orientation, Orientation> omap_270 = {
+            {Orientation::LEFT, Orientation::UP},
+            {Orientation::UP, Orientation::RIGHT},
+            {Orientation::RIGHT, Orientation::DOWN},
+            {Orientation::DOWN, Orientation::LEFT},
+    };
+    static const std::map<Orientation, Orientation> omap_mirror = {
+            {Orientation::LEFT, Orientation::RIGHT},
+            {Orientation::UP, Orientation::UP},
+            {Orientation::RIGHT, Orientation::LEFT},
+            {Orientation::DOWN, Orientation::DOWN},
+    };
+
+    const auto angle = placement.get_angle();
+    if (angle == 16384) {
+        pin_orientation = omap_90.at(pin_orientation);
+    }
+    if (angle == 32768) {
+        pin_orientation = omap_180.at(pin_orientation);
+    }
+    if (angle == 49152) {
+        pin_orientation = omap_270.at(pin_orientation);
+    }
+    if (placement.mirror) {
+        pin_orientation = omap_mirror.at(pin_orientation);
+    }
+    return pin_orientation;
 }
 
 } // namespace horizon
