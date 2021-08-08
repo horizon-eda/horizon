@@ -76,4 +76,6 @@ void ensure_parent_dir(const std::string &path);
 
 std::string append_dot_json(const std::string &s);
 
+Orientation get_pin_orientation_for_placement(Orientation pin_orientation, const class Placement &placement);
+
 } // namespace horizon

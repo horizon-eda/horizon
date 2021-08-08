@@ -66,48 +66,9 @@ SymbolPin::SymbolPin(UUID uu) : uuid(uu)
 {
 }
 
-static const std::map<Orientation, Orientation> omap_90 = {
-        {Orientation::LEFT, Orientation::DOWN},
-        {Orientation::UP, Orientation::LEFT},
-        {Orientation::RIGHT, Orientation::UP},
-        {Orientation::DOWN, Orientation::RIGHT},
-};
-static const std::map<Orientation, Orientation> omap_180 = {
-        {Orientation::LEFT, Orientation::RIGHT},
-        {Orientation::UP, Orientation::DOWN},
-        {Orientation::RIGHT, Orientation::LEFT},
-        {Orientation::DOWN, Orientation::UP},
-};
-static const std::map<Orientation, Orientation> omap_270 = {
-        {Orientation::LEFT, Orientation::UP},
-        {Orientation::UP, Orientation::RIGHT},
-        {Orientation::RIGHT, Orientation::DOWN},
-        {Orientation::DOWN, Orientation::LEFT},
-};
-static const std::map<Orientation, Orientation> omap_mirror = {
-        {Orientation::LEFT, Orientation::RIGHT},
-        {Orientation::UP, Orientation::UP},
-        {Orientation::RIGHT, Orientation::LEFT},
-        {Orientation::DOWN, Orientation::DOWN},
-};
-
 Orientation SymbolPin::get_orientation_for_placement(const Placement &pl) const
 {
-    Orientation pin_orientation = orientation;
-    auto angle = pl.get_angle();
-    if (angle == 16384) {
-        pin_orientation = omap_90.at(pin_orientation);
-    }
-    if (angle == 32768) {
-        pin_orientation = omap_180.at(pin_orientation);
-    }
-    if (angle == 49152) {
-        pin_orientation = omap_270.at(pin_orientation);
-    }
-    if (pl.mirror) {
-        pin_orientation = omap_mirror.at(pin_orientation);
-    }
-    return pin_orientation;
+    return get_pin_orientation_for_placement(orientation, pl);
 }
 
 json SymbolPin::serialize() const
