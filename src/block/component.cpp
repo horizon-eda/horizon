@@ -111,6 +111,9 @@ Component::Component(const UUID &uu, const json &j, IPool &pool, Block *block)
             }
         }
     }
+    if (j.count("href")) {
+        href = uuid_vec_from_string(j.at("href").get<std::string>());
+    }
 }
 Component::Component(const UUID &uu) : uuid(uu)
 {
@@ -178,6 +181,8 @@ json Component::serialize() const
             j["custom_pin_names"][(std::string)it.first] = it.second;
         }
     }
+    if (href.size())
+        j["href"] = uuid_vec_to_string(href);
     return j;
 }
 } // namespace horizon
