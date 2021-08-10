@@ -195,7 +195,7 @@ void SchematicPropertiesDialog::update_view()
         row[tree_columns.name] = "Top block";
         row[tree_columns.block] = blocks.top_block;
         row[tree_columns.sheet] = UUID();
-        sheets_to_row(row, blocks.get_top_block().schematic, blocks.top_block);
+        sheets_to_row(row, blocks.get_top_block_item().schematic, blocks.top_block);
     }
 
     for (const auto &[block_uu, block] : blocks.blocks) {
@@ -236,7 +236,7 @@ void SchematicPropertiesDialog::selection_changed()
         const auto sheet = row.get_value(tree_columns.sheet);
         const auto block = row.get_value(tree_columns.block);
         if (!sheet && !block) {
-            current = Gtk::manage(new ProjectMetaEditor(doc.get_blocks().get_top_block().block.project_meta));
+            current = Gtk::manage(new ProjectMetaEditor(doc.get_blocks().get_top_block_item().block.project_meta));
             current->property_margin() = 20;
             remove_button->set_sensitive(false);
         }
@@ -295,7 +295,7 @@ void SchematicPropertiesDialog::add_block()
     if (const auto r = dias.ask_datum_string("Enter new block name", "Channel")) {
         auto &b = doc.get_blocks().add_block(*r);
         b.schematic.get_sheet_at_index(1).pool_frame =
-                doc.get_blocks().get_top_block().schematic.get_sheet_at_index(1).pool_frame;
+                doc.get_blocks().get_top_block_item().schematic.get_sheet_at_index(1).pool_frame;
         b.symbol.create_template();
         update_view();
         store->foreach_iter([this, &b](const Gtk::TreeIter &it) {

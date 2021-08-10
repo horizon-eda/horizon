@@ -30,7 +30,7 @@ public:
 static Block get_flattend_block(const std::string &blocks_filename, IPool &pool)
 {
     auto blocks = Blocks::new_from_file(blocks_filename, pool);
-    return blocks.get_top_block().block.flatten();
+    return blocks.get_top_block_item().block.flatten();
 }
 
 CoreBoard::CoreBoard(const std::string &board_filename, const std::string &blocks_filename,

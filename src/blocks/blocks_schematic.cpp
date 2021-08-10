@@ -120,18 +120,18 @@ BlocksSchematic::BlockItemSchematic &BlocksSchematic::add_block(const std::strin
     auto &b = blocks.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, name))
                       .first->second;
     b.block.net_classes.clear();
-    const auto &top = get_top_block().block;
+    const auto &top = get_top_block_item().block;
     auto &nc = b.block.net_classes.emplace(top.net_class_default->uuid, top.net_class_default->uuid).first->second;
     b.block.net_class_default = &nc;
     return b;
 }
 
-BlocksSchematic::BlockItemSchematic &BlocksSchematic::get_top_block()
+BlocksSchematic::BlockItemSchematic &BlocksSchematic::get_top_block_item()
 {
     return blocks.at(top_block);
 }
 
-const BlocksSchematic::BlockItemSchematic &BlocksSchematic::get_top_block() const
+const BlocksSchematic::BlockItemSchematic &BlocksSchematic::get_top_block_item() const
 {
     return blocks.at(top_block);
 }

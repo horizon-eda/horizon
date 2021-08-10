@@ -85,7 +85,7 @@ class BoardWrapper *create_board_wrapper(const horizon::Project &prj)
 static horizon::Block get_flattend_block(const std::string &blocks_filename, horizon::IPool &pool)
 {
     auto blocks = horizon::Blocks::new_from_file(blocks_filename, pool);
-    return blocks.get_top_block().block.flatten();
+    return blocks.get_top_block_item().block.flatten();
 }
 
 BoardWrapper::BoardWrapper(const horizon::Project &prj)

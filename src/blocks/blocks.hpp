@@ -67,8 +67,8 @@ public:
 
     std::map<UUID, BlockItem> blocks;
 
-    BlockItem &get_top_block();
-    const BlockItem &get_top_block() const;
+    BlockItem &get_top_block_item();
+    const BlockItem &get_top_block_item() const;
 
     Block &get_block(const UUID &uu) override;
     json serialize() const;

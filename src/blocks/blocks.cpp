@@ -155,12 +155,12 @@ Blocks::Blocks(const Blocks &other) : BlocksBase(other), blocks(other.blocks)
     }
 }
 
-BlocksBase::BlockItem &Blocks::get_top_block()
+BlocksBase::BlockItem &Blocks::get_top_block_item()
 {
     return blocks.at(top_block);
 }
 
-const BlocksBase::BlockItem &Blocks::get_top_block() const
+const BlocksBase::BlockItem &Blocks::get_top_block_item() const
 {
     return blocks.at(top_block);
 }

@@ -33,8 +33,8 @@ public:
 
     std::vector<const BlockItemSchematic *> get_blocks_sorted() const;
 
-    BlockItemSchematic &get_top_block();
-    const BlockItemSchematic &get_top_block() const;
+    BlockItemSchematic &get_top_block_item();
+    const BlockItemSchematic &get_top_block_item() const;
 
     BlockItemSchematic &add_block(const std::string &name);
 

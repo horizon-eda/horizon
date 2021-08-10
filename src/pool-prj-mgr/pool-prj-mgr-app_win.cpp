@@ -1563,7 +1563,7 @@ bool PoolProjectManagerAppWindow::cleanup_pool_cache(Gtk::Window *parent)
 
     ProjectPool project_pool(project->pool_directory, false);
     auto blocks = BlocksSchematic::new_from_file(project->blocks_filename, project_pool);
-    auto flat_block = blocks.get_top_block().block.flatten();
+    auto flat_block = blocks.get_top_block_item().block.flatten();
     auto board = Board::new_from_file(project->board_filename, flat_block, project_pool);
     board.expand();
     for (auto &[uu, block] : blocks.blocks) {

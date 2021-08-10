@@ -11,7 +11,7 @@
 SchematicWrapper::SchematicWrapper(const horizon::Project &prj)
     : pool(prj.pool_directory, false), blocks(horizon::BlocksSchematic::new_from_file(prj.blocks_filename, pool))
 {
-    auto &top = blocks.get_top_block();
+    auto &top = blocks.get_top_block_item();
     top.block.create_instance_mappings();
     top.schematic.update_sheet_mapping();
     for (auto &[uu, block] : blocks.blocks) {
@@ -50,7 +50,7 @@ static void PySchematic_dealloc(PyObject *pself)
 static PyObject *PySchematic_get_pdf_export_settings(PyObject *pself)
 {
     auto self = reinterpret_cast<PySchematic *>(pself);
-    auto settings = self->schematic->blocks.get_top_block().schematic.pdf_export_settings.serialize_schematic();
+    auto settings = self->schematic->blocks.get_top_block_item().schematic.pdf_export_settings.serialize_schematic();
     return py_from_json(settings);
 }
 
@@ -63,7 +63,7 @@ static PyObject *PySchematic_export_pdf(PyObject *pself, PyObject *args)
     try {
         auto settings_json = json_from_py(py_export_settings);
         horizon::PDFExportSettings settings(settings_json);
-        horizon::export_pdf(self->schematic->blocks.get_top_block().schematic, settings, nullptr);
+        horizon::export_pdf(self->schematic->blocks.get_top_block_item().schematic, settings, nullptr);
     }
     catch (const std::exception &e) {
         PyErr_SetString(PyExc_IOError, e.what());
@@ -84,7 +84,7 @@ static PyObject *PySchematic_export_pdf(PyObject *pself, PyObject *args)
 static PyObject *PySchematic_get_bom_export_settings(PyObject *pself)
 {
     auto self = reinterpret_cast<PySchematic *>(pself);
-    auto settings = self->schematic->blocks.get_top_block().block.bom_export_settings.serialize();
+    auto settings = self->schematic->blocks.get_top_block_item().block.bom_export_settings.serialize();
     return py_from_json(settings);
 }
 
@@ -97,7 +97,7 @@ static PyObject *PySchematic_export_bom(PyObject *pself, PyObject *args)
     try {
         auto settings_json = json_from_py(py_export_settings);
         horizon::BOMExportSettings settings(settings_json, self->schematic->pool);
-        horizon::export_BOM(settings.output_filename, self->schematic->blocks.get_top_block().block, settings);
+        horizon::export_BOM(settings.output_filename, self->schematic->blocks.get_top_block_item().block, settings);
     }
     catch (const std::exception &e) {
         PyErr_SetString(PyExc_IOError, e.what());

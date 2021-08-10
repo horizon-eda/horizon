@@ -52,7 +52,7 @@ Schematic *CoreSchematic::get_current_schematic()
 
 const Schematic *CoreSchematic::get_top_schematic() const
 {
-    return &blocks->get_top_block().schematic;
+    return &blocks->get_top_block_item().schematic;
 }
 
 Schematic *CoreSchematic::get_top_schematic()
@@ -68,7 +68,7 @@ Block *CoreSchematic::get_current_block()
 
 Block *CoreSchematic::get_top_block()
 {
-    return &blocks->get_top_block().block;
+    return &blocks->get_top_block_item().block;
 }
 
 LayerProvider &CoreSchematic::get_layer_provider()
@@ -768,7 +768,7 @@ const UUIDVec &CoreSchematic::get_instance_path() const
 const BlockInstanceMapping *CoreSchematic::get_block_instance_mapping() const
 {
     if (instance_path.size()) {
-        auto &map = blocks->get_top_block().block.block_instance_mappings.at(instance_path);
+        auto &map = blocks->get_top_block_item().block.block_instance_mappings.at(instance_path);
         assert(map.block == block_uuid);
         return &map;
     }
@@ -784,7 +784,8 @@ BlockInstanceMapping *CoreSchematic::get_block_instance_mapping()
 unsigned int CoreSchematic::get_sheet_index(const class UUID &sheet) const
 {
     if (in_hierarchy()) {
-        return blocks->get_top_block().schematic.sheet_mapping.sheet_numbers.at(uuid_vec_append(instance_path, sheet));
+        return blocks->get_top_block_item().schematic.sheet_mapping.sheet_numbers.at(
+                uuid_vec_append(instance_path, sheet));
     }
     else {
         return get_current_schematic()->sheets.at(sheet).index;
@@ -793,13 +794,13 @@ unsigned int CoreSchematic::get_sheet_index(const class UUID &sheet) const
 
 unsigned int CoreSchematic::get_sheet_index_for_path(const class UUID &sheet, const UUIDVec &path) const
 {
-    return blocks->get_top_block().schematic.sheet_mapping.sheet_numbers.at(uuid_vec_append(path, sheet));
+    return blocks->get_top_block_item().schematic.sheet_mapping.sheet_numbers.at(uuid_vec_append(path, sheet));
 }
 
 unsigned int CoreSchematic::get_sheet_total() const
 {
     if (in_hierarchy())
-        return blocks->get_top_block().schematic.sheet_mapping.sheet_total;
+        return blocks->get_top_block_item().schematic.sheet_mapping.sheet_total;
     else
         return get_current_schematic()->sheets.size();
 }
@@ -815,7 +816,7 @@ Schematic &CoreSchematic::get_schematic_for_instance_path(const UUIDVec &path)
 
 void CoreSchematic::fix_current_block()
 {
-    auto &top_block = blocks->get_top_block();
+    auto &top_block = blocks->get_top_block_item();
     bool block_changed = false;
     if (blocks->blocks.count(block_uuid) == 0) {
         block_uuid = top_block.uuid;
@@ -848,7 +849,7 @@ void CoreSchematic::fix_current_block()
 void CoreSchematic::rebuild(bool from_undo)
 {
     clock_t begin = clock();
-    auto &top_block = blocks->get_top_block();
+    auto &top_block = blocks->get_top_block_item();
 
 
     fix_current_block();
@@ -962,7 +963,7 @@ const std::string &CoreSchematic::get_filename() const
 
 void CoreSchematic::save(const std::string &suffix)
 {
-    auto &top = blocks->get_top_block();
+    auto &top = blocks->get_top_block_item();
     top.schematic.rules = rules;
     top.block.bom_export_settings = bom_export_settings;
     top.schematic.pdf_export_settings = pdf_export_settings;

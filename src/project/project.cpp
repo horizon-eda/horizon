@@ -117,7 +117,7 @@ std::string Project::create(const std::map<std::string, std::string> &meta, cons
 
     BlocksSchematic blocks;
     blocks.base_path = base_path;
-    auto &top_block = blocks.get_top_block();
+    auto &top_block = blocks.get_top_block_item();
 
     top_block.block.project_meta = meta;
     const auto top_block_filename = Glib::build_filename(blocks.base_path, top_block.block_filename);
