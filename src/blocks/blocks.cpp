@@ -170,6 +170,20 @@ Block &Blocks::get_block(const UUID &uu)
     return blocks.at(uu).block;
 }
 
+Block &Blocks::get_top_block()
+{
+    return get_top_block_item().block;
+}
+
+std::map<UUID, Block *> Blocks::get_blocks()
+{
+    std::map<UUID, Block *> r;
+    for (auto &[uu, block] : blocks) {
+        r.emplace(uu, &block.block);
+    }
+    return r;
+}
+
 Blocks Blocks::new_from_file(const std::string &filename, IPool &pool)
 {
     const auto j = load_json_from_file(filename);

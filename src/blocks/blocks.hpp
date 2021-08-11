@@ -71,6 +71,8 @@ public:
     const BlockItem &get_top_block_item() const;
 
     Block &get_block(const UUID &uu) override;
+    std::map<UUID, Block *> get_blocks() override;
+    Block &get_top_block() override;
     json serialize() const;
 };
 

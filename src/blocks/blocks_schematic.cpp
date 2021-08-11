@@ -141,6 +141,20 @@ Block &BlocksSchematic::get_block(const UUID &uu)
     return blocks.at(uu).block;
 }
 
+Block &BlocksSchematic::get_top_block()
+{
+    return get_top_block_item().block;
+}
+
+std::map<UUID, Block *> BlocksSchematic::get_blocks()
+{
+    std::map<UUID, Block *> r;
+    for (auto &[uu, block] : blocks) {
+        r.emplace(uu, &block.block);
+    }
+    return r;
+}
+
 BlockSymbol &BlocksSchematic::get_block_symbol(const UUID &uu)
 {
     return blocks.at(uu).symbol;

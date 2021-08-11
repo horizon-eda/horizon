@@ -20,6 +20,16 @@ public:
         throw std::runtime_error("no blocks");
     }
 
+    Block &get_top_block() override
+    {
+        throw std::runtime_error("no blocks");
+    }
+
+    std::map<UUID, Block *> get_blocks() override
+    {
+        throw std::runtime_error("no blocks");
+    }
+
     static auto &get()
     {
         static NoneBlockProvider inst;

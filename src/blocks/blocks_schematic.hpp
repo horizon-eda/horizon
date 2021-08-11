@@ -39,6 +39,8 @@ public:
     BlockItemSchematic &add_block(const std::string &name);
 
     Block &get_block(const UUID &uu) override;
+    std::map<UUID, Block *> get_blocks() override;
+    Block &get_top_block() override;
     BlockSymbol &get_block_symbol(const UUID &uu) override;
     Schematic &get_schematic(const UUID &uu) override;
     json serialize() const;
