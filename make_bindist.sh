@@ -100,6 +100,7 @@ LIBS=(
 	libdeflate.dll\
 	libwebp-7.dll\
 	libjbig-0.dll\
+	libLerc.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
 )
