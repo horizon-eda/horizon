@@ -119,11 +119,6 @@ public:
     std::vector<BlockItem<false>> get_instantiated_blocks_and_top();
     std::vector<BlockItem<true>> get_instantiated_blocks_and_top() const;
 
-    std::set<Block *> get_all_blocks();
-    std::set<const Block *> get_all_blocks() const;
-    std::set<Block *> get_all_blocks_and_top();
-    std::set<const Block *> get_all_blocks_and_top() const;
-
     bool can_delete_power_net(const UUID &uu) const;
 
     bool can_add_block_instance(const UUID &where, const UUID &block_inst) const;

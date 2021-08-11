@@ -730,42 +730,6 @@ std::vector<Block::BlockItem<false>> Block::get_instantiated_blocks_and_top()
     return get_instantiated_blocks(true);
 }
 
-std::set<Block *> Block::get_all_blocks()
-{
-    std::set<Block *> blocks;
-    for (auto &it : get_instantiated_blocks()) {
-        blocks.insert(&it.block);
-    }
-    return blocks;
-}
-
-std::set<Block *> Block::get_all_blocks_and_top()
-{
-    std::set<Block *> blocks;
-    for (auto &it : get_instantiated_blocks_and_top()) {
-        blocks.insert(&it.block);
-    }
-    return blocks;
-}
-
-std::set<const Block *> Block::get_all_blocks() const
-{
-    std::set<const Block *> blocks;
-    for (auto &it : get_instantiated_blocks()) {
-        blocks.insert(&it.block);
-    }
-    return blocks;
-}
-
-std::set<const Block *> Block::get_all_blocks_and_top() const
-{
-    std::set<const Block *> blocks;
-    for (auto &it : get_instantiated_blocks_and_top()) {
-        blocks.insert(&it.block);
-    }
-    return blocks;
-}
-
 void Block::create_instance_mappings()
 {
     for (const auto &[block, instance_path] : get_instantiated_blocks()) {
