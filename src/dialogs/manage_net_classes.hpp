@@ -4,10 +4,10 @@ namespace horizon {
 
 class ManageNetClassesDialog : public Gtk::Dialog {
 public:
-    ManageNetClassesDialog(Gtk::Window *parent, class Block &b);
+    ManageNetClassesDialog(Gtk::Window *parent, class IBlockProvider &b);
 
 private:
-    Block &block;
+    IBlockProvider &blocks;
     Gtk::ListBox *listbox = nullptr;
     void handle_add_net_class();
 };

@@ -7,6 +7,7 @@
 #include <iostream>
 #include "core/tool_id.hpp"
 #include "imp/imp_interface.hpp"
+#include "blocks/blocks_schematic.hpp"
 
 namespace horizon {
 
@@ -51,8 +52,7 @@ ToolResponse ToolManageBuses::begin(const ToolArgs &args)
         r = imp->dialogs.annotate(*sch);
     }
     else if (tool_id == ToolID::MANAGE_NET_CLASSES) {
-        auto sch = doc.c->get_top_schematic();
-        r = imp->dialogs.manage_net_classes(*sch->block);
+        r = imp->dialogs.manage_net_classes(doc.c->get_blocks());
     }
     else if (tool_id == ToolID::EDIT_SCHEMATIC_PROPERTIES) {
         r = imp->dialogs.edit_schematic_properties(*doc.co);
@@ -61,7 +61,7 @@ ToolResponse ToolManageBuses::begin(const ToolArgs &args)
         r = imp->dialogs.edit_stackup(*doc.b);
     }
     else if (tool_id == ToolID::MANAGE_POWER_NETS) {
-        r = imp->dialogs.manage_power_nets(*doc.c->get_top_block());
+        r = imp->dialogs.manage_power_nets(doc.c->get_blocks());
     }
     else if (tool_id == ToolID::EDIT_FRAME_PROPERTIES) {
         r = imp->dialogs.edit_frame_properties(doc.f->get_frame());

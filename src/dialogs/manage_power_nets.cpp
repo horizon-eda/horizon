@@ -2,12 +2,13 @@
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
 #include "block/block.hpp"
+#include "blocks/iblock_provider.hpp"
 
 namespace horizon {
 
 class PowerNetEditor : public Gtk::Box {
 public:
-    PowerNetEditor(Net &n, Block &bl) : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4), net(n), block(bl)
+    PowerNetEditor(Net &n, IBlockProvider &bl) : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4), net(n), blocks(bl)
     {
         auto entry = Gtk::manage(new Gtk::Entry());
         entry->set_text(net.name);
@@ -38,10 +39,12 @@ public:
         auto delete_button = Gtk::manage(new Gtk::Button());
         delete_button->set_margin_start(4);
         delete_button->set_image_from_icon_name("list-remove-symbolic", Gtk::ICON_SIZE_BUTTON);
-        delete_button->set_sensitive(block.can_delete_power_net(net.uuid));
+        auto all_blocks = blocks.get_blocks();
+        delete_button->set_sensitive(std::all_of(all_blocks.begin(), all_blocks.end(),
+                                                 [this](auto &x) { return x.second->can_delete_power_net(net.uuid); }));
         pack_start(*delete_button, false, false, 0);
         delete_button->signal_clicked().connect([this] {
-            block.nets.erase(net.uuid);
+            blocks.get_top_block().nets.erase(net.uuid);
             delete this->get_parent();
         });
 
@@ -54,13 +57,13 @@ public:
 
 private:
     Net &net;
-    Block &block;
+    IBlockProvider &blocks;
 };
 
-ManagePowerNetsDialog::ManagePowerNetsDialog(Gtk::Window *parent, Block &bl)
+ManagePowerNetsDialog::ManagePowerNetsDialog(Gtk::Window *parent, IBlockProvider &bl)
     : Gtk::Dialog("Manage power nets", *parent,
                   Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
-      block(bl)
+      blocks(bl)
 {
     add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
     add_button("OK", Gtk::ResponseType::RESPONSE_OK);
@@ -95,7 +98,7 @@ ManagePowerNetsDialog::ManagePowerNetsDialog(Gtk::Window *parent, Block &bl)
 
     std::vector<Net *> nets_sorted;
 
-    for (auto &it : block.nets) {
+    for (auto &it : blocks.get_top_block().nets) {
         if (it.second.is_power) {
             nets_sorted.push_back(&it.second);
         }
@@ -104,7 +107,7 @@ ManagePowerNetsDialog::ManagePowerNetsDialog(Gtk::Window *parent, Block &bl)
               [](const auto a, const auto b) { return strcmp_natural(a->name, b->name) < 0; });
 
     for (auto net : nets_sorted) {
-        auto ne = Gtk::manage(new PowerNetEditor(*net, block));
+        auto ne = Gtk::manage(new PowerNetEditor(*net, blocks));
         listbox->add(*ne);
     }
 
@@ -115,11 +118,11 @@ ManagePowerNetsDialog::ManagePowerNetsDialog(Gtk::Window *parent, Block &bl)
 
 void ManagePowerNetsDialog::handle_add_power_net()
 {
-    auto net = block.insert_net();
+    auto net = blocks.get_top_block().insert_net();
     net->name = "GND";
     net->is_power = true;
 
-    auto ne = Gtk::manage(new PowerNetEditor(*net, block));
+    auto ne = Gtk::manage(new PowerNetEditor(*net, blocks));
     listbox->add(*ne);
 }
 } // namespace horizon

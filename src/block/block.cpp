@@ -591,19 +591,14 @@ UUID Block::get_uuid() const
 
 bool Block::can_delete_power_net(const UUID &uu) const
 {
-    const auto all_blocks = get_all_blocks_and_top();
-    const bool can_delete = std::all_of(all_blocks.begin(), all_blocks.end(), [uu](auto b) {
-        if (b->nets.count(uu)) {
-            auto &bn = b->nets.at(uu);
-            return bn.n_pins_connected == 0 && !bn.is_power_forced;
-        }
-        else {
-            return true;
-        }
-    });
-    return can_delete;
+    if (nets.count(uu)) {
+        auto &bn = nets.at(uu);
+        return bn.n_pins_connected == 0 && !bn.is_power_forced;
+    }
+    else {
+        return true;
+    }
 }
-
 
 void Block::update_non_top(Block &other) const
 {

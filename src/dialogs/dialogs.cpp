@@ -240,13 +240,13 @@ bool Dialogs::manage_buses(Block &b)
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::manage_net_classes(Block &b)
+bool Dialogs::manage_net_classes(IBlockProvider &b)
 {
     ManageNetClassesDialog dia(parent, b);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::manage_power_nets(Block &b)
+bool Dialogs::manage_power_nets(IBlockProvider &b)
 {
     ManagePowerNetsDialog dia(parent, b);
     return dia.run() == Gtk::RESPONSE_OK;

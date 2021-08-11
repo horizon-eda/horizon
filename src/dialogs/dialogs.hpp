@@ -39,8 +39,8 @@ public:
 
     unsigned int ask_net_merge(class Net &net, class Net &into);
     bool manage_buses(class Block &b);
-    bool manage_net_classes(class Block &b);
-    bool manage_power_nets(class Block &b);
+    bool manage_net_classes(class IBlockProvider &b);
+    bool manage_power_nets(class IBlockProvider &b);
     bool manage_included_boards(class Board &b);
     bool edit_board_hole(std::set<class BoardHole *> &holes, class IPool &pool, class IPool &pool_caching,
                          class Block &block);
