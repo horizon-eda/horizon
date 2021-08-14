@@ -17,6 +17,7 @@ Wanna chat about the project? Join #horizon-eda on libera.chat
 - KiCad's awesome interactive router
 - Lag- and glitch-free rendering
 - Rule-based DRC
+- Hierarchical schematics
 - Undo/redo
 - Copy/paste for some objects
 - Builds and runs on Linux and Windows
