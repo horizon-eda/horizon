@@ -1262,6 +1262,8 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
                 sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_assign_part));
 
         set_view_mode(ViewMode::PROJECT);
+
+        view_project.update_meta();
     }
 }
 
