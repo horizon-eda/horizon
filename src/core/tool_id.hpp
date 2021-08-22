@@ -154,5 +154,6 @@ enum class ToolID {
     EDIT_CUSTOM_VALUE,
     PLACE_DOT,
     SET_TRACK_WIDTH,
+    EXCHANGE_GATES,
 };
 } // namespace horizon
