@@ -22,7 +22,9 @@ RulesCheckResult check_item(IPool &pool, ObjectType type, const UUID &uu)
         return check_part(*pool.get_part(uu));
 
     case ObjectType::SYMBOL: {
-        const auto &sym = *pool.get_symbol(uu);
+        auto sym = *pool.get_symbol(uu);
+        sym.expand();
+        sym.apply_placement(Placement());
         return sym.rules.check(RuleID::SYMBOL_CHECKS, sym);
     }
 
