@@ -458,7 +458,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
     update_tip();
     if (doc.c) {
         auto sch = doc.c->get_schematic();
-        sch->expand(true);
+        sch->expand(false);
         for (auto &it : sch->sheets) {
             it.second.warnings.clear();
         }
