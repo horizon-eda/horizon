@@ -1411,12 +1411,8 @@ void ImpBase::tool_process(ToolResponse &resp)
             canvas->set_selection(core->get_tool_selection());
         }
         else {
-            if (canvas->get_selection_mode() == CanvasGL::SelectionMode::NORMAL) {
-                canvas->set_selection(core->get_tool_selection());
-            }
-            else {
-                canvas->set_selection({});
-            }
+            canvas->set_selection(core->get_tool_selection(),
+                                  canvas->get_selection_mode() == CanvasGL::SelectionMode::NORMAL);
         }
     }
     if (resp.next_tool != ToolID::NONE) {
