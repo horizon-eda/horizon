@@ -1,3 +1,77 @@
+# Version 2.1.0
+
+## New features
+
+### Editors
+
+ - Add support for saving and recalling grids ([52fb1fc](https://github.com/horizon-eda/horizon/commit/52fb1fc563c8cf6cc5b961eefdaff2a0c24cf958))
+ - Add option for upside-down text ([76d7cec](https://github.com/horizon-eda/horizon/commit/76d7cec6a5d1b7332d9c05e2a28b3e5fbc6d5c12))
+ - Show popup with available key sequences ([8d9ac5f](https://github.com/horizon-eda/horizon/commit/8d9ac5f415f96e9ceac6e72b14aeb5143f029ec9))
+ - Show spacebar menu hint in status bar ([aaa3d63](https://github.com/horizon-eda/horizon/commit/aaa3d63a315dba6cc5e7757977015022308fbbab))
+
+### 3D preview
+
+ - Support for keyboard shortcuts ([54d3eb1](https://github.com/horizon-eda/horizon/commit/54d3eb17e8c9857c71958a6ab7b2ceaaaafebd3b))
+
+## Enhancements
+
+### Project manager
+
+ - Add option for fixing gitignore ([88f3d2a](https://github.com/horizon-eda/horizon/commit/88f3d2a119be517958253c0fd18128894bfe6d91))
+ - Duplicate window: only duplicate if all filenames are valid ([064dd87](https://github.com/horizon-eda/horizon/commit/064dd877c4f6a45241d20bdafa1fa9f6dd00db6b))
+ - LocationEntry: automatically append .json from file chooser if needed ([31ee359](https://github.com/horizon-eda/horizon/commit/31ee35911e751ac679692d83f56a8834866ffb5a))
+
+### Board editor
+
+ - Add checks for plane fill order assignment ([39f937a](https://github.com/horizon-eda/horizon/commit/39f937a7e7b11a6b6c25f46f7b072743de498233), [644e2c8](https://github.com/horizon-eda/horizon/commit/644e2c8d8d5f1e79015636f706a9c05c4fc573ea), [cf0f435](https://github.com/horizon-eda/horizon/commit/cf0f4352e5c364967123567c2c95c4a19061450c))
+ - Include plane in polygon display name ([ce2aa0e](https://github.com/horizon-eda/horizon/commit/ce2aa0ee704403e525012fa31d8211282cc46d75))
+ - Improved appearance of composite pads (such as rounded rectangle) ([782917a](https://github.com/horizon-eda/horizon/commit/782917a25a0e08831ab6c044d38879c874b039c7))
+ - New tool: set track width ([69f8791](https://github.com/horizon-eda/horizon/commit/69f8791dae9f8436b922f3b5ef274d41e288c4ed))
+ - Show track spacing in HUD ([6ac5172](https://github.com/horizon-eda/horizon/commit/6ac517257df007787715b7c8a66d87d092196a98))
+ - Automatically create top/bottom layer pair for new boards ([7c54653](https://github.com/horizon-eda/horizon/commit/7c54653cc70ea0e65991a819ceeb3b90fb68bccb))
+ - Enter datum tool supports tracks ([8366cf1](https://github.com/horizon-eda/horizon/commit/8366cf1dbe9d6ffafe0200e6d0e87607453eb415))
+ - Rules check: show layer for copper clearance violation ([f868a42](https://github.com/horizon-eda/horizon/commit/f868a42b589b9c992bbf81b2c79d69e9a013cb53))
+ - Rules check: don't check non-copper layers of plated holes ([6e9b081](https://github.com/horizon-eda/horizon/commit/6e9b08177e46258b4ccb5f1833e7c6e2de8fa4cc))
+
+### Editors
+
+ - Draw line rectangle tool remembers mode ([87f42f9](https://github.com/horizon-eda/horizon/commit/87f42f9d33eba19a178844f6ebcdbd3219fcd441))
+ - Use arcs for polygons when exporting to pdf (#609) ([09e0e85](https://github.com/horizon-eda/horizon/commit/09e0e854d730a0f8dff635681139fd3f981bca9c))
+ - Improved arc selection ([31013c2](https://github.com/horizon-eda/horizon/commit/31013c2535c4fecc12d7405496344c4f8e5dddfa))
+ - DXF import: support circles ([f07b2c6](https://github.com/horizon-eda/horizon/commit/f07b2c6758fb768af9dfda17bd1713581cc4cc7f))
+ - Show deltas in HUD when various items are selected ([60a0b16](https://github.com/horizon-eda/horizon/commit/60a0b169f1f84a1c92a7348bb8661eabcb948358))
+ - Draw arc tool: add set center, radius, angles mode ([6fc2160](https://github.com/horizon-eda/horizon/commit/6fc2160e296a2826e8e649d01bcd54fe51f16521))
+
+### Schematic editor
+
+ - Place bus ripper tool: sort members by bus ripper count ([f75da40](https://github.com/horizon-eda/horizon/commit/f75da40176c1170b6bb32723c76a27dac38af6ea))
+ - Manage buses tool: remember sequence settings ([0d43d3a](https://github.com/horizon-eda/horizon/commit/0d43d3a94827ab4261aa407398d18d325d9d733a))
+ - Duplicate net name warning now is case insensitive ([993ca88](https://github.com/horizon-eda/horizon/commit/993ca885f004a1aa166d8bb804069f7838d27fe5))
+
+### Package editor
+
+ - Set default corner radius in dual inline footprint generator ([10acf4d](https://github.com/horizon-eda/horizon/commit/10acf4d3db5ebcc675218475389e4984b30ee15f))
+
+## Bugfixes
+
+### Board editor
+
+ - Make sure warnings don't end up in gerber files ([91ad430](https://github.com/horizon-eda/horizon/commit/91ad4308574db68e803aa6c4670037f06e375658), [3865ea7](https://github.com/horizon-eda/horizon/commit/3865ea73237ef75083b9f7d8cb894e16485702cb))
+ - Don't crash when rendering panels ([623ff02](https://github.com/horizon-eda/horizon/commit/623ff023fa757ee89b7b89cad9add15ff6a763bb))
+ - Only show "Smash package outline" tool if package has an outline ([6b867b7](https://github.com/horizon-eda/horizon/commit/6b867b7f7371a7188e6e7ff99fbdcdccc30b34bc))
+ - Update junction layers when mirroring ([a7e023d](https://github.com/horizon-eda/horizon/commit/a7e023d791d4f03eb5df4483e3abf67e549ffb02))
+ - Interactive router: remove airwires connected to deleted junction ([6fa6252](https://github.com/horizon-eda/horizon/commit/6fa6252242c6e83192df292f23f1ee18ebf5a19d))
+
+### Editors
+
+ - Fix integer truncation errors in PDF export ([fbf7305](https://github.com/horizon-eda/horizon/commit/fbf73054d99809259699905311cb1c33ef752f61))
+ - Enter datum tool: don't begin with empty selection ([056e4e3](https://github.com/horizon-eda/horizon/commit/056e4e3a3bb77410c7a8bc456b6d1e03fa3a50bc))
+ - Enter datum tool: enable set line length relative to junction ([df14f3b](https://github.com/horizon-eda/horizon/commit/df14f3b3db61f6d85385c434621e112266fa8ec3))
+
+### Project pools
+
+ - Always use forward slashes in 3d model paths ([3d29746](https://github.com/horizon-eda/horizon/commit/3d297464ebca0fb899f427ad040dfb15bbdda0cd))
+
 # Version 2.0.0
 
 ## New features

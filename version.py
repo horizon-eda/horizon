@@ -1,6 +1,6 @@
 major = 2
-minor = 0
+minor = 1
 micro = 0
-name = "Fata Morgana"
+name = "Green Flash"
 
 string = ".".join(str(x) for x in (major, minor, micro))

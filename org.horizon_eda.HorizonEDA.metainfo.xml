@@ -39,6 +39,17 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+    <release version="2.1.0" date="2021-09-07">
+      <url>https://github.com/horizon-eda/horizon/releases/tag/v2.1.0</url>
+      <description>
+        <p>New features</p>
+        <ul>
+          <li>Grid save &amp; recall</li>
+          <li>Keyboard shortcuts in 3D preview</li>
+          <li>Improved appearance of rounded pads</li>
+        </ul>
+      </description>
+    </release>
     <release version="2.0.0" date="2021-06-01">
       <url>https://github.com/horizon-eda/horizon/releases/tag/v2.0.0</url>
       <description>
