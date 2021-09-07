@@ -740,9 +740,6 @@
                                             <property name="valign">baseline</property>
                                             <property name="label" translatable="yes">label</property>
                                             <property name="single-line-mode">True</property>
-                                            <attributes>
-                                              <attribute name="style" value="italic"/>
-                                            </attributes>
                                           </object>
                                           <packing>
                                             <property name="expand">False</property>

@@ -102,9 +102,13 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     label_set_tnum(search_status_label);
     label_set_tnum(view_hints_label);
     {
-        auto attributes_list = gtk_label_get_attributes(tool_bar_action_tip_label->gobj());
+        auto attributes_list = pango_attr_list_new();
         auto attribute_font_features = pango_attr_font_features_new("tnum 1");
         pango_attr_list_insert(attributes_list, attribute_font_features);
+        auto attribute_italic = pango_attr_style_new(PANGO_STYLE_ITALIC);
+        pango_attr_list_insert(attributes_list, attribute_italic);
+        gtk_label_set_attributes(tool_bar_action_tip_label->gobj(), attributes_list);
+        pango_attr_list_unref(attributes_list);
     }
 
     GET_WIDGET(gl_container);
