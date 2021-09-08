@@ -1,6 +1,7 @@
 #pragma once
 #include "common/common.hpp"
 #include "util/uuid.hpp"
+#include "util/uuid_vec.hpp"
 #include <deque>
 #include <epoxy/gl.h>
 
@@ -26,11 +27,11 @@ enum class MarkerDomain { CHECK, SEARCH, N_DOMAINS };
 class MarkerRef {
 public:
     Coordf position;
-    UUID sheet;
+    UUIDVec sheet;
     Color color;
     enum class Size { DEFAULT, SMALL };
     Size size = Size::DEFAULT;
-    MarkerRef(const Coordf &pos, const Color &co, const UUID &s = UUID()) : position(pos), sheet(s), color(co)
+    MarkerRef(const Coordf &pos, const Color &co, const UUIDVec &s = {}) : position(pos), sheet(s), color(co)
     {
     }
 };
@@ -44,11 +45,11 @@ public:
     std::deque<MarkerRef> &get_domain(MarkerDomain dom);
     void set_domain_visible(MarkerDomain dom, bool vis);
     void update();
-    void set_sheet_filter(const UUID &uu);
+    void set_sheet_filter(const UUIDVec &uu);
 
 private:
     std::array<std::deque<MarkerRef>, static_cast<int>(MarkerDomain::N_DOMAINS)> domains;
-    UUID sheet_filter;
+    UUIDVec sheet_filter;
     std::array<bool, static_cast<int>(MarkerDomain::N_DOMAINS)> domains_visible;
     CanvasGL &ca;
 };

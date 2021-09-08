@@ -6,11 +6,14 @@
 #include "net_class.hpp"
 #include "util/uuid.hpp"
 #include "bom_export_settings.hpp"
+#include "block_instance.hpp"
 #include <fstream>
 #include <map>
 #include <set>
 #include <vector>
 #include "util/item_set.hpp"
+#include "util/uuid_vec.hpp"
+#include "util/template_util.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -25,18 +28,22 @@ using json = nlohmann::json;
  */
 class Block {
 public:
-    Block(const UUID &uu, const json &, class IPool &pool);
+    Block(const UUID &uu, const json &, class IPool &pool, class IBlockProvider &prv);
     Block(const UUID &uu);
-    static Block new_from_file(const std::string &filename, IPool &pool);
+    static Block new_from_file(const std::string &filename, IPool &pool, class IBlockProvider &prv);
     static std::map<std::string, std::string> peek_project_meta(const std::string &filename);
+    static std::set<UUID> peek_instantiated_blocks(const std::string &filename);
     Net *get_net(const UUID &uu);
     UUID uuid;
     std::string name;
     std::map<UUID, Net> nets;
     std::map<UUID, Bus> buses;
     std::map<UUID, Component> components;
+    std::map<UUID, BlockInstance> block_instances;
     std::map<UUID, NetClass> net_classes;
     uuid_ptr<NetClass> net_class_default = nullptr;
+
+    std::map<UUIDVec, BlockInstanceMapping> block_instance_mappings;
 
     std::map<UUID, std::string> group_names;
     std::map<UUID, std::string> tag_names;
@@ -62,11 +69,15 @@ public:
     void vacuum_group_tag_names();
 
     /**
-     * Takes pins specified by pins and moves them over to net
+     * Takes pins specified by pins&ports and moves them over to net
      * \param pins UUIDPath of component, gate and pin UUID
      * \param net the destination Net or nullptr for new Net
      */
-    Net *extract_pins(const std::set<UUIDPath<3>> &pins, Net *net = nullptr);
+    struct NetPinsAndPorts {
+        std::set<UUIDPath<3>> pins;  // component/gate/pin
+        std::set<UUIDPath<2>> ports; // instance/port
+    };
+    Net *extract_pins(const NetPinsAndPorts &pins, Net *net = nullptr);
 
     void update_connection_count();
 
@@ -82,9 +93,44 @@ public:
 
     ItemSet get_pool_items_used() const;
 
-    json serialize();
+    void update_non_top(Block &other) const;
+
+    void create_instance_mappings();
+
+    Block flatten() const;
+
+    UUID get_uuid() const;
+
+    BlockInstanceMapping::ComponentInfo get_component_info(const Component &comp, const UUIDVec &instance_path) const;
+    std::string get_refdes(const Component &comp, const UUIDVec &instance_path) const;
+    void set_refdes(Component &comp, const UUIDVec &instance_path, const std::string &rd);
+    void set_nopopulate(Component &comp, const UUIDVec &instance_path, bool nopopulate);
+
+    template <bool c> struct BlockItem {
+        BlockItem(make_const_ref_t<c, Block> b, const UUIDVec &p) : block(b), instance_path(p)
+        {
+        }
+        make_const_ref_t<c, Block> block;
+        UUIDVec instance_path;
+    };
+
+    std::vector<BlockItem<false>> get_instantiated_blocks();
+    std::vector<BlockItem<true>> get_instantiated_blocks() const;
+    std::vector<BlockItem<false>> get_instantiated_blocks_and_top();
+    std::vector<BlockItem<true>> get_instantiated_blocks_and_top() const;
+
+    bool can_delete_power_net(const UUID &uu) const;
+
+    bool can_add_block_instance(const UUID &where, const UUID &block_inst) const;
+
+    json serialize() const;
+
+    static const size_t max_instance_path_len;
+    static bool instance_path_too_long(const UUIDVec &path, const char *funcname);
 
 private:
     void update_refs();
+    std::vector<BlockItem<false>> get_instantiated_blocks(bool inc_top);
+    std::vector<BlockItem<true>> get_instantiated_blocks(bool inc_top) const;
 };
 } // namespace horizon

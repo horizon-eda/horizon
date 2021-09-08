@@ -28,6 +28,8 @@
 #include "pool-update/pool-update.hpp"
 #include "pool_update_error_dialog.hpp"
 #include "project/project.hpp"
+#include "blocks/blocks_schematic.hpp"
+#include "project/project.hpp"
 #include <filesystem>
 
 #ifdef G_OS_WIN32
@@ -387,7 +389,7 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::find_top_schematic_proce
 {
     if (!project)
         return nullptr;
-    return find_process(project->get_top_block().schematic_filename);
+    return find_process(project->blocks_filename);
 }
 
 PoolProjectManagerProcess *PoolProjectManagerAppWindow::find_board_process()
@@ -780,12 +782,7 @@ static std::optional<std::string> peek_name(const std::string &path)
         }
         else {
             auto prj = Project::new_from_file(path);
-            auto block_filename = prj.get_top_block().block_filename;
-            auto meta = Block::peek_project_meta(block_filename);
-            if (meta.count("project_title"))
-                name = meta.at("project_title");
-            if (!name.size())
-                name = load_json_from_file(path).at("title");
+            return prj.peek_title();
         }
     }
     catch (...) {
@@ -1109,6 +1106,7 @@ bool PoolProjectManagerAppWindow::migrate_project(const std::string &path)
             ProjectPool::create_directories(info.base_path);
             info.save();
             save_json_to_file(path, prj.serialize());
+            prj.create_blocks();
 
             // copy pool items
             for (const auto &file : fs::directory_iterator(cache_directory)) {
@@ -1220,6 +1218,8 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
         }
         project = std::make_unique<Project>(Project::new_from_file(path));
         project_filename = path;
+        project_needs_save = false;
+
         check_schema_update(project->pool_directory);
 
         check_pool_update(project->pool_directory);
@@ -1236,8 +1236,14 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
             else {
                 set_version_info("");
             }
+
             if (version.get_app() < version.get_file()) {
                 project_read_only = true;
+            }
+            if (version.get_app() > version.get_file()) {
+                // need to create blocks.json
+                project->create_blocks();
+                project_needs_save = true;
             }
         }
 
@@ -1257,13 +1263,7 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
 
         set_view_mode(ViewMode::PROJECT);
 
-        if (view_project.update_meta() == false) {
-            Gtk::MessageDialog md(*this, "Metadata update required", false /* use_markup */, Gtk::MESSAGE_ERROR,
-                                  Gtk::BUTTONS_OK);
-            md.set_secondary_text(
-                    "Open and save the schematic for the project title to appear in the project manager.");
-            md.run();
-        }
+        view_project.update_meta();
     }
 }
 
@@ -1401,11 +1401,11 @@ bool PoolProjectManagerAppWindow::check_autosave(PoolProjectManagerProcess::Type
         return true;
 
     std::vector<std::string> my_filenames = filenames;
+    my_filenames.resize(1);
     if (type == PoolProjectManagerProcess::Type::IMP_SCHEMATIC) {
-        my_filenames.resize(2);
-    }
-    else {
-        my_filenames.resize(1);
+        // is blocks file, get filename
+        const auto filenames_from_blocks = BlocksBase::peek_filenames(my_filenames.front());
+        my_filenames.insert(my_filenames.end(), filenames_from_blocks.begin(), filenames_from_blocks.end());
     }
 
     bool have_autosave = std::all_of(my_filenames.begin(), my_filenames.end(), [](auto &x) {
@@ -1564,19 +1564,20 @@ bool PoolProjectManagerAppWindow::cleanup_pool_cache(Gtk::Window *parent)
     ItemSet items_needed;
 
     ProjectPool project_pool(project->pool_directory, false);
-    auto block = Block::new_from_file(project->get_top_block().block_filename, project_pool);
-    auto sch = Schematic::new_from_file(project->get_top_block().schematic_filename, block, project_pool);
-    sch.expand();
-    auto board = Board::new_from_file(project->board_filename, block, project_pool);
+    auto blocks = BlocksSchematic::new_from_file(project->blocks_filename, project_pool);
+    auto flat_block = blocks.get_top_block_item().block.flatten();
+    auto board = Board::new_from_file(project->board_filename, flat_block, project_pool);
     board.expand();
-
-    {
-        auto items = block.get_pool_items_used();
-        items_needed.insert(items.begin(), items.end());
-    }
-    {
-        auto items = sch.get_pool_items_used();
-        items_needed.insert(items.begin(), items.end());
+    for (auto &[uu, block] : blocks.blocks) {
+        block.schematic.expand();
+        {
+            ItemSet items = block.schematic.get_pool_items_used();
+            items_needed.insert(items.begin(), items.end());
+        }
+        {
+            ItemSet items = block.schematic.get_pool_items_used();
+            items_needed.insert(items.begin(), items.end());
+        }
     }
     {
         auto items = board.get_pool_items_used();

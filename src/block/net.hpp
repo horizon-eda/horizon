@@ -2,6 +2,8 @@
 #include "nlohmann/json_fwd.hpp"
 #include "util/uuid.hpp"
 #include "util/uuid_ptr.hpp"
+#include "util/uuid_vec.hpp"
+#include "pool/unit.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -24,11 +26,17 @@ public:
     uuid_ptr<Net> diffpair;
     bool diffpair_master = false;
 
+    bool is_port = false;
+    Pin::Direction port_direction = Pin::Direction::BIDIRECTIONAL;
+
+
     // not saved
     bool is_power_forced = false;
     bool is_bussed = false;
     unsigned int n_pins_connected = 0;
     bool has_bus_rippers = false;
+    std::vector<UUIDVec> hrefs;
+    bool is_nc = false;
     json serialize() const;
     bool is_named() const;
 };

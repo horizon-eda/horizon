@@ -177,6 +177,7 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
           {
                   {ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING, "Name", 0}},
                   {ObjectProperty::ID::IS_POWER, {ObjectProperty::Type::BOOL, "Is power net", 2}},
+                  {ObjectProperty::ID::IS_PORT, {ObjectProperty::Type::BOOL, "Is port", 4}},
                   {ObjectProperty::ID::NET_CLASS, {ObjectProperty::Type::NET_CLASS, "Net class", 1}},
                   {ObjectProperty::ID::DIFFPAIR, {ObjectProperty::Type::STRING_RO, "Diff. pair", 3}},
           }}},
@@ -187,6 +188,7 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                   {ObjectProperty::ID::SIZE, {ObjectProperty::Type::LENGTH, "Size", 2}},
                   {ObjectProperty::ID::OFFSHEET_REFS, {ObjectProperty::Type::BOOL, "Offsheet refs", 1}},
                   {ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Net name", 0}},
+                  {ObjectProperty::ID::IS_PORT, {ObjectProperty::Type::BOOL, "Show port", 3}},
           }}},
         {ObjectType::POLYGON,
          {"Polygon",
@@ -334,6 +336,16 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
 
           }}},
         {ObjectType::PROJECT, {"Project", "Projects", {}}},
+        {ObjectType::BLOCK_SYMBOL_PORT, {"Port", "Ports", {}}},
+        {ObjectType::BLOCK, {"Block", "Blocks", {}}},
+        {ObjectType::SCHEMATIC_BLOCK_SYMBOL, {"Block symbol", "Block symbols", {}}},
+        {ObjectType::BLOCK_INSTANCE,
+         {"Instance",
+          "Instances",
+          {
+                  {ObjectProperty::ID::REFDES, {ObjectProperty::Type::STRING, "Ref. desig.", 0}},
+                  {ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Block", 1}},
+          }}},
 
 };
 } // namespace horizon

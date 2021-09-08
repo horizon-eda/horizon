@@ -3,7 +3,8 @@
 #include "common/common.hpp"
 #include "pool/entity.hpp"
 #include "util/uuid.hpp"
-#include <deque>
+#include "util/uuid_vec.hpp"
+#include <vector>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -31,13 +32,19 @@ class RulesCheckCacheNetPins : public RulesCheckCacheBase {
 public:
     RulesCheckCacheNetPins(class IDocument &c);
     struct NetPin {
-        const class Component &comp;
+        UUID comp;
         const class Gate &gate;
         const class Pin &pin;
         UUID sheet;
+        UUIDVec instance_path;
         Coordi location;
     };
-    using NetPins = std::map<const class Net *, std::vector<NetPin>>;
+    struct NetInfo {
+        std::string name;
+        bool is_nc = false;
+        std::vector<NetPin> pins;
+    };
+    using NetPins = std::map<UUID, NetInfo>;
     const NetPins &get_net_pins() const;
 
 private:

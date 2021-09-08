@@ -14,7 +14,7 @@ class RulesWindow : public Gtk::Window, public Changeable {
 public:
     RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class CanvasGL &ca, class Core &c);
     static RulesWindow *create(Gtk::Window *p, class CanvasGL &ca, class Core &c);
-    typedef sigc::signal<void, Coordi, UUID> type_signal_goto;
+    typedef sigc::signal<void, Coordi, UUID, UUIDVec> type_signal_goto;
     type_signal_goto signal_goto()
     {
         return s_signal_goto;
@@ -79,6 +79,7 @@ private:
             Gtk::TreeModelColumnRecord::add(has_location);
             Gtk::TreeModelColumnRecord::add(location);
             Gtk::TreeModelColumnRecord::add(sheet);
+            Gtk::TreeModelColumnRecord::add(instance_path);
             Gtk::TreeModelColumnRecord::add(running);
             Gtk::TreeModelColumnRecord::add(status);
             Gtk::TreeModelColumnRecord::add(pulse);
@@ -88,6 +89,7 @@ private:
         Gtk::TreeModelColumn<bool> has_location;
         Gtk::TreeModelColumn<Coordi> location;
         Gtk::TreeModelColumn<UUID> sheet;
+        Gtk::TreeModelColumn<UUIDVec> instance_path;
         Gtk::TreeModelColumn<bool> running;
         Gtk::TreeModelColumn<std::string> status;
         Gtk::TreeModelColumn<int> pulse;

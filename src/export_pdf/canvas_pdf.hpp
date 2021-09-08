@@ -26,6 +26,10 @@ public:
     int current_layer = 0;
     bool fill = true;
     bool use_layer_colors = false;
+    const auto &get_selectables() const
+    {
+        return selectables;
+    }
 
 private:
     PoDoFo::PdfPainterMM &painter;

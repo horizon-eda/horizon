@@ -9,6 +9,8 @@
 #include "schematic/schematic.hpp"
 #include "document/idocument_symbol.hpp"
 #include "pool/symbol.hpp"
+#include "document/idocument_block_symbol.hpp"
+#include "block_symbol/block_symbol.hpp"
 #include "imp/imp_interface.hpp"
 #include "canvas/canvas_gl.hpp"
 #include "pool/entity.hpp"
@@ -70,6 +72,10 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
             for (const auto &it_text : sym.texts) {
                 delete_extra.emplace(it_text->uuid, ObjectType::TEXT);
             }
+        }
+        else if (it.type == ObjectType::SCHEMATIC_BLOCK_SYMBOL) {
+            auto &sym = doc.c->get_sheet()->block_symbols.at(it.uuid);
+            doc.c->get_current_schematic()->disconnect_block_symbol(doc.c->get_sheet(), &sym);
         }
         else if (it.type == ObjectType::BOARD_PACKAGE) {
             auto pkg = &doc.b->get_board()->packages.at(it.uuid);
@@ -249,6 +255,9 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
         case ObjectType::SYMBOL_PIN:
             doc.y->delete_symbol_pin(it.uuid);
             break;
+        case ObjectType::BLOCK_SYMBOL_PORT:
+            doc.o->get_block_symbol().ports.erase(it.uuid);
+            break;
         case ObjectType::BOARD_PACKAGE:
             doc.b->get_board()->packages.erase(it.uuid);
             break;
@@ -285,6 +294,11 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
                 sch->block->components.erase(comp->uuid);
                 comp = nullptr;
             }
+        } break;
+        case ObjectType::SCHEMATIC_BLOCK_SYMBOL: {
+            auto &schsym = doc.c->get_sheet()->block_symbols.at(it.uuid);
+            doc.c->get_current_block()->block_instances.erase(schsym.block_instance->uuid);
+            doc.c->get_sheet()->block_symbols.erase(it.uuid);
         } break;
         case ObjectType::NET_LABEL: {
             doc.c->get_sheet()->net_labels.erase(it.uuid);

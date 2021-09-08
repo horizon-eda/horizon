@@ -7,6 +7,7 @@
 #include "util/util.hpp"
 #include <algorithm>
 #include "util/bbox_accumulator.hpp"
+#include "block_symbol/block_symbol.hpp"
 
 namespace horizon {
 
@@ -251,6 +252,14 @@ void Canvas::update(const class Decal &dec, bool edit)
     clear();
     layer_provider = &dec;
     render(dec, edit);
+    request_push();
+}
+
+void Canvas::update(const class BlockSymbol &sym, bool edit)
+{
+    clear();
+    layer_provider = &sym;
+    render(sym, !edit);
     request_push();
 }
 

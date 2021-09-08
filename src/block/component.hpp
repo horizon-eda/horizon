@@ -5,6 +5,7 @@
 #include "util/uuid.hpp"
 #include "util/uuid_path.hpp"
 #include "util/uuid_ptr.hpp"
+#include "util/uuid_vec.hpp"
 #include <fstream>
 #include <map>
 #include <vector>
@@ -52,6 +53,13 @@ public:
     UUID group;
     UUID tag;
     bool nopopulate = false;
+
+    UUIDVec href;
+
+    enum class NopopulateFromInstance { SET, CLEAR, UNSET };
+    NopopulateFromInstance nopopulate_from_instance = NopopulateFromInstance::UNSET;
+
+    bool get_nopopulate() const;
 
     /**
      * which Nins are connected to which Net

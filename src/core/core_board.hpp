@@ -9,7 +9,7 @@
 namespace horizon {
 class CoreBoard : public Core, public DocumentBoard {
 public:
-    CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &pictures_dir,
+    CoreBoard(const std::string &board_filename, const std::string &blocks_filename, const std::string &pictures_dir,
               IPool &pool, IPool &pool_caching);
 
     class Block *get_top_block() override;
@@ -89,7 +89,7 @@ private:
     BoardColors colors;
 
     std::string m_board_filename;
-    std::string m_block_filename;
+    std::string m_blocks_filename;
     std::string m_pictures_dir;
 
     class HistoryItem : public Core::HistoryItem {

@@ -80,6 +80,8 @@ bool ToolPlacePowerSymbol::do_merge(Net *other)
         return true;
     if (other->is_bussed)
         return false; // can't merge with bussed net
+    if (other->is_port)
+        return false;
     if (other->is_power && other != net) {
         // junction is connected to other power net, can't merge
         return false;

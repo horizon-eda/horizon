@@ -19,6 +19,7 @@ public:
     static UUID random();
     UUID(const char *str);
     UUID(const std::string &str);
+    static UUID UUID5(const UUID &nsid, const unsigned char *name, size_t name_size);
     operator std::string() const
     {
         char str[40];
@@ -29,6 +30,11 @@ public:
      *  @return true if uuid is non-null, false otherwise
      */
     operator bool() const;
+    const unsigned char *get_bytes() const
+    {
+        return uu;
+    }
+    static constexpr auto size = sizeof(uuid_t);
 
     friend bool operator==(const UUID &self, const UUID &other);
     friend bool operator!=(const UUID &self, const UUID &other);

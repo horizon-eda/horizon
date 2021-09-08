@@ -6,7 +6,9 @@ versions:
     4: add rule net class regex matching
   schematic:
     1: add custom values on symbols
+    2: add hierarchy
   project:
     1: replace pool cache with project pool
+    2: add hierarchy
   part:
     1: add flags

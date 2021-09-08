@@ -150,3 +150,99 @@
   border-radius: 3px 3px 0px 0px;
   padding-top: 3px;
 }
+
+.imp-instance-path-box > button, .imp-instance-path-box  button.image-button {box-shadow:none; padding-top:0px; padding-bottom:0px; padding-left: 8px; padding-right:8px; border-radius: 0px; border-top-width: 0px; border-bottom-width: 0px; }
+.imp-instance-path-box  button.image-button {padding:1px;}
+
+/* adapted from https://gitlab.gnome.org/GNOME/dconf-editor/-/blob/master/editor/large-pathbar.css */
+.imp-instance-path-bar {
+
+
+  padding:0;
+
+
+  /* nautilus/src/resources/css/Adwaita.css:71 .path-bar-box uses 200ms */
+  transition: background-color 0.3s,
+              color            0.3s,
+              border-color     0.3s;
+  border-color:transparent;
+}
+
+.imp-instance-path-bar {
+  background-color:@theme_bg_color;
+  color           :@theme_fg_color;
+  border-color    :@borders;
+}
+
+window:backdrop .imp-instance-path-bar {
+  background-color:@theme_unfocused_bg_color;
+  color           :@theme_unfocused_fg_color;
+  border-color    :@unfocused_borders;
+}
+
+/*\
+* * items generic init and hacks
+\*/
+
+/* transition hacks */
+box.imp-instance-path-bar         > button,
+box.imp-instance-path-bar         > label {
+  transition:all 0 ease;
+}
+
+/* button config */
+.imp-instance-path-bar            > button {
+  padding:0 0.1em;
+  margin :0 0.1em;
+
+  outline-offset:-4px;
+
+  border-radius:0;
+
+  border:none;
+  border-color:transparent;
+  box-shadow:none;
+  background:none;
+  background-color:transparent;
+  color:currentColor;
+}
+
+/*\
+* * border bottom
+\*/
+
+.imp-instance-path-bar                > button                                > label {
+  border-width:3px 2px;
+  border-radius:0;
+  padding:2px 4px;
+  border-style:solid;
+  border-color:transparent;
+  transition:border-bottom-color 0.3s,
+             padding             0.2s;  /* needs to be a bit faster */
+}
+
+.imp-instance-path-bar                > button:hover                          > label {
+  border-bottom-color:@borders;
+}
+
+.imp-instance-path-bar                > button.active                         > label,
+.imp-instance-path-bar                > button.active:hover                   > label {
+  border-bottom-color:@theme_selected_bg_color;
+}
+
+.imp-instance-path-bar:backdrop       > button.active                         > label,
+.imp-instance-path-bar:backdrop       > button.active:hover                   > label {
+  border-bottom-color:@borders;
+}
+
+/*\
+* * special texts "colors"
+\*/
+
+/* slash */
+.imp-instance-path-bar                > label {
+  opacity:0.55;
+}
+.imp-instance-path-bar:backdrop       > label {
+  opacity:0.8;
+}

@@ -27,6 +27,7 @@
 #include "util/geom_util.hpp"
 #include "board/board_panel.hpp"
 #include "common/picture.hpp"
+#include "block_symbol/block_symbol.hpp"
 #include "util/polygon_arc_removal_proxy.hpp"
 #include <algorithm>
 #include <ctime>
@@ -466,44 +467,7 @@ void Canvas::render(const SymbolPin &pin, bool interactive, ColorP co)
         draw_line(Coordf(-(int64_t)pin.length, .375_mm), Coordf(-(int64_t)pin.length - .75_mm, 0), c_main, 0, true, 0);
         draw_line(Coordf(-(int64_t)pin.length, -.375_mm), Coordf(-(int64_t)pin.length - .75_mm, 0), c_main, 0, true, 0);
     }
-    {
-        auto dl = [this, c_pin](float ax, float ay, float bx, float by) {
-            draw_line(Coordf(ax * 1_mm, ay * 1_mm), Coordf(bx * 1_mm, by * 1_mm), c_pin, 0, true, 0);
-        };
-        switch (pin.direction) {
-        case Pin::Direction::OUTPUT:
-            dl(0, -.6, -1, -.2);
-            dl(0, -.6, -1, -1);
-            break;
-        case Pin::Direction::INPUT:
-            dl(-1, -.6, 0, -.2);
-            dl(-1, -.6, 0, -1);
-            break;
-        case Pin::Direction::POWER_INPUT:
-            dl(-1, -.6, 0, -.2);
-            dl(-1, -.6, 0, -1);
-            dl(-1.4, -.6, -.4, -.2);
-            dl(-1.4, -.6, -.4, -1);
-            break;
-        case Pin::Direction::POWER_OUTPUT:
-            dl(0, -.6, -1, -.2);
-            dl(0, -.6, -1, -1);
-            dl(-.4, -.6, -1.4, -.2);
-            dl(-.4, -.6, -1.4, -1);
-            break;
-        case Pin::Direction::BIDIRECTIONAL:
-            dl(0, -.6, -1, -.2);
-            dl(0, -.6, -1, -1);
-            dl(-2, -.6, -1, -.2);
-            dl(-2, -.6, -1, -1);
-            break;
-        case Pin::Direction::NOT_CONNECTED:
-            dl(-.4, -1, -1, -.2);
-            dl(-.4, -.2, -1, -1);
-            break;
-        default:;
-        }
-    }
+    draw_direction(pin.direction, c_pin);
     transform_restore();
 
     if (pin.decoration.schmitt) {
@@ -628,7 +592,8 @@ void Canvas::render(const SchematicSymbol &sym)
         render(*it, true, ColorP::FROM_LAYER);
     }
 
-    if (sym.component->nopopulate) {
+    if (sym.component->nopopulate
+        || sym.component->nopopulate_from_instance == Component::NopopulateFromInstance::SET) {
         transform = sym.placement;
         img_auto_line = img_mode;
         draw_line(bb.first - Coordi(0.2_mm, 0.2_mm), bb.second + Coordi(0.2_mm, 0.2_mm), ColorP::NOPOPULATE_X, 0, true,
@@ -691,10 +656,41 @@ void Canvas::render(const NetLabel &label)
 {
     std::string txt = "<no net>";
     auto c = ColorP::NET;
+    const Net *net = label.junction->net;
     if (label.junction->net) {
         txt = label.junction->net->name;
         if (label.junction->net->diffpair)
             c = ColorP::DIFFPAIR;
+    }
+    if (label.show_port && net && net->is_port) {
+        std::string port_txt;
+        switch (net->port_direction) {
+        case Pin::Direction::BIDIRECTIONAL:
+            port_txt = "BIDI";
+            break;
+        case Pin::Direction::INPUT:
+            port_txt = "IN";
+            break;
+        case Pin::Direction::OUTPUT:
+            port_txt = "OUT";
+            break;
+        case Pin::Direction::OPEN_COLLECTOR:
+            port_txt = "OC";
+            break;
+        case Pin::Direction::POWER_INPUT:
+            port_txt = "PIN";
+            break;
+        case Pin::Direction::POWER_OUTPUT:
+            port_txt = "POUT";
+            break;
+        case Pin::Direction::PASSIVE:
+            port_txt = "PASV";
+            break;
+        case Pin::Direction::NOT_CONNECTED:
+            port_txt = "NC";
+            break;
+        }
+        txt = port_txt + ": " + txt;
     }
     if (txt == "") {
         txt = "? plz fix";
@@ -1095,6 +1091,9 @@ void Canvas::render(const Sheet &sheet)
         render(it.second);
     }
     for (const auto &it : sheet.pictures) {
+        render(it.second);
+    }
+    for (const auto &it : sheet.block_symbols) {
         render(it.second);
     }
 }
@@ -1609,7 +1608,7 @@ void Canvas::render(const Decal &dec, bool interactive)
     }
 }
 
-void Canvas::render(const Picture &pic)
+void Canvas::render(const Picture &pic, bool interactive)
 {
     if (!pic.data && !img_mode) {
         draw_error(pic.placement.shift, 2e5, "Image " + (std::string)pic.data_uuid + " not found");
@@ -1621,17 +1620,21 @@ void Canvas::render(const Picture &pic)
         return;
     pictures.emplace_back();
     auto &x = pictures.back();
-    x.angle = pic.placement.get_angle_rad();
-    x.x = pic.placement.shift.x;
-    x.y = pic.placement.shift.y;
+    auto tr = transform;
+    tr.accumulate(pic.placement);
+    x.angle = tr.get_angle_rad();
+    x.x = tr.shift.x;
+    x.y = tr.shift.y;
     x.px_size = pic.px_size;
     x.data = pic.data;
     x.on_top = pic.on_top;
     x.opacity = pic.opacity;
-    float w = pic.data->width * pic.px_size;
-    float h = pic.data->height * pic.px_size;
-    selectables.append_angled(pic.uuid, ObjectType::PICTURE, pic.placement.shift, pic.placement.shift, {w, h},
-                              pic.placement.get_angle_rad());
+    if (interactive) {
+        float w = pic.data->width * pic.px_size;
+        float h = pic.data->height * pic.px_size;
+        selectables.append_angled(pic.uuid, ObjectType::PICTURE, pic.placement.shift, pic.placement.shift, {w, h},
+                                  pic.placement.get_angle_rad());
+    }
 }
 
 void Canvas::render(const BoardDecal &decal)
@@ -1646,5 +1649,198 @@ void Canvas::render(const BoardDecal &decal)
     render(decal.get_decal(), false);
     transform_restore();
 }
+
+void Canvas::render(const BlockSymbol &sym, bool on_sheet)
+{
+    if (!on_sheet) {
+        for (const auto &it : sym.junctions) {
+            auto &junc = it.second;
+            selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, 10000, true);
+            targets.emplace_back(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position));
+        }
+    }
+    for (const auto &it : sym.lines) {
+        render(it.second, !on_sheet);
+    }
+
+    if (object_refs_current.size() && object_refs_current.back().type == ObjectType::SCHEMATIC_BLOCK_SYMBOL) {
+        auto sym_uuid = object_refs_current.back().uuid;
+        for (const auto &it : sym.ports) {
+            object_ref_push(ObjectType::BLOCK_SYMBOL_PORT, it.second.uuid, sym_uuid);
+            render(it.second, !on_sheet);
+            object_ref_pop();
+        }
+    }
+    else {
+        for (const auto &it : sym.ports) {
+            render(it.second, !on_sheet);
+        }
+    }
+
+
+    for (const auto &it : sym.arcs) {
+        render(it.second, !on_sheet);
+    }
+    for (const auto &it : sym.texts) {
+        render(it.second, !on_sheet);
+    }
+    for (const auto &it : sym.pictures) {
+        render(it.second, !on_sheet);
+    }
+}
+
+void Canvas::draw_direction(Pin::Direction dir, ColorP color)
+{
+    auto dl = [this, color](float ax, float ay, float bx, float by) {
+        draw_line(Coordf(ax * 1_mm, ay * 1_mm), Coordf(bx * 1_mm, by * 1_mm), color, 0, true, 0);
+    };
+    switch (dir) {
+    case Pin::Direction::OUTPUT:
+        dl(0, -.6, -1, -.2);
+        dl(0, -.6, -1, -1);
+        break;
+    case Pin::Direction::INPUT:
+        dl(-1, -.6, 0, -.2);
+        dl(-1, -.6, 0, -1);
+        break;
+    case Pin::Direction::POWER_INPUT:
+        dl(-1, -.6, 0, -.2);
+        dl(-1, -.6, 0, -1);
+        dl(-1.4, -.6, -.4, -.2);
+        dl(-1.4, -.6, -.4, -1);
+        break;
+    case Pin::Direction::POWER_OUTPUT:
+        dl(0, -.6, -1, -.2);
+        dl(0, -.6, -1, -1);
+        dl(-.4, -.6, -1.4, -.2);
+        dl(-.4, -.6, -1.4, -1);
+        break;
+    case Pin::Direction::BIDIRECTIONAL:
+        dl(0, -.6, -1, -.2);
+        dl(0, -.6, -1, -1);
+        dl(-2, -.6, -1, -.2);
+        dl(-2, -.6, -1, -1);
+        break;
+    case Pin::Direction::NOT_CONNECTED:
+        dl(-.4, -1, -1, -.2);
+        dl(-.4, -.2, -1, -1);
+        break;
+    default:;
+    }
+}
+
+void Canvas::render(const class BlockSymbolPort &port, bool interactive)
+{
+    Coordi p0 = transform.transform(port.position);
+    Coordi p1 = p0;
+
+    Coordi p_name = p0;
+    Coordi p_nc = p0;
+
+    Orientation port_orientation = port.get_orientation_for_placement(transform);
+
+    Orientation name_orientation = Orientation::LEFT;
+    int64_t text_shift = 0.5_mm;
+    int64_t text_shift_name = text_shift;
+    int64_t nc_shift = 0.25_mm;
+    int64_t length = port.length;
+    const auto nc_orientation = port_orientation;
+
+    switch (port_orientation) {
+    case Orientation::LEFT:
+        p1.x += length;
+        p_name.x += port.length + text_shift_name;
+        p_nc.x -= nc_shift;
+        name_orientation = Orientation::RIGHT;
+        break;
+
+    case Orientation::RIGHT:
+        p1.x -= length;
+        p_name.x -= port.length + text_shift_name;
+        p_nc.x += nc_shift;
+        name_orientation = Orientation::LEFT;
+        break;
+
+    case Orientation::UP:
+        p1.y -= length;
+        p_name.y -= port.length + text_shift_name;
+        p_nc.y += nc_shift;
+        name_orientation = Orientation::DOWN;
+        break;
+
+    case Orientation::DOWN:
+        p1.y += length;
+        p_name.y += port.length + text_shift_name;
+        p_nc.y -= nc_shift;
+        name_orientation = Orientation::UP;
+        break;
+    }
+    ColorP c_main = ColorP::FROM_LAYER;
+    ColorP c_name = ColorP::PIN;
+    ColorP c_port = ColorP::PIN;
+
+    img_auto_line = img_mode;
+    draw_text(p_name, 1.5_mm, port.name, orientation_to_angle(name_orientation), TextOrigin::CENTER, c_name, 0, {});
+
+
+    transform_save();
+    transform.accumulate(port.position);
+    transform.set_angle(0);
+    transform.mirror = false;
+    switch (port_orientation) {
+    case Orientation::RIGHT:
+        break;
+    case Orientation::LEFT:
+        transform.mirror ^= true;
+        break;
+    case Orientation::UP:
+        transform.inc_angle_deg(90);
+        break;
+    case Orientation::DOWN:
+        transform.inc_angle_deg(-90);
+        transform.mirror = true;
+        break;
+    }
+
+    draw_direction(port.direction, c_port);
+    transform_restore();
+
+    switch (port.connector_style) {
+    case BlockSymbolPort::ConnectorStyle::BOX:
+        draw_box(p0, 0.25_mm, c_main, 0, false);
+        break;
+
+    case BlockSymbolPort::ConnectorStyle::NC:
+        draw_cross(p0, 0.25_mm, c_main, 0, false);
+        draw_text(p_nc, 1.5_mm, "NC", orientation_to_angle(nc_orientation), TextOrigin::CENTER, c_port, 0, {});
+        break;
+
+    case BlockSymbolPort::ConnectorStyle::NONE:
+        break;
+    }
+    /* if (port.connected_net_lines.size() > 1) {
+         draw_line(p0, p0 + Coordi(0, 10), c_main, 0, false, 0.75_mm);
+     }*/
+    draw_line(p0, p1, c_main, 0, false);
+    if (interactive)
+        selectables.append_line(port.uuid, ObjectType::BLOCK_SYMBOL_PORT, p0, p1, 0);
+    img_auto_line = false;
+}
+
+void Canvas::render(const SchematicBlockSymbol &sym)
+{
+    transform = sym.placement;
+    object_ref_push(ObjectType::SCHEMATIC_BLOCK_SYMBOL, sym.uuid);
+    render(sym.symbol, true);
+    object_ref_pop();
+    for (const auto &it : sym.symbol.ports) {
+        targets.emplace_back(UUIDPath<2>(sym.uuid, it.second.uuid), ObjectType::BLOCK_SYMBOL_PORT,
+                             transform.transform(it.second.position));
+    }
+    auto bb = sym.symbol.get_bbox();
+    selectables.append(sym.uuid, ObjectType::SCHEMATIC_BLOCK_SYMBOL, {0, 0}, bb.first, bb.second);
+    transform.reset();
+}
+
 
 } // namespace horizon

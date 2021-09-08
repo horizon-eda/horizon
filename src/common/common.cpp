@@ -13,7 +13,8 @@ const LutEnumStr<ObjectType> object_type_lut = {
         {"unit", ObjectType::UNIT},           {"symbol", ObjectType::SYMBOL},   {"entity", ObjectType::ENTITY},
         {"padstack", ObjectType::PADSTACK},   {"package", ObjectType::PACKAGE}, {"part", ObjectType::PART},
         {"schematic", ObjectType::SCHEMATIC}, {"board", ObjectType::BOARD},     {"frame", ObjectType::FRAME},
-        {"model_3d", ObjectType::MODEL_3D},   {"decal", ObjectType::DECAL},     {"project", ObjectType::PROJECT}};
+        {"model_3d", ObjectType::MODEL_3D},   {"decal", ObjectType::DECAL},     {"project", ObjectType::PROJECT},
+        {"blocks", ObjectType::BLOCKS}};
 
 const LutEnumStr<Orientation> orientation_lut = {
         {"up", Orientation::UP},

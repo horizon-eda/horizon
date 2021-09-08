@@ -15,8 +15,8 @@ std::pair<class SchematicSymbol *, SchematicSymbol *> ToolSwapGates::get_symbols
         it++;
         r.second = &doc.c->get_sheet()->symbols.at(it->uuid);
         if (r.first->component == r.second->component
-            && doc.c->get_top_block()->can_swap_gates(r.first->component->uuid, r.first->gate->uuid,
-                                                      r.second->gate->uuid)) {
+            && doc.c->get_current_block()->can_swap_gates(r.first->component->uuid, r.first->gate->uuid,
+                                                          r.second->gate->uuid)) {
             return r;
         }
         else {

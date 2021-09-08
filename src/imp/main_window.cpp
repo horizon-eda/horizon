@@ -65,6 +65,14 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     GET_WIDGET(key_hint_revealer);
     key_hint_size_group = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
 
+    GET_WIDGET(instance_path_revealer);
+    GET_WIDGET(parent_block_button);
+    GET_WIDGET(instance_path_box);
+    GET_WIDGET(block_symbol_button);
+    GET_WIDGET(ports_button);
+    GET_WIDGET(hierarchy_stack);
+    GET_WIDGET(out_of_hierarchy_label);
+
     set_version_info("");
 
     grid_options_button->signal_clicked().connect([this] {

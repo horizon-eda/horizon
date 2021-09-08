@@ -6,6 +6,7 @@
 #include "pool/part.hpp"
 #include "pool/symbol.hpp"
 #include "block/block.hpp"
+#include "blocks/blocks.hpp"
 #include "pool/project_pool.hpp"
 
 namespace horizon {
@@ -44,7 +45,8 @@ void IncludedBoard::reload()
 
     try {
         pool = std::make_unique<ProjectPool>(prj.pool_directory, false);
-        block = std::make_unique<Block>(horizon::Block::new_from_file(prj.get_top_block().block_filename, *pool));
+        auto blocks = Blocks::new_from_file(prj.blocks_filename, *pool);
+        block = std::make_unique<Block>(blocks.get_top_block_item().block.flatten());
         board = std::make_unique<Board>(horizon::Board::new_from_file(prj.board_filename, *block, *pool));
         board->expand();
     }

@@ -11,15 +11,21 @@ RulesCheckResult SchematicRules::check_single_pin_net(const class Schematic &sch
     auto &rule = rule_single_pin_net;
     auto &c = dynamic_cast<RulesCheckCacheNetPins &>(cache.get_cache(RulesCheckCacheID::NET_PINS));
 
-    for (const auto &[net, pins] : c.get_net_pins()) {
-        if (rule.include_unnamed || net->is_named()) {
-            if (pins.size() == 1) {
+    for (const auto &[net_uu, it] : c.get_net_pins()) {
+        if (rule.include_unnamed || it.name.size()) {
+            if (it.pins.size() == 1 && !it.is_nc) {
                 r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
                 auto &x = r.errors.back();
-                auto &conn = pins.at(0);
-                x.comment = "Net \"" + net->name + "\" only connected to " + conn.comp.refdes + conn.gate.suffix + "."
+                auto &conn = it.pins.front();
+                std::string refdes;
+                if (conn.instance_path.size())
+                    refdes = sch.block->get_component_info(conn.comp, conn.instance_path).refdes;
+                else
+                    refdes = sch.block->components.at(conn.comp).refdes;
+                x.comment = "Net \"" + it.name + "\" only connected to " + refdes + conn.gate.suffix + "."
                             + conn.pin.primary_name;
                 x.sheet = conn.sheet;
+                x.instance_path = conn.instance_path;
                 x.location = conn.location;
                 x.has_location = true;
             }

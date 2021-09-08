@@ -87,6 +87,8 @@
 #include "tools/tool_place_dot.hpp"
 #include "tools/tool_set_track_width.hpp"
 #include "tools/tool_exchange_gates.hpp"
+#include "tools/tool_map_port.hpp"
+#include "tools/tool_add_block_instance.hpp"
 
 namespace horizon {
 
@@ -175,6 +177,7 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     case ToolID::EDIT_FRAME_PROPERTIES:
     case ToolID::TOGGLE_GROUP_TAG_VISIBLE:
     case ToolID::MANAGE_INCLUDED_BOARDS:
+    case ToolID::MANAGE_PORTS:
         return std::make_unique<ToolManageBuses>(this, tool_id);
 
     case ToolID::DRAW_POLYGON:
@@ -412,6 +415,12 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::EXCHANGE_GATES:
         return std::make_unique<ToolExchangeGates>(this, tool_id);
+
+    case ToolID::MAP_PORT:
+        return std::make_unique<ToolMapPort>(this, tool_id);
+
+    case ToolID::ADD_BLOCK_INSTANCE:
+        return std::make_unique<ToolAddBlockInstance>(this, tool_id);
 
     default:
         return nullptr;

@@ -9,6 +9,7 @@
 #include "util/picture_load.hpp"
 #include "pool/ipool.hpp"
 #include "util/str_util.hpp"
+#include "iinstancce_mapping_provider.hpp"
 
 namespace horizon {
 
@@ -48,14 +49,14 @@ json Schematic::Annotation::serialize() const
     return j;
 }
 
-static const unsigned int app_version = 1;
+static const unsigned int app_version = 2;
 
 unsigned int Schematic::get_app_version()
 {
     return app_version;
 }
 
-Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, IPool &pool)
+Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, IPool &pool, IBlockSymbolAndSchematicProvider &prv)
     : uuid(uu), block(&iblock), name(j.at("name").get<std::string>()),
       group_tag_visible(j.value("group_tag_visible", false)), annotation(j.value("annotation", json())),
       version(app_version, j)
@@ -64,7 +65,7 @@ Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, IPool &pool)
         const json &o = j["sheets"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            sheets.emplace(std::make_pair(u, Sheet(u, it.value(), *block, pool)));
+            sheets.emplace(std::make_pair(u, Sheet(u, it.value(), *block, pool, prv)));
         }
     }
     if (j.count("rules")) {
@@ -88,10 +89,11 @@ Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, IPool &pool)
     update_refs();
 }
 
-Schematic Schematic::new_from_file(const std::string &filename, Block &block, IPool &pool)
+Schematic Schematic::new_from_file(const std::string &filename, Block &block, IPool &pool,
+                                   IBlockSymbolAndSchematicProvider &prv)
 {
     auto j = load_json_from_file(filename);
-    return Schematic(UUID(j.at("uuid").get<std::string>()), j, block, pool);
+    return Schematic(UUID(j.at("uuid").get<std::string>()), j, block, pool, prv);
 }
 
 Schematic::Schematic(const UUID &uu, Block &bl) : uuid(uu), block(&bl), version(app_version)
@@ -203,6 +205,65 @@ void Schematic::autoconnect_symbol(Sheet *sheet, SchematicSymbol *sym)
         expand(true);
 }
 
+
+void Schematic::autoconnect_block_symbol(Sheet *sheet, SchematicBlockSymbol *sym)
+{
+    assert(sheet == &sheets.at(sheet->uuid));
+    assert(sym == &sheet->block_symbols.at(sym->uuid));
+    bool connected = false;
+    for (auto &[port_uuz, sym_port] : sym->symbol.ports) {
+        auto port_pos = sym->placement.transform(sym_port.position);
+        if (sym->block_instance->connections.count(sym_port.net))
+            continue; // pin is connected, don't connect
+        for (auto it_junc = sheet->junctions.begin(); it_junc != sheet->junctions.end();) {
+            bool erase = false;
+            if (!it_junc->second.bus && it_junc->second.position == port_pos
+                && (it_junc->second.net || it_junc->second.connected_net_lines.size()
+                    || it_junc->second.connected_power_symbols.size())) {
+                erase = true;
+                bool net_created = false;
+                if (it_junc->second.net == nullptr) {
+                    it_junc->second.net = block->insert_net();
+                    net_created = true;
+                }
+                sym->block_instance->connections.emplace(sym_port.net, static_cast<Net *>(it_junc->second.net));
+                bool has_power_sym = false;
+                for (const auto &it_ps : sheet->power_symbols) {
+                    if (it_ps.second.junction->uuid == it_junc->first) {
+                        has_power_sym = true;
+                        break;
+                    }
+                }
+                if (has_power_sym) {
+                    erase = false;
+                    // create line
+                    auto uu = UUID::random();
+                    auto *line = &sheet->net_lines.emplace(uu, uu).first->second;
+                    line->net = it_junc->second.net;
+                    line->from.connect(sym, &sym_port);
+                    line->to.connect(&it_junc->second);
+                }
+                else {
+                    sheet->replace_junction(&it_junc->second, sym, &sym_port);
+                }
+                connected = true;
+
+                if (net_created)
+                    expand(true);
+            }
+            if (erase) {
+                sheet->junctions.erase(it_junc++);
+                break;
+            }
+            else {
+                it_junc++;
+            }
+        }
+    }
+    if (connected)
+        expand(true);
+}
+
 void Schematic::disconnect_symbol(Sheet *sheet, SchematicSymbol *sym)
 {
     assert(sheet == &sheets.at(sheet->uuid));
@@ -238,6 +299,33 @@ void Schematic::disconnect_symbol(Sheet *sheet, SchematicSymbol *sym)
         }
     }
 }
+
+void Schematic::disconnect_block_symbol(Sheet *sheet, SchematicBlockSymbol *sym)
+{
+    assert(sheet == &sheets.at(sheet->uuid));
+    assert(sym == &sheet->block_symbols.at(sym->uuid));
+    std::map<const BlockSymbolPort *, SchematicJunction *> port_junctions;
+    for (auto &[uu_line, line] : sheet->net_lines) {
+        for (auto it_ft : {&line.to, &line.from}) {
+            if (it_ft->block_symbol == sym) {
+                SchematicJunction *j = nullptr;
+                if (port_junctions.count(it_ft->port)) {
+                    j = port_junctions.at(it_ft->port);
+                }
+                else {
+                    auto uu = UUID::random();
+                    j = port_junctions.emplace(it_ft->port, &sheet->junctions.emplace(uu, uu).first->second)
+                                .first->second;
+                }
+                auto c = it_ft->get_position();
+                j->position = c;
+                it_ft->connect(j);
+            }
+        }
+        sym->block_instance->connections.clear();
+    }
+}
+
 
 void Schematic::smash_symbol(Sheet *sheet, SchematicSymbol *sym)
 {
@@ -295,6 +383,13 @@ bool Schematic::delete_net_line(Sheet *sheet, LineNet *line)
                 UUIDPath<2> conn_path(it_ft.symbol->gate.uuid, it_ft.pin->uuid);
                 if (it_ft.symbol->component->connections.count(conn_path) && it_ft.pin->connection_count <= 1) {
                     it_ft.symbol->component->connections.erase(conn_path);
+                }
+            }
+            else if (it_ft.is_port()) {
+                const auto net_port = it_ft.port->net;
+                if (it_ft.block_symbol->block_instance->connections.count(net_port)
+                    && it_ft.port->connection_count <= 1) {
+                    it_ft.block_symbol->block_instance->connections.erase(net_port);
                 }
             }
         }
@@ -589,6 +684,44 @@ void Schematic::expand_connectivity(bool careful)
                 }
             }
         }
+        for (auto &[uu_sym, schsym] : sheet.block_symbols) {
+            const auto &inst = *schsym.block_instance;
+            for (const auto &[net_port, conn] : inst.connections) {
+                if (auto symport = schsym.symbol.get_port_for_net(net_port)) {
+                    if (conn.net) {
+                        symport->connector_style = BlockSymbolPort::ConnectorStyle::NONE;
+                        if (symport->net_segment) {
+                            auto &ns = net_segments.at(symport->net_segment);
+                            if (ns.is_bus()) {
+                                throw std::runtime_error("illegal bus-pin connection");
+                            }
+                            if (ns.net == nullptr) {
+                                ns.net = conn.net;
+                            }
+                            if (ns.net != conn.net) {
+                                throw std::runtime_error("illegal connection");
+                            }
+                        }
+                    }
+                    else {
+                        symport->connector_style = BlockSymbolPort::ConnectorStyle::NC;
+                    }
+                }
+                else {
+                    if (conn.net)
+                        Logger::log_critical("Port " + inst.block->nets.at(net_port).name
+                                                     + " not found on block symbol " + schsym.block_instance->refdes
+                                                     + " but is connected to net "
+                                                     + block->get_net_name(conn.net->uuid),
+                                             Logger::Domain::SCHEMATIC);
+                    else
+                        Logger::log_critical("Port " + inst.block->nets.at(net_port).name
+                                                     + " not found on block symbol " + schsym.block_instance->refdes
+                                                     + " but is set to no connect",
+                                             Logger::Domain::SCHEMATIC);
+                }
+            }
+        }
         for (auto &it_line : sheet.net_lines) {
             it_line.second.net = net_segments.at(it_line.second.net_segment).net;
             it_line.second.bus = net_segments.at(it_line.second.net_segment).bus;
@@ -645,7 +778,7 @@ void Schematic::expand_connectivity(bool careful)
                 for (auto &it_line : sheet.net_lines) {
                     LineNet &line = it_line.second;
                     if (line.coord_on_line(pin_pos)) {
-                        if (!line.is_connected_to(it_sym.first, it_pin.first)) {
+                        if (!line.is_connected_to_symbol(it_sym.first, it_pin.first)) {
                             sheet.warnings.emplace_back(pin_pos, "Pin on Line");
                         }
                     }
@@ -690,8 +823,14 @@ void Schematic::expand_connectivity(bool careful)
     }
 }
 
-void Schematic::expand(bool careful)
+void Schematic::expand(bool careful, const IInstanceMappingProvider *inst_map_prv)
 {
+    const BlockInstanceMapping *inst_map = nullptr;
+    if (inst_map_prv) {
+        if ((inst_map = inst_map_prv->get_block_instance_mapping()))
+            assert(inst_map->block == block->uuid);
+    }
+
     for (auto &it_sheet : sheets) {
         Sheet &sheet = it_sheet.second;
         for (auto &it : sheet.texts) {
@@ -728,20 +867,98 @@ void Schematic::expand(bool careful)
         }
     }
 
+    for (auto &[uu, comp] : block->components) {
+        using N = Component::NopopulateFromInstance;
+        if (inst_map) {
+            if (inst_map->components.count(uu)) {
+                if (inst_map->components.at(uu).nopopulate)
+                    comp.nopopulate_from_instance = N::SET;
+                else
+                    comp.nopopulate_from_instance = N::CLEAR;
+            }
+            else {
+                comp.nopopulate_from_instance = N::CLEAR;
+            }
+        }
+        else {
+            comp.nopopulate_from_instance = N::UNSET;
+        }
+    }
 
-    for (auto &it_sheet : sheets) {
-        Sheet &sheet = it_sheet.second;
-        for (auto &it_sym : sheet.symbols) {
-            auto &texts = it_sym.second.texts;
+
+    for (auto &[uu_sheet, sheet] : sheets) {
+        // disconnected deleted ports
+        for (auto &[uu_sym, sym] : sheet.block_symbols) {
+            auto &prv_sym = *sym.prv_symbol;
+            map_erase_if(sym.block_instance->connections,
+                         [&prv_sym](const auto &conn) { return prv_sym.get_port_for_net(conn.first) == nullptr; });
+        }
+
+        // delete net lines connected to deleted ports
+        map_erase_if(sheet.net_lines, [](auto &x) {
+            for (auto it_ft : {&x.second.from, &x.second.to}) {
+                if (it_ft->is_port()) {
+                    if (it_ft->block_symbol->prv_symbol->ports.count(it_ft->port.uuid) == 0) { // port is gone
+                        return true;
+                    }
+                }
+            }
+            return false;
+        });
+    }
+
+    {
+        std::set<UUID> insts;
+        for (const auto &[uu_inst, inst] : block->block_instances) {
+            for (const auto &[uu_port, conn] : inst.connections) {
+                auto &port_net = inst.block->nets.at(uu_port);
+                if (!port_net.is_port) {
+                    Logger::log_critical("block instance " + inst.refdes + " has connection at non-port net "
+                                                 + inst.block->get_net_name(uu_port),
+                                         Logger::Domain::BLOCK);
+                }
+            }
+            insts.insert(uu_inst);
+        }
+        for (const auto &[uu_sheet, sheet] : sheets) {
+            for (const auto &[uu_sym, sym] : sheet.block_symbols) {
+                insts.erase(sym.block_instance->uuid);
+            }
+        }
+        for (const auto &uu : insts) {
+            Logger::log_critical("block instance " + block->block_instances.at(uu).refdes + " (" + (std::string)uu
+                                         + ") has no block symbol",
+                                 Logger::Domain::BLOCK);
+        }
+    }
+
+    for (auto &[uu_sheet, sheet] : sheets) {
+        for (auto &[uu_sym, sym] : sheet.symbols) {
+            auto &texts = sym.texts;
+            auto &sh = sheet;
             texts.erase(std::remove_if(texts.begin(), texts.end(),
-                                       [&sheet](const auto &a) { return sheet.texts.count(a.uuid) == 0; }),
+                                       [&sh](const auto &a) { return sh.texts.count(a.uuid) == 0; }),
                         texts.end());
         }
         if (!careful)
-            sheet.expand_symbols(*this);
+            sheet.expand_symbols(*this, inst_map);
     }
 
     expand_connectivity(careful);
+
+
+    std::set<const Net *> nets_witout_port;
+    for (const auto &[uu, net] : block->nets) {
+        if (net.is_port)
+            nets_witout_port.insert(&net);
+    }
+
+    for (auto &[uu_sheet, sheet] : sheets) {
+        for (const auto &[uu, la] : sheet.net_labels) {
+            if (la.show_port)
+                nets_witout_port.erase(la.junction->net);
+        }
+    }
 
 
     std::map<std::string, std::set<const Net *>> net_names;
@@ -763,6 +980,9 @@ void Schematic::expand(bool careful)
         for (const auto &it : it_sheet.second.analyze_net_segments()) {
             if (nets_duplicate.count(it.second.net)) {
                 it_sheet.second.warnings.emplace_back(it.second.position, "Duplicate net name");
+            }
+            if (nets_witout_port.count(it.second.net)) {
+                it_sheet.second.warnings.emplace_back(it.second.position, "Need 'show port' net label");
             }
         }
     }
@@ -791,28 +1011,29 @@ void Schematic::expand(bool careful)
         }
     }
 
-    for (auto &it_sheet : sheets) {
-        Sheet &sheet = it_sheet.second;
-        if (sheet.pool_frame) {
-            std::map<std::string, std::string> values = block->project_meta;
-            for (const auto &it_v : sheet.title_block_values) {
-                values[it_v.first] = it_v.second;
-            }
-            sheet.frame = *sheet.pool_frame;
-            for (auto &it_text : sheet.frame.texts) {
-                auto &txt = it_text.second.text;
-                replace_substr(txt, "$sheet_idx", std::to_string(sheet.index));
-                replace_substr(txt, "$sheet_total", std::to_string(sheets.size()));
-                replace_substr(txt, "$sheet_title", sheet.name);
-                for (const auto &it_v : values) {
-                    replace_substr(txt, "$" + it_v.first, it_v.second);
+    {
+        for (auto &[sheet_uu, sheet] : sheets) {
+            for (const auto &[sym_uu, sym] : sheet.block_symbols) {
+                std::map<UUID, const Net *> ports;
+                for (const auto &[net_uu, net] : sym.block_instance->block->nets) {
+                    if (net.is_port)
+                        ports.emplace(net_uu, &net);
+                }
+                for (const auto &[port_uu, port] : sym.symbol.ports) {
+                    ports.erase(port.net);
+                }
+                if (ports.size()) {
+                    std::string txt = "Missing ports:";
+                    for (const auto &[net_uu, net] : ports) {
+                        txt += " " + net->name;
+                    }
+                    sheet.warnings.emplace_back(sym.placement.shift, txt);
                 }
             }
         }
-        else {
-            sheet.frame = Frame(UUID());
-        }
     }
+
+    expand_frames(inst_map_prv);
 
     if (!careful) {
         for (auto &it_sheet : sheets) {
@@ -842,45 +1063,72 @@ void Schematic::expand(bool careful)
     }
 }
 
-void Schematic::annotate()
+void Schematic::expand_frames(const class IInstanceMappingProvider *inst_map)
 {
-    if (!annotation.keep) {
-        for (auto &it : block->components) {
-            it.second.refdes = "?";
+    const unsigned int sheet_total = inst_map ? inst_map->get_sheet_total() : sheets.size();
+
+    for (auto &[uu, sheet] : sheets) {
+        if (sheet.pool_frame) {
+            const unsigned int sheet_idx = inst_map ? inst_map->get_sheet_index(uu) : sheet.index;
+
+            std::map<std::string, std::string> values = block->project_meta;
+            for (const auto &it_v : sheet.title_block_values) {
+                values[it_v.first] = it_v.second;
+            }
+            sheet.frame = *sheet.pool_frame;
+            for (auto &it_text : sheet.frame.texts) {
+                auto &txt = it_text.second.text;
+
+                replace_substr(txt, "$sheet_idx", std::to_string(sheet_idx));
+                replace_substr(txt, "$sheet_total", std::to_string(sheet_total));
+                replace_substr(txt, "$sheet_title", sheet.name);
+                for (const auto &it_v : values) {
+                    replace_substr(txt, "$" + it_v.first, it_v.second);
+                }
+            }
+        }
+        else {
+            sheet.frame = Frame(UUID());
+        }
+    }
+}
+
+struct AnnotationContext {
+    Schematic &top;
+    std::map<std::string, std::vector<unsigned int>> refdes;
+};
+
+static void visit_schematic_for_annotation(Schematic &sch, const UUIDVec &instance_path, AnnotationContext &ctx)
+{
+    auto &annotation = ctx.top.annotation;
+    using Annotation = Schematic::Annotation;
+    if (!ctx.top.annotation.keep) {
+        for (auto &[uu, comp] : sch.block->components) {
+            ctx.top.block->set_refdes(comp, instance_path, "?");
         }
     }
 
-    std::map<std::string, std::vector<unsigned int>> refdes;
-    for (const auto &it : block->components) {
-        refdes[it.second.entity->prefix];
+    for (const auto &[uu, comp] : sch.block->components) {
+        ctx.refdes[comp.entity->prefix];
     }
 
-
-    std::vector<Sheet *> sheets_sorted;
-    sheets_sorted.reserve(sheets.size());
-    std::transform(sheets.begin(), sheets.end(), std::back_inserter(sheets_sorted), [](auto &a) { return &a.second; });
-    std::sort(sheets_sorted.begin(), sheets_sorted.end(),
-              [](const auto a, const auto b) { return a->index < b->index; });
-
-
-    unsigned int sheet_offset = 0;
-    unsigned int sheet_incr = 0;
-
-    for (auto sheet : sheets_sorted) {
+    for (auto sheet : sch.get_sheets_sorted()) {
+        const auto sheet_index = ctx.top.sheet_mapping.sheet_numbers.at(uuid_vec_append(instance_path, sheet->uuid));
+        unsigned int sheet_offset = 0;
+        unsigned int sheet_incr = 0;
         if (annotation.mode != Annotation::Mode::SEQUENTIAL) {
-            for (auto &it : refdes) {
+            for (auto &it : ctx.refdes) {
                 it.second.clear();
             }
             if (annotation.mode == Annotation::Mode::SHEET_100) {
-                sheet_offset = 100 * sheet->index;
+                sheet_offset = 100 * sheet_index;
                 sheet_incr = 100;
             }
             else if (annotation.mode == Annotation::Mode::SHEET_1000) {
-                sheet_offset = 1000 * sheet->index;
+                sheet_offset = 1000 * sheet_index;
                 sheet_incr = 1000;
             }
         }
-
 
         std::vector<SchematicSymbol *> symbols;
         symbols.reserve(sheet->symbols.size());
@@ -902,16 +1150,17 @@ void Schematic::annotate()
         }
 
         for (const auto sym : symbols) {
-            auto &v = refdes[sym->component->entity->prefix];
-            if (sym->component->refdes.find('?') == std::string::npos) { // already annotated
-                auto ss = sym->component->refdes.substr(sym->component->entity->prefix.size());
+            auto &v = ctx.refdes[sym->component->entity->prefix];
+            const auto rd = ctx.top.block->get_refdes(*sym->component, instance_path);
+            if (rd.find('?') == std::string::npos) { // already annotated
+                auto ss = rd.substr(sym->component->entity->prefix.size());
                 int si = -1;
                 try {
                     si = std::stoi(ss);
                 }
                 catch (const std::invalid_argument &e) {
                     if (!annotation.ignore_unknown)
-                        sym->component->refdes = "?";
+                        ctx.top.block->set_refdes(*sym->component, instance_path, "?");
                 }
                 if (si > 0) {
                     v.push_back(si);
@@ -921,8 +1170,9 @@ void Schematic::annotate()
         }
 
         for (const auto sym : symbols) {
-            auto &v = refdes[sym->component->entity->prefix];
-            if (sym->component->refdes.find('?') != std::string::npos) { // needs annotatation
+            auto &v = ctx.refdes[sym->component->entity->prefix];
+            const auto rd = ctx.top.block->get_refdes(*sym->component, instance_path);
+            if (rd.find('?') != std::string::npos) { // needs annotatation
                 unsigned int n = 1 + sheet_offset;
                 if (v.size() != 0) {
                     if (annotation.fill_gaps && v.size() >= 2) {
@@ -942,19 +1192,27 @@ void Schematic::annotate()
                         n = v.back() + 1;
                     }
                 }
-                if (sheet_incr && n / sheet_incr != sheet->index) {
+                if (sheet_incr && n / sheet_incr != sheet_index) {
                     n = sheet_offset + 1;
                 }
                 v.push_back(n);
-                sym->component->refdes = sym->component->entity->prefix + std::to_string(n);
+                ctx.top.block->set_refdes(*sym->component, instance_path,
+                                          sym->component->entity->prefix + std::to_string(n));
             }
             std::sort(v.begin(), v.end());
         }
 
-        // for(auto &it_sym: it_sheet.second.symbols) {
-        //
-        //}
+        for (auto sym : sheet->get_block_symbols_sorted()) {
+            visit_schematic_for_annotation(*sym->schematic, uuid_vec_append(instance_path, sym->block_instance->uuid),
+                                           ctx);
+        }
     }
+}
+
+void Schematic::annotate()
+{
+    AnnotationContext ctx{*this, {}};
+    visit_schematic_for_annotation(*this, {}, ctx);
 }
 
 std::map<UUIDPath<2>, std::string> Schematic::get_unplaced_gates() const
@@ -1014,7 +1272,7 @@ Glib::RefPtr<Glib::Regex> Schematic::get_sheetref_regex()
 
 Schematic::Schematic(const Schematic &sch)
     : uuid(sch.uuid), block(sch.block), name(sch.name), sheets(sch.sheets), rules(sch.rules),
-      group_tag_visible(sch.group_tag_visible), annotation(sch.annotation),
+      group_tag_visible(sch.group_tag_visible), annotation(sch.annotation), sheet_mapping(sch.sheet_mapping),
       pdf_export_settings(sch.pdf_export_settings), version(sch.version)
 {
     update_refs();
@@ -1031,6 +1289,9 @@ void Schematic::update_refs()
             for (auto &it_text : schsym.texts) {
                 it_text.update(sheet.texts);
             }
+        }
+        for (auto &[uu, sym] : sheet.block_symbols) {
+            sym.block_instance.update(block->block_instances);
         }
         for (auto &it_line : sheet.net_lines) {
             LineNet &line = it_line.second;
@@ -1091,16 +1352,6 @@ json Schematic::serialize() const
     return j;
 }
 
-
-void Schematic::save_pictures(const std::string &dir) const
-{
-    std::list<const std::map<UUID, Picture> *> pictures;
-    for (const auto &it : sheets) {
-        pictures.push_back(&it.second.pictures);
-    }
-    pictures_save(pictures, dir, "sch");
-}
-
 void Schematic::load_pictures(const std::string &dir)
 {
     std::list<std::map<UUID, Picture> *> pictures;
@@ -1142,6 +1393,128 @@ std::vector<Sheet *> Schematic::get_sheets_sorted()
 std::vector<const Sheet *> Schematic::get_sheets_sorted() const
 {
     return sort_sheets<const Sheet>(*this);
+}
+
+
+void Schematic::SheetMapping::update(const Schematic &sch, const UUIDVec &instance_path)
+{
+    if (Block::instance_path_too_long(instance_path, __FUNCTION__))
+        return;
+    for (const auto sh : sch.get_sheets_sorted()) {
+        sheet_numbers.emplace(uuid_vec_append(instance_path, sh->uuid), index);
+        index++;
+        for (const auto sym : sh->get_block_symbols_sorted()) {
+            update(*sym->schematic, uuid_vec_append(instance_path, sym->block_instance->uuid));
+        }
+    }
+}
+
+void Schematic::SheetMapping::update(const Schematic &sch)
+{
+    index = 1;
+    sheet_numbers.clear();
+    update(sch, {});
+    sheet_total = index - 1;
+}
+
+void Schematic::update_sheet_mapping()
+{
+    sheet_mapping.update(*this);
+}
+
+
+template <bool c>
+using WalkCB =
+        std::function<void(make_const_ref_t<c, Sheet>, unsigned int, make_const_ref_t<c, Schematic>, const UUIDVec &)>;
+
+template <bool c> struct WalkContext {
+    WalkCB<c> cb;
+    const Schematic &top;
+};
+
+template <bool c>
+static void walk_sheets_rec(make_const_ref_t<c, Schematic> sch, const UUIDVec &instance_path, WalkContext<c> &ctx)
+{
+    if (Block::instance_path_too_long(instance_path, __FUNCTION__))
+        return;
+    for (auto sheet : sch.get_sheets_sorted()) {
+        const auto sheet_index = ctx.top.sheet_mapping.sheet_numbers.at(uuid_vec_append(instance_path, sheet->uuid));
+        ctx.cb(*sheet, sheet_index, sch, instance_path);
+        for (auto sym : sheet->get_block_symbols_sorted()) {
+            walk_sheets_rec(*sym->schematic, uuid_vec_append(instance_path, sym->block_instance->uuid), ctx);
+        }
+    }
+}
+
+template <bool c> static void walk_sheets(make_const_ref_t<c, Schematic> sch, WalkCB<c> cb)
+{
+    WalkContext<c> ctx{cb, sch};
+    walk_sheets_rec(sch, {}, ctx);
+}
+
+std::vector<Schematic::SheetItem<true>> Schematic::get_all_sheets() const
+{
+    std::vector<Schematic::SheetItem<true>> items;
+    walk_sheets<true>(*this, [&items](const Sheet &sheet, unsigned int sheet_index, const Schematic &sch,
+                                      const UUIDVec &instance_path) {
+        items.emplace_back(sheet, sheet_index, sch, instance_path);
+    });
+    return items;
+}
+
+std::vector<Schematic::SheetItem<false>> Schematic::get_all_sheets()
+{
+    std::vector<Schematic::SheetItem<false>> items;
+    walk_sheets<false>(*this,
+                       [&items](Sheet &sheet, unsigned int sheet_index, Schematic &sch, const UUIDVec &instance_path) {
+                           items.emplace_back(sheet, sheet_index, sch, instance_path);
+                       });
+    return items;
+}
+
+Sheet &Schematic::add_sheet()
+{
+    auto uu = UUID::random();
+    auto sheet_max = std::max_element(sheets.begin(), sheets.end(),
+                                      [](const auto &p1, const auto &p2) { return p1.second.index < p2.second.index; });
+    auto &sheet = sheets.emplace(uu, uu).first->second;
+    sheet.index = sheet_max->second.index + 1;
+    sheet.name = "sheet " + std::to_string(sheet.index);
+    return sheet;
+}
+
+void Schematic::delete_sheet(const UUID &uu)
+{
+    if (sheets.size() <= 1)
+        return;
+    if (!sheets.at(uu).can_be_removed()) // only delete empty sheets
+        return;
+    auto deleted_index = sheets.at(uu).index;
+    sheets.erase(uu);
+    for (auto &it : sheets) {
+        if (it.second.index > deleted_index) {
+            it.second.index--;
+        }
+    }
+}
+
+const Sheet &Schematic::get_sheet_at_index(unsigned int index) const
+{
+    auto x = std::find_if(sheets.begin(), sheets.end(), [index](auto e) { return e.second.index == index; });
+    if (x == sheets.end())
+        throw std::runtime_error("sheet " + std::to_string(index) + "not found");
+    else
+        return x->second;
+}
+
+
+Sheet &Schematic::get_sheet_at_index(unsigned int index)
+{
+    auto x = std::find_if(sheets.begin(), sheets.end(), [index](auto e) { return e.second.index == index; });
+    if (x == sheets.end())
+        throw std::runtime_error("sheet " + std::to_string(index) + "not found");
+    else
+        return x->second;
 }
 
 } // namespace horizon

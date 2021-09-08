@@ -19,7 +19,7 @@ Net::Net(const UUID &uu, const json &j, Block &block) : Net(uu, j)
 }
 Net::Net(const UUID &uu, const json &j)
     : uuid(uu), name(j.at("name").get<std::string>()), is_power(j.value("is_power", false)),
-      power_symbol_name_visible(j.value("power_symbol_name_visible", true))
+      power_symbol_name_visible(j.value("power_symbol_name_visible", true)), is_port(j.value("is_port", false))
 {
     net_class.uuid = j.at("net_class").get<std::string>();
     if (j.count("diffpair")) {
@@ -31,6 +31,13 @@ Net::Net(const UUID &uu, const json &j)
     }
     if (j.count("power_symbol_style"))
         power_symbol_style = power_symbol_style_lut.lookup(j.at("power_symbol_style"));
+    if (j.count("port_direction"))
+        port_direction = Pin::direction_lut.lookup(j.at("port_direction"));
+    if (j.count("hrefs")) {
+        for (const auto &it : j.at("hrefs")) {
+            hrefs.push_back(uuid_vec_from_string(it.get<std::string>()));
+        }
+    }
 }
 
 Net::Net(const UUID &uu) : uuid(uu){};
@@ -50,6 +57,14 @@ json Net::serialize() const
     j["power_symbol_style"] = power_symbol_style_lut.lookup_reverse(power_symbol_style);
     if (diffpair_master)
         j["diffpair"] = diffpair->uuid;
+    j["is_port"] = is_port;
+    j["port_direction"] = Pin::direction_lut.lookup_reverse(port_direction);
+    if (hrefs.size()) {
+        auto a = json::array();
+        for (const auto &it : hrefs)
+            a.push_back(uuid_vec_to_string(it));
+        j["hrefs"] = a;
+    }
     return j;
 }
 

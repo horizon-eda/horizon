@@ -88,6 +88,16 @@ public:
     void group_begin();
     void group_end();
 
+    const auto &get_items() const
+    {
+        return items;
+    }
+
+    const auto &get_items_ref() const
+    {
+        return items_ref;
+    }
+
 private:
     const Canvas &ca;
     std::vector<Selectable> items;

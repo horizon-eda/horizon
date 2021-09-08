@@ -8,16 +8,49 @@
 #include "pool/ipool.hpp"
 #include "pool/part.hpp"
 #include "util/picture_load.hpp"
+#include "blocks/iblock_provider.hpp"
+#include "blocks/blocks.hpp"
 
 namespace horizon {
-CoreBoard::CoreBoard(const std::string &board_filename, const std::string &block_filename,
+
+class NoneBlockProvider : public IBlockProvider {
+public:
+    Block &get_block(const UUID &uu) override
+    {
+        throw std::runtime_error("no blocks");
+    }
+
+    Block &get_top_block() override
+    {
+        throw std::runtime_error("no blocks");
+    }
+
+    std::map<UUID, Block *> get_blocks() override
+    {
+        throw std::runtime_error("no blocks");
+    }
+
+    static auto &get()
+    {
+        static NoneBlockProvider inst;
+        return inst;
+    }
+};
+
+static Block get_flattend_block(const std::string &blocks_filename, IPool &pool)
+{
+    auto blocks = Blocks::new_from_file(blocks_filename, pool);
+    return blocks.get_top_block_item().block.flatten();
+}
+
+CoreBoard::CoreBoard(const std::string &board_filename, const std::string &blocks_filename,
                      const std::string &pictures_dir, IPool &pool, IPool &pool_caching)
-    : Core(pool, &pool_caching), block(Block::new_from_file(block_filename, pool_caching)),
+    : Core(pool, &pool_caching), block(get_flattend_block(blocks_filename, pool)),
       brd(Board::new_from_file(board_filename, *block, pool_caching)), rules(brd->rules),
       fab_output_settings(brd->fab_output_settings), pdf_export_settings(brd->pdf_export_settings),
       step_export_settings(brd->step_export_settings), pnp_export_settings(brd->pnp_export_settings),
       grid_settings(brd->grid_settings), colors(brd->colors), m_board_filename(board_filename),
-      m_block_filename(block_filename), m_pictures_dir(pictures_dir)
+      m_blocks_filename(blocks_filename), m_pictures_dir(pictures_dir)
 {
     brd->load_pictures(pictures_dir);
     rebuild();
@@ -25,7 +58,7 @@ CoreBoard::CoreBoard(const std::string &board_filename, const std::string &block
 
 void CoreBoard::reload_netlist()
 {
-    block = Block::new_from_file(m_block_filename, m_pool_caching);
+    block = get_flattend_block(m_blocks_filename, m_pool_caching);
     brd->block = &*block;
     brd->update_refs();
     for (auto it = brd->packages.begin(); it != brd->packages.end();) {
@@ -661,7 +694,7 @@ void CoreBoard::reload_pool()
     const auto block_j = block->serialize();
     m_pool.clear();
     m_pool_caching.clear();
-    block.emplace(block->uuid, block_j, m_pool_caching);
+    block.emplace(block->uuid, block_j, m_pool_caching, NoneBlockProvider::get());
     brd.emplace(brd->uuid, brd_j, *block, m_pool_caching);
     keeper.restore(brd->pictures);
     history_clear();

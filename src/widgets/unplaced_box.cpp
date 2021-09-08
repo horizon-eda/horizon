@@ -106,4 +106,10 @@ void UnplacedBox::update(const std::map<UUIDPath<2>, std::string> &items)
         }
     }
 }
+
+void UnplacedBox::set_title(const std::string &title)
+{
+    view->get_column(0)->set_title(title);
+}
+
 } // namespace horizon

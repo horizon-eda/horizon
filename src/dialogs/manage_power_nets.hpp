@@ -5,10 +5,10 @@ namespace horizon {
 
 class ManagePowerNetsDialog : public Gtk::Dialog {
 public:
-    ManagePowerNetsDialog(Gtk::Window *parent, class Block &b);
+    ManagePowerNetsDialog(Gtk::Window *parent, class IBlockProvider &b);
 
 private:
-    Block &block;
+    IBlockProvider &blocks;
     Gtk::ListBox *listbox = nullptr;
     void handle_add_power_net();
 };

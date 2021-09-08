@@ -972,6 +972,34 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::TOOL, ToolID::EXCHANGE_GATES},
          {"Exchange gates", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::MANAGE_PORTS},
+         {"Manage port nets", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::MAP_PORT},
+         {"Place port", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::ADD_BLOCK_INSTANCE},
+         {"Place block", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::PUSH_INTO_BLOCK, ToolID::NONE},
+         {"Push", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_SPECIFIC}},
+
+        {{ActionID::POP_OUT_OF_BLOCK, ToolID::NONE},
+         {"Pop to parent block", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::EDIT_BLOCK_SYMBOL, ToolID::NONE},
+         {"Edit block symbol", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_SPECIFIC}},
+
+        {{ActionID::GO_TO_BLOCK_SYMBOL, ToolID::NONE},
+         {"Go to block symbol", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1110,6 +1138,10 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(VIEW_3D_RIGHT),
         ACTION_LUT_ITEM(GRIDS_WINDOW),
         ACTION_LUT_ITEM(SELECT_GRID),
+        ACTION_LUT_ITEM(PUSH_INTO_BLOCK),
+        ACTION_LUT_ITEM(POP_OUT_OF_BLOCK),
+        ACTION_LUT_ITEM(EDIT_BLOCK_SYMBOL),
+        ACTION_LUT_ITEM(GO_TO_BLOCK_SYMBOL),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \
@@ -1267,5 +1299,8 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(PLACE_DOT),
         TOOL_LUT_ITEM(SET_TRACK_WIDTH),
         TOOL_LUT_ITEM(EXCHANGE_GATES),
+        TOOL_LUT_ITEM(MANAGE_PORTS),
+        TOOL_LUT_ITEM(MAP_PORT),
+        TOOL_LUT_ITEM(ADD_BLOCK_INSTANCE),
 };
 } // namespace horizon

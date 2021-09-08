@@ -22,6 +22,8 @@ public:
         POOL_UPDATE,
         PICTURE,
         PART,
+        PROJECT,
+        BLOCKS,
     };
 
     Logger();

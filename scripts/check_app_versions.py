@@ -14,7 +14,8 @@ types = (
 	"decal",
 	"project",
 	"board",
-	"schematic"
+	"schematic",
+	"blocks",
 )
 
 version_yml = yaml.load(open("scripts/app_versions.yml", "r"), Loader=yaml.SafeLoader)["versions"]
