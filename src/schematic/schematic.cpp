@@ -547,9 +547,6 @@ void Schematic::expand_connectivity(bool careful)
             it_sym.second.net->is_power = true;
             it_sym.second.net->is_power_forced = true;
         }
-        for (auto &it : sheet.texts) {
-            it.second.overridden = false;
-        }
     }
 
     if (!careful) {
