@@ -48,6 +48,7 @@ SRC_COMMON = \
 	src/common/pdf_export_settings.cpp\
 	src/pool/padstack.cpp\
 	src/common/polygon.cpp\
+	src/util/polygon_arc_removal_proxy.cpp\
 	src/common/hole.cpp\
 	src/common/shape.cpp\
 	src/common/patch_type_names.cpp\
@@ -185,7 +186,6 @@ SRC_CANVAS = \
 	src/canvas/appearance.cpp\
 	src/canvas/bitmap_font_util.cpp\
 	src/canvas/picture_renderer.cpp\
-	src/util/polygon_arc_removal_proxy.cpp\
 	src/util/warp_cursor.cpp\
 
 SRC_IMP = \
@@ -762,7 +762,6 @@ SRC_PR_REVIEW = \
 	src/canvas/selectables.cpp\
 	src/canvas/fragment_cache.cpp\
 	src/canvas/canvas_patch.cpp\
-	src/util/polygon_arc_removal_proxy.cpp\
 	src/util/text_data.cpp \
 	3rd_party/polypartition/polypartition.cpp\
 	3rd_party/poly2tri/common/shapes.cpp\
@@ -873,7 +872,6 @@ SRC_SHARED = $(SRC_COMMON) \
 	src/canvas/selectables.cpp\
 	src/canvas/fragment_cache.cpp\
 	src/util/text_data.cpp \
-	src/util/polygon_arc_removal_proxy.cpp\
 	3rd_party/polypartition/polypartition.cpp\
 	3rd_party/poly2tri/common/shapes.cpp\
 	3rd_party/poly2tri/sweep/cdt.cpp\
