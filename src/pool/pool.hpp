@@ -6,10 +6,8 @@
 #include "package.hpp"
 #include "package/pad.hpp"
 #include "decal.hpp"
-#include <fstream>
 #include <map>
 #include <set>
-#include <vector>
 #include "ipool.hpp"
 #include "pool_info.hpp"
 
