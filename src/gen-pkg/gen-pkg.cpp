@@ -7,6 +7,8 @@
 #include "pool/pool_manager.hpp"
 #include <glibmm/miscutils.h>
 #include <giomm.h>
+#include <iomanip>
+#include <iostream>
 
 using namespace horizon;
 
