@@ -1,14 +1,10 @@
 #pragma once
 #include "util/uuid.hpp"
 #include "nlohmann/json_fwd.hpp"
-#include "block/block.hpp"
 #include "block/block_instance.hpp"
 #include "block_symbol/block_symbol.hpp"
 #include "util/uuid_ptr.hpp"
 #include "util/placement.hpp"
-#include "pool/pool.hpp"
-#include <vector>
-#include <map>
 
 namespace horizon {
 using json = nlohmann::json;
