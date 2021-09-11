@@ -1,9 +1,10 @@
 #pragma once
 #include "nlohmann/json_fwd.hpp"
-#include "common/common.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
+
+enum class ObjectType;
 
 class FileVersion {
 public:

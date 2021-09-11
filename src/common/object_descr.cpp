@@ -336,6 +336,7 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
 
           }}},
         {ObjectType::PROJECT, {"Project", "Projects", {}}},
+        {ObjectType::POOL, {"Pool", "Pools", {}}},
         {ObjectType::BLOCK_SYMBOL_PORT, {"Port", "Ports", {}}},
         {ObjectType::BLOCK, {"Block", "Blocks", {}}},
         {ObjectType::SCHEMATIC_BLOCK_SYMBOL, {"Block symbol", "Block symbols", {}}},

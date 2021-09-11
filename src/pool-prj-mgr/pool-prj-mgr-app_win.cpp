@@ -1184,9 +1184,19 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
             if (!PoolManager::get().get_pools().count(pool_base_path) && !pool->get_pool_info().is_project_pool()) {
                 info_bar_show(info_bar_pool_not_added);
             }
+            pool_notebook->signal_saved().connect([this] { set_version_info(""); });
             pool_box->pack_start(*pool_notebook, true, true, 0);
             pool_notebook->show();
             header->set_subtitle(pool_base_path);
+            const auto &version = pool->get_pool_info().version;
+            const auto version_msg = version.get_message(ObjectType::POOL);
+            if (version_msg.size()) {
+                set_version_info(version_msg
+                                 + " This only applies to the pool.json file. Pool items have different versions.");
+            }
+            else {
+                set_version_info("");
+            }
 
             if (pool->get_pool_info().is_project_pool()) {
                 button_close->hide();

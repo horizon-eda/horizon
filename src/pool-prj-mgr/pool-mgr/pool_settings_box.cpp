@@ -74,10 +74,15 @@ void PoolSettingsBox::save()
     save_button->set_sensitive(false);
     hint_label->set_markup("Almost there! For the items of the included pool to show up, click <i>Update pool</i>.");
     needs_save = false;
+    s_signal_saved.emit();
 }
 
 void PoolSettingsBox::set_needs_save()
 {
+    auto &version = pool.get_pool_info().version;
+    if (version.get_file() > version.get_app()) {
+        return;
+    }
     needs_save = true;
     save_button->set_sensitive(true);
     hint_label->set_markup("For the items of the included pool to show up, click <i>Save</i> and <i>Update pool</i>.");

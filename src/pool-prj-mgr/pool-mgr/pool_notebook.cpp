@@ -259,6 +259,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         settings_box = PoolSettingsBox::create(pool);
         settings_box->signal_open_pool().connect(
                 [this](auto pool_bp) { appwin.app.open_pool(Glib::build_filename(pool_bp, "pool.json")); });
+        settings_box->signal_saved().connect([this] { s_signal_saved.emit(); });
         pool_uuid = pool.get_pool_info().uuid;
 
         settings_box->show();

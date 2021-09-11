@@ -24,6 +24,12 @@ public:
         return s_signal_open_pool;
     }
 
+    typedef sigc::signal<void> type_signal_saved;
+    type_signal_saved signal_saved()
+    {
+        return s_signal_saved;
+    }
+
 private:
     IPool &pool;
     Gtk::Entry *entry_name = nullptr;
@@ -49,5 +55,6 @@ private:
     void set_needs_save();
 
     type_signal_open_pool s_signal_open_pool;
+    type_signal_saved s_signal_saved;
 };
 } // namespace horizon

@@ -3,6 +3,7 @@
 #include "util/uuid.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include <vector>
+#include "util/file_version.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -20,6 +21,8 @@ public:
     std::vector<UUID> pools_included;
     void save() const;
     bool is_project_pool() const;
+    static unsigned int get_app_version();
+    FileVersion version;
 
 private:
     PoolInfo(const json &j, const std::string &bp);

@@ -34,6 +34,12 @@ public:
     ~PoolNotebook();
     PoolProjectManagerAppWindow &appwin;
 
+    typedef sigc::signal<void> type_signal_saved;
+    type_signal_saved signal_saved()
+    {
+        return s_signal_saved;
+    }
+
 private:
     const std::string base_path;
     Pool pool;
@@ -135,5 +141,7 @@ private:
 
     void pool_updated();
     bool pool_busy = false;
+
+    type_signal_saved s_signal_saved;
 };
 } // namespace horizon
