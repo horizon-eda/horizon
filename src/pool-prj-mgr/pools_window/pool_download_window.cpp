@@ -179,8 +179,7 @@ void PoolDownloadWindow::download_thread(std::string gh_username, std::string gh
         {
             RawClient raw_client;
             const auto j_pool = raw_client.get("/repos/" + gh_username + "/" + gh_repo + "/contents/pool.json");
-            PoolInfo info;
-            info.from_json(j_pool);
+            PoolInfo info(j_pool);
             for (const auto &it : info.pools_included) {
                 if (PoolManager::get().get_by_uuid(it) == nullptr) {
                     throw std::runtime_error("Included pool " + (std::string)it + " not found locally");

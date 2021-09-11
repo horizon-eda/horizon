@@ -12,6 +12,7 @@ public:
     static const UUID project_pool_uuid;
     PoolInfo(const std::string &bp);
     PoolInfo();
+    PoolInfo(const json &j);
     std::string base_path;
     UUID uuid;
     UUID default_via;
@@ -19,6 +20,8 @@ public:
     std::vector<UUID> pools_included;
     void save() const;
     bool is_project_pool() const;
-    void from_json(const json &j);
+
+private:
+    PoolInfo(const json &j, const std::string &bp);
 };
 } // namespace horizon
