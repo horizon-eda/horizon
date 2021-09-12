@@ -19,12 +19,8 @@ RulesCheckResult check_entity(const Entity &entity)
     if (needs_trim(entity.manufacturer)) {
         r.errors.emplace_back(RulesCheckErrorLevel::FAIL, "Manufacturer has trailing/leading whitespace");
     }
-    {
-        const Glib::ustring up(entity.prefix);
-        if (!Glib::Regex::match_simple("^[A-Z]+$", up)) {
-            r.errors.emplace_back(RulesCheckErrorLevel::FAIL, "Prefix doesn't match regex");
-        }
-    }
+    if (!check_prefix(entity.prefix))
+        r.errors.emplace_back(RulesCheckErrorLevel::FAIL, "Prefix doesn't match regex");
     if (entity.tags.size() == 0) {
         r.errors.emplace_back(RulesCheckErrorLevel::FAIL, "Tags must not be empty");
     }
