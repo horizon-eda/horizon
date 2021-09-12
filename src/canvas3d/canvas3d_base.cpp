@@ -488,37 +488,21 @@ std::map<std::string, std::string> Canvas3DBase::get_model_filenames(IPool &pool
 {
     std::map<std::string, std::string> model_filenames; // first: relative, second: absolute
     for (const auto &it : brd->packages) {
-        auto model = it.second.package.get_model(it.second.model);
-        if (model) {
-            std::string model_filename;
-            const Package *pool_package = nullptr;
-
-            UUID this_pool_uuid = pool.get_pool_info().uuid;
-            UUID pkg_pool_uuid;
-            try {
-                pool_package = pool.get_package(it.second.package.uuid, &pkg_pool_uuid);
-            }
-            catch (const std::runtime_error &e) {
-                // it's okay
-            }
-            if (it.second.pool_package == pool_package) {
-                // package is from pool, ask pool for model filename (might come from cache)
-                model_filename = pool.get_model_filename(it.second.package.uuid, model->uuid);
-            }
-            else {
-                // package is not from pool (from package editor, use filename relative to current pool)
-                if (pkg_pool_uuid && pkg_pool_uuid != this_pool_uuid) { // pkg is open in RO mode from included pool
-                    model_filename = pool.get_model_filename(it.second.package.uuid, model->uuid);
-                }
-                else { // really editing package
-                    model_filename = Glib::build_filename(pool.get_base_path(), model->filename);
-                }
-            }
-            if (model_filename.size())
-                model_filenames[model->filename] = model_filename;
-        }
+        const auto model_filename = get_model_filename(it.second, pool);
+        if (model_filename.has_value())
+            model_filenames[model_filename->first] = model_filename->second;
     }
     return model_filenames;
+}
+
+std::optional<std::pair<std::string, std::string>> Canvas3DBase::get_model_filename(const BoardPackage &pkg,
+                                                                                    IPool &pool)
+{
+    auto model = pkg.package.get_model(pkg.model);
+    if (model)
+        return std::make_pair(model->filename, pool.get_model_filename(pkg.package.uuid, model->uuid));
+    else
+        return {};
 }
 
 void Canvas3DBase::clear_3d_models()

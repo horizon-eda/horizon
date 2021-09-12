@@ -11,6 +11,9 @@ public:
 protected:
     STEPImporter::Faces import_step(const std::string &filename_rel, const std::string &filename_abs) override;
 
+    std::optional<std::pair<std::string, std::string>> get_model_filename(const class BoardPackage &pkg,
+                                                                          IPool &pool) override;
+
 private:
     ImpPackage &imp;
 };

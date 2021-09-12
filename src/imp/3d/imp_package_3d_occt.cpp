@@ -16,6 +16,7 @@
 #include "canvas/annotation.hpp"
 #include <glm/gtx/rotate_vector.hpp>
 #include <BRep_Tool.hxx>
+#include "pool/pool_manager.hpp"
 
 namespace horizon {
 
@@ -34,6 +35,35 @@ STEPImporter::Faces ImpPackage::ImportCanvas3D::import_step(const std::string &f
         }
     }
     return result.faces;
+}
+
+std::optional<std::pair<std::string, std::string>>
+ImpPackage::ImportCanvas3D::get_model_filename(const BoardPackage &pkg, IPool &pool)
+{
+    auto model = pkg.package.get_model(pkg.model);
+    if (model) {
+        UUID this_pool_uuid = pool.get_pool_info().uuid;
+        UUID pkg_pool_uuid;
+        try {
+            pool.get_package(pkg.package.uuid, &pkg_pool_uuid);
+        }
+        catch (const std::runtime_error &e) {
+            // it's okay
+        }
+        auto pkg_pool = PoolManager::get().get_by_uuid(pkg_pool_uuid);
+        std::string bp;
+        if (pkg_pool && pkg_pool_uuid != this_pool_uuid) { // pkg is open in RO mode from included pool
+            bp = pkg_pool->base_path;
+        }
+        else {
+            bp = pool.get_base_path();
+        }
+        const auto fn = Glib::build_filename(bp, model->filename);
+        return std::make_pair(model->filename, fn);
+    }
+    else {
+        return {};
+    }
 }
 
 
