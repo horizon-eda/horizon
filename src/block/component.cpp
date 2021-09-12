@@ -153,6 +153,14 @@ std::string Component::replace_text(const std::string &t, bool *replaced) const
     }
 }
 
+const std::string &Component::get_prefix() const
+{
+    if (part)
+        return part->get_prefix();
+    else
+        return entity->prefix;
+}
+
 json Component::serialize() const
 {
     json j;

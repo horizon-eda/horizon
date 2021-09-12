@@ -62,6 +62,11 @@ private:
     Gtk::Label *w_flags_label = nullptr;
     Gtk::Grid *w_flags_grid = nullptr;
 
+    Gtk::RadioButton *w_override_prefix_inherit_button = nullptr;
+    Gtk::RadioButton *w_override_prefix_no_button = nullptr;
+    Gtk::RadioButton *w_override_prefix_yes_button = nullptr;
+    Gtk::Entry *w_override_prefix_entry = nullptr;
+
     class PinListColumns : public Gtk::TreeModelColumnRecord {
     public:
         PinListColumns()
@@ -115,6 +120,7 @@ private:
     void copy_from_other_part();
     void update_map_buttons();
     void update_flags_label();
+    void update_prefix_entry();
 
     class ParametricEditor *parametric_editor = nullptr;
     void update_parametric_editor();

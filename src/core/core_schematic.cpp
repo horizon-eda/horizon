@@ -269,7 +269,7 @@ bool CoreSchematic::get_property(ObjectType type, const UUID &uu, ObjectProperty
         switch (property) {
         case ObjectProperty::ID::REFDES:
             if (!in_hierarchy())
-                dynamic_cast<PropertyValueString &>(value).value = comp->entity->prefix + "?";
+                dynamic_cast<PropertyValueString &>(value).value = comp->get_prefix() + "?";
             if (info)
                 dynamic_cast<PropertyValueString &>(value).value = info->refdes;
             else

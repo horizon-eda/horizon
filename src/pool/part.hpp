@@ -75,6 +75,11 @@ public:
     std::map<Flag, FlagState> flags;
     bool get_flag(Flag fl) const;
 
+    enum class OverridePrefix { NO, YES, INHERIT };
+    OverridePrefix override_prefix = OverridePrefix::NO;
+    std::string prefix;
+    const std::string &get_prefix() const;
+
     FileVersion version;
 
     json serialize() const;

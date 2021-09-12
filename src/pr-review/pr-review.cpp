@@ -635,6 +635,12 @@ int Reviewer::main(int c_argc, char *c_argv[])
                     ofs << " (inherited)";
                 ofs << "\n";
             }
+            if (part.override_prefix != Part::OverridePrefix::NO) {
+                ofs << "| Prefix | " << part.get_prefix();
+                if (part.override_prefix == Part::OverridePrefix::INHERIT)
+                    ofs << " (inherited)";
+                ofs << "\n";
+            }
             ofs << "\n\n";
 
             if (part.orderable_MPNs.size()) {

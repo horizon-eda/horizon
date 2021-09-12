@@ -61,6 +61,8 @@ public:
 
     bool get_nopopulate() const;
 
+    const std::string &get_prefix() const;
+
     /**
      * which Nins are connected to which Net
      * the UUIDPath consists of Gate and Pin UUID

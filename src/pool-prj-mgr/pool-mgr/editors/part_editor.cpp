@@ -224,6 +224,10 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("orderable_MPNs_add_button", w_orderable_MPNs_add_button);
     x->get_widget("flags_grid", w_flags_grid);
     x->get_widget("flags_label", w_flags_label);
+    x->get_widget("override_prefix_inherit_button", w_override_prefix_inherit_button);
+    x->get_widget("override_prefix_no_button", w_override_prefix_no_button);
+    x->get_widget("override_prefix_yes_button", w_override_prefix_yes_button);
+    x->get_widget("override_prefix_entry", w_override_prefix_entry);
     w_parametric_from_base->hide();
 
     w_entity_label->set_track_visited_links(false);
@@ -507,6 +511,27 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         }
     }
     update_flags_label();
+
+    {
+        w_override_prefix_inherit_button->set_sensitive(part.base);
+        std::map<Part::OverridePrefix, Gtk::RadioButton *> rbs = {
+                {Part::OverridePrefix::NO, w_override_prefix_no_button},
+                {Part::OverridePrefix::INHERIT, w_override_prefix_inherit_button},
+                {Part::OverridePrefix::YES, w_override_prefix_yes_button},
+        };
+        bind_widget<Part::OverridePrefix>(rbs, part.override_prefix, [this](auto v) {
+            update_prefix_entry();
+            set_needs_save();
+        });
+        update_prefix_entry();
+    }
+
+    w_override_prefix_entry->signal_changed().connect([this] {
+        if (part.override_prefix == Part::OverridePrefix::YES) {
+            part.prefix = w_override_prefix_entry->get_text();
+            set_needs_save();
+        }
+    });
 }
 class OrderableMPNEditor *PartEditor::create_orderable_MPN_editor(const UUID &uu)
 {
@@ -580,6 +605,26 @@ void PartEditor::update_flags_label()
         s = "<i>none set</i>";
     }
     w_flags_label->set_markup(s);
+}
+
+void PartEditor::update_prefix_entry()
+{
+    switch (part.override_prefix) {
+    case Part::OverridePrefix::NO:
+        w_override_prefix_entry->set_sensitive(false);
+        w_override_prefix_entry->set_text(part.entity->prefix);
+        break;
+
+    case Part::OverridePrefix::INHERIT:
+        w_override_prefix_entry->set_sensitive(false);
+        w_override_prefix_entry->set_text(part.base->get_prefix());
+        break;
+
+    case Part::OverridePrefix::YES:
+        w_override_prefix_entry->set_sensitive(true);
+        w_override_prefix_entry->set_text(part.prefix);
+        break;
+    }
 }
 
 void PartEditor::map_pin(Gtk::TreeModel::iterator it_pin)

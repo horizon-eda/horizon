@@ -152,7 +152,7 @@ void ClipboardSchematic::serialize(json &j)
         switch (it.type) {
         case ObjectType::COMPONENT: {
             auto comp = bl.components.at(it.uuid);
-            comp.refdes = comp.entity->prefix + "?";
+            comp.refdes = comp.get_prefix() + "?";
             map_erase_if(comp.connections, [&nets](auto &x) { return nets.count(x.second.net.uuid) == 0; });
             map_erase_if(comp.connections, [&comp, &net_lines, &symbols](auto &x) {
                 for (const auto &[uu_line, line] : net_lines) {

@@ -139,7 +139,7 @@ std::string SchematicSymbol::replace_text(const std::string &t, bool *replaced, 
                 r = inst_map->components.at(component->uuid).refdes;
             }
             else {
-                r = component->entity->prefix + "?";
+                r = component->get_prefix() + "?";
             }
         }
         else {

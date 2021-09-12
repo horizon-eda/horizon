@@ -12,3 +12,4 @@ versions:
     2: add hierarchy
   part:
     1: add flags
+    2: add prefix override

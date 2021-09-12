@@ -1106,7 +1106,7 @@ static void visit_schematic_for_annotation(Schematic &sch, const UUIDVec &instan
     }
 
     for (const auto &[uu, comp] : sch.block->components) {
-        ctx.refdes[comp.entity->prefix];
+        ctx.refdes[comp.get_prefix()];
     }
 
     for (auto sheet : sch.get_sheets_sorted()) {
@@ -1147,10 +1147,10 @@ static void visit_schematic_for_annotation(Schematic &sch, const UUIDVec &instan
         }
 
         for (const auto sym : symbols) {
-            auto &v = ctx.refdes[sym->component->entity->prefix];
+            auto &v = ctx.refdes[sym->component->get_prefix()];
             const auto rd = ctx.top.block->get_refdes(*sym->component, instance_path);
             if (rd.find('?') == std::string::npos) { // already annotated
-                auto ss = rd.substr(sym->component->entity->prefix.size());
+                auto ss = rd.substr(sym->component->get_prefix().size());
                 int si = -1;
                 try {
                     si = std::stoi(ss);
@@ -1167,7 +1167,7 @@ static void visit_schematic_for_annotation(Schematic &sch, const UUIDVec &instan
         }
 
         for (const auto sym : symbols) {
-            auto &v = ctx.refdes[sym->component->entity->prefix];
+            auto &v = ctx.refdes[sym->component->get_prefix()];
             const auto rd = ctx.top.block->get_refdes(*sym->component, instance_path);
             if (rd.find('?') != std::string::npos) { // needs annotatation
                 unsigned int n = 1 + sheet_offset;
@@ -1194,7 +1194,7 @@ static void visit_schematic_for_annotation(Schematic &sch, const UUIDVec &instan
                 }
                 v.push_back(n);
                 ctx.top.block->set_refdes(*sym->component, instance_path,
-                                          sym->component->entity->prefix + std::to_string(n));
+                                          sym->component->get_prefix() + std::to_string(n));
             }
             std::sort(v.begin(), v.end());
         }

@@ -10,7 +10,7 @@
 
 namespace horizon {
 
-static const unsigned int app_version = 1;
+static const unsigned int app_version = 2;
 
 unsigned int Part::get_app_version()
 {
@@ -27,6 +27,12 @@ static const LutEnumStr<Part::FlagState> flag_state_lut = {
         {"set", Part::FlagState::SET},
         {"clear", Part::FlagState::CLEAR},
         {"inherit", Part::FlagState::INHERIT},
+};
+
+static const LutEnumStr<Part::OverridePrefix> override_prefix_lut = {
+        {"no", Part::OverridePrefix::NO},
+        {"yes", Part::OverridePrefix::YES},
+        {"inherit", Part::OverridePrefix::INHERIT},
 };
 
 void init_flags(decltype(Part::flags) &flags)
@@ -154,6 +160,11 @@ Part::Part(const UUID &uu, const json &j, IPool &pool)
         }
     }
 
+    if (j.count("override_prefix")) {
+        override_prefix = override_prefix_lut.lookup(j.at("override_prefix").get<std::string>());
+        prefix = j.at("prefix");
+    }
+
     if (package->models.count(model) == 0)
         model = package->default_model;
     // if(value.size() == 0) {
@@ -239,6 +250,26 @@ bool Part::get_flag(Flag fl) const
     }
 }
 
+const std::string &Part::get_prefix() const
+{
+    switch (override_prefix) {
+    case OverridePrefix::INHERIT:
+        if (base)
+            return base->get_prefix();
+        else
+            return entity->prefix;
+
+    case OverridePrefix::NO:
+        return entity->prefix;
+
+    case OverridePrefix::YES:
+        return prefix;
+
+    default:
+        return entity->prefix;
+    }
+}
+
 Part::Part(const UUID &uu) : uuid(uu), version(app_version)
 {
     attributes[Attribute::MPN] = {false, ""};
@@ -267,6 +298,8 @@ json Part::serialize() const
             std::count_if(flags.begin(), flags.end(), [](const auto &x) { return x.second != FlagState::CLEAR; });
     if (have_flags)
         j["version"] = 1;
+    if (override_prefix != OverridePrefix::NO)
+        j["version"] = 2;
     j["type"] = "part";
     j["uuid"] = (std::string)uuid;
 
@@ -320,6 +353,10 @@ json Part::serialize() const
         for (const auto [fl, st] : flags) {
             j["flags"][flag_lut.lookup_reverse(fl)] = flag_state_lut.lookup_reverse(st);
         }
+    }
+    if (override_prefix != OverridePrefix::NO) {
+        j["override_prefix"] = override_prefix_lut.lookup_reverse(override_prefix);
+        j["prefix"] = prefix;
     }
     return j;
 }

@@ -65,7 +65,7 @@ ToolResponse ToolAddPart::begin(const ToolArgs &args)
             return ToolResponse::end();
         }
     }
-    comp->refdes = comp->entity->prefix + "?";
+    comp->refdes = comp->get_prefix() + "?";
     comp->tag = create_tag();
 
     for (auto &it : comp->entity->gates) {
@@ -124,7 +124,7 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
                 comp = &sch->block->components.emplace(uu, uu).first->second;
                 comp->entity = last_comp->entity;
                 comp->part = last_comp->part;
-                comp->refdes = comp->entity->prefix + "?";
+                comp->refdes = comp->get_prefix() + "?";
                 comp->tag = create_tag();
 
                 auto old_symbol = sym_current;

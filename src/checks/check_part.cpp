@@ -58,6 +58,11 @@ RulesCheckResult check_part(const Part &part)
         r.errors.emplace_back(RulesCheckErrorLevel::WARN, "Discouraged datasheet domain " + *d);
     }
 
+    if (part.override_prefix == Part::OverridePrefix::YES) {
+        if (!check_prefix(part.prefix))
+            r.errors.emplace_back(RulesCheckErrorLevel::FAIL, "Prefix doesn't match regex");
+    }
+
     for (const auto &[uu, mpn] : part.orderable_MPNs) {
         if (needs_trim(mpn)) {
             r.errors.emplace_back(RulesCheckErrorLevel::FAIL,
