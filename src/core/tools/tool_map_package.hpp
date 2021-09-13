@@ -17,7 +17,21 @@ public:
         };
     }
 
+    class Settings : public ToolSettings {
+    public:
+        json serialize() const override;
+        void load_from_json(const json &j) override;
+        bool flip = false;
+    };
+
+    ToolSettings *get_settings() override
+    {
+        return &settings;
+    }
+
 private:
+    Settings settings;
+
     std::vector<std::pair<class Component *, bool>> components;
     unsigned int component_index = 0;
     class BoardPackage *pkg = nullptr;
@@ -25,7 +39,6 @@ private:
     std::set<UUID> all_nets;
     void place_package(Component *comp, const Coordi &c);
     void update_tooltip();
-    bool flipped = false;
     int angle = 0;
 };
 } // namespace horizon

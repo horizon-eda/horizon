@@ -3,9 +3,21 @@
 #include "board/board.hpp"
 #include "imp/imp_interface.hpp"
 #include "pool/part.hpp"
-#include <iostream>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
+
+json ToolMapPackage::Settings::serialize() const
+{
+    json j;
+    j["flip"] = flip;
+    return j;
+}
+
+void ToolMapPackage::Settings::load_from_json(const json &j)
+{
+    flip = j.value("flip", false);
+}
 
 bool ToolMapPackage::can_begin()
 {
@@ -95,7 +107,7 @@ void ToolMapPackage::place_package(Component *comp, const Coordi &c)
     pkg = &brd->packages.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, comp))
                    .first->second;
     pkg->placement.shift = c;
-    pkg->flip = flipped;
+    pkg->flip = settings.flip;
     pkg->placement.set_angle(angle);
     pkg->update(*brd);
 
@@ -174,7 +186,7 @@ ToolResponse ToolMapPackage::update(const ToolArgs &args)
         case InToolActionID::ROTATE:
         case InToolActionID::MIRROR:
             move_mirror_or_rotate(pkg->placement.shift, args.action == InToolActionID::ROTATE);
-            flipped = pkg->flip;
+            settings.flip = pkg->flip;
             angle = pkg->placement.get_angle();
             break;
 
