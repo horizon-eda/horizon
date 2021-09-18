@@ -435,7 +435,7 @@ void export_step(const std::string &filename, const Board &brd, class IPool &poo
     {
         TopoDS_Shape board_face = face_from_countour(outline);
         const auto v = gp_Vec(0, 0, total_thickness / 1e6);
-        if (cutouts.Size()) {
+        if (!cutouts.IsEmpty()) {
             BRepAlgoAPI_Cut builder;
 
             TopTools_ListOfShape board_shapes;
