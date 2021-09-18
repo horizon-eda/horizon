@@ -238,7 +238,8 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             component_xlat.emplace(it.key(), u);
             Component comp(u, it.value(), doc.r->get_pool_caching());
             for (auto &it_conn : comp.connections) {
-                it_conn.second.net = &block->nets.at(net_xlat.at(it_conn.second.net.uuid));
+                if (it_conn.second.net.uuid)
+                    it_conn.second.net = &block->nets.at(net_xlat.at(it_conn.second.net.uuid));
             }
             block->components.emplace(u, comp);
         }
