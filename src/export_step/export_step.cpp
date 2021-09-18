@@ -434,17 +434,23 @@ void export_step(const std::string &filename, const Board &brd, class IPool &poo
     TopoDS_Shape board;
     {
         TopoDS_Shape board_face = face_from_countour(outline);
-        BRepAlgoAPI_Cut builder;
+        const auto v = gp_Vec(0, 0, total_thickness / 1e6);
+        if (cutouts.Size()) {
+            BRepAlgoAPI_Cut builder;
 
-        TopTools_ListOfShape board_shapes;
-        board_shapes.Append(board_face);
+            TopTools_ListOfShape board_shapes;
+            board_shapes.Append(board_face);
 
-        builder.SetArguments(board_shapes);
-        builder.SetTools(cutouts);
-        builder.SetRunParallel(Standard_True);
-        builder.Build();
+            builder.SetArguments(board_shapes);
+            builder.SetTools(cutouts);
+            builder.SetRunParallel(Standard_True);
+            builder.Build();
 
-        board = BRepPrimAPI_MakePrism(builder.Shape(), gp_Vec(0, 0, total_thickness / 1e6));
+            board = BRepPrimAPI_MakePrism(builder.Shape(), v);
+        }
+        else {
+            board = BRepPrimAPI_MakePrism(board_face, v);
+        }
     }
 
     TDF_Label board_label = assy->AddShape(board, false);
