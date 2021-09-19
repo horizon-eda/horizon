@@ -320,6 +320,7 @@ SRC_IMP = \
 	src/core/tools/tool_map_port.cpp\
 	src/core/tools/tool_add_block_instance.cpp\
 	src/core/tools/tool_helper_save_placements.cpp\
+	src/core/tools/tool_align_and_distribute.cpp\
 	src/document/documents.cpp\
 	src/core/clipboard/clipboard.cpp\
 	src/core/clipboard/clipboard_padstack.cpp\
@@ -363,6 +364,7 @@ SRC_IMP = \
 	src/dialogs/edit_custom_value.cpp\
 	src/dialogs/manage_ports.cpp\
 	src/dialogs/select_block.cpp\
+	src/dialogs/align_and_distribute_window.cpp\
 	src/util/sort_controller.cpp\
 	src/core/core_symbol.cpp\
 	src/core/core_schematic.cpp\

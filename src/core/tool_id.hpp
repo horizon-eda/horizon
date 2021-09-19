@@ -158,5 +158,6 @@ enum class ToolID {
     MANAGE_PORTS,
     MAP_PORT,
     ADD_BLOCK_INSTANCE,
+    ALIGN_AND_DISTRIBUTE,
 };
 } // namespace horizon

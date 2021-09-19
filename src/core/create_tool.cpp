@@ -89,6 +89,7 @@
 #include "tools/tool_exchange_gates.hpp"
 #include "tools/tool_map_port.hpp"
 #include "tools/tool_add_block_instance.hpp"
+#include "tools/tool_align_and_distribute.hpp"
 
 namespace horizon {
 
@@ -421,6 +422,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::ADD_BLOCK_INSTANCE:
         return std::make_unique<ToolAddBlockInstance>(this, tool_id);
+
+    case ToolID::ALIGN_AND_DISTRIBUTE:
+        return std::make_unique<ToolAlignAndDistribute>(this, tool_id);
 
     default:
         return nullptr;

@@ -80,6 +80,14 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-lmb-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-rmb-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/rule-imported-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/align-bottom-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/align-left-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/align-right-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/align-top-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/distribute-center-h-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/distribute-center-v-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/distribute-h-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/distribute-v-symbolic.svg</file>
     <file>icons/scalable/apps/horizon-eda.svg</file>
     <file>icons/16x16/apps/horizon-eda.png</file>
     <file>icons/32x32/apps/horizon-eda.png</file>

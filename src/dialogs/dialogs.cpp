@@ -42,6 +42,7 @@
 #include "widgets/net_selector.hpp"
 #include "manage_ports.hpp"
 #include "select_block.hpp"
+#include "align_and_distribute_window.hpp"
 
 namespace horizon {
 void Dialogs::set_parent(Gtk::Window *w)
@@ -600,6 +601,20 @@ PadParameterSetWindow *Dialogs::show_pad_parameter_set_window(std::set<class Pad
     win->present();
     return win;
 }
+
+AlignAndDistributeWindow *Dialogs::show_align_and_distribute_window()
+{
+    if (auto win = dynamic_cast<AlignAndDistributeWindow *>(window_nonmodal)) {
+        win->present();
+        return win;
+    }
+    auto win = new AlignAndDistributeWindow(parent, interface);
+    window_nonmodal = win;
+    win->signal_hide().connect([this] { close_nonmodal(); });
+    win->present();
+    return win;
+}
+
 
 void Dialogs::close_nonmodal()
 {

@@ -74,6 +74,7 @@ public:
     class EnterDatumScaleWindow *show_enter_datum_scale_window(const std::string &label, double def = 1);
     class PadParameterSetWindow *show_pad_parameter_set_window(std::set<class Pad *> &pads, class IPool &pool,
                                                                class Package &pkg);
+    class AlignAndDistributeWindow *show_align_and_distribute_window();
 
     void close_nonmodal();
     class ToolWindow *get_nonmodal();
