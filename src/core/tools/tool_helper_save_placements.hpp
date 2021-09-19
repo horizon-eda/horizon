@@ -3,6 +3,7 @@
 #include "canvas/selectables.hpp"
 #include "core/tool.hpp"
 #include "util/placement.hpp"
+#include <functional>
 
 namespace horizon {
 class ToolHelperSavePlacements : public virtual ToolBase {
