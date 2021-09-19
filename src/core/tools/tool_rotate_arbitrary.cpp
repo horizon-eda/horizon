@@ -2,18 +2,11 @@
 #include "canvas/canvas_gl.hpp"
 #include "document/idocument_board.hpp"
 #include "board/board.hpp"
-#include "document/idocument_package.hpp"
-#include "pool/package.hpp"
-#include "document/idocument_padstack.hpp"
-#include "pool/padstack.hpp"
 #include "document/idocument_schematic.hpp"
 #include "schematic/schematic.hpp"
-#include "document/idocument_symbol.hpp"
-#include "pool/symbol.hpp"
 #include "imp/imp_interface.hpp"
 #include "util/accumulator.hpp"
 #include "util/geom_util.hpp"
-#include <iostream>
 #include "core/tool_id.hpp"
 #include "dialogs/enter_datum_angle_window.hpp"
 #include "dialogs/enter_datum_scale_window.hpp"
@@ -95,7 +88,6 @@ void ToolRotateArbitrary::expand_selection()
 
 ToolResponse ToolRotateArbitrary::begin(const ToolArgs &args)
 {
-    std::cout << "tool move\n";
     ref = args.coords;
     origin = args.coords;
 
@@ -121,7 +113,7 @@ ToolRotateArbitrary::~ToolRotateArbitrary()
 bool ToolRotateArbitrary::can_begin()
 {
     expand_selection();
-    return selection.size() > 0;
+    return count_types_supported() > 0;
 }
 
 void ToolRotateArbitrary::update_tip()
@@ -166,43 +158,6 @@ void ToolRotateArbitrary::update_tip()
     imp->tool_bar_set_actions(actions);
 }
 
-void ToolRotateArbitrary::save_placements()
-{
-    for (const auto &it : selection) {
-        switch (it.type) {
-        case ObjectType::JUNCTION:
-            placements[it] = Placement(doc.r->get_junction(it.uuid)->position);
-            break;
-        case ObjectType::POLYGON_VERTEX:
-            placements[it] = Placement(doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).position);
-            break;
-        case ObjectType::POLYGON_ARC_CENTER:
-            placements[it] = Placement(doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).arc_center);
-            break;
-        case ObjectType::TEXT:
-            placements[it] = doc.r->get_text(it.uuid)->placement;
-            break;
-        case ObjectType::BOARD_PACKAGE:
-            placements[it] = doc.b->get_board()->packages.at(it.uuid).placement;
-            break;
-        case ObjectType::BOARD_DECAL: {
-            const auto &dec = doc.b->get_board()->decals.at(it.uuid);
-            placements[it] = dec.placement;
-            decal_scales[it.uuid] = dec.get_scale();
-        } break;
-        case ObjectType::PICTURE: {
-            const auto pic = doc.r->get_picture(it.uuid);
-            placements[it] = pic->placement;
-            picture_px_sizes[it.uuid] = pic->px_size;
-        } break;
-        case ObjectType::PAD:
-            placements[it] = doc.k->get_package().pads.at(it.uuid).placement;
-            break;
-        default:;
-        }
-    }
-}
-
 static Placement rotate_placement(const Placement &p, const Coordi &origin, int angle)
 {
     Placement q = p;
@@ -214,40 +169,12 @@ static Placement rotate_placement(const Placement &p, const Coordi &origin, int 
 
 void ToolRotateArbitrary::apply_placements_rotation(int angle)
 {
-    for (const auto &it : placements) {
-        switch (it.first.type) {
-        case ObjectType::JUNCTION:
-            doc.r->get_junction(it.first.uuid)->position = rotate_placement(it.second, origin, angle).shift;
-            break;
-        case ObjectType::POLYGON_VERTEX:
-            doc.r->get_polygon(it.first.uuid)->vertices.at(it.first.vertex).position =
-                    rotate_placement(it.second, origin, angle).shift;
-            break;
-        case ObjectType::POLYGON_ARC_CENTER:
-            doc.r->get_polygon(it.first.uuid)->vertices.at(it.first.vertex).arc_center =
-                    rotate_placement(it.second, origin, angle).shift;
-            break;
-        case ObjectType::TEXT: {
-            auto &pl = doc.r->get_text(it.first.uuid)->placement;
-            pl = rotate_placement(it.second, origin, angle);
-            if (pl.mirror)
-                pl.inc_angle(-2 * angle);
-        } break;
-        case ObjectType::BOARD_PACKAGE:
-            doc.b->get_board()->packages.at(it.first.uuid).placement = rotate_placement(it.second, origin, angle);
-            break;
-        case ObjectType::BOARD_DECAL:
-            doc.b->get_board()->decals.at(it.first.uuid).placement = rotate_placement(it.second, origin, angle);
-            break;
-        case ObjectType::PICTURE:
-            doc.r->get_picture(it.first.uuid)->placement = rotate_placement(it.second, origin, angle);
-            break;
-        case ObjectType::PAD:
-            doc.k->get_package().pads.at(it.first.uuid).placement = rotate_placement(it.second, origin, angle);
-            break;
-        default:;
-        }
-    }
+    apply_placements([this, angle](const SelectableRef &sel, const PlacementInfo &it) {
+        auto pl = rotate_placement(it.placement, origin, angle);
+        if (sel.type == ObjectType::TEXT && pl.mirror)
+            pl.inc_angle(-2 * angle);
+        return pl;
+    });
 }
 
 static Placement scale_placement(const Placement &p, const Coordi &origin, double scale)
@@ -262,38 +189,17 @@ static Placement scale_placement(const Placement &p, const Coordi &origin, doubl
 
 void ToolRotateArbitrary::apply_placements_scale(double sc)
 {
-    for (const auto &it : placements) {
-        switch (it.first.type) {
-        case ObjectType::JUNCTION:
-            doc.r->get_junction(it.first.uuid)->position = scale_placement(it.second, origin, sc).shift;
-            break;
-        case ObjectType::POLYGON_VERTEX:
-            doc.r->get_polygon(it.first.uuid)->vertices.at(it.first.vertex).position =
-                    scale_placement(it.second, origin, sc).shift;
-            break;
-        case ObjectType::POLYGON_ARC_CENTER:
-            doc.r->get_polygon(it.first.uuid)->vertices.at(it.first.vertex).arc_center =
-                    scale_placement(it.second, origin, sc).shift;
-            break;
-        case ObjectType::TEXT:
-            doc.r->get_text(it.first.uuid)->placement = scale_placement(it.second, origin, sc);
-            break;
-        case ObjectType::BOARD_PACKAGE:
-            doc.b->get_board()->packages.at(it.first.uuid).placement = scale_placement(it.second, origin, sc);
-            break;
-        case ObjectType::BOARD_DECAL: {
-            auto &dec = doc.b->get_board()->decals.at(it.first.uuid);
-            dec.placement = scale_placement(it.second, origin, sc);
-            dec.set_scale(decal_scales.at(it.first.uuid) * sc);
-        } break;
-        case ObjectType::PICTURE: {
-            auto pic = doc.r->get_picture(it.first.uuid);
-            pic->placement = scale_placement(it.second, origin, sc);
-            pic->px_size = picture_px_sizes.at(it.first.uuid) * sc;
-        } break;
-        default:;
+    apply_placements([this, sc](const SelectableRef &sel, const PlacementInfo &it) {
+        if (sel.type == ObjectType::PICTURE) {
+            auto pic = doc.r->get_picture(sel.uuid);
+            pic->px_size = picture_px_sizes.at(sel.uuid) * sc;
         }
-    }
+        else if (sel.type == ObjectType::BOARD_DECAL) {
+            auto &dec = doc.b->get_board()->decals.at(sel.uuid);
+            dec.set_scale(decal_scales.at(sel.uuid) * sc);
+        }
+        return scale_placement(it.placement, origin, sc);
+    });
 }
 
 void ToolRotateArbitrary::update_airwires(bool fast)

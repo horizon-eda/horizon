@@ -319,6 +319,7 @@ SRC_IMP = \
 	src/core/tools/tool_exchange_gates.cpp\
 	src/core/tools/tool_map_port.cpp\
 	src/core/tools/tool_add_block_instance.cpp\
+	src/core/tools/tool_helper_save_placements.cpp\
 	src/document/documents.cpp\
 	src/core/clipboard/clipboard.cpp\
 	src/core/clipboard/clipboard_padstack.cpp\

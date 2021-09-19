@@ -3,10 +3,11 @@
 #include "canvas/selectables.hpp"
 #include "util/placement.hpp"
 #include "tool_helper_collect_nets.hpp"
+#include "tool_helper_save_placements.hpp"
 
 namespace horizon {
 
-class ToolRotateArbitrary : public virtual ToolBase, public ToolHelperCollectNets {
+class ToolRotateArbitrary : public virtual ToolBase, public ToolHelperCollectNets, public ToolHelperSavePlacements {
 public:
     using ToolBase::ToolBase;
     ToolResponse begin(const ToolArgs &args) override;
@@ -33,14 +34,10 @@ private:
     double scale = 1;
     void expand_selection();
     void update_tip();
-    void save_placements();
     void apply_placements_rotation(int angle);
     void apply_placements_scale(double sc);
     enum class State { ORIGIN, ROTATE, REF, SCALE };
     State state = State::ORIGIN;
-    std::map<SelectableRef, Placement> placements;
-    std::map<UUID, double> decal_scales;
-    std::map<UUID, uint64_t> picture_px_sizes;
     class CanvasAnnotation *annotation = nullptr;
     std::set<UUID> nets;
     void update_airwires(bool fast);
