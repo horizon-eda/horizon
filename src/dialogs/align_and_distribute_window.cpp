@@ -61,20 +61,20 @@ AlignAndDistributeWindow::AlignAndDistributeWindow(Gtk::Window *parent, ImpInter
     {
         auto b = make_box("Align bounding boxes",
                           {O::ALIGN_BBOX_LEFT, O::ALIGN_BBOX_BOTTOM, O::ALIGN_BBOX_TOP, O::ALIGN_BBOX_RIGHT});
-        gr->attach(*b, 0, 0);
+        gr->attach(*b, 0, 0, 1, 1);
     }
     {
         auto b = make_box("Align centers",
                           {O::ALIGN_ORIGIN_LEFT, O::ALIGN_ORIGIN_BOTTOM, O::ALIGN_ORIGIN_TOP, O::ALIGN_ORIGIN_RIGHT});
-        gr->attach(*b, 0, 1);
+        gr->attach(*b, 0, 1, 1, 1);
     }
     {
         auto b = make_box("Distribute", {O::DISTRIBUTE_EQUIDISTANT_HORIZONTAL, O::DISTRIBUTE_EQUIDISTANT_VERTICAL});
-        gr->attach(*b, 1, 0);
+        gr->attach(*b, 1, 0, 1, 1);
     }
     {
         auto b = make_box("Distribute centers", {O::DISTRIBUTE_ORIGIN_HORIZONTAL, O::DISTRIBUTE_ORIGIN_VERTICAL});
-        gr->attach(*b, 1, 1);
+        gr->attach(*b, 1, 1, 1, 1);
     }
     gr->show_all();
     add(*gr);
