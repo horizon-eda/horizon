@@ -1004,6 +1004,11 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::TOOL, ToolID::ALIGN_AND_DISTRIBUTE},
          {"Align and distribute", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::GO_TO_PROJECT_MANAGER, ToolID::NONE},
+         {"Go to project manager", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1146,6 +1151,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(POP_OUT_OF_BLOCK),
         ACTION_LUT_ITEM(EDIT_BLOCK_SYMBOL),
         ACTION_LUT_ITEM(GO_TO_BLOCK_SYMBOL),
+        ACTION_LUT_ITEM(GO_TO_PROJECT_MANAGER),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

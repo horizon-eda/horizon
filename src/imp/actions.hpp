@@ -114,5 +114,6 @@ enum class ActionID {
     POP_OUT_OF_BLOCK,
     EDIT_BLOCK_SYMBOL,
     GO_TO_BLOCK_SYMBOL,
+    GO_TO_PROJECT_MANAGER,
 };
 }

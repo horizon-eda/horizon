@@ -618,6 +618,9 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             }
         }
     }
+    else if (op == "focus") {
+        present(timestamp);
+    }
     return nullptr;
 }
 

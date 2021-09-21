@@ -310,6 +310,7 @@ void ImpBoard::update_action_sensitivity()
 
     set_action_sensitive(make_action(ActionID::GO_TO_SCHEMATIC), sockets_connected);
     set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), n_pkgs == 1 && sockets_connected);
+    set_action_sensitive(make_action(ActionID::GO_TO_PROJECT_MANAGER), sockets_connected);
 
     ImpBase::update_action_sensitivity();
 }
@@ -541,6 +542,8 @@ void ImpBoard::construct()
             allow_set_foreground_window(this->get_schematic_pid());
             this->send_json(j);
         });
+
+        connect_go_to_project_manager_action();
     }
 
     connect_action(ActionID::RELOAD_NETLIST, [this](const ActionConnection &c) {

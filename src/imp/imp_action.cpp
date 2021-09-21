@@ -332,4 +332,15 @@ void ImpBase::force_end_tool()
     Logger::get().log_critical("Tool didn't end", Logger::Domain::IMP, "end the tool and repeat the last action");
 }
 
+void ImpBase::connect_go_to_project_manager_action()
+{
+    connect_action(ActionID::GO_TO_PROJECT_MANAGER, [this](const auto &conn) {
+        json j;
+        j["time"] = gtk_get_current_event_time();
+        j["op"] = "focus";
+        allow_set_foreground_window(mgr_pid);
+        this->send_json(j);
+    });
+}
+
 } // namespace horizon

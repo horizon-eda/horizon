@@ -133,6 +133,8 @@ protected:
     bool trigger_action(ActionID aid);
     bool trigger_action(ToolID tid);
 
+    void connect_go_to_project_manager_action();
+
     void add_tool_action(ToolID tid, const std::string &action);
     void add_tool_action(ActionID aid, const std::string &action);
     void add_hamburger_menu();

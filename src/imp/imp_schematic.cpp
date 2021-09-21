@@ -639,6 +639,8 @@ void ImpSchematic::construct()
             this->send_json(j);
         });
 
+        connect_go_to_project_manager_action();
+
         connect_action(ActionID::SHOW_IN_POOL_MANAGER, [this](const auto &conn) {
             for (const auto &it : canvas->get_selection()) {
                 auto sheet = core_schematic.get_sheet();
@@ -886,6 +888,7 @@ void ImpSchematic::update_action_sensitivity()
     }
     set_action_sensitive(make_action(ActionID::MOVE_TO_OTHER_SHEET), sel.size() > 0);
     set_action_sensitive(make_action(ActionID::GO_TO_BOARD), sockets_connected);
+    set_action_sensitive(make_action(ActionID::GO_TO_PROJECT_MANAGER), sockets_connected);
 
     const bool can_highlight_net = std::any_of(sel.begin(), sel.end(), [](const auto &x) {
         switch (x.type) {
