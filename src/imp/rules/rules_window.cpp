@@ -295,8 +295,10 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
                     row_err[tree_columns.running] = false;
 
                     if (it_err.has_location) {
-                        dom.emplace_back(it_err.location, rules_check_error_level_to_color(it_err.level),
-                                         uuid_vec_append(it_err.instance_path, it_err.sheet));
+                        UUIDVec sheet;
+                        if (it_err.sheet)
+                            sheet = uuid_vec_append(it_err.instance_path, it_err.sheet);
+                        dom.emplace_back(it_err.location, rules_check_error_level_to_color(it_err.level), sheet);
                     }
 
                     for (const auto &path : it_err.error_polygons) {
