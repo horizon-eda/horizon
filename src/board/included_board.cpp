@@ -8,11 +8,20 @@
 #include "block/block.hpp"
 #include "blocks/blocks.hpp"
 #include "pool/project_pool.hpp"
+#include "logger/logger.hpp"
 
 namespace horizon {
-IncludedBoard::IncludedBoard(const UUID &uu, const Project &prj, const std::string &p) : uuid(uu), project_filename(p)
+IncludedBoard::IncludedBoard(const UUID &uu, const std::string &p) : uuid(uu), project_filename(p)
 {
-    reload();
+    try {
+        reload();
+    }
+    catch (const std::exception &e) {
+        Logger::log_warning("error loading included board", Logger::Domain::BOARD, e.what());
+    }
+    catch (...) {
+        Logger::log_warning("error loading included board", Logger::Domain::BOARD);
+    }
 }
 
 IncludedBoard::~IncludedBoard()
@@ -24,18 +33,16 @@ IncludedBoard::IncludedBoard(const UUID &uu, const json &j)
 {
 }
 
-IncludedBoard::IncludedBoard(const UUID &uu, const std::string &prj_filename)
-    : IncludedBoard(uu, Project::new_from_file(prj_filename), prj_filename)
-{
-}
-
 IncludedBoard::IncludedBoard(const IncludedBoard &other)
     : uuid(other.uuid), project_filename(other.project_filename),
-      pool(std::make_unique<ProjectPool>(other.pool->get_base_path(), false)),
-      block(std::make_unique<Block>(*other.block)), board(std::make_unique<Board>(*other.board))
+      pool(other.is_valid() ? std::make_unique<ProjectPool>(other.pool->get_base_path(), false) : nullptr),
+      block(other.is_valid() ? std::make_unique<Block>(*other.block) : nullptr),
+      board(other.is_valid() ? std::make_unique<Board>(*other.board) : nullptr)
 {
-    board->block = block.get();
-    board->update_refs();
+    if (is_valid()) {
+        board->block = block.get();
+        board->update_refs();
+    }
 }
 
 void IncludedBoard::reload()

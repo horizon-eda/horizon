@@ -27,7 +27,6 @@ public:
     ~IncludedBoard();
 
 private:
-    IncludedBoard(const UUID &uu, const class Project &prj, const std::string &p);
     void reset();
 };
 } // namespace horizon
