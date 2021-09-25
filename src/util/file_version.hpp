@@ -28,6 +28,8 @@ public:
 
     std::string get_message(ObjectType type) const;
 
+    static const std::string learn_more_markup;
+
 private:
     unsigned int app = 0;
     unsigned int file = 0;
