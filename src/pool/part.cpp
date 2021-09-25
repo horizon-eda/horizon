@@ -296,12 +296,10 @@ json Part::serialize() const
     json j;
     const bool have_flags =
             std::count_if(flags.begin(), flags.end(), [](const auto &x) { return x.second != FlagState::CLEAR; });
-    if (have_flags)
-        j["version"] = 1;
-    if (override_prefix != OverridePrefix::NO)
-        j["version"] = 2;
     j["type"] = "part";
     j["uuid"] = (std::string)uuid;
+    if (auto v = get_required_version())
+        j["version"] = v;
 
     {
         const auto &a = attributes.at(Attribute::MPN);
@@ -377,4 +375,17 @@ void Part::update_refs(IPool &pool)
         it.second.pin = &it.second.gate->unit->pins.at(it.second.pin.uuid);
     }
 }
+
+unsigned int Part::get_required_version() const
+{
+    const bool have_flags =
+            std::count_if(flags.begin(), flags.end(), [](const auto &x) { return x.second != FlagState::CLEAR; });
+    unsigned int v = 0;
+    if (have_flags)
+        v = 1;
+    if (override_prefix != OverridePrefix::NO)
+        v = 2;
+    return v;
+}
+
 } // namespace horizon

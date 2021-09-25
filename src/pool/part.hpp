@@ -80,6 +80,8 @@ public:
     std::string prefix;
     const std::string &get_prefix() const;
 
+    unsigned int get_required_version() const;
+
     FileVersion version;
 
     json serialize() const;
