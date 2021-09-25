@@ -16,6 +16,7 @@ public:
     virtual std::string get_name() const = 0;
     virtual const UUID &get_uuid() const = 0;
     virtual const class FileVersion &get_version() const = 0;
+    virtual unsigned int get_required_version() const;
     virtual ObjectType get_type() const = 0;
     std::string filename;
 
@@ -62,6 +63,7 @@ private:
     Gtk::Popover *check_popover = nullptr;
     Gtk::Label *check_label = nullptr;
     Gtk::InfoBar *info_bar = nullptr;
+    Gtk::Label *info_bar_label = nullptr;
     class IPool &pool;
     class PoolParametric *pool_parametric;
     bool need_update = false;
@@ -73,5 +75,8 @@ private:
     WindowStateStore state_store;
     void run_checks();
     bool read_only;
+
+    unsigned int saved_version = 0;
+    void update_version_warning();
 };
 } // namespace horizon

@@ -14,6 +14,7 @@
 #include "checks/check_entity.hpp"
 #include "checks/check_unit.hpp"
 #include "checks/check_part.hpp"
+#include "common/object_descr.hpp"
 
 namespace horizon {
 
@@ -24,6 +25,11 @@ EditorWindowStore::EditorWindowStore(const std::string &fn) : filename(fn)
 void EditorWindowStore::save()
 {
     save_as(filename);
+}
+
+unsigned int EditorWindowStore::get_required_version() const
+{
+    return get_version().get_app();
 }
 
 class UnitStore : public EditorWindowStore {
@@ -122,6 +128,10 @@ public:
     {
         return part.version;
     }
+    unsigned int get_required_version() const override
+    {
+        return part.get_required_version();
+    }
     ObjectType get_type() const override
     {
         return ObjectType::PART;
@@ -199,21 +209,25 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
     box->show();
 
     {
+        info_bar = Gtk::manage(new Gtk::InfoBar());
+        info_bar_label = Gtk::manage(new Gtk::Label);
+        info_bar_label->set_line_wrap(true);
+        dynamic_cast<Gtk::Container &>(*info_bar->get_content_area()).add(*info_bar_label);
+        info_bar_label->show();
+        info_bar->show();
+        box->pack_start(*info_bar, false, false, 0);
+        info_bar_hide(info_bar);
+    }
+
+    {
         const auto &version = store->get_version();
-        if (version.get_app() != version.get_file()) {
-            info_bar = Gtk::manage(new Gtk::InfoBar());
-            auto label = Gtk::manage(new Gtk::Label);
-            label->set_line_wrap(true);
-            dynamic_cast<Gtk::Container &>(*info_bar->get_content_area()).add(*label);
-            label->show();
-            label->set_markup(version.get_message(store->get_type()));
-            if (version.get_app() < version.get_file()) {
-                read_only = true;
-            }
-            info_bar->show();
-            box->pack_start(*info_bar, false, false, 0);
+        if (version.get_app() < version.get_file()) {
+            info_bar_label->set_markup(version.get_message(store->get_type()));
+            read_only = true;
+            info_bar_show(info_bar);
         }
     }
+    saved_version = store->get_version().get_file();
 
     editor->show();
     box->pack_start(*editor, true, true, 0);
@@ -244,6 +258,7 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
         if (iface->get_needs_save()) {
             run_checks();
         }
+        update_version_warning();
     });
     run_checks();
 
@@ -296,6 +311,22 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
     save_button->signal_clicked().connect(sigc::mem_fun(*this, &EditorWindow::save));
 }
 
+void EditorWindow::update_version_warning()
+{
+    if (read_only)
+        return;
+    if (store->get_required_version() > saved_version) {
+        const auto &t = object_descriptions.at(store->get_type()).name;
+        info_bar_label->set_markup("Saving this " + t + " will update it from version " + std::to_string(saved_version)
+                                   + " to " + std::to_string(store->get_required_version()) + " . "
+                                   + FileVersion::learn_more_markup);
+        info_bar_show(info_bar);
+    }
+    else {
+        info_bar_hide(info_bar);
+    }
+}
+
 void EditorWindow::force_close()
 {
     hide();
@@ -319,6 +350,7 @@ void EditorWindow::save()
         if (iface)
             iface->save();
         store->save();
+        saved_version = store->get_required_version();
         need_update = true;
         s_signal_saved.emit(store->filename);
     }
@@ -349,6 +381,7 @@ void EditorWindow::save()
             std::string fn = append_dot_json(chooser->get_filename());
             s_signal_filename_changed.emit(fn);
             store->save_as(fn);
+            saved_version = store->get_required_version();
             s_signal_saved.emit(store->filename);
             save_button->set_label("Save");
             need_update = true;
