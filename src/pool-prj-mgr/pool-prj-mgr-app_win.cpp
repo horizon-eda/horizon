@@ -1159,6 +1159,7 @@ bool PoolProjectManagerAppWindow::migrate_project(const std::string &path)
     return true;
 }
 
+#if GTK_CHECK_VERSION(3, 24, 0)
 gboolean PoolProjectManagerAppWindow::part_browser_key_pressed(GtkEventControllerKey *controller, guint keyval,
                                                                guint keycode, GdkModifierType state, gpointer user_data)
 {
@@ -1176,6 +1177,7 @@ gboolean PoolProjectManagerAppWindow::part_browser_key_pressed(GtkEventControlle
 
     return TRUE;
 }
+#endif
 
 void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &file)
 {
@@ -1292,11 +1294,13 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
         part_browser_window->signal_assign_part().connect(
                 sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_assign_part));
 
+#if GTK_CHECK_VERSION(3, 24, 0)
         {
             auto ctrl = gtk_event_controller_key_new(GTK_WIDGET(part_browser_window->gobj()));
             gtk_event_controller_set_propagation_phase(ctrl, GTK_PHASE_CAPTURE);
             g_signal_connect(ctrl, "key-pressed", G_CALLBACK(part_browser_key_pressed), this);
         }
+#endif
 
         set_view_mode(ViewMode::PROJECT);
 
