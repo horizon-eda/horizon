@@ -1159,6 +1159,24 @@ bool PoolProjectManagerAppWindow::migrate_project(const std::string &path)
     return true;
 }
 
+gboolean PoolProjectManagerAppWindow::part_browser_key_pressed(GtkEventControllerKey *controller, guint keyval,
+                                                               guint keycode, GdkModifierType state, gpointer user_data)
+{
+    if (keyval != GDK_KEY_Escape)
+        return FALSE;
+
+    auto self = reinterpret_cast<PoolProjectManagerAppWindow *>(user_data);
+    if (auto proc = self->find_top_schematic_process()) {
+        auto pid = proc->proc->get_pid();
+        json tx;
+        tx["op"] = "present";
+        tx["time"] = gtk_get_current_event_time();
+        self->app.send_json(pid, tx);
+    }
+
+    return TRUE;
+}
+
 void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &file)
 {
     auto path = file->get_path();
@@ -1273,6 +1291,12 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
                 sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_place_part));
         part_browser_window->signal_assign_part().connect(
                 sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_assign_part));
+
+        {
+            auto ctrl = gtk_event_controller_key_new(GTK_WIDGET(part_browser_window->gobj()));
+            gtk_event_controller_set_propagation_phase(ctrl, GTK_PHASE_CAPTURE);
+            g_signal_connect(ctrl, "key-pressed", G_CALLBACK(part_browser_key_pressed), this);
+        }
 
         set_view_mode(ViewMode::PROJECT);
 

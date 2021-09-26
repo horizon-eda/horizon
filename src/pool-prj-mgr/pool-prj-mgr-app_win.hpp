@@ -133,6 +133,8 @@ private:
     void save_project();
     class PartBrowserWindow *part_browser_window = nullptr;
     void cleanup();
+    static gboolean part_browser_key_pressed(GtkEventControllerKey *controller, guint keyval, guint keycode,
+                                             GdkModifierType state, gpointer user_data);
 
     ViewMode view_mode = ViewMode::OPEN;
     void set_view_mode(ViewMode mode);
