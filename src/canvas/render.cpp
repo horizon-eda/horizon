@@ -609,11 +609,12 @@ void Canvas::render(const Text &text, bool interactive, ColorP co)
 {
     bool rev = layer_provider->get_layers().at(text.layer).reverse;
     transform_save();
+    const auto mirror_orig = transform.mirror;
+    const auto angle_orig = transform.get_angle();
     transform.accumulate(text.placement);
-    auto angle = transform.get_angle();
-    if (transform.mirror ^ rev) {
-        angle = 32768 - angle;
-    }
+    const auto text_angle = text.placement.get_angle();
+    const auto angle =
+            (transform.mirror ^ rev ? 32768 - text_angle : text_angle) + (mirror_orig ^ rev ? -1 : 1) * angle_orig;
 
     img_patch_type(PatchType::TEXT);
     triangle_type_current = TriangleInfo::Type::TEXT;
