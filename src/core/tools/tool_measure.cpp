@@ -71,7 +71,6 @@ ToolResponse ToolMeasure::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         switch (state) {
         case State::FROM:
-            from = args.coords;
             break;
         case State::TO:
             to = args.coords;
@@ -98,6 +97,7 @@ ToolResponse ToolMeasure::update(const ToolArgs &args)
         case InToolActionID::LMB:
             switch (state) {
             case State::FROM:
+                from = args.coords;
                 s_from = name_from_target(args.target);
                 state = State::TO;
                 break;
