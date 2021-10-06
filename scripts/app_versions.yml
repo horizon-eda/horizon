@@ -13,3 +13,5 @@ versions:
   part:
     1: add flags
     2: add prefix override
+  symbol:
+    1: fix orientation-specifix text placement

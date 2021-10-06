@@ -89,7 +89,7 @@ UUID SymbolPin::get_uuid() const
     return uuid;
 }
 
-static const unsigned int app_version = 0;
+static const unsigned int app_version = 1;
 
 unsigned int Symbol::get_app_version()
 {
@@ -156,6 +156,10 @@ Symbol::Symbol(const UUID &uu, const json &j, IPool &pool)
                 UUID u(it2.key());
                 if (texts.count(u)) {
                     Placement placement(it2.value());
+                    if (version.get_file() == 0) { // has broken text placement
+                        if (placement.mirror)
+                            placement.set_angle(-placement.get_angle());
+                    }
                     std::tuple<int, bool, UUID> key(angle, mirror, u);
                     text_placements[key] = placement;
                 }
