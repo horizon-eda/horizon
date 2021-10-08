@@ -638,7 +638,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/pool-mgr/pool_cache_box.cpp\
 	src/pool-prj-mgr/pool_update_error_dialog.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_git_box.cpp\
-	src/pool-prj-mgr/forced_pool_update_dialog.cpp\
+	src/widgets/forced_pool_update_dialog.cpp\
 	src/widgets/pool_browser.cpp\
 	src/widgets/pool_selector.cpp\
 	src/widgets/pool_browser_unit.cpp\
@@ -744,6 +744,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/pools_window/pool_merge_box.cpp\
 	src/pool-prj-mgr/pools_window/pool_download_window.cpp\
 	src/pool-prj-mgr/pool-mgr/move_window.cpp\
+	src/util/pool_check_schema_update.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp

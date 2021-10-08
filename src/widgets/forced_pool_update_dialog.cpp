@@ -4,8 +4,8 @@
 
 namespace horizon {
 
-ForcedPoolUpdateDialog::ForcedPoolUpdateDialog(const std::string &bp, Gtk::Window *parent)
-    : Gtk::Dialog("Pool update", *parent, Gtk::DIALOG_MODAL), base_path(bp)
+ForcedPoolUpdateDialog::ForcedPoolUpdateDialog(const std::string &bp, Gtk::Window &parent)
+    : Gtk::Dialog("Pool update", parent, Gtk::DIALOG_MODAL), base_path(bp)
 {
     auto hb = Gtk::manage(new Gtk::HeaderBar);
     hb->set_show_close_button(false);

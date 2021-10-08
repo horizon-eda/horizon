@@ -9,7 +9,7 @@ enum class PoolUpdateStatus;
 
 class ForcedPoolUpdateDialog : public Gtk::Dialog {
 public:
-    ForcedPoolUpdateDialog(const std::string &bp, Gtk::Window *parent);
+    ForcedPoolUpdateDialog(const std::string &bp, Gtk::Window &parent);
     ~ForcedPoolUpdateDialog();
 
 private:
