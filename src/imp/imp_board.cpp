@@ -117,32 +117,24 @@ void ImpBoard::update_highlights()
 void ImpBoard::apply_net_colors()
 {
     canvas->reset_color2();
+    std::map<UUID, std::vector<ObjectRef>> net_to_object_ref;
+    for (const auto &[uu, track] : core_board.get_board()->tracks) {
+        net_to_object_ref[track.net.uuid].emplace_back(ObjectType::TRACK, uu);
+    }
+    for (const auto &[uu, via] : core_board.get_board()->vias) {
+        net_to_object_ref[via.junction->net.uuid].emplace_back(ObjectType::VIA, uu);
+    }
+    for (const auto &[uu_pkg, pkg] : core_board.get_board()->packages) {
+        for (const auto &[uu_pad, pad] : pkg.package.pads) {
+            net_to_object_ref[pad.net.uuid].emplace_back(ObjectType::PAD, uu_pad, uu_pkg);
+        }
+    }
+    for (const auto &[uu, plane] : core_board.get_board()->planes) {
+        net_to_object_ref[plane.net.uuid].emplace_back(ObjectType::PLANE, uu);
+    }
     for (const auto &[net, color] : net_color_map) {
-        for (const auto &it_track : core_board.get_board()->tracks) {
-            if (it_track.second.net.uuid == net) {
-                ObjectRef ref(ObjectType::TRACK, it_track.first);
-                canvas->set_color2(ref, color);
-            }
-        }
-        for (const auto &it_via : core_board.get_board()->vias) {
-            if (it_via.second.junction->net.uuid == net) {
-                ObjectRef ref(ObjectType::VIA, it_via.first);
-                canvas->set_color2(ref, color);
-            }
-        }
-        for (const auto &it_pkg : core_board.get_board()->packages) {
-            for (const auto &it_pad : it_pkg.second.package.pads) {
-                if (it_pad.second.net.uuid == net) {
-                    ObjectRef ref(ObjectType::PAD, it_pad.first, it_pkg.first);
-                    canvas->set_color2(ref, color);
-                }
-            }
-        }
-        for (const auto &it_plane : core_board.get_board()->planes) {
-            if (it_plane.second.net.uuid == net) {
-                ObjectRef ref(ObjectType::PLANE, it_plane.first);
-                canvas->set_color2(ref, color);
-            }
+        for (const auto &ref : net_to_object_ref[net]) {
+            canvas->set_color2(ref, color);
         }
     }
 }
