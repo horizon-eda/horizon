@@ -12,6 +12,7 @@
 #include "pool_status_provider.hpp"
 #include "pool_merge_box.hpp"
 #include "../pool-prj-mgr-app.hpp"
+#include "util/pool_check_schema_update.hpp"
 
 namespace horizon {
 namespace fs = std::filesystem;
@@ -295,6 +296,7 @@ void PoolsWindow::add_pool(const std::string &path)
 
     if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         auto cpath = chooser->get_file()->get_parent()->get_path();
+        pool_check_schema_update(cpath, *this);
         mgr.add_pool(cpath);
         update();
     }
