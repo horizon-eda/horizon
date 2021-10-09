@@ -40,13 +40,6 @@ Client::Client()
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
     // curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-
-#ifdef G_OS_WIN32
-    {
-        std::string cert_file = Glib::build_filename(horizon::get_exe_dir(), "ca-bundle.crt");
-        curl_easy_setopt(curl, CURLOPT_CAINFO, cert_file.c_str());
-    }
-#endif
 }
 
 void Client::set_timeout(int timeout)

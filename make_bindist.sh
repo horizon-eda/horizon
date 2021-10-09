@@ -90,8 +90,6 @@ LIBS=(
 	libpsl-5.dll\
 	libthai-0.dll\
 	libdatrie-1.dll\
-	libssl-1_1-x64.dll\
-	libcrypto-1_1-x64.dll\
 	libpodofo.dll\
 	libidn-12.dll\
 	libzip.dll\
@@ -121,8 +119,6 @@ rm $DISTDIR/lib/gdk-pixbuf-*/*/loaders/*.a
 
 mkdir -p $DISTDIR/share/glib-2.0/schemas
 cp /mingw64/share/glib-2.0/schemas/gschemas.compiled $DISTDIR/share/glib-2.0/schemas
-
-cp /mingw64/ssl/certs/ca-bundle.crt $DISTDIR/ca-bundle.crt
 
 git log -10 | unix2dos > dist/log.txt
 if [ "$1" != "-n" ]; then
