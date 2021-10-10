@@ -269,18 +269,16 @@ void PoolProjectManagerApplication::on_action_quit()
     // must remove the window from the application. One way of doing this
     // is to hide the window. See comment in create_appwindow().
     auto windows = dynamic_cast_vector<PoolProjectManagerAppWindow *>(get_windows());
-    std::map<std::string, std::map<UUID, std::string>> files;
-    std::map<std::string, PoolProjectManagerAppWindow *> files_windows;
+
+    ConfirmCloseDialog::WindowMap files_windows;
     for (auto win : windows) {
         if (win->get_filename().size())
-            files_windows[win->get_filename()] = win;
+            files_windows.emplace(win->get_filename(), ConfirmCloseDialog::WindowInfo{*win});
     }
 
     bool need_dialog = false;
-    for (auto it : files_windows) {
-        auto win = it.second;
-        auto filename = it.first;
-        auto pol = win->get_close_policy();
+    for (auto &[filename, it] : files_windows) {
+        auto pol = it.win.get_close_policy();
         if (!pol.can_close) {
             Gtk::MessageDialog md(*get_active_window(), "Can't close right now", false /* use_markup */,
                                   Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
@@ -288,38 +286,37 @@ void PoolProjectManagerApplication::on_action_quit()
             md.run();
             return;
         }
-        auto &fis = files[filename];
         for (const auto &it_proc : pol.procs_need_save) {
             need_dialog = true;
-            fis[it_proc] = win->get_proc_filename(it_proc);
+            it.files_need_save.emplace(it_proc, it.win.get_proc_filename(it_proc));
         }
     }
 
     if (need_dialog) {
         ConfirmCloseDialog dia(get_active_window());
-        dia.set_files(files);
+        dia.set_files(files_windows);
         auto r = dia.run();
         if (r == ConfirmCloseDialog::RESPONSE_NO_SAVE || r == ConfirmCloseDialog::RESPONSE_SAVE) {
             auto files_from_dia = dia.get_files();
-            for (const auto &it : files_from_dia) {
-                auto win = files_windows.at(it.first);
-                win->prepare_close();
+            for (const auto &[win_filename, procs] : files_from_dia) {
+                auto &win = files_windows.at(win_filename).win;
+                win.prepare_close();
                 if (r == ConfirmCloseDialog::RESPONSE_SAVE) {
-                    for (const auto &it2 : it.second) {
-                        win->process_save(it2);
+                    for (const auto &proc : procs) {
+                        win.process_save(proc);
                     }
                 }
-                auto procs = win->get_processes();
-                for (auto proc : procs) {
-                    win->process_close(proc.first);
+                auto win_procs = win.get_processes();
+                for (auto &[uu, proc] : win_procs) {
+                    win.process_close(uu);
                 }
-                win->wait_for_all_processes();
-                if (!win->really_close_pool_or_project()) {
+                win.wait_for_all_processes();
+                if (!win.really_close_pool_or_project()) {
                     Gtk::MessageDialog md(*get_active_window(), "Couldn't close", false /* use_markup */,
                                           Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
                     md.run();
                 }
-                win->hide();
+                win.hide();
             }
 
             quit();

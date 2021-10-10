@@ -841,10 +841,10 @@ bool PoolProjectManagerAppWindow::close_pool_or_project()
     }
     else if (pol.procs_need_save.size()) {
         ConfirmCloseDialog dia(this);
-        std::map<std::string, std::map<UUID, std::string>> files;
-        auto &this_files = files[get_filename()];
+        ConfirmCloseDialog::WindowMap files;
+        auto &this_files = files.emplace(get_filename(), ConfirmCloseDialog::WindowInfo{*this}).first->second;
         for (const auto &it : pol.procs_need_save) {
-            this_files[it] = get_proc_filename(it);
+            this_files.files_need_save.emplace(it, get_proc_filename(it));
         }
         dia.set_files(files);
         auto r = dia.run();

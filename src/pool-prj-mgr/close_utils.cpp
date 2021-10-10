@@ -87,30 +87,30 @@ ConfirmCloseDialog::ConfirmCloseDialog(Gtk::Window *parent)
     get_content_area()->set_spacing(0);
 }
 
-void ConfirmCloseDialog::set_files(std::map<std::string, std::map<UUID, std::string>> &files)
+void ConfirmCloseDialog::set_files(const WindowMap &files)
 {
     store->clear();
     Gtk::TreeModel::Row row;
-    for (const auto &it : files) {
+    for (const auto &[win_filename, it] : files) {
         auto itt = store->append();
         row = *itt;
-        row[tree_columns.name] = it.first;
-        row[tree_columns.display_name] = Glib::Markup::escape_text(it.first);
-        auto dir_parent = Gio::File::create_for_path(it.first)->get_parent();
+        row[tree_columns.name] = win_filename;
+        row[tree_columns.display_name] = Glib::Markup::escape_text(win_filename);
+        auto dir_parent = Gio::File::create_for_path(win_filename)->get_parent();
         row[tree_columns.save] = true;
         row[tree_columns.inconsistent] = false;
         row[tree_columns.sensitive] = true;
-        for (const auto &it2 : it.second) {
+        for (const auto &[uu, filename] : it.files_need_save) {
             auto itt2 = store->append(itt->children());
             row = *itt2;
-            row[tree_columns.name] = it2.second;
-            row[tree_columns.uuid] = it2.first;
+            row[tree_columns.name] = filename;
+            row[tree_columns.uuid] = uu;
             row[tree_columns.sensitive] = true;
             row[tree_columns.save] = true;
-            if (it2.second.size()) {
-                std::string p = dir_parent->get_relative_path(Gio::File::create_for_path(it2.second));
+            if (filename.size()) {
+                std::string p = dir_parent->get_relative_path(Gio::File::create_for_path(filename));
                 if (p.size() == 0) {
-                    p = it2.second;
+                    p = filename;
                     row[tree_columns.sensitive] = false;
                     row[tree_columns.save] = false;
                 }

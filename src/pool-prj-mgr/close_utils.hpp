@@ -7,7 +7,14 @@ namespace horizon {
 class ConfirmCloseDialog : public Gtk::MessageDialog {
 public:
     ConfirmCloseDialog(Gtk::Window *parent);
-    void set_files(std::map<std::string, std::map<UUID, std::string>> &files);
+    struct WindowInfo {
+        class PoolProjectManagerAppWindow &win;
+        std::map<UUID, std::string> files_need_save;
+    };
+
+    using WindowMap = std::map<std::string, WindowInfo>;
+
+    void set_files(const WindowMap &files);
     std::map<std::string, std::set<UUID>> get_files() const;
 
     enum {
