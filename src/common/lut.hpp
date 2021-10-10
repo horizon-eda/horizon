@@ -2,6 +2,7 @@
 #include <string>
 #include <map>
 #include <optional>
+#include "nlohmann/json_fwd.hpp"
 
 namespace horizon {
 
@@ -9,6 +10,11 @@ namespace horizon {
  * Trivial bidirectional map for mapping strings to enums.
  * Used for serializing and derserializing objects to/from json.
  */
+
+namespace detail {
+std::string string_from_json(const nlohmann::json &j);
+}
+
 template <typename T> class LutEnumStr {
     static_assert(std::is_enum<T>::value, "Must be an enum type");
 
@@ -27,6 +33,10 @@ public:
     {
         return fwd.at(s);
     }
+    const T lookup(const nlohmann::json &j) const
+    {
+        return lookup(detail::string_from_json(j));
+    }
 
     const std::optional<T> lookup_opt(const std::string &s) const
     {
@@ -42,6 +52,10 @@ public:
             return fwd.at(s);
         else
             return def;
+    }
+    const T lookup(const nlohmann::json &j, T def) const
+    {
+        return lookup(detail::string_from_json(j), def);
     }
 
     /**

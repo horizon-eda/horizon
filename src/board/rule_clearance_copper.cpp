@@ -18,14 +18,11 @@ RuleClearanceCopper::RuleClearanceCopper(const UUID &uu, const json &j, const Ru
 {
     id = RuleID::CLEARANCE_COPPER;
     std::fill(clearances.begin(), clearances.end(), .1_mm);
-    {
-        const json &o = j["clearances"];
-        for (auto it = o.cbegin(); it != o.cend(); ++it) {
-            const json &va = it.value();
-            PatchType a = patch_type_lut.lookup(va.at("types").at(0));
-            PatchType b = patch_type_lut.lookup(va.at("types").at(1));
-            set_clearance(a, b, va.at("clearance"));
-        }
+
+    for (const auto &va : j.at("clearances")) {
+        PatchType a = patch_type_lut.lookup(va.at("types").at(0));
+        PatchType b = patch_type_lut.lookup(va.at("types").at(1));
+        set_clearance(a, b, va.at("clearance").get<uint64_t>());
     }
 }
 

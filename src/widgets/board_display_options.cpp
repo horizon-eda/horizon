@@ -75,9 +75,9 @@ public:
     virtual void load_from_json(const json &j) override
     {
         if (j.count("text"))
-            cb_text->set_active(j.at("text"));
+            cb_text->set_active(j.at("text").get<bool>());
         if (j.count("gfx"))
-            cb_gfx->set_active(j.at("gfx"));
+            cb_gfx->set_active(j.at("gfx").get<bool>());
     }
 
 private:
@@ -115,7 +115,7 @@ public:
     virtual void load_from_json(const json &j) override
     {
         if (j.count("planes_outline"))
-            cb_planes_outline->set_active(j.at("planes_outline"));
+            cb_planes_outline->set_active(j.at("planes_outline").get<bool>());
     }
 
 private:

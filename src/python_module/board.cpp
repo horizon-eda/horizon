@@ -288,7 +288,7 @@ static PyObject *PyBoard_run_checks(PyObject *pself, PyObject *args)
         Py_DECREF(item);
         horizon::RuleID id;
         try {
-            id = horizon::rule_id_lut.lookup(rule_name);
+            id = horizon::rule_id_lut.lookup(std::string{rule_name});
             ids.emplace(id);
         }
         catch (...) {

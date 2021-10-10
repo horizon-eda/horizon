@@ -215,7 +215,7 @@ Package::Package(const UUID &uu, const json &j, IPool &pool)
         alternate_for = pool.get_package(UUID(j.at("alternate_for").get<std::string>()));
     }
     if (j.count("model_filename")) {
-        std::string mfn = j.at("model_filename");
+        const auto mfn = j.at("model_filename").get<std::string>();
         if (mfn.size()) {
             auto m_uu = Model::legacy_model_uuid;
             models.emplace(std::piecewise_construct, std::forward_as_tuple(m_uu),
@@ -225,9 +225,9 @@ Package::Package(const UUID &uu, const json &j, IPool &pool)
     }
     if (j.count("models")) {
         const json &o = j["models"];
-        for (auto it = o.cbegin(); it != o.cend(); ++it) {
-            auto u = UUID(it.key());
-            models.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
+        for (const auto &[key, value] : o.items()) {
+            auto u = UUID(key);
+            models.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, value));
         }
         default_model = j.at("default_model").get<std::string>();
     }

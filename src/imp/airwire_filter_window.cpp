@@ -363,7 +363,7 @@ void AirwireFilterWindow::load_from_json(const json &j)
     for (const auto &[key, value] : j.at("airwires_visible").items()) {
         const UUID net = key;
         if (block.nets.count(net))
-            airwires_visible[net] = value;
+            airwires_visible[net] = value.get<bool>();
     }
     for (const auto &[key, value] : j.at("net_colors").items()) {
         const UUID net = key;

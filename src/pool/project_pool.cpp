@@ -34,13 +34,13 @@ std::map<UUID, std::string> ProjectPool::patch_package(json &j, const UUID &pool
 {
     std::map<UUID, std::string> models;
     if (j.count("model_filename")) { // legacy single model filename
-        const auto new_filename = prepend_model_filename(pool_uuid, j.at("model_filename"));
+        const auto new_filename = prepend_model_filename(pool_uuid, j.at("model_filename").get<std::string>());
         j.at("model_filename") = new_filename;
         models.emplace(Package::Model::legacy_model_uuid, new_filename);
     }
     else if (j.count("models")) {
         for (auto &[model_key, model] : j.at("models").items()) {
-            const auto new_filename = prepend_model_filename(pool_uuid, model.at("filename"));
+            const auto new_filename = prepend_model_filename(pool_uuid, model.at("filename").get<std::string>());
             model.at("filename") = new_filename;
             models.emplace(model_key, new_filename);
         }

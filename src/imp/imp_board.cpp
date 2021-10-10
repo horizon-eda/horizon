@@ -142,7 +142,7 @@ void ImpBoard::apply_net_colors()
 bool ImpBoard::handle_broadcast(const json &j)
 {
     if (!ImpBase::handle_broadcast(j)) {
-        std::string op = j.at("op");
+        const auto op = j.at("op").get<std::string>();
         guint32 timestamp = j.value("time", 0);
         if (op == "highlight" && cross_probing_enabled && !core->tool_is_active()) {
             highlights.clear();
@@ -335,7 +335,7 @@ int ImpBoard::get_schematic_pid()
 {
     json j;
     j["op"] = "get-schematic-pid";
-    return this->send_json(j);
+    return this->send_json(j).get<int>();
 }
 
 static json serialize_connector(const Track::Connection &conn)

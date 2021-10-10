@@ -235,9 +235,9 @@ json color_to_json(const Color &c)
 Color color_from_json(const json &j)
 {
     Color c;
-    c.r = j.at("r");
-    c.g = j.at("g");
-    c.b = j.at("b");
+    c.r = j.at("r").get<float>();
+    c.g = j.at("g").get<float>();
+    c.b = j.at("b").get<float>();
     return c;
 }
 
@@ -254,9 +254,9 @@ json colori_to_json(const ColorI &c)
 ColorI colori_from_json(const json &j)
 {
     ColorI c;
-    c.r = j.at("r");
-    c.g = j.at("g");
-    c.b = j.at("b");
+    c.r = j.at("r").get<int>();
+    c.g = j.at("g").get<int>();
+    c.b = j.at("b").get<int>();
     return c;
 }
 

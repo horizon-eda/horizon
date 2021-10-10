@@ -207,11 +207,11 @@ Padstack::Padstack(const UUID &uu, const json &j)
     }
     if (j.count("parameters_required")) {
         const json &o = j["parameters_required"];
-        for (auto it = o.cbegin(); it != o.cend(); ++it) {
-            parameters_required.insert(parameter_id_from_string(it.value()));
+        for (const auto &value : o) {
+            parameters_required.insert(parameter_id_from_string(value.get<std::string>()));
         }
     }
-} // namespace horizon
+}
 
 Padstack Padstack::new_from_file(const std::string &filename)
 {

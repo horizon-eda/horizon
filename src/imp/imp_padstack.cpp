@@ -68,7 +68,7 @@ void ImpPadstack::construct()
     core_padstack.signal_save().connect([this, well_known_name_entry, type_combo] {
         padstack.name = name_entry->get_text();
         padstack.well_known_name = well_known_name_entry->get_text();
-        padstack.type = Padstack::type_lut.lookup(type_combo->get_active_id());
+        padstack.type = Padstack::type_lut.lookup(static_cast<std::string>(type_combo->get_active_id()));
     });
 
     auto editor = new ParameterSetEditor(&core_padstack.parameter_set, false); //, &core_padstack.parameters_required);

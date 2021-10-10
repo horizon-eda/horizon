@@ -18,6 +18,7 @@ SRC_COMMON = \
 	src/pool/symbol.cpp \
 	src/pool/part.cpp\
 	src/common/common.cpp \
+	src/common/lut.cpp \
 	src/common/junction.cpp \
 	src/common/junction_util.cpp \
 	src/common/line.cpp \
@@ -807,7 +808,7 @@ SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC
 
 INC = -Isrc -isystem 3rd_party -I$(BUILDDIR)/gen
 
-DEFINES = -D_USE_MATH_DEFINES -DGLM_ENABLE_EXPERIMENTAL
+DEFINES = -D_USE_MATH_DEFINES -DGLM_ENABLE_EXPERIMENTAL -DJSON_USE_IMPLICIT_CONVERSIONS=0
 
 LIBS_COMMON = sqlite3 libzip
 ifneq ($(OS),Windows_NT)

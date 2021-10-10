@@ -485,10 +485,10 @@ void PoolGitBox::handle_pr()
         GitHubClient client;
         auto pr = client.get_pull_request(gh_owner, gh_repo, pr_id);
 
-        std::string pr_url = pr.at("head").at("repo").at("git_url");
-        std::string pr_ref = pr.at("head").at("ref");
-        std::string pr_remote_name = "pr-" + std::to_string(pr_id);
-        std::string fetchspec = "+refs/heads/" + pr_ref + ":refs/remotes/" + pr_remote_name + "/pr";
+        const auto pr_url = pr.at("head").at("repo").at("git_url").get<std::string>();
+        const auto pr_ref = pr.at("head").at("ref").get<std::string>();
+        const auto pr_remote_name = "pr-" + std::to_string(pr_id);
+        const auto fetchspec = "+refs/heads/" + pr_ref + ":refs/remotes/" + pr_remote_name + "/pr";
 
         autofree_ptr<git_remote> pr_remote(git_remote_free);
         {

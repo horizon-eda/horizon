@@ -15,25 +15,21 @@ BOMExportSettings::BOMExportSettings(const json &j, IPool &pool)
       include_nopopulate(j.value("include_nopopulate", true))
 {
     if (j.count("orderable_MPNs")) {
-        const json &o = j["orderable_MPNs"];
-        for (auto it = o.cbegin(); it != o.cend(); ++it) {
-            auto u = UUID(it.key());
-            orderable_MPNs.emplace(u, it.value().get<std::string>());
+        for (const auto &[key, value] : j.at("orderable_MPNs").items()) {
+            orderable_MPNs.emplace(key, value.get<std::string>());
         }
     }
     if (j.count("concrete_parts")) {
-        const json &o = j["concrete_parts"];
-        for (auto it = o.cbegin(); it != o.cend(); ++it) {
-            auto u = UUID(it.key());
+        for (const auto &[key, value] : j.at("concrete_parts").items()) {
             const Part *part = nullptr;
             try {
-                part = pool.get_part(it.value().get<std::string>());
+                part = pool.get_part(value.get<std::string>());
             }
             catch (...) {
                 // not found
             }
             if (part)
-                concrete_parts.emplace(u, part);
+                concrete_parts.emplace(key, part);
         }
     }
 }

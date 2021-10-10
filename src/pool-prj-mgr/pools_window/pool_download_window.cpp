@@ -174,7 +174,7 @@ void PoolDownloadWindow::download_thread(std::string gh_username, std::string gh
 
         GitHubClient client;
         json repo = client.get_repo(gh_username, gh_repo);
-        const std::string clone_url = repo.at("clone_url");
+        const auto clone_url = repo.at("clone_url").get<std::string>();
 
         {
             RawClient raw_client;

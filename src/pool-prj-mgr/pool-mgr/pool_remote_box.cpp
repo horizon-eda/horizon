@@ -528,7 +528,7 @@ PullRequestItemBox::PullRequestItemBox(BaseObjectType *cobject, const Glib::RefP
     name_label->set_text(j.at("title").get<std::string>());
     number_label->set_text("#" + std::to_string(pr_number));
     link_button->set_uri(j.at("_links").at("html").at("href").get<std::string>());
-    const std::string open_user = j.at("user").at("login");
+    const auto open_user = j.at("user").at("login").get<std::string>();
 
     const bool is_pool_mgr_branch = Glib::Regex::match_simple(
             "^pool_mgr_[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-"
@@ -536,7 +536,7 @@ PullRequestItemBox::PullRequestItemBox(BaseObjectType *cobject, const Glib::RefP
             branch_name);
 
     update_button->set_visible(!no_update && open_user == gh_user && is_pool_mgr_branch);
-    const std::string created_at = j.at("created_at");
+    const auto created_at = j.at("created_at").get<std::string>();
     descr_label->set_text("opened by " + open_user + " on " + created_at);
 }
 
@@ -574,7 +574,7 @@ void PoolRemoteBox::update_prs()
 
     for (const auto &it : pull_requests) {
         if (gh_username.size() && show_only_my_prs_cb->get_active()) {
-            std::string user = it.at("user").at("login");
+            const auto user = it.at("user").at("login").get<std::string>();
             if (user != gh_username)
                 continue;
         }
@@ -853,12 +853,12 @@ void PoolRemoteBox::login_thread()
 
         auto j_auth = load_json_from_file(get_token_filename());
 
-        auto token = j_auth.at("token");
+        const auto token = j_auth.at("token").get<std::string>();
 
         GitHubClient client;
         auto user_info = client.login_token(token);
 
-        gh_username = user_info.at("login");
+        gh_username = user_info.at("login").get<std::string>();
         gh_token = token;
 
         {
@@ -1034,7 +1034,7 @@ autofree_ptr<git_remote> PoolRemoteBox::get_or_create_remote(GitHubClient &clien
             throw std::runtime_error("timeout waiting for fork");
         }
 
-        std::string fork_url = fork_info.at("clone_url");
+        const auto fork_url = fork_info.at("clone_url").get<std::string>();
         if (git_remote_create(&my_remote.ptr, repo, gh_username.c_str(), fork_url.c_str()) != 0) {
             throw std::runtime_error("error adding remote");
         }

@@ -14,7 +14,8 @@ static const LutEnumStr<PDFExportSettings::Layer::Mode> mode_lut = {
 };
 
 PDFExportSettings::Layer::Layer(int l, const json &j)
-    : layer(l), color(color_from_json(j.at("color"))), mode(mode_lut.lookup(j.at("mode"))), enabled(j.at("enabled"))
+    : layer(l), color(color_from_json(j.at("color"))), mode(mode_lut.lookup(j.at("mode"))),
+      enabled(j.at("enabled").get<bool>())
 {
 }
 

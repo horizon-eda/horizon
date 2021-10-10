@@ -64,7 +64,7 @@ PoolCacheCleanupDialog::PoolCacheCleanupDialog(Gtk::Window *parent, const std::s
         auto j_cache = load_json_from_file(fi);
         Gtk::TreeModel::Row row;
         row = *item_store->append();
-        std::string type_str = j_cache.at("type");
+        const auto type_str = j_cache.at("type").get<std::string>();
         row[list_columns.filename] = fi;
         if (type_str == "part") {
             auto part = Part::new_from_file(fi, pool);

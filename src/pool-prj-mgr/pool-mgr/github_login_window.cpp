@@ -176,7 +176,7 @@ void GitHubLoginWindow::worker_thread()
 
         GitHubClient gh_client;
         auto user_info = gh_client.login_token(token);
-        user = user_info.at("login");
+        user = user_info.at("login").get<std::string>();
     }
     catch (const std::exception &e) {
         error_msg = "exception " + std::string(e.what());

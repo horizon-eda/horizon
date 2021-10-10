@@ -76,22 +76,21 @@ Component::Component(const UUID &uu, const json &j, IPool &pool, Block *block)
     }
     {
         const json &o = j["pin_names"];
-        for (auto it = o.cbegin(); it != o.cend(); ++it) {
-            UUIDPath<2> u(it.key());
+        for (const auto &[key, val] : o.items()) {
+            UUIDPath<2> u(key);
             if (entity->gates.count(u.at(0)) > 0) {
                 const auto &g = entity->gates.at(u.at(0));
                 if (g.unit->pins.count(u.at(1)) > 0) {
                     const auto &p = g.unit->pins.at(u.at(1));
                     std::set<int> s;
-                    if (it.value().is_number_integer()) {
-                        int index = it.value();
+                    if (val.is_number_integer()) {
+                        const auto index = val.get<int>();
                         if ((int)p.names.size() >= index + 1) {
                             s.insert(index);
                         }
                     }
-                    else if (it.value().is_array()) {
-                        std::set<int> s2 = it.value();
-                        s = s2;
+                    else if (val.is_array()) {
+                        s = val.get<decltype(s)>();
                     }
                     pin_names.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(s));
                 }
@@ -100,13 +99,12 @@ Component::Component(const UUID &uu, const json &j, IPool &pool, Block *block)
     }
     if (j.count("custom_pin_names")) {
         const json &o = j["custom_pin_names"];
-        for (auto it = o.cbegin(); it != o.cend(); ++it) {
-            UUIDPath<2> u(it.key());
+        for (const auto &[key, val] : o.items()) {
+            UUIDPath<2> u(key);
             if (entity->gates.count(u.at(0)) > 0) {
                 const auto &g = entity->gates.at(u.at(0));
                 if (g.unit->pins.count(u.at(1)) > 0) {
-                    std::string name = it.value();
-                    custom_pin_names.emplace(u, name);
+                    custom_pin_names.emplace(u, val.get<std::string>());
                 }
             }
         }

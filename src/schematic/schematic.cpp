@@ -32,8 +32,8 @@ Schematic::Annotation::Annotation(const json &j)
     if (!j.is_null()) {
         order = annotation_order_lut.lookup(j.at("order"));
         mode = annotation_mode_lut.lookup(j.at("mode"));
-        fill_gaps = j.at("fill_gaps");
-        keep = j.at("keep");
+        fill_gaps = j.at("fill_gaps").get<bool>();
+        keep = j.at("keep").get<bool>();
         ignore_unknown = j.value("ignore_unknown", false);
     }
 }
@@ -73,8 +73,8 @@ Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, IPool &pool, 
     }
     if (j.count("title_block_values")) {
         const json &o = j["title_block_values"];
-        for (auto it = o.cbegin(); it != o.cend(); ++it) {
-            block->project_meta[it.key()] = it.value();
+        for (const auto &[key, value] : o.items()) {
+            block->project_meta[key] = value.get<std::string>();
         }
     }
     if (j.count("pdf_export_settings")) {

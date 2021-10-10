@@ -14,7 +14,7 @@ BusRipper::BusRipper(const UUID &uu, const json &j)
         orientation = orientation_lut.lookup(j.at("orientation"));
     }
     else if (j.count("mirror")) {
-        bool m = j.at("mirror");
+        const auto m = j.at("mirror").get<bool>();
         if (m)
             orientation = Orientation::LEFT;
         else

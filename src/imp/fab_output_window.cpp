@@ -93,7 +93,8 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 
     drill_mode_combo->set_active_id(FabOutputSettings::mode_lut.lookup_reverse(settings.drill_mode));
     drill_mode_combo->signal_changed().connect([this] {
-        settings.drill_mode = FabOutputSettings::mode_lut.lookup(drill_mode_combo->get_active_id());
+        settings.drill_mode =
+                FabOutputSettings::mode_lut.lookup(static_cast<std::string>(drill_mode_combo->get_active_id()));
         update_drill_visibility();
         s_signal_changed.emit();
         update_export_button();

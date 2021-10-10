@@ -38,9 +38,8 @@ PoolManager::PoolManager()
         auto j = load_json_from_file(pool_config);
         if (j.count("pools")) {
             auto o = j.at("pools");
-            for (auto it = o.cbegin(); it != o.cend(); ++it) {
-                std::string pool_base_path = it.key();
-                bool enabled = it.value();
+            for (const auto &[pool_base_path, value] : o.items()) {
+                const auto enabled = value.get<bool>();
                 if (Glib::file_test(Glib::build_filename(pool_base_path, "pool.json"), Glib::FILE_TEST_IS_REGULAR)) {
                     pools.emplace(std::piecewise_construct, std::forward_as_tuple(pool_base_path),
                                   std::forward_as_tuple(pool_base_path));
@@ -54,7 +53,7 @@ PoolManager::PoolManager()
         if (j.count("pools")) {
             auto o = j.at("pools");
             for (auto it = o.cbegin(); it != o.cend(); ++it) {
-                std::string pool_base_path = Glib::path_get_dirname(it.value());
+                std::string pool_base_path = Glib::path_get_dirname(it.value().get<std::string>());
                 if (Glib::file_test(Glib::build_filename(pool_base_path, "pool.json"), Glib::FILE_TEST_IS_REGULAR)) {
                     pools.emplace(std::piecewise_construct, std::forward_as_tuple(pool_base_path),
                                   std::forward_as_tuple(pool_base_path));

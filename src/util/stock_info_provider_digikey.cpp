@@ -725,15 +725,15 @@ void StockInfoProviderDigiKey::construct_popover(const StockInfoRecordDigiKey &r
 
         {
             std::string descr = it_part.MPN;
-            descr = it_part.j.at("DetailedDescription");
+            descr = it_part.j.at("DetailedDescription").get<std::string>();
             auto la = Gtk::manage(new Gtk::Label());
             la->set_max_width_chars(0);
             la->set_ellipsize(Pango::ELLIPSIZE_END);
             la->set_xalign(0);
-            la->set_markup(
-                    make_link_markup(it_part.j.at("PrimaryDatasheet"), descr) + "\n"
-                    + make_link_markup(it_part.j.at("ProductUrl"), it_part.j.at("DigiKeyPartNumber").get<std::string>())
-                    + "\n" + it_part.j.at("Packaging").at("Value").get<std::string>());
+            la->set_markup(make_link_markup(it_part.j.at("PrimaryDatasheet").get<std::string>(), descr) + "\n"
+                           + make_link_markup(it_part.j.at("ProductUrl").get<std::string>(),
+                                              it_part.j.at("DigiKeyPartNumber").get<std::string>())
+                           + "\n" + it_part.j.at("Packaging").at("Value").get<std::string>());
             box->pack_start(*la, false, false, 0);
         }
 

@@ -68,7 +68,7 @@ PnPExportWindow::PnPExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 
     mode_combo->set_active_id(PnPExportSettings::mode_lut.lookup_reverse(settings.mode));
     mode_combo->signal_changed().connect([this] {
-        settings.mode = PnPExportSettings::mode_lut.lookup(mode_combo->get_active_id());
+        settings.mode = PnPExportSettings::mode_lut.lookup(static_cast<std::string>(mode_combo->get_active_id()));
         update_filename_visibility();
         s_signal_changed.emit();
         update_export_button();

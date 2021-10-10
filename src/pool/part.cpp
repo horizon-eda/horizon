@@ -162,7 +162,7 @@ Part::Part(const UUID &uu, const json &j, IPool &pool)
 
     if (j.count("override_prefix")) {
         override_prefix = override_prefix_lut.lookup(j.at("override_prefix").get<std::string>());
-        prefix = j.at("prefix");
+        prefix = j.at("prefix").get<std::string>();
     }
 
     if (package->models.count(model) == 0)

@@ -16,12 +16,10 @@ RuleClearanceCopperKeepout::RuleClearanceCopperKeepout(const UUID &uu, const jso
       routing_offset(j.value("routing_offset", 0.05_mm))
 {
     id = RuleID::CLEARANCE_COPPER_KEEPOUT;
-    {
-        const json &o = j["clearances"];
-        for (auto it = o.cbegin(); it != o.cend(); ++it) {
-            PatchType a = patch_type_lut.lookup(it.key());
-            set_clearance(a, it.value());
-        }
+
+    for (const auto &[key, value] : j.at("clearances").items()) {
+        PatchType a = patch_type_lut.lookup(key);
+        set_clearance(a, value.get<uint64_t>());
     }
 }
 

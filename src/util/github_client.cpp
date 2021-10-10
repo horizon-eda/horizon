@@ -19,7 +19,7 @@ json GitHubClient::login_token(const std::string &token)
 {
     client.append_header("authorization: Bearer " + token);
     auto r = client.get("/user");
-    login_user = r.at("login");
+    login_user = r.at("login").get<std::string>();
     return r;
 }
 

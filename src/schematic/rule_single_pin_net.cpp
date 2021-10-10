@@ -12,7 +12,7 @@ RuleSinglePinNet::RuleSinglePinNet() : Rule()
 RuleSinglePinNet::RuleSinglePinNet(const json &j) : Rule(j)
 {
     id = RuleID::SINGLE_PIN_NET;
-    include_unnamed = j.at("include_unnamed");
+    include_unnamed = j.at("include_unnamed").get<bool>();
 }
 
 json RuleSinglePinNet::serialize() const

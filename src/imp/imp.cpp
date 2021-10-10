@@ -1509,7 +1509,7 @@ void ImpBase::handle_warning_selected(const Coordi &pos)
 
 bool ImpBase::handle_broadcast(const json &j)
 {
-    const std::string op = j.at("op");
+    const auto op = j.at("op").get<std::string>();
     guint32 timestamp = j.value("time", 0);
     if (op == "present") {
         main_window->present(timestamp);

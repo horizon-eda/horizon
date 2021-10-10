@@ -91,9 +91,9 @@ PoolParametric::Column::Column(const json &j)
       type(type_lut.lookup(j.at("type"))), required(j.value("required", true))
 {
     if (type == Type::QUANTITY) {
-        unit = j.at("unit");
+        unit = j.at("unit").get<std::string>();
         digits = j.value("digits", 3);
-        use_si = j.at("use_si");
+        use_si = j.at("use_si").get<bool>();
         no_milli = j.value("no_milli", false);
     }
     else if (type == Type::ENUM) {

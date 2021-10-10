@@ -274,16 +274,15 @@ void KeySequencesPreferences::append_from_json(const json &j)
                     auto k = std::make_pair(action, tool);
                     if (keys.count(k) == 0) {
                         keys[k];
-                        auto &j2 = it.at("keys");
-                        for (auto it2 = j2.cbegin(); it2 != j2.cend(); ++it2) {
-                            auto av = static_cast<ActionCatalogItem::Availability>(std::stoi(it2.key()));
+                        for (const auto &[av_str, value] : it.at("keys").items()) {
+                            const auto av = static_cast<ActionCatalogItem::Availability>(std::stoi(av_str));
                             keys[k][av];
-                            for (const auto &it3 : it2.value()) {
+                            for (const auto &it3 : value) {
                                 keys[k][av].emplace_back();
                                 for (const auto &it4 : it3) {
-                                    std::string keyname = it4.at("key");
-                                    auto key = gdk_keyval_from_name(keyname.c_str());
-                                    auto mod = static_cast<GdkModifierType>(it4.at("mod").get<int>());
+                                    const auto keyname = it4.at("key").get<std::string>();
+                                    const auto key = gdk_keyval_from_name(keyname.c_str());
+                                    const auto mod = static_cast<GdkModifierType>(it4.at("mod").get<int>());
                                     keys[k][av].back().emplace_back(key, mod);
                                 }
                             }
@@ -336,9 +335,9 @@ void InToolKeySequencesPreferences::append_from_json(const json &j)
                     for (const auto &seq : keys_seqs) {
                         keys[action].emplace_back();
                         for (const auto &it4 : seq) {
-                            std::string keyname = it4.at("key");
-                            auto key = gdk_keyval_from_name(keyname.c_str());
-                            auto mod = static_cast<GdkModifierType>(it4.at("mod").get<int>());
+                            const auto keyname = it4.at("key").get<std::string>();
+                            const auto key = gdk_keyval_from_name(keyname.c_str());
+                            const auto mod = static_cast<GdkModifierType>(it4.at("mod").get<int>());
                             keys[action].back().emplace_back(key, mod);
                         }
                     }
@@ -356,9 +355,9 @@ void InToolKeySequencesPreferences::append_from_json(const json &j)
 
 void PartInfoPreferences::load_from_json(const json &j)
 {
-    url = j.at("url");
-    preferred_distributor = j.at("preferred_distributor");
-    ignore_moq_gt_1 = j.at("ignore_moq_gt_1");
+    url = j.at("url").get<std::string>();
+    preferred_distributor = j.at("preferred_distributor").get<std::string>();
+    ignore_moq_gt_1 = j.at("ignore_moq_gt_1").get<bool>();
     max_price_breaks = j.value("max_price_breaks", 3);
 }
 
@@ -375,8 +374,8 @@ json PartInfoPreferences::serialize() const
 
 void DigiKeyApiPreferences::load_from_json(const json &j)
 {
-    client_id = j.at("client_id");
-    client_secret = j.at("client_secret");
+    client_id = j.at("client_id").get<std::string>();
+    client_secret = j.at("client_secret").get<std::string>();
     currency = j.value("currency", "EUR");
     site = j.value("site", "DE");
     max_price_breaks = j.value("max_price_breaks", 3);

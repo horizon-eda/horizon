@@ -133,7 +133,7 @@ Plane::Fragment::Fragment(const json &j) : orphan(j.at("orphan"))
         auto &path = paths.back();
         path.reserve(j_path.size());
         for (const auto &it : j_path) {
-            path.emplace_back(it.at(0), it.at(1));
+            path.emplace_back(it.at(0).get<int64_t>(), it.at(1).get<int64_t>());
         }
     }
 }

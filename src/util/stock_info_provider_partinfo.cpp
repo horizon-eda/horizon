@@ -266,15 +266,15 @@ void StockInfoProviderPartinfoWorker::add_record(const UUID &uu, const json &j, 
             for (const auto &offer : offers) {
                 int moq = 1;
                 if (offer.at("moq").is_number_integer())
-                    moq = offer.at("moq");
+                    moq = offer.at("moq").get<int>();
                 if (moq > 1 && prefs.ignore_moq_gt_1)
                     continue;
 
                 if (offer.at("sku").at("vendor") == prefs.preferred_distributor) {
-                    int qty = offer.at("in_stock_quantity");
+                    const auto qty = offer.at("in_stock_quantity").get<int>();
                     if (qty > stock) {
                         stock = qty;
-                        url = offer.at("product_url");
+                        url = offer.at("product_url").get<std::string>();
                     }
                 }
             }
@@ -595,13 +595,13 @@ void StockInfoProviderPartinfo::add_columns(Gtk::TreeView *treeview,
                                     {
                                         std::string descr = "Datasheet";
                                         if (it_part.j.at("description").is_string())
-                                            descr = it_part.j.at("description");
+                                            descr = it_part.j.at("description").get<std::string>();
                                         auto la = Gtk::manage(new Gtk::Label());
                                         la->set_max_width_chars(0);
                                         la->set_ellipsize(Pango::ELLIPSIZE_END);
                                         la->set_xalign(0);
                                         if (it_part.j.at("datasheet").is_string()) {
-                                            std::string ds_url = it_part.j.at("datasheet");
+                                            const auto ds_url = it_part.j.at("datasheet").get<std::string>();
                                             la->set_markup(make_link_markup(ds_url, descr));
                                         }
                                         else {
@@ -613,19 +613,19 @@ void StockInfoProviderPartinfo::add_columns(Gtk::TreeView *treeview,
                                     }
                                     auto sg_offer = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
                                     bool no_offers = true;
-                                    std::vector<json> offers = it_part.j.at("offers");
+                                    auto offers = it_part.j.at("offers").get<std::vector<json>>();
                                     std::sort(offers.begin(), offers.end(), [](const json &a, const json &b) {
                                         const auto &preferred =
                                                 PreferencesProvider::get_prefs().partinfo.preferred_distributor;
-                                        std::string vendor_a = a.at("sku").at("vendor");
-                                        std::string vendor_b = b.at("sku").at("vendor");
+                                        const auto vendor_a = a.at("sku").at("vendor").get<std::string>();
+                                        const auto vendor_b = b.at("sku").at("vendor").get<std::string>();
                                         if (vendor_a == preferred)
                                             return true;
                                         else if (vendor_b == preferred)
                                             return false;
                                         if (vendor_a == vendor_b) {
-                                            int stock_qty_a = a.at("in_stock_quantity");
-                                            int stock_qty_b = b.at("in_stock_quantity");
+                                            const auto stock_qty_a = a.at("in_stock_quantity").get<int>();
+                                            const auto stock_qty_b = b.at("in_stock_quantity").get<int>();
                                             return stock_qty_b < stock_qty_a;
                                         }
                                         else {
@@ -635,16 +635,16 @@ void StockInfoProviderPartinfo::add_columns(Gtk::TreeView *treeview,
                                     for (const auto &offer : offers) {
                                         int moq = 1;
                                         if (offer.at("moq").is_number_integer())
-                                            moq = offer.at("moq");
+                                            moq = offer.at("moq").get<int>();
                                         if (moq > 1 && PreferencesProvider::get_prefs().partinfo.ignore_moq_gt_1)
                                             continue;
                                         no_offers = false;
                                         auto hbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
                                         {
                                             auto la = Gtk::manage(new Gtk::Label());
-                                            std::string vendor = offer.at("sku").at("vendor");
-                                            std::string sku = offer.at("sku").at("part");
-                                            std::string prod_url = offer.at("product_url");
+                                            const auto vendor = offer.at("sku").at("vendor").get<std::string>();
+                                            const auto sku = offer.at("sku").at("part").get<std::string>();
+                                            const auto prod_url = offer.at("product_url").get<std::string>();
                                             la->set_markup("<b>" + Glib::Markup::escape_text(vendor) + "</b> "
                                                            + make_link_markup(prod_url, sku));
                                             la->set_xalign(0);
@@ -653,7 +653,7 @@ void StockInfoProviderPartinfo::add_columns(Gtk::TreeView *treeview,
                                         }
                                         {
                                             auto la = Gtk::manage(new Gtk::Label());
-                                            int stock_qty = offer.at("in_stock_quantity");
+                                            const auto stock_qty = offer.at("in_stock_quantity").get<int>();
                                             std::ostringstream oss;
                                             oss.imbue(std::locale(""));
                                             oss << "Stock: " << stock_qty;
@@ -673,8 +673,8 @@ void StockInfoProviderPartinfo::add_columns(Gtk::TreeView *treeview,
                                                 int max_price_breaks =
                                                         PreferencesProvider::get_prefs().partinfo.max_price_breaks;
                                                 for (const auto &it_price : offer.at("prices").at(it_currency.first)) {
-                                                    int qty = it_price.at(0);
-                                                    double price = it_price.at(1);
+                                                    const auto qty = it_price.at(0).get<int>();
+                                                    const auto price = it_price.at(1).get<double>();
                                                     auto la_qty = Gtk::manage(new Gtk::Label(std::to_string(qty)));
                                                     la_qty->set_xalign(0);
                                                     auto la_price = Gtk::manage(new Gtk::Label());

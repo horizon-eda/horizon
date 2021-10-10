@@ -12,9 +12,9 @@ RuleParameters::RuleParameters() : Rule()
 RuleParameters::RuleParameters(const json &j, const RuleImportMap &import_map) : Rule(j, import_map)
 {
     id = RuleID::PARAMETERS;
-    solder_mask_expansion = j.at("solder_mask_expansion");
-    paste_mask_contraction = j.at("paste_mask_contraction");
-    courtyard_expansion = j.at("courtyard_expansion");
+    solder_mask_expansion = j.at("solder_mask_expansion").get<uint64_t>();
+    paste_mask_contraction = j.at("paste_mask_contraction").get<uint64_t>();
+    courtyard_expansion = j.at("courtyard_expansion").get<uint64_t>();
     via_solder_mask_expansion = j.value("via_solder_mask_expansion", .1_mm);
     hole_solder_mask_expansion = j.value("hole_solder_mask_expansion", .1_mm);
 }

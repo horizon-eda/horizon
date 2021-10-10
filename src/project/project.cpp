@@ -42,7 +42,7 @@ unsigned int Project::get_app_version()
 Project::Project(const UUID &uu, const json &j, const std::string &base)
     : base_path(base), uuid(uu), blocks_filename(Glib::build_filename(base, j.value("blocks_filename", "blocks.json"))),
       pictures_directory(Glib::build_filename(base, j.value("pictures_directory", "pictures"))),
-      board_filename(Glib::build_filename(base, j.at("board_filename"))),
+      board_filename(Glib::build_filename(base, j.at("board_filename").get<std::string>())),
       pool_directory(Glib::build_filename(base, j.value("pool_directory", "pool"))), version(app_version, j),
       title_old(j.value("title", "")), name_old(j.value("name", "")),
       vias_directory_old(Glib::build_filename(base, j.value("vias_directory", "vias"))),
@@ -53,12 +53,10 @@ Project::Project(const UUID &uu, const json &j, const std::string &base)
     version.check(ObjectType::PROJECT, "", uuid);
 
     if (j.count("blocks")) {
-        const json &o = j.at("blocks");
-        for (auto it = o.cbegin(); it != o.cend(); ++it) {
-            const json &k = it.value();
-            std::string block_filename = Glib::build_filename(base, k.at("block_filename"));
-            std::string schematic_filename = Glib::build_filename(base, k.at("schematic_filename"));
-            bool is_top = k.at("is_top");
+        for (const auto &it : j.at("blocks")) {
+            std::string block_filename = Glib::build_filename(base, it.at("block_filename").get<std::string>());
+            std::string schematic_filename = Glib::build_filename(base, it.at("schematic_filename").get<std::string>());
+            const auto is_top = it.at("is_top").get<bool>();
 
             json block_j = load_json_from_file(block_filename);
 

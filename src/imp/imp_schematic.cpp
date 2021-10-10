@@ -370,7 +370,7 @@ void ImpSchematic::clear_highlights()
 bool ImpSchematic::handle_broadcast(const json &j)
 {
     if (!ImpBase::handle_broadcast(j)) {
-        std::string op = j.at("op");
+        const auto op = j.at("op").get<std::string>();
         guint32 timestamp = j.value("time", 0);
         if (op == "place-part") {
             force_end_tool();
@@ -498,7 +498,7 @@ int ImpSchematic::get_board_pid()
 {
     json j;
     j["op"] = "get-board-pid";
-    return this->send_json(j);
+    return this->send_json(j).get<int>();
 }
 
 
@@ -868,7 +868,7 @@ void ImpSchematic::update_action_sensitivity()
     if (sockets_connected) {
         json req;
         req["op"] = "has-board";
-        bool has_board = send_json(req);
+        const auto has_board = send_json(req).get<bool>();
         set_action_sensitive(make_action(ActionID::SAVE_RELOAD_NETLIST), has_board);
         auto n_sym = std::count_if(sel.begin(), sel.end(),
                                    [](const auto &x) { return x.type == ObjectType::SCHEMATIC_SYMBOL; });

@@ -84,17 +84,13 @@ Block::Block(const UUID &uu, const json &j, IPool &pool, class IBlockProvider &p
         }
     }
     if (j.count("group_names")) {
-        const json &o = j["group_names"];
-        for (auto it = o.cbegin(); it != o.cend(); ++it) {
-            auto u = UUID(it.key());
-            group_names[u] = it.value();
+        for (const auto &[key, value] : j.at("group_names").items()) {
+            group_names.emplace(key, value.get<std::string>());
         }
     }
     if (j.count("tag_names")) {
-        const json &o = j["tag_names"];
-        for (auto it = o.cbegin(); it != o.cend(); ++it) {
-            auto u = UUID(it.key());
-            tag_names[u] = it.value();
+        for (const auto &[key, value] : j.at("tag_names").items()) {
+            tag_names.emplace(key, value.get<std::string>());
         }
     }
     for (const auto &it : components) {
@@ -114,9 +110,8 @@ Block::Block(const UUID &uu, const json &j, IPool &pool, class IBlockProvider &p
         }
     }
     if (j.count("project_meta")) {
-        const json &o = j["project_meta"];
-        for (auto it = o.cbegin(); it != o.cend(); ++it) {
-            project_meta[it.key()] = it.value();
+        for (const auto &[key, value] : j.at("project_meta").items()) {
+            project_meta.emplace(key, value.get<std::string>());
         }
     }
 }
@@ -480,8 +475,8 @@ std::map<std::string, std::string> Block::peek_project_meta(const std::string &f
     if (j.count("project_meta")) {
         const json &o = j["project_meta"];
         std::map<std::string, std::string> project_meta;
-        for (auto it = o.cbegin(); it != o.cend(); ++it) {
-            project_meta[it.key()] = it.value();
+        for (const auto &[key, value] : o.items()) {
+            project_meta.emplace(key, value.get<std::string>());
         }
         return project_meta;
     }

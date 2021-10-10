@@ -414,7 +414,7 @@ bool PoolProjectManagerAppWindow::check_pools()
 
 json PoolProjectManagerAppWindow::handle_req(const json &j)
 {
-    std::string op = j.at("op");
+    const auto op = j.at("op").get<std::string>();
     guint32 timestamp = j.value("time", 0);
     if (op == "part-placed") {
         UUID part = j.at("part").get<std::string>();
@@ -516,14 +516,14 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
         }
     }
     else if (op == "needs-save") {
-        int pid = j.at("pid");
-        bool needs_save = j.at("needs_save");
+        const auto pid = j.at("pid").get<int>();
+        const auto needs_save = j.at("needs_save").get<bool>();
         std::cout << "needs save " << pid << " " << needs_save << std::endl;
         pids_need_save[pid] = needs_save;
         if (project && !needs_save)
             view_project.update_meta();
         if (!needs_save) {
-            s_signal_process_saved.emit(j.at("filename"));
+            s_signal_process_saved.emit(j.at("filename").get<std::string>());
             if (auto proc = find_top_schematic_process()) {
                 if (proc->proc->get_pid() == pid) { // schematic got saved
                     if (auto proc_board = find_board_process()) {
@@ -537,7 +537,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
         }
     }
     else if (op == "ready") {
-        int pid = j.at("pid");
+        const auto pid = j.at("pid").get<int>();
         for (auto &it : processes) {
             if (it.second.proc && it.second.proc->get_pid() == pid) {
                 it.second.signal_ready().emit();
@@ -577,7 +577,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
     else if (op == "preferences") {
         auto win = app.show_preferences_window(timestamp);
         if (j.count("page"))
-            win->show_page(j.at("page"));
+            win->show_page(j.at("page").get<std::string>());
     }
     else if (op == "show-in-pool-mgr") {
         UUID uu = j.at("uuid").get<std::string>();

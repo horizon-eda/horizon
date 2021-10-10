@@ -49,7 +49,7 @@ PoolCacheStatus PoolCacheStatus::from_project_pool(class IPool &pool)
         status.items.emplace_back();
         auto &item = status.items.back();
         status.n_total++;
-        std::string type_str = j_cache.at("type");
+        const auto type_str = j_cache.at("type").get<std::string>();
         item.filename_cached = itempath;
         item.name = name;
         item.type = type;

@@ -61,11 +61,8 @@ json parameter_set_serialize(const ParameterSet &p)
 ParameterSet parameter_set_from_json(const json &j)
 {
     ParameterSet ps;
-    {
-        for (auto it = j.cbegin(); it != j.cend(); ++it) {
-            auto k = parameter_id_from_string(it.key());
-            ps[k] = it.value();
-        }
+    for (const auto &[key, value] : j.items()) {
+        ps.emplace(parameter_id_from_string(key), value.get<int64_t>());
     }
     return ps;
 }
