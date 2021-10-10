@@ -37,7 +37,7 @@ Debian packages are hosted by [packagecloud](https://packagecloud.io/).
 
 | Directory in `3rd_party` | Project                   | Version                                  | URL                                                                     | License      |
 |--------------------------|---------------------------|------------------------------------------|-------------------------------------------------------------------------|--------------|
-| nlohmann                 | JSON for Modern C++       | 3.9.1                                    | https://github.com/nlohmann/json/                                       | MIT          |
+| nlohmann                 | JSON for Modern C++       | 3.10.3                                   | https://github.com/nlohmann/json/                                       | MIT          |
 | clipper                  | Clipper                   | 6.4.2                                    | http://www.angusj.com/delphi/clipper.php                                | Boost        |
 | polypartition            | polypartition             | 7bdffb428b2b19ad1c43aa44c714dcc104177e84 | https://github.com/ivanfratric/polypartition/                           | MIT          |
 | poly2tri                 | poly2tri                  | d949f3cd6f85b20728af0bdc454b090226068c73 | https://github.com/jhasse/poly2tri                                      | 3-Clause BSD |
