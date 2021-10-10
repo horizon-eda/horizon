@@ -259,21 +259,15 @@ void PoolProjectManagerApplication::on_hide_window(Gtk::Window *window)
     delete window;
 }
 
-void PoolProjectManagerApplication::on_action_quit()
+bool PoolProjectManagerApplication::close_windows(std::vector<CloseOrHomeWindow> windows)
 {
-    // Gio::Application::quit() will make Gio::Application::run() return,
-    // but it's a crude way of ending the program. The window is not removed
-    // from the application. Neither the window's nor the application's
-    // destructors will be called, because there will be remaining reference
-    // counts in both of them. If we want the destructors to be called, we
-    // must remove the window from the application. One way of doing this
-    // is to hide the window. See comment in create_appwindow().
-    auto windows = dynamic_cast_vector<PoolProjectManagerAppWindow *>(get_windows());
-
     ConfirmCloseDialog::WindowMap files_windows;
-    for (auto win : windows) {
-        if (win->get_filename().size())
-            files_windows.emplace(win->get_filename(), ConfirmCloseDialog::WindowInfo{*win});
+    std::vector<PoolProjectManagerAppWindow *> windows_without_file;
+    for (auto it : windows) {
+        if (it.win.get_filename().size())
+            files_windows.emplace(it.win.get_filename(), ConfirmCloseDialog::WindowInfo{it.win, it.close});
+        else if (it.close)
+            windows_without_file.push_back(&it.win);
     }
 
     bool need_dialog = false;
@@ -284,7 +278,7 @@ void PoolProjectManagerApplication::on_action_quit()
                                   Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
             md.set_secondary_text(pol.reason);
             md.run();
-            return;
+            return false;
         }
         for (const auto &it_proc : pol.procs_need_save) {
             need_dialog = true;
@@ -299,7 +293,8 @@ void PoolProjectManagerApplication::on_action_quit()
         if (r == ConfirmCloseDialog::RESPONSE_NO_SAVE || r == ConfirmCloseDialog::RESPONSE_SAVE) {
             auto files_from_dia = dia.get_files();
             for (const auto &[win_filename, procs] : files_from_dia) {
-                auto &win = files_windows.at(win_filename).win;
+                auto &win_info = files_windows.at(win_filename);
+                auto &win = win_info.win;
                 win.prepare_close();
                 if (r == ConfirmCloseDialog::RESPONSE_SAVE) {
                     for (const auto &proc : procs) {
@@ -315,34 +310,59 @@ void PoolProjectManagerApplication::on_action_quit()
                     Gtk::MessageDialog md(*get_active_window(), "Couldn't close", false /* use_markup */,
                                           Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
                     md.run();
+                    return false;
                 }
-                win.hide();
+                if (win_info.close)
+                    win.hide();
             }
-
-            quit();
         }
         else {
-            return;
+            return false;
         }
     }
     else {
         for (auto win : windows) {
-            win->prepare_close();
-            auto procs = win->get_processes();
+            win.win.prepare_close();
+            auto procs = win.win.get_processes();
             for (auto &it : procs) {
-                win->process_close(it.first);
+                win.win.process_close(it.first);
             }
-            win->wait_for_all_processes();
-            if (!win->really_close_pool_or_project()) {
+            win.win.wait_for_all_processes();
+            if (!win.win.really_close_pool_or_project()) {
                 Gtk::MessageDialog md(*get_active_window(), "Couldn't close", false /* use_markup */,
                                       Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
                 md.run();
+                return false;
             }
-            win->hide();
+            if (win.close)
+                win.win.hide();
         }
-        quit();
     }
+
+    for (auto win : windows_without_file) {
+        win->hide();
+    }
+    return true;
 }
+
+void PoolProjectManagerApplication::on_action_quit()
+{
+    // Gio::Application::quit() will make Gio::Application::run() return,
+    // but it's a crude way of ending the program. The window is not removed
+    // from the application. Neither the window's nor the application's
+    // destructors will be called, because there will be remaining reference
+    // counts in both of them. If we want the destructors to be called, we
+    // must remove the window from the application. One way of doing this
+    // is to hide the window. See comment in create_appwindow().
+    auto app_windows = dynamic_cast_vector<PoolProjectManagerAppWindow *>(get_windows());
+    std::vector<CloseOrHomeWindow> windows;
+    windows.reserve(app_windows.size());
+    for (auto win : app_windows)
+        windows.push_back({*win});
+
+    close_windows(windows);
+}
+
 void PoolProjectManagerApplication::on_action_new_window()
 {
     auto appwin = create_appwindow();

@@ -51,6 +51,12 @@ public:
         return s_signal_pool_updated;
     }
 
+    struct CloseOrHomeWindow {
+        class PoolProjectManagerAppWindow &win;
+        bool close = true;
+    };
+    bool close_windows(std::vector<CloseOrHomeWindow> windows);
+
 protected:
     // Override default signal handlers:
     void on_activate() override;

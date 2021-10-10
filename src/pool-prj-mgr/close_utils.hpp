@@ -9,6 +9,7 @@ public:
     ConfirmCloseDialog(Gtk::Window *parent);
     struct WindowInfo {
         class PoolProjectManagerAppWindow &win;
+        bool close;
         std::map<UUID, std::string> files_need_save;
     };
 

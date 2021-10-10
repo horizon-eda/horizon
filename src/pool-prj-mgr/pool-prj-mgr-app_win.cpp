@@ -830,61 +830,19 @@ void PoolProjectManagerAppWindow::prepare_close()
 
 bool PoolProjectManagerAppWindow::close_pool_or_project()
 {
-    auto pol = get_close_policy();
-
-    if (!pol.can_close) {
-        Gtk::MessageDialog md(*this, "Can't close right now", false /* use_markup */, Gtk::MESSAGE_ERROR,
-                              Gtk::BUTTONS_OK);
-        md.set_secondary_text(pol.reason);
-        md.run();
-        return false;
-    }
-    else if (pol.procs_need_save.size()) {
-        ConfirmCloseDialog dia(this);
-        ConfirmCloseDialog::WindowMap files;
-        auto &this_files = files.emplace(get_filename(), ConfirmCloseDialog::WindowInfo{*this}).first->second;
-        for (const auto &it : pol.procs_need_save) {
-            this_files.files_need_save.emplace(it, get_proc_filename(it));
-        }
-        dia.set_files(files);
-        auto r = dia.run();
-        if (r == ConfirmCloseDialog::RESPONSE_NO_SAVE || r == ConfirmCloseDialog::RESPONSE_SAVE) { // save
-            prepare_close();
-            auto files_from_dia = dia.get_files();
-            auto &this_files_from_dia = files_from_dia.at(get_filename());
-            if (r == ConfirmCloseDialog::RESPONSE_SAVE) {
-                for (auto &it : this_files_from_dia) { // files that need save
-                    process_save(it);
-                }
+    std::vector<PoolProjectManagerApplication::CloseOrHomeWindow> windows;
+    windows.push_back({*this, false});
+    if (project) {
+        auto pool_path = Glib::build_filename(project->pool_directory, "pool.json");
+        for (auto ws : app.get_windows()) {
+            auto wi = dynamic_cast<PoolProjectManagerAppWindow *>(ws);
+            if (wi && wi->get_filename() == pool_path) {
+                windows.push_back({*wi, true});
+                break;
             }
-            std::set<UUID> open_procs;
-            for (auto &it : processes) {
-                open_procs.emplace(it.first);
-            }
-            for (auto &it : open_procs) {
-                process_close(it);
-            }
-            wait_for_all_processes();
-            return really_close_pool_or_project();
-        }
-        else {
-            return false;
         }
     }
-    else {
-        prepare_close();
-        std::set<UUID> open_procs;
-        for (auto &it : processes) {
-            open_procs.emplace(it.first);
-        }
-        for (auto &it : open_procs) {
-            process_close(it);
-        }
-        wait_for_all_processes();
-        return really_close_pool_or_project();
-    }
-
-    return really_close_pool_or_project();
+    return app.close_windows(windows);
 }
 
 
