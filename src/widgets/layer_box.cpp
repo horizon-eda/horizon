@@ -54,7 +54,7 @@ bool LayerDisplayButton::on_draw(const Cairo::RefPtr<::Cairo::Context> &cr)
     cr->set_source_rgb(c.get_red(), c.get_green(), c.get_blue());
     cr->set_line_width(2);
     LayerDisplay::Mode dm = p_property_display_mode.get_value();
-    if (dm == LayerDisplay::Mode::FILL || dm == LayerDisplay::Mode::FILL_ONLY) {
+    if (dm == LayerDisplay::Mode::FILL || dm == LayerDisplay::Mode::FILL_ONLY || dm == LayerDisplay::Mode::DOTTED) {
         cr->fill_preserve();
     }
 
@@ -74,6 +74,28 @@ bool LayerDisplayButton::on_draw(const Cairo::RefPtr<::Cairo::Context> &cr)
         cr->stroke();
         cr->move_to(7, 16);
         cr->line_to(16, 7);
+        cr->stroke();
+    }
+    if (dm == LayerDisplay::Mode::DOTTED) {
+        cr->save();
+        cr->set_source_rgb(0, 0, 0);
+        cr->begin_new_sub_path();
+        cr->arc(8, 1, 2, 0, 2 * M_PI);
+        cr->begin_new_sub_path();
+        cr->arc(8, 8, 2, 0, 2 * M_PI);
+        cr->begin_new_sub_path();
+        cr->arc(8, 15, 2, 0, 2 * M_PI);
+        cr->begin_new_sub_path();
+        cr->arc(2, 4.5, 2, 0, 2 * M_PI);
+        cr->begin_new_sub_path();
+        cr->arc(2, 12.5, 2, 0, 2 * M_PI);
+        cr->begin_new_sub_path();
+        cr->arc(14, 4.5, 2, 0, 2 * M_PI);
+        cr->begin_new_sub_path();
+        cr->arc(14, 12.5, 2, 0, 2 * M_PI);
+        cr->fill();
+        cr->restore();
+        cr->rectangle(0, 0, 16, 16);
         cr->stroke();
     }
 
@@ -326,6 +348,7 @@ static const LutEnumStr<LayerDisplay::Mode> dm_lut = {
         {"hatch", LayerDisplay::Mode::HATCH},
         {"fill", LayerDisplay::Mode::FILL},
         {"fill_only", LayerDisplay::Mode::FILL_ONLY},
+        {"dotted", LayerDisplay::Mode::DOTTED},
 };
 
 
