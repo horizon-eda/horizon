@@ -233,7 +233,7 @@ protected:
     Placement transform;
     void transform_save();
     void transform_restore();
-    std::list<Placement> transforms;
+    std::vector<Placement> transforms;
 
     Selectables selectables;
     std::vector<Target> targets;
