@@ -22,7 +22,7 @@ public:
         if (angle == 0) {
             // nop
         }
-        if (angle == 16384) {
+        else if (angle == 16384) {
             r.y = c.x;
             r.x = -c.y;
         }
