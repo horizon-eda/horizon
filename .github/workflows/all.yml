@@ -57,6 +57,9 @@ jobs:
           - container: ubuntu:hirsute
             cxx: g++
             cc: gcc
+          - container: ubuntu:impish
+            cxx: g++
+            cc: gcc
           - container: debian:buster
             cxx: g++
             cc: gcc
