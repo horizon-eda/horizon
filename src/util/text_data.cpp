@@ -145,7 +145,7 @@ static const std::vector<unsigned int> &get_font_data(TextData::Font font)
 
 static unsigned int codepoint_to_hershey(gunichar c, TextData::Font font)
 {
-    auto font_data = get_font_data(font);
+    const auto &font_data = get_font_data(font);
     unsigned int x = c - ' ';
     if (x >= 0 && x < font_data.size()) {
         return font_data.at(x);
