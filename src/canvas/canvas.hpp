@@ -18,6 +18,7 @@
 #include "picture.hpp"
 #include "pool/unit.hpp"
 #include "util/vector_pair.hpp"
+#include "util/text_data.hpp"
 
 namespace horizon {
 class Canvas {
@@ -262,5 +263,7 @@ private:
     size_t group_size = 0;
 
     void draw_direction(Pin::Direction dir, ColorP color);
+
+    TextData::Buffer text_data_buffer;
 };
 } // namespace horizon

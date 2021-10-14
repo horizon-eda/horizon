@@ -178,8 +178,9 @@ static unsigned int codepoint_to_hershey(gunichar c, TextData::Font font)
 
 extern const char *hershey_glyphs[];
 
-TextData::TextData(const std::string &str, Font font)
+TextData::TextData(Buffer &buf, const std::string &str, Font font) : lines(buf)
 {
+    lines.clear();
     Glib::ustring ustr(str);
     int x0 = 0;
     lines.reserve(ustr.size());

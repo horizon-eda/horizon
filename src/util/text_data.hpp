@@ -20,8 +20,9 @@ public:
         SCRIPT_SIMPLEX,
         SCRIPT_COMPLEX
     };
-    TextData(const std::string &s, Font font = Font::SIMPLEX);
-    std::vector<std::pair<Coordi, Coordi>> lines;
+    using Buffer = std::vector<std::pair<Coordi, Coordi>>;
+    TextData(Buffer &buf, const std::string &s, Font font = Font::SIMPLEX);
+    Buffer &lines;
     int ymin = 0;
     int ymax = 0;
     int xmin = 100;

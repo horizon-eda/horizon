@@ -41,7 +41,7 @@ std::pair<Coordf, Coordf> Canvas::draw_text(const Coordf &p, float size, const s
     }
     begin_group(layer);
     while (std::getline(ss, line, '\n')) {
-        const TextData td{line, opts.font};
+        const TextData td{text_data_buffer, line, opts.font};
 
         Placement tf;
         tf.shift.x = p.x;
