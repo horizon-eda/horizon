@@ -40,6 +40,8 @@ public:
         return l == TOP_SILKSCREEN || l == BOTTOM_SILKSCREEN;
     }
 
+    static const unsigned int max_inner_layers;
+
     static std::string get_layer_name(int l);
     static const std::vector<int> &get_layers();
 };

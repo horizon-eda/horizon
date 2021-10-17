@@ -82,4 +82,6 @@ const std::vector<int> &BoardLayers::get_layers()
     return layers;
 }
 
+const unsigned int BoardLayers::max_inner_layers = 4;
+
 } // namespace horizon

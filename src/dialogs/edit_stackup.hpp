@@ -15,7 +15,8 @@ private:
     Gtk::SpinButton *sp_n_inner_layers = nullptr;
     void ok_clicked();
     void update_layers();
-    std::map<std::pair<int, bool>, uint64_t> saved;
+    void create_editors();
+    void create_editor(int layer, bool cu);
     Glib::RefPtr<Gtk::SizeGroup> sg_layer_name;
 };
 } // namespace horizon
