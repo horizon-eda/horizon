@@ -97,7 +97,7 @@ void PartsWindow::update()
     store->clear();
     std::map<const Part *, std::list<const Component *>> parts;
     for (const auto &[uu, comp] : board.block->components) {
-        if (comp.part)
+        if (comp.part && !comp.nopopulate)
             parts[comp.part].push_back(&comp);
     }
     for (auto &[part, comps] : parts) {
