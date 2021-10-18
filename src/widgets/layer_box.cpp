@@ -9,43 +9,39 @@
 
 namespace horizon {
 
-class LayerDisplayButton : public Gtk::DrawingArea {
+class LayerDisplayPreview : public Gtk::DrawingArea {
 public:
-    LayerDisplayButton();
-
-    typedef Glib::Property<Gdk::RGBA> type_property_color;
-    Glib::PropertyProxy<Gdk::RGBA> property_color()
-    {
-        return p_property_color.get_proxy();
-    }
-    typedef Glib::Property<LayerDisplay::Mode> type_property_display_mode;
-    Glib::PropertyProxy<LayerDisplay::Mode> property_display_mode()
-    {
-        return p_property_display_mode.get_proxy();
-    }
-    void set_color(const Color &c);
+    LayerDisplayPreview(const Glib::PropertyProxy<Gdk::RGBA> &property_color, LayerDisplay::Mode display_mode);
+    LayerDisplayPreview(const Glib::PropertyProxy<Gdk::RGBA> &property_color,
+                        Glib::PropertyProxy<LayerDisplay::Mode> property_display_mode);
 
 private:
     bool on_draw(const Cairo::RefPtr<::Cairo::Context> &cr) override;
-    bool on_button_press_event(GdkEventButton *ev) override;
-    type_property_color p_property_color;
-    type_property_display_mode p_property_display_mode;
+    Glib::PropertyProxy<Gdk::RGBA> property_color;
+    LayerDisplay::Mode dm;
 };
 
-LayerDisplayButton::LayerDisplayButton()
-    : Glib::ObjectBase(typeid(LayerDisplayButton)), Gtk::DrawingArea(),
-      p_property_color(*this, "color", Gdk::RGBA("#ff0000")), p_property_display_mode(*this, "display-mode")
+LayerDisplayPreview::LayerDisplayPreview(const Glib::PropertyProxy<Gdk::RGBA> &color, LayerDisplay::Mode mode)
+    : Glib::ObjectBase(typeid(LayerDisplayPreview)), Gtk::DrawingArea(), property_color(color), dm(mode)
 {
     set_size_request(18, 18);
-    add_events(Gdk::BUTTON_PRESS_MASK);
-    property_display_mode().signal_changed().connect([this] { queue_draw(); });
-    property_color().signal_changed().connect([this] { queue_draw(); });
+    property_color.signal_changed().connect([this] { queue_draw(); });
 }
 
-bool LayerDisplayButton::on_draw(const Cairo::RefPtr<::Cairo::Context> &cr)
+LayerDisplayPreview::LayerDisplayPreview(const Glib::PropertyProxy<Gdk::RGBA> &color,
+                                         Glib::PropertyProxy<LayerDisplay::Mode> property_display_mode)
+    : LayerDisplayPreview(color, property_display_mode.get_value())
+{
+    property_display_mode.signal_changed().connect([this, property_display_mode] {
+        dm = property_display_mode.get_value();
+        queue_draw();
+    });
+}
+
+bool LayerDisplayPreview::on_draw(const Cairo::RefPtr<::Cairo::Context> &cr)
 {
 
-    const auto c = p_property_color.get_value();
+    const auto c = property_color.get_value();
     cr->save();
     cr->translate(1, 1);
     cr->rectangle(0, 0, 16, 16);
@@ -53,8 +49,7 @@ bool LayerDisplayButton::on_draw(const Cairo::RefPtr<::Cairo::Context> &cr)
     cr->fill_preserve();
     cr->set_source_rgb(c.get_red(), c.get_green(), c.get_blue());
     cr->set_line_width(2);
-    LayerDisplay::Mode dm = p_property_display_mode.get_value();
-    if (dm == LayerDisplay::Mode::FILL || dm == LayerDisplay::Mode::FILL_ONLY) {
+    if (dm == LayerDisplay::Mode::FILL || dm == LayerDisplay::Mode::FILL_ONLY || dm == LayerDisplay::Mode::DOTTED) {
         cr->fill_preserve();
     }
 
@@ -76,20 +71,75 @@ bool LayerDisplayButton::on_draw(const Cairo::RefPtr<::Cairo::Context> &cr)
         cr->line_to(16, 7);
         cr->stroke();
     }
+    if (dm == LayerDisplay::Mode::DOTTED) {
+        cr->save();
+        cr->set_source_rgb(0, 0, 0);
+        cr->begin_new_sub_path();
+        cr->arc(8, 1, 2, 0, 2 * M_PI);
+        cr->begin_new_sub_path();
+        cr->arc(8, 8, 2, 0, 2 * M_PI);
+        cr->begin_new_sub_path();
+        cr->arc(8, 15, 2, 0, 2 * M_PI);
+        cr->begin_new_sub_path();
+        cr->arc(2, 4.5, 2, 0, 2 * M_PI);
+        cr->begin_new_sub_path();
+        cr->arc(2, 12.5, 2, 0, 2 * M_PI);
+        cr->begin_new_sub_path();
+        cr->arc(14, 4.5, 2, 0, 2 * M_PI);
+        cr->begin_new_sub_path();
+        cr->arc(14, 12.5, 2, 0, 2 * M_PI);
+        cr->fill();
+        cr->restore();
+        cr->rectangle(0, 0, 16, 16);
+        cr->stroke();
+    }
 
     cr->restore();
     Gtk::DrawingArea::on_draw(cr);
     return true;
 }
 
-bool LayerDisplayButton::on_button_press_event(GdkEventButton *ev)
+
+class LayerDisplayButton : public Gtk::EventBox {
+public:
+    LayerDisplayButton();
+    void set_color(const Color &c);
+
+    Glib::PropertyProxy<Gdk::RGBA> property_color()
+    {
+        return p_property_color.get_proxy();
+    }
+
+    Glib::PropertyProxy<LayerDisplay::Mode> property_display_mode()
+    {
+        return p_property_display_mode.get_proxy();
+    }
+
+private:
+    void append_context_menu_item(const std::string &name, LayerDisplay::Mode mode);
+    bool on_button_press_event(GdkEventButton *ev) override;
+    Gtk::Menu context_menu;
+    Gtk::RadioButtonGroup context_menu_group;
+    std::map<LayerDisplay::Mode, Gtk::RadioMenuItem *> layer_mode_menu_items;
+
+    Glib::Property<Gdk::RGBA> p_property_color;
+    Glib::Property<LayerDisplay::Mode> p_property_display_mode;
+
+    LayerDisplayPreview button_face;
+};
+
+LayerDisplayButton::LayerDisplayButton()
+    : Glib::ObjectBase(typeid(LayerDisplayButton)), Gtk::EventBox(),
+      p_property_color(*this, "color", Gdk::RGBA("#ff0000")), p_property_display_mode(*this, "display-mode"),
+      button_face(p_property_color.get_proxy(), p_property_display_mode.get_proxy())
 {
-    if (ev->button != 1)
-        return false;
-    auto old_mode = static_cast<int>(static_cast<LayerDisplay::Mode>(property_display_mode()));
-    auto new_mode = static_cast<LayerDisplay::Mode>((old_mode + 1) % static_cast<int>(LayerDisplay::Mode::N_MODES));
-    p_property_display_mode = new_mode;
-    return true;
+    add(button_face);
+    add_events(Gdk::BUTTON_PRESS_MASK);
+    append_context_menu_item("Outline", LayerDisplay::Mode::OUTLINE);
+    append_context_menu_item("Hatched", LayerDisplay::Mode::HATCH);
+    append_context_menu_item("Fill", LayerDisplay::Mode::FILL);
+    append_context_menu_item("Fill only", LayerDisplay::Mode::FILL_ONLY);
+    append_context_menu_item("Dotted", LayerDisplay::Mode::DOTTED);
 }
 
 void LayerDisplayButton::set_color(const Color &c)
@@ -99,6 +149,46 @@ void LayerDisplayButton::set_color(const Color &c)
     rgba.set_green(c.g);
     rgba.set_blue(c.b);
     property_color() = rgba;
+}
+
+void LayerDisplayButton::append_context_menu_item(const std::string &name, LayerDisplay::Mode mode)
+{
+    auto it = Gtk::manage(new Gtk::RadioMenuItem(context_menu_group));
+
+    auto *hbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
+    auto *preview = Gtk::manage(new LayerDisplayPreview(property_color(), mode));
+    hbox->pack_start(*preview, false, false, 0);
+    preview->show();
+    auto *label = Gtk::manage(new Gtk::Label(name));
+    hbox->pack_start(*label, false, false, 0);
+    label->show();
+
+    it->add(*hbox);
+    hbox->show();
+
+    it->signal_activate().connect([this, mode] { p_property_display_mode = mode; });
+    context_menu.append(*it);
+    it->show();
+    layer_mode_menu_items.emplace(mode, it);
+}
+
+bool LayerDisplayButton::on_button_press_event(GdkEventButton *ev)
+{
+    if (gdk_event_triggers_context_menu((GdkEvent *)ev)) {
+        layer_mode_menu_items.at(p_property_display_mode)->set_active();
+#if GTK_CHECK_VERSION(3, 22, 0)
+        context_menu.popup_at_pointer((GdkEvent *)ev);
+#else
+        context_menu.popup(ev->button, gtk_get_current_event_time());
+#endif
+        return true;
+    }
+    if (ev->button != 1)
+        return false;
+    auto old_mode = static_cast<int>(static_cast<LayerDisplay::Mode>(property_display_mode()));
+    auto new_mode = static_cast<LayerDisplay::Mode>((old_mode + 1) % static_cast<int>(LayerDisplay::Mode::N_MODES));
+    p_property_display_mode = new_mode;
+    return true;
 }
 
 
@@ -321,13 +411,15 @@ void LayerBox::update()
     update_work_layer();
 }
 
+// clang-format off
 static const LutEnumStr<LayerDisplay::Mode> dm_lut = {
         {"outline", LayerDisplay::Mode::OUTLINE},
         {"hatch", LayerDisplay::Mode::HATCH},
         {"fill", LayerDisplay::Mode::FILL},
         {"fill_only", LayerDisplay::Mode::FILL_ONLY},
+        {"dotted", LayerDisplay::Mode::DOTTED},
 };
-
+// clang-format on
 
 void LayerBox::update_work_layer()
 {
