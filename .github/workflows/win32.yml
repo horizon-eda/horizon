@@ -37,6 +37,9 @@ jobs:
           make
           git
           dos2unix
+    - name: annotate
+      shell: msys2 {0}
+      run: echo "::notice title=Foo::Please find..."
     - name: Build
       shell: msys2 {0}
       run: make -j2 WARNFLAGS="-Wall -Wshadow -Wno-attributes"
