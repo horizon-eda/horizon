@@ -55,7 +55,9 @@ jobs:
     - name: deploy to artifactory
       if: github.event_name != 'pull_request'
       shell: msys2 {0}
-      run: curl -u actions:${{ secrets.ARTIFACTORY }} -T dist/*.zip "https://horizoneda.jfrog.io/artifactory/horizon-win64-ci/$(basename dist/*.zip);commit=${{ github.sha }};ref=${{ github.ref }}"
+      run: |
+        curl -u actions:${{ secrets.ARTIFACTORY }} -T dist/*.zip "https://horizoneda.jfrog.io/artifactory/horizon-win64-ci/$(basename dist/*.zip);commit=${{ github.sha }};ref=${{ github.ref }}" > deploy.json
+        echo "::notice title=Download this build::Please find the zip archive on Artifactory: $(jq -r .downloadUri < deploy.json)"
     - name: Build MSI
       if: startsWith(github.ref, 'refs/tags/')
       run: |
