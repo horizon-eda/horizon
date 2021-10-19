@@ -42,17 +42,17 @@ jobs:
       run: make -j2 WARNFLAGS="-Wall -Wshadow -Wno-attributes"
     - name: Make dist
       shell: msys2 {0}
-      run: ./make_bindist.sh -n
+      run: ./make_bindist.sh
     - name: Check for missing DLLs
       shell: msys2 {0}
       run: ./check_dll.sh
     - name: set artifact name
       shell: msys2 {0}
       run: echo "artifact_name=horizon-win64-$(date +%Y-%m-%d-%H%M)" >> $GITHUB_ENV
-    - uses: actions/upload-artifact@v2-preview
-      with:
-        name: ${{ env.artifact_name }}
-        path: dist/
+    - name: deploy to artifactory
+      if: github.event_name != 'pull_request'
+      shell: msys2 {0}
+      run: curl -u actions:${{ secrets.ARTIFACTORY }} -T dist/*.zip "https://horizoneda.jfrog.io/artifactory/horizon-win64-ci/$(basename dist/*.zip);commit=${{ github.sha }};ref=${{ github.ref }}"
     - name: Build MSI
       if: startsWith(github.ref, 'refs/tags/')
       run: |
