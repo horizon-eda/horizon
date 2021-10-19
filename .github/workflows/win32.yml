@@ -33,6 +33,7 @@ jobs:
           mingw-w64-x86_64-podofo
           mingw-w64-x86_64-libzip
           mingw-w64-x86_64-curl-winssl
+          mingw-w64-x86_64-jq
           zip
           make
           git
