@@ -55,7 +55,6 @@ LIBS=(
 	libcurl-4.dll\
 	libgit2.dll\
 	libidn2-0.dll\
-	libnghttp2-14.dll\
 	libssh2-1.dll\
 	libunistring-2.dll\
 	libTKBO.dll\
