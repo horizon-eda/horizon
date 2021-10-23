@@ -114,7 +114,7 @@ jobs:
       run: pacman -Sy --needed --noconfirm zeromq gtkmm3 cairomm librsvg sqlite3 libgit2 curl opencascade boost glm podofo libzip python
     - name: Install python dependencies
       if: ${{ matrix.target == 'build/horizon.so' }}
-      run: pacman -S --needed --noconfirm mesa python-cairo python-yaml
+      run: pacman -S --needed --noconfirm mesa python-cairo python-yaml libffi
     - name: Build
       run: make -j2 ${{ matrix.target }}
     - name: Check version
