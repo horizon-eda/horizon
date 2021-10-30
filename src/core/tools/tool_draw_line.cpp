@@ -35,7 +35,7 @@ ToolResponse ToolDrawLine::begin(const ToolArgs &args)
 void ToolDrawLine::update_tip()
 {
     std::vector<ActionLabelInfo> actions;
-    actions.reserve(8);
+    actions.reserve(9);
     actions.emplace_back(InToolActionID::LMB, "place junction");
     if (temp_line) {
         actions.emplace_back(InToolActionID::RMB, "finish current segment");
@@ -45,6 +45,7 @@ void ToolDrawLine::update_tip()
     }
     actions.emplace_back(InToolActionID::ENTER_WIDTH, "line width");
     actions.emplace_back(InToolActionID::RESTRICT);
+    actions.emplace_back(InToolActionID::TOGGLE_DEG45_RESTRICT);
 
     imp->tool_bar_set_tip(restrict_mode_to_string());
     imp->tool_bar_set_actions(actions);
@@ -118,6 +119,11 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
 
         case InToolActionID::RESTRICT:
             cycle_restrict_mode();
+            do_move(args.coords);
+            break;
+
+        case InToolActionID::TOGGLE_DEG45_RESTRICT:
+            toogle_45_degrees_mode();
             do_move(args.coords);
             break;
 
