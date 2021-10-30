@@ -324,5 +324,13 @@
                 "mod": 0
             }
         ]
+    ],
+    "TOGGLE_DEG45_RESTRICT": [
+        [
+            {
+                "key": "q",
+                "mod": 0
+            }
+        ]
     ]
 }

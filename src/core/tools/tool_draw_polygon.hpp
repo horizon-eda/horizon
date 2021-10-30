@@ -15,7 +15,7 @@ public:
     {
         using I = InToolActionID;
         return {
-                I::LMB, I::CANCEL, I::RMB, I::FLIP_ARC, I::TOGGLE_ARC, I::RESTRICT,
+                I::LMB, I::CANCEL, I::RMB, I::FLIP_ARC, I::TOGGLE_ARC, I::RESTRICT, I::TOGGLE_DEG45_RESTRICT
         };
     }
 

@@ -57,7 +57,7 @@ void ToolDrawPolygon::set_snap_filter()
 void ToolDrawPolygon::update_tip()
 {
     std::vector<ActionLabelInfo> actions;
-    actions.reserve(8);
+    actions.reserve(9);
     if (arc_mode == ArcMode::CURRENT) {
         actions.emplace_back(InToolActionID::LMB, "place arc enter");
     }
@@ -70,6 +70,7 @@ void ToolDrawPolygon::update_tip()
     actions.emplace_back(InToolActionID::RMB, "delete last vertex and finish");
     actions.emplace_back(InToolActionID::TOGGLE_ARC);
     actions.emplace_back(InToolActionID::RESTRICT);
+    actions.emplace_back(InToolActionID::TOGGLE_DEG45_RESTRICT);
     if (last_vertex && (last_vertex->type == Polygon::Vertex::Type::ARC)) {
         actions.emplace_back(InToolActionID::FLIP_ARC);
     }
@@ -155,6 +156,10 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
 
         case InToolActionID::RESTRICT:
             cycle_restrict_mode();
+            update_vertex(args.coords);
+            break;
+        case InToolActionID::TOGGLE_DEG45_RESTRICT:
+            toogle_45_degrees_mode();
             update_vertex(args.coords);
             break;
         default:;
