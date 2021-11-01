@@ -54,7 +54,7 @@ std::string ToolHelperRestrict::restrict_mode_to_string() const
         return "Y only";
         break;
     case RestrictMode::DEG45:
-        return "45 degrees only";
+        return "45° only";
         break;
     }
     return "";
@@ -78,8 +78,8 @@ Coordi ToolHelperRestrict::get_coord_restrict(const Coordi &old, const Coordi &c
 Coordi ToolHelperRestrict::find_45deg_coord(const Coordi &old, const Coordi &cur) const
 {    
     Coordi result;
-    Coordi vect = cur - old;
-    Coordi vect_abs = {std::abs(vect.x), std::abs(vect.y)};
+    const Coordi vect = cur - old;
+    const Coordi vect_abs = {std::abs(vect.x), std::abs(vect.y)};
 
     if(vect_abs.x >= vect_abs.y){
         result.x = cur.x;
