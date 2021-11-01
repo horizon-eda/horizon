@@ -78,7 +78,7 @@ enum class InToolActionID {
 
     // draw arc
     ARC_MODE,
-    //restrict drawing to 45deg
+    // restrict drawing to 45deg
     TOGGLE_DEG45_RESTRICT,
 };
 
