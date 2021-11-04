@@ -15,7 +15,7 @@ public:
     {
         using I = InToolActionID;
         return {
-                I::LMB, I::CANCEL, I::RMB, I::RESTRICT, I::ENTER_WIDTH,
+                I::LMB, I::CANCEL, I::RMB, I::RESTRICT, I::TOGGLE_DEG45_RESTRICT, I::ENTER_WIDTH,
         };
     }
 

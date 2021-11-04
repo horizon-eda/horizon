@@ -82,6 +82,8 @@ const std::map<InToolActionID, InToolActionCatalogItem> in_tool_action_catalog =
          {"Flip direction", ToolID::ADD_VERTEX, InToolActionCatalogItem::FLAGS_DEFAULT}},
 
         {InToolActionID::ARC_MODE, {"arc mode", ToolID::DRAW_ARC, InToolActionCatalogItem::FLAGS_DEFAULT}},
+        {InToolActionID::TOGGLE_DEG45_RESTRICT,
+         {"toggle 45° restrict", ToolID::NONE, InToolActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 
@@ -144,6 +146,7 @@ const LutEnumStr<InToolActionID> in_tool_action_lut = {
         LUT_ITEM(NC_MODE),
         LUT_ITEM(FLIP_DIRECTION),
         LUT_ITEM(ARC_MODE),
+        LUT_ITEM(TOGGLE_DEG45_RESTRICT),
 };
 
 
