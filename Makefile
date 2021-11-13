@@ -784,6 +784,7 @@ SRC_PR_REVIEW = \
 	src/checks/check_unit.cpp\
 	src/checks/check_part.cpp\
 	src/checks/check_item.cpp\
+	src/canvas/layer_display.cpp\
 
 SRC_OCE = \
 	src/import_step/step_importer.cpp\
@@ -899,6 +900,7 @@ SRC_SHARED = $(SRC_COMMON) \
 	src/document/document_board.cpp \
 	src/rules/cache.cpp \
 	src/board/board_rules_check.cpp \
+	src/canvas/layer_display.cpp\
 	$(SRC_POOL_UPDATE)\
 	$(SRC_SHARED_3D)
 
