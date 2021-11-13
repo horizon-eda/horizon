@@ -811,7 +811,8 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
             add_triangle(poly.layer, transform.transform(tri[0]), transform.transform(tri[1]),
                          transform.transform(tri[2]), co);
         }
-        triangle_type_current = TriangleInfo::Type::PLANE_OUTLINE;
+        triangle_type_current = TriangleInfo::Type::NONE;
+
         for (const auto &frag : plane->fragments) {
             ColorP co_orphan = co;
             if (frag.orphan == true)
@@ -832,12 +833,9 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
             }
         }
         end_group();
-        triangle_type_current = TriangleInfo::Type::NONE;
         object_ref_pop();
     }
     else { // normal polygon
-        if (triangle_type_current == TriangleInfo::Type::NONE)
-            triangle_type_current = TriangleInfo::Type::POLYGON;
         begin_group(poly.layer);
         if (poly_is_rect(poly)) {
             const Coordf p0 = (poly.get_vertex(0).position + poly.get_vertex(1).position) / 2;
@@ -875,8 +873,6 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
             }
         }
         end_group();
-        if (triangle_type_current == TriangleInfo::Type::POLYGON)
-            triangle_type_current = TriangleInfo::Type::NONE;
     }
 
     if (interactive) {
