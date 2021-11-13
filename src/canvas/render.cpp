@@ -836,8 +836,9 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
         object_ref_pop();
     }
     else { // normal polygon
+        const bool is_keepout = dynamic_cast<Keepout *>(poly.usage.ptr);
         begin_group(poly.layer);
-        if (poly_is_rect(poly)) {
+        if (poly_is_rect(poly) && !is_keepout) {
             const Coordf p0 = (poly.get_vertex(0).position + poly.get_vertex(1).position) / 2;
             const Coordf p1 = (poly.get_vertex(2).position + poly.get_vertex(3).position) / 2;
             const float width = (poly.get_vertex(0).position - poly.get_vertex(1).position).magd();
@@ -860,12 +861,19 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
             TPPLPartition part;
             po.SetOrientation(TPPL_ORIENTATION_CCW);
             part.Triangulate_EC(&po, &outpolys);
+            if (is_keepout) {
+                assert(triangle_type_current == TriangleInfo::Type::NONE);
+                triangle_type_current = TriangleInfo::Type::KEEPOUT_FILL;
+            }
             for (auto &tri : outpolys) {
                 assert(tri.GetNumPoints() == 3);
                 Coordf p0 = transform.transform(coordf_from_pt(tri[0]));
                 Coordf p1 = transform.transform(coordf_from_pt(tri[1]));
                 Coordf p2 = transform.transform(coordf_from_pt(tri[2]));
                 add_triangle(poly.layer, p0, p1, p2, co);
+            }
+            if (is_keepout) {
+                triangle_type_current = TriangleInfo::Type::NONE;
             }
             for (size_t i = 0; i < poly.vertices.size(); i++) {
                 draw_line(poly.vertices[i].position, poly.vertices[(i + 1) % poly.vertices.size()].position, co,

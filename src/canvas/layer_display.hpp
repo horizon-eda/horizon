@@ -6,12 +6,8 @@ class LayerDisplay {
 public:
     // also used in shaders
     enum class Mode { OUTLINE = 0, HATCH = 1, FILL = 2, FILL_ONLY = 3, DOTTED = 4, N_MODES };
-    LayerDisplay(bool vi, Mode mo) : visible(vi), mode(mo)
-    {
-    }
-    LayerDisplay()
-    {
-    }
+    LayerDisplay(bool vi, Mode mo);
+    LayerDisplay();
 
     bool visible = true;
     Mode mode = Mode::FILL;

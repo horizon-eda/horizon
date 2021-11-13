@@ -103,28 +103,37 @@ public:
     {
         cb_planes_outline = add_checkbutton("Don't fill planes");
         cb_planes_outline->signal_toggled().connect(sigc::mem_fun(*this, &LayerOptionsCopper::emit));
+
+        cb_keepouts_outline = add_checkbutton("Don't fill keepouts");
+        cb_keepouts_outline->set_active(true);
+        cb_keepouts_outline->signal_toggled().connect(sigc::mem_fun(*this, &LayerOptionsCopper::emit));
     }
 
     json serialize() override
     {
         json j;
         j["planes_outline"] = cb_planes_outline->get_active();
+        j["keepouts_outline"] = cb_keepouts_outline->get_active();
         return j;
     }
 
     virtual void load_from_json(const json &j) override
     {
-        if (j.count("planes_outline"))
-            cb_planes_outline->set_active(j.at("planes_outline").get<bool>());
+        cb_planes_outline->set_active(j.value("planes_outline", false));
+        cb_keepouts_outline->set_active(j.value("keepouts_outline", true));
     }
 
 private:
     Gtk::CheckButton *cb_planes_outline = nullptr;
+    Gtk::CheckButton *cb_keepouts_outline = nullptr;
     void emit()
     {
         LayerDisplay ld;
         if (cb_planes_outline->get_active()) {
             ld.types_visible &= ~(1 << static_cast<int>(TriangleInfo::Type::PLANE_FILL));
+        }
+        if (!cb_keepouts_outline->get_active()) {
+            ld.types_visible |= (1 << static_cast<int>(TriangleInfo::Type::KEEPOUT_FILL));
         }
         emit_layer_display(ld);
     }
