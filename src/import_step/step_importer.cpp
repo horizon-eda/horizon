@@ -137,7 +137,8 @@ void STEPImporter::processWire(const TopoDS_Wire &wire, const glm::dmat4 &mat)
 }
 
 #if OCC_VERSION_MAJOR >= 7 && OCC_VERSION_MINOR >= 6
-#define NEW_OCC
+#define HORIZON_NEW_OCC
+#warning "Using new OCC"
 #endif
 
 bool STEPImporter::processFace(const TopoDS_Face &face, Quantity_Color *color, const glm::dmat4 &mat)
@@ -191,7 +192,7 @@ bool STEPImporter::processFace(const TopoDS_Face &face, Quantity_Color *color, c
 
     Poly::ComputeNormals(triangulation);
 
-#ifndef NEW_OCC
+#ifndef HORIZON_NEW_OCC
     const TColgp_Array1OfPnt &arrPolyNodes = triangulation->Nodes();
     const Poly_Array1OfTriangle &arrTriangles = triangulation->Triangles();
     const TShort_Array1OfShortReal &arrNormals = triangulation->Normals();
@@ -212,7 +213,7 @@ bool STEPImporter::processFace(const TopoDS_Face &face, Quantity_Color *color, c
 
     std::map<Vertex, std::vector<size_t>> pts_map;
     for (int i = 1; i <= triangulation->NbNodes(); i++) {
-#ifdef NEW_OCC
+#ifdef HORIZON_NEW_OCC
         gp_XYZ v(triangulation->Node(i).Coord());
 #else
         gp_XYZ v(arrPolyNodes(i).Coord());
@@ -226,7 +227,7 @@ bool STEPImporter::processFace(const TopoDS_Face &face, Quantity_Color *color, c
 
     face_out.normals.reserve(triangulation->NbNodes());
     for (int i = 1; i <= triangulation->NbNodes(); i++) {
-#ifdef NEW_OCC
+#ifdef HORIZON_NEW_OCC
         const auto n = triangulation->Normal(i);
         glm::vec4 vg(n.X(), n.Y(), n.Z(), 0);
 #else
@@ -258,7 +259,7 @@ bool STEPImporter::processFace(const TopoDS_Face &face, Quantity_Color *color, c
     face_out.triangle_indices.reserve(triangulation->NbTriangles());
     for (int i = 1; i <= triangulation->NbTriangles(); i++) {
         int a, b, c;
-#ifdef NEW_OCC
+#ifdef HORIZON_NEW_OCC
         triangulation->Triangle(i).Get(a, b, c);
 #else
         arrTriangles(i).Get(a, b, c);
