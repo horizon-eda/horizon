@@ -136,6 +136,10 @@ void STEPImporter::processWire(const TopoDS_Wire &wire, const glm::dmat4 &mat)
     }
 }
 
+#if OCC_VERSION_MAJOR >= 7 && OCC_VERSION_MINOR >= 6
+#define NEW_OCC
+#endif
+
 bool STEPImporter::processFace(const TopoDS_Face &face, Quantity_Color *color, const glm::dmat4 &mat)
 {
     if (Standard_True == face.IsNull())
@@ -187,6 +191,13 @@ bool STEPImporter::processFace(const TopoDS_Face &face, Quantity_Color *color, c
 
     Poly::ComputeNormals(triangulation);
 
+#ifndef NEW_OCC
+    const TColgp_Array1OfPnt &arrPolyNodes = triangulation->Nodes();
+    const Poly_Array1OfTriangle &arrTriangles = triangulation->Triangles();
+    const TShort_Array1OfShortReal &arrNormals = triangulation->Normals();
+#endif
+
+
     result->faces.emplace_back();
     auto &face_out = result->faces.back();
     if (color) {
@@ -201,7 +212,11 @@ bool STEPImporter::processFace(const TopoDS_Face &face, Quantity_Color *color, c
 
     std::map<Vertex, std::vector<size_t>> pts_map;
     for (int i = 1; i <= triangulation->NbNodes(); i++) {
+#ifdef NEW_OCC
         gp_XYZ v(triangulation->Node(i).Coord());
+#else
+        gp_XYZ v(arrPolyNodes(i).Coord());
+#endif
         const glm::vec4 vg(v.X(), v.Y(), v.Z(), 1);
         const auto vt = mat * vg;
         const Vertex vertex(vt.x, vt.y, vt.z);
@@ -211,8 +226,16 @@ bool STEPImporter::processFace(const TopoDS_Face &face, Quantity_Color *color, c
 
     face_out.normals.reserve(triangulation->NbNodes());
     for (int i = 1; i <= triangulation->NbNodes(); i++) {
+#ifdef NEW_OCC
         const auto n = triangulation->Normal(i);
         glm::vec4 vg(n.X(), n.Y(), n.Z(), 0);
+#else
+        auto offset = (i - 1) * 3 + 1;
+        auto x = arrNormals(offset + 0);
+        auto y = arrNormals(offset + 1);
+        auto z = arrNormals(offset + 2);
+        glm::vec4 vg(x, y, z, 0);
+#endif
         auto vt = mat * vg;
         vt /= vt.length();
         face_out.normals.emplace_back(vt.x, vt.y, vt.z);
@@ -235,7 +258,11 @@ bool STEPImporter::processFace(const TopoDS_Face &face, Quantity_Color *color, c
     face_out.triangle_indices.reserve(triangulation->NbTriangles());
     for (int i = 1; i <= triangulation->NbTriangles(); i++) {
         int a, b, c;
+#ifdef NEW_OCC
         triangulation->Triangle(i).Get(a, b, c);
+#else
+        arrTriangles(i).Get(a, b, c);
+#endif
         face_out.triangle_indices.emplace_back(a - 1, b - 1, c - 1);
     }
 
