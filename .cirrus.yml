@@ -8,5 +8,6 @@ task:
     - pkg install -y git gmake pkgconf e2fsprogs-libuuid sqlite3 gtkmm30 cppzmq libgit2 boost-libs glm opencascade podofo libzip
   script:
     - ls
+    - cat /usr/local/include/OpenCASCADE/Standard_Version.hxx
     - clang --version
     - gmake -j2
