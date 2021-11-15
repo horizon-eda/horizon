@@ -187,6 +187,10 @@ bool STEPImporter::processFace(const TopoDS_Face &face, Quantity_Color *color, c
 
     Poly::ComputeNormals(triangulation);
 
+    const TColgp_Array1OfPnt &arrPolyNodes = triangulation->Nodes();
+    const Poly_Array1OfTriangle &arrTriangles = triangulation->Triangles();
+    const TShort_Array1OfShortReal &arrNormals = triangulation->Normals();
+
     result->faces.emplace_back();
     auto &face_out = result->faces.back();
     if (color) {
@@ -201,7 +205,7 @@ bool STEPImporter::processFace(const TopoDS_Face &face, Quantity_Color *color, c
 
     std::map<Vertex, std::vector<size_t>> pts_map;
     for (int i = 1; i <= triangulation->NbNodes(); i++) {
-        gp_XYZ v(triangulation->Node(i).Coord());
+        gp_XYZ v(arrPolyNodes(i).Coord());
         const glm::vec4 vg(v.X(), v.Y(), v.Z(), 1);
         const auto vt = mat * vg;
         const Vertex vertex(vt.x, vt.y, vt.z);
@@ -211,8 +215,11 @@ bool STEPImporter::processFace(const TopoDS_Face &face, Quantity_Color *color, c
 
     face_out.normals.reserve(triangulation->NbNodes());
     for (int i = 1; i <= triangulation->NbNodes(); i++) {
-        const auto n = triangulation->Normal(i);
-        glm::vec4 vg(n.X(), n.Y(), n.Z(), 0);
+        auto offset = (i - 1) * 3 + 1;
+        auto x = arrNormals(offset + 0);
+        auto y = arrNormals(offset + 1);
+        auto z = arrNormals(offset + 2);
+        glm::vec4 vg(x, y, z, 0);
         auto vt = mat * vg;
         vt /= vt.length();
         face_out.normals.emplace_back(vt.x, vt.y, vt.z);
@@ -235,7 +242,7 @@ bool STEPImporter::processFace(const TopoDS_Face &face, Quantity_Color *color, c
     face_out.triangle_indices.reserve(triangulation->NbTriangles());
     for (int i = 1; i <= triangulation->NbTriangles(); i++) {
         int a, b, c;
-        triangulation->Triangle(i).Get(a, b, c);
+        arrTriangles(i).Get(a, b, c);
         face_out.triangle_indices.emplace_back(a - 1, b - 1, c - 1);
     }
 
