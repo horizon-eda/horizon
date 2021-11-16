@@ -1,9 +1,15 @@
-freebsd_instance:
-  image_family: freebsd-12-2
 
 task:
+  matrix:
+    - name: FreeBSD 12.2
+      freebsd_instance:
+        image: freebsd-12-2-release-amd64
+    - name: FreeBSD 13.0
+      freebsd_instance:
+        image: freebsd-13-0-release-amd64
   install_script:
-    - pkg update
+    - sed -i.bak -e 's,pkg+http://pkg.FreeBSD.org/\${ABI}/quarterly,pkg+http://pkg.FreeBSD.org/\${ABI}/latest,' /etc/pkg/FreeBSD.conf
+    - pkg update -f
     - pkg upgrade -y
     - pkg install -y git gmake pkgconf e2fsprogs-libuuid sqlite3 gtkmm30 cppzmq libgit2 boost-libs glm opencascade podofo libzip
   script:
