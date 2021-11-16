@@ -4,6 +4,7 @@
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
 #include <XCAFApp_Application.hxx>
+#include <Standard_Version.hxx>
 
 #include <AIS_Shape.hxx>
 
@@ -138,7 +139,6 @@ void STEPImporter::processWire(const TopoDS_Wire &wire, const glm::dmat4 &mat)
 
 #if OCC_VERSION_MAJOR >= 7 && OCC_VERSION_MINOR >= 6
 #define HORIZON_NEW_OCC
-#warning "Using new OCC"
 #endif
 
 bool STEPImporter::processFace(const TopoDS_Face &face, Quantity_Color *color, const glm::dmat4 &mat)
