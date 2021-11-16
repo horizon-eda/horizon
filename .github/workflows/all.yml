@@ -5,6 +5,7 @@ on:
     branches:
       - '*'
       - '!appveyor-*'
+      - '!freebsd-*'
     tags: [ '*' ]
   pull_request:
     branches: [ master ]
