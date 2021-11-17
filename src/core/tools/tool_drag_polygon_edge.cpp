@@ -58,9 +58,9 @@ ToolResponse ToolDragPolygonEdge::begin(const ToolArgs &args)
 ToolResponse ToolDragPolygonEdge::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {
-        const auto [pos_from, pos_to] = poly_info->get_pos(args.coords - pos_orig);
-        poly->get_vertex(edge).position = pos_from;
-        poly->get_vertex(edge + 1).position = pos_to;
+        const auto pos = poly_info->get_pos(args.coords - pos_orig);
+        poly->get_vertex(edge).position = pos.from;
+        poly->get_vertex(edge + 1).position = pos.to;
     }
     else if (args.type == ToolEventType::ACTION) {
         switch (args.action) {

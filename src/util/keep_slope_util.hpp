@@ -4,7 +4,11 @@
 namespace horizon {
 class KeepSlopeInfo {
 public:
-    std::pair<Coordi, Coordi> get_pos(const Coordd &shift) const;
+    struct Position {
+        Coordi from;
+        Coordi to;
+    };
+    Position get_pos(const Coordd &shift) const;
 
 protected:
     Coordi pos_from2;

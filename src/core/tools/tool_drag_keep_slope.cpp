@@ -92,9 +92,9 @@ ToolResponse ToolDragKeepSlope::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {
         for (const auto &it : track_info) {
-            const auto [pos_from, pos_to] = it.get_pos(args.coords - pos_orig);
-            it.track.from.junc->position = pos_from;
-            it.track.to.junc->position = pos_to;
+            const auto pos = it.get_pos(args.coords - pos_orig);
+            it.track.from.junc->position = pos.from;
+            it.track.to.junc->position = pos.to;
         }
         doc.b->get_board()->update_airwires(true, nets);
     }
