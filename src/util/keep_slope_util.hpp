@@ -7,6 +7,7 @@ public:
     struct Position {
         Coordi from;
         Coordi to;
+        Coordi arc_center;
     };
     Position get_pos(const Coordd &shift) const;
 

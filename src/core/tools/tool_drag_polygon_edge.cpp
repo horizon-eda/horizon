@@ -23,6 +23,7 @@ void ToolDragPolygonEdge::update_tip()
 ToolDragPolygonEdge::PolyInfo::PolyInfo(const Polygon &poly, int edge)
 {
     auto get_pos = [&poly](int x) { return poly.get_vertex(x).position; };
+    arc_center_orig = poly.get_vertex(edge).arc_center;
     pos_from_orig = get_pos(edge);
     pos_from2 = get_pos(edge - 1);
     pos_to_orig = get_pos(edge + 1);
@@ -61,6 +62,9 @@ ToolResponse ToolDragPolygonEdge::update(const ToolArgs &args)
         const auto pos = poly_info->get_pos(args.coords - pos_orig);
         poly->get_vertex(edge).position = pos.from;
         poly->get_vertex(edge + 1).position = pos.to;
+        if (poly->get_vertex(edge).type == Polygon::Vertex::Type::ARC) {
+            poly->get_vertex(edge).arc_center = poly_info->arc_center_orig + pos.arc_center;
+        }
     }
     else if (args.type == ToolEventType::ACTION) {
         switch (args.action) {

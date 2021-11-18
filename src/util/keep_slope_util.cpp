@@ -8,6 +8,9 @@ KeepSlopeInfo::Position KeepSlopeInfo::get_pos(const Coordd &shift) const
     const Coordd vtr = pos_to_orig - pos_from_orig;
     const Coordd vtrn = Coordd(vtr.y, -vtr.x).normalize();
 
+    const auto cos_alpha = vto.normalize().dot(vfrom.normalize());
+    const auto n = 2. / (1 + cos_alpha); // 1/cos(α/2)²
+
     // shift projected onto vector perpendicular to track
     const Coordd vshift2 = vtrn * vtrn.dot(shift);
 
@@ -18,6 +21,6 @@ KeepSlopeInfo::Position KeepSlopeInfo::get_pos(const Coordd &shift) const
         shift_to = {0, 0};
     }
 
-    return {pos_from_orig + shift_from.to_coordi(), pos_to_orig + shift_to.to_coordi()};
+    return {pos_from_orig + shift_from.to_coordi(), pos_to_orig + shift_to.to_coordi(), (vshift2 * n).to_coordi()};
 }
 } // namespace horizon

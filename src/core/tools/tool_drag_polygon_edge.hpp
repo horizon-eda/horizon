@@ -29,6 +29,8 @@ private:
     class PolyInfo : public KeepSlopeInfo {
     public:
         PolyInfo(const class Polygon &poly, int edge);
+
+        Coordi arc_center_orig;
     };
     std::optional<PolyInfo> poly_info;
 
