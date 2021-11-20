@@ -1,5 +1,6 @@
 #include "dependency_graph.hpp"
 #include <algorithm>
+#include <stdexcept>
 
 namespace horizon {
 
@@ -11,6 +12,11 @@ void DependencyGraph::visit(Node &node, unsigned int level)
 {
     if (level > node.level)
         node.level = level;
+
+    if (node.in_stack)
+        throw std::runtime_error("cycle with node " + (std::string)node.uuid);
+
+    node.in_stack = true;
     unsigned int order = 0;
     for (const auto &dep : node.dependencies) {
         if (nodes.count(dep)) {
@@ -23,6 +29,7 @@ void DependencyGraph::visit(Node &node, unsigned int level)
             not_found.insert(dep);
         }
     }
+    node.in_stack = false;
 }
 
 std::vector<UUID> DependencyGraph::get_sorted()

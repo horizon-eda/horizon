@@ -23,6 +23,7 @@ protected:
         const std::vector<UUID> dependencies;
         unsigned int level = 0;
         unsigned int order = 0;
+        bool in_stack = false;
         bool operator<(const Node &other) const
         {
             return std::make_pair(level, order) < std::make_pair(other.level, other.order);
