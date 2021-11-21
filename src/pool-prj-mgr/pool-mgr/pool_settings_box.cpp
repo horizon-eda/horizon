@@ -46,6 +46,7 @@ PoolSettingsBox::PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk
             auto it = dynamic_cast<PoolListItem *>(row->get_child());
             s_signal_open_pool.emit(it->base_path);
         });
+        lb->signal_row_selected().connect([this](auto row) { update_button_sensitivity(); });
     }
 
     update_pools();
@@ -212,6 +213,7 @@ void PoolSettingsBox::update_pools()
             }
         }
     }
+    update_button_sensitivity();
 }
 
 void PoolSettingsBox::update_actual()
@@ -225,6 +227,22 @@ void PoolSettingsBox::update_actual()
         auto w = Gtk::manage(new PoolListItem(uu));
         pools_actually_included_listbox->append(*w);
         w->show();
+    }
+}
+
+void PoolSettingsBox::update_button_sensitivity()
+{
+    pool_inc_button->set_sensitive(pool_from_listbox(pools_available_listbox).has_value());
+    const auto sel = pool_from_listbox(pools_included_listbox);
+    pool_excl_button->set_sensitive(sel.has_value());
+    if (sel.has_value()) {
+        auto it = std::find(pools_included.begin(), pools_included.end(), sel.value());
+        pool_up_button->set_sensitive(it != pools_included.begin());
+        pool_down_button->set_sensitive(it != (pools_included.end() - 1));
+    }
+    else {
+        pool_up_button->set_sensitive(false);
+        pool_down_button->set_sensitive(false);
     }
 }
 

@@ -50,6 +50,7 @@ private:
 
     void inc_excl_pool(bool inc);
     void pool_up_down(bool up);
+    void update_button_sensitivity();
 
     bool needs_save = false;
     void set_needs_save();
