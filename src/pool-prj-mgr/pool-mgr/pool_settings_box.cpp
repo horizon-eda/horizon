@@ -10,9 +10,10 @@ namespace horizon {
 
 class PoolListItem : public Gtk::Box {
 public:
-    PoolListItem(const UUID &uu);
+    PoolListItem(const UUID &uu, bool available = true);
     const UUID uuid;
     std::string base_path;
+    const bool available;
 };
 
 PoolSettingsBox::PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IPool &p)
@@ -102,7 +103,8 @@ void PoolSettingsBox::pool_updated()
     update_actual();
 }
 
-PoolListItem::PoolListItem(const UUID &uu) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 5), uuid(uu)
+PoolListItem::PoolListItem(const UUID &uu, bool avail)
+    : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 5), uuid(uu), available(avail)
 {
     property_margin() = 5;
     auto pool = PoolManager::get().get_by_uuid(uu);
@@ -127,13 +129,21 @@ PoolListItem::PoolListItem(const UUID &uu) : Gtk::Box(Gtk::ORIENTATION_VERTICAL,
         pack_start(*la, true, true, 0);
         la->show();
     }
+
+    if (!avail) {
+        set_tooltip_text("Not available since the opened pool is a depedendency.");
+        set_sensitive(false);
+    }
 }
 
 static std::optional<UUID> pool_from_listbox(Gtk::ListBox *lb)
 {
     if (auto row = lb->get_selected_row()) {
         auto it = dynamic_cast<PoolListItem *>(row->get_child());
-        return it->uuid;
+        if (it->available)
+            return it->uuid;
+        else
+            return {};
     }
     else {
         return {};
@@ -190,7 +200,11 @@ void PoolSettingsBox::update_pools()
         for (const auto &it : PoolManager::get().get_pools()) {
             if (it.second.enabled && it.second.uuid != pool.get_pool_info().uuid
                 && std::count(pools_included.begin(), pools_included.end(), it.second.uuid) == 0) {
-                auto w = Gtk::manage(new PoolListItem(it.second.uuid));
+                Pool other_pool(it.second.base_path);
+                SQLite::Query q(other_pool.db, "SELECT uuid FROM pools_included WHERE uuid = ?");
+                q.bind(1, pool.get_pool_info().uuid);
+                const bool includes_this_pool = q.step();
+                auto w = Gtk::manage(new PoolListItem(it.second.uuid, !includes_this_pool));
                 pools_available_listbox->append(*w);
                 w->show();
                 if (sel && it.second.uuid == *sel) {
