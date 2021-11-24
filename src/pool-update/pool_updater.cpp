@@ -8,6 +8,7 @@
 #include "util/util.hpp"
 #include "common/object_descr.hpp"
 #include "util/fs_util.hpp"
+#include "util/installation_uuid.hpp"
 
 namespace horizon {
 PoolUpdater::PoolUpdater(const std::string &bp, pool_update_cb_t cb) : status_cb(cb)
@@ -28,6 +29,11 @@ PoolUpdater::PoolUpdater(const std::string &bp, pool_update_cb_t cb) : status_cb
         }
     }
     pool.emplace(bp, false);
+    {
+        SQLite::Query q(pool->db, "UPDATE installation_uuid SET uuid=?");
+        q.bind(1, InstallationUUID::get());
+        q.step();
+    }
     q_exists.emplace(pool->db, "SELECT pool_uuid, last_pool_uuid FROM all_items_view WHERE uuid = ? AND type = ?");
     q_add_dependency.emplace(pool->db, "INSERT INTO dependencies VALUES (?, ?, ?, ?)");
     q_insert_part.emplace(

@@ -16,6 +16,7 @@ namespace horizon {
 using json = nlohmann::json;
 
 enum class PoolUpdateStatus;
+enum class CheckSchemaUpdateResult;
 
 class PoolProjectManagerAppWindow : public Gtk::ApplicationWindow {
     friend class PoolProjectManagerViewProject;
@@ -126,6 +127,8 @@ private:
     Gtk::Label *version_label = nullptr;
 
     Gtk::InfoBar *info_bar_gitignore = nullptr;
+
+    Gtk::InfoBar *info_bar_installation_uuid_mismatch = nullptr;
 
     std::unique_ptr<class Project> project;
     std::string project_filename;

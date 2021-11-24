@@ -73,6 +73,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     builder->get_widget("info_bar_version", info_bar_version);
     builder->get_widget("version_label", version_label);
     builder->get_widget("info_bar_gitignore", info_bar_gitignore);
+    builder->get_widget("info_bar_installation_uuid_mismatch", info_bar_installation_uuid_mismatch);
 
     set_view_mode(ViewMode::OPEN);
 
@@ -140,6 +141,10 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
         }
         info_bar_hide(info_bar_gitignore);
     });
+
+    info_bar_hide(info_bar_installation_uuid_mismatch);
+    info_bar_installation_uuid_mismatch->signal_response().connect(
+            [this](int resp) { info_bar_hide(info_bar_installation_uuid_mismatch); });
 
     show_output_button->signal_clicked().connect([this] {
         output_window->present();
@@ -917,6 +922,7 @@ void PoolProjectManagerAppWindow::set_view_mode(ViewMode mode)
         header->set_title("Horizon EDA");
         update_recent_items();
         set_version_info("");
+        info_bar_hide(info_bar_installation_uuid_mismatch);
         break;
 
     case ViewMode::POOL:
@@ -995,8 +1001,11 @@ PoolProjectManagerAppWindow *PoolProjectManagerAppWindow::create(PoolProjectMana
 
 void PoolProjectManagerAppWindow::check_schema_update(const std::string &base_path)
 {
-    pool_check_schema_update(base_path, *this);
+    const auto r = pool_check_schema_update(base_path, *this);
+    if (r == CheckSchemaUpdateResult::INSTALLATION_UUID_MISMATCH)
+        info_bar_show(info_bar_installation_uuid_mismatch);
 }
+
 
 void PoolProjectManagerAppWindow::check_pool_update(const std::string &base_path)
 {

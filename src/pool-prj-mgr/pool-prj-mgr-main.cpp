@@ -7,6 +7,7 @@
 #endif
 #include "util/automatic_prefs.hpp"
 #include "util/stock_info_provider.hpp"
+#include "util/installation_uuid.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -22,6 +23,7 @@ int main(int argc, char *argv[])
     horizon::AutomaticPreferences::get();
     horizon::StockInfoProvider::init_db();
     horizon::install_signal_exception_handler();
+    horizon::InstallationUUID::get();
 
     // Start the application, showing the initial window,
     // and opening extra views for any files that it is asked to open,
