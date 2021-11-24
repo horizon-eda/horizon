@@ -93,7 +93,7 @@ const std::string &Pool::get_base_path() const
 
 int Pool::get_required_schema_version()
 { // keep in sync with schema definition
-    return 21;
+    return 22;
 }
 
 std::string Pool::get_tmp_filename(ObjectType type, const UUID &uu) const
@@ -344,5 +344,13 @@ std::map<std::string, UUID> Pool::get_actually_included_pools(bool include_self)
     return base_paths;
 }
 
+UUID Pool::get_installation_uuid()
+{
+    SQLite::Query q(db, "SELECT uuid FROM installation_uuid");
+    if (q.step())
+        return q.get<std::string>(0);
+    else
+        return UUID();
+}
 
 } // namespace horizon

@@ -76,6 +76,8 @@ public:
 
     std::map<std::string, UUID> get_actually_included_pools(bool include_self) override;
 
+    UUID get_installation_uuid();
+
 protected:
     const std::string base_path;
     const PoolInfo pool_info;

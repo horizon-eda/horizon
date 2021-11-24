@@ -131,6 +131,7 @@ SRC_COMMON = \
 	src/blocks/blocks_schematic.cpp\
 	src/block_symbol/block_symbol.cpp\
 	src/blocks/dependency_graph.cpp\
+	src/util/installation_uuid.cpp\
 
 
 ifeq ($(OS),Windows_NT)
