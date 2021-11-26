@@ -26,6 +26,7 @@ void PoolBrowserEntity::create_columns()
         auto col = append_column_with_item_source_cr("Entity", list_columns.entity_name, Pango::ELLIPSIZE_END);
         col->set_resizable(true);
         col->set_min_width(150);
+        install_column_tooltip(*col, list_columns.entity_name);
     }
     {
         auto col = append_column("Manufacturer", list_columns.entity_manufacturer, Pango::ELLIPSIZE_END);
