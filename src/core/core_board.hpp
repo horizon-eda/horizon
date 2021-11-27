@@ -22,7 +22,6 @@ public:
     bool get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID property,
                            class PropertyMeta &meta) override;
 
-    void rebuild(bool from_undo = false) override;
     void reload_netlist();
 
     const Board &get_canvas_data();
@@ -98,6 +97,7 @@ private:
         Block block;
         Board brd;
     };
+    void rebuild_internal(bool from_undo) override;
     void history_push() override;
     void history_load(unsigned int i) override;
     void save(const std::string &suffix) override;

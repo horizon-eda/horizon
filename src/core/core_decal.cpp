@@ -52,9 +52,9 @@ std::map<UUID, Arc> *CoreDecal::get_arc_map()
     return &decal.arcs;
 }
 
-void CoreDecal::rebuild(bool from_undo)
+void CoreDecal::rebuild_internal(bool from_undo)
 {
-    Core::rebuild(from_undo);
+    rebuild_finish(from_undo);
 }
 
 LayerProvider &CoreDecal::get_layer_provider()

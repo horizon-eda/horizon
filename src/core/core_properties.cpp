@@ -429,7 +429,7 @@ bool Core::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
         return false;
     }
     if (!property_transaction) {
-        rebuild(false);
+        rebuild_internal(false);
         set_needs_save(true);
     }
     return true;

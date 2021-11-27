@@ -228,7 +228,7 @@ bool CoreSymbol::set_property(ObjectType type, const UUID &uu, ObjectProperty::I
         return false;
     }
     if (!property_transaction) {
-        rebuild(false);
+        rebuild_internal(false);
         set_needs_save(true);
     }
     return true;
@@ -265,10 +265,10 @@ std::string CoreSymbol::get_display_name(ObjectType type, const UUID &uu)
     }
 }
 
-void CoreSymbol::rebuild(bool from_undo)
+void CoreSymbol::rebuild_internal(bool from_undo)
 {
     sym.expand(pin_display_mode);
-    Core::rebuild(from_undo);
+    rebuild_finish(from_undo);
 }
 
 void CoreSymbol::history_push()

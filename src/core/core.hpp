@@ -70,7 +70,7 @@ public:
      * Expands the non-working document.
      * And copies the non-working document to the working document.
      */
-    virtual void rebuild(bool from_undo = false);
+    void rebuild();
     ToolResponse tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInterface *imp, bool transient = false);
     ToolResponse tool_update(const ToolArgs &args);
     std::pair<bool, bool> tool_can_begin(ToolID tool_id, const std::set<SelectableRef> &selection);
@@ -191,6 +191,8 @@ protected:
     bool needs_save = false;
     void set_needs_save(bool v);
 
+    void rebuild_finish(bool from_undo);
+
     class HistoryItem {
     public:
         // Symbol sym;
@@ -221,5 +223,6 @@ private:
     std::unique_ptr<ToolBase> create_tool(ToolID tool_id);
     std::set<SelectableRef> tool_selection;
     void maybe_end_tool(const ToolResponse &r);
+    virtual void rebuild_internal(bool from_undo) = 0;
 };
 } // namespace horizon

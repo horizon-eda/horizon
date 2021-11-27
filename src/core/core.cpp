@@ -82,11 +82,11 @@ void Core::maybe_end_tool(const ToolResponse &r)
         s_signal_tool_changed.emit(ToolID::NONE);
         if (r.result == ToolResponse::Result::COMMIT) {
             set_needs_save(true);
-            rebuild();
+            rebuild_internal(false);
         }
         else if (r.result == ToolResponse::Result::REVERT) {
             history_load(history_current);
-            rebuild(true);
+            rebuild_internal(true);
         }
         else if (r.result == ToolResponse::Result::END) { // did nothing
             // do nothing
@@ -138,7 +138,12 @@ ToolResponse Core::tool_update(const ToolArgs &args)
     return ToolResponse();
 }
 
-void Core::rebuild(bool from_undo)
+void Core::rebuild()
+{
+    rebuild_internal(false);
+}
+
+void Core::rebuild_finish(bool from_undo)
 {
     if (!from_undo) {
         while (history_current + 1 != (int)history.size()) {

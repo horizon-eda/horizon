@@ -552,7 +552,7 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
         return false;
     }
     if (!property_transaction) {
-        rebuild(false);
+        rebuild_internal(false);
         set_needs_save(true);
     }
     return true;
@@ -621,11 +621,11 @@ bool CoreBoard::get_property_meta(ObjectType type, const UUID &uu, ObjectPropert
     }
 }
 
-void CoreBoard::rebuild(bool from_undo)
+void CoreBoard::rebuild_internal(bool from_undo)
 {
     clock_t begin = clock();
     brd->expand_some();
-    Core::rebuild(from_undo);
+    rebuild_finish(from_undo);
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
     std::cout << "rebuild took " << elapsed_secs << std::endl;

@@ -14,8 +14,6 @@ public:
     const Decal &get_canvas_data() const;
     class LayerProvider &get_layer_provider() override;
 
-    void rebuild(bool from_undo = false) override;
-
     std::pair<Coordi, Coordi> get_bbox() override;
 
     const std::string &get_filename() const override;
@@ -46,6 +44,7 @@ private:
         HistoryItem(const Decal &r);
         Decal decal;
     };
+    void rebuild_internal(bool from_undo) override;
     void history_push() override;
     void history_load(unsigned int i) override;
     void save(const std::string &suffix) override;

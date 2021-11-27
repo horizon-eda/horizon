@@ -493,7 +493,7 @@ bool CoreSchematic::set_property(ObjectType type, const UUID &uu, ObjectProperty
         return false;
     }
     if (!property_transaction) {
-        rebuild(false);
+        rebuild_internal(false);
         set_needs_save(true);
     }
     return true;
@@ -846,7 +846,7 @@ void CoreSchematic::fix_current_block()
     }
 }
 
-void CoreSchematic::rebuild(bool from_undo)
+void CoreSchematic::rebuild_internal(bool from_undo)
 {
     clock_t begin = clock();
     auto &top_block = blocks->get_top_block_item();
@@ -872,7 +872,7 @@ void CoreSchematic::rebuild(bool from_undo)
             prv = this;
         block.schematic.expand(false, prv);
     }
-    Core::rebuild(from_undo);
+    rebuild_finish(from_undo);
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
     std::cout << "rebuild took " << elapsed_secs << std::endl;

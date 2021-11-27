@@ -73,10 +73,10 @@ bool CoreFrame::get_property_meta(ObjectType type, const UUID &uu, ObjectPropert
     return false;
 }
 
-void CoreFrame::rebuild(bool from_undo)
+void CoreFrame::rebuild_internal(bool from_undo)
 {
     frame.expand();
-    Core::rebuild(from_undo);
+    rebuild_finish(from_undo);
 }
 
 LayerProvider &CoreFrame::get_layer_provider()

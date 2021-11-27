@@ -33,8 +33,6 @@ public:
     std::vector<Line *> get_lines() override;
     std::vector<Arc *> get_arcs() override;
 
-    void rebuild(bool from_undo = false) override;
-
     bool set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property,
                       const class PropertyValue &value) override;
     bool get_property(ObjectType type, const UUID &uu, ObjectProperty::ID property,
@@ -83,6 +81,7 @@ private:
         }
         Symbol sym;
     };
+    void rebuild_internal(bool from_undo) override;
     void history_push() override;
     void history_load(unsigned int i) override;
     void save(const std::string &suffix) override;

@@ -34,8 +34,6 @@ public:
         return &grid_settings;
     }
 
-    void rebuild(bool from_undo = false) override;
-
     const Package &get_canvas_data();
     std::pair<Coordi, Coordi> get_bbox() override;
     json get_meta() override;
@@ -79,6 +77,7 @@ private:
         }
         Package package;
     };
+    void rebuild_internal(bool from_undo) override;
     void history_push() override;
     void history_load(unsigned int i) override;
     void save(const std::string &suffix) override;

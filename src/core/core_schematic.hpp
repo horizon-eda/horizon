@@ -56,8 +56,6 @@ public:
         return &pdf_export_settings;
     }
 
-    void rebuild(bool from_undo = false) override;
-
     void add_sheet();
     void delete_sheet(const UUID &uu);
 
@@ -131,6 +129,7 @@ private:
         }
         BlocksSchematic blocks;
     };
+    void rebuild_internal(bool from_undo) override;
     void history_push() override;
     void history_load(unsigned int i) override;
     void save(const std::string &suffix) override;

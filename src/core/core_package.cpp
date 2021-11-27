@@ -188,7 +188,7 @@ bool CorePackage::set_property(ObjectType type, const UUID &uu, ObjectProperty::
         return false;
     }
     if (!property_transaction) {
-        rebuild(false);
+        rebuild_internal(false);
         set_needs_save(true);
     }
     return true;
@@ -210,14 +210,14 @@ bool CorePackage::get_property_meta(ObjectType type, const UUID &uu, ObjectPrope
     return Core::get_property_meta(type, uu, property, meta);
 }
 
-void CorePackage::rebuild(bool from_undo)
+void CorePackage::rebuild_internal(bool from_undo)
 {
     if (auto r = package.apply_parameter_set({})) {
         Logger::get().log_critical("Parameter program failed", Logger::Domain::CORE, r.value());
     }
     package.expand();
     package.update_warnings();
-    Core::rebuild(from_undo);
+    rebuild_finish(from_undo);
 }
 
 void CorePackage::history_push()

@@ -135,7 +135,7 @@ bool CorePadstack::set_property(ObjectType type, const UUID &uu, ObjectProperty:
         return false;
     }
     if (!property_transaction) {
-        rebuild(false);
+        rebuild_internal(false);
         set_needs_save(true);
     }
     return true;
@@ -212,9 +212,9 @@ std::map<UUID, Hole> *CorePadstack::get_hole_map()
     return &padstack.holes;
 }
 
-void CorePadstack::rebuild(bool from_undo)
+void CorePadstack::rebuild_internal(bool from_undo)
 {
-    Core::rebuild(from_undo);
+    rebuild_finish(from_undo);
 }
 
 void CorePadstack::history_push()
