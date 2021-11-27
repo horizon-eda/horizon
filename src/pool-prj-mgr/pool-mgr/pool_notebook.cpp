@@ -388,17 +388,9 @@ void PoolNotebook::add_context_menu(PoolBrowser *br)
             this_pool_lambda);
 }
 
-PoolNotebook::ItemPoolInfo PoolNotebook::get_pool_uuids(ObjectType ty, const UUID &uu)
+Pool::ItemPoolInfo PoolNotebook::get_pool_uuids(ObjectType ty, const UUID &uu)
 {
-    SQLite::Query q(pool.get_db(), "SELECT pool_uuid, last_pool_uuid FROM all_items_view WHERE type = ? AND uuid = ?");
-    q.bind(1, ty);
-    q.bind(2, uu);
-    if (q.step()) {
-        const UUID pool_uu(q.get<std::string>(0));
-        const UUID last_pool_uu(q.get<std::string>(1));
-        return {pool_uu, last_pool_uu};
-    }
-    throw std::runtime_error("item not found");
+    return pool.get_pool_uuids(ty, uu);
 }
 
 void PoolNotebook::handle_delete(ObjectType ty, const UUID &uu)

@@ -353,4 +353,17 @@ UUID Pool::get_installation_uuid()
         return UUID();
 }
 
+Pool::ItemPoolInfo Pool::get_pool_uuids(ObjectType ty, const UUID &uu)
+{
+    SQLite::Query q(db, "SELECT pool_uuid, last_pool_uuid FROM all_items_view WHERE type = ? AND uuid = ?");
+    q.bind(1, ty);
+    q.bind(2, uu);
+    if (q.step()) {
+        const UUID pool_uu(q.get<std::string>(0));
+        const UUID last_pool_uu(q.get<std::string>(1));
+        return {pool_uu, last_pool_uu};
+    }
+    throw std::runtime_error("item not found");
+}
+
 } // namespace horizon

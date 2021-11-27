@@ -117,11 +117,8 @@ private:
     void handle_move_rename(ObjectType ty, const UUID &uu);
     void handle_copy_path(ObjectType ty, const UUID &uu);
     void add_context_menu(class PoolBrowser *br);
-    struct ItemPoolInfo {
-        UUID pool;
-        UUID last;
-    };
-    ItemPoolInfo get_pool_uuids(ObjectType ty, const UUID &uu);
+
+    Pool::ItemPoolInfo get_pool_uuids(ObjectType ty, const UUID &uu);
     void handle_edit_item(ObjectType ty, const UUID &uu);
     void handle_duplicate_item(ObjectType ty, const UUID &uu);
 

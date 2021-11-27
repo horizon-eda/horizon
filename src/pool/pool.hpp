@@ -78,6 +78,12 @@ public:
 
     UUID get_installation_uuid();
 
+    struct ItemPoolInfo {
+        UUID pool;
+        UUID last;
+    };
+    ItemPoolInfo get_pool_uuids(ObjectType ty, const UUID &uu);
+
 protected:
     const std::string base_path;
     const PoolInfo pool_info;
