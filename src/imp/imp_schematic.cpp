@@ -501,6 +501,22 @@ int ImpSchematic::get_board_pid()
     return this->send_json(j).get<int>();
 }
 
+void ImpSchematic::handle_show_in_pool_manager(const ActionConnection &conn)
+{
+    const auto &sheet = *core_schematic.get_sheet();
+    const auto pool_sel = conn.action_id == ActionID::SHOW_IN_PROJECT_POOL_MANAGER ? ShowInPoolManagerPool::CURRENT
+                                                                                   : ShowInPoolManagerPool::LAST;
+    for (const auto &it : canvas->get_selection()) {
+        if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
+            const auto &sym = sheet.symbols.at(it.uuid);
+            if (sym.component->part) {
+                show_in_pool_manager(ObjectType::PART, sym.component->part->uuid, pool_sel);
+                break;
+            }
+        }
+    }
+}
+
 
 void ImpSchematic::construct()
 {
@@ -641,26 +657,13 @@ void ImpSchematic::construct()
 
         connect_go_to_project_manager_action();
 
-        connect_action(ActionID::SHOW_IN_POOL_MANAGER, [this](const auto &conn) {
-            for (const auto &it : canvas->get_selection()) {
-                auto sheet = core_schematic.get_sheet();
-                if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-                    auto &sym = sheet->symbols.at(it.uuid);
-                    if (sym.component->part) {
-                        json j;
-                        j["op"] = "show-in-pool-mgr";
-                        j["type"] = "part";
-                        UUID pool_uuid;
-                        pool->get_filename(ObjectType::PART, sym.component->part->uuid, &pool_uuid);
-                        j["pool_uuid"] = (std::string)pool_uuid;
-                        j["uuid"] = (std::string)sym.component->part->uuid;
-                        this->send_json(j);
-                        break;
-                    }
-                }
-            }
-        });
+
+        connect_action(ActionID::SHOW_IN_POOL_MANAGER,
+                       sigc::mem_fun(*this, &ImpSchematic::handle_show_in_pool_manager));
+        connect_action(ActionID::SHOW_IN_PROJECT_POOL_MANAGER,
+                       sigc::mem_fun(*this, &ImpSchematic::handle_show_in_pool_manager));
         set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), false);
+        set_action_sensitive(make_action(ActionID::SHOW_IN_PROJECT_POOL_MANAGER), false);
     }
 
     connect_action(ActionID::MOVE_TO_OTHER_SHEET,
@@ -874,6 +877,7 @@ void ImpSchematic::update_action_sensitivity()
                                    [](const auto &x) { return x.type == ObjectType::SCHEMATIC_SYMBOL; });
         set_action_sensitive(make_action(ActionID::SHOW_IN_BROWSER), n_sym == 1);
         set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), n_sym == 1);
+        set_action_sensitive(make_action(ActionID::SHOW_IN_PROJECT_POOL_MANAGER), n_sym == 1);
         if (!has_board) {
             set_action_sensitive(make_action(ActionID::TO_BOARD), false);
         }
@@ -885,6 +889,7 @@ void ImpSchematic::update_action_sensitivity()
         set_action_sensitive(make_action(ActionID::TO_BOARD), false);
         set_action_sensitive(make_action(ActionID::SHOW_IN_BROWSER), false);
         set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), false);
+        set_action_sensitive(make_action(ActionID::SHOW_IN_PROJECT_POOL_MANAGER), false);
     }
     set_action_sensitive(make_action(ActionID::MOVE_TO_OTHER_SHEET), sel.size() > 0);
     set_action_sensitive(make_action(ActionID::GO_TO_BOARD), sockets_connected);

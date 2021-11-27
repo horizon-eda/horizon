@@ -690,6 +690,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Show in pool manager", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
           ActionCatalogItem::FLAGS_SPECIFIC}},
 
+        {{ActionID::SHOW_IN_PROJECT_POOL_MANAGER, ToolID::NONE},
+         {"Show in project pool manager", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
+          ActionCatalogItem::FLAGS_SPECIFIC}},
+
         {{ActionID::SELECT_ALL, ToolID::NONE},
          {"Select all", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
@@ -1103,6 +1107,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(GO_TO_BOARD),
         ACTION_LUT_ITEM(GO_TO_SCHEMATIC),
         ACTION_LUT_ITEM(SHOW_IN_POOL_MANAGER),
+        ACTION_LUT_ITEM(SHOW_IN_PROJECT_POOL_MANAGER),
         ACTION_LUT_ITEM(SELECT_ALL),
         ACTION_LUT_ITEM(PDF_EXPORT_WINDOW),
         ACTION_LUT_ITEM(EXPORT_PDF),

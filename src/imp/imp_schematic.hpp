@@ -98,5 +98,7 @@ private:
     UUIDVec instance_path_for_bar;
 
     const Block &get_block_for_group_tag_names() override;
+
+    void handle_show_in_pool_manager(const ActionConnection &conn);
 };
 } // namespace horizon

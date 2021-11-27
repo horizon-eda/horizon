@@ -1725,6 +1725,22 @@ void ImpBase::view_options_menu_append_action(const std::string &label, const st
     bu->show();
 }
 
+void ImpBase::show_in_pool_manager(ObjectType type, const UUID &uu, ShowInPoolManagerPool p)
+{
+    json j;
+    j["op"] = "show-in-pool-mgr";
+    j["type"] = object_type_lut.lookup_reverse(type);
+    const auto pool_uuids = pool->get_pool_uuids(type, uu);
+    UUID pool_uuid;
+    if ((p == ShowInPoolManagerPool::LAST) && pool_uuids.last)
+        pool_uuid = pool_uuids.last;
+    else
+        pool_uuid = pool_uuids.pool;
+    j["pool_uuid"] = (std::string)pool_uuid;
+    j["uuid"] = (std::string)uu;
+    send_json(j);
+}
+
 static const char *get_cursor_icon(ToolID id)
 {
     switch (id) {

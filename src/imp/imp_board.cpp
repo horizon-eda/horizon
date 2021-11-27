@@ -302,6 +302,7 @@ void ImpBoard::update_action_sensitivity()
 
     set_action_sensitive(make_action(ActionID::GO_TO_SCHEMATIC), sockets_connected);
     set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), n_pkgs == 1 && sockets_connected);
+    set_action_sensitive(make_action(ActionID::SHOW_IN_PROJECT_POOL_MANAGER), n_pkgs == 1 && sockets_connected);
     set_action_sensitive(make_action(ActionID::GO_TO_PROJECT_MANAGER), sockets_connected);
 
     ImpBase::update_action_sensitivity();
@@ -426,6 +427,22 @@ void ImpBoard::handle_select_more(const ActionConnection &conn)
     canvas->set_selection_mode(CanvasGL::SelectionMode::NORMAL);
 }
 
+void ImpBoard::handle_show_in_pool_manager(const ActionConnection &conn)
+{
+    const auto &board = *core_board.get_board();
+    const auto pool_sel = conn.action_id == ActionID::SHOW_IN_PROJECT_POOL_MANAGER ? ShowInPoolManagerPool::CURRENT
+                                                                                   : ShowInPoolManagerPool::LAST;
+    for (const auto &it : canvas->get_selection()) {
+        if (it.type == ObjectType::BOARD_PACKAGE) {
+            const auto &pkg = board.packages.at(it.uuid);
+            if (pkg.component->part) {
+                show_in_pool_manager(ObjectType::PART, pkg.component->part->uuid, pool_sel);
+                break;
+            }
+        }
+    }
+}
+
 void ImpBoard::construct()
 {
     ImpLayer::construct_layer_box(false);
@@ -502,20 +519,16 @@ void ImpBoard::construct()
                 if (it.type == ObjectType::BOARD_PACKAGE) {
                     const auto &pkg = board->packages.at(it.uuid);
                     if (pkg.component->part) {
-                        json j;
-                        j["op"] = "show-in-pool-mgr";
-                        j["type"] = "part";
-                        UUID pool_uuid;
-                        pool->get_filename(ObjectType::PART, pkg.component->part->uuid, &pool_uuid);
-                        j["pool_uuid"] = (std::string)pool_uuid;
-                        j["uuid"] = (std::string)pkg.component->part->uuid;
-                        this->send_json(j);
+                        show_in_pool_manager(ObjectType::PART, pkg.component->part->uuid,
+                                             ShowInPoolManagerPool::CURRENT);
+
                         break;
                     }
                 }
             }
         });
         set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), false);
+        set_action_sensitive(make_action(ActionID::SHOW_IN_PROJECT_POOL_MANAGER), false);
 
         connect_action(ActionID::BACKANNOTATE_CONNECTION_LINES, [this](const auto &conn) {
             json j;

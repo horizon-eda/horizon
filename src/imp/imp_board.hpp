@@ -92,5 +92,7 @@ private:
     sigc::connection reload_netlist_delay_conn;
 
     UUID net_from_selectable(const SelectableRef &sr);
+
+    void handle_show_in_pool_manager(const ActionConnection &conn);
 };
 } // namespace horizon

@@ -243,6 +243,9 @@ protected:
     }
     virtual void clear_highlights();
 
+    enum class ShowInPoolManagerPool { CURRENT, LAST };
+    void show_in_pool_manager(ObjectType type, const UUID &uu, ShowInPoolManagerPool p);
+
 private:
     void fix_cursor_pos();
     Glib::RefPtr<Gio::FileMonitor> preferences_monitor;
