@@ -22,7 +22,7 @@ json RuleSinglePinNet::serialize() const
     return j;
 }
 
-std::string RuleSinglePinNet::get_brief(const class Block *block) const
+std::string RuleSinglePinNet::get_brief(const class Block *block, class IPool *pool) const
 {
     return "";
 }

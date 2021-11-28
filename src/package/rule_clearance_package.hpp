@@ -9,7 +9,7 @@ public:
     RuleClearancePackage(const json &j);
     json serialize() const override;
 
-    std::string get_brief(const class Block *block = nullptr) const override;
+    std::string get_brief(const class Block *block = nullptr, class IPool *pool = nullptr) const override;
 
     uint64_t clearance_silkscreen_cu = 0.2_mm;
     uint64_t clearance_silkscreen_pkg = 0.2_mm;

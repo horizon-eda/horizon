@@ -27,7 +27,7 @@ json RuleVia::serialize() const
     return j;
 }
 
-std::string RuleVia::get_brief(const class Block *block) const
+std::string RuleVia::get_brief(const class Block *block, class IPool *pool) const
 {
     return "Match " + match.get_brief(block);
 }

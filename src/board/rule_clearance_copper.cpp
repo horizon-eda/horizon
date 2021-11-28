@@ -89,7 +89,7 @@ void RuleClearanceCopper::set_clearance(PatchType a, PatchType b, uint64_t c)
     clearances.at(get_index(a, b)) = c;
 }
 
-std::string RuleClearanceCopper::get_brief(const class Block *block) const
+std::string RuleClearanceCopper::get_brief(const class Block *block, class IPool *pool) const
 {
     std::stringstream ss;
     ss << "1<sup>st</sup> Match " << match_1.get_brief(block) << "\n";
