@@ -11,7 +11,7 @@ public:
     RuleClearanceCopperKeepout(const UUID &uu, const json &j);
     json serialize() const override;
 
-    std::string get_brief(const class Block *block = nullptr) const override;
+    std::string get_brief(const class Block *block = nullptr, class IPool *pool = nullptr) const override;
     bool is_match_all() const override;
 
     uint64_t get_clearance(PatchType pt_copper) const;

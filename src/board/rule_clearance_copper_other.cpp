@@ -66,7 +66,7 @@ json RuleClearanceCopperOther::serialize() const
     return j;
 }
 
-std::string RuleClearanceCopperOther::get_brief(const class Block *block) const
+std::string RuleClearanceCopperOther::get_brief(const class Block *block, class IPool *pool) const
 {
     std::stringstream ss;
     ss << "Match " << match.get_brief(block) << "\n";

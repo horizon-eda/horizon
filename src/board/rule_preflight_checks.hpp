@@ -9,6 +9,6 @@ public:
     RulePreflightChecks(const json &j);
     json serialize() const override;
 
-    std::string get_brief(const class Block *block = nullptr) const override;
+    std::string get_brief(const class Block *block = nullptr, class IPool *pool = nullptr) const override;
 };
 } // namespace horizon

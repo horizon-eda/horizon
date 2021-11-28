@@ -25,7 +25,7 @@ json RuleHoleSize::serialize() const
     return j;
 }
 
-std::string RuleHoleSize::get_brief(const class Block *block) const
+std::string RuleHoleSize::get_brief(const class Block *block, class IPool *pool) const
 {
     return "Match " + match.get_brief(block);
 }

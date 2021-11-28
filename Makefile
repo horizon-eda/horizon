@@ -132,6 +132,9 @@ SRC_COMMON = \
 	src/block_symbol/block_symbol.cpp\
 	src/blocks/dependency_graph.cpp\
 	src/util/installation_uuid.cpp\
+	src/rules/rule_match_component.cpp\
+	src/board/rule_shorted_pads.cpp\
+	src/rules/rule_match_component.cpp\
 
 
 ifeq ($(OS),Windows_NT)
@@ -435,6 +438,7 @@ SRC_IMP = \
 	src/imp/rules/rules_window.cpp\
 	src/imp/rules/rule_editor.cpp\
 	src/imp/rules/rule_match_editor.cpp\
+	src/imp/rules/rule_match_component_editor.cpp\
 	src/imp/rules/rule_match_keepout_editor.cpp\
 	src/imp/rules/rule_editor_hole_size.cpp\
 	src/imp/rules/rule_editor_clearance_silk_exp_copper.cpp\
@@ -449,6 +453,7 @@ SRC_IMP = \
 	src/imp/rules/rule_editor_clearance_copper_keepout.cpp\
 	src/imp/rules/rule_editor_layer_pair.cpp\
 	src/imp/rules/rule_editor_clearance_same_net.cpp\
+	src/imp/rules/rule_editor_shorted_pads.cpp\
 	src/imp/rules/import.cpp\
 	src/imp/rules/export.cpp\
 	src/widgets/location_entry.cpp\

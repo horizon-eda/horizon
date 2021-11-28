@@ -1,23 +1,23 @@
 #pragma once
 #include "common/common.hpp"
-#include "plane.hpp"
 #include "rules/rule.hpp"
 #include "rules/rule_match.hpp"
+#include "rules/rule_match_component.hpp"
+#include <set>
 
 namespace horizon {
-class RulePlane : public Rule {
+class RuleShortedPads : public Rule {
 public:
-    RulePlane(const UUID &uu);
-    RulePlane(const UUID &uu, const json &j, const RuleImportMap &import_map);
+    RuleShortedPads(const UUID &uu);
+    RuleShortedPads(const UUID &uu, const json &j);
     json serialize() const override;
 
     std::string get_brief(const class Block *block = nullptr, class IPool *pool = nullptr) const override;
-    bool is_match_all() const override;
     bool can_export() const override;
 
-    RuleMatch match;
-    int layer = 10000;
+    bool matches(const class Component *component, const class Net *net) const;
 
-    PlaneSettings settings;
+    RuleMatch match;
+    RuleMatchComponent match_component;
 };
 } // namespace horizon

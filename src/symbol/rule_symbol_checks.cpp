@@ -20,7 +20,7 @@ json RuleSymbolChecks::serialize() const
     return j;
 }
 
-std::string RuleSymbolChecks::get_brief(const class Block *block) const
+std::string RuleSymbolChecks::get_brief(const class Block *block, class IPool *pool) const
 {
     return "";
 }

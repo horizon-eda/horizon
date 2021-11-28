@@ -28,7 +28,7 @@ json RuleDiffpair::serialize() const
     return j;
 }
 
-std::string RuleDiffpair::get_brief(const class Block *block) const
+std::string RuleDiffpair::get_brief(const class Block *block, class IPool *pool) const
 {
     return "Net class " + (net_class ? block->net_classes.at(net_class).name : "?");
 }

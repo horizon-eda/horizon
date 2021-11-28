@@ -15,6 +15,7 @@
 #include "rule_editor_clearance_copper_keepout.hpp"
 #include "rule_editor_layer_pair.hpp"
 #include "rule_editor_clearance_same_net.hpp"
+#include "rule_editor_shorted_pads.hpp"
 #include "rules/cache.hpp"
 #include "rules/rule_descr.hpp"
 #include "rules/rules.hpp"
@@ -619,6 +620,10 @@ RuleEditor *RulesWindow::create_editor(Rule &r)
         e = new RuleEditorClearanceSameNet(r, core);
         break;
 
+    case RuleID::SHORTED_PADS:
+        e = new RuleEditorShortedPads(r, core);
+        break;
+
     default:
         e = new RuleEditor(r, core);
     }
@@ -643,8 +648,8 @@ void RulesWindow::update_rule_instances(RuleID id)
         delete it;
     }
     for (const auto &it : inst) {
-        auto la = Gtk::manage(
-                new RuleLabel(sg_order, it.second->get_brief(get_top_block()), id, it.first, it.second->get_order()));
+        auto la = Gtk::manage(new RuleLabel(sg_order, it.second->get_brief(get_top_block(), &core.get_pool()), id,
+                                            it.first, it.second->get_order()));
         la->set_sensitive(it.second->enabled);
         la->set_imported(it.second->imported);
         la->show();
@@ -665,7 +670,7 @@ void RulesWindow::update_rule_instance_labels()
     for (auto ch : lb_multi->get_children()) {
         auto la = dynamic_cast<RuleLabel *>(dynamic_cast<Gtk::ListBoxRow *>(ch)->get_child());
         auto rule = rules.get_rule(la->id, la->uuid);
-        la->set_text(rule->get_brief(get_top_block()));
+        la->set_text(rule->get_brief(get_top_block(), &core.get_pool()));
         la->set_sensitive(rule->enabled);
         la->set_order(rule->get_order());
         la->set_imported(rule->imported);

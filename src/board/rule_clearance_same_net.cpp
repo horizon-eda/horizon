@@ -68,7 +68,7 @@ json RuleClearanceSameNet::serialize() const
     return j;
 }
 
-std::string RuleClearanceSameNet::get_brief(const class Block *block) const
+std::string RuleClearanceSameNet::get_brief(const class Block *block, class IPool *pool) const
 {
     std::stringstream ss;
     ss << "Match " << match.get_brief(block) << "\n";
