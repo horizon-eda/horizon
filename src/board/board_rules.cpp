@@ -18,6 +18,7 @@ BoardRules::BoardRules(const BoardRules &other)
       rule_clearance_copper_other(other.rule_clearance_copper_other), rule_plane(other.rule_plane),
       rule_diffpair(other.rule_diffpair), rule_clearance_copper_keepout(other.rule_clearance_copper_keepout),
       rule_layer_pair(other.rule_layer_pair), rule_clearance_same_net(other.rule_clearance_same_net),
+      rule_shorted_pads(other.rule_shorted_pads),
       rule_clearance_silkscreen_exposed_copper(other.rule_clearance_silkscreen_exposed_copper),
       rule_parameters(other.rule_parameters), rule_preflight_checks(other.rule_preflight_checks)
 {
@@ -36,6 +37,7 @@ void BoardRules::operator=(const BoardRules &other)
     rule_clearance_copper_keepout = other.rule_clearance_copper_keepout;
     rule_layer_pair = other.rule_layer_pair;
     rule_clearance_same_net = other.rule_clearance_same_net;
+    rule_shorted_pads = other.rule_shorted_pads;
     rule_clearance_silkscreen_exposed_copper = other.rule_clearance_silkscreen_exposed_copper;
     rule_parameters = other.rule_parameters;
     rule_preflight_checks = other.rule_preflight_checks;
@@ -150,6 +152,14 @@ void BoardRules::import_rules(const json &j, const RuleImportMap &import_map)
         }
         fix_order(RuleID::CLEARANCE_SAME_NET);
     }
+    if (j.count("shorted_pads")) {
+        for (const auto &[key, value] : j.at("shorted_pads").items()) {
+            UUID u = key;
+            rule_shorted_pads.emplace(std::piecewise_construct, std::forward_as_tuple(u),
+                                      std::forward_as_tuple(u, value));
+        }
+        fix_order(RuleID::SHORTED_PADS);
+    }
     if (j.count("clearance_silkscreen_exposed_copper")) {
         const json &o = j["clearance_silkscreen_exposed_copper"];
         rule_clearance_silkscreen_exposed_copper = RuleClearanceSilkscreenExposedCopper(o, import_map);
@@ -191,6 +201,9 @@ void BoardRules::cleanup(const Block *block)
     for (auto &it : rule_clearance_same_net) {
         it.second.match.cleanup(block);
     }
+    for (auto &it : rule_shorted_pads) {
+        it.second.match.cleanup(block);
+    }
     for (auto &it : rule_diffpair) {
         if (!block->net_classes.count(it.second.net_class))
             it.second.net_class = block->net_class_default->uuid;
@@ -199,6 +212,7 @@ void BoardRules::cleanup(const Block *block)
 
 void BoardRules::apply(RuleID id, Board &brd, IPool &pool) const
 {
+    brd.rules = *this;
     if (id == RuleID::TRACK_WIDTH) {
         for (auto &it : brd.tracks) {
             auto &track = it.second;
@@ -234,6 +248,9 @@ void BoardRules::apply(RuleID id, Board &brd, IPool &pool) const
             }
         }
     }
+    else if (id == RuleID::SHORTED_PADS) {
+        brd.expand_flags |= Board::EXPAND_ALL_AIRWIRES;
+    }
 }
 
 json BoardRules::serialize_or_export(Rule::SerializeMode mode) const
@@ -256,6 +273,7 @@ json BoardRules::serialize_or_export(Rule::SerializeMode mode) const
     SERIALIZE(via);
     SERIALIZE(plane);
     SERIALIZE(diffpair);
+    SERIALIZE(shorted_pads);
     SERIALIZE(clearance_copper_other);
     SERIALIZE(clearance_copper_keepout);
     SERIALIZE(clearance_same_net);
@@ -285,6 +303,7 @@ std::set<RuleID> BoardRules::get_rule_ids() const
             RuleID::CLEARANCE_COPPER_OTHER,
             RuleID::PLANE,
             RuleID::DIFFPAIR,
+            RuleID::SHORTED_PADS,
             RuleID::PREFLIGHT_CHECKS,
             RuleID::CLEARANCE_COPPER_KEEPOUT,
             RuleID::LAYER_PAIR,
@@ -329,6 +348,8 @@ const Rule *BoardRules::get_rule(RuleID id, const UUID &uu) const
         return &rule_layer_pair.at(uu);
     case RuleID::CLEARANCE_SAME_NET:
         return &rule_clearance_same_net.at(uu);
+    case RuleID::SHORTED_PADS:
+        return &rule_shorted_pads.at(uu);
     default:
         return nullptr;
     }
@@ -396,6 +417,12 @@ std::map<UUID, const Rule *> BoardRules::get_rules(RuleID id) const
         }
         break;
 
+    case RuleID::SHORTED_PADS:
+        for (auto &it : rule_shorted_pads) {
+            r.emplace(it.first, &it.second);
+        }
+        break;
+
     default:;
     }
     return r;
@@ -442,6 +469,10 @@ void BoardRules::remove_rule(RuleID id, const UUID &uu)
 
     case RuleID::CLEARANCE_SAME_NET:
         rule_clearance_same_net.erase(uu);
+        break;
+
+    case RuleID::SHORTED_PADS:
+        rule_shorted_pads.erase(uu);
         break;
 
     default:;
@@ -493,6 +524,10 @@ Rule *BoardRules::add_rule(RuleID id)
 
     case RuleID::CLEARANCE_SAME_NET:
         r = &rule_clearance_same_net.emplace(uu, uu).first->second;
+        break;
+
+    case RuleID::SHORTED_PADS:
+        r = &rule_shorted_pads.emplace(uu, uu).first->second;
         break;
 
     default:

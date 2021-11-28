@@ -15,6 +15,7 @@
 #include "rule_editor_clearance_copper_keepout.hpp"
 #include "rule_editor_layer_pair.hpp"
 #include "rule_editor_clearance_same_net.hpp"
+#include "rule_editor_shorted_pads.hpp"
 #include "rules/cache.hpp"
 #include "rules/rule_descr.hpp"
 #include "rules/rules.hpp"
@@ -617,6 +618,10 @@ RuleEditor *RulesWindow::create_editor(Rule &r)
 
     case RuleID::CLEARANCE_SAME_NET:
         e = new RuleEditorClearanceSameNet(r, core);
+        break;
+
+    case RuleID::SHORTED_PADS:
+        e = new RuleEditorShortedPads(r, core);
         break;
 
     default:
