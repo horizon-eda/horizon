@@ -91,9 +91,9 @@ protected:
     Glib::RefPtr<Glib::Binding> grid_spacing_binding;
 
     std::map<ActionToolID, ActionConnection> action_connections;
-    ActionConnection &connect_action(ToolID tool_id, std::function<void(const ActionConnection &)> cb);
+
     ActionConnection &connect_action(ToolID tool_id);
-    ActionConnection &connect_action(ActionID action_id, std::function<void(const ActionConnection &)> cb);
+    ActionConnection &connect_action(ActionToolID id, std::function<void(const ActionConnection &)> cb);
 
     class RulesWindow *rules_window = nullptr;
 
@@ -129,14 +129,11 @@ protected:
     bool handle_close(const GdkEventAny *ev);
     json send_json(const json &j);
 
-    bool trigger_action(const ActionToolID &action);
-    bool trigger_action(ActionID aid);
-    bool trigger_action(ToolID tid);
+    bool trigger_action(ActionToolID action);
 
     void connect_go_to_project_manager_action();
 
-    void add_tool_action(ToolID tid, const std::string &action);
-    void add_tool_action(ActionID aid, const std::string &action);
+    void add_tool_action(ActionToolID id, const std::string &action);
     void add_hamburger_menu();
 
     Preferences preferences;
@@ -159,8 +156,8 @@ protected:
 
     Gtk::Button *create_action_button(ActionToolID action);
 
-    void set_action_sensitive(ActionToolID, bool v);
-    bool get_action_sensitive(ActionToolID) const;
+    void set_action_sensitive(ActionID, bool v);
+    bool get_action_sensitive(ActionID) const;
     virtual void update_action_sensitivity();
 
     typedef sigc::signal<void> type_signal_action_sensitive;
@@ -261,9 +258,6 @@ private:
     void handle_file_changed(const Glib::RefPtr<Gio::File> &file1, const Glib::RefPtr<Gio::File> &file2,
                              Gio::FileMonitorEvent ev);
 
-    ActionConnection &connect_action(ActionID action_id, ToolID tool_id,
-                                     std::function<void(const ActionConnection &)> cb);
-
     void create_context_menu(Gtk::Menu *parent, const std::set<SelectableRef> &sel);
     Gtk::MenuItem *create_context_menu_item(ActionToolID act);
 
@@ -288,7 +282,7 @@ private:
     Coordf cursor_pos_drag_begin;
     Coordi cursor_pos_grid_drag_begin;
 
-    std::map<ActionToolID, bool> action_sensitivity;
+    std::map<ActionID, bool> action_sensitivity;
     type_signal_action_sensitive s_signal_action_sensitive;
 
     bool property_panel_has_focus();

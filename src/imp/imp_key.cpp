@@ -173,7 +173,7 @@ bool ImpBase::handle_action_key(const GdkEventKey *ev)
                     can_begin = core->tool_can_begin(it.second.id.tool, selection).first;
                 }
                 else if (it.second.id.is_action()) {
-                    can_begin = get_action_sensitive(k);
+                    can_begin = get_action_sensitive(k.action);
                 }
                 if (can_begin) {
                     for (const auto &it2 : it.second.key_sequences) {

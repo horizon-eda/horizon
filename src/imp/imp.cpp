@@ -531,7 +531,7 @@ void ImpBase::run(int argc, char *argv[])
                 can_begin[it.first] = r;
             }
             else {
-                can_begin[it.first] = this->get_action_sensitive(it.first);
+                can_begin[it.first] = this->get_action_sensitive(it.first.action);
             }
         }
         tool_popover->set_can_begin(can_begin);
@@ -1202,7 +1202,8 @@ void ImpBase::create_context_menu(Gtk::Menu *parent, const std::set<SelectableRe
                     }
                 }
                 else {
-                    if (get_action_sensitive(it.first) && (it.second.flags & ActionCatalogItem::FLAGS_SPECIFIC)) {
+                    if (get_action_sensitive(it.first.action)
+                        && (it.second.flags & ActionCatalogItem::FLAGS_SPECIFIC)) {
                         auto la_sub = create_context_menu_item(it.first);
                         ActionID action_id = it.first.action;
                         std::set<SelectableRef> sr(sel);

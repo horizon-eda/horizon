@@ -148,23 +148,18 @@ void ImpBase::add_tool_button(ToolID id, const std::string &label, bool left)
         main_window->header->pack_end(*button);
 }
 
-void ImpBase::add_tool_action(ToolID tid, const std::string &action)
+void ImpBase::add_tool_action(ActionToolID id, const std::string &action)
 {
-    auto tool_action = main_window->add_action(action, [this, tid] { tool_begin(tid); });
+    auto tool_action = main_window->add_action(action, [this, id] { trigger_action(id); });
 }
 
-void ImpBase::add_tool_action(ActionID aid, const std::string &action)
-{
-    auto tool_action = main_window->add_action(action, [this, aid] { trigger_action(aid); });
-}
-
-void ImpBase::set_action_sensitive(ActionToolID action, bool v)
+void ImpBase::set_action_sensitive(ActionID action, bool v)
 {
     action_sensitivity[action] = v;
     s_signal_action_sensitive.emit();
 }
 
-bool ImpBase::get_action_sensitive(ActionToolID action) const
+bool ImpBase::get_action_sensitive(ActionID action) const
 {
     if (core->tool_is_active())
         return action_catalog.at(action).flags & ActionCatalogItem::FLAGS_IN_TOOL;
@@ -200,18 +195,21 @@ Gtk::Button *ImpBase::create_action_button(ActionToolID action)
 {
     auto &catitem = action_catalog.at(action);
     auto button = Gtk::manage(new Gtk::Button(catitem.name));
-    signal_action_sensitive().connect([this, button, action] { button->set_sensitive(get_action_sensitive(action)); });
     button->signal_clicked().connect([this, action] { trigger_action(action); });
-    button->set_sensitive(get_action_sensitive(action));
+    if (action.is_action()) {
+        signal_action_sensitive().connect(
+                [this, button, action] { button->set_sensitive(get_action_sensitive(action.action)); });
+        button->set_sensitive(get_action_sensitive(action.action));
+    }
     return button;
 }
 
-bool ImpBase::trigger_action(const ActionToolID &action)
+bool ImpBase::trigger_action(ActionToolID action)
 {
     if (core->tool_is_active() && !(action_catalog.at(action).flags & ActionCatalogItem::FLAGS_IN_TOOL)) {
         return false;
     }
-    if (!get_action_sensitive(action))
+    if (action.is_action() && !get_action_sensitive(action.action))
         return false;
     main_window->key_hint_set_visible(false);
     if (keys_current.size()) {
@@ -223,31 +221,10 @@ bool ImpBase::trigger_action(const ActionToolID &action)
     return true;
 }
 
-bool ImpBase::trigger_action(ActionID aid)
-{
-    return trigger_action({aid, ToolID::NONE});
-}
-
-bool ImpBase::trigger_action(ToolID tid)
-{
-    return trigger_action({ActionID::TOOL, tid});
-}
-
 void ImpBase::handle_tool_action(const ActionConnection &conn)
 {
     assert(conn.id.is_tool());
     tool_begin(conn.id.tool);
-}
-
-
-ActionConnection &ImpBase::connect_action(ActionID action_id, std::function<void(const ActionConnection &)> cb)
-{
-    return connect_action(action_id, ToolID::NONE, cb);
-}
-
-ActionConnection &ImpBase::connect_action(ToolID tool_id, std::function<void(const ActionConnection &)> cb)
-{
-    return connect_action(ActionID::TOOL, tool_id, cb);
 }
 
 ActionConnection &ImpBase::connect_action(ToolID tool_id)
@@ -255,18 +232,16 @@ ActionConnection &ImpBase::connect_action(ToolID tool_id)
     return connect_action(tool_id, sigc::mem_fun(*this, &ImpBase::handle_tool_action));
 }
 
-ActionConnection &ImpBase::connect_action(ActionID action_id, ToolID tool_id,
-                                          std::function<void(const ActionConnection &)> cb)
+ActionConnection &ImpBase::connect_action(ActionToolID id, std::function<void(const ActionConnection &)> cb)
 {
-    const auto key = ActionToolID(action_id, tool_id);
-    if (action_connections.count(key)) {
+    if (action_connections.count(id)) {
         throw std::runtime_error("duplicate action");
     }
-    if (action_catalog.count(key) == 0) {
+    if (action_catalog.count(id) == 0) {
         throw std::runtime_error("invalid action");
     }
     auto &act = action_connections
-                        .emplace(std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(key, cb))
+                        .emplace(std::piecewise_construct, std::forward_as_tuple(id), std::forward_as_tuple(id, cb))
                         .first->second;
 
     return act;
