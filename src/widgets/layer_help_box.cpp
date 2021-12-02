@@ -27,12 +27,12 @@ LayerHelpBox::LayerHelpBox(class IPool &pool) : Gtk::ScrolledWindow()
                 if (url.find("a:") == 0) {
                     std::string action = url.substr(2);
                     std::cout << "act " << action << std::endl;
-                    s_signal_trigger_action.emit(make_action(action_lut.lookup(action)));
+                    s_signal_trigger_action.emit(action_lut.lookup(action));
                 }
                 else if (url.find("t:") == 0) {
                     std::string tool = url.substr(2);
                     std::cout << "tool " << tool << std::endl;
-                    s_signal_trigger_action.emit(make_action(tool_lut.lookup(tool)));
+                    s_signal_trigger_action.emit(tool_lut.lookup(tool));
                 }
                 return true;
             },

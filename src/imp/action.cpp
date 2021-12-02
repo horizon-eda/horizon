@@ -6,6 +6,31 @@
 
 namespace horizon {
 
+ActionToolID::ActionToolID(ActionID a) : action(a), tool(ToolID::NONE)
+{
+}
+
+ActionToolID::ActionToolID(ToolID t) : action(ActionID::TOOL), tool(t)
+{
+}
+
+ActionToolID::ActionToolID() : action(ActionID::NONE), tool(ToolID::NONE)
+{
+}
+
+bool ActionToolID::is_tool() const
+{
+    return action == ActionID::TOOL;
+}
+bool ActionToolID::is_action() const
+{
+    return action != ActionID::TOOL && tool == ToolID::NONE;
+}
+bool ActionToolID::is_valid() const
+{
+    return action != ActionID::NONE;
+}
+
 std::string key_sequence_item_to_string(const KeySequenceItem &it)
 {
     const auto &[val, mod] = it;
@@ -93,16 +118,6 @@ KeyMatchResult key_sequence_match(const KeySequence &keys_current, const KeySequ
         return KeyMatchResult::COMPLETE;
     else
         return KeyMatchResult::PREFIX;
-}
-
-ActionToolID make_action(ActionID id)
-{
-    return {id, ToolID::NONE};
-}
-
-ActionToolID make_action(ToolID id)
-{
-    return {ActionID::TOOL, id};
 }
 
 } // namespace horizon

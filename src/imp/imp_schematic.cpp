@@ -251,14 +251,14 @@ void ImpSchematic::handle_next_prev_sheet(const ActionConnection &conn)
 {
     const auto &sch = *core_schematic.get_current_schematic();
     const int sheet_idx_current = core_schematic.get_sheet()->index;
-    const int inc = conn.action_id == ActionID::PREV_SHEET ? -1 : 1;
+    const int inc = conn.id.action == ActionID::PREV_SHEET ? -1 : 1;
     const int sheet_idx_next = sheet_idx_current + inc;
     auto next_sheet = std::find_if(sch.sheets.begin(), sch.sheets.end(),
                                    [sheet_idx_next](const auto &x) { return (int)x.second.index == sheet_idx_next; });
     if (next_sheet != sch.sheets.end()) {
         sheet_box->select_sheet(next_sheet->second.uuid);
     }
-    else if (conn.action_id == ActionID::PREV_SHEET && core_schematic.get_instance_path().size()) {
+    else if (conn.id.action == ActionID::PREV_SHEET && core_schematic.get_instance_path().size()) {
         trigger_action(ActionID::POP_OUT_OF_BLOCK);
     }
 }
@@ -504,7 +504,7 @@ int ImpSchematic::get_board_pid()
 void ImpSchematic::handle_show_in_pool_manager(const ActionConnection &conn)
 {
     const auto &sheet = *core_schematic.get_sheet();
-    const auto pool_sel = conn.action_id == ActionID::SHOW_IN_PROJECT_POOL_MANAGER ? ShowInPoolManagerPool::CURRENT
+    const auto pool_sel = conn.id.action == ActionID::SHOW_IN_PROJECT_POOL_MANAGER ? ShowInPoolManagerPool::CURRENT
                                                                                    : ShowInPoolManagerPool::LAST;
     for (const auto &it : canvas->get_selection()) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
@@ -616,7 +616,7 @@ void ImpSchematic::construct()
             allow_set_foreground_window(this->get_board_pid());
             this->send_json(j);
         });
-        set_action_sensitive(make_action(ActionID::TO_BOARD), false);
+        set_action_sensitive(ActionID::TO_BOARD, false);
 
         connect_action(ActionID::SHOW_IN_BROWSER, [this](const auto &conn) {
             for (const auto &it : canvas->get_selection()) {
@@ -643,7 +643,7 @@ void ImpSchematic::construct()
             j["op"] = "reload-netlist";
             this->send_json(j);
         });
-        set_action_sensitive(make_action(ActionID::SAVE_RELOAD_NETLIST), false);
+        set_action_sensitive(ActionID::SAVE_RELOAD_NETLIST, false);
 
         connect_action(ActionID::GO_TO_BOARD, [this](const auto &conn) {
             json j;
@@ -662,8 +662,8 @@ void ImpSchematic::construct()
                        sigc::mem_fun(*this, &ImpSchematic::handle_show_in_pool_manager));
         connect_action(ActionID::SHOW_IN_PROJECT_POOL_MANAGER,
                        sigc::mem_fun(*this, &ImpSchematic::handle_show_in_pool_manager));
-        set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), false);
-        set_action_sensitive(make_action(ActionID::SHOW_IN_PROJECT_POOL_MANAGER), false);
+        set_action_sensitive(ActionID::SHOW_IN_POOL_MANAGER, false);
+        set_action_sensitive(ActionID::SHOW_IN_PROJECT_POOL_MANAGER, false);
     }
 
     connect_action(ActionID::MOVE_TO_OTHER_SHEET,
@@ -844,16 +844,16 @@ void ImpSchematic::construct()
         }
     });
 
-    add_action_button_schematic(make_action(ActionID::PLACE_PART));
-    add_action_button_schematic(make_action(ToolID::DRAW_NET));
+    add_action_button_schematic(ActionID::PLACE_PART);
+    add_action_button_schematic(ToolID::DRAW_NET);
     {
-        auto &b = add_action_button_schematic(make_action(ToolID::PLACE_NET_LABEL));
-        b.add_action(make_action(ToolID::PLACE_BUS_LABEL));
-        b.add_action(make_action(ToolID::PLACE_BUS_RIPPER));
+        auto &b = add_action_button_schematic(ToolID::PLACE_NET_LABEL);
+        b.add_action(ToolID::PLACE_BUS_LABEL);
+        b.add_action(ToolID::PLACE_BUS_RIPPER);
     }
-    add_action_button_schematic(make_action(ToolID::PLACE_POWER_SYMBOL));
+    add_action_button_schematic(ToolID::PLACE_POWER_SYMBOL);
     add_action_button_line();
-    add_action_button(make_action(ToolID::PLACE_TEXT));
+    add_action_button(ToolID::PLACE_TEXT);
 
     update_monitor();
 }
@@ -872,28 +872,28 @@ void ImpSchematic::update_action_sensitivity()
         json req;
         req["op"] = "has-board";
         const auto has_board = send_json(req).get<bool>();
-        set_action_sensitive(make_action(ActionID::SAVE_RELOAD_NETLIST), has_board);
+        set_action_sensitive(ActionID::SAVE_RELOAD_NETLIST, has_board);
         auto n_sym = std::count_if(sel.begin(), sel.end(),
                                    [](const auto &x) { return x.type == ObjectType::SCHEMATIC_SYMBOL; });
-        set_action_sensitive(make_action(ActionID::SHOW_IN_BROWSER), n_sym == 1);
-        set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), n_sym == 1);
-        set_action_sensitive(make_action(ActionID::SHOW_IN_PROJECT_POOL_MANAGER), n_sym == 1);
+        set_action_sensitive(ActionID::SHOW_IN_BROWSER, n_sym == 1);
+        set_action_sensitive(ActionID::SHOW_IN_POOL_MANAGER, n_sym == 1);
+        set_action_sensitive(ActionID::SHOW_IN_PROJECT_POOL_MANAGER, n_sym == 1);
         if (!has_board) {
-            set_action_sensitive(make_action(ActionID::TO_BOARD), false);
+            set_action_sensitive(ActionID::TO_BOARD, false);
         }
         else {
-            set_action_sensitive(make_action(ActionID::TO_BOARD), n_sym && core_schematic.in_hierarchy());
+            set_action_sensitive(ActionID::TO_BOARD, n_sym && core_schematic.in_hierarchy());
         }
     }
     else {
-        set_action_sensitive(make_action(ActionID::TO_BOARD), false);
-        set_action_sensitive(make_action(ActionID::SHOW_IN_BROWSER), false);
-        set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), false);
-        set_action_sensitive(make_action(ActionID::SHOW_IN_PROJECT_POOL_MANAGER), false);
+        set_action_sensitive(ActionID::TO_BOARD, false);
+        set_action_sensitive(ActionID::SHOW_IN_BROWSER, false);
+        set_action_sensitive(ActionID::SHOW_IN_POOL_MANAGER, false);
+        set_action_sensitive(ActionID::SHOW_IN_PROJECT_POOL_MANAGER, false);
     }
-    set_action_sensitive(make_action(ActionID::MOVE_TO_OTHER_SHEET), sel.size() > 0);
-    set_action_sensitive(make_action(ActionID::GO_TO_BOARD), sockets_connected);
-    set_action_sensitive(make_action(ActionID::GO_TO_PROJECT_MANAGER), sockets_connected);
+    set_action_sensitive(ActionID::MOVE_TO_OTHER_SHEET, sel.size() > 0);
+    set_action_sensitive(ActionID::GO_TO_BOARD, sockets_connected);
+    set_action_sensitive(ActionID::GO_TO_PROJECT_MANAGER, sockets_connected);
 
     const bool can_highlight_net = std::any_of(sel.begin(), sel.end(), [](const auto &x) {
         switch (x.type) {
@@ -907,8 +907,8 @@ void ImpSchematic::update_action_sensitivity()
             return false;
         }
     });
-    set_action_sensitive(make_action(ActionID::HIGHLIGHT_NET), can_highlight_net);
-    set_action_sensitive(make_action(ActionID::HIGHLIGHT_NET_CLASS), can_highlight_net);
+    set_action_sensitive(ActionID::HIGHLIGHT_NET, can_highlight_net);
+    set_action_sensitive(ActionID::HIGHLIGHT_NET_CLASS, can_highlight_net);
     bool can_higlight_group = false;
     bool can_higlight_tag = false;
     if (sel.size() == 1 && (*sel.begin()).type == ObjectType::SCHEMATIC_SYMBOL) {
@@ -920,16 +920,16 @@ void ImpSchematic::update_action_sensitivity()
         }
     }
 
-    set_action_sensitive(make_action(ActionID::NEXT_SHEET), !core_schematic.get_block_symbol_mode());
-    set_action_sensitive(make_action(ActionID::PREV_SHEET), !core_schematic.get_block_symbol_mode());
+    set_action_sensitive(ActionID::NEXT_SHEET, !core_schematic.get_block_symbol_mode());
+    set_action_sensitive(ActionID::PREV_SHEET, !core_schematic.get_block_symbol_mode());
 
-    set_action_sensitive(make_action(ActionID::HIGHLIGHT_GROUP), can_higlight_group);
-    set_action_sensitive(make_action(ActionID::HIGHLIGHT_TAG), can_higlight_tag);
+    set_action_sensitive(ActionID::HIGHLIGHT_GROUP, can_higlight_group);
+    set_action_sensitive(ActionID::HIGHLIGHT_TAG, can_higlight_tag);
     bool have_block_sym = sel_count_type(sel, ObjectType::SCHEMATIC_BLOCK_SYMBOL) == 1;
-    set_action_sensitive(make_action(ActionID::PUSH_INTO_BLOCK), have_block_sym && core_schematic.in_hierarchy());
-    set_action_sensitive(make_action(ActionID::EDIT_BLOCK_SYMBOL), have_block_sym);
-    set_action_sensitive(make_action(ActionID::POP_OUT_OF_BLOCK), core_schematic.get_instance_path().size());
-    set_action_sensitive(make_action(ActionID::GO_TO_BLOCK_SYMBOL), !core_schematic.current_block_is_top());
+    set_action_sensitive(ActionID::PUSH_INTO_BLOCK, have_block_sym && core_schematic.in_hierarchy());
+    set_action_sensitive(ActionID::EDIT_BLOCK_SYMBOL, have_block_sym);
+    set_action_sensitive(ActionID::POP_OUT_OF_BLOCK, core_schematic.get_instance_path().size());
+    set_action_sensitive(ActionID::GO_TO_BLOCK_SYMBOL, !core_schematic.current_block_is_top());
     ImpBase::update_action_sensitivity();
 }
 
@@ -1047,7 +1047,7 @@ void ImpSchematic::handle_tool_change(ToolID id)
 
 void ImpSchematic::handle_highlight_group_tag(const ActionConnection &a)
 {
-    bool tag_mode = a.action_id == ActionID::HIGHLIGHT_TAG;
+    const bool tag_mode = a.id.action == ActionID::HIGHLIGHT_TAG;
     auto sel = canvas->get_selection();
     if (sel.size() == 1 && (*sel.begin()).type == ObjectType::SCHEMATIC_SYMBOL) {
         auto comp_sel = core_schematic.get_sheet()->symbols.at((*sel.begin()).uuid).component;
@@ -1428,19 +1428,20 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
 
 ActionToolID ImpSchematic::get_doubleclick_action(ObjectType type, const UUID &uu)
 {
-    auto a = ImpBase::get_doubleclick_action(type, uu);
-    if (a.first != ActionID::NONE)
+    const auto a = ImpBase::get_doubleclick_action(type, uu);
+    if (a.is_valid())
         return a;
+
     switch (type) {
     case ObjectType::NET_LABEL:
     case ObjectType::LINE_NET:
-        return make_action(ToolID::ENTER_DATUM);
-        break;
+        return ToolID::ENTER_DATUM;
+
     case ObjectType::SCHEMATIC_BLOCK_SYMBOL:
-        return make_action(ActionID::PUSH_INTO_BLOCK);
-        break;
+        return ActionID::PUSH_INTO_BLOCK;
+
     default:
-        return {ActionID::NONE, ToolID::NONE};
+        return {};
     }
 }
 

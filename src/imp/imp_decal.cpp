@@ -52,7 +52,7 @@ void ImpDecal::construct()
 
     add_action_button_line();
     add_action_button_polygon();
-    add_action_button(make_action(ToolID::PLACE_TEXT));
+    add_action_button(ToolID::PLACE_TEXT);
 
     update_header();
 }

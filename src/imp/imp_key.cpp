@@ -166,13 +166,13 @@ bool ImpBase::handle_action_key(const GdkEventKey *ev)
         auto selection = canvas->get_selection();
         update_action_sensitivity();
         for (auto &it : action_connections) {
-            auto k = std::make_pair(it.second.action_id, it.second.tool_id);
+            const auto k = it.second.id;
             if (action_catalog.at(k).availability & get_editor_type_for_action()) {
                 bool can_begin = false;
-                if (it.second.action_id == ActionID::TOOL && !core->tool_is_active()) {
-                    can_begin = core->tool_can_begin(it.second.tool_id, selection).first;
+                if (it.second.id.is_tool() && !core->tool_is_active()) {
+                    can_begin = core->tool_can_begin(it.second.id.tool, selection).first;
                 }
-                else if (it.second.tool_id == ToolID::NONE) {
+                else if (it.second.id.is_action()) {
                     can_begin = get_action_sensitive(k);
                 }
                 if (can_begin) {
@@ -206,7 +206,7 @@ bool ImpBase::handle_action_key(const GdkEventKey *ev)
             keys_current.clear();
             main_window->key_hint_set_visible(false);
             auto conn = connections_matched.begin()->first;
-            if (!trigger_action({conn->action_id, conn->tool_id})) {
+            if (!trigger_action(conn->id)) {
                 reset_tool_hint_label();
                 return false;
             }
@@ -234,7 +234,7 @@ bool ImpBase::handle_action_key(const GdkEventKey *ev)
                 if (res == KeyMatchResult::COMPLETE) {
                     have_conflict = true;
                 }
-                conflicts.emplace_back(action_catalog.at(std::make_pair(conn->action_id, conn->tool_id)).name, seq);
+                conflicts.emplace_back(action_catalog.at(conn->id).name, seq);
             }
             for (const auto &[act, it] : in_tool_actions_matched) {
                 const auto &[res, seq] = it;
@@ -269,8 +269,7 @@ bool ImpBase::handle_action_key(const GdkEventKey *ev)
                 rtrim(seq_label);
                 seq_label += "</b>";
 
-                auto la = Gtk::manage(
-                        new KeyLabel(main_window->key_hint_size_group, seq_label, {conn->action_id, conn->tool_id}));
+                auto la = Gtk::manage(new KeyLabel(main_window->key_hint_size_group, seq_label, conn->id));
                 main_window->key_hint_box->append(*la);
                 la->show();
             }
@@ -306,10 +305,10 @@ void ImpBase::apply_arrow_keys()
 
     {
         const auto mod0 = static_cast<GdkModifierType>(0);
-        action_connections.at(make_action(ToolID::MOVE_KEY_LEFT)).key_sequences = {{{left, mod0}}};
-        action_connections.at(make_action(ToolID::MOVE_KEY_RIGHT)).key_sequences = {{{right, mod0}}};
-        action_connections.at(make_action(ToolID::MOVE_KEY_UP)).key_sequences = {{{up, mod0}}};
-        action_connections.at(make_action(ToolID::MOVE_KEY_DOWN)).key_sequences = {{{down, mod0}}};
+        action_connections.at(ToolID::MOVE_KEY_LEFT).key_sequences = {{{left, mod0}}};
+        action_connections.at(ToolID::MOVE_KEY_RIGHT).key_sequences = {{{right, mod0}}};
+        action_connections.at(ToolID::MOVE_KEY_UP).key_sequences = {{{up, mod0}}};
+        action_connections.at(ToolID::MOVE_KEY_DOWN).key_sequences = {{{down, mod0}}};
 
         in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_LEFT] = {{{left, mod0}}};
         in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_RIGHT] = {{{right, mod0}}};
@@ -327,10 +326,10 @@ void ImpBase::apply_arrow_keys()
             grid_fine_modifier = GDK_CONTROL_MASK;
             break;
         }
-        action_connections.at(make_action(ToolID::MOVE_KEY_FINE_LEFT)).key_sequences = {{{left, grid_fine_modifier}}};
-        action_connections.at(make_action(ToolID::MOVE_KEY_FINE_RIGHT)).key_sequences = {{{right, grid_fine_modifier}}};
-        action_connections.at(make_action(ToolID::MOVE_KEY_FINE_UP)).key_sequences = {{{up, grid_fine_modifier}}};
-        action_connections.at(make_action(ToolID::MOVE_KEY_FINE_DOWN)).key_sequences = {{{down, grid_fine_modifier}}};
+        action_connections.at(ToolID::MOVE_KEY_FINE_LEFT).key_sequences = {{{left, grid_fine_modifier}}};
+        action_connections.at(ToolID::MOVE_KEY_FINE_RIGHT).key_sequences = {{{right, grid_fine_modifier}}};
+        action_connections.at(ToolID::MOVE_KEY_FINE_UP).key_sequences = {{{up, grid_fine_modifier}}};
+        action_connections.at(ToolID::MOVE_KEY_FINE_DOWN).key_sequences = {{{down, grid_fine_modifier}}};
         in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_LEFT_FINE] = {{{left, grid_fine_modifier}}};
         in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_RIGHT_FINE] = {{{right, grid_fine_modifier}}};
         in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_UP_FINE] = {{{up, grid_fine_modifier}}};

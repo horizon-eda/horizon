@@ -10,8 +10,8 @@ namespace horizon {
 void ImpBase::init_action()
 {
     for (const auto &it : action_catalog) {
-        if ((it.first.first == ActionID::TOOL) && (it.second.availability & get_editor_type_for_action())) {
-            connect_action(it.first.second);
+        if (it.first.is_tool() && (it.second.availability & get_editor_type_for_action())) {
+            connect_action(it.first.tool);
         }
     }
     connect_action(ActionID::PAN_LEFT, sigc::mem_fun(*this, &ImpBase::handle_pan_action));
@@ -53,18 +53,18 @@ ActionButtonMenu &ImpBase::add_action_button_menu(const char *icon_name)
 
 ActionButton &ImpBase::add_action_button_polygon()
 {
-    auto &b = add_action_button(make_action(ToolID::DRAW_POLYGON));
-    b.add_action(make_action(ToolID::DRAW_POLYGON_RECTANGLE));
-    b.add_action(make_action(ToolID::DRAW_POLYGON_CIRCLE));
+    auto &b = add_action_button(ToolID::DRAW_POLYGON);
+    b.add_action(ToolID::DRAW_POLYGON_RECTANGLE);
+    b.add_action(ToolID::DRAW_POLYGON_CIRCLE);
     return b;
 }
 
 ActionButton &ImpBase::add_action_button_line()
 {
-    auto &b = add_action_button(make_action(ToolID::DRAW_LINE));
-    b.add_action(make_action(ToolID::DRAW_LINE_RECTANGLE));
-    b.add_action(make_action(ToolID::DRAW_LINE_CIRCLE));
-    b.add_action(make_action(ToolID::DRAW_ARC));
+    auto &b = add_action_button(ToolID::DRAW_LINE);
+    b.add_action(ToolID::DRAW_LINE_RECTANGLE);
+    b.add_action(ToolID::DRAW_LINE_CIRCLE);
+    b.add_action(ToolID::DRAW_ARC);
     return b;
 }
 
@@ -176,11 +176,11 @@ bool ImpBase::get_action_sensitive(ActionToolID action) const
 
 void ImpBase::update_action_sensitivity()
 {
-    set_action_sensitive(make_action(ActionID::SAVE), !read_only && core->get_needs_save());
-    set_action_sensitive(make_action(ActionID::UNDO), core->can_undo());
-    set_action_sensitive(make_action(ActionID::REDO), core->can_redo());
+    set_action_sensitive(ActionID::SAVE, !read_only && core->get_needs_save());
+    set_action_sensitive(ActionID::UNDO, core->can_undo());
+    set_action_sensitive(ActionID::REDO, core->can_redo());
     auto sel = canvas->get_selection();
-    set_action_sensitive(make_action(ActionID::COPY), sel.size() > 0);
+    set_action_sensitive(ActionID::COPY, sel.size() > 0);
     bool can_select_polygon = std::any_of(sel.begin(), sel.end(), [](const auto &x) {
         switch (x.type) {
         case ObjectType::POLYGON_ARC_CENTER:
@@ -192,7 +192,7 @@ void ImpBase::update_action_sensitivity()
             return false;
         }
     });
-    set_action_sensitive(make_action(ActionID::SELECT_POLYGON), can_select_polygon);
+    set_action_sensitive(ActionID::SELECT_POLYGON, can_select_polygon);
 }
 
 
@@ -235,8 +235,8 @@ bool ImpBase::trigger_action(ToolID tid)
 
 void ImpBase::handle_tool_action(const ActionConnection &conn)
 {
-    assert(conn.action_id == ActionID::TOOL);
-    tool_begin(conn.tool_id);
+    assert(conn.id.is_tool());
+    tool_begin(conn.id.tool);
 }
 
 
@@ -258,7 +258,7 @@ ActionConnection &ImpBase::connect_action(ToolID tool_id)
 ActionConnection &ImpBase::connect_action(ActionID action_id, ToolID tool_id,
                                           std::function<void(const ActionConnection &)> cb)
 {
-    const auto key = std::make_pair(action_id, tool_id);
+    const auto key = ActionToolID(action_id, tool_id);
     if (action_connections.count(key)) {
         throw std::runtime_error("duplicate action");
     }
@@ -275,7 +275,7 @@ ActionConnection &ImpBase::connect_action(ActionID action_id, ToolID tool_id,
 void ImpBase::handle_pan_action(const ActionConnection &c)
 {
     Coordf d;
-    switch (c.action_id) {
+    switch (c.id.action) {
     case ActionID::PAN_DOWN:
         d.y = -1;
         break;
@@ -302,7 +302,7 @@ void ImpBase::handle_pan_action(const ActionConnection &c)
 void ImpBase::handle_zoom_action(const ActionConnection &conn)
 {
     auto inc = 1;
-    if (conn.action_id == ActionID::ZOOM_OUT)
+    if (conn.id.action == ActionID::ZOOM_OUT)
         inc = -1;
 
     Coordf c;

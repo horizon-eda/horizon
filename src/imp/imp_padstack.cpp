@@ -128,26 +128,27 @@ void ImpPadstack::construct()
     });
     core->signal_tool_changed().connect([this](ToolID t) { parameter_window->set_can_apply(t == ToolID::NONE); });
 
-    add_action_button(make_action(ToolID::PLACE_SHAPE));
-    add_action_button(make_action(ToolID::PLACE_SHAPE_RECTANGLE));
-    add_action_button(make_action(ToolID::PLACE_SHAPE_OBROUND));
-    add_action_button(make_action(ToolID::PLACE_HOLE)).set_margin_top(5);
-    add_action_button(make_action(ToolID::PLACE_HOLE_SLOT));
+    add_action_button(ToolID::PLACE_SHAPE);
+    add_action_button(ToolID::PLACE_SHAPE_RECTANGLE);
+    add_action_button(ToolID::PLACE_SHAPE_OBROUND);
+    add_action_button(ToolID::PLACE_HOLE).set_margin_top(5);
+    add_action_button(ToolID::PLACE_HOLE_SLOT);
     add_action_button_polygon().set_margin_top(5);
     update_header();
 }
 
 ActionToolID ImpPadstack::get_doubleclick_action(ObjectType type, const UUID &uu)
 {
-    auto a = ImpBase::get_doubleclick_action(type, uu);
-    if (a.first != ActionID::NONE)
+    const auto a = ImpBase::get_doubleclick_action(type, uu);
+    if (a.is_valid())
         return a;
+
     switch (type) {
     case ObjectType::SHAPE:
-        return make_action(ToolID::EDIT_SHAPE);
-        break;
+        return ToolID::EDIT_SHAPE;
+
     default:
-        return {ActionID::NONE, ToolID::NONE};
+        return {};
     }
 }
 

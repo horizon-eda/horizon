@@ -86,7 +86,7 @@ std::string ImpPackage::get_hud_text(std::set<SelectableRef> &sel)
 void ImpPackage::update_action_sensitivity()
 {
     auto sel = canvas->get_selection();
-    set_action_sensitive(make_action(ActionID::EDIT_PADSTACK),
+    set_action_sensitive(ActionID::EDIT_PADSTACK,
                          sockets_connected && std::any_of(sel.begin(), sel.end(), [](const auto &x) {
                              return x.type == ObjectType::PAD;
                          }));
@@ -326,18 +326,18 @@ void ImpPackage::construct()
         }
     });
 
-    add_action_button(make_action(ToolID::PLACE_PAD));
+    add_action_button(ToolID::PLACE_PAD);
     add_action_button_line();
     add_action_button_polygon();
-    add_action_button(make_action(ToolID::PLACE_TEXT));
-    add_action_button(make_action(ToolID::DRAW_DIMENSION));
+    add_action_button(ToolID::PLACE_TEXT);
+    add_action_button(ToolID::DRAW_DIMENSION);
 
     {
         auto &b = add_action_button_menu("action-generate-symbolic");
         b.set_margin_top(5);
-        b.add_action(make_action(ActionID::FOOTPRINT_GENERATOR));
-        b.add_action(make_action(ToolID::GENERATE_COURTYARD));
-        b.add_action(make_action(ToolID::GENERATE_SILKSCREEN));
+        b.add_action(ActionID::FOOTPRINT_GENERATOR);
+        b.add_action(ToolID::GENERATE_COURTYARD);
+        b.add_action(ToolID::GENERATE_SILKSCREEN);
         b.set_tooltip_text("Generate…");
     }
 
@@ -365,15 +365,16 @@ void ImpPackage::update_highlights()
 
 ActionToolID ImpPackage::get_doubleclick_action(ObjectType type, const UUID &uu)
 {
-    auto a = ImpBase::get_doubleclick_action(type, uu);
-    if (a.first != ActionID::NONE)
+    const auto a = ImpBase::get_doubleclick_action(type, uu);
+    if (a.is_valid())
         return a;
+
     switch (type) {
     case ObjectType::PAD:
-        return make_action(ToolID::EDIT_PAD_PARAMETER_SET);
-        break;
+        return ToolID::EDIT_PAD_PARAMETER_SET;
+
     default:
-        return {ActionID::NONE, ToolID::NONE};
+        return {};
     }
 }
 

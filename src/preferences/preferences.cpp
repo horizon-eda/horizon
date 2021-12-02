@@ -233,8 +233,8 @@ json KeySequencesPreferences::serialize() const
     json j;
     for (const auto &it : keys) {
         json k;
-        auto a_str = action_lut.lookup_reverse(it.first.first);
-        auto t_str = tool_lut.lookup_reverse(it.first.second);
+        auto a_str = action_lut.lookup_reverse(it.first.action);
+        auto t_str = tool_lut.lookup_reverse(it.first.tool);
         k["action"] = a_str;
         k["tool"] = t_str;
         k["keys"] = json::object();
@@ -271,7 +271,7 @@ void KeySequencesPreferences::append_from_json(const json &j)
             if (action != ActionID::NONE) {
                 auto tool = tool_lut.lookup(it.at("tool"), ToolID::NONE);
                 if (action != ActionID::TOOL || (action == ActionID::TOOL && tool != ToolID::NONE)) {
-                    auto k = std::make_pair(action, tool);
+                    auto k = ActionToolID(action, tool);
                     if (keys.count(k) == 0) {
                         keys[k];
                         for (const auto &[av_str, value] : it.at("keys").items()) {

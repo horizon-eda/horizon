@@ -67,7 +67,7 @@ InToolKeySequencesPreferencesEditor::InToolKeySequencesPreferencesEditor(BaseObj
         if (tool_id == ToolID::NONE)
             gr_row[tree_columns.name] = "Common";
         else
-            gr_row[tree_columns.name] = action_catalog.at(make_action(tool_id)).name;
+            gr_row[tree_columns.name] = action_catalog.at(tool_id).name;
         gr_row[tree_columns.action] = InToolActionID::NONE;
         gr_row[tree_columns.tool] = tool_id;
         for (const auto &[aid, item] : in_tool_action_catalog) {

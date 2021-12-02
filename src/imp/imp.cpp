@@ -414,7 +414,7 @@ void ImpBase::run(int argc, char *argv[])
     }
 
     canvas->signal_selection_mode_changed().connect([this](auto mode) {
-        set_action_sensitive(make_action(ActionID::CLICK_SELECT), mode == CanvasGL::SelectionMode::HOVER);
+        set_action_sensitive(ActionID::CLICK_SELECT, mode == CanvasGL::SelectionMode::HOVER);
         if (mode == CanvasGL::SelectionMode::HOVER) {
             main_window->selection_mode_label->set_text("Hover select");
         }
@@ -526,8 +526,8 @@ void ImpBase::run(int argc, char *argv[])
         std::map<ActionToolID, bool> can_begin;
         auto sel = canvas->get_selection();
         for (const auto &it : action_catalog) {
-            if (it.first.first == ActionID::TOOL) {
-                bool r = core->tool_can_begin(it.first.second, sel).first;
+            if (it.first.is_tool()) {
+                bool r = core->tool_can_begin(it.first.tool, sel).first;
                 can_begin[it.first] = r;
             }
             else {
@@ -615,12 +615,12 @@ void ImpBase::run(int argc, char *argv[])
         main_window->grid_window_button->signal_clicked().connect([this] { trigger_action(ActionID::GRIDS_WINDOW); });
         grids_window->signal_changed().connect([this] {
             core->set_needs_save();
-            set_action_sensitive(make_action(ActionID::SELECT_GRID), grids_window->has_grids());
+            set_action_sensitive(ActionID::SELECT_GRID, grids_window->has_grids());
         });
-        set_action_sensitive(make_action(ActionID::SELECT_GRID), grids_window->has_grids());
+        set_action_sensitive(ActionID::SELECT_GRID, grids_window->has_grids());
     }
 
-    auto save_button = create_action_button(make_action(ActionID::SAVE));
+    auto save_button = create_action_button(ActionID::SAVE);
     save_button->show();
     main_window->header->pack_start(*save_button);
     core->signal_needs_save().connect([this](bool v) {
@@ -632,19 +632,19 @@ void ImpBase::run(int argc, char *argv[])
         j["needs_save"] = core->get_needs_save();
         send_json(j);
     });
-    set_action_sensitive(make_action(ActionID::SAVE), false);
+    set_action_sensitive(ActionID::SAVE, false);
 
     {
         auto undo_redo_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0));
         undo_redo_box->get_style_context()->add_class("linked");
 
-        auto undo_button = create_action_button(make_action(ActionID::UNDO));
+        auto undo_button = create_action_button(ActionID::UNDO);
         gtk_button_set_label(undo_button->gobj(), NULL);
         undo_button->set_tooltip_text("Undo");
         undo_button->set_image_from_icon_name("edit-undo-symbolic", Gtk::ICON_SIZE_BUTTON);
         undo_redo_box->pack_start(*undo_button, false, false, 0);
 
-        auto redo_button = create_action_button(make_action(ActionID::REDO));
+        auto redo_button = create_action_button(ActionID::REDO);
         gtk_button_set_label(redo_button->gobj(), NULL);
         redo_button->set_tooltip_text("Redo");
         redo_button->set_image_from_icon_name("edit-redo-symbolic", Gtk::ICON_SIZE_BUTTON);
@@ -687,7 +687,7 @@ void ImpBase::run(int argc, char *argv[])
         connect_action(ActionID::RULES_APPLY, [this](const auto &conn) { rules_window->apply_rules(); });
 
         {
-            auto button = create_action_button(make_action(ActionID::RULES));
+            auto button = create_action_button(ActionID::RULES);
             button->set_label("Rules…");
             main_window->header->pack_start(*button);
             button->show();
@@ -697,7 +697,7 @@ void ImpBase::run(int argc, char *argv[])
     tool_popover = Gtk::manage(new ToolPopover(canvas, get_editor_type_for_action()));
     tool_popover->set_position(Gtk::POS_BOTTOM);
     tool_popover->signal_action_activated().connect(
-            [this](ActionID action_id, ToolID tool_id) { trigger_action(std::make_pair(action_id, tool_id)); });
+            [this](ActionID action_id, ToolID tool_id) { trigger_action(ActionToolID(action_id, tool_id)); });
 
 
     log_window = new LogWindow();
@@ -1186,11 +1186,11 @@ void ImpBase::create_context_menu(Gtk::Menu *parent, const std::set<SelectableRe
         for (const auto &it : action_catalog) {
             if (it.second.group == it_gr.first && (it.second.availability & get_editor_type_for_action())
                 && !(it.second.flags & ActionCatalogItem::FLAGS_NO_MENU)) {
-                if (it.first.first == ActionID::TOOL) {
-                    auto r = core->tool_can_begin(it.first.second, {sel});
+                if (it.first.is_tool()) {
+                    auto r = core->tool_can_begin(it.first.tool, {sel});
                     if (r.first && r.second) {
                         auto la_sub = create_context_menu_item(it.first);
-                        ToolID tool_id = it.first.second;
+                        ToolID tool_id = it.first.tool;
                         std::set<SelectableRef> sr(sel);
                         la_sub->signal_activate().connect([this, tool_id, sr] {
                             canvas->set_selection(sr, false);
@@ -1204,12 +1204,12 @@ void ImpBase::create_context_menu(Gtk::Menu *parent, const std::set<SelectableRe
                 else {
                     if (get_action_sensitive(it.first) && (it.second.flags & ActionCatalogItem::FLAGS_SPECIFIC)) {
                         auto la_sub = create_context_menu_item(it.first);
-                        ActionID action_id = it.first.first;
+                        ActionID action_id = it.first.action;
                         std::set<SelectableRef> sr(sel);
                         la_sub->signal_activate().connect([this, action_id, sr] {
                             canvas->set_selection(sr, false);
                             fix_cursor_pos();
-                            trigger_action(make_action(action_id));
+                            trigger_action(action_id);
                         });
                         la_sub->show();
                         menu_items.push_back(la_sub);
@@ -1245,7 +1245,7 @@ void ImpBase::create_context_menu(Gtk::Menu *parent, const std::set<SelectableRe
 
 void ImpBase::reset_tool_hint_label()
 {
-    const auto act = make_action(ActionID::POPOVER);
+    const auto act = ActionID::POPOVER;
     if (action_connections.count(act)) {
         if (action_connections.at(act).key_sequences.size()) {
             const auto keys = key_sequence_to_string(action_connections.at(act).key_sequences.front());
@@ -1287,7 +1287,7 @@ bool ImpBase::handle_click(const GdkEventButton *button_event)
         auto sel = canvas->get_selection();
         if (sel.size() == 1) {
             auto a = get_doubleclick_action(sel.begin()->type, sel.begin()->uuid);
-            if (a.first != ActionID::NONE) {
+            if (a.is_valid()) {
                 selection_for_drag_move.clear();
                 trigger_action(a);
             }
@@ -1591,15 +1591,15 @@ ActionToolID ImpBase::get_doubleclick_action(ObjectType type, const UUID &uu)
 {
     switch (type) {
     case ObjectType::TEXT:
-        return make_action(ToolID::ENTER_DATUM);
-        break;
+        return ToolID::ENTER_DATUM;
+
     case ObjectType::POLYGON_ARC_CENTER:
     case ObjectType::POLYGON_VERTEX:
     case ObjectType::POLYGON_EDGE:
-        return make_action(ActionID::SELECT_POLYGON);
-        break;
+        return ActionID::SELECT_POLYGON;
+
     default:
-        return {ActionID::NONE, ToolID::NONE};
+        return {};
     }
 }
 
@@ -1762,7 +1762,7 @@ static const char *get_cursor_icon(ToolID id)
         return nullptr;
 
     default:
-        return get_action_icon(make_action(id));
+        return get_action_icon(id);
     }
 }
 

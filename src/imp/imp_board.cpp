@@ -279,8 +279,8 @@ void ImpBoard::update_action_sensitivity()
     bool have_tracks = std::any_of(sel.begin(), sel.end(), [](const auto &x) { return x.type == ObjectType::TRACK; });
     int n_pkgs =
             std::count_if(sel.begin(), sel.end(), [](const auto &x) { return x.type == ObjectType::BOARD_PACKAGE; });
-    set_action_sensitive(make_action(ActionID::TUNING_ADD_TRACKS), have_tracks);
-    set_action_sensitive(make_action(ActionID::TUNING_ADD_TRACKS_ALL), have_tracks);
+    set_action_sensitive(ActionID::TUNING_ADD_TRACKS, have_tracks);
+    set_action_sensitive(ActionID::TUNING_ADD_TRACKS_ALL, have_tracks);
 
     bool can_select_more = std::any_of(sel.begin(), sel.end(), [](const auto &x) {
         switch (x.type) {
@@ -294,16 +294,16 @@ void ImpBoard::update_action_sensitivity()
         }
     });
 
-    set_action_sensitive(make_action(ActionID::HIGHLIGHT_NET), can_select_more);
-    set_action_sensitive(make_action(ActionID::HIGHLIGHT_NET_CLASS), can_select_more);
-    set_action_sensitive(make_action(ActionID::SELECT_MORE), can_select_more);
-    set_action_sensitive(make_action(ActionID::SELECT_MORE_NO_VIA), can_select_more);
-    set_action_sensitive(make_action(ActionID::FILTER_AIRWIRES), can_select_more || n_pkgs);
+    set_action_sensitive(ActionID::HIGHLIGHT_NET, can_select_more);
+    set_action_sensitive(ActionID::HIGHLIGHT_NET_CLASS, can_select_more);
+    set_action_sensitive(ActionID::SELECT_MORE, can_select_more);
+    set_action_sensitive(ActionID::SELECT_MORE_NO_VIA, can_select_more);
+    set_action_sensitive(ActionID::FILTER_AIRWIRES, can_select_more || n_pkgs);
 
-    set_action_sensitive(make_action(ActionID::GO_TO_SCHEMATIC), sockets_connected);
-    set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), n_pkgs == 1 && sockets_connected);
-    set_action_sensitive(make_action(ActionID::SHOW_IN_PROJECT_POOL_MANAGER), n_pkgs == 1 && sockets_connected);
-    set_action_sensitive(make_action(ActionID::GO_TO_PROJECT_MANAGER), sockets_connected);
+    set_action_sensitive(ActionID::GO_TO_SCHEMATIC, sockets_connected);
+    set_action_sensitive(ActionID::SHOW_IN_POOL_MANAGER, n_pkgs == 1 && sockets_connected);
+    set_action_sensitive(ActionID::SHOW_IN_PROJECT_POOL_MANAGER, n_pkgs == 1 && sockets_connected);
+    set_action_sensitive(ActionID::GO_TO_PROJECT_MANAGER, sockets_connected);
 
     ImpBase::update_action_sensitivity();
 }
@@ -367,7 +367,7 @@ static json serialize_connector(const Track::Connection &conn)
 
 void ImpBoard::handle_select_more(const ActionConnection &conn)
 {
-    const bool no_via = conn.action_id == ActionID::SELECT_MORE_NO_VIA;
+    const bool no_via = conn.id.action == ActionID::SELECT_MORE_NO_VIA;
     std::map<const Junction *, std::set<const Track *>> junction_connections;
     const auto brd = core_board.get_board();
     for (const auto &it : brd->tracks) {
@@ -430,7 +430,7 @@ void ImpBoard::handle_select_more(const ActionConnection &conn)
 void ImpBoard::handle_show_in_pool_manager(const ActionConnection &conn)
 {
     const auto &board = *core_board.get_board();
-    const auto pool_sel = conn.action_id == ActionID::SHOW_IN_PROJECT_POOL_MANAGER ? ShowInPoolManagerPool::CURRENT
+    const auto pool_sel = conn.id.action == ActionID::SHOW_IN_PROJECT_POOL_MANAGER ? ShowInPoolManagerPool::CURRENT
                                                                                    : ShowInPoolManagerPool::LAST;
     for (const auto &it : canvas->get_selection()) {
         if (it.type == ObjectType::BOARD_PACKAGE) {
@@ -527,8 +527,8 @@ void ImpBoard::construct()
                 }
             }
         });
-        set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), false);
-        set_action_sensitive(make_action(ActionID::SHOW_IN_PROJECT_POOL_MANAGER), false);
+        set_action_sensitive(ActionID::SHOW_IN_POOL_MANAGER, false);
+        set_action_sensitive(ActionID::SHOW_IN_PROJECT_POOL_MANAGER, false);
 
         connect_action(ActionID::BACKANNOTATE_CONNECTION_LINES, [this](const auto &conn) {
             json j;
@@ -566,7 +566,7 @@ void ImpBoard::construct()
     });
 
     {
-        auto button = create_action_button(make_action(ActionID::RELOAD_NETLIST));
+        auto button = create_action_button(ActionID::RELOAD_NETLIST);
         button->show();
         main_window->header->pack_end(*button);
 
@@ -844,18 +844,18 @@ void ImpBoard::construct()
         airwire_filter_window->load_from_json(m_meta.at("nets"));
 
     {
-        auto &b = add_action_button(make_action(ToolID::ROUTE_TRACK_INTERACTIVE));
-        b.add_action(make_action(ToolID::ROUTE_DIFFPAIR_INTERACTIVE));
+        auto &b = add_action_button(ToolID::ROUTE_TRACK_INTERACTIVE);
+        b.add_action(ToolID::ROUTE_DIFFPAIR_INTERACTIVE);
     }
     add_action_button_polygon();
     {
-        auto &b = add_action_button(make_action(ToolID::PLACE_BOARD_HOLE));
-        b.add_action(make_action(ToolID::PLACE_VIA));
+        auto &b = add_action_button(ToolID::PLACE_BOARD_HOLE);
+        b.add_action(ToolID::PLACE_VIA);
     }
     add_action_button_line();
 
-    add_action_button(make_action(ToolID::PLACE_TEXT));
-    add_action_button(make_action(ToolID::DRAW_DIMENSION));
+    add_action_button(ToolID::PLACE_TEXT);
+    add_action_button(ToolID::DRAW_DIMENSION);
 
     update_monitor();
 
@@ -1082,7 +1082,7 @@ void ImpBoard::handle_measure_tracks(const ActionConnection &a)
             tracks.insert(it.uuid);
         }
     }
-    tuning_window->add_tracks(tracks, a.action_id == ActionID::TUNING_ADD_TRACKS_ALL);
+    tuning_window->add_tracks(tracks, a.id.action == ActionID::TUNING_ADD_TRACKS_ALL);
     tuning_window->present();
 }
 
@@ -1189,17 +1189,17 @@ void ImpBoard::handle_drag()
 ActionToolID ImpBoard::get_doubleclick_action(ObjectType type, const UUID &uu)
 {
     auto a = ImpBase::get_doubleclick_action(type, uu);
-    if (a.first != ActionID::NONE)
+    if (a.action != ActionID::NONE)
         return a;
     switch (type) {
     case ObjectType::BOARD_HOLE:
-        return make_action(ToolID::EDIT_BOARD_HOLE);
+        return ToolID::EDIT_BOARD_HOLE;
         break;
     case ObjectType::VIA:
-        return make_action(ToolID::EDIT_VIA);
+        return ToolID::EDIT_VIA;
         break;
     case ObjectType::TRACK:
-        return make_action(ActionID::SELECT_MORE);
+        return ActionID::SELECT_MORE;
         break;
     case ObjectType::POLYGON:
     case ObjectType::POLYGON_EDGE:
@@ -1208,10 +1208,10 @@ ActionToolID ImpBoard::get_doubleclick_action(ObjectType type, const UUID &uu)
         if (poly->usage) {
             switch (poly->usage->get_type()) {
             case PolygonUsage::Type::PLANE:
-                return make_action(ToolID::EDIT_PLANE);
+                return ToolID::EDIT_PLANE;
 
             case PolygonUsage::Type::KEEPOUT:
-                return make_action(ToolID::EDIT_KEEPOUT);
+                return ToolID::EDIT_KEEPOUT;
 
             default:
                 return {ActionID::NONE, ToolID::NONE};

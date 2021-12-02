@@ -460,7 +460,7 @@ bool View3DWindow::handle_action_key(const GdkEventKey *ev)
         }
         std::map<ActionConnection *, std::pair<KeyMatchResult, KeySequence>> connections_matched;
         for (auto &it : action_connections) {
-            auto k = std::make_pair(it.second.action_id, it.second.tool_id);
+            auto k = it.first;
             if (action_catalog.at(k).availability & ActionCatalogItem::AVAILABLE_IN_3D) {
                 bool can_begin = true;
                 if (can_begin) {
@@ -478,7 +478,7 @@ bool View3DWindow::handle_action_key(const GdkEventKey *ev)
         if (connections_matched.size() == 1) {
             keys_current.clear();
             auto conn = connections_matched.begin()->first;
-            trigger_action(conn->action_id);
+            trigger_action(conn->id.action);
             return true;
         }
 
@@ -490,7 +490,7 @@ bool View3DWindow::handle_action_key(const GdkEventKey *ev)
                 if (res == KeyMatchResult::COMPLETE) {
                     have_conflict = true;
                 }
-                conflicts.emplace_back(action_catalog.at(std::make_pair(conn->action_id, conn->tool_id)).name, seq);
+                conflicts.emplace_back(action_catalog.at(conn->id).name, seq);
             }
             if (have_conflict) {
                 keys_current.clear();
@@ -520,12 +520,12 @@ ActionConnection &View3DWindow::connect_action(ActionID action_id, std::function
     if (action_connections.count(action_id)) {
         throw std::runtime_error("duplicate action");
     }
-    if (action_catalog.count(make_action(action_id)) == 0) {
+    if (action_catalog.count(action_id) == 0) {
         throw std::runtime_error("invalid action");
     }
     auto &act = action_connections
                         .emplace(std::piecewise_construct, std::forward_as_tuple(action_id),
-                                 std::forward_as_tuple(make_action(action_id), cb))
+                                 std::forward_as_tuple(action_id, cb))
                         .first->second;
 
     return act;
@@ -537,10 +537,9 @@ void View3DWindow::apply_preferences(const Preferences &prefs)
     canvas->set_appearance(prefs.canvas_layer.appearance);
     const auto av = ActionCatalogItem::AVAILABLE_IN_3D;
     for (auto &it : action_connections) {
-        const auto k = make_action(it.first);
-        auto act = action_catalog.at(k);
-        if (!(act.flags & ActionCatalogItem::FLAGS_NO_PREFERENCES) && prefs.key_sequences.keys.count(k)) {
-            const auto &pref = prefs.key_sequences.keys.at(k);
+        const auto &act = action_catalog.at(it.first);
+        if (!(act.flags & ActionCatalogItem::FLAGS_NO_PREFERENCES) && prefs.key_sequences.keys.count(it.first)) {
+            const auto &pref = prefs.key_sequences.keys.at(it.first);
             const std::vector<KeySequence> *seqs = nullptr;
             if (pref.count(av) && pref.at(av).size()) {
                 seqs = &pref.at(av);
@@ -562,7 +561,7 @@ void View3DWindow::apply_preferences(const Preferences &prefs)
 void View3DWindow::handle_pan_action(const ActionConnection &c)
 {
     Coordf d;
-    switch (c.action_id) {
+    switch (c.id.action) {
     case ActionID::PAN_DOWN:
         d.y = 1;
         break;
@@ -590,7 +589,7 @@ void View3DWindow::handle_pan_action(const ActionConnection &c)
 void View3DWindow::handle_zoom_action(const ActionConnection &conn)
 {
     auto inc = 1;
-    if (conn.action_id == ActionID::ZOOM_IN)
+    if (conn.id.action == ActionID::ZOOM_IN)
         inc = -1;
 
     canvas->set_cam_distance(canvas->get_cam_distance() * pow(1.5, inc));
@@ -599,7 +598,7 @@ void View3DWindow::handle_zoom_action(const ActionConnection &conn)
 void View3DWindow::handle_rotate_action(const ActionConnection &conn)
 {
     auto inc = 90;
-    if (conn.action_id == ActionID::ROTATE_VIEW_LEFT)
+    if (conn.id.action == ActionID::ROTATE_VIEW_LEFT)
         inc = -90;
     canvas->inc_cam_azimuth(inc);
 }
@@ -607,7 +606,7 @@ void View3DWindow::handle_rotate_action(const ActionConnection &conn)
 void View3DWindow::handle_view_action(const ActionConnection &conn)
 {
     for (const auto &it : views) {
-        if (it.action == conn.action_id) {
+        if (it.action == conn.id.action) {
             canvas->set_cam_azimuth(it.azimuth);
             canvas->set_cam_elevation(it.elevation);
             return;
@@ -617,7 +616,7 @@ void View3DWindow::handle_view_action(const ActionConnection &conn)
 
 void View3DWindow::handle_proj_action(const ActionConnection &conn)
 {
-    if (conn.action_id == ActionID::VIEW_3D_ORTHO)
+    if (conn.id.action == ActionID::VIEW_3D_ORTHO)
         proj_ortho_rb->set_active(true);
     else
         proj_persp_rb->set_active(true);

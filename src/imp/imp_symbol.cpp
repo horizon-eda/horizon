@@ -107,7 +107,7 @@ void ImpSymbol::construct()
         unit_label->set_xalign(0);
         unit_label->set_selectable(true);
         box->pack_start(*unit_label, true, true, 0);
-        auto button = create_action_button(make_action(ToolID::CHANGE_UNIT));
+        auto button = create_action_button(ToolID::CHANGE_UNIT);
         button->set_label("Change");
         box->pack_start(*button, false, false, 0);
         box->show_all();
@@ -197,7 +197,7 @@ void ImpSymbol::construct()
 
     connect_action(ActionID::EDIT_UNIT,
                    [this](const auto &a) { this->edit_pool_item(ObjectType::UNIT, symbol.unit->uuid); });
-    set_action_sensitive(make_action(ActionID::EDIT_UNIT), sockets_connected);
+    set_action_sensitive(ActionID::EDIT_UNIT, sockets_connected);
 
     hamburger_menu->append("Change unit", "win.change_unit");
     add_tool_action(ToolID::CHANGE_UNIT, "change_unit");
@@ -214,17 +214,17 @@ void ImpSymbol::construct()
     bbox_annotation->on_top = false;
     bbox_annotation->set_display(LayerDisplay(true, LayerDisplay::Mode::OUTLINE));
 
-    add_action_button(make_action(ToolID::DRAW_LINE_RECTANGLE));
-    add_action_button(make_action(ToolID::PLACE_REFDES_AND_VALUE));
+    add_action_button(ToolID::DRAW_LINE_RECTANGLE);
+    add_action_button(ToolID::PLACE_REFDES_AND_VALUE);
     {
-        auto &x = add_action_button(make_action(ToolID::DRAW_LINE));
-        x.add_action(make_action(ToolID::DRAW_LINE_CIRCLE));
-        x.add_action(make_action(ToolID::DRAW_ARC));
+        auto &x = add_action_button(ToolID::DRAW_LINE);
+        x.add_action(ToolID::DRAW_LINE_CIRCLE);
+        x.add_action(ToolID::DRAW_ARC);
     }
     add_action_button_polygon();
-    add_action_button(make_action(ToolID::PLACE_DOT));
-    add_action_button(make_action(ToolID::PLACE_TEXT));
-    add_action_button(make_action(ToolID::RESIZE_SYMBOL));
+    add_action_button(ToolID::PLACE_DOT);
+    add_action_button(ToolID::PLACE_TEXT);
+    add_action_button(ToolID::RESIZE_SYMBOL);
 }
 
 void ImpSymbol::update_header()

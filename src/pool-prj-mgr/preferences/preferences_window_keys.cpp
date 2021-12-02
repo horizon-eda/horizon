@@ -61,7 +61,7 @@ KeySequencesPreferencesEditor::KeySequencesPreferencesEditor(BaseObjectType *cob
     for (const auto &it_gr : action_group_catalog) {
         Gtk::TreeModel::Row gr_row = *key_sequences_store->append();
         gr_row[tree_columns.name] = it_gr.second;
-        gr_row[tree_columns.action] = std::make_pair(ActionID::NONE, ToolID::NONE);
+        gr_row[tree_columns.action] = ActionToolID();
         for (const auto &it_act : action_catalog) {
             if (it_act.second.group == it_gr.first
                 && !(it_act.second.flags & ActionCatalogItem::FLAGS_NO_PREFERENCES)) {
@@ -137,7 +137,7 @@ void KeySequencesPreferencesEditor::update_action_editors()
     if (it) {
         Gtk::TreeModel::Row row = *it;
         ActionToolID action = row[tree_columns.action];
-        if (action.first != ActionID::NONE) {
+        if (action.is_valid()) {
             const auto cat = action_catalog.at(row[tree_columns.action]);
             auto av = static_cast<unsigned int>(cat.availability);
             int count = 0;

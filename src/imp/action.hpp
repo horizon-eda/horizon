@@ -9,7 +9,35 @@ namespace horizon {
 enum class ToolID;
 enum class ActionID;
 
-using ActionToolID = std::pair<ActionID, ToolID>;
+
+struct ActionToolID {
+    ActionToolID(ActionID a, ToolID t) : action(a), tool(t)
+    {
+    }
+
+    ActionToolID(ActionID a);
+    ActionToolID(ToolID t);
+    ActionToolID();
+
+    bool is_tool() const;
+    bool is_action() const;
+    bool is_valid() const;
+
+    ActionID action;
+    ToolID tool;
+
+private:
+    auto tie() const
+    {
+        return std::tie(action, tool);
+    }
+
+public:
+    bool operator<(const ActionToolID &other) const
+    {
+        return tie() < other.tie();
+    }
+};
 
 enum class ActionGroup {
     ALL,
@@ -49,18 +77,13 @@ KeyMatchResult key_sequence_match(const KeySequence &keys_current, const KeySequ
 
 class ActionConnection {
 public:
-    ActionConnection(ActionToolID id, std::function<void(const ActionConnection &)> c)
-        : action_id(id.first), tool_id(id.second), cb(c)
+    ActionConnection(ActionToolID atid, std::function<void(const ActionConnection &)> c) : id(atid), cb(c)
     {
     }
 
-    const ActionID action_id;
-    const ToolID tool_id;
+    const ActionToolID id;
     std::vector<KeySequence> key_sequences;
     std::function<void(const ActionConnection &)> cb;
 };
-
-ActionToolID make_action(ActionID id);
-ActionToolID make_action(ToolID id);
 
 } // namespace horizon
