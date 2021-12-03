@@ -24,8 +24,7 @@ ToolPopover::ToolPopover(Gtk::Widget *parent, ActionCatalogItem::Availability av
             if (selected_group == ActionGroup::ALL)
                 return true;
             else {
-                const auto key = ActionToolID(row[list_columns.action_id], row[list_columns.tool_id]);
-                return action_catalog.at(key).group == selected_group;
+                return action_catalog.at(row[list_columns.action_id]).group == selected_group;
             }
         }
         Glib::ustring tool_name_u = row[list_columns.name];
@@ -155,8 +154,7 @@ ToolPopover::ToolPopover(Gtk::Widget *parent, ActionCatalogItem::Availability av
         if ((it.second.availability & availability) && !(it.second.flags & ActionCatalogItem::FLAGS_NO_POPOVER)) {
             Gtk::TreeModel::Row row = *(store->append());
             row[list_columns.name] = it.second.name;
-            row[list_columns.tool_id] = it.first.tool;
-            row[list_columns.action_id] = it.first.action;
+            row[list_columns.action_id] = it.first;
             row[list_columns.can_begin] = true;
             row[list_columns.keys] = "";
         }
@@ -200,14 +198,14 @@ void ToolPopover::emit_tool_activated()
         hide();
 #endif
         Gtk::TreeModel::Row row = *it;
-        s_signal_action_activated.emit(row[list_columns.action_id], row[list_columns.tool_id]);
+        s_signal_action_activated.emit(row[list_columns.action_id]);
     }
 }
 
 void ToolPopover::set_can_begin(const std::map<ActionToolID, bool> &can_begin)
 {
     for (auto &it : store->children()) {
-        auto k = ActionToolID(it[list_columns.action_id], it[list_columns.tool_id]);
+        const auto k = it.get_value(list_columns.action_id);
         if (can_begin.count(k)) {
             it[list_columns.can_begin] = can_begin.at(k);
         }
@@ -221,7 +219,7 @@ void ToolPopover::set_key_sequences(ActionToolID action_id, const std::vector<Ke
 {
     auto str = key_sequences_to_string(seqs);
     for (auto &it : store->children()) {
-        if (it[list_columns.tool_id] == action_id.tool && it[list_columns.action_id] == action_id.action) {
+        if (it.get_value(list_columns.action_id) == action_id) {
             it[list_columns.keys] = str;
         }
     }

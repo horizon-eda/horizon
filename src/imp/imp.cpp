@@ -696,8 +696,7 @@ void ImpBase::run(int argc, char *argv[])
 
     tool_popover = Gtk::manage(new ToolPopover(canvas, get_editor_type_for_action()));
     tool_popover->set_position(Gtk::POS_BOTTOM);
-    tool_popover->signal_action_activated().connect(
-            [this](ActionID action_id, ToolID tool_id) { trigger_action(ActionToolID(action_id, tool_id)); });
+    tool_popover->signal_action_activated().connect([this](ActionToolID action_id) { trigger_action(action_id); });
 
 
     log_window = new LogWindow();

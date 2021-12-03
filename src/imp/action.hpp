@@ -37,6 +37,10 @@ public:
     {
         return tie() < other.tie();
     }
+    bool operator==(const ActionToolID &other) const
+    {
+        return tie() == other.tie();
+    }
 };
 
 enum class ActionGroup {

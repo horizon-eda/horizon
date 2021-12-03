@@ -8,7 +8,7 @@ namespace horizon {
 class ToolPopover : public Gtk::Popover {
 public:
     ToolPopover(Gtk::Widget *parent, ActionCatalogItem::Availability av);
-    typedef sigc::signal<void, ActionID, ToolID> type_signal_action_activated;
+    typedef sigc::signal<void, ActionToolID> type_signal_action_activated;
     type_signal_action_activated signal_action_activated()
     {
         return s_signal_action_activated;
@@ -24,13 +24,11 @@ private:
         {
             Gtk::TreeModelColumnRecord::add(name);
             Gtk::TreeModelColumnRecord::add(action_id);
-            Gtk::TreeModelColumnRecord::add(tool_id);
             Gtk::TreeModelColumnRecord::add(can_begin);
             Gtk::TreeModelColumnRecord::add(keys);
         }
         Gtk::TreeModelColumn<Glib::ustring> name;
-        Gtk::TreeModelColumn<ActionID> action_id;
-        Gtk::TreeModelColumn<ToolID> tool_id;
+        Gtk::TreeModelColumn<ActionToolID> action_id;
         Gtk::TreeModelColumn<bool> can_begin;
         Gtk::TreeModelColumn<Glib::ustring> keys;
     };
