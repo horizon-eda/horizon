@@ -6,14 +6,12 @@
 namespace horizon {
 RuleHoleSize::RuleHoleSize(const UUID &uu) : Rule(uu)
 {
-    id = RuleID::HOLE_SIZE;
 }
 
 RuleHoleSize::RuleHoleSize(const UUID &uu, const json &j, const RuleImportMap &import_map)
     : Rule(uu, j, import_map), diameter_min(j.at("diameter_min")), diameter_max(j.at("diameter_max")),
       match(j.at("match"), import_map)
 {
-    id = RuleID::HOLE_SIZE;
 }
 
 json RuleHoleSize::serialize() const

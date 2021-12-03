@@ -5,12 +5,10 @@
 namespace horizon {
 RuleClearancePackage::RuleClearancePackage() : Rule()
 {
-    id = RuleID::CLEARANCE_PACKAGE;
 }
 
 RuleClearancePackage::RuleClearancePackage(const json &j) : Rule(j)
 {
-    id = RuleID::CLEARANCE_PACKAGE;
     clearance_silkscreen_cu = j.value("clearance_silkscreen_cu", .2_mm);
     clearance_silkscreen_pkg = j.value("clearance_silkscreen_pkg", .2_mm);
 }

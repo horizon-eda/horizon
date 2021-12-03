@@ -6,12 +6,10 @@
 namespace horizon {
 RulePackageChecks::RulePackageChecks() : Rule()
 {
-    id = RuleID::PACKAGE_CHECKS;
 }
 
 RulePackageChecks::RulePackageChecks(const json &j) : Rule(j)
 {
-    id = RuleID::PACKAGE_CHECKS;
 }
 
 json RulePackageChecks::serialize() const

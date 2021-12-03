@@ -5,6 +5,12 @@
 namespace horizon {
 class RuleClearanceSilkscreenExposedCopper : public Rule {
 public:
+    static const auto id = RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER;
+    RuleID get_id() const override
+    {
+        return id;
+    }
+
     RuleClearanceSilkscreenExposedCopper();
     RuleClearanceSilkscreenExposedCopper(const json &j, const RuleImportMap &import_map);
     json serialize() const override;

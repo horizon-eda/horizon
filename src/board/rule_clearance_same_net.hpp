@@ -6,6 +6,12 @@
 namespace horizon {
 class RuleClearanceSameNet : public Rule {
 public:
+    static const auto id = RuleID::CLEARANCE_SAME_NET;
+    RuleID get_id() const override
+    {
+        return id;
+    }
+
     RuleClearanceSameNet(const UUID &uu);
     RuleClearanceSameNet(const UUID &uu, const json &j, const RuleImportMap &import_map);
     json serialize() const override;

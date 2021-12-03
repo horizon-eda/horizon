@@ -5,6 +5,12 @@
 namespace horizon {
 class RuleParameters : public Rule {
 public:
+    static const auto id = RuleID::PARAMETERS;
+    RuleID get_id() const override
+    {
+        return id;
+    }
+
     RuleParameters();
     RuleParameters(const json &j, const RuleImportMap &import_map);
     json serialize() const override;

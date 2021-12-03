@@ -5,6 +5,12 @@
 namespace horizon {
 class RulePreflightChecks : public Rule {
 public:
+    static const auto id = RuleID::PREFLIGHT_CHECKS;
+    RuleID get_id() const override
+    {
+        return id;
+    }
+
     RulePreflightChecks();
     RulePreflightChecks(const json &j);
     json serialize() const override;

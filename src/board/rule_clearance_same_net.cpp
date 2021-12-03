@@ -8,14 +8,11 @@ namespace horizon {
 
 RuleClearanceSameNet::RuleClearanceSameNet(const UUID &uu) : Rule(uu)
 {
-    id = RuleID::CLEARANCE_SAME_NET;
 }
 
 RuleClearanceSameNet::RuleClearanceSameNet(const UUID &uu, const json &j, const RuleImportMap &import_map)
     : Rule(uu, j, import_map), match(j.at("match"), import_map), layer(j.at("layer"))
 {
-    id = RuleID::CLEARANCE_SAME_NET;
-
     for (const auto &va : j.at("clearances")) {
         PatchType a = patch_type_lut.lookup(va.at("types").at(0));
         PatchType b = patch_type_lut.lookup(va.at("types").at(1));

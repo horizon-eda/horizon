@@ -34,14 +34,21 @@ static const char *text_sym =
 void RuleEditorPackageChecks::populate()
 {
     Gtk::Label *editor = Gtk::manage(new Gtk::Label);
-    if (rule.id == RuleID::PACKAGE_CHECKS) {
+    switch (rule.get_id()) {
+    case RuleID::PACKAGE_CHECKS:
         editor->set_text(text_pkg);
-    }
-    else if (rule.id == RuleID::PREFLIGHT_CHECKS) {
+        break;
+
+    case RuleID::PREFLIGHT_CHECKS:
         editor->set_text(text_preflight);
-    }
-    else if (rule.id == RuleID::SYMBOL_CHECKS) {
+        break;
+
+    case RuleID::SYMBOL_CHECKS:
         editor->set_text(text_sym);
+        break;
+
+    default:
+        break;
     }
     editor->set_xalign(0);
     editor->set_valign(Gtk::ALIGN_START);

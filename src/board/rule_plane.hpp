@@ -7,6 +7,12 @@
 namespace horizon {
 class RulePlane : public Rule {
 public:
+    static const auto id = RuleID::PLANE;
+    RuleID get_id() const override
+    {
+        return id;
+    }
+
     RulePlane(const UUID &uu);
     RulePlane(const UUID &uu, const json &j, const RuleImportMap &import_map);
     json serialize() const override;

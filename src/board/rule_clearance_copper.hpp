@@ -6,6 +6,12 @@
 namespace horizon {
 class RuleClearanceCopper : public Rule {
 public:
+    static const auto id = RuleID::CLEARANCE_COPPER;
+    RuleID get_id() const override
+    {
+        return id;
+    }
+
     RuleClearanceCopper(const UUID &uu);
     RuleClearanceCopper(const UUID &uu, const json &j, const RuleImportMap &import_map);
     json serialize() const override;

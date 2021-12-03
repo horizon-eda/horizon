@@ -8,6 +8,12 @@
 namespace horizon {
 class RuleShortedPads : public Rule {
 public:
+    static const auto id = RuleID::SHORTED_PADS;
+    RuleID get_id() const override
+    {
+        return id;
+    }
+
     RuleShortedPads(const UUID &uu);
     RuleShortedPads(const UUID &uu, const json &j);
     json serialize() const override;

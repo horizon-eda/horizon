@@ -6,14 +6,12 @@
 namespace horizon {
 RuleClearanceSilkscreenExposedCopper::RuleClearanceSilkscreenExposedCopper() : Rule()
 {
-    id = RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER;
 }
 
 RuleClearanceSilkscreenExposedCopper::RuleClearanceSilkscreenExposedCopper(const json &j,
                                                                            const RuleImportMap &import_map)
     : Rule(j, import_map)
 {
-    id = RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER;
     clearance_top = j.at("clearance_top").get<uint64_t>();
     clearance_bottom = j.at("clearance_bottom").get<uint64_t>();
 }

@@ -5,6 +5,12 @@
 namespace horizon {
 class RuleHoleSize : public Rule {
 public:
+    static const auto id = RuleID::HOLE_SIZE;
+    RuleID get_id() const override
+    {
+        return id;
+    }
+
     RuleHoleSize(const UUID &uu);
     RuleHoleSize(const UUID &uu, const json &j, const RuleImportMap &import_map);
     json serialize() const override;

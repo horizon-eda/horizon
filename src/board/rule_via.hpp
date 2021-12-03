@@ -7,6 +7,12 @@
 namespace horizon {
 class RuleVia : public Rule {
 public:
+    static const auto id = RuleID::VIA;
+    RuleID get_id() const override
+    {
+        return id;
+    }
+
     RuleVia(const UUID &uu);
     RuleVia(const UUID &uu, const json &j, const RuleImportMap &import_map);
     json serialize() const override;

@@ -6,12 +6,10 @@
 namespace horizon {
 RuleSinglePinNet::RuleSinglePinNet() : Rule()
 {
-    id = RuleID::SINGLE_PIN_NET;
 }
 
 RuleSinglePinNet::RuleSinglePinNet(const json &j) : Rule(j)
 {
-    id = RuleID::SINGLE_PIN_NET;
     include_unnamed = j.at("include_unnamed").get<bool>();
 }
 

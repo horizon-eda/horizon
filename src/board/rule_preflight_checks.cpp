@@ -6,12 +6,10 @@
 namespace horizon {
 RulePreflightChecks::RulePreflightChecks() : Rule()
 {
-    id = RuleID::PREFLIGHT_CHECKS;
 }
 
 RulePreflightChecks::RulePreflightChecks(const json &j) : Rule(j)
 {
-    id = RuleID::PREFLIGHT_CHECKS;
 }
 
 json RulePreflightChecks::serialize() const

@@ -61,7 +61,7 @@ public:
     Rule(const UUID &uu, const json &j);
     Rule(const UUID &uu, const json &j, const RuleImportMap &import_map);
     UUID uuid;
-    RuleID id = RuleID::NONE;
+    virtual RuleID get_id() const = 0;
     bool enabled = true;
     bool imported = false;
     int get_order() const

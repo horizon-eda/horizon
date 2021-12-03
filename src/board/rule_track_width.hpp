@@ -6,6 +6,12 @@
 namespace horizon {
 class RuleTrackWidth : public Rule {
 public:
+    static const auto id = RuleID::TRACK_WIDTH;
+    RuleID get_id() const override
+    {
+        return id;
+    }
+
     class Widths {
     public:
         Widths();

@@ -21,13 +21,11 @@ json RuleTrackWidth::Widths::serialize() const
 
 RuleTrackWidth::RuleTrackWidth(const UUID &uu) : Rule(uu)
 {
-    id = RuleID::TRACK_WIDTH;
 }
 
 RuleTrackWidth::RuleTrackWidth(const UUID &uu, const json &j, const RuleImportMap &import_map)
     : Rule(uu, j, import_map), match(j.at("match"), import_map)
 {
-    id = RuleID::TRACK_WIDTH;
     {
         const json &o = j["widths"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {

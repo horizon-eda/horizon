@@ -6,6 +6,12 @@
 namespace horizon {
 class RuleDiffpair : public Rule {
 public:
+    static const auto id = RuleID::DIFFPAIR;
+    RuleID get_id() const override
+    {
+        return id;
+    }
+
     RuleDiffpair(const UUID &uu);
     RuleDiffpair(const UUID &uu, const json &j, const RuleImportMap &import_map);
     json serialize() const override;

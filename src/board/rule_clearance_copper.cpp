@@ -8,7 +8,6 @@ namespace horizon {
 
 RuleClearanceCopper::RuleClearanceCopper(const UUID &uu) : Rule(uu)
 {
-    id = RuleID::CLEARANCE_COPPER;
     std::fill(clearances.begin(), clearances.end(), .1_mm);
 }
 
@@ -16,7 +15,6 @@ RuleClearanceCopper::RuleClearanceCopper(const UUID &uu, const json &j, const Ru
     : Rule(uu, j, import_map), match_1(j.at("match_1"), import_map), match_2(j.at("match_2"), import_map),
       layer(j.at("layer")), routing_offset(j.value("routing_offset", 0.05_mm))
 {
-    id = RuleID::CLEARANCE_COPPER;
     std::fill(clearances.begin(), clearances.end(), .1_mm);
 
     for (const auto &va : j.at("clearances")) {

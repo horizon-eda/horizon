@@ -8,13 +8,11 @@ namespace horizon {
 
 RuleShortedPads::RuleShortedPads(const UUID &uu) : Rule(uu)
 {
-    id = RuleID::SHORTED_PADS;
 }
 
 RuleShortedPads::RuleShortedPads(const UUID &uu, const json &j)
     : Rule(uu, j), match(j.at("match")), match_component(j.at("match_component"))
 {
-    id = RuleID::SHORTED_PADS;
 }
 
 json RuleShortedPads::serialize() const

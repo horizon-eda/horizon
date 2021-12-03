@@ -6,12 +6,10 @@
 namespace horizon {
 RuleParameters::RuleParameters() : Rule()
 {
-    id = RuleID::PARAMETERS;
 }
 
 RuleParameters::RuleParameters(const json &j, const RuleImportMap &import_map) : Rule(j, import_map)
 {
-    id = RuleID::PARAMETERS;
     solder_mask_expansion = j.at("solder_mask_expansion").get<uint64_t>();
     paste_mask_contraction = j.at("paste_mask_contraction").get<uint64_t>();
     courtyard_expansion = j.at("courtyard_expansion").get<uint64_t>();

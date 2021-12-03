@@ -563,7 +563,7 @@ void RulesWindow::show_editor(RuleEditor *e)
 RuleEditor *RulesWindow::create_editor(Rule &r)
 {
     RuleEditor *e = nullptr;
-    switch (r.id) {
+    switch (r.get_id()) {
     case RuleID::HOLE_SIZE:
         e = new RuleEditorHoleSize(r, core);
         break;

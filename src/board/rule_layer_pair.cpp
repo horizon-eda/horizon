@@ -7,13 +7,11 @@ namespace horizon {
 
 RuleLayerPair::RuleLayerPair(const UUID &uu) : Rule(uu)
 {
-    id = RuleID::LAYER_PAIR;
 }
 
 RuleLayerPair::RuleLayerPair(const UUID &uu, const json &j, const RuleImportMap &import_map)
     : Rule(uu, j, import_map), match(j.at("match"), import_map), layers(j.at("layers"))
 {
-    id = RuleID::LAYER_PAIR;
 }
 
 json RuleLayerPair::serialize() const

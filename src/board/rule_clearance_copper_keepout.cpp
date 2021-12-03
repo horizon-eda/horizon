@@ -8,15 +8,12 @@ namespace horizon {
 
 RuleClearanceCopperKeepout::RuleClearanceCopperKeepout(const UUID &uu) : Rule(uu)
 {
-    id = RuleID::CLEARANCE_COPPER_KEEPOUT;
 }
 
 RuleClearanceCopperKeepout::RuleClearanceCopperKeepout(const UUID &uu, const json &j)
     : Rule(uu, j), match(j.at("match")), match_keepout(j.at("match_keepout")),
       routing_offset(j.value("routing_offset", 0.05_mm))
 {
-    id = RuleID::CLEARANCE_COPPER_KEEPOUT;
-
     for (const auto &[key, value] : j.at("clearances").items()) {
         PatchType a = patch_type_lut.lookup(key);
         set_clearance(a, value.get<uint64_t>());

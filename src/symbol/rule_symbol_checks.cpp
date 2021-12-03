@@ -6,12 +6,10 @@
 namespace horizon {
 RuleSymbolChecks::RuleSymbolChecks() : Rule()
 {
-    id = RuleID::SYMBOL_CHECKS;
 }
 
 RuleSymbolChecks::RuleSymbolChecks(const json &j) : Rule(j)
 {
-    id = RuleID::SYMBOL_CHECKS;
 }
 
 json RuleSymbolChecks::serialize() const

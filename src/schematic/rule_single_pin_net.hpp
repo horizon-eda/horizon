@@ -4,6 +4,12 @@
 namespace horizon {
 class RuleSinglePinNet : public Rule {
 public:
+    static const auto id = RuleID::SINGLE_PIN_NET;
+    RuleID get_id() const override
+    {
+        return id;
+    }
+
     RuleSinglePinNet();
     RuleSinglePinNet(const json &j);
     json serialize() const override;
