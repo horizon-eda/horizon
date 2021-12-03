@@ -57,7 +57,7 @@ bool RuleMatchKeepout::match(const KeepoutContour *contour) const
     }
 }
 
-std::string RuleMatchKeepout::get_brief(const Block *block) const
+std::string RuleMatchKeepout::get_brief(const Block *block, class IPool *pool) const
 {
     if (block) {
         switch (mode) {

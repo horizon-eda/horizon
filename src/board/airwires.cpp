@@ -144,6 +144,7 @@ void Board::update_airwire(bool fast, const UUID &net)
     std::vector<double> points_for_delaunator;
     delaunator::Points pts(points_for_delaunator);
     std::map<Coordi, std::vector<size_t>> pts_map;
+    const Net *net_p = &block->nets.at(net);
 
     // collect possible ratsnest points
     for (auto &it_junc : junctions) {
@@ -155,7 +156,13 @@ void Board::update_airwire(bool fast, const UUID &net)
             pts_map[pos].push_back(pts.size() - 1);
         }
     }
+
+    std::set<std::pair<size_t, size_t>> edges_from_board;
+    std::vector<std::pair<size_t, size_t>> zero_length_airwires;
+    auto shorted_pads_rules = rules.get_rules_sorted<const RuleShortedPads>(RuleID::SHORTED_PADS);
+
     for (auto &it_pkg : packages) {
+        std::vector<size_t> pad_positions_pts_idx;
         for (auto &it_pad : it_pkg.second.package.pads) {
             if (it_pad.second.net && it_pad.second.net->uuid == net) {
                 Track::Connection conn(&it_pkg.second, &it_pad.second);
@@ -164,16 +171,31 @@ void Board::update_airwire(bool fast, const UUID &net)
                 points_for_delaunator.emplace_back(pos.y);
                 points_ref.push_back(conn);
                 pts_map[pos].push_back(pts.size() - 1);
+                pad_positions_pts_idx.push_back(pts.size() - 1);
+            }
+        }
+
+        // Add connections if pads are considered shortened by the shorted_pads_rules
+        if (pad_positions_pts_idx.size() > 1) {
+            for (const auto rule : shorted_pads_rules) {
+                if (rule->matches(it_pkg.second.component, net_p)) {
+                    auto first_pad = pad_positions_pts_idx[0];
+                    bool first = true;
+                    for (auto second_pad : pad_positions_pts_idx) {
+                        if (first) {
+                            first = false;
+                            continue;
+                        }
+                        edges_from_board.emplace(first_pad, second_pad);
+                    }
+                    break;
+                }
             }
         }
     }
     for (size_t i = 0; i < points_ref.size(); i++) {
         connmap[points_ref[i]] = i;
     }
-
-
-    std::set<std::pair<size_t, size_t>> edges_from_board;
-    std::vector<std::pair<size_t, size_t>> zero_length_airwires;
 
     // collect edges formed by overlapping points
     for (const auto &[pos, idxs] : pts_map) {

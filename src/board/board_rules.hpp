@@ -13,6 +13,7 @@
 #include "rule_clearance_copper_keepout.hpp"
 #include "rule_layer_pair.hpp"
 #include "rule_clearance_same_net.hpp"
+#include "rule_shorted_pads.hpp"
 #include "rules/rules.hpp"
 #include "util/uuid.hpp"
 
@@ -74,6 +75,7 @@ private:
     std::map<UUID, RuleClearanceCopperKeepout> rule_clearance_copper_keepout;
     std::map<UUID, RuleLayerPair> rule_layer_pair;
     std::map<UUID, RuleClearanceSameNet> rule_clearance_same_net;
+    std::map<UUID, RuleShortedPads> rule_shorted_pads;
 
     std::vector<const RuleClearanceCopper *> rule_sorted_clearance_copper;
     void update_sorted();

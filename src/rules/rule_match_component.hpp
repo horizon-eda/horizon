@@ -5,19 +5,23 @@
 namespace horizon {
 using json = nlohmann::json;
 
-class RuleMatchKeepout {
+class RuleMatchComponent {
 public:
-    RuleMatchKeepout();
-    RuleMatchKeepout(const json &j);
+    RuleMatchComponent();
+    RuleMatchComponent(const json &j);
     json serialize() const;
     std::string get_brief(const class Block *block = nullptr, class IPool *pool = nullptr) const;
     void cleanup(const class Block *block);
-    bool match(const class KeepoutContour *contour) const;
+    bool can_export() const;
 
-    enum class Mode { ALL, KEEPOUT_CLASS, COMPONENT };
-    Mode mode = Mode::ALL;
+    bool matches(const class Component *component) const;
 
-    std::string keepout_class;
+    enum class Mode { COMPONENT, PART };
+    Mode mode = Mode::COMPONENT;
+
     UUID component;
+    UUID part;
+
+    bool match(const class Component *component) const;
 };
 } // namespace horizon

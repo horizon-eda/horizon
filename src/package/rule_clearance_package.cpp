@@ -23,7 +23,7 @@ json RuleClearancePackage::serialize() const
     return j;
 }
 
-std::string RuleClearancePackage::get_brief(const class Block *block) const
+std::string RuleClearancePackage::get_brief(const class Block *block, class IPool *pool) const
 {
     return "";
 }

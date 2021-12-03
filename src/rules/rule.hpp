@@ -20,6 +20,7 @@ enum class RuleID {
     PLANE,
     DIFFPAIR,
     PACKAGE_CHECKS,
+    SHORTED_PADS,
     PREFLIGHT_CHECKS,
     CLEARANCE_COPPER_KEEPOUT,
     LAYER_PAIR,
@@ -69,7 +70,7 @@ public:
     }
 
     virtual json serialize() const;
-    virtual std::string get_brief(const class Block *block = nullptr) const = 0;
+    virtual std::string get_brief(const class Block *block = nullptr, class IPool *pool = nullptr) const = 0;
     virtual bool is_match_all() const
     {
         return false;

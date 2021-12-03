@@ -28,6 +28,8 @@ const std::map<RuleID, RD> rule_descriptions = {
 
         {RuleID::PACKAGE_CHECKS, {"Package checks", RD::CAN_CHECK}},
 
+        {RuleID::SHORTED_PADS, {"Shorted Pads", RD::IS_MULTI | RD::CAN_APPLY}},
+
         {RuleID::PREFLIGHT_CHECKS, {"Preflight checks", RD::CAN_CHECK}},
 
         {RuleID::CLEARANCE_COPPER_KEEPOUT,

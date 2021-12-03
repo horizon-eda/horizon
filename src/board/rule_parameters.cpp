@@ -30,7 +30,7 @@ json RuleParameters::serialize() const
     return j;
 }
 
-std::string RuleParameters::get_brief(const class Block *block) const
+std::string RuleParameters::get_brief(const class Block *block, class IPool *pool) const
 {
     return "";
 }
