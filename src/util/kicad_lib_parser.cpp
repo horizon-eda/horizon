@@ -22,7 +22,7 @@ static std::vector<std::string> get_fields(const std::string &line)
 
 Coordi coordi_from_fields(const std::vector<std::string> &fields, size_t first)
 {
-    return Coordi(std::stoul(fields.at(first)), std::stoul(fields.at(first + 1)));
+    return Coordi(std::stoll(fields.at(first)), std::stoll(fields.at(first + 1)));
 }
 
 static const std::map<std::string, Orientation> orientation_map = {
