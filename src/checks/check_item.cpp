@@ -38,7 +38,7 @@ RulesCheckResult check_item(IPool &pool, ObjectType type, const UUID &uu)
         result.errors = package_check_result.errors;
         accumulate_level(result.level, package_check_result.level);
 
-        auto &rule_cl = dynamic_cast<RuleClearancePackage &>(*pkg.rules.get_rule_nc(RuleID::CLEARANCE_PACKAGE));
+        auto &rule_cl = dynamic_cast<RuleClearancePackage &>(pkg.rules.get_rule_nc(RuleID::CLEARANCE_PACKAGE));
         rule_cl.clearance_silkscreen_cu = 0.2_mm;
         rule_cl.clearance_silkscreen_pkg = 0.2_mm;
         const auto r = pkg.rules.check(RuleID::CLEARANCE_PACKAGE, pkg);

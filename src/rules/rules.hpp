@@ -61,15 +61,15 @@ public:
     virtual json serialize() const = 0;
     virtual std::set<RuleID> get_rule_ids() const = 0;
 
-    virtual const Rule *get_rule(RuleID id) const = 0;
-    Rule *get_rule(RuleID id);
-    Rule *get_rule_nc(RuleID id)
+    virtual const Rule &get_rule(RuleID id) const = 0;
+    Rule &get_rule(RuleID id);
+    Rule &get_rule_nc(RuleID id)
     {
         return get_rule(id);
     }
 
-    virtual const Rule *get_rule(RuleID id, const UUID &uu) const = 0;
-    Rule *get_rule(RuleID id, const UUID &uu);
+    virtual const Rule &get_rule(RuleID id, const UUID &uu) const = 0;
+    Rule &get_rule(RuleID id, const UUID &uu);
 
     virtual std::map<UUID, const Rule *> get_rules(RuleID id) const = 0;
     std::map<UUID, Rule *> get_rules(RuleID id);
@@ -100,7 +100,7 @@ public:
     }
 
     virtual void remove_rule(RuleID id, const UUID &uu) = 0;
-    virtual Rule *add_rule(RuleID id) = 0;
+    virtual Rule &add_rule(RuleID id) = 0;
     void move_rule(RuleID id, const UUID &uu, int dir);
 
     virtual ~Rules();

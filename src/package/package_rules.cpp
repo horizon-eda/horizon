@@ -35,20 +35,20 @@ std::set<RuleID> PackageRules::get_rule_ids() const
     return {RuleID::PACKAGE_CHECKS, RuleID::CLEARANCE_PACKAGE};
 }
 
-const Rule *PackageRules::get_rule(RuleID id) const
+const Rule &PackageRules::get_rule(RuleID id) const
 {
     if (id == RuleID::PACKAGE_CHECKS) {
-        return &rule_package_checks;
+        return rule_package_checks;
     }
     else if (id == RuleID::CLEARANCE_PACKAGE) {
-        return &rule_clearance_package;
+        return rule_clearance_package;
     }
-    return nullptr;
+    throw std::runtime_error("rule does not exist");
 }
 
-const Rule *PackageRules::get_rule(RuleID id, const UUID &uu) const
+const Rule &PackageRules::get_rule(RuleID id, const UUID &uu) const
 {
-    return nullptr;
+    throw std::runtime_error("rule does not exist");
 }
 
 std::map<UUID, const Rule *> PackageRules::get_rules(RuleID id) const
@@ -68,13 +68,8 @@ void PackageRules::remove_rule(RuleID id, const UUID &uu)
     fix_order(id);
 }
 
-Rule *PackageRules::add_rule(RuleID id)
+Rule &PackageRules::add_rule(RuleID id)
 {
-    Rule *r = nullptr;
-    switch (id) {
-    default:
-        return nullptr;
-    }
-    return r;
+    throw std::runtime_error("not implemented");
 }
 } // namespace horizon

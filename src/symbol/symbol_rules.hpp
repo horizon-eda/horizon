@@ -15,11 +15,11 @@ public:
     RulesCheckResult check(RuleID id, const class Symbol &sym) const;
     json serialize() const override;
     std::set<RuleID> get_rule_ids() const override;
-    const Rule *get_rule(RuleID id) const override;
-    const Rule *get_rule(RuleID id, const UUID &uu) const override;
+    const Rule &get_rule(RuleID id) const override;
+    const Rule &get_rule(RuleID id, const UUID &uu) const override;
     std::map<UUID, const Rule *> get_rules(RuleID id) const override;
     void remove_rule(RuleID id, const UUID &uu) override;
-    Rule *add_rule(RuleID id) override;
+    Rule &add_rule(RuleID id) override;
 
 private:
     RuleSymbolChecks rule_symbol_checks;

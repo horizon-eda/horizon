@@ -311,47 +311,47 @@ std::set<RuleID> BoardRules::get_rule_ids() const
     };
 }
 
-const Rule *BoardRules::get_rule(RuleID id) const
+const Rule &BoardRules::get_rule(RuleID id) const
 {
     if (id == RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER) {
-        return &rule_clearance_silkscreen_exposed_copper;
+        return rule_clearance_silkscreen_exposed_copper;
     }
     else if (id == RuleID::PARAMETERS) {
-        return &rule_parameters;
+        return rule_parameters;
     }
     else if (id == RuleID::PREFLIGHT_CHECKS) {
-        return &rule_preflight_checks;
+        return rule_preflight_checks;
     }
-    return nullptr;
+    throw std::runtime_error("rule does not exist");
 }
 
-const Rule *BoardRules::get_rule(RuleID id, const UUID &uu) const
+const Rule &BoardRules::get_rule(RuleID id, const UUID &uu) const
 {
     switch (id) {
     case RuleID::HOLE_SIZE:
-        return &rule_hole_size.at(uu);
+        return rule_hole_size.at(uu);
     case RuleID::TRACK_WIDTH:
-        return &rule_track_width.at(uu);
+        return rule_track_width.at(uu);
     case RuleID::CLEARANCE_COPPER:
-        return &rule_clearance_copper.at(uu);
+        return rule_clearance_copper.at(uu);
     case RuleID::VIA:
-        return &rule_via.at(uu);
+        return rule_via.at(uu);
     case RuleID::CLEARANCE_COPPER_OTHER:
-        return &rule_clearance_copper_other.at(uu);
+        return rule_clearance_copper_other.at(uu);
     case RuleID::PLANE:
-        return &rule_plane.at(uu);
+        return rule_plane.at(uu);
     case RuleID::DIFFPAIR:
-        return &rule_diffpair.at(uu);
+        return rule_diffpair.at(uu);
     case RuleID::CLEARANCE_COPPER_KEEPOUT:
-        return &rule_clearance_copper_keepout.at(uu);
+        return rule_clearance_copper_keepout.at(uu);
     case RuleID::LAYER_PAIR:
-        return &rule_layer_pair.at(uu);
+        return rule_layer_pair.at(uu);
     case RuleID::CLEARANCE_SAME_NET:
-        return &rule_clearance_same_net.at(uu);
+        return rule_clearance_same_net.at(uu);
     case RuleID::SHORTED_PADS:
-        return &rule_shorted_pads.at(uu);
+        return rule_shorted_pads.at(uu);
     default:
-        return nullptr;
+        throw std::runtime_error("rule does not exist");
     }
 }
 
@@ -481,7 +481,7 @@ void BoardRules::remove_rule(RuleID id, const UUID &uu)
     update_sorted();
 }
 
-Rule *BoardRules::add_rule(RuleID id)
+Rule &BoardRules::add_rule(RuleID id)
 {
     auto uu = UUID::random();
     Rule *r = nullptr;
@@ -531,11 +531,11 @@ Rule *BoardRules::add_rule(RuleID id)
         break;
 
     default:
-        return nullptr;
+        throw std::runtime_error("unsupported rule");
     }
     fix_order(id);
     update_sorted();
-    return r;
+    return *r;
 }
 
 void BoardRules::update_sorted()

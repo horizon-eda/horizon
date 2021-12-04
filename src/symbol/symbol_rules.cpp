@@ -29,17 +29,17 @@ std::set<RuleID> SymbolRules::get_rule_ids() const
     return {RuleID::SYMBOL_CHECKS};
 }
 
-const Rule *SymbolRules::get_rule(RuleID id) const
+const Rule &SymbolRules::get_rule(RuleID id) const
 {
     if (id == RuleID::SYMBOL_CHECKS) {
-        return &rule_symbol_checks;
+        return rule_symbol_checks;
     }
-    return nullptr;
+    throw std::runtime_error("rule does not exist");
 }
 
-const Rule *SymbolRules::get_rule(RuleID id, const UUID &uu) const
+const Rule &SymbolRules::get_rule(RuleID id, const UUID &uu) const
 {
-    return nullptr;
+    throw std::runtime_error("rule does not exist");
 }
 
 std::map<UUID, const Rule *> SymbolRules::get_rules(RuleID id) const
@@ -59,13 +59,8 @@ void SymbolRules::remove_rule(RuleID id, const UUID &uu)
     fix_order(id);
 }
 
-Rule *SymbolRules::add_rule(RuleID id)
+Rule &SymbolRules::add_rule(RuleID id)
 {
-    Rule *r = nullptr;
-    switch (id) {
-    default:
-        return nullptr;
-    }
-    return r;
+    throw std::runtime_error("not implemented");
 }
 } // namespace horizon

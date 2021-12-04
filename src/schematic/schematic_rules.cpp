@@ -34,17 +34,17 @@ std::set<RuleID> SchematicRules::get_rule_ids() const
     return {RuleID::SINGLE_PIN_NET};
 }
 
-const Rule *SchematicRules::get_rule(RuleID id) const
+const Rule &SchematicRules::get_rule(RuleID id) const
 {
     if (id == RuleID::SINGLE_PIN_NET) {
-        return &rule_single_pin_net;
+        return rule_single_pin_net;
     }
-    return nullptr;
+    throw std::runtime_error("rule does not exist");
 }
 
-const Rule *SchematicRules::get_rule(RuleID id, const UUID &uu) const
+const Rule &SchematicRules::get_rule(RuleID id, const UUID &uu) const
 {
-    return nullptr;
+    throw std::runtime_error("rule does not exist");
 }
 
 std::map<UUID, const Rule *> SchematicRules::get_rules(RuleID id) const
@@ -64,13 +64,8 @@ void SchematicRules::remove_rule(RuleID id, const UUID &uu)
     fix_order(id);
 }
 
-Rule *SchematicRules::add_rule(RuleID id)
+Rule &SchematicRules::add_rule(RuleID id)
 {
-    Rule *r = nullptr;
-    switch (id) {
-    default:
-        return nullptr;
-    }
-    return r;
+    throw std::runtime_error("not implemented");
 }
 } // namespace horizon

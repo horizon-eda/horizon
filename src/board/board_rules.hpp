@@ -32,11 +32,11 @@ public:
     void apply(RuleID id, class Board &b, class IPool &pool) const;
     json serialize() const override;
     std::set<RuleID> get_rule_ids() const override;
-    const Rule *get_rule(RuleID id) const override;
-    const Rule *get_rule(RuleID id, const UUID &uu) const override;
+    const Rule &get_rule(RuleID id) const override;
+    const Rule &get_rule(RuleID id, const UUID &uu) const override;
     std::map<UUID, const Rule *> get_rules(RuleID id) const override;
     void remove_rule(RuleID id, const UUID &uu) override;
-    Rule *add_rule(RuleID id) override;
+    Rule &add_rule(RuleID id) override;
     void cleanup(const class Block *block);
 
     uint64_t get_default_track_width(const class Net *net, int layer) const;

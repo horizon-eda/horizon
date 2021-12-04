@@ -110,31 +110,31 @@ void Rules::fix_order(RuleID id)
 void Rules::move_rule(RuleID id, const UUID &uu, int dir)
 {
     auto rules = get_rules(id);
-    auto rule = get_rule(id, uu);
+    auto &rule = get_rule(id, uu);
     if (dir < 0) {
         dir = -1;
     }
     else {
         dir = 1;
     }
-    if (dir < 0 && rule->order == 0)
+    if (dir < 0 && rule.order == 0)
         return;
-    if (dir > 0 && rule->order == static_cast<int>(rules.size()) - 1)
+    if (dir > 0 && rule.order == static_cast<int>(rules.size()) - 1)
         return;
     auto rule_other = std::find_if(rules.begin(), rules.end(),
-                                   [rule, dir](const auto x) { return x.second->order == rule->order + dir; });
+                                   [&rule, dir](const auto x) { return x.second->order == rule.order + dir; });
     assert(rule_other != rules.end());
-    std::swap(rule_other->second->order, rule->order);
+    std::swap(rule_other->second->order, rule.order);
 }
 
-Rule *Rules::get_rule(RuleID id)
+Rule &Rules::get_rule(RuleID id)
 {
-    return const_cast<Rule *>(static_cast<const Rules *>(this)->get_rule(id));
+    return const_cast<Rule &>(static_cast<const Rules *>(this)->get_rule(id));
 }
 
-Rule *Rules::get_rule(RuleID id, const UUID &uu)
+Rule &Rules::get_rule(RuleID id, const UUID &uu)
 {
-    return const_cast<Rule *>(static_cast<const Rules *>(this)->get_rule(id, uu));
+    return const_cast<Rule &>(static_cast<const Rules *>(this)->get_rule(id, uu));
 }
 
 std::map<UUID, Rule *> Rules::get_rules(RuleID id)

@@ -521,17 +521,15 @@ void RulesWindow::rule_selected(RuleID id)
         update_warning();
     }
     else {
-        auto rule = rules.get_rule(id);
-        show_editor(create_editor(*rule));
+        auto &rule = rules.get_rule(id);
+        show_editor(create_editor(rule));
     }
 }
 
 void RulesWindow::rule_instance_selected(RuleID id, const UUID &uu)
 {
-    auto rule = rules.get_rule(id, uu);
-    if (rule == nullptr)
-        return;
-    show_editor(create_editor(*rule));
+    auto &rule = rules.get_rule(id, uu);
+    show_editor(create_editor(rule));
 }
 
 void RulesWindow::reload_editor()
@@ -669,11 +667,11 @@ void RulesWindow::update_rule_instance_labels()
 {
     for (auto ch : lb_multi->get_children()) {
         auto la = dynamic_cast<RuleLabel *>(dynamic_cast<Gtk::ListBoxRow *>(ch)->get_child());
-        auto rule = rules.get_rule(la->id, la->uuid);
-        la->set_text(rule->get_brief(get_top_block(), &core.get_pool()));
-        la->set_sensitive(rule->enabled);
-        la->set_order(rule->get_order());
-        la->set_imported(rule->imported);
+        auto &rule = rules.get_rule(la->id, la->uuid);
+        la->set_text(rule.get_brief(get_top_block(), &core.get_pool()));
+        la->set_sensitive(rule.enabled);
+        la->set_order(rule.get_order());
+        la->set_imported(rule.imported);
     }
     lb_multi->invalidate_sort();
 }
@@ -684,9 +682,9 @@ void RulesWindow::update_rule_labels()
         auto la = dynamic_cast<RuleLabel *>(dynamic_cast<Gtk::ListBoxRow *>(ch)->get_child());
         auto is_multi = rule_descriptions.at(la->id).multi;
         if (!is_multi) {
-            auto r = rules.get_rule(la->id);
-            la->set_sensitive(r->enabled);
-            la->set_imported(r->imported);
+            auto &r = rules.get_rule(la->id);
+            la->set_sensitive(r.enabled);
+            la->set_imported(r.imported);
         }
         else {
             auto r = rules.get_rules(la->id);
