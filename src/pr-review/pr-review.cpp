@@ -866,7 +866,7 @@ int Reviewer::main(int c_argc, char *c_argv[])
                 ofs << "\n";
             }
             {
-                auto &rule_cl = dynamic_cast<RuleClearancePackage &>(*pkg.rules.get_rule_nc(RuleID::CLEARANCE_PACKAGE));
+                auto &rule_cl = pkg.rules.get_rule_t<RuleClearancePackage>();
                 rule_cl.clearance_silkscreen_cu = 0.2_mm;
                 rule_cl.clearance_silkscreen_pkg = 0.2_mm;
                 auto r = pkg.rules.check(RuleID::CLEARANCE_PACKAGE, pkg);

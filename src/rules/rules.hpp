@@ -68,8 +68,27 @@ public:
         return get_rule(id);
     }
 
+    template <typename T> const T &get_rule_t() const
+    {
+        return dynamic_cast<const T &>(get_rule(T::id));
+    }
+
+    template <typename T> T &get_rule_t()
+    {
+        return dynamic_cast<T &>(get_rule(T::id));
+    }
+
     virtual const Rule &get_rule(RuleID id, const UUID &uu) const = 0;
     Rule &get_rule(RuleID id, const UUID &uu);
+
+    template <typename T> const T &get_rule_t(const UUID &uu) const
+    {
+        return dynamic_cast<const T &>(get_rule(T::id, uu));
+    }
+    template <typename T> T &get_rule_t(const UUID &uu)
+    {
+        return dynamic_cast<T &>(get_rule(T::id, uu));
+    }
 
     virtual std::map<UUID, const Rule *> get_rules(RuleID id) const = 0;
     std::map<UUID, Rule *> get_rules(RuleID id);
@@ -90,6 +109,11 @@ public:
         return rv;
     }
 
+    template <typename T> std::vector<const T *> get_rules_sorted() const
+    {
+        return get_rules_sorted<T>(T::id);
+    }
+
     template <typename T = Rule> std::vector<T *> get_rules_sorted(RuleID id)
     {
         std::vector<T *> r;
@@ -99,7 +123,16 @@ public:
         return r;
     }
 
+    template <typename T> std::vector<T *> get_rules_sorted()
+    {
+        return get_rules_sorted<T>(T::id);
+    }
+
     virtual void remove_rule(RuleID id, const UUID &uu) = 0;
+    template <typename T> T &add_rule_t()
+    {
+        return dynamic_cast<T &>(add_rule(T::id));
+    }
     virtual Rule &add_rule(RuleID id) = 0;
     void move_rule(RuleID id, const UUID &uu, int dir);
 

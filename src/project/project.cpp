@@ -145,7 +145,7 @@ std::string Project::create(const std::map<std::string, std::string> &meta, cons
 
     Board board(UUID::random(), top_block.block);
     if (default_via) {
-        auto &rule_via = dynamic_cast<RuleVia &>(board.rules.add_rule(RuleID::VIA));
+        auto &rule_via = board.rules.add_rule_t<RuleVia>();
         rule_via.padstack = default_via;
     }
     board.fab_output_settings.prefix = name;

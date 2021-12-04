@@ -24,7 +24,7 @@ RulesCheckResult BoardRules::check_track_width(const Board &brd) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
-    auto rules = get_rules_sorted<RuleTrackWidth>(RuleID::TRACK_WIDTH);
+    auto rules = get_rules_sorted<RuleTrackWidth>();
     for (const auto &it : brd.tracks) {
         auto width = it.second.width;
         Net *net = it.second.net;
@@ -78,7 +78,7 @@ RulesCheckResult BoardRules::check_hole_size(const Board &brd) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
-    auto rules = get_rules_sorted<RuleHoleSize>(RuleID::HOLE_SIZE);
+    auto rules = get_rules_sorted<RuleHoleSize>();
     for (const auto &it : brd.holes) {
         Net *net = it.second.net;
         for (const auto &it_hole : it.second.padstack.holes) {
@@ -611,7 +611,7 @@ RulesCheckResult BoardRules::check_clearance_copper_keepout(const Board &brd, Ru
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
     status_cb("Getting patches");
-    auto rules = get_rules_sorted<RuleClearanceCopperKeepout>(RuleID::CLEARANCE_COPPER_KEEPOUT);
+    auto rules = get_rules_sorted<RuleClearanceCopperKeepout>();
     auto &c = dynamic_cast<RulesCheckCacheBoardImage &>(cache.get_cache(RulesCheckCacheID::BOARD_IMAGE));
     std::set<int> layers;
     const auto &patches = c.get_canvas().get_patches();
@@ -699,7 +699,7 @@ RulesCheckResult BoardRules::check_clearance_same_net(const Board &brd, RulesChe
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
     status_cb("Getting patches");
-    auto rules = get_rules_sorted<RuleClearanceSameNet>(RuleID::CLEARANCE_SAME_NET);
+    auto rules = get_rules_sorted<RuleClearanceSameNet>();
     auto &c = dynamic_cast<RulesCheckCacheBoardImage &>(cache.get_cache(RulesCheckCacheID::BOARD_IMAGE));
     std::set<int> layers;
     const auto &patches = c.get_canvas().get_patches();

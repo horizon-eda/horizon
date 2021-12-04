@@ -540,12 +540,12 @@ Rule &BoardRules::add_rule(RuleID id)
 
 void BoardRules::update_sorted()
 {
-    rule_sorted_clearance_copper = get_rules_sorted<const RuleClearanceCopper>(RuleID::CLEARANCE_COPPER);
+    rule_sorted_clearance_copper = get_rules_sorted<const RuleClearanceCopper>();
 }
 
 uint64_t BoardRules::get_default_track_width(const Net *net, int layer) const
 {
-    auto rules = get_rules_sorted<RuleTrackWidth>(RuleID::TRACK_WIDTH);
+    auto rules = get_rules_sorted<RuleTrackWidth>();
     for (auto rule : rules) {
         if (rule->enabled && rule->match.match(net)) {
             if (rule->widths.count(layer)) {
@@ -575,7 +575,7 @@ static const RuleClearanceCopperOther fallback_clearance_copper_non_copper = UUI
 
 const RuleClearanceCopperOther *BoardRules::get_clearance_copper_other(const Net *net, int layer) const
 {
-    auto rules = get_rules_sorted<RuleClearanceCopperOther>(RuleID::CLEARANCE_COPPER_OTHER);
+    auto rules = get_rules_sorted<RuleClearanceCopperOther>();
     for (auto ru : rules) {
         if (ru->enabled && (ru->match.match(net) && (ru->layer == layer || ru->layer == 10000))) {
             return ru;
@@ -588,7 +588,7 @@ static const RuleDiffpair diffpair_fallback = UUID();
 
 const RuleDiffpair *BoardRules::get_diffpair(const NetClass *net_class, int layer) const
 {
-    auto rules = get_rules_sorted<RuleDiffpair>(RuleID::DIFFPAIR);
+    auto rules = get_rules_sorted<RuleDiffpair>();
     for (auto ru : rules) {
         if (ru->enabled && (ru->net_class == net_class->uuid && (ru->layer == layer || ru->layer == 10000))) {
             return ru;
@@ -602,7 +602,7 @@ static const RuleClearanceCopperKeepout keepout_fallback = UUID();
 const RuleClearanceCopperKeepout *BoardRules::get_clearance_copper_keepout(const Net *net,
                                                                            const KeepoutContour *contour) const
 {
-    auto rules = get_rules_sorted<RuleClearanceCopperKeepout>(RuleID::CLEARANCE_COPPER_KEEPOUT);
+    auto rules = get_rules_sorted<RuleClearanceCopperKeepout>();
     for (auto ru : rules) {
         if (ru->enabled && ru->match.match(net) && ru->match_keepout.match(contour)) {
             return ru;
@@ -614,7 +614,7 @@ static const RuleClearanceSameNet same_net_fallback = UUID();
 
 const RuleClearanceSameNet *BoardRules::get_clearance_same_net(const Net *net, int layer) const
 {
-    auto rules = get_rules_sorted<RuleClearanceSameNet>(RuleID::CLEARANCE_SAME_NET);
+    auto rules = get_rules_sorted<RuleClearanceSameNet>();
     for (auto ru : rules) {
         if (ru->enabled && ru->match.match(net) && (ru->layer == layer || ru->layer == 10000)) {
             return ru;
@@ -628,7 +628,7 @@ uint64_t BoardRules::get_max_clearance() const
 {
     uint64_t max_clearance = 0;
     {
-        auto rules = get_rules_sorted<RuleClearanceCopper>(RuleID::CLEARANCE_COPPER);
+        auto rules = get_rules_sorted<RuleClearanceCopper>();
         for (auto ru : rules) {
             if (ru->enabled) {
                 max_clearance = std::max(max_clearance, ru->get_max_clearance());
@@ -636,7 +636,7 @@ uint64_t BoardRules::get_max_clearance() const
         }
     }
     {
-        auto rules = get_rules_sorted<RuleClearanceCopperOther>(RuleID::CLEARANCE_COPPER_OTHER);
+        auto rules = get_rules_sorted<RuleClearanceCopperOther>();
         for (auto ru : rules) {
             if (ru->enabled) {
                 max_clearance = std::max(max_clearance, ru->get_max_clearance());
@@ -644,7 +644,7 @@ uint64_t BoardRules::get_max_clearance() const
         }
     }
     {
-        auto rules = get_rules_sorted<RuleClearanceCopperKeepout>(RuleID::CLEARANCE_COPPER_KEEPOUT);
+        auto rules = get_rules_sorted<RuleClearanceCopperKeepout>();
         for (auto ru : rules) {
             if (ru->enabled) {
                 max_clearance = std::max(max_clearance, ru->get_max_clearance());
@@ -661,7 +661,7 @@ const RuleParameters *BoardRules::get_parameters() const
 
 UUID BoardRules::get_via_padstack_uuid(const Net *net) const
 {
-    auto rules = get_rules_sorted<RuleVia>(RuleID::VIA);
+    auto rules = get_rules_sorted<RuleVia>();
     for (auto rule : rules) {
         if (rule->enabled && rule->match.match(net)) {
             return rule->padstack;
@@ -674,7 +674,7 @@ static const ParameterSet ps_empty;
 
 const ParameterSet &BoardRules::get_via_parameter_set(const Net *net) const
 {
-    auto rules = get_rules_sorted<RuleVia>(RuleID::VIA);
+    auto rules = get_rules_sorted<RuleVia>();
     for (auto rule : rules) {
         if (rule->enabled && rule->match.match(net)) {
             return rule->parameter_set;
@@ -687,7 +687,7 @@ static const PlaneSettings plane_settings_default;
 
 const PlaneSettings &BoardRules::get_plane_settings(const Net *net, int layer) const
 {
-    auto rules = get_rules_sorted<RulePlane>(RuleID::PLANE);
+    auto rules = get_rules_sorted<RulePlane>();
     for (auto rule : rules) {
         if (rule->enabled && rule->match.match(net) && (rule->layer == layer || rule->layer == 10000)) {
             return rule->settings;
@@ -698,7 +698,7 @@ const PlaneSettings &BoardRules::get_plane_settings(const Net *net, int layer) c
 
 int BoardRules::get_layer_pair(const Net *net, int layer) const
 {
-    auto rules = get_rules_sorted<RuleLayerPair>(RuleID::LAYER_PAIR);
+    auto rules = get_rules_sorted<RuleLayerPair>();
     for (auto rule : rules) {
         if (rule->enabled && rule->match.match(net)) {
             if (rule->layers.first == layer)

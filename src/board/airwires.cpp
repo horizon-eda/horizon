@@ -159,7 +159,7 @@ void Board::update_airwire(bool fast, const UUID &net)
 
     std::set<std::pair<size_t, size_t>> edges_from_board;
     std::vector<std::pair<size_t, size_t>> zero_length_airwires;
-    auto shorted_pads_rules = rules.get_rules_sorted<const RuleShortedPads>(RuleID::SHORTED_PADS);
+    auto shorted_pads_rules = rules.get_rules_sorted<const RuleShortedPads>();
 
     for (auto &it_pkg : packages) {
         std::vector<size_t> pad_positions_pts_idx;

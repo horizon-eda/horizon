@@ -97,8 +97,7 @@ PNS_HORIZON_RULE_RESOLVER::PNS_HORIZON_RULE_RESOLVER(const horizon::Board *aBoar
     PNS::TOPOLOGY topo(world);
 
     m_iface = static_cast<PNS_HORIZON_IFACE *>(m_router->GetInterface());
-    m_rules_keepout =
-            m_rules->get_rules_sorted<horizon::RuleClearanceCopperKeepout>(horizon::RuleID::CLEARANCE_COPPER_KEEPOUT);
+    m_rules_keepout = m_rules->get_rules_sorted<horizon::RuleClearanceCopperKeepout>();
 }
 
 PNS_HORIZON_RULE_RESOLVER::~PNS_HORIZON_RULE_RESOLVER()

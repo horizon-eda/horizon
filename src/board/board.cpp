@@ -295,15 +295,13 @@ Board::Board(const UUID &uu, Block &bl) : uuid(uu), block(&bl), version(app_vers
     rules.add_rule(RuleID::CLEARANCE_COPPER_OTHER);
     rules.add_rule(RuleID::PLANE);
     {
-        rules.add_rule(RuleID::TRACK_WIDTH);
-        auto &r = dynamic_cast<RuleTrackWidth &>(*rules.get_rules_nc(RuleID::TRACK_WIDTH).begin()->second);
+        auto &r = rules.add_rule_t<RuleTrackWidth>();
         r.widths.emplace(std::piecewise_construct, std::forward_as_tuple(0), std::forward_as_tuple());
         // TBD: inner layers
         r.widths.emplace(std::piecewise_construct, std::forward_as_tuple(-100), std::forward_as_tuple());
     }
     {
-        rules.add_rule(RuleID::LAYER_PAIR);
-        auto &r = dynamic_cast<RuleLayerPair &>(*rules.get_rules_nc(RuleID::LAYER_PAIR).begin()->second);
+        auto &r = rules.add_rule_t<RuleLayerPair>();
         r.layers = std::make_pair(BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER);
     }
 }
