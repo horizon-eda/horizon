@@ -83,42 +83,35 @@ PreferencesRowBoolButton::PreferencesRowBoolButton(const std::string &title, con
     pack_start(*box, false, false, 0);
 }
 
-class PreferencesRowNumeric : public PreferencesRow {
+template <typename T> class PreferencesRowNumeric : public PreferencesRow {
 public:
-    PreferencesRowNumeric(const std::string &title, const std::string &subtitle, Preferences &prefs, float &v);
+    PreferencesRowNumeric(const std::string &title, const std::string &subtitle, Preferences &prefs, T &v)
+        : PreferencesRow(title, subtitle, prefs), value(v)
+    {
+        sp = Gtk::manage(new Gtk::SpinButton);
+        sp->set_valign(Gtk::ALIGN_CENTER);
+        sp->show();
+        pack_start(*sp, false, false, 0);
+    }
 
-    Gtk::SpinButton &get_spinbutton();
-    void bind();
+    Gtk::SpinButton &get_spinbutton()
+    {
+        return *sp;
+    }
+
+    void bind()
+    {
+        sp->set_value(value);
+        sp->signal_value_changed().connect([this] {
+            value = sp->get_value();
+            preferences.signal_changed().emit();
+        });
+    }
 
 private:
-    float &value;
+    T &value;
     Gtk::SpinButton *sp = nullptr;
 };
-
-PreferencesRowNumeric::PreferencesRowNumeric(const std::string &title, const std::string &subtitle, Preferences &prefs,
-                                             float &v)
-    : PreferencesRow(title, subtitle, prefs), value(v)
-{
-    sp = Gtk::manage(new Gtk::SpinButton);
-    sp->set_valign(Gtk::ALIGN_CENTER);
-    sp->show();
-    pack_start(*sp, false, false, 0);
-}
-
-void PreferencesRowNumeric::bind()
-{
-    sp->set_value(value);
-    sp->signal_value_changed().connect([this] {
-        value = sp->get_value();
-        preferences.signal_changed().emit();
-    });
-}
-
-Gtk::SpinButton &PreferencesRowNumeric::get_spinbutton()
-{
-    return *sp;
-}
-
 
 class PreferencesGroup : public Gtk::Box {
 public:
@@ -241,9 +234,9 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
             gr->add_row(*r);
         }
         {
-            auto r =
-                    Gtk::manage(new PreferencesRowNumeric("Zoom factor", "How far to zoom in on each mouse wheel click",
-                                                          preferences, preferences.zoom.zoom_factor));
+            auto r = Gtk::manage(new PreferencesRowNumeric<float>("Zoom factor",
+                                                                  "How far to zoom in on each mouse wheel click",
+                                                                  preferences, preferences.zoom.zoom_factor));
             auto &sp = r->get_spinbutton();
             sp.set_range(10, 100);
             sp.set_increments(10, 10);
