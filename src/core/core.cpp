@@ -215,11 +215,15 @@ void Core::history_clear()
 
 void Core::history_trim()
 {
-    const size_t history_max = 50;
     while (history.size() > history_max) {
         history.pop_front();
         history_current--;
     }
+}
+
+void Core::set_history_max(unsigned int m)
+{
+    history_max = m;
 }
 
 bool Core::can_redo() const

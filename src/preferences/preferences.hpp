@@ -74,6 +74,7 @@ public:
 class UndoRedoPreferences {
 public:
     bool show_hints = true;
+    unsigned int max_depth = 50;
 
     void load_from_json(const json &j);
     json serialize() const;

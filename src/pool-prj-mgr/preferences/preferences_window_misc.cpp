@@ -310,6 +310,16 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
                     preferences.undo_redo.show_hints));
             gr->add_row(*r);
         }
+        {
+            auto r = Gtk::manage(new PreferencesRowNumeric("Undo/redo depth", "How many undo/redo steps to store",
+                                                           preferences, preferences.undo_redo.max_depth));
+            auto &sp = r->get_spinbutton();
+            sp.set_range(3, 100);
+            sp.set_increments(10, 10);
+            sp.set_width_chars(5);
+            r->bind();
+            gr->add_row(*r);
+        }
     }
     {
         auto gr = Gtk::manage(new PreferencesGroup("Action Bar"));

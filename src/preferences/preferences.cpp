@@ -431,12 +431,14 @@ json UndoRedoPreferences::serialize() const
 {
     json j;
     j["show_hints"] = show_hints;
+    j["max_depth"] = max_depth;
     return j;
 }
 
 void UndoRedoPreferences::load_from_json(const json &j)
 {
     show_hints = j.value("show_hints", true);
+    max_depth = j.value("max_depth", 50);
 }
 
 json Preferences::serialize() const
