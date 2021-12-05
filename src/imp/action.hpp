@@ -67,6 +67,11 @@ enum class ActionGroup {
     VIEW_3D,
 };
 
+enum class ActionSource {
+    UNKNOWN,
+    KEY,
+};
+
 using KeySequenceItem = std::pair<unsigned int, GdkModifierType>;
 using KeySequence = std::vector<KeySequenceItem>;
 
@@ -81,13 +86,13 @@ KeyMatchResult key_sequence_match(const KeySequence &keys_current, const KeySequ
 
 class ActionConnection {
 public:
-    ActionConnection(ActionToolID atid, std::function<void(const ActionConnection &)> c) : id(atid), cb(c)
+    ActionConnection(ActionToolID atid, std::function<void(const ActionConnection &, ActionSource)> c) : id(atid), cb(c)
     {
     }
 
     const ActionToolID id;
     std::vector<KeySequence> key_sequences;
-    std::function<void(const ActionConnection &)> cb;
+    std::function<void(const ActionConnection &, ActionSource)> cb;
 };
 
 } // namespace horizon

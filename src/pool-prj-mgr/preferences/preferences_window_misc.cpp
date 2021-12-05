@@ -308,6 +308,17 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
         }
     }
     {
+        auto gr = Gtk::manage(new PreferencesGroup("Undo / Redo"));
+        box->pack_start(*gr, false, false, 0);
+        gr->show();
+        {
+            auto r = Gtk::manage(new PreferencesRowBool(
+                    "Show popups", "Briefly show what's been undone/redone when using keyboard shortcuts", preferences,
+                    preferences.undo_redo.show_hints));
+            gr->add_row(*r);
+        }
+    }
+    {
         auto gr = Gtk::manage(new PreferencesGroup("Action Bar"));
         box->pack_start(*gr, false, false, 0);
         gr->show();

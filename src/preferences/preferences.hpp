@@ -71,6 +71,14 @@ public:
     json serialize() const;
 };
 
+class UndoRedoPreferences {
+public:
+    bool show_hints = true;
+
+    void load_from_json(const json &j);
+    json serialize() const;
+};
+
 class PartInfoPreferences {
 public:
     std::string url = "https://dev-partinfo.kitspace.org/graphql";
@@ -143,6 +151,7 @@ public:
     ActionBarPreferences action_bar;
     InToolKeySequencesPreferences in_tool_key_sequences;
     MousePreferences mouse;
+    UndoRedoPreferences undo_redo;
 
     bool show_pull_request_tools = false;
     bool hud_debug = false;

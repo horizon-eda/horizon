@@ -94,6 +94,8 @@ protected:
 
     ActionConnection &connect_action(ToolID tool_id);
     ActionConnection &connect_action(ActionToolID id, std::function<void(const ActionConnection &)> cb);
+    ActionConnection &connect_action_with_source(ActionToolID id,
+                                                 std::function<void(const ActionConnection &, ActionSource)> cb);
 
     class RulesWindow *rules_window = nullptr;
 
@@ -129,7 +131,7 @@ protected:
     bool handle_close(const GdkEventAny *ev);
     json send_json(const json &j);
 
-    bool trigger_action(ActionToolID action);
+    bool trigger_action(ActionToolID action, ActionSource source = ActionSource::UNKNOWN);
 
     void connect_go_to_project_manager_action();
 

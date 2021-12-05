@@ -206,7 +206,7 @@ bool ImpBase::handle_action_key(const GdkEventKey *ev)
             keys_current.clear();
             main_window->key_hint_set_visible(false);
             auto conn = connections_matched.begin()->first;
-            if (!trigger_action(conn->id)) {
+            if (!trigger_action(conn->id, ActionSource::KEY)) {
                 reset_tool_hint_label();
                 return false;
             }

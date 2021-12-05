@@ -246,3 +246,7 @@ box.imp-instance-path-bar         > label {
 .imp-instance-path-bar:backdrop       > label {
   opacity:0.8;
 }
+
+.imp_undo_redo_hint {
+  border-radius: 5px;
+}

@@ -73,6 +73,10 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     GET_WIDGET(hierarchy_stack);
     GET_WIDGET(out_of_hierarchy_label);
 
+    GET_WIDGET(undo_redo_hint_frame);
+    GET_WIDGET(undo_redo_hint_label);
+    undo_redo_hint_frame->set_visible(false);
+
     set_version_info("");
 
     grid_options_button->signal_clicked().connect([this] {
@@ -304,6 +308,32 @@ void MainWindow::key_hint_set_visible(bool show)
     }
     else {
         key_hint_revealer->set_reveal_child(false);
+    }
+}
+
+void MainWindow::set_undo_redo_hint(const std::string &s)
+{
+    if (!undo_redo_hint_frame->get_visible()) {
+        undo_redo_hint_connection.disconnect();
+        undo_redo_hint_label->set_text(s);
+        undo_redo_hint_frame->set_visible(true);
+        undo_redo_hint_connection = Glib::signal_timeout().connect(
+                [this] {
+                    undo_redo_hint_frame->set_visible(false);
+                    return false;
+                },
+                1000);
+    }
+    else if (undo_redo_hint_frame->get_visible()) {
+        undo_redo_hint_connection.disconnect();
+        undo_redo_hint_frame->set_visible(false);
+        const std::string s_copy = s;
+        undo_redo_hint_connection = Glib::signal_timeout().connect(
+                [this, s_copy] {
+                    set_undo_redo_hint(s_copy);
+                    return false;
+                },
+                200);
     }
 }
 

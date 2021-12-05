@@ -498,12 +498,16 @@ void ImpBase::run(int argc, char *argv[])
             main_window->set_version_info("");
         }
     });
-    connect_action(ActionID::UNDO, [this](const auto &a) {
+    connect_action_with_source(ActionID::UNDO, [this](const auto &a, auto src) {
+        if (src == ActionSource::KEY && preferences.undo_redo.show_hints)
+            main_window->set_undo_redo_hint("Undid " + core->get_undo_comment());
         core->undo();
         this->canvas_update_from_pp();
         this->update_property_panels();
     });
-    connect_action(ActionID::REDO, [this](const auto &a) {
+    connect_action_with_source(ActionID::REDO, [this](const auto &a, auto src) {
+        if (src == ActionSource::KEY && preferences.undo_redo.show_hints)
+            main_window->set_undo_redo_hint("Redid " + core->get_redo_comment());
         core->redo();
         this->canvas_update_from_pp();
         this->update_property_panels();

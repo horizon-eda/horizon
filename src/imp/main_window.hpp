@@ -84,6 +84,8 @@ public:
 
     void set_version_info(const std::string &s);
 
+    void set_undo_redo_hint(const std::string &s);
+
     // virtual ~MainWindow();
 private:
     Gtk::EventBox *gl_container = nullptr;
@@ -126,5 +128,9 @@ private:
     Gtk::Revealer *key_hint_revealer = nullptr;
     sigc::connection key_hint_connection;
     void update_key_hint_position();
+
+    Gtk::Frame *undo_redo_hint_frame = nullptr;
+    Gtk::Label *undo_redo_hint_label = nullptr;
+    sigc::connection undo_redo_hint_connection;
 };
 } // namespace horizon

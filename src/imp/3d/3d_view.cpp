@@ -512,7 +512,7 @@ bool View3DWindow::handle_action_key(const GdkEventKey *ev)
 void View3DWindow::trigger_action(ActionID action)
 {
     auto conn = action_connections.at(action);
-    conn.cb(conn);
+    conn.cb(conn, ActionSource::UNKNOWN);
 }
 
 ActionConnection &View3DWindow::connect_action(ActionID action_id, std::function<void(const ActionConnection &)> cb)
@@ -523,9 +523,10 @@ ActionConnection &View3DWindow::connect_action(ActionID action_id, std::function
     if (action_catalog.count(action_id) == 0) {
         throw std::runtime_error("invalid action");
     }
+    auto cb_wrapped = [cb](const ActionConnection &conn, ActionSource) { cb(conn); };
     auto &act = action_connections
                         .emplace(std::piecewise_construct, std::forward_as_tuple(action_id),
-                                 std::forward_as_tuple(action_id, cb))
+                                 std::forward_as_tuple(action_id, cb_wrapped))
                         .first->second;
 
     return act;

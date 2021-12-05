@@ -204,7 +204,7 @@ Gtk::Button *ImpBase::create_action_button(ActionToolID action)
     return button;
 }
 
-bool ImpBase::trigger_action(ActionToolID action)
+bool ImpBase::trigger_action(ActionToolID action, ActionSource source)
 {
     if (core->tool_is_active() && !(action_catalog.at(action).flags & ActionCatalogItem::FLAGS_IN_TOOL)) {
         return false;
@@ -217,7 +217,7 @@ bool ImpBase::trigger_action(ActionToolID action)
         reset_tool_hint_label();
     }
     auto conn = action_connections.at(action);
-    conn.cb(conn);
+    conn.cb(conn, source);
     return true;
 }
 
@@ -232,7 +232,8 @@ ActionConnection &ImpBase::connect_action(ToolID tool_id)
     return connect_action(tool_id, sigc::mem_fun(*this, &ImpBase::handle_tool_action));
 }
 
-ActionConnection &ImpBase::connect_action(ActionToolID id, std::function<void(const ActionConnection &)> cb)
+ActionConnection &ImpBase::connect_action_with_source(ActionToolID id,
+                                                      std::function<void(const ActionConnection &, ActionSource)> cb)
 {
     if (action_connections.count(id)) {
         throw std::runtime_error("duplicate action");
@@ -245,6 +246,11 @@ ActionConnection &ImpBase::connect_action(ActionToolID id, std::function<void(co
                         .first->second;
 
     return act;
+}
+
+ActionConnection &ImpBase::connect_action(ActionToolID id, std::function<void(const ActionConnection &)> cb)
+{
+    return connect_action_with_source(id, [cb](const ActionConnection &conn, ActionSource) { cb(conn); });
 }
 
 void ImpBase::handle_pan_action(const ActionConnection &c)

@@ -1296,6 +1296,38 @@
                         <property name="index">5</property>
                       </packing>
                     </child>
+                    <child type="overlay">
+                      <object class="GtkFrame" id="undo_redo_hint_frame">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">center</property>
+                        <property name="valign">end</property>
+                        <property name="margin-bottom">100</property>
+                        <property name="label-xalign">0</property>
+                        <property name="shadow-type">none</property>
+                        <child>
+                          <object class="GtkLabel" id="undo_redo_hint_label">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-start">10</property>
+                            <property name="margin-end">10</property>
+                            <property name="margin-top">10</property>
+                            <property name="margin-bottom">10</property>
+                            <property name="label" translatable="yes">Undid Move</property>
+                          </object>
+                        </child>
+                        <child type="label_item">
+                          <placeholder/>
+                        </child>
+                        <style>
+                          <class name="osd"/>
+                          <class name="imp_undo_redo_hint"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="index">6</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">True</property>

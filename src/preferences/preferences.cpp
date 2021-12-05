@@ -427,6 +427,18 @@ void MousePreferences::load_from_json(const json &j)
     drag_to_move = j.value("drag_to_move", true);
 }
 
+json UndoRedoPreferences::serialize() const
+{
+    json j;
+    j["show_hints"] = show_hints;
+    return j;
+}
+
+void UndoRedoPreferences::load_from_json(const json &j)
+{
+    show_hints = j.value("show_hints", true);
+}
+
 json Preferences::serialize() const
 {
     json j;
@@ -443,6 +455,7 @@ json Preferences::serialize() const
     j["digikey_api"] = digikey_api.serialize();
     j["action_bar"] = action_bar.serialize();
     j["mouse"] = mouse.serialize();
+    j["undo_redo"] = undo_redo.serialize();
     j["show_pull_request_tools"] = show_pull_request_tools;
     j["hud_debug"] = hud_debug;
     return j;
@@ -486,6 +499,8 @@ void Preferences::load_from_json(const json &j)
         partinfo.load_from_json(j.at("partinfo"));
     if (j.count("digikey_api"))
         digikey_api.load_from_json(j.at("digikey_api"));
+    if (j.count("undo_redo"))
+        undo_redo.load_from_json(j.at("undo_redo"));
 }
 
 void Preferences::load()
