@@ -90,6 +90,8 @@ private:
                                             check_status_cb_t status_cb) const;
     RulesCheckResult check_clearance_copper_non_copper(const class Board &b, class RulesCheckCache &cache,
                                                        check_status_cb_t status_cb) const;
+    RulesCheckResult check_clearance_silkscreen_exposed_copper(const class Board &b, class RulesCheckCache &cache,
+                                                               check_status_cb_t status_cb) const;
     RulesCheckResult check_preflight(const class Board &b) const;
     RulesCheckResult check_clearance_copper_keepout(const class Board &b, class RulesCheckCache &cache,
                                                     check_status_cb_t status_cb) const;

@@ -5,6 +5,7 @@ versions:
     3: add silkscreen color
     4: add rule net class regex matching
     5: add shorted pads rule
+    6: add pads only flag to silkscreen exposed copper rule
   schematic:
     1: add custom values on symbols
     2: add hierarchy
