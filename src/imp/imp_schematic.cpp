@@ -1420,7 +1420,7 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
     core_schematic.get_current_schematic()->update_refs();
 
     core_schematic.set_needs_save();
-    core_schematic.rebuild();
+    core_schematic.rebuild("move to other sheet");
     canvas_update();
     canvas->set_selection(selection);
     tool_begin(ToolID::MOVE);

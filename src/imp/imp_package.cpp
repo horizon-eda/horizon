@@ -238,7 +238,7 @@ void ImpPackage::construct()
         else {
             parameter_window->set_error_message("");
         }
-        core_package.rebuild();
+        core_package.rebuild("apply parameter set");
         canvas_update();
     });
 

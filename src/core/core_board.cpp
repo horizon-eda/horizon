@@ -53,7 +53,7 @@ CoreBoard::CoreBoard(const std::string &board_filename, const std::string &block
       m_blocks_filename(blocks_filename), m_pictures_dir(pictures_dir)
 {
     brd->load_pictures(pictures_dir);
-    rebuild();
+    rebuild("init");
 }
 
 void CoreBoard::reload_netlist()
@@ -98,7 +98,7 @@ void CoreBoard::reload_netlist()
     brd->update_refs();
     rules.cleanup(&*block);
     brd->expand_flags = Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_ALL_AIRWIRES | Board::EXPAND_PACKAGES;
-    rebuild();
+    rebuild("reload netlist");
 }
 
 bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, PropertyValue &value)
@@ -552,7 +552,7 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
         return false;
     }
     if (!property_transaction) {
-        rebuild_internal(false);
+        rebuild_internal(false, "edit properties");
         set_needs_save(true);
     }
     return true;
@@ -621,11 +621,11 @@ bool CoreBoard::get_property_meta(ObjectType type, const UUID &uu, ObjectPropert
     }
 }
 
-void CoreBoard::rebuild_internal(bool from_undo)
+void CoreBoard::rebuild_internal(bool from_undo, const std::string &comment)
 {
     clock_t begin = clock();
     brd->expand_some();
-    rebuild_finish(from_undo);
+    rebuild_finish(from_undo, comment);
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
     std::cout << "rebuild took " << elapsed_secs << std::endl;
@@ -666,13 +666,14 @@ void CoreBoard::update_rules()
     brd->rules = rules;
 }
 
-CoreBoard::HistoryItem::HistoryItem(const Block &b, const Board &r) : block(b), brd(shallow_copy, r)
+CoreBoard::HistoryItem::HistoryItem(const Block &b, const Board &r, const std::string &cm)
+    : Core::HistoryItem(cm), block(b), brd(shallow_copy, r)
 {
 }
 
-void CoreBoard::history_push()
+void CoreBoard::history_push(const std::string &comment)
 {
-    history.push_back(std::make_unique<CoreBoard::HistoryItem>(*block, *brd));
+    history.push_back(std::make_unique<CoreBoard::HistoryItem>(*block, *brd, comment));
 }
 
 void CoreBoard::history_load(unsigned int i)
@@ -698,7 +699,7 @@ void CoreBoard::reload_pool()
     brd.emplace(brd->uuid, brd_j, *block, m_pool_caching);
     keeper.restore(brd->pictures);
     history_clear();
-    rebuild();
+    rebuild("reload pool");
 }
 
 json CoreBoard::get_meta()

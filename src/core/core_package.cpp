@@ -16,7 +16,7 @@ CorePackage::CorePackage(const std::string &filename, IPool &pool)
       parameter_set(package.parameter_set), models(package.models), default_model(package.default_model)
 {
     package.load_pictures(m_pictures_dir);
-    rebuild();
+    rebuild("init");
 }
 
 bool CorePackage::has_object_type(ObjectType ty) const
@@ -188,7 +188,7 @@ bool CorePackage::set_property(ObjectType type, const UUID &uu, ObjectProperty::
         return false;
     }
     if (!property_transaction) {
-        rebuild_internal(false);
+        rebuild_internal(false, "edit properties");
         set_needs_save(true);
     }
     return true;
@@ -210,19 +210,19 @@ bool CorePackage::get_property_meta(ObjectType type, const UUID &uu, ObjectPrope
     return Core::get_property_meta(type, uu, property, meta);
 }
 
-void CorePackage::rebuild_internal(bool from_undo)
+void CorePackage::rebuild_internal(bool from_undo, const std::string &comment)
 {
     if (auto r = package.apply_parameter_set({})) {
         Logger::get().log_critical("Parameter program failed", Logger::Domain::CORE, r.value());
     }
     package.expand();
     package.update_warnings();
-    rebuild_finish(from_undo);
+    rebuild_finish(from_undo, comment);
 }
 
-void CorePackage::history_push()
+void CorePackage::history_push(const std::string &comment)
 {
-    history.push_back(std::make_unique<CorePackage::HistoryItem>(package));
+    history.push_back(std::make_unique<CorePackage::HistoryItem>(package, comment));
 }
 
 void CorePackage::history_load(unsigned int i)
@@ -241,7 +241,7 @@ void CorePackage::reload_pool()
     m_pool.clear();
     package.update_refs(m_pool);
     history_clear();
-    rebuild();
+    rebuild("reload pool");
 }
 
 json CorePackage::get_meta()

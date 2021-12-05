@@ -11,7 +11,7 @@ CorePadstack::CorePadstack(const std::string &filename, IPool &pool)
       parameter_program_code(padstack.parameter_program.get_code()), parameter_set(padstack.parameter_set),
       parameters_required(padstack.parameters_required)
 {
-    rebuild();
+    rebuild("init");
 }
 
 bool CorePadstack::has_object_type(ObjectType ty) const
@@ -135,7 +135,7 @@ bool CorePadstack::set_property(ObjectType type, const UUID &uu, ObjectProperty:
         return false;
     }
     if (!property_transaction) {
-        rebuild_internal(false);
+        rebuild_internal(false, "edit properties");
         set_needs_save(true);
     }
     return true;
@@ -212,14 +212,14 @@ std::map<UUID, Hole> *CorePadstack::get_hole_map()
     return &padstack.holes;
 }
 
-void CorePadstack::rebuild_internal(bool from_undo)
+void CorePadstack::rebuild_internal(bool from_undo, const std::string &comment)
 {
-    rebuild_finish(from_undo);
+    rebuild_finish(from_undo, comment);
 }
 
-void CorePadstack::history_push()
+void CorePadstack::history_push(const std::string &comment)
 {
-    history.push_back(std::make_unique<CorePadstack::HistoryItem>(padstack));
+    history.push_back(std::make_unique<CorePadstack::HistoryItem>(padstack, comment));
 }
 
 void CorePadstack::history_load(unsigned int i)

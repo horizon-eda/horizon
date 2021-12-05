@@ -44,11 +44,11 @@ private:
 
     class HistoryItem : public Core::HistoryItem {
     public:
-        HistoryItem(const Frame &r);
+        HistoryItem(const Frame &r, const std::string &comment);
         Frame frame;
     };
-    void rebuild_internal(bool from_undo) override;
-    void history_push() override;
+    void rebuild_internal(bool from_undo, const std::string &comment) override;
+    void history_push(const std::string &comment) override;
     void history_load(unsigned int i) override;
     void save(const std::string &suffix) override;
     void delete_autosave() override;

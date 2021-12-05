@@ -70,7 +70,7 @@ public:
      * Expands the non-working document.
      * And copies the non-working document to the working document.
      */
-    void rebuild();
+    void rebuild(const std::string &comment);
     ToolResponse tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInterface *imp, bool transient = false);
     ToolResponse tool_update(const ToolArgs &args);
     std::pair<bool, bool> tool_can_begin(ToolID tool_id, const std::set<SelectableRef> &selection);
@@ -83,6 +83,9 @@ public:
 
     bool can_undo() const;
     bool can_redo() const;
+
+    const std::string &get_undo_comment() const;
+    const std::string &get_redo_comment() const;
 
     inline bool tool_is_active()
     {
@@ -179,6 +182,7 @@ protected:
     class IPool &m_pool;
     class IPool &m_pool_caching;
 
+    ToolID tool_id_current;
     std::unique_ptr<ToolBase> tool = nullptr;
     type_signal_tool_changed s_signal_tool_changed;
     type_signal_rebuilt s_signal_rebuilt;
@@ -191,20 +195,21 @@ protected:
     bool needs_save = false;
     void set_needs_save(bool v);
 
-    void rebuild_finish(bool from_undo);
+    void rebuild_finish(bool from_undo, const std::string &comment);
 
     class HistoryItem {
     public:
-        // Symbol sym;
-        // HistoryItem(const Symbol &s): sym(s) {}
-        std::string comment;
+        HistoryItem(const std::string &c) : comment(c)
+        {
+        }
+        const std::string comment;
         virtual ~HistoryItem()
         {
         }
     };
     std::deque<std::unique_ptr<HistoryItem>> history;
     int history_current = -1;
-    virtual void history_push() = 0;
+    virtual void history_push(const std::string &comment) = 0;
     virtual void history_load(unsigned int i) = 0;
     void history_clear();
     void history_trim();
@@ -223,6 +228,6 @@ private:
     std::unique_ptr<ToolBase> create_tool(ToolID tool_id);
     std::set<SelectableRef> tool_selection;
     void maybe_end_tool(const ToolResponse &r);
-    virtual void rebuild_internal(bool from_undo) = 0;
+    virtual void rebuild_internal(bool from_undo, const std::string &comment) = 0;
 };
 } // namespace horizon

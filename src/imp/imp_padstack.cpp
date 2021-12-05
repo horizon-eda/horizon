@@ -123,7 +123,7 @@ void ImpPadstack::construct()
         else {
             parameter_window->set_error_message("");
         }
-        core_padstack.rebuild();
+        core_padstack.rebuild("apply parameter set");
         canvas_update();
     });
     core->signal_tool_changed().connect([this](ToolID t) { parameter_window->set_can_apply(t == ToolID::NONE); });

@@ -63,6 +63,7 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
                                  Logger::Domain::CORE, e.what());
             return ToolResponse::end();
         }
+        tool_id_current = tool_id;
         maybe_end_tool(r);
 
         return r;
@@ -82,15 +83,17 @@ void Core::maybe_end_tool(const ToolResponse &r)
         s_signal_tool_changed.emit(ToolID::NONE);
         if (r.result == ToolResponse::Result::COMMIT) {
             set_needs_save(true);
-            rebuild_internal(false);
+            const auto comment = action_catalog.at(tool_id_current).name;
+            rebuild_internal(false, comment);
         }
         else if (r.result == ToolResponse::Result::REVERT) {
             history_load(history_current);
-            rebuild_internal(true);
+            rebuild_internal(true, "undo");
         }
         else if (r.result == ToolResponse::Result::END) { // did nothing
             // do nothing
         }
+        tool_id_current = ToolID::NONE;
     }
 }
 
@@ -138,19 +141,19 @@ ToolResponse Core::tool_update(const ToolArgs &args)
     return ToolResponse();
 }
 
-void Core::rebuild()
+void Core::rebuild(const std::string &comment)
 {
-    rebuild_internal(false);
+    rebuild_internal(false, comment);
 }
 
-void Core::rebuild_finish(bool from_undo)
+void Core::rebuild_finish(bool from_undo, const std::string &comment)
 {
     if (!from_undo) {
         while (history_current + 1 != (int)history.size()) {
             history.pop_back();
         }
         assert(history_current + 1 == (int)history.size());
-        history_push();
+        history_push(comment);
         history_current++;
         history_trim();
     }
@@ -179,6 +182,28 @@ void Core::redo()
     signal_rebuilt().emit();
     signal_can_undo_redo().emit();
     set_needs_save();
+}
+
+static const std::string empty_string;
+
+const std::string &Core::get_undo_comment() const
+{
+    if (can_undo()) {
+        return history.at(history_current)->comment;
+    }
+    else {
+        return empty_string;
+    }
+}
+
+const std::string &Core::get_redo_comment() const
+{
+    if (can_redo()) {
+        return history.at(history_current + 1)->comment;
+    }
+    else {
+        return empty_string;
+    }
 }
 
 void Core::history_clear()
@@ -218,7 +243,7 @@ void Core::set_property_commit()
 {
     if (!property_transaction)
         throw std::runtime_error("no transaction in progress");
-    rebuild();
+    rebuild("edit property");
     set_needs_save(true);
     property_transaction = false;
 }
@@ -278,7 +303,8 @@ void Core::autosave()
     save(autosave_suffix);
 }
 
-Core::Core(IPool &pool, IPool *pool_caching) : m_pool(pool), m_pool_caching(pool_caching ? *pool_caching : pool)
+Core::Core(IPool &pool, IPool *pool_caching)
+    : m_pool(pool), m_pool_caching(pool_caching ? *pool_caching : pool), tool_id_current(ToolID::NONE)
 {
 }
 

@@ -356,7 +356,7 @@ void RulesWindow::apply_rules()
     for (auto &rule : rules.get_rule_ids()) {
         rules_apply(rules, rule, core);
     }
-    core.rebuild();
+    core.rebuild("apply rules");
     s_signal_canvas_update.emit();
     s_signal_changed.emit();
 }

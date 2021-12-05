@@ -58,7 +58,7 @@ void ImpSymbol::construct()
                 it.second.placement = pl.at(key);
         }
         core_symbol.set_needs_save();
-        core_symbol.rebuild();
+        core_symbol.rebuild("load preview");
         auto sel = canvas->get_selection();
         canvas_update();
         canvas->set_selection(sel);

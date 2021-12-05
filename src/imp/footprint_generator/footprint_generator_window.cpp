@@ -61,7 +61,7 @@ FootprintGeneratorWindow::FootprintGeneratorWindow(BaseObjectType *cobject, cons
             if (gen) {
                 if (gen->generate()) {
                     core.set_needs_save();
-                    core.rebuild();
+                    core.rebuild("generate footprint");
                     signal_generated().emit();
                     hide();
                 }
@@ -72,7 +72,7 @@ FootprintGeneratorWindow::FootprintGeneratorWindow(BaseObjectType *cobject, cons
             if (gen) {
                 if (gen->generate()) {
                     core.set_needs_save();
-                    core.rebuild();
+                    core.rebuild("generate footprint");
                     signal_generated().emit();
                     hide();
                 }

@@ -29,7 +29,7 @@ CoreSchematic::CoreSchematic(const std::string &blocks_filename, const std::stri
         block.schematic.load_pictures(m_pictures_dir);
         block.symbol.load_pictures(m_pictures_dir);
     }
-    rebuild();
+    rebuild("init");
 }
 
 Junction *CoreSchematic::get_junction(const UUID &uu)
@@ -493,7 +493,7 @@ bool CoreSchematic::set_property(ObjectType type, const UUID &uu, ObjectProperty
         return false;
     }
     if (!property_transaction) {
-        rebuild_internal(false);
+        rebuild_internal(false, "edit properties");
         set_needs_save(true);
     }
     return true;
@@ -669,7 +669,7 @@ void CoreSchematic::add_sheet()
     auto &sch = *get_current_schematic();
     auto &sheet = sch.add_sheet();
     sheet.pool_frame = sch.sheets.at(sheet_uuid).pool_frame;
-    rebuild();
+    rebuild("add sheet");
 }
 
 void CoreSchematic::delete_sheet(const UUID &uu)
@@ -680,7 +680,7 @@ void CoreSchematic::delete_sheet(const UUID &uu)
         if (sheet_uuid == uu) {       // deleted current sheet
             sheet_uuid = sch->get_sheet_at_index(1).uuid;
         }
-        rebuild();
+        rebuild("delete sheet");
     }
 }
 
@@ -846,7 +846,7 @@ void CoreSchematic::fix_current_block()
     }
 }
 
-void CoreSchematic::rebuild_internal(bool from_undo)
+void CoreSchematic::rebuild_internal(bool from_undo, const std::string &comment)
 {
     clock_t begin = clock();
     auto &top_block = blocks->get_top_block_item();
@@ -872,7 +872,7 @@ void CoreSchematic::rebuild_internal(bool from_undo)
             prv = this;
         block.schematic.expand(false, prv);
     }
-    rebuild_finish(from_undo);
+    rebuild_finish(from_undo, comment);
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
     std::cout << "rebuild took " << elapsed_secs << std::endl;
@@ -888,9 +888,9 @@ const BlockSymbol &CoreSchematic::get_canvas_data_block_symbol()
     return get_block_symbol();
 }
 
-void CoreSchematic::history_push()
+void CoreSchematic::history_push(const std::string &comment)
 {
-    history.push_back(std::make_unique<CoreSchematic::HistoryItem>(*blocks));
+    history.push_back(std::make_unique<CoreSchematic::HistoryItem>(*blocks, comment));
 }
 
 void CoreSchematic::history_load(unsigned int i)
@@ -948,7 +948,7 @@ void CoreSchematic::reload_pool()
 
     bom_export_settings.update_refs(m_pool_caching);
     history_clear();
-    rebuild();
+    rebuild("reload pool");
 }
 
 std::pair<Coordi, Coordi> CoreSchematic::get_bbox()

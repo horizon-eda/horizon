@@ -12,7 +12,7 @@ namespace horizon {
 CoreSymbol::CoreSymbol(const std::string &filename, IPool &pool)
     : Core(pool, nullptr), sym(Symbol::new_from_file(filename, pool)), m_filename(filename)
 {
-    rebuild();
+    rebuild("init");
 }
 
 bool CoreSymbol::has_object_type(ObjectType ty) const
@@ -228,7 +228,7 @@ bool CoreSymbol::set_property(ObjectType type, const UUID &uu, ObjectProperty::I
         return false;
     }
     if (!property_transaction) {
-        rebuild_internal(false);
+        rebuild_internal(false, "edit properties");
         set_needs_save(true);
     }
     return true;
@@ -265,15 +265,15 @@ std::string CoreSymbol::get_display_name(ObjectType type, const UUID &uu)
     }
 }
 
-void CoreSymbol::rebuild_internal(bool from_undo)
+void CoreSymbol::rebuild_internal(bool from_undo, const std::string &comment)
 {
     sym.expand(pin_display_mode);
-    rebuild_finish(from_undo);
+    rebuild_finish(from_undo, comment);
 }
 
-void CoreSymbol::history_push()
+void CoreSymbol::history_push(const std::string &comment)
 {
-    history.push_back(std::make_unique<CoreSymbol::HistoryItem>(sym));
+    history.push_back(std::make_unique<CoreSymbol::HistoryItem>(sym, comment));
 }
 
 void CoreSymbol::history_load(unsigned int i)
@@ -316,7 +316,7 @@ void CoreSymbol::reload_pool()
     m_pool.clear();
     sym.unit = m_pool.get_unit(sym.unit.uuid);
     history_clear();
-    rebuild();
+    rebuild("reload pool");
 }
 
 void CoreSymbol::set_pin_display_mode(Symbol::PinDisplayMode mode)

@@ -8,7 +8,7 @@ namespace horizon {
 CoreDecal::CoreDecal(const std::string &decal_filename, IPool &pool)
     : Core(pool, nullptr), decal(Decal::new_from_file(decal_filename)), m_decal_filename(decal_filename)
 {
-    rebuild();
+    rebuild("init");
 }
 
 
@@ -52,9 +52,9 @@ std::map<UUID, Arc> *CoreDecal::get_arc_map()
     return &decal.arcs;
 }
 
-void CoreDecal::rebuild_internal(bool from_undo)
+void CoreDecal::rebuild_internal(bool from_undo, const std::string &comment)
 {
-    rebuild_finish(from_undo);
+    rebuild_finish(from_undo, comment);
 }
 
 LayerProvider &CoreDecal::get_layer_provider()
@@ -72,13 +72,13 @@ Decal &CoreDecal::get_decal()
     return decal;
 }
 
-CoreDecal::HistoryItem::HistoryItem(const Decal &dec) : decal(dec)
+CoreDecal::HistoryItem::HistoryItem(const Decal &dec, const std::string &cm) : Core::HistoryItem(cm), decal(dec)
 {
 }
 
-void CoreDecal::history_push()
+void CoreDecal::history_push(const std::string &comment)
 {
-    history.push_back(std::make_unique<CoreDecal::HistoryItem>(decal));
+    history.push_back(std::make_unique<CoreDecal::HistoryItem>(decal, comment));
 }
 
 void CoreDecal::history_load(unsigned int i)

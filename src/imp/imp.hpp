@@ -327,5 +327,8 @@ private:
     void update_cursor(ToolID tool_id);
 
     std::set<SelectableRef> last_canvas_selection;
+
+    Gtk::Button *undo_button = nullptr;
+    Gtk::Button *redo_button = nullptr;
 };
 } // namespace horizon

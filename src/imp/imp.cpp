@@ -304,6 +304,14 @@ void ImpBase::set_flip_view(bool flip)
     g_simple_action_set_state(bottom_view_action->gobj(), g_variant_new_boolean(canvas->get_flip_view()));
 }
 
+static std::string append_if_not_empty(const std::string &prefix, const std::string &suffix)
+{
+    if (suffix.size())
+        return prefix + " " + suffix;
+    else
+        return prefix;
+}
+
 void ImpBase::run(int argc, char *argv[])
 {
     auto app = Gtk::Application::create(argc, argv, "org.horizon_eda.HorizonEDA.imp", Gio::APPLICATION_NON_UNIQUE);
@@ -638,13 +646,13 @@ void ImpBase::run(int argc, char *argv[])
         auto undo_redo_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0));
         undo_redo_box->get_style_context()->add_class("linked");
 
-        auto undo_button = create_action_button(ActionID::UNDO);
+        undo_button = create_action_button(ActionID::UNDO);
         gtk_button_set_label(undo_button->gobj(), NULL);
         undo_button->set_tooltip_text("Undo");
         undo_button->set_image_from_icon_name("edit-undo-symbolic", Gtk::ICON_SIZE_BUTTON);
         undo_redo_box->pack_start(*undo_button, false, false, 0);
 
-        auto redo_button = create_action_button(ActionID::REDO);
+        redo_button = create_action_button(ActionID::REDO);
         gtk_button_set_label(redo_button->gobj(), NULL);
         redo_button->set_tooltip_text("Redo");
         redo_button->set_image_from_icon_name("edit-redo-symbolic", Gtk::ICON_SIZE_BUTTON);
@@ -654,7 +662,11 @@ void ImpBase::run(int argc, char *argv[])
         main_window->header->pack_start(*undo_redo_box);
     }
 
-    core->signal_can_undo_redo().connect([this] { update_action_sensitivity(); });
+    core->signal_can_undo_redo().connect([this] {
+        undo_button->set_tooltip_text(append_if_not_empty("Undo", core->get_undo_comment()));
+        redo_button->set_tooltip_text(append_if_not_empty("Redo", core->get_redo_comment()));
+        update_action_sensitivity();
+    });
     canvas->signal_selection_changed().connect([this] {
         if (!core->tool_is_active()) {
             update_action_sensitivity();

@@ -9,7 +9,7 @@ namespace horizon {
 CoreFrame::CoreFrame(const std::string &frame_filename, IPool &pool)
     : Core(pool, nullptr), frame(Frame::new_from_file(frame_filename)), m_frame_filename(frame_filename)
 {
-    rebuild();
+    rebuild("init");
 }
 
 
@@ -73,10 +73,10 @@ bool CoreFrame::get_property_meta(ObjectType type, const UUID &uu, ObjectPropert
     return false;
 }
 
-void CoreFrame::rebuild_internal(bool from_undo)
+void CoreFrame::rebuild_internal(bool from_undo, const std::string &comment)
 {
     frame.expand();
-    rebuild_finish(from_undo);
+    rebuild_finish(from_undo, comment);
 }
 
 LayerProvider &CoreFrame::get_layer_provider()
@@ -94,13 +94,13 @@ Frame &CoreFrame::get_frame()
     return frame;
 }
 
-CoreFrame::HistoryItem::HistoryItem(const Frame &fr) : frame(fr)
+CoreFrame::HistoryItem::HistoryItem(const Frame &fr, const std::string &cm) : Core::HistoryItem(cm), frame(fr)
 {
 }
 
-void CoreFrame::history_push()
+void CoreFrame::history_push(const std::string &comment)
 {
-    history.push_back(std::make_unique<CoreFrame::HistoryItem>(frame));
+    history.push_back(std::make_unique<CoreFrame::HistoryItem>(frame, comment));
 }
 
 void CoreFrame::history_load(unsigned int i)

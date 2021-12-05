@@ -252,7 +252,7 @@ void SheetBox::sheet_move(int dir)
         assert(sheet_other != sheets.end());
         std::swap(sheet_other->second.index, sheet->index);
         core.set_needs_save();
-        core.rebuild();
+        core.rebuild("reorder sheet");
     }
 }
 
@@ -305,7 +305,7 @@ void SheetBox::name_edited(const Glib::ustring &path, const Glib::ustring &new_t
             if (sh.name != new_text) {
                 sh.name = new_text;
                 core.set_needs_save();
-                core.rebuild();
+                core.rebuild("rename sheet");
             }
         }
         else if (type == RowType::BLOCK) {
@@ -313,7 +313,7 @@ void SheetBox::name_edited(const Glib::ustring &path, const Glib::ustring &new_t
             if (bl.name != new_text) {
                 bl.name = new_text;
                 core.set_needs_save();
-                core.rebuild();
+                core.rebuild("rename block");
             }
         }
     }

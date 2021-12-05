@@ -46,13 +46,13 @@ private:
 
     class HistoryItem : public Core::HistoryItem {
     public:
-        HistoryItem(const Padstack &s) : padstack(s)
+        HistoryItem(const Padstack &s, const std::string &cm) : Core::HistoryItem(cm), padstack(s)
         {
         }
         Padstack padstack;
     };
-    void rebuild_internal(bool from_undo) override;
-    void history_push() override;
+    void rebuild_internal(bool from_undo, const std::string &comment) override;
+    void history_push(const std::string &comment) override;
     void history_load(unsigned int i) override;
     void save(const std::string &suffix) override;
     void delete_autosave() override;
