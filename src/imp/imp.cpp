@@ -1043,6 +1043,7 @@ void ImpBase::apply_preferences()
         it->set_keep_primary_action(!preferences.action_bar.remember);
     }
     main_window->set_use_action_bar(preferences.action_bar.enable);
+    core->set_history_max(preferences.undo_redo.max_depth);
 }
 
 void ImpBase::canvas_update_from_pp()

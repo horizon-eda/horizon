@@ -87,6 +87,8 @@ public:
     const std::string &get_undo_comment() const;
     const std::string &get_redo_comment() const;
 
+    void set_history_max(unsigned int m);
+
     inline bool tool_is_active()
     {
         return tool != nullptr;
@@ -209,6 +211,7 @@ protected:
     };
     std::deque<std::unique_ptr<HistoryItem>> history;
     int history_current = -1;
+    size_t history_max = 50;
     virtual void history_push(const std::string &comment) = 0;
     virtual void history_load(unsigned int i) = 0;
     void history_clear();
