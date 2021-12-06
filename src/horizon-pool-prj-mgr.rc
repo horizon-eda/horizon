@@ -1,8 +1,11 @@
+#include <windows.h>
+
 2 ICON "src/icons/horizon-eda.ico"
 
 1 VERSIONINFO
-FILEVERSION     0,0,0,0
+FILEVERSION     1,0,0,0
 PRODUCTVERSION  0,0,0,0
+FILEFLAGS       VS_FF_PRIVATEBUILD
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
@@ -11,7 +14,9 @@ BEGIN
       VALUE "FileDescription", "Horizon EDA"
       VALUE "InternalName", "horizon-eda"
       VALUE "OriginalFilename", "horizon-eda.exe"
-      VALUE "ProductName", "horizon EDA"
+      VALUE "ProductName", "Horizon EDA"
+      VALUE "ProductVersion", "1.2.3.4"
+      VALUE "PrivateBuild", "special"
     END
   END
   BLOCK "VarFileInfo"
