@@ -949,6 +949,7 @@ void CoreSchematic::reload_pool()
     bom_export_settings.update_refs(m_pool_caching);
     history_clear();
     rebuild("reload pool");
+    s_signal_can_undo_redo.emit();
 }
 
 std::pair<Coordi, Coordi> CoreSchematic::get_bbox()

@@ -700,6 +700,7 @@ void CoreBoard::reload_pool()
     keeper.restore(brd->pictures);
     history_clear();
     rebuild("reload pool");
+    s_signal_can_undo_redo.emit();
 }
 
 json CoreBoard::get_meta()

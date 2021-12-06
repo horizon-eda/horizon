@@ -242,6 +242,7 @@ void CorePackage::reload_pool()
     package.update_refs(m_pool);
     history_clear();
     rebuild("reload pool");
+    s_signal_can_undo_redo.emit();
 }
 
 json CorePackage::get_meta()

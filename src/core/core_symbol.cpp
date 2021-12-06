@@ -317,6 +317,7 @@ void CoreSymbol::reload_pool()
     sym.unit = m_pool.get_unit(sym.unit.uuid);
     history_clear();
     rebuild("reload pool");
+    s_signal_can_undo_redo.emit();
 }
 
 void CoreSymbol::set_pin_display_mode(Symbol::PinDisplayMode mode)

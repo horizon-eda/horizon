@@ -210,7 +210,6 @@ void Core::history_clear()
 {
     history.clear();
     history_current = -1;
-    signal_can_undo_redo().emit();
 }
 
 void Core::history_trim()
