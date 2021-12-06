@@ -955,7 +955,7 @@ endif
 
 OBJ_RES =
 ifeq ($(OS),Windows_NT)
-	SRC_RES = src/horizon-pool-prj-mgr.rc
+	SRC_RES = build/gen/horizon-eda.rc
 	OBJ_RES = $(addprefix $(OBJDIR)/,$(SRC_RES:.rc=.res))
 endif
 
@@ -979,6 +979,11 @@ $(BUILDDIR)/gen/version_gen.cpp: $(wildcard .git/HEAD .git/index) version.py mak
 	$(QUIET)$(MKDIR) $(dir $@)
 	$(ECHO) " $@"
 	$(QUIET)python3 make_version.py $@
+
+$(BUILDDIR)/gen/horizon-eda.rc: version.py make_rc.py
+	$(QUIET)$(MKDIR) $(dir $@)
+	$(ECHO) " $@"
+	$(QUIET)python3 make_rc.py $@
 
 $(BUILDDIR)/gen/help_texts.cpp: scripts/make_help.py src/help_texts.txt $(BUILDDIR)/gen/help_texts.hpp
 	$(QUIET)$(MKDIR) $(dir $@)
