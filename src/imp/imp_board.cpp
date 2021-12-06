@@ -513,20 +513,9 @@ void ImpBoard::construct()
             this->send_json(j);
         });
 
-        connect_action(ActionID::SHOW_IN_POOL_MANAGER, [this](const auto &conn) {
-            for (const auto &it : canvas->get_selection()) {
-                auto board = core_board.get_board();
-                if (it.type == ObjectType::BOARD_PACKAGE) {
-                    const auto &pkg = board->packages.at(it.uuid);
-                    if (pkg.component->part) {
-                        show_in_pool_manager(ObjectType::PART, pkg.component->part->uuid,
-                                             ShowInPoolManagerPool::CURRENT);
-
-                        break;
-                    }
-                }
-            }
-        });
+        connect_action(ActionID::SHOW_IN_POOL_MANAGER, sigc::mem_fun(*this, &ImpBoard::handle_show_in_pool_manager));
+        connect_action(ActionID::SHOW_IN_PROJECT_POOL_MANAGER,
+                       sigc::mem_fun(*this, &ImpBoard::handle_show_in_pool_manager));
         set_action_sensitive(ActionID::SHOW_IN_POOL_MANAGER, false);
         set_action_sensitive(ActionID::SHOW_IN_PROJECT_POOL_MANAGER, false);
 
