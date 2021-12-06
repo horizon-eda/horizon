@@ -161,8 +161,12 @@ void ImpBase::set_action_sensitive(ActionID action, bool v)
 
 bool ImpBase::get_action_sensitive(ActionID action) const
 {
-    if (core->tool_is_active())
+    if (!action_connections.count(action)) // actions not connected can't be sensitive
+        return false;
+
+    if (core->tool_is_active()) // actions available int tools are always sensitive
         return action_catalog.at(action).flags & ActionCatalogItem::FLAGS_IN_TOOL;
+
     if (action_sensitivity.count(action))
         return action_sensitivity.at(action);
     else
