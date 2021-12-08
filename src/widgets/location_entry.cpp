@@ -93,7 +93,10 @@ void LocationEntry::handle_button()
             }
         }
         else {
-            entry->set_text(filename);
+            if (autoappend_json)
+                entry->set_text(append_dot_json(filename));
+            else
+                entry->set_text(filename);
         }
     }
 }
