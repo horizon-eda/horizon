@@ -21,6 +21,7 @@ RuleExportBox::RuleExportBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     GET_WIDGET(file_name_box);
     location_entry = Gtk::manage(new LocationEntry(""));
     location_entry->set_append_json(true);
+    location_entry->signal_changed().connect([this] { location_entry->check_ends_json(); });
     file_name_box->pack_start(*location_entry, true, true, 0);
     location_entry->show();
 
