@@ -99,6 +99,7 @@ json Plane::serialize() const
     j["net"] = (std::string)net->uuid;
     j["polygon"] = (std::string)polygon->uuid;
     j["priority"] = priority;
+    j["from_rules"] = from_rules;
     j["settings"] = settings.serialize();
     auto frags = json::array();
     for (const auto &it : fragments) {
