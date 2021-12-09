@@ -40,6 +40,7 @@ private:
     void polynode_to_tris(const ClipperLib::PolyNode *node, int layer);
     void prepare_layer(int layer);
     void prepare_soldermask(int layer);
+    void prepare_silkscreen(int layer, int soldermask_layer);
     void add_path(int layer, const ClipperLib::Path &path);
 };
 } // namespace horizon

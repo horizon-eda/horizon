@@ -96,13 +96,13 @@ void CanvasMesh::prepare()
     layers[layer].offset = brd->stackup.at(0).thickness / 1e6 + 1e-3;
     layers[layer].thickness = 0.035;
     layers[layer].explode_mul = 4;
-    prepare_layer(layer);
+    prepare_silkscreen(layer, BoardLayers::TOP_MASK);
 
     layer = BoardLayers::BOTTOM_SILKSCREEN;
     layers[layer].offset = -board_thickness - .1e-3;
     layers[layer].thickness = -0.035;
     layers[layer].explode_mul = -2 * n_inner_layers - 4;
-    prepare_layer(layer);
+    prepare_silkscreen(layer, BoardLayers::BOTTOM_MASK);
 
     layer = BoardLayers::TOP_PASTE;
     layers[layer].offset = brd->stackup.at(0).thickness / 1e6 + 1e-3;
@@ -154,6 +154,56 @@ void CanvasMesh::prepare_soldermask(int layer)
     ClipperLib::ClipperOffset cl;
     cl.AddPaths(temp, ClipperLib::jtSquare, ClipperLib::etClosedPolygon);
     cl.Execute(pt, -.001_mm);
+
+    for (const auto node : pt.Childs) {
+        polynode_to_tris(node, layer);
+    }
+}
+
+void CanvasMesh::prepare_silkscreen(int layer, int soldermask_layer)
+{
+    ClipperLib::Paths result;
+    {
+
+        ClipperLib::Clipper cl;
+        for (const auto &it : ca.get_patches()) {
+            if (it.first.layer == layer) {
+                cl.AddPaths(it.second, ClipperLib::ptSubject, true);
+            }
+        }
+        cl.Execute(ClipperLib::ctUnion, result, ClipperLib::pftNonZero);
+    }
+
+    ClipperLib::Paths holes_without_soldermask;
+    {
+        ClipperLib::Clipper cl;
+        for (const auto &it : ca.get_patches()) {
+            if (it.first.layer == 10000
+                && (it.first.type == PatchType::HOLE_NPTH || it.first.type == PatchType::HOLE_PTH)) {
+                cl.AddPaths(it.second, ClipperLib::ptSubject, true);
+            }
+            else if (it.first.layer == soldermask_layer) {
+                cl.AddPaths(it.second, ClipperLib::ptClip, true);
+            }
+        }
+        cl.Execute(ClipperLib::ctIntersection, holes_without_soldermask, ClipperLib::pftNonZero,
+                   ClipperLib::pftNonZero);
+    }
+
+    ClipperLib::Paths result_with_holes;
+    {
+        ClipperLib::Clipper cl;
+        cl.AddPaths(result, ClipperLib::ptSubject, true);
+        cl.AddPaths(holes_without_soldermask, ClipperLib::ptClip, true);
+        cl.Execute(ClipperLib::ctDifference, result_with_holes, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+    }
+
+    ClipperLib::PolyTree pt;
+    {
+        ClipperLib::ClipperOffset cl;
+        cl.AddPaths(result_with_holes, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
+        cl.Execute(pt, -100); // .1um
+    }
 
     for (const auto node : pt.Childs) {
         polynode_to_tris(node, layer);
