@@ -11,7 +11,7 @@ const std::map<RuleID, RD> rule_descriptions = {
 
         {RuleID::CLEARANCE_COPPER, {"Copper clearance", RD::IS_MULTI | RD::CAN_CHECK | RD::NEEDS_MATCH_ALL}},
 
-        {RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER, {"Clearance\nSilkscreen - Exposed copper", RD::CAN_CHECK}},
+        {RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER, {"Clearance Silkscreen - Exposed copper", RD::CAN_CHECK}},
 
         {RuleID::PARAMETERS, {"Parameters", RD::CAN_APPLY}},
 

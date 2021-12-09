@@ -44,7 +44,9 @@ public:
         label_order = Gtk::manage(new Gtk::Label(std::to_string(o)));
         label_order->set_xalign(1);
         label_text = Gtk::manage(new Gtk::Label());
-        label_text->set_markup(t);
+        label_text->set_text(t);
+        label_text->set_line_wrap(true);
+        label_text->set_width_chars(22);
         label_text->set_xalign(0);
         pack_start(*label_order, false, false, 0);
         pack_start(*label_text, true, true, 0);
