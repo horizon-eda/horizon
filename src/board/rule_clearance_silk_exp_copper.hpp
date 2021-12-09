@@ -17,6 +17,7 @@ public:
 
     std::string get_brief(const class Block *block = nullptr, class IPool *pool = nullptr) const override;
 
+    bool pads_only = false;
     uint64_t clearance_top = 0.1_mm;
     uint64_t clearance_bottom = 0.1_mm;
 };

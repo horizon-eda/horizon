@@ -14,11 +14,13 @@ RuleClearanceSilkscreenExposedCopper::RuleClearanceSilkscreenExposedCopper(const
 {
     clearance_top = j.at("clearance_top").get<uint64_t>();
     clearance_bottom = j.at("clearance_bottom").get<uint64_t>();
+    pads_only = j.value("pads_only", false);
 }
 
 json RuleClearanceSilkscreenExposedCopper::serialize() const
 {
     json j = Rule::serialize();
+    j["pads_only"] = pads_only;
     j["clearance_top"] = clearance_top;
     j["clearance_bottom"] = clearance_bottom;
     return j;

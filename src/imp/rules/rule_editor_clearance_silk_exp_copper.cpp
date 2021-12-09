@@ -47,6 +47,14 @@ void RuleEditorClearanceSilkscreenExposedCopper::populate()
             rule1->clearance_bottom = sp_bot->get_value_as_int();
             s_signal_updated.emit();
         });
+
+        auto cb_pads_only = Gtk::manage(new Gtk::CheckButton("Pads only"));
+        cb_pads_only->set_active(rule1->pads_only);
+        cb_pads_only->signal_toggled().connect([this, cb_pads_only, rule1] {
+            rule1->pads_only = cb_pads_only->get_active();
+            s_signal_updated.emit();
+        });
+        grid->attach(*cb_pads_only, 0, top, 1, 1);
     }
     if (auto rule2 = dynamic_cast<RuleParameters *>(&rule)) {
         auto sp_solder = create_sp_dim("Solder mask expansion");

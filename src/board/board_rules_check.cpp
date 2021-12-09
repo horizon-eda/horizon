@@ -497,6 +497,100 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board &brd,
     return r;
 }
 
+RulesCheckResult BoardRules::check_clearance_silkscreen_exposed_copper(const Board &brd, RulesCheckCache &cache,
+                                                                       check_status_cb_t status_cb) const
+{
+    RulesCheckResult r;
+    r.level = RulesCheckErrorLevel::PASS;
+    auto &c = dynamic_cast<RulesCheckCacheBoardImage &>(cache.get_cache(RulesCheckCacheID::BOARD_IMAGE));
+    const auto &patches = c.get_canvas().get_patches();
+
+    const auto &rule = rule_clearance_silkscreen_exposed_copper;
+
+    if (!rule.enabled) {
+        r.level = RulesCheckErrorLevel::DISABLED;
+        return r;
+    }
+
+    struct { // Store layers to avoid redundancies for top and bottom side
+        BoardLayers::Layer copper;
+        BoardLayers::Layer mask;
+        BoardLayers::Layer silkscreen;
+        uint64_t clearance;
+        bool top;
+    } top_side, bottom_side;
+
+    top_side.copper = BoardLayers::TOP_COPPER;
+    top_side.mask = BoardLayers::TOP_MASK;
+    top_side.silkscreen = BoardLayers::TOP_SILKSCREEN;
+    top_side.clearance = rule.clearance_top;
+    top_side.top = true;
+
+    bottom_side.copper = BoardLayers::BOTTOM_COPPER;
+    bottom_side.mask = BoardLayers::BOTTOM_MASK;
+    bottom_side.silkscreen = BoardLayers::BOTTOM_SILKSCREEN;
+    bottom_side.clearance = rule.clearance_top;
+    bottom_side.top = false;
+
+    for (const auto &side : {top_side, bottom_side}) {
+        ClipperLib::Clipper copper_outline;
+        // Generate exposed copper
+        for (const auto &[key, paths] : patches) {
+            if (key.layer == side.copper
+                && (!rule.pads_only || key.type == PatchType::PAD || key.type == PatchType::PAD_TH)) {
+                copper_outline.AddPaths(paths, ClipperLib::ptSubject, true);
+            }
+            else if (key.layer == BoardLayers::TOP_MASK) {
+                copper_outline.AddPaths(paths, ClipperLib::ptClip, true);
+            }
+        }
+        ClipperLib::Paths exposed_copper;
+        copper_outline.Execute(ClipperLib::ctIntersection, exposed_copper, ClipperLib::pftNonZero);
+
+        // Expand exposed copper as this should be faster then expanding silkscreen
+        ClipperLib::ClipperOffset ofs;
+        ofs.ArcTolerance = 10e3;
+        ofs.AddPaths(exposed_copper, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
+        ClipperLib::Paths exposed_copper_expanded;
+        ofs.Execute(exposed_copper_expanded, side.clearance);
+
+        // Check everything on the silkscreen for overlap with the expanded exposed copper
+        for (const auto &[key, paths] : patches) {
+            if (key.layer == side.silkscreen) {
+                ClipperLib::Clipper clipper;
+                clipper.AddPaths(exposed_copper_expanded, ClipperLib::ptClip, true);
+                clipper.AddPaths(paths, ClipperLib::ptSubject, true);
+                ClipperLib::Paths errors;
+                clipper.Execute(ClipperLib::ctIntersection, errors, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+
+                // no intersection: no clearance violation
+                if (errors.size() > 0) {
+                    for (const auto &ite : errors) {
+                        r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
+                        auto &e = r.errors.back();
+                        e.has_location = true;
+                        Accumulator<Coordi> acc;
+                        for (const auto &ite2 : ite) {
+                            acc.accumulate({ite2.X, ite2.Y});
+                        }
+                        e.location = acc.get();
+                        if (side.top) {
+                            e.comment = "Top side: Silkscreen near exposed copper";
+                        }
+                        else {
+                            e.comment = "Bottom side: Silkscreen near exposed copper";
+                        }
+                        e.error_polygons = {ite};
+                    }
+                }
+            }
+        }
+    }
+    r.update();
+
+    return r;
+}
+
 RulesCheckResult BoardRules::check_preflight(const Board &brd) const
 {
     RulesCheckResult r;
@@ -921,6 +1015,9 @@ RulesCheckResult BoardRules::check(RuleID id, const Board &brd, RulesCheckCache 
 
     case RuleID::CLEARANCE_COPPER_OTHER:
         return BoardRules::check_clearance_copper_non_copper(brd, cache, status_cb);
+
+    case RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER:
+        return BoardRules::check_clearance_silkscreen_exposed_copper(brd, cache, status_cb);
 
     case RuleID::CLEARANCE_COPPER_KEEPOUT:
         return BoardRules::check_clearance_copper_keepout(brd, cache, status_cb);
