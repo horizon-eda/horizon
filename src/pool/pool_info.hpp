@@ -21,6 +21,7 @@ public:
     std::vector<UUID> pools_included;
     void save() const;
     bool is_project_pool() const;
+    bool is_usable() const;
     static unsigned int get_app_version();
     FileVersion version;
 

@@ -3,6 +3,8 @@
 #include <glibmm/miscutils.h>
 #include "nlohmann/json.hpp"
 #include "logger/logger.hpp"
+#include "pool/pool.hpp"
+#include "util/installation_uuid.hpp"
 
 namespace horizon {
 
@@ -63,5 +65,18 @@ void PoolInfo::save() const
     version.serialize(j);
     save_json_to_file(Glib::build_filename(base_path, "pool.json"), j);
 }
+
+bool PoolInfo::is_usable() const
+{
+    try {
+        Pool pool(base_path);
+        return pool.db.get_user_version() == Pool::get_required_schema_version()
+               && pool.get_installation_uuid() == InstallationUUID::get();
+    }
+    catch (SQLite::Error &) {
+        return false;
+    }
+}
+
 
 } // namespace horizon

@@ -131,7 +131,8 @@ PoolListItem::PoolListItem(const UUID &uu, bool avail)
     }
 
     if (!avail) {
-        set_tooltip_text("Not available since the opened pool is a depedendency.");
+        set_tooltip_text(
+                "Not available since the opened pool is a depedendency or the selected pool needs to be rebuilt.");
         set_sensitive(false);
     }
 }
@@ -200,11 +201,14 @@ void PoolSettingsBox::update_pools()
         for (const auto &it : PoolManager::get().get_pools()) {
             if (it.second.enabled && it.second.uuid != pool.get_pool_info().uuid
                 && std::count(pools_included.begin(), pools_included.end(), it.second.uuid) == 0) {
-                Pool other_pool(it.second.base_path);
-                SQLite::Query q(other_pool.db, "SELECT uuid FROM pools_included WHERE uuid = ?");
-                q.bind(1, pool.get_pool_info().uuid);
-                const bool includes_this_pool = q.step();
-                auto w = Gtk::manage(new PoolListItem(it.second.uuid, !includes_this_pool));
+                bool usable = it.second.is_usable();
+                if (usable) {
+                    Pool other_pool(it.second.base_path);
+                    SQLite::Query q(other_pool.db, "SELECT uuid FROM pools_included WHERE uuid = ?");
+                    q.bind(1, pool.get_pool_info().uuid);
+                    usable = !q.step();
+                }
+                auto w = Gtk::manage(new PoolListItem(it.second.uuid, usable));
                 pools_available_listbox->append(*w);
                 w->show();
                 if (sel && it.second.uuid == *sel) {
