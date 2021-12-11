@@ -17,6 +17,7 @@ public:
     bool get_needs_save() const;
     void save();
     void pool_updated();
+    void update_pools();
 
     typedef sigc::signal<void, std::string> type_signal_open_pool;
     type_signal_open_pool signal_open_pool()
@@ -45,7 +46,6 @@ private:
 
     std::vector<UUID> pools_included;
 
-    void update_pools();
     void update_actual();
 
     void inc_excl_pool(bool inc);

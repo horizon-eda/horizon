@@ -329,6 +329,8 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
                         return;
                     }
                 }
+                if (settings_box)
+                    settings_box->update_pools();
             },
             *this));
 }
