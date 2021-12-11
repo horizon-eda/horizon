@@ -1004,6 +1004,8 @@ void PoolProjectManagerAppWindow::check_schema_update(const std::string &base_pa
     const auto r = pool_check_schema_update(base_path, *this);
     if (r == CheckSchemaUpdateResult::INSTALLATION_UUID_MISMATCH)
         info_bar_show(info_bar_installation_uuid_mismatch);
+    if (r != CheckSchemaUpdateResult::NO_UPDATE)
+        app.signal_pool_updated().emit(base_path);
 }
 
 
