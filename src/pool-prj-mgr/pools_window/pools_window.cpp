@@ -22,8 +22,8 @@ using json = nlohmann::json;
 class PoolItemEditor : public Gtk::Box {
 public:
     PoolItemEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const PoolManagerPool &pool,
-                   PoolStatusProviderBase *aprv)
-        : Gtk::Box(cobject), base_path(pool.base_path), prv(aprv)
+                   PoolStatusProviderBase *aprv, bool us)
+        : Gtk::Box(cobject), base_path(pool.base_path), prv(aprv), usable(us)
     {
         x->get_widget("pool_item_name", label_name);
         x->get_widget("pool_item_path", label_path);
@@ -36,22 +36,24 @@ public:
         label_uuid->set_text((std::string)pool.uuid);
         switch_enabled->set_active(pool.enabled);
         auto bp = fs::u8path(pool.base_path);
-
-        if (prv) {
+        if (prv && usable) {
             prv->signal_changed().connect(sigc::track_obj([this] { update_from_prv(); }, *this));
             update_from_prv();
         }
-        else {
+        else if (usable) {
             label_managed->set_text("Not managed");
         }
+        else {
+            label_managed->set_text("Not usable");
+        }
     }
-    static PoolItemEditor *create(const PoolManagerPool &pool, PoolStatusProviderBase *prv)
+    static PoolItemEditor *create(const PoolManagerPool &pool, PoolStatusProviderBase *prv, bool usable)
     {
         PoolItemEditor *w;
         Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
         std::vector<Glib::ustring> objs = {"pool_item_box", "image1"};
         x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/pools_window/pools_window.ui", objs);
-        x->get_widget_derived("pool_item_box", w, pool, prv);
+        x->get_widget_derived("pool_item_box", w, pool, prv, usable);
 
         w->reference();
         return w;
@@ -74,6 +76,7 @@ private:
         auto &st = prv->get();
         label_managed->set_text(st.get_brief());
     }
+    const bool usable;
 };
 
 class PoolInfoBox : public Gtk::Box {
@@ -87,26 +90,32 @@ public:
         GET_WIDGET(pool_info_name_label);
         GET_WIDGET(pool_info_stats_label);
         pool_info_name_label->set_text(apool.name);
-        Pool pool(apool.base_path);
-        std::string stats;
-        SQLite::Query q(pool.db, "SELECT type, COUNT(*) FROM all_items_view WHERE pool_uuid = ? GROUP BY type");
-        q.bind(1, apool.uuid);
-        while (q.step()) {
-            const auto type = q.get<ObjectType>(0);
-            const auto count = q.get<int>(1);
-            if (stats.size())
-                stats += ", ";
-            stats += std::to_string(count) + " " + object_descriptions.at(type).get_name_for_n(count);
-        }
-        pool_info_stats_label->set_text(stats);
+        if (apool.is_usable()) {
+            Pool pool(apool.base_path);
+            std::string stats;
+            SQLite::Query q(pool.db, "SELECT type, COUNT(*) FROM all_items_view WHERE pool_uuid = ? GROUP BY type");
+            q.bind(1, apool.uuid);
+            while (q.step()) {
+                const auto type = q.get<ObjectType>(0);
+                const auto count = q.get<int>(1);
+                if (stats.size())
+                    stats += ", ";
+                stats += std::to_string(count) + " " + object_descriptions.at(type).get_name_for_n(count);
+            }
+            pool_info_stats_label->set_text(stats);
 
-        Gtk::Box *pool_info_delta_box;
-        GET_WIDGET(pool_info_delta_box);
-        if (auto p = dynamic_cast<PoolStatusProviderPoolManager *>(prv)) {
-            auto box = PoolMergeBox2::create(*p);
-            pool_info_delta_box->pack_start(*box, true, true, 0);
-            box->show();
-            box->unreference();
+            Gtk::Box *pool_info_delta_box;
+            GET_WIDGET(pool_info_delta_box);
+            if (auto p = dynamic_cast<PoolStatusProviderPoolManager *>(prv)) {
+                auto box = PoolMergeBox2::create(*p);
+                pool_info_delta_box->pack_start(*box, true, true, 0);
+                box->show();
+                box->unreference();
+            }
+        }
+        else {
+            pool_info_stats_label->set_text(
+                    "This pool's database needs to be rebuilt to become usable. Open this pool to rebuild it.");
         }
         {
             Gtk::Button *pool_info_open_button;
@@ -223,6 +232,8 @@ PoolsWindow::PoolsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         GET_WIDGET(refresh_available_button);
         refresh_available_button->signal_clicked().connect([this] { update_index(); });
     }
+
+    app.signal_pool_updated().connect(sigc::track_obj([this](const std::string &p) { update(); }, *this));
 }
 
 void PoolsWindow::check_for_updates()
@@ -247,18 +258,22 @@ void PoolsWindow::update()
     const auto pools = mgr.get_pools();
     for (const auto &it : pools) {
         PoolStatusProviderBase *prv = nullptr;
-        if (pool_status_providers.count(it.first)) {
-            prv = pool_status_providers.at(it.first).get();
-        }
-        else {
-            auto bp = fs::u8path(it.first);
-            if (fs::is_directory(bp / ".remote")) {
-                prv = pool_status_providers.emplace(it.first, std::make_unique<PoolStatusProviderPoolManager>(it.first))
-                              .first->second.get();
-                prv->refresh();
+        const auto usable = it.second.is_usable();
+        if (usable) {
+            if (pool_status_providers.count(it.first)) {
+                prv = pool_status_providers.at(it.first).get();
+            }
+            else {
+                auto bp = fs::u8path(it.first);
+                if (fs::is_directory(bp / ".remote")) {
+                    prv = pool_status_providers
+                                  .emplace(it.first, std::make_unique<PoolStatusProviderPoolManager>(it.first))
+                                  .first->second.get();
+                    prv->refresh();
+                }
             }
         }
-        auto x = PoolItemEditor::create(it.second, prv);
+        auto x = PoolItemEditor::create(it.second, prv, usable);
         auto row = Gtk::manage(new Gtk::ListBoxRow);
         row->add(*x);
         row->show_all();
