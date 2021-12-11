@@ -28,13 +28,14 @@ static int natural_compare(void *pArg, int len1, const void *data1, int len2, co
 
 Database::Database(const std::string &filename, int flags, int timeout_ms)
 {
-    if (sqlite3_open_v2(filename.c_str(), &db, flags, nullptr) != SQLITE_OK) {
-        throw std::runtime_error(sqlite3_errmsg(db));
+    if (const auto rc = sqlite3_open_v2(filename.c_str(), &db, flags, nullptr) != SQLITE_OK) {
+        throw Error(rc, sqlite3_errmsg(db));
     }
     sqlite3_busy_timeout(db, timeout_ms);
 
-    if (sqlite3_create_collation(db, "naturalCompare", SQLITE_UTF8, nullptr, natural_compare) != SQLITE_OK) {
-        throw std::runtime_error(sqlite3_errmsg(db));
+    if (const auto rc =
+                sqlite3_create_collation(db, "naturalCompare", SQLITE_UTF8, nullptr, natural_compare) != SQLITE_OK) {
+        throw Error(rc, sqlite3_errmsg(db));
     }
 }
 
@@ -45,8 +46,8 @@ void Database::execute(const std::string &query)
 
 void Database::execute(const char *query)
 {
-    if (sqlite3_exec(db, query, nullptr, nullptr, nullptr) != SQLITE_OK) {
-        throw std::runtime_error(sqlite3_errmsg(db));
+    if (const auto rc = sqlite3_exec(db, query, nullptr, nullptr, nullptr) != SQLITE_OK) {
+        throw Error(rc, sqlite3_errmsg(db));
     }
 }
 
@@ -64,14 +65,14 @@ int Database::get_user_version()
 
 Query::Query(Database &dab, const std::string &sql) : db(dab)
 {
-    if (sqlite3_prepare_v2(db.db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
-        throw std::runtime_error(sqlite3_errmsg(db.db));
+    if (const auto rc = sqlite3_prepare_v2(db.db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
+        throw Error(rc, sqlite3_errmsg(db.db));
     }
 }
 Query::Query(Database &dab, const char *sql, int size) : db(dab)
 {
-    if (sqlite3_prepare_v2(db.db, sql, size, &stmt, nullptr) != SQLITE_OK) {
-        throw std::runtime_error(sqlite3_errmsg(db.db));
+    if (const auto rc = sqlite3_prepare_v2(db.db, sql, size, &stmt, nullptr) != SQLITE_OK) {
+        throw Error(rc, sqlite3_errmsg(db.db));
     }
 }
 
@@ -113,8 +114,9 @@ ObjectType Query::get(int idx, ObjectType) const
 
 void Query::bind(int idx, const std::string &v, bool copy)
 {
-    if (sqlite3_bind_text(stmt, idx, v.c_str(), -1, copy ? SQLITE_TRANSIENT : SQLITE_STATIC) != SQLITE_OK) {
-        throw std::runtime_error(sqlite3_errmsg(db.db));
+    if (const auto rc =
+                sqlite3_bind_text(stmt, idx, v.c_str(), -1, copy ? SQLITE_TRANSIENT : SQLITE_STATIC) != SQLITE_OK) {
+        throw Error(rc, sqlite3_errmsg(db.db));
     }
 }
 void Query::bind(const char *name, const std::string &v, bool copy)
@@ -124,8 +126,8 @@ void Query::bind(const char *name, const std::string &v, bool copy)
 
 void Query::bind(int idx, int v)
 {
-    if (sqlite3_bind_int(stmt, idx, v) != SQLITE_OK) {
-        throw std::runtime_error(sqlite3_errmsg(db.db));
+    if (const auto rc = sqlite3_bind_int(stmt, idx, v) != SQLITE_OK) {
+        throw Error(rc, sqlite3_errmsg(db.db));
     }
 }
 void Query::bind(const char *name, int v)
@@ -153,8 +155,8 @@ void Query::bind(const char *name, ObjectType v)
 
 void Query::reset()
 {
-    if (sqlite3_reset(stmt) != SQLITE_OK) {
-        throw std::runtime_error(sqlite3_errmsg(db.db));
+    if (const auto rc = sqlite3_reset(stmt) != SQLITE_OK) {
+        throw Error(rc, sqlite3_errmsg(db.db));
     }
 }
 
