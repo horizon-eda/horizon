@@ -61,6 +61,9 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
             Logger::log_critical("exception thrown in tool_begin of "
                                          + action_catalog.at({ActionID::TOOL, tool_id}).name,
                                  Logger::Domain::CORE, e.what());
+            tool_id_current = ToolID::NONE;
+            history_load(history_current);
+            rebuild_internal(true, "undo");
             return ToolResponse::end();
         }
         tool_id_current = tool_id;
@@ -133,6 +136,9 @@ ToolResponse Core::tool_update(const ToolArgs &args)
             tool.reset();
             s_signal_tool_changed.emit(ToolID::NONE);
             Logger::log_critical("exception thrown in tool_update", Logger::Domain::CORE, e.what());
+            tool_id_current = ToolID::NONE;
+            history_load(history_current);
+            rebuild_internal(true, "undo");
             return ToolResponse::end();
         }
         maybe_end_tool(r);
