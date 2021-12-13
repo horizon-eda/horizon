@@ -1044,6 +1044,7 @@ void ImpBase::apply_preferences()
     }
     main_window->set_use_action_bar(preferences.action_bar.enable);
     core->set_history_max(preferences.undo_redo.max_depth);
+    preferences_apply_appearance(preferences);
 }
 
 void ImpBase::canvas_update_from_pp()

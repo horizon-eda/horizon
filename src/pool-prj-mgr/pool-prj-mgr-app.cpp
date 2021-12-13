@@ -11,6 +11,7 @@
 #include "pool/pool_manager.hpp"
 #include "preferences/preferences_window.hpp"
 #include "preferences/preferences_provider.hpp"
+#include "preferences/preferences_util.hpp"
 #include "widgets/about_dialog.hpp"
 #include "widgets/log_window.hpp"
 #include "logger/logger.hpp"
@@ -135,11 +136,13 @@ void PoolProjectManagerApplication::on_startup()
     preferences.load();
     PreferencesProvider::get().set_prefs(preferences);
     preferences.signal_changed().connect([this] {
+        preferences_apply_appearance(preferences);
         json j;
         j["op"] = "preferences";
         j["preferences"] = preferences.serialize();
         send_json(0, j);
     });
+    preferences_apply_appearance(preferences);
 
     log_window = new LogWindow();
     log_dispatcher.set_handler([this](const auto &it) { log_window->get_view()->push_log(it); });

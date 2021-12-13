@@ -31,4 +31,9 @@ void preferences_apply_to_canvas(class CanvasGL *ca, const class Preferences &pr
     ca->zoom_base = 1 + (prefs.zoom.zoom_factor / 100);
 }
 
+void preferences_apply_appearance(const Preferences &prefs)
+{
+    Gtk::Settings::get_default()->property_gtk_application_prefer_dark_theme().set_value(prefs.appearance.dark_theme);
+}
+
 } // namespace horizon

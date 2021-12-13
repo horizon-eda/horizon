@@ -344,6 +344,16 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
             gr->add_row(*r);
         }
     }
+    {
+        auto gr = Gtk::manage(new PreferencesGroup("Appearance (also applies to Pool/Project Manager)"));
+        box->pack_start(*gr, false, false, 0);
+        gr->show();
+        {
+            auto r = Gtk::manage(new PreferencesRowBool("Dark theme", "Use dark theme variant if available",
+                                                        preferences, preferences.appearance.dark_theme));
+            gr->add_row(*r);
+        }
+    }
 }
 
 } // namespace horizon

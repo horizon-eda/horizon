@@ -125,6 +125,14 @@ public:
     json serialize() const;
 };
 
+class AppearancePreferences {
+public:
+    bool dark_theme = false;
+
+    void load_from_json(const json &j);
+    json serialize() const;
+};
+
 class Preferences {
 public:
     Preferences();
@@ -153,6 +161,7 @@ public:
     InToolKeySequencesPreferences in_tool_key_sequences;
     MousePreferences mouse;
     UndoRedoPreferences undo_redo;
+    AppearancePreferences appearance;
 
     bool show_pull_request_tools = false;
     bool hud_debug = false;
