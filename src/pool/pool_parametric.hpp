@@ -48,5 +48,7 @@ private:
     std::string base_path;
     std::map<std::string, Table> tables;
     bool has_table(const std::string &table);
+
+    static bool check_identifier(const std::string &s);
 };
 } // namespace horizon

@@ -6,11 +6,19 @@
 #include "util/util.hpp"
 #include "common/lut.hpp"
 #include "pool_manager.hpp"
+#include "logger/logger.hpp"
+#include <regex>
 
 namespace horizon {
 
 PoolParametric::Column::Column()
 {
+}
+
+bool PoolParametric::check_identifier(const std::string &s)
+{
+    static const std::regex id_regex("\\w+");
+    return std::regex_match(s, id_regex);
 }
 
 static std::string get_db_filename(const std::string &db_file, bool read_only)
@@ -52,7 +60,12 @@ PoolParametric::PoolParametric(const std::string &bp, bool read_only)
             auto j = load_json_from_file(fn);
             const json &o = j.at("tables");
             for (auto it2 = o.cbegin(); it2 != o.cend(); ++it2) {
-                std::string table_name = it2.key();
+                const std::string table_name = it2.key();
+                if (!check_identifier(table_name)) {
+                    Logger::log_warning("table name doesn't match regex, skipping", Logger::Domain::UNSPECIFIED,
+                                        table_name);
+                    continue;
+                }
                 bool table_exists = has_table(table_name);
                 if (table_exists || !read_only)
                     tables.emplace(std::piecewise_construct, std::forward_as_tuple(table_name),
@@ -78,6 +91,11 @@ PoolParametric::Table::Table(const std::string &n, const json &j)
     const json &o = j.at("columns");
     for (auto it = o.cbegin(); it != o.cend(); ++it) {
         columns.emplace_back(it.value());
+        const auto &col = columns.back();
+        if (!check_identifier(col.name)) {
+            Logger::log_warning("column name doesn't match regex, skipping", Logger::Domain::UNSPECIFIED, col.name);
+            columns.pop_back();
+        }
     }
 }
 
