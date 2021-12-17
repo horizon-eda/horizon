@@ -91,25 +91,30 @@ bool Query::step()
     return rc == SQLITE_ROW;
 }
 
-std::string Query::get(int idx, std::string) const
+void Query::get(int idx, std::string &r) const
 {
     auto c = reinterpret_cast<const char *>(sqlite3_column_text(stmt, idx));
     if (c) {
-        return c;
+        r = c;
     }
     else {
-        return "";
+        r = "";
     }
 }
 
-int Query::get(int idx, int) const
+void Query::get(int idx, UUID &r) const
 {
-    return sqlite3_column_int(stmt, idx);
+    r = get<std::string>(idx);
 }
 
-ObjectType Query::get(int idx, ObjectType) const
+void Query::get(int idx, int &r) const
 {
-    return object_type_lut.lookup(get<std::string>(idx));
+    r = sqlite3_column_int(stmt, idx);
+}
+
+void Query::get(int idx, ObjectType &r) const
+{
+    r = object_type_lut.lookup(get<std::string>(idx));
 }
 
 void Query::bind(int idx, const std::string &v, bool copy)

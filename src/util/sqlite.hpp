@@ -30,16 +30,9 @@ public:
     bool step();
     template <class T> T get(int idx) const
     {
-        return get(idx, T());
-    }
-
-    template <class T> struct convert {
-        using to_int = int;
-    };
-
-    template <class... Ts> std::tuple<Ts...> get_columns(typename convert<Ts>::to_int... idxs) const
-    {
-        return std::make_tuple(get(idxs, Ts())...);
+        T r;
+        get(idx, r);
+        return r;
     }
 
     void bind(int idx, const std::string &v, bool copy = true);
@@ -56,9 +49,10 @@ private:
     class Database &db;
     sqlite3_stmt *stmt;
 
-    std::string get(int idx, std::string) const;
-    int get(int idx, int) const;
-    ObjectType get(int idx, ObjectType) const;
+    void get(int idx, std::string &r) const;
+    void get(int idx, UUID &r) const;
+    void get(int idx, int &r) const;
+    void get(int idx, ObjectType &r) const;
 };
 
 class Error : public std::runtime_error {
