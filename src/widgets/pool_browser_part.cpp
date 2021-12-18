@@ -99,6 +99,7 @@ void PoolBrowserPart::add_sort_controller_columns()
     sort_controller->add_column(0, "parts.MPN");
     sort_controller->add_column(1, "parts.manufacturer");
     sort_controller->add_column(2, "packages.name");
+    sort_controller->add_column(mtime_column, "parts.mtime");
 }
 
 void PoolBrowserPart::search()

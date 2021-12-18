@@ -211,6 +211,7 @@ void EntityEditor::handle_add()
 {
     auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
     PoolBrowserDialog dia(top, ObjectType::UNIT, pool);
+    dia.get_browser().sort_by_mtime();
     if (dia.run() == Gtk::RESPONSE_OK) {
         auto unit_uu = dia.get_browser().get_selected();
         if (unit_uu) {

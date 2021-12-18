@@ -20,6 +20,7 @@ void PoolNotebook::handle_create_symbol()
 
     {
         PoolBrowserDialog dia(top, ObjectType::UNIT, pool);
+        dia.get_browser().sort_by_mtime();
         if (dia.run() == Gtk::RESPONSE_OK) {
             unit_uuid = dia.get_browser().get_selected();
         }

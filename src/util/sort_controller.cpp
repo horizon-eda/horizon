@@ -15,11 +15,12 @@ SortController::SortController(Gtk::TreeView *tv) : treeview(tv), is_simple(true
             *this));
 }
 
-void SortController::add_column(unsigned int index, const std::string &name)
+void SortController::add_column(int index, const std::string &name)
 {
     columns.insert({index, {name, Sort::NONE}});
-    treeview->get_column(index)->signal_clicked().connect(
-            sigc::bind<unsigned int>(sigc::mem_fun(*this, &SortController::handle_click), index));
+    if (index >= 0)
+        treeview->get_column(index)->signal_clicked().connect(
+                sigc::bind<unsigned int>(sigc::mem_fun(*this, &SortController::handle_click), index));
     update_treeview();
 }
 
@@ -31,14 +32,16 @@ void SortController::set_simple(bool s)
 
 void SortController::update_treeview()
 {
-    for (const auto &it : columns) {
-        treeview->get_column(it.first)->set_sort_indicator(it.second.second != Sort::NONE);
-        treeview->get_column(it.first)->set_sort_order(it.second.second == Sort::ASC ? Gtk::SORT_ASCENDING
-                                                                                     : Gtk::SORT_DESCENDING);
+    for (const auto &[idx, it] : columns) {
+        if (idx >= 0) {
+            treeview->get_column(idx)->set_sort_indicator(it.second != Sort::NONE);
+            treeview->get_column(idx)->set_sort_order(it.second == Sort::ASC ? Gtk::SORT_ASCENDING
+                                                                             : Gtk::SORT_DESCENDING);
+        }
     }
 }
 
-void SortController::handle_click(unsigned int index)
+void SortController::handle_click(int index)
 {
     for (auto &it : columns) {
         auto &c = it.second;
@@ -79,7 +82,7 @@ void SortController::handle_click(unsigned int index)
     s_signal_changed.emit();
 }
 
-void SortController::set_sort(unsigned int index, Sort s)
+void SortController::set_sort(int index, Sort s)
 {
     for (auto &it : columns) {
         auto &c = it.second;

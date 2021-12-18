@@ -20,6 +20,8 @@ CreatePartDialog::CreatePartDialog(Gtk::Window *parent, IPool &ipool, const UUID
     browser_package = Gtk::manage(new PoolBrowserPackage(pool));
     browser_entity->go_to(entity_uuid);
     browser_package->go_to(package_uuid);
+    browser_entity->sort_by_mtime();
+    browser_package->sort_by_mtime();
 
     auto boxe = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 4));
     auto lae = Gtk::manage(new Gtk::Label());

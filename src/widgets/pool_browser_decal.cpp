@@ -27,6 +27,7 @@ void PoolBrowserDecal::create_columns()
 void PoolBrowserDecal::add_sort_controller_columns()
 {
     sort_controller->add_column(0, "decals.name");
+    sort_controller->add_column(mtime_column, "decals.mtime");
 }
 
 void PoolBrowserDecal::search()

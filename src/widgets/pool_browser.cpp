@@ -249,8 +249,13 @@ void PoolBrowser::construct(Gtk::Widget *search_box)
     sort_controller->set_sort(0, SortController::Sort::ASC);
     sort_controller->signal_changed().connect(sigc::mem_fun(*this, &PoolBrowser::search));
 
-    // dynamic_cast<Gtk::CellRendererText*>(view->get_column_cell_renderer(3))->property_ellipsize()
-    // = Pango::ELLIPSIZE_END;
+    {
+        auto la = Gtk::manage(new Gtk::MenuItem("Sort most recently modified first"));
+        la->show();
+        header_context_menu.append(*la);
+        la->signal_activate().connect(sigc::mem_fun(*this, &PoolBrowser::sort_by_mtime));
+    }
+
     treeview->get_selection()->set_mode(Gtk::SelectionMode::SELECTION_BROWSE);
     treeview->signal_row_activated().connect(sigc::mem_fun(*this, &PoolBrowser::row_activated));
     treeview->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &PoolBrowser::selection_changed));
@@ -258,21 +263,32 @@ void PoolBrowser::construct(Gtk::Widget *search_box)
         path_column->set_visible(false);
     }
     treeview->signal_button_press_event().connect_notify([this](GdkEventButton *ev) {
-        if (ev->button == 3 && context_menu.get_children().size()) {
-            Gtk::TreeModel::Path path;
-            if (treeview->get_bin_window()->gobj() == ev->window && treeview->get_path_at_pos(ev->x, ev->y, path)) {
-                if (auto it = store->get_iter(path)) {
-                    Gtk::TreeModel::Row row = *it;
-                    auto sel = uuid_from_row(row);
-                    for (auto &[widget, cb] : menu_item_sensitive_cbs) {
-                        widget->set_visible(!sel || cb(sel));
-                    }
+        if (gdk_event_triggers_context_menu((GdkEvent *)ev)) {
+            if (treeview->get_bin_window()->gobj() == ev->window) {
+                if (context_menu.get_children().size()) {
+                    Gtk::TreeModel::Path path;
+                    if (treeview->get_path_at_pos(ev->x, ev->y, path)) {
+                        if (auto it = store->get_iter(path)) {
+                            Gtk::TreeModel::Row row = *it;
+                            auto sel = uuid_from_row(row);
+                            for (auto &[widget, cb] : menu_item_sensitive_cbs) {
+                                widget->set_visible(!sel || cb(sel));
+                            }
 #if GTK_CHECK_VERSION(3, 22, 0)
-                    context_menu.popup_at_pointer((GdkEvent *)ev);
+                            context_menu.popup_at_pointer((GdkEvent *)ev);
 #else
-                    context_menu.popup(ev->button, gtk_get_current_event_time());
+                            context_menu.popup(ev->button, gtk_get_current_event_time());
 #endif
+                        }
+                    }
                 }
+            }
+            else {
+#if GTK_CHECK_VERSION(3, 22, 0)
+                header_context_menu.popup_at_pointer((GdkEvent *)ev);
+#else
+                header_context_menu.popup(ev->button, gtk_get_current_event_time());
+#endif
             }
         }
     });
@@ -563,5 +579,10 @@ void PoolBrowser::bind_tags_query(SQLite::Query &q, const std::set<std::string> 
 }
 
 PoolBrowser::~PoolBrowser() = default;
+
+void PoolBrowser::sort_by_mtime()
+{
+    sort_controller->set_sort(mtime_column, SortController::Sort::DESC);
+}
 
 } // namespace horizon

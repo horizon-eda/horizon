@@ -27,6 +27,7 @@ void PoolBrowserFrame::create_columns()
 void PoolBrowserFrame::add_sort_controller_columns()
 {
     sort_controller->add_column(0, "frames.name");
+    sort_controller->add_column(mtime_column, "frames.mtime");
 }
 
 void PoolBrowserFrame::search()

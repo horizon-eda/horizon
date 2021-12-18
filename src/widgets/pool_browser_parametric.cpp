@@ -320,6 +320,7 @@ void PoolBrowserParametric::add_sort_controller_columns()
         auto &col = table.columns.at(i);
         sort_controller->add_column(3 + i, "p." + col.name);
     }
+    sort_controller->add_column(mtime_column, "parts.mtime");
 }
 
 static std::string get_in(const std::string &prefix, size_t n)

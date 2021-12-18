@@ -33,6 +33,7 @@ public:
     void clear_search();
     void focus_search();
     void reload_pools();
+    void sort_by_mtime();
 
     enum class PoolItemSource { LOCAL, INCLUDED, OVERRIDDEN, OVERRIDDEN_LOCAL, CACHED };
 
@@ -70,6 +71,7 @@ protected:
 
     Glib::RefPtr<Gtk::ListStore> store;
     std::unique_ptr<class SortController> sort_controller;
+    static const int mtime_column = -1;
 
     void row_activated(const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *column);
     void selection_changed();
@@ -78,6 +80,7 @@ protected:
     void scroll_to_selection();
 
     Gtk::Menu context_menu;
+    Gtk::Menu header_context_menu;
     std::set<Gtk::Entry *> search_entries;
     std::set<TagEntry *> tag_entries;
 

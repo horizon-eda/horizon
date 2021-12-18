@@ -75,6 +75,7 @@ void PoolBrowserPackage::add_sort_controller_columns()
     sort_controller->add_column(0, "packages.name");
     sort_controller->add_column(1, "packages.manufacturer");
     sort_controller->add_column(2, "packages.n_pads");
+    sort_controller->add_column(mtime_column, "packages.mtime");
 }
 
 void PoolBrowserPackage::search()

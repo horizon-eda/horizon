@@ -29,6 +29,7 @@ void PoolBrowserUnit::add_sort_controller_columns()
 {
     sort_controller->add_column(0, "units.name");
     sort_controller->add_column(1, "units.manufacturer");
+    sort_controller->add_column(mtime_column, "units.mtime");
 }
 
 void PoolBrowserUnit::search()

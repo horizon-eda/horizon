@@ -51,6 +51,7 @@ void PoolBrowserEntity::add_sort_controller_columns()
 {
     sort_controller->add_column(0, "entities.name");
     sort_controller->add_column(1, "entities.manufacturer");
+    sort_controller->add_column(mtime_column, "entities.mtime");
 }
 
 void PoolBrowserEntity::search()

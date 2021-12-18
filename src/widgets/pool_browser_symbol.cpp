@@ -44,6 +44,7 @@ void PoolBrowserSymbol::add_sort_controller_columns()
     sort_controller->add_column(0, "symbols.name");
     sort_controller->add_column(1, "units.name");
     sort_controller->add_column(2, "units.manufacturer");
+    sort_controller->add_column(mtime_column, "symbols.mtime");
 }
 
 void PoolBrowserSymbol::set_unit_uuid(const UUID &uu)
