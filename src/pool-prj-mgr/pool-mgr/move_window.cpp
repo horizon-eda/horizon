@@ -56,8 +56,10 @@ public:
         }
 
         entry = Gtk::manage(new LocationEntry);
-        if (type != ObjectType::MODEL_3D)
+        if (type != ObjectType::MODEL_3D) {
             entry->set_append_json(true);
+            entry->signal_changed().connect([this] { entry->check_ends_json(); });
+        };
         entry->show();
         entry->set_rel_filename(filename);
         parent.sg_dest->add_widget(*entry);
