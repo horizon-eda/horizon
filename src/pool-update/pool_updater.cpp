@@ -10,6 +10,8 @@
 #include "util/fs_util.hpp"
 #include "util/installation_uuid.hpp"
 
+namespace fs = std::filesystem;
+
 namespace horizon {
 PoolUpdater::PoolUpdater(const std::string &bp, pool_update_cb_t cb) : status_cb(cb)
 {
@@ -39,10 +41,11 @@ PoolUpdater::PoolUpdater(const std::string &bp, pool_update_cb_t cb) : status_cb
     q_insert_part.emplace(
             pool->db,
             "INSERT INTO parts "
-            "(uuid, MPN, manufacturer, entity, package, description, datasheet, filename, pool_uuid, last_pool_uuid, "
+            "(uuid, MPN, manufacturer, entity, package, description, datasheet, filename, mtime, pool_uuid, "
+            "last_pool_uuid, "
             "parametric_table, base, flag_base_part) "
             "VALUES "
-            "($uuid, $MPN, $manufacturer, $entity, $package, $description, $datasheet, $filename, $pool_uuid, "
+            "($uuid, $MPN, $manufacturer, $entity, $package, $description, $datasheet, $filename, $mtime, $pool_uuid, "
             "$last_pool_uuid, $parametric_table, $base, $flag_base_part)");
     q_add_tag.emplace(pool->db,
                       "INSERT into tags (tag, uuid, type) "
@@ -401,6 +404,12 @@ void PoolUpdater::clear_dependencies(ObjectType type, const UUID &uu)
         q.bind(2, type);
         q.step();
     }
+}
+
+fs::file_time_type::duration::rep PoolUpdater::get_mtime(const std::string &filename)
+{
+    const auto mtime = fs::last_write_time(fs::u8path(filename));
+    return mtime.time_since_epoch().count();
 }
 
 } // namespace horizon

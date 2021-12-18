@@ -28,12 +28,13 @@ void PoolUpdater::update_frame(const std::string &filename)
             return;
         SQLite::Query q(pool->db,
                         "INSERT INTO frames "
-                        "(uuid, name, filename, pool_uuid, last_pool_uuid) "
+                        "(uuid, name, filename, mtime, pool_uuid, last_pool_uuid) "
                         "VALUES "
-                        "($uuid, $name, $filename, $pool_uuid, $last_pool_uuid)");
+                        "($uuid, $name, $filename, $mtime, $pool_uuid, $last_pool_uuid)");
         q.bind("$uuid", frame.uuid);
         q.bind("$name", frame.name);
         q.bind("$filename", get_path_rel(filename));
+        q.bind("$mtime", get_mtime(filename));
         q.bind("$pool_uuid", pool_uuid);
         q.bind("$last_pool_uuid", *last_pool_uuid);
         q.step();

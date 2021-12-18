@@ -7,13 +7,14 @@
 namespace horizon {
 
 void PoolUpdater::add_padstack(const Padstack &padstack, const UUID &pkg_uuid, const UUID &last_pool_uuid,
-                               const std::string &filename)
+                               const std::string &filename, const std::string &filename_abs)
 {
-    SQLite::Query q(pool->db,
-                    "INSERT INTO padstacks "
-                    "(uuid, name, well_known_name, filename, package, type, pool_uuid, last_pool_uuid) "
-                    "VALUES "
-                    "($uuid, $name, $well_known_name, $filename, $package, $type, $pool_uuid, $last_pool_uuid)");
+    SQLite::Query q(
+            pool->db,
+            "INSERT INTO padstacks "
+            "(uuid, name, well_known_name, filename, mtime, package, type, pool_uuid, last_pool_uuid) "
+            "VALUES "
+            "($uuid, $name, $well_known_name, $filename, $mtime, $package, $type, $pool_uuid, $last_pool_uuid)");
     q.bind("$uuid", padstack.uuid);
     q.bind("$name", padstack.name);
     q.bind("$well_known_name", padstack.well_known_name);
@@ -22,6 +23,7 @@ void PoolUpdater::add_padstack(const Padstack &padstack, const UUID &pkg_uuid, c
     q.bind("$pool_uuid", pool_uuid);
     q.bind("$last_pool_uuid", last_pool_uuid);
     q.bind("$filename", filename);
+    q.bind_int64("$mtime", get_mtime(filename_abs));
     q.step();
 }
 
@@ -61,7 +63,7 @@ void PoolUpdater::update_padstacks(const std::string &directory, const std::stri
                                 if (!last_pool_uuid)
                                     throw std::runtime_error("shouldn't happen in complete pool update");
                                 add_padstack(padstack, pkg_uuid, *last_pool_uuid,
-                                             Glib::build_filename("packages", prefix, it, "padstacks", it2));
+                                             Glib::build_filename("packages", prefix, it, "padstacks", it2), filename);
                             }
                             catch (const std::exception &e) {
                                 status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());
@@ -92,7 +94,8 @@ void PoolUpdater::update_padstacks_global(const std::string &directory, const st
                 const auto last_pool_uuid = handle_override(ObjectType::PADSTACK, padstack.uuid);
                 if (!last_pool_uuid)
                     throw std::runtime_error("shouldn't happen in complete pool update");
-                add_padstack(padstack, UUID(), *last_pool_uuid, Glib::build_filename("padstacks", prefix, it));
+                add_padstack(padstack, UUID(), *last_pool_uuid, Glib::build_filename("padstacks", prefix, it),
+                             filename);
             }
             catch (const std::exception &e) {
                 status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());
@@ -125,7 +128,7 @@ void PoolUpdater::update_padstack(const std::string &filename)
         const auto last_pool_uuid = handle_override(ObjectType::PADSTACK, padstack.uuid);
         if (!last_pool_uuid)
             return;
-        add_padstack(padstack, package_uuid, *last_pool_uuid, get_path_rel(filename));
+        add_padstack(padstack, package_uuid, *last_pool_uuid, get_path_rel(filename), filename);
     }
     catch (const std::exception &e) {
         status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());

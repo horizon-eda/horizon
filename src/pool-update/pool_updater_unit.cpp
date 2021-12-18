@@ -29,13 +29,14 @@ void PoolUpdater::update_unit(const std::string &filename)
             return;
         SQLite::Query q(pool->db,
                         "INSERT INTO units "
-                        "(uuid, name, manufacturer, filename, pool_uuid, last_pool_uuid) "
+                        "(uuid, name, manufacturer, filename, mtime, pool_uuid, last_pool_uuid) "
                         "VALUES "
-                        "($uuid, $name, $manufacturer, $filename, $pool_uuid, $last_pool_uuid)");
+                        "($uuid, $name, $manufacturer, $filename, $mtime, $pool_uuid, $last_pool_uuid)");
         q.bind("$uuid", unit.uuid);
         q.bind("$name", unit.name);
         q.bind("$manufacturer", unit.manufacturer);
         q.bind("$filename", get_path_rel(filename));
+        q.bind_int64("$mtime", get_mtime(filename));
         q.bind("$pool_uuid", pool_uuid);
         q.bind("$last_pool_uuid", *last_pool_uuid);
         q.step();

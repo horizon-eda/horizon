@@ -89,11 +89,12 @@ void PoolUpdater::update_package(const std::string &filename)
         const auto last_pool_uuid = handle_override(ObjectType::PACKAGE, package.uuid);
         if (!last_pool_uuid)
             return;
-        SQLite::Query q(pool->db,
-                        "INSERT INTO packages "
-                        "(uuid, name, manufacturer, filename, n_pads, alternate_for, pool_uuid, last_pool_uuid) "
-                        "VALUES "
-                        "($uuid, $name, $manufacturer, $filename, $n_pads, $alt_for, $pool_uuid, $last_pool_uuid)");
+        SQLite::Query q(
+                pool->db,
+                "INSERT INTO packages "
+                "(uuid, name, manufacturer, filename, mtime, n_pads, alternate_for, pool_uuid, last_pool_uuid) "
+                "VALUES "
+                "($uuid, $name, $manufacturer, $filename, $mtime, $n_pads, $alt_for, $pool_uuid, $last_pool_uuid)");
         q.bind("$uuid", package.uuid);
         q.bind("$name", package.name);
         q.bind("$manufacturer", package.manufacturer);
@@ -102,9 +103,8 @@ void PoolUpdater::update_package(const std::string &filename)
                }));
         q.bind("$alt_for", package.alternate_for ? package.alternate_for->uuid : UUID());
 
-        auto bp = Gio::File::create_for_path(base_path);
-        auto rel = bp->get_relative_path(Gio::File::create_for_path(filename));
-        q.bind("$filename", rel);
+        q.bind("$filename", get_path_rel(filename));
+        q.bind_int64("$mtime", get_mtime(filename));
         q.bind("$pool_uuid", pool_uuid);
         q.bind("$last_pool_uuid", *last_pool_uuid);
         q.step();

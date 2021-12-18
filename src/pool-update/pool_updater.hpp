@@ -3,7 +3,7 @@
 #include "util/sqlite.hpp"
 #include "pool-update_pool.hpp"
 #include "graph.hpp"
-
+#include <filesystem>
 
 namespace horizon {
 class PoolUpdater {
@@ -33,7 +33,7 @@ private:
     void update_entities(const std::string &directory, const std::string &prefix = "");
     void update_symbols(const std::string &directory, const std::string &prefix = "");
     void add_padstack(const Padstack &padstack, const UUID &pkg_uuid, const UUID &last_pool_uuid,
-                      const std::string &filename);
+                      const std::string &filename, const std::string &filename_abs);
     void update_padstacks(const std::string &directory, const std::string &prefix = "");
     void update_padstacks_global(const std::string &directory, const std::string &prefix = "");
     void update_packages(const std::string &directory);
@@ -65,5 +65,7 @@ private:
     bool is_partial_update = false;
     void set_pool_info(const std::string &bp);
     std::string get_path_rel(const std::string &filename) const;
+
+    static std::filesystem::file_time_type::duration::rep get_mtime(const std::string &filename);
 };
 } // namespace horizon

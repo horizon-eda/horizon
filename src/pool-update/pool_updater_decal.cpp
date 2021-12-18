@@ -28,12 +28,13 @@ void PoolUpdater::update_decal(const std::string &filename)
             return;
         SQLite::Query q(pool->db,
                         "INSERT INTO DECALS "
-                        "(uuid, name, filename, pool_uuid, last_pool_uuid) "
+                        "(uuid, name, filename, mtime, pool_uuid, last_pool_uuid) "
                         "VALUES "
-                        "($uuid, $name, $filename, $pool_uuid, $last_pool_uuid)");
+                        "($uuid, $name, $filename, $mtime, $pool_uuid, $last_pool_uuid)");
         q.bind("$uuid", decal.uuid);
         q.bind("$name", decal.name);
         q.bind("$filename", get_path_rel(filename));
+        q.bind_int64("$mtime", get_mtime(filename));
         q.bind("$pool_uuid", pool_uuid);
         q.bind("$last_pool_uuid", *last_pool_uuid);
         q.step();

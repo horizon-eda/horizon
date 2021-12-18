@@ -28,11 +28,12 @@ void PoolUpdater::update_entity(const std::string &filename)
         const auto last_pool_uuid = handle_override(ObjectType::ENTITY, entity.uuid);
         if (!last_pool_uuid)
             return;
-        SQLite::Query q(pool->db,
-                        "INSERT INTO entities "
-                        "(uuid, name, manufacturer, filename, n_gates, prefix, pool_uuid, last_pool_uuid) "
-                        "VALUES "
-                        "($uuid, $name, $manufacturer, $filename, $n_gates, $prefix, $pool_uuid, $last_pool_uuid)");
+        SQLite::Query q(
+                pool->db,
+                "INSERT INTO entities "
+                "(uuid, name, manufacturer, filename, mtime, n_gates, prefix, pool_uuid, last_pool_uuid) "
+                "VALUES "
+                "($uuid, $name, $manufacturer, $filename, $mtime, $n_gates, $prefix, $pool_uuid, $last_pool_uuid)");
         q.bind("$uuid", entity.uuid);
         q.bind("$name", entity.name);
         q.bind("$manufacturer", entity.manufacturer);
@@ -41,6 +42,7 @@ void PoolUpdater::update_entity(const std::string &filename)
         q.bind("$pool_uuid", pool_uuid);
         q.bind("$last_pool_uuid", *last_pool_uuid);
         q.bind("$filename", get_path_rel(filename));
+        q.bind_int64("$mtime", get_mtime(filename));
         q.step();
         for (const auto &it_tag : entity.tags) {
             add_tag(ObjectType::ENTITY, entity.uuid, it_tag);

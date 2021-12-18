@@ -1,4 +1,4 @@
-PRAGMA user_version=22; --keep in sync with pool.cpp
+PRAGMA user_version=23; --keep in sync with pool.cpp
 
 DROP TABLE IF EXISTS "units";
 CREATE TABLE "units" (
@@ -6,6 +6,7 @@ CREATE TABLE "units" (
 	'name'	TEXT NOT NULL,
 	'manufacturer'	TEXT NOT NULL,
 	'filename'	TEXT NOT NULL,
+	'mtime'		INTEGER NOT NULL,
 	'pool_uuid'	TEXT NOT NULL,
 	'last_pool_uuid' TEXT NOT NULL,
 	PRIMARY KEY('uuid')
@@ -19,6 +20,7 @@ CREATE TABLE "entities" (
 	'n_gates'	INTEGER NOT NULL,
 	'prefix'	TEXT NOT NULL,
 	'filename'	TEXT NOT NULL,
+	'mtime'		INTEGER NOT NULL,
 	'pool_uuid'	TEXT NOT NULL,
 	'last_pool_uuid' TEXT NOT NULL,
 	PRIMARY KEY('uuid')
@@ -30,6 +32,7 @@ CREATE TABLE "symbols" (
 	'unit'	TEXT NOT NULL,
 	'name'	TEXT NOT NULL,
 	'filename'	TEXT NOT NULL,
+	'mtime'		INTEGER NOT NULL,
 	'pool_uuid'	TEXT NOT NULL,
 	'last_pool_uuid' TEXT NOT NULL,
 	PRIMARY KEY('uuid')
@@ -43,6 +46,7 @@ CREATE TABLE "packages" (
 	'n_pads'	INTEGER NOT NULL,
 	'alternate_for'	TEXT NOT NULL,
 	'filename'	TEXT NOT NULL,
+	'mtime'		INTEGER NOT NULL,
 	'pool_uuid'	TEXT NOT NULL,
 	'last_pool_uuid' TEXT NOT NULL,
 	PRIMARY KEY('uuid')
@@ -67,6 +71,7 @@ CREATE TABLE "parts" (
 	'parametric_table'	TEXT NOT NULL,
 	'base'	TEXT NOT NULL,
 	'filename'	TEXT,
+	'mtime'		INTEGER NOT NULL,
 	'flag_base_part' BOOLEAN NOT NULL,
 	'pool_uuid'	TEXT NOT NULL,
 	'last_pool_uuid' TEXT NOT NULL,
@@ -108,6 +113,7 @@ CREATE TABLE "padstacks" (
 	'well_known_name'	TEXT NOT NULL,
 	'package'	TEXT NOT NULL,
 	'filename'	TEXT NOT NULL,
+	'mtime'		INTEGER NOT NULL,
 	'type'	TEXT NOT NULL,
 	'pool_uuid'	TEXT NOT NULL,
 	'last_pool_uuid' TEXT NOT NULL,
@@ -119,6 +125,7 @@ CREATE TABLE "frames" (
 	'uuid'	TEXT NOT NULL UNIQUE,
 	'name'	TEXT NOT NULL,
 	'filename'	TEXT NOT NULL,
+	'mtime'		INTEGER NOT NULL,
 	'pool_uuid'	TEXT NOT NULL,
 	'last_pool_uuid' TEXT NOT NULL,
 	PRIMARY KEY('uuid')
@@ -141,6 +148,7 @@ CREATE TABLE "decals" (
 	'uuid'	TEXT NOT NULL UNIQUE,
 	'name'	TEXT NOT NULL,
 	'filename'	TEXT NOT NULL,
+	'mtime'		INTEGER NOT NULL,
 	'pool_uuid'	TEXT NOT NULL,
 	'last_pool_uuid' TEXT NOT NULL,
 	PRIMARY KEY('uuid')
@@ -155,14 +163,14 @@ CREATE TABLE "pools_included" (
 
 DROP VIEW IF EXISTS "all_items_view";
 CREATE VIEW "all_items_view" AS
-	SELECT 'unit' AS 'type',     uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid, last_pool_uuid AS last_pool_uuid FROM units UNION ALL
-	SELECT 'symbol' AS 'type',   uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid, last_pool_uuid AS last_pool_uuid FROM symbols UNION ALL
-	SELECT 'entity' AS 'type',   uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid, last_pool_uuid AS last_pool_uuid FROM entities UNION ALL
-	SELECT 'padstack' AS 'type', uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid, last_pool_uuid AS last_pool_uuid FROM padstacks UNION ALL
-	SELECT 'package' AS 'type',  uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid, last_pool_uuid AS last_pool_uuid FROM packages UNION ALL
-	SELECT 'frame' AS 'type',    uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid, last_pool_uuid AS last_pool_uuid FROM frames UNION ALL
-	SELECT 'decal' AS 'type',    uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid, last_pool_uuid AS last_pool_uuid FROM decals UNION ALL
-	SELECT 'part' AS 'type',      uuid AS uuid, filename AS filename, MPN AS name, pool_uuid AS pool_uuid, last_pool_uuid AS last_pool_uuid FROM parts;
+	SELECT 'unit' AS 'type',     uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid, last_pool_uuid AS last_pool_uuid, mtime AS mtime FROM units UNION ALL
+	SELECT 'symbol' AS 'type',   uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid, last_pool_uuid AS last_pool_uuid, mtime AS mtime FROM symbols UNION ALL
+	SELECT 'entity' AS 'type',   uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid, last_pool_uuid AS last_pool_uuid, mtime AS mtime FROM entities UNION ALL
+	SELECT 'padstack' AS 'type', uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid, last_pool_uuid AS last_pool_uuid, mtime AS mtime FROM padstacks UNION ALL
+	SELECT 'package' AS 'type',  uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid, last_pool_uuid AS last_pool_uuid, mtime AS mtime FROM packages UNION ALL
+	SELECT 'frame' AS 'type',    uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid, last_pool_uuid AS last_pool_uuid, mtime AS mtime FROM frames UNION ALL
+	SELECT 'decal' AS 'type',    uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid, last_pool_uuid AS last_pool_uuid, mtime AS mtime FROM decals UNION ALL
+	SELECT 'part' AS 'type',     uuid AS uuid, filename AS filename,  MPN AS name, pool_uuid AS pool_uuid, last_pool_uuid AS last_pool_uuid, mtime AS mtime FROM parts;
 
 DROP VIEW IF EXISTS "tags_view";
 CREATE VIEW "tags_view" AS
