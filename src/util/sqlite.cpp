@@ -112,6 +112,11 @@ void Query::get(int idx, int &r) const
     r = sqlite3_column_int(stmt, idx);
 }
 
+void Query::get(int idx, sqlite3_int64 &r) const
+{
+    r = sqlite3_column_int64(stmt, idx);
+}
+
 void Query::get(int idx, ObjectType &r) const
 {
     r = object_type_lut.lookup(get<std::string>(idx));
@@ -138,6 +143,17 @@ void Query::bind(int idx, int v)
 void Query::bind(const char *name, int v)
 {
     bind(sqlite3_bind_parameter_index(stmt, name), v);
+}
+
+void Query::bind_int64(int idx, sqlite3_int64 v)
+{
+    if (const auto rc = sqlite3_bind_int64(stmt, idx, v) != SQLITE_OK) {
+        throw Error(rc, sqlite3_errmsg(db.db));
+    }
+}
+void Query::bind_int64(const char *name, sqlite3_int64 v)
+{
+    bind_int64(sqlite3_bind_parameter_index(stmt, name), v);
 }
 
 void Query::bind(int idx, const horizon::UUID &v)
