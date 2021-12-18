@@ -2,6 +2,7 @@
 #include "pool/ipool.hpp"
 #include "util/sqlite.hpp"
 #include "tag_entry.hpp"
+#include "util/sort_controller.hpp"
 #include <set>
 
 namespace horizon {

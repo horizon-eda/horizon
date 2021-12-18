@@ -1,6 +1,7 @@
 #include "pool_browser_decal.hpp"
 #include "pool/ipool.hpp"
 #include "util/sqlite.hpp"
+#include "util/sort_controller.hpp"
 
 namespace horizon {
 PoolBrowserDecal::PoolBrowserDecal(IPool &p) : PoolBrowser(p)

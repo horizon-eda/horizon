@@ -1,6 +1,7 @@
 #include "pool_browser_padstack.hpp"
 #include "pool/ipool.hpp"
 #include "util/sqlite.hpp"
+#include "util/sort_controller.hpp"
 #include <set>
 
 namespace horizon {

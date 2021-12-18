@@ -3,6 +3,7 @@
 #include "pool/part.hpp"
 #include "util/util.hpp"
 #include "util/geom_util.hpp"
+#include "util/sort_controller.hpp"
 
 namespace horizon {
 

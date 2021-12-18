@@ -1,6 +1,7 @@
 #include "pool_browser_unit.hpp"
 #include "pool/ipool.hpp"
 #include "util/sqlite.hpp"
+#include "util/sort_controller.hpp"
 
 namespace horizon {
 PoolBrowserUnit::PoolBrowserUnit(IPool &p) : PoolBrowser(p)

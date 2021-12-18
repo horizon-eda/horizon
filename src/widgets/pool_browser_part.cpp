@@ -3,6 +3,7 @@
 #include "util/sqlite.hpp"
 #include "pool/part.hpp"
 #include "widgets/tag_entry.hpp"
+#include "util/sort_controller.hpp"
 #include <set>
 
 namespace horizon {

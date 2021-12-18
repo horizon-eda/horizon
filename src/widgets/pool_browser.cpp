@@ -8,6 +8,7 @@
 #include "tag_entry.hpp"
 #include "util/sqlite.hpp"
 #include "pool_selector.hpp"
+#include "util/sort_controller.hpp"
 
 namespace horizon {
 PoolBrowser::PoolBrowser(IPool &p, const std::string &prefix)
@@ -560,5 +561,7 @@ void PoolBrowser::bind_tags_query(SQLite::Query &q, const std::set<std::string> 
         q.bind("$tag_type", get_type());
     }
 }
+
+PoolBrowser::~PoolBrowser() = default;
 
 } // namespace horizon

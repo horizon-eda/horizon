@@ -1,6 +1,7 @@
 #include "pool_browser_symbol.hpp"
 #include "pool/ipool.hpp"
 #include "util/sqlite.hpp"
+#include "util/sort_controller.hpp"
 
 namespace horizon {
 PoolBrowserSymbol::PoolBrowserSymbol(IPool &p, const UUID &uu, const std::string &instance)

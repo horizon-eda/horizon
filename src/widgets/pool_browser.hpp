@@ -3,7 +3,6 @@
 #include <memory>
 #include <set>
 #include "util/uuid.hpp"
-#include "util/sort_controller.hpp"
 #include "util/selection_provider.hpp"
 #include "common/common.hpp"
 #include "util/treeview_state_store.hpp"
@@ -37,6 +36,8 @@ public:
 
     enum class PoolItemSource { LOCAL, INCLUDED, OVERRIDDEN, OVERRIDDEN_LOCAL, CACHED };
 
+    virtual ~PoolBrowser();
+
 protected:
     void construct(Gtk::Widget *search_box = nullptr);
     class IPool &pool;
@@ -68,7 +69,7 @@ protected:
     virtual UUID uuid_from_row(const Gtk::TreeModel::Row &row) = 0;
 
     Glib::RefPtr<Gtk::ListStore> store;
-    std::unique_ptr<SortController> sort_controller;
+    std::unique_ptr<class SortController> sort_controller;
 
     void row_activated(const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *column);
     void selection_changed();
