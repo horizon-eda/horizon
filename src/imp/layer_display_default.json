@@ -29,6 +29,10 @@
 		"display_mode": "outline",
 		"visible": true
 	},
+	"-200": {
+		"display_mode": "outline",
+		"visible": false
+	},
 	"0": {
 		"display_mode": "fill",
 		"visible": true
@@ -44,6 +48,10 @@
 	"110": {
 		"display_mode": "outline",
 		"visible": true
+	},
+	"200": {
+		"display_mode": "outline",
+		"visible": false
 	},
 	"20": {
 		"display_mode": "fill_only",
