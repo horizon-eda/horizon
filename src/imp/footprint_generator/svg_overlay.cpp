@@ -1,6 +1,10 @@
 #include "svg_overlay.hpp"
 #include "util/util.hpp"
 
+#if LIBRSVG_CHECK_VERSION(2, 48, 0)
+#define HAVE_SET_STYLESHEET
+#endif
+
 namespace horizon {
 
 SVGOverlay::SVGOverlay(const guint8 *data, gsize data_len)
@@ -17,6 +21,11 @@ SVGOverlay::SVGOverlay(const char *resource)
 
 bool SVGOverlay::draw(const Cairo::RefPtr<Cairo::Context> &cr)
 {
+#ifndef HAVE_SET_STYLESHEET
+    Gdk::Cairo::set_source_rgba(cr, Gdk::RGBA("#D6D1CD"));
+    cr->paint();
+#endif
+
     cr->save();
     rsvg_handle_render_cairo(handle, cr->cobj());
     cr->restore();
@@ -75,10 +84,12 @@ void SVGOverlay::init(const guint8 *data, gsize data_len)
 
     get_style_context()->signal_changed().connect(sigc::mem_fun(*this, &SVGOverlay::apply_style));
     apply_style();
+    fg_color = Gdk::RGBA("#000");
 }
 
 void SVGOverlay::apply_style()
 {
+#ifdef HAVE_SET_STYLESHEET
     static const std::string style_tmpl =
             "rect,path,ellipse,circle,polygon {"
             "stroke: rgb($r,$g,$b) !important;"
@@ -104,6 +115,7 @@ void SVGOverlay::apply_style()
     });
     fg_color = fg;
     rsvg_handle_set_stylesheet(handle, reinterpret_cast<const guint8 *>(style_str.c_str()), style_str.size(), nullptr);
+#endif
 }
 
 SVGOverlay::~SVGOverlay()
