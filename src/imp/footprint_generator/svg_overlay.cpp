@@ -1,4 +1,5 @@
 #include "svg_overlay.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 
@@ -16,9 +17,6 @@ SVGOverlay::SVGOverlay(const char *resource)
 
 bool SVGOverlay::draw(const Cairo::RefPtr<Cairo::Context> &cr)
 {
-    cr->set_source_rgb(.95, .95, .95);
-    cr->paint();
-
     cr->save();
     rsvg_handle_render_cairo(handle, cr->cobj());
     cr->restore();
@@ -39,7 +37,7 @@ bool SVGOverlay::draw(const Cairo::RefPtr<Cairo::Context> &cr)
         layout->set_text(it.second);
         Pango::Rectangle ink, logic;
         layout->get_extents(ink, logic);
-        cr->set_source_rgb(0, 0, 0);
+        Gdk::Cairo::set_source_rgba(cr, fg_color);
         cr->move_to(pos.x, pos.y + (dim.height - logic.get_height() / PANGO_SCALE) / 2);
         layout->show_in_cairo_context(cr);
     }
@@ -74,6 +72,38 @@ void SVGOverlay::init(const guint8 *data, gsize data_len)
     area->show();
     area->signal_draw().connect(sigc::mem_fun(*this, &SVGOverlay::draw));
     add(*area);
+
+    get_style_context()->signal_changed().connect(sigc::mem_fun(*this, &SVGOverlay::apply_style));
+    apply_style();
+}
+
+void SVGOverlay::apply_style()
+{
+    static const std::string style_tmpl =
+            "rect,path,ellipse,circle,polygon {"
+            "stroke: rgb($r,$g,$b) !important;"
+            "}\n"
+
+            "circle {"
+            "fill: rgb($r,$g,$b) !important;"
+            "}\n"
+
+            "marker>path {"
+            "fill: rgb($r,$g,$b) !important;"
+            "}";
+    const auto fg = get_style_context()->get_color();
+    const auto style_str = interpolate_text(style_tmpl, [&fg](const auto &v) {
+        double c = 0;
+        if (v == "r")
+            c = fg.get_red();
+        else if (v == "g")
+            c = fg.get_green();
+        else if (v == "b")
+            c = fg.get_blue();
+        return std::to_string((int)(c * 255));
+    });
+    fg_color = fg;
+    rsvg_handle_set_stylesheet(handle, reinterpret_cast<const guint8 *>(style_str.c_str()), style_str.size(), nullptr);
 }
 
 SVGOverlay::~SVGOverlay()

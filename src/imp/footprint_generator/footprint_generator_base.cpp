@@ -27,9 +27,9 @@ FootprintGeneratorBase::FootprintGeneratorBase(const char *resource, IDocumentPa
     }
 
     box_top->show_all();
-    box_top->set_margin_top(4);
-    box_top->set_margin_start(4);
-    box_top->set_margin_end(4);
+    box_top->set_margin_top(8);
+    box_top->set_margin_start(8);
+    box_top->set_margin_end(8);
 
     overlay = Gtk::manage(new SVGOverlay(resource));
     pack_start(*overlay, true, true, 0);

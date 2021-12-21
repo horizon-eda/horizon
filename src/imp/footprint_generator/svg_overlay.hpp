@@ -17,5 +17,7 @@ private:
     void init(const guint8 *data, gsize data_len);
     Gtk::DrawingArea *area;
     bool draw(const Cairo::RefPtr<Cairo::Context> &ctx);
+    void apply_style();
+    Gdk::RGBA fg_color;
 };
 } // namespace horizon
