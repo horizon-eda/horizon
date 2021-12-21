@@ -84,8 +84,8 @@ private:
     type_signal_pool_items_edited s_signal_pool_items_edited;
     type_signal_pool_updated s_signal_pool_updated;
 
-
 public:
+    const UUID ipc_cookie;
     zmq::socket_t sock_broadcast;
 };
 } // namespace horizon

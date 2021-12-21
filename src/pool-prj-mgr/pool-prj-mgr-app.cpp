@@ -29,7 +29,7 @@ namespace horizon {
 
 PoolProjectManagerApplication::PoolProjectManagerApplication()
     : Gtk::Application("org.horizon_eda.HorizonEDA.pool_prj_mgr", Gio::APPLICATION_HANDLES_OPEN),
-      sock_broadcast(zctx, ZMQ_PUB)
+      ipc_cookie(UUID::random()), sock_broadcast(zctx, ZMQ_PUB)
 {
     sock_broadcast.bind("tcp://127.0.0.1:*");
     sock_broadcast_ep = zmq_helper::get_last_endpoint(sock_broadcast);
@@ -43,10 +43,11 @@ const std::string &PoolProjectManagerApplication::get_ep_broadcast() const
 void PoolProjectManagerApplication::send_json(int pid, const json &j)
 {
     std::string s = j.dump();
-    zmq::message_t msg(s.size() + 5);
-    memcpy(msg.data(), &pid, 4);
-    memcpy(((uint8_t *)msg.data()) + 4, s.c_str(), s.size());
+    zmq::message_t msg(sizeof(int) + UUID::size + s.size() + 1);
     auto m = (char *)msg.data();
+    memcpy(m, &pid, sizeof(int));
+    memcpy(m + sizeof(int), ipc_cookie.get_bytes(), UUID::size);
+    memcpy(m + sizeof(int) + UUID::size, s.c_str(), s.size());
     m[msg.size() - 1] = 0;
     zmq_helper::send(sock_broadcast, msg);
 }

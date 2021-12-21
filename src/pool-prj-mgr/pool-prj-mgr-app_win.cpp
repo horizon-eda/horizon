@@ -165,7 +165,11 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
                                               zmq::message_t msg;
                                               if (zmq_helper::recv(sock_mgr, msg)) {
                                                   char *data = (char *)msg.data();
-                                                  json jrx = json::parse(data);
+                                                  if (msg.size() < (UUID::size + 1))
+                                                      throw std::runtime_error("received short message");
+                                                  if (memcmp(data, app.ipc_cookie.get_bytes(), UUID::size) != 0)
+                                                      throw std::runtime_error("IPC cookie didn't match");
+                                                  json jrx = json::parse(data + UUID::size);
                                                   json jtx = handle_req(jrx);
 
                                                   std::string stx = jtx.dump();
@@ -1321,7 +1325,8 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
 
         std::vector<std::string> env = {"HORIZON_POOL=" + pool_base_path,
                                         "HORIZON_EP_BROADCAST=" + app.get_ep_broadcast(),
-                                        "HORIZON_EP_MGR=" + sock_mgr_ep, "HORIZON_MGR_PID=" + std::to_string(getpid())};
+                                        "HORIZON_EP_MGR=" + sock_mgr_ep, "HORIZON_MGR_PID=" + std::to_string(getpid()),
+                                        "HORIZON_IPC_COOKIE=" + (std::string)app.ipc_cookie};
         std::string filename = args.at(0);
         if (filename.size()) {
             if (!Glib::file_test(filename, Glib::FILE_TEST_IS_REGULAR)) {

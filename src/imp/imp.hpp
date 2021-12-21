@@ -104,6 +104,7 @@ protected:
     zmq::socket_t sock_project;
     bool sockets_connected = false;
     int mgr_pid = -1;
+    UUID ipc_cookie;
     bool no_update = false;
     bool distraction_free = false;
 

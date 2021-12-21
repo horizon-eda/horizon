@@ -98,14 +98,27 @@ ImpBase::ImpBase(const PoolParams &params)
                 mgr_pid = std::stoi(pid_p);
         }
 
+        {
+            auto ipc_cookie_p = Glib::getenv("HORIZON_IPC_COOKIE");
+            if (ipc_cookie_p.size())
+                ipc_cookie = ipc_cookie_p;
+        }
+
         Glib::signal_io().connect(
                 [this](Glib::IOCondition cond) {
                     while (zmq_helper::can_recv(sock_broadcast_rx)) {
                         zmq::message_t msg;
                         if (zmq_helper::recv(sock_broadcast_rx, msg)) {
+                            if (msg.size() < (UUID::size + sizeof(int) + 1))
+                                throw std::runtime_error("received short message");
+
                             int prefix;
-                            memcpy(&prefix, msg.data(), 4);
-                            char *data = ((char *)msg.data()) + 4;
+                            auto m = reinterpret_cast<const char *>(msg.data());
+                            memcpy(&prefix, m, sizeof(int));
+                            if (memcmp(m + sizeof(int), ipc_cookie.get_bytes(), UUID::size) != 0)
+                                throw std::runtime_error("IPC cookie didn't match");
+
+                            auto data = m + sizeof(int) + UUID::size;
                             json j = json::parse(data);
                             if (prefix == 0 || prefix == getpid()) {
                                 handle_broadcast(j);
@@ -143,9 +156,10 @@ json ImpBase::send_json(const json &j)
         return nullptr;
 
     std::string s = j.dump();
-    zmq::message_t msg(s.size() + 1);
-    memcpy(((uint8_t *)msg.data()), s.c_str(), s.size());
+    zmq::message_t msg(UUID::size + s.size() + 1);
     auto m = (char *)msg.data();
+    memcpy(m, ipc_cookie.get_bytes(), UUID::size);
+    memcpy(m + UUID::size, s.c_str(), s.size());
     m[msg.size() - 1] = 0;
     try {
         if (zmq_helper::send(sock_project, msg) == false) {
