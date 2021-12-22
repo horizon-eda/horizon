@@ -40,7 +40,8 @@ ToolResponse ToolDrawPlane::commit()
         auto &plane = brd.planes.emplace(uu, uu).first->second;
         plane.polygon = temp;
         temp->usage = &plane;
-        imp->dialogs.show_edit_plane_window(plane, brd);
+
+        show_edit_plane_window(plane, brd);
         return ToolResponse();
     }
     return ToolResponse::commit();
@@ -49,14 +50,7 @@ ToolResponse ToolDrawPlane::commit()
 ToolResponse ToolDrawPlane::update(const ToolArgs &args)
 {
     if (done) {
-        if (args.type == ToolEventType::DATA) {
-            if (auto data = dynamic_cast<const ToolDataWindow *>(args.data.get())) {
-                if (data->event == ToolDataWindow::Event::CLOSE)
-                    return ToolResponse::revert();
-                else if (data->event == ToolDataWindow::Event::OK)
-                    return ToolResponse::commit();
-            }
-        }
+        return update_for_plane(args);
     }
     else {
         return ToolDrawPolygon::update(args);

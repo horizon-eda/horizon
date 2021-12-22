@@ -40,6 +40,7 @@ void NetButton::set_net(const UUID &uu)
         net_current = UUID();
     }
     update_label();
+    s_signal_changed.emit(uu);
 }
 
 UUID NetButton::get_net()
