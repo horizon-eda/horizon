@@ -9,6 +9,9 @@ public:
     bool can_begin() override;
 
 protected:
+    bool done = false;
+
     ToolResponse commit() override;
+    ToolResponse update(const ToolArgs &args) override;
 };
 } // namespace horizon

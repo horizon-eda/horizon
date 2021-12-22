@@ -4,6 +4,7 @@
 #include "core/tool_id.hpp"
 #include "common/keepout.hpp"
 #include "imp/imp_interface.hpp"
+#include "core/tool_data_window.hpp"
 
 namespace horizon {
 
@@ -20,7 +21,10 @@ bool ToolDrawPlane::can_begin()
 
 ToolResponse ToolDrawPlane::commit()
 {
+    done = true;
     imp->canvas_update();
+    imp->tool_bar_set_actions({});
+    imp->tool_bar_set_tip("");
     if (tool_id == ToolID::DRAW_KEEPOUT) {
         auto keepout = doc.r->insert_keepout(UUID::random());
         keepout->polygon = temp;
@@ -36,14 +40,29 @@ ToolResponse ToolDrawPlane::commit()
         auto &plane = brd.planes.emplace(uu, uu).first->second;
         plane.polygon = temp;
         temp->usage = &plane;
-        if (imp->dialogs.edit_plane(plane, brd)) {
-            brd.update_plane(&plane);
-            return ToolResponse::commit();
-        }
-        else {
-            return ToolResponse::revert();
-        }
+        imp->dialogs.show_edit_plane_window(plane, brd);
+        return ToolResponse();
     }
     return ToolResponse::commit();
 }
+
+ToolResponse ToolDrawPlane::update(const ToolArgs &args)
+{
+    if (done) {
+        if (args.type == ToolEventType::DATA) {
+            if (auto data = dynamic_cast<const ToolDataWindow *>(args.data.get())) {
+                if (data->event == ToolDataWindow::Event::CLOSE)
+                    return ToolResponse::revert();
+                else if (data->event == ToolDataWindow::Event::OK)
+                    return ToolResponse::commit();
+            }
+        }
+    }
+    else {
+        return ToolDrawPolygon::update(args);
+    }
+    return ToolResponse();
+}
+
+
 } // namespace horizon

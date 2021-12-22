@@ -351,7 +351,7 @@ SRC_IMP = \
 	src/dialogs/edit_via.cpp\
 	src/dialogs/pool_browser_dialog.cpp\
 	src/dialogs/schematic_properties.cpp\
-	src/dialogs/edit_plane.cpp\
+	src/dialogs/edit_plane_window.cpp\
 	src/dialogs/edit_stackup.cpp\
 	src/dialogs/edit_board_hole.cpp\
 	src/dialogs/edit_frame.cpp\

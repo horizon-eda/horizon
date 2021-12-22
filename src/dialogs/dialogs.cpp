@@ -20,7 +20,7 @@
 #include "pad_parameter_set_window.hpp"
 #include "schematic_properties.hpp"
 #include "edit_via.hpp"
-#include "edit_plane.hpp"
+#include "edit_plane_window.hpp"
 #include "edit_stackup.hpp"
 #include "edit_board_hole.hpp"
 #include "edit_frame.hpp"
@@ -427,12 +427,6 @@ std::optional<UUID> Dialogs::select_decal(IPool &pool)
     }
 }
 
-bool Dialogs::edit_plane(class Plane &plane, class Board &brd)
-{
-    EditPlaneDialog dia(parent, plane, brd);
-    return dia.run() == Gtk::RESPONSE_OK;
-}
-
 bool Dialogs::edit_keepout(class Keepout &keepout, class IDocument &c, bool add_mode)
 {
     EditKeepoutDialog dia(parent, keepout, c, add_mode);
@@ -615,6 +609,19 @@ AlignAndDistributeWindow *Dialogs::show_align_and_distribute_window()
     return win;
 }
 
+
+EditPlaneWindow *Dialogs::show_edit_plane_window(class Plane &plane, class Board &brd)
+{
+    if (auto win = dynamic_cast<EditPlaneWindow *>(window_nonmodal)) {
+        win->present();
+        return win;
+    }
+    auto win = new EditPlaneWindow(parent, interface, plane, brd);
+    window_nonmodal = win;
+    win->signal_hide().connect([this] { close_nonmodal(); });
+    win->present();
+    return win;
+}
 
 void Dialogs::close_nonmodal()
 {
