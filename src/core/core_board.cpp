@@ -72,7 +72,20 @@ void CoreBoard::reload_netlist()
             it++;
         }
     }
+
+    // delete planes with deleted nets
+    for (auto it = brd->planes.begin(); it != brd->planes.end();) {
+        const auto &plane = it->second;
+        if (!block->nets.count(plane.net.uuid)) { // net is gone
+            plane.polygon->usage = nullptr;
+            brd->planes.erase(it++);
+        }
+        else {
+            it++;
+        }
+    }
     brd->update_refs();
+
     for (auto it = brd->tracks.begin(); it != brd->tracks.end();) {
         bool del = false;
         for (auto &it_ft : {it->second.from, it->second.to}) {
