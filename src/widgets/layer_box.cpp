@@ -134,6 +134,7 @@ LayerDisplayButton::LayerDisplayButton()
       button_face(p_property_color.get_proxy(), p_property_display_mode.get_proxy())
 {
     add(button_face);
+    button_face.show();
     add_events(Gdk::BUTTON_PRESS_MASK);
     append_context_menu_item("Outline", LayerDisplay::Mode::OUTLINE);
     append_context_menu_item("Hatched", LayerDisplay::Mode::HATCH);
