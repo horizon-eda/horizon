@@ -549,9 +549,11 @@ void ImpBoard::construct()
 #endif
         core_board.reload_netlist();
         core_board.set_needs_save();
+        const auto sel = canvas->get_selection();
         canvas_update();
         airwire_filter_window->update_nets();
         parts_window->update();
+        canvas->set_selection(sel);
     });
 
     {
