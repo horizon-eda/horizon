@@ -50,7 +50,7 @@ UUID NetButton::get_net()
 void NetButton::update_label()
 {
     if (net_current) {
-        set_label(block.nets.at(net_current).name);
+        set_label(block.get_net_name(net_current));
     }
     else {
         set_label("<no net>");

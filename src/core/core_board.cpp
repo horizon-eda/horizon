@@ -276,7 +276,8 @@ bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID
             return true;
 
         case ObjectProperty::ID::NAME:
-            dynamic_cast<PropertyValueString &>(value).value = plane->net ? (plane->net->name) : "<no net>";
+            dynamic_cast<PropertyValueString &>(value).value =
+                    plane->net ? brd->block->get_net_name(plane->net->uuid) : "<no net>";
             return true;
 
         case ObjectProperty::ID::PRIORITY:
