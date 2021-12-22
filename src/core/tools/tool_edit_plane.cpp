@@ -6,6 +6,7 @@
 #include "pool/part.hpp"
 #include "core/tool_id.hpp"
 #include "core/tool_data_window.hpp"
+#include "dialogs/edit_plane_window.hpp"
 
 namespace horizon {
 
@@ -78,19 +79,11 @@ ToolResponse ToolEditPlane::begin(const ToolArgs &args)
         plane->polygon = poly;
         poly->usage = plane;
     }
-    imp->dialogs.show_edit_plane_window(*plane, *brd);
+    show_edit_plane_window(*plane, *brd);
     return ToolResponse();
 }
 ToolResponse ToolEditPlane::update(const ToolArgs &args)
 {
-    if (args.type == ToolEventType::DATA) {
-        if (auto data = dynamic_cast<const ToolDataWindow *>(args.data.get())) {
-            if (data->event == ToolDataWindow::Event::CLOSE)
-                return ToolResponse::revert();
-            else if (data->event == ToolDataWindow::Event::OK)
-                return ToolResponse::commit();
-        }
-    }
-    return ToolResponse();
+    return update_for_plane(args);
 }
 } // namespace horizon

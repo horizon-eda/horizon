@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-class ToolDrawPolygon : public ToolBase, public ToolHelperRestrict {
+class ToolDrawPolygon : public virtual ToolBase, private ToolHelperRestrict {
 public:
     using ToolBase::ToolBase;
     ToolResponse begin(const ToolArgs &args) override;

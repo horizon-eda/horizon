@@ -4,6 +4,7 @@
 #include "widgets/plane_editor.hpp"
 #include "board/board.hpp"
 #include "util/gtk_util.hpp"
+#include "imp/imp_interface.hpp"
 
 namespace horizon {
 
@@ -31,7 +32,7 @@ EditPlaneWindow::EditPlaneWindow(Gtk::Window *parent, ImpInterface *intf, Plane 
     bind_widget(from_rules, plane.from_rules);
     box2->pack_start(*from_rules, false, false, 0);
 
-    auto net_button = Gtk::manage(new NetButton(*brd.block));
+    net_button = Gtk::manage(new NetButton(*brd.block));
     if (plane.net) {
         net_button->set_net(plane.net->uuid);
     }
@@ -43,7 +44,23 @@ EditPlaneWindow::EditPlaneWindow(Gtk::Window *parent, ImpInterface *intf, Plane 
         plane.net = brd.block->get_net(uu);
         ok_button->set_sensitive(true);
     });
-    box2->pack_start(*net_button, true, true, 0);
+
+    {
+        auto box3 = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0));
+        box3->get_style_context()->add_class("linked");
+        box3->pack_start(*net_button, true, true, 0);
+        pick_button = Gtk::manage(new Gtk::ToggleButton());
+        pick_button->set_tooltip_text("Pick net");
+        pick_button->set_image_from_icon_name("find-location-symbolic", Gtk::ICON_SIZE_BUTTON);
+        box3->pack_start(*pick_button, false, false, 0);
+        box2->pack_start(*box3, true, true, 0);
+        pick_button->signal_toggled().connect([this] {
+            auto data = std::make_unique<ToolDataEditPlane>();
+            data->event = ToolDataWindow::Event::UPDATE;
+            data->pick_net = pick_button->get_active();
+            interface->tool_update_data(std::move(data));
+        });
+    }
 
     box->pack_start(*box2, false, false, 0);
 
@@ -82,6 +99,13 @@ void EditPlaneWindow::on_event(ToolDataWindow::Event ev)
             brd.update_planes();
         }
     }
+}
+
+void EditPlaneWindow::set_net(const UUID &uu)
+{
+    if (uu)
+        net_button->set_net(uu);
+    pick_button->set_active(false);
 }
 
 } // namespace horizon

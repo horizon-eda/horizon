@@ -1,8 +1,8 @@
 #pragma once
-#include "core/tool.hpp"
+#include "tool_helper_edit_plane.hpp"
 
 namespace horizon {
-class ToolEditPlane : public ToolBase {
+class ToolEditPlane : public virtual ToolBase, private ToolHelperEditPlane {
 public:
     using ToolBase::ToolBase;
     ToolResponse begin(const ToolArgs &args) override;
@@ -11,6 +11,11 @@ public:
     bool is_specific() override
     {
         return true;
+    }
+    std::set<InToolActionID> get_actions() const override
+    {
+        using I = InToolActionID;
+        return {I::LMB, I::RMB};
     }
 
 private:
