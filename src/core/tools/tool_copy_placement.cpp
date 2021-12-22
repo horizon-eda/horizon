@@ -103,6 +103,8 @@ ToolResponse ToolCopyPlacement::update(const ToolArgs &args)
 
                             it->placement.accumulate(rp);
                             it->flip = it->placement.mirror;
+                            it->update(*brd);
+                            brd->update_refs();
                         }
 
                         if (this_ref_pkg->alternate_package == it->alternate_package
