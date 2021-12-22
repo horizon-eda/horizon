@@ -1,4 +1,4 @@
-#include "edit_plane.hpp"
+#include "edit_plane_window.hpp"
 #include "widgets/net_button.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "widgets/plane_editor.hpp"
@@ -13,15 +13,10 @@ void bind(Gtk::Switch *sw, bool &v)
     sw->property_active().signal_changed().connect([sw, &v] { v = sw->get_active(); });
 }
 
-EditPlaneDialog::EditPlaneDialog(Gtk::Window *parent, Plane &p, Board &brd)
-    : Gtk::Dialog("Edit Plane", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
-      plane(p)
+EditPlaneWindow::EditPlaneWindow(Gtk::Window *parent, ImpInterface *intf, Plane &p, Board &b)
+    : ToolWindow(parent, intf), plane(p), plane_uuid(plane.uuid), brd(b), poly(*plane.polygon)
 {
-    add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
-    auto ok_button = add_button("OK", Gtk::ResponseType::RESPONSE_OK);
-    set_default_response(Gtk::ResponseType::RESPONSE_OK);
-    // set_default_size(400, 300);
-
+    set_title("Edit Plane");
 
     auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 20));
     box->set_margin_start(20);
@@ -44,7 +39,7 @@ EditPlaneDialog::EditPlaneDialog(Gtk::Window *parent, Plane &p, Board &brd)
         ok_button->set_sensitive(false);
     }
 
-    net_button->signal_changed().connect([this, &brd, ok_button](const UUID &uu) {
+    net_button->signal_changed().connect([this](const UUID &uu) {
         plane.net = brd.block->get_net(uu);
         ok_button->set_sensitive(true);
     });
@@ -59,16 +54,34 @@ EditPlaneDialog::EditPlaneDialog(Gtk::Window *parent, Plane &p, Board &brd)
 
     if (plane.net) {
         auto delete_button = Gtk::manage(new Gtk::Button("Delete Plane"));
-        delete_button->signal_clicked().connect([this, &brd] {
+        delete_button->signal_clicked().connect([this] {
             brd.planes.erase(plane.uuid);
-            response(Gtk::RESPONSE_OK);
+            emit_event(ToolDataWindow::Event::OK);
         });
         box->pack_start(*delete_button, false, false, 0);
     }
 
 
-    get_content_area()->pack_start(*box, true, true, 0);
+    add(*box);
 
-    show_all();
+    box->show_all();
 }
+
+void EditPlaneWindow::on_event(ToolDataWindow::Event ev)
+{
+    if (ev == ToolDataWindow::Event::OK) {
+        if (brd.planes.count(plane_uuid)) { // may have been deleted
+            if (plane.from_rules) {
+                plane.settings = brd.rules.get_plane_settings(plane.net, poly.layer);
+            }
+            brd.update_plane(&plane);
+            brd.update_airwires(false, {plane.net->uuid});
+        }
+        else {
+            poly.usage = nullptr;
+            brd.update_planes();
+        }
+    }
+}
+
 } // namespace horizon

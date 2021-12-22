@@ -45,7 +45,6 @@ public:
     bool edit_board_hole(std::set<class BoardHole *> &holes, class IPool &pool, class IPool &pool_caching,
                          class Block &block);
     bool annotate(class Schematic &s);
-    bool edit_plane(class Plane &plane, class Board &brd);
     bool edit_keepout(class Keepout &keepout, class IDocument &c, bool add_mode);
     bool edit_stackup(class IDocumentBoard &brd);
     bool edit_schematic_properties(class IDocumentSchematicBlockSymbol &s);
@@ -75,6 +74,7 @@ public:
     class PadParameterSetWindow *show_pad_parameter_set_window(std::set<class Pad *> &pads, class IPool &pool,
                                                                class Package &pkg);
     class AlignAndDistributeWindow *show_align_and_distribute_window();
+    class EditPlaneWindow *show_edit_plane_window(class Plane &plane, class Board &brd);
 
     void close_nonmodal();
     class ToolWindow *get_nonmodal();

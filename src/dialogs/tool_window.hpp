@@ -10,6 +10,10 @@ public:
     void set_use_ok(bool okay);
 
 protected:
+    virtual void on_event(ToolDataWindow::Event ev)
+    {
+    }
+
     Gtk::Button *ok_button = nullptr;
     Gtk::Button *cancel_button = nullptr;
     void set_title(const std::string &title);
