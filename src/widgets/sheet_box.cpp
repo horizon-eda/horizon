@@ -194,12 +194,14 @@ SheetBox::SheetBox(CoreSchematic &c) : Gtk::Box(Gtk::Orientation::ORIENTATION_VE
             tb->pack_start(*box, false, false, 0);
             {
                 auto tbo = Gtk::manage(new Gtk::Button());
+                tbo->set_tooltip_text("Add sheet");
                 tbo->set_image_from_icon_name("list-add-symbolic");
                 tbo->signal_clicked().connect([this] { core.add_sheet(); });
                 box->pack_start(*tbo, false, false, 0);
             }
             {
                 auto tbo = Gtk::manage(new Gtk::Button());
+                tbo->set_tooltip_text("Remove current sheet");
                 tbo->set_image_from_icon_name("list-remove-symbolic");
                 tbo->signal_clicked().connect(sigc::mem_fun(*this, &SheetBox::remove_clicked));
                 box->pack_start(*tbo, false, false, 0);
@@ -207,6 +209,7 @@ SheetBox::SheetBox(CoreSchematic &c) : Gtk::Box(Gtk::Orientation::ORIENTATION_VE
             }
             {
                 auto tbo = Gtk::manage(new Gtk::Button());
+                tbo->set_tooltip_text("Move current sheet up");
                 tbo->set_image_from_icon_name("go-up-symbolic");
                 tbo->signal_clicked().connect([this] { sheet_move(-1); });
                 box->pack_start(*tbo, false, false, 0);
@@ -214,6 +217,7 @@ SheetBox::SheetBox(CoreSchematic &c) : Gtk::Box(Gtk::Orientation::ORIENTATION_VE
             }
             {
                 auto tbo = Gtk::manage(new Gtk::Button());
+                tbo->set_tooltip_text("Move current sheet down");
                 tbo->set_image_from_icon_name("go-down-symbolic");
                 tbo->signal_clicked().connect([this] { sheet_move(1); });
                 box->pack_start(*tbo, false, false, 0);
@@ -224,6 +228,7 @@ SheetBox::SheetBox(CoreSchematic &c) : Gtk::Box(Gtk::Orientation::ORIENTATION_VE
             auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0));
             tb->pack_end(*box, false, false, 0);
             auto tbo = Gtk::manage(new Gtk::Button());
+            tbo->set_tooltip_text("Schematic properties…");
             tbo->set_image_from_icon_name("view-more-symbolic");
             tbo->signal_clicked().connect([this] { s_signal_edit_more.emit(); });
             box->pack_start(*tbo, false, false, 0);
