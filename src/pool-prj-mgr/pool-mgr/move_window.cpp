@@ -93,7 +93,7 @@ MoveWindow::MoveWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
                     "WHERE dependencies.dep_type = where_used.typex "
                     "AND dependencies.dep_uuid = where_used.uuidx) "
 
-                    "SELECT filename, x.type, x.uuid FROM "
+                    "SELECT filename, x.type, all_items_view.name FROM "
                     "(SELECT typex as type, uuidx as uuid FROM deps "
                     "UNION SELECT 'symbol' as type, symbols.uuid as uuid FROM symbols "
                     "INNER JOIN deps ON (symbols.unit = uuidx AND typex = 'unit')) AS x "

@@ -375,8 +375,8 @@ void PoolNotebook::add_context_menu(PoolBrowser *br)
             });
     br->add_context_menu_item(
             "Move to other pool",
-            [this](const UUID &uu) {
-                auto win = MoveWindow::create(pool, ObjectType::PART, uu);
+            [this, ty](const UUID &uu) {
+                auto win = MoveWindow::create(pool, ty, uu);
                 auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
                 win->set_transient_for(*top);
                 win->present();
