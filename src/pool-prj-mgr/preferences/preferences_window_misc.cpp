@@ -262,6 +262,25 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
                                                         preferences, preferences.zoom.touchpad_pan));
             gr->add_row(*r);
         }
+
+        {
+            auto r = Gtk::manage(new PreferencesRowNumeric<int>(
+                    "Touchpad rotate snap threshold",
+                    "How aggressively to snap to 90-degree angles when rotating with touchpad gestures", preferences,
+                    preferences.zoom.touchpad_rotate_snap_threshold));
+            auto &sp = r->get_spinbutton();
+            sp.set_range(0, 360);
+            sp.set_increments(1, 1);
+            sp.set_width_chars(5);
+            sp.set_alignment(1);
+            sp.signal_output().connect([&sp] {
+                int v = sp.get_value_as_int();
+                sp.set_text(std::to_string(v) + " °");
+                return true;
+            });
+            r->bind();
+            gr->add_row(*r);
+        }
         {
             auto r = Gtk::manage(new PreferencesRowBoolButton("Keyboard zoom center", "Where to zoom in using keyboard",
                                                               "Cursor", "Screen center", preferences,
