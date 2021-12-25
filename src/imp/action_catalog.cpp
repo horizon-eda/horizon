@@ -1013,6 +1013,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Align and distribute", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::MERGE_DUPLICATE_JUNCTIONS},
+         {"Merge duplicate junctions", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::GO_TO_PROJECT_MANAGER, ToolID::NONE},
          {"Go to project manager", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
@@ -1323,5 +1327,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(MAP_PORT),
         TOOL_LUT_ITEM(ADD_BLOCK_INSTANCE),
         TOOL_LUT_ITEM(ALIGN_AND_DISTRIBUTE),
+        TOOL_LUT_ITEM(MERGE_DUPLICATE_JUNCTIONS),
 };
 } // namespace horizon

@@ -231,6 +231,7 @@ SRC_IMP = \
 	src/core/tool.cpp \
 	src/core/create_tool.cpp \
 	src/core/core_properties.cpp\
+	src/core/tools/tool_merge_duplicate_junctions.cpp\
 	src/core/tools/tool_move.cpp\
 	src/core/tools/tool_place_junction.cpp\
 	src/core/tools/tool_place_junction_schematic.cpp\

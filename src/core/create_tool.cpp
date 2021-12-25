@@ -91,6 +91,7 @@
 #include "tools/tool_map_port.hpp"
 #include "tools/tool_add_block_instance.hpp"
 #include "tools/tool_align_and_distribute.hpp"
+#include "tools/tool_merge_duplicate_junctions.hpp"
 
 namespace horizon {
 
@@ -429,6 +430,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::ALIGN_AND_DISTRIBUTE:
         return std::make_unique<ToolAlignAndDistribute>(this, tool_id);
+
+    case ToolID::MERGE_DUPLICATE_JUNCTIONS:
+        return std::make_unique<ToolMergeDuplicateJunctions>(this, tool_id);
 
     default:
         return nullptr;
