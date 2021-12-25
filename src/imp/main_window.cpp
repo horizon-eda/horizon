@@ -112,7 +112,6 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     label_set_tnum(tool_bar_tip_label);
     label_set_tnum(grid_mul_label);
     label_set_tnum(search_status_label);
-    label_set_tnum(view_hints_label);
     {
         auto attributes_list = pango_attr_list_new();
         auto attribute_font_features = pango_attr_font_features_new("tnum 1");

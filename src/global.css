@@ -250,3 +250,8 @@ box.imp-instance-path-bar         > label {
 .imp_undo_redo_hint {
   border-radius: 5px;
 }
+
+
+.tnum {
+  font-feature-settings: "tnum 1";
+}
