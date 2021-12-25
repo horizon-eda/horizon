@@ -625,6 +625,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Line loop to polygon", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::LINES_TO_TRACKS},
+         {"Lines to tracks", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::RELOAD_POOL, ToolID::NONE},
          {"Reload pool", ActionGroup::UNKNOWN,
           ActionCatalogItem::AVAILABLE_IN_PACKAGE | ActionCatalogItem::AVAILABLE_IN_SYMBOL
@@ -1269,6 +1273,7 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(MOVE_KEY_FINE_RIGHT),
         TOOL_LUT_ITEM(SWAP_NETS),
         TOOL_LUT_ITEM(LINE_LOOP_TO_POLYGON),
+        TOOL_LUT_ITEM(LINES_TO_TRACKS),
         TOOL_LUT_ITEM(SCALE),
         TOOL_LUT_ITEM(CHANGE_UNIT),
         TOOL_LUT_ITEM(EDIT_FRAME_PROPERTIES),

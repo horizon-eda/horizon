@@ -294,6 +294,7 @@ SRC_IMP = \
 	src/core/tools/tool_copy_tracks.cpp\
 	src/core/tools/tool_swap_nets.cpp\
 	src/core/tools/tool_line_loop_to_polygon.cpp\
+	src/core/tools/tool_lines_to_tracks.cpp\
 	src/core/tools/tool_change_unit.cpp\
 	src/core/tools/tool_helper_line_width_setting.cpp\
 	src/core/tools/tool_set_nc_all.cpp\
