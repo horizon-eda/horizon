@@ -1,4 +1,4 @@
-PRAGMA user_version=23; --keep in sync with pool.cpp
+PRAGMA user_version=24; --keep in sync with pool.cpp
 
 DROP TABLE IF EXISTS "units";
 CREATE TABLE "units" (
@@ -9,7 +9,8 @@ CREATE TABLE "units" (
 	'mtime'		INTEGER NOT NULL,
 	'pool_uuid'	TEXT NOT NULL,
 	'last_pool_uuid' TEXT NOT NULL,
-	PRIMARY KEY('uuid')
+	PRIMARY KEY('uuid'),
+	UNIQUE('filename', 'pool_uuid')
 );
 
 DROP TABLE IF EXISTS "entities";
@@ -23,7 +24,8 @@ CREATE TABLE "entities" (
 	'mtime'		INTEGER NOT NULL,
 	'pool_uuid'	TEXT NOT NULL,
 	'last_pool_uuid' TEXT NOT NULL,
-	PRIMARY KEY('uuid')
+	PRIMARY KEY('uuid'),
+	UNIQUE('filename', 'pool_uuid')
 );
 
 DROP TABLE IF EXISTS "symbols";
@@ -35,7 +37,8 @@ CREATE TABLE "symbols" (
 	'mtime'		INTEGER NOT NULL,
 	'pool_uuid'	TEXT NOT NULL,
 	'last_pool_uuid' TEXT NOT NULL,
-	PRIMARY KEY('uuid')
+	PRIMARY KEY('uuid'),
+	UNIQUE('filename', 'pool_uuid')
 );
 
 DROP TABLE IF EXISTS "packages";
@@ -49,7 +52,8 @@ CREATE TABLE "packages" (
 	'mtime'		INTEGER NOT NULL,
 	'pool_uuid'	TEXT NOT NULL,
 	'last_pool_uuid' TEXT NOT NULL,
-	PRIMARY KEY('uuid')
+	PRIMARY KEY('uuid'),
+	UNIQUE('filename', 'pool_uuid')
 );
 
 DROP TABLE IF EXISTS "models";
@@ -70,12 +74,13 @@ CREATE TABLE "parts" (
 	'datasheet'	TEXT NOT NULL,
 	'parametric_table'	TEXT NOT NULL,
 	'base'	TEXT NOT NULL,
-	'filename'	TEXT,
+	'filename'	TEXT NOT NULL,
 	'mtime'		INTEGER NOT NULL,
 	'flag_base_part' BOOLEAN NOT NULL,
 	'pool_uuid'	TEXT NOT NULL,
 	'last_pool_uuid' TEXT NOT NULL,
-	PRIMARY KEY('uuid')
+	PRIMARY KEY('uuid'),
+	UNIQUE('filename', 'pool_uuid')
 );
 
 DROP INDEX IF EXISTS part_mpn;
@@ -117,7 +122,8 @@ CREATE TABLE "padstacks" (
 	'type'	TEXT NOT NULL,
 	'pool_uuid'	TEXT NOT NULL,
 	'last_pool_uuid' TEXT NOT NULL,
-	PRIMARY KEY('uuid')
+	PRIMARY KEY('uuid'),
+	UNIQUE('filename', 'pool_uuid')
 );
 
 DROP TABLE IF EXISTS "frames";
@@ -128,7 +134,8 @@ CREATE TABLE "frames" (
 	'mtime'		INTEGER NOT NULL,
 	'pool_uuid'	TEXT NOT NULL,
 	'last_pool_uuid' TEXT NOT NULL,
-	PRIMARY KEY('uuid')
+	PRIMARY KEY('uuid'),
+	UNIQUE('filename', 'pool_uuid')
 );
 
 DROP TABLE IF EXISTS "dependencies";
@@ -151,7 +158,8 @@ CREATE TABLE "decals" (
 	'mtime'		INTEGER NOT NULL,
 	'pool_uuid'	TEXT NOT NULL,
 	'last_pool_uuid' TEXT NOT NULL,
-	PRIMARY KEY('uuid')
+	PRIMARY KEY('uuid'),
+	UNIQUE('filename', 'pool_uuid')
 );
 
 DROP TABLE IF EXISTS "pools_included";
