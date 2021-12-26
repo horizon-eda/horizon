@@ -15,6 +15,7 @@
 #include "checks/check_unit.hpp"
 #include "checks/check_part.hpp"
 #include "common/object_descr.hpp"
+#include <iostream>
 
 namespace horizon {
 
@@ -376,15 +377,24 @@ void EditorWindow::save()
             chooser->set_current_folder(Glib::path_get_dirname(original_filename));
 
         if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+            std::cout << __LINE__ << std::endl;
             if (iface)
                 iface->save();
+            std::cout << __LINE__ << std::endl;
             std::string fn = append_dot_json(chooser->get_filename());
+            std::cout << __LINE__ << std::endl;
             s_signal_filename_changed.emit(fn);
+            std::cout << __LINE__ << std::endl;
             store->save_as(fn);
+            std::cout << __LINE__ << std::endl;
             saved_version = store->get_required_version();
+            std::cout << __LINE__ << std::endl;
             s_signal_saved.emit(store->filename);
+            std::cout << __LINE__ << std::endl;
             save_button->set_label("Save");
+            std::cout << __LINE__ << std::endl;
             need_update = true;
+            std::cout << __LINE__ << std::endl;
         }
     }
     if (info_bar)
