@@ -1017,8 +1017,8 @@ void PoolProjectManagerAppWindow::check_pool_update(const std::string &base_path
 {
     Pool my_pool(base_path);
     for (auto &[bp, uu] : my_pool.get_actually_included_pools(false)) {
-        Pool inc_pool(bp);
-        if (inc_pool.db.get_user_version() == my_pool.db.get_user_version()) {
+        PoolInfo pool_info(bp);
+        if (pool_info.is_usable()) {
             {
                 SQLite::Query q(my_pool.db, "ATTACH ? as inc");
                 q.bind(1, (fs::u8path(bp) / "pool.db").u8string());
