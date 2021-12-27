@@ -5,7 +5,7 @@
 
 namespace horizon {
 PoolBrowserSymbol::PoolBrowserSymbol(IPool &p, const UUID &uu, const std::string &instance)
-    : PoolBrowser(p, TreeViewStateStore::get_prefix(instance, "pool_browser_package")), unit_uuid(uu)
+    : PoolBrowser(p, TreeViewStateStore::get_prefix(instance, "pool_browser_symbol")), unit_uuid(uu)
 {
     construct();
     name_entry = create_search_entry("Name", create_pool_selector());
