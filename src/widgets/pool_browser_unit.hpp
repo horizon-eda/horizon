@@ -4,7 +4,7 @@
 namespace horizon {
 class PoolBrowserUnit : public PoolBrowser {
 public:
-    PoolBrowserUnit(class IPool &p);
+    PoolBrowserUnit(class IPool &p, const std::string &instance = "");
     void search() override;
     ObjectType get_type() const override
     {

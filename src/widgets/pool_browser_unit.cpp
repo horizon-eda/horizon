@@ -4,7 +4,8 @@
 #include "util/sort_controller.hpp"
 
 namespace horizon {
-PoolBrowserUnit::PoolBrowserUnit(IPool &p) : PoolBrowser(p)
+PoolBrowserUnit::PoolBrowserUnit(IPool &p, const std::string &instance)
+    : PoolBrowser(p, TreeViewStateStore::get_prefix(instance, "pool_browser_unit"))
 {
     construct();
     name_entry = create_search_entry("Name", create_pool_selector());
@@ -19,8 +20,16 @@ Glib::RefPtr<Gtk::ListStore> PoolBrowserUnit::create_list_store()
 
 void PoolBrowserUnit::create_columns()
 {
-    append_column_with_item_source_cr("Unit", list_columns.name);
-    treeview->append_column("Manufacturer", list_columns.manufacturer);
+    {
+        auto col = append_column_with_item_source_cr("Unit", list_columns.name, Pango::ELLIPSIZE_END);
+        col->set_resizable(true);
+        col->set_min_width(150);
+    }
+    {
+        auto col = append_column("Manufacturer", list_columns.manufacturer, Pango::ELLIPSIZE_END);
+        col->set_resizable(true);
+        col->set_min_width(50);
+    }
     path_column = append_column("Path", list_columns.path, Pango::ELLIPSIZE_START);
     install_column_tooltip(*path_column, list_columns.path);
 }
