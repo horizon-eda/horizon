@@ -376,7 +376,10 @@ void EditorWindow::save()
         if (original_filename.size())
             chooser->set_current_folder(Glib::path_get_dirname(original_filename));
 
-        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+        std::cout << __LINE__ << std::endl;
+        const auto rc = gtk_native_dialog_run(GTK_NATIVE_DIALOG(native));
+        std::cout << __LINE__ << " " << rc << std::endl;
+        if (rc == GTK_RESPONSE_ACCEPT) {
             std::cout << __LINE__ << std::endl;
             if (iface)
                 iface->save();
