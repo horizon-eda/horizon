@@ -249,6 +249,7 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
         save_button->set_label("Save as..");
     }
 
+    std::cout << __LINE__ << " " << __FUNCTION__ << " " << iface << std::endl;
     assert(iface);
     iface->signal_goto().connect([this](ObjectType t, UUID uu) { s_signal_goto.emit(t, uu); });
     if (!read_only) {
@@ -267,6 +268,7 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
         set_default_size(-1, 600);
 
     signal_delete_event().connect([this](GdkEventAny *ev) {
+        std::cout << __LINE__ << " " << __FUNCTION__ << " " << iface << std::endl;
         if (iface && iface->get_needs_save()) {
             if (!read_only) { // not read only
                 Gtk::MessageDialog md(*this, "Save changes before closing?", false /* use_markup */,
@@ -345,6 +347,8 @@ void EditorWindow::set_original_filename(const std::string &s)
 
 void EditorWindow::save()
 {
+    std::cout << __LINE__ << " " << __FUNCTION__ << " " << iface << std::endl;
+
     if (read_only)
         return;
     if (store->filename.size()) {
@@ -376,28 +380,28 @@ void EditorWindow::save()
         if (original_filename.size())
             chooser->set_current_folder(Glib::path_get_dirname(original_filename));
 
-        std::cout << __LINE__ << std::endl;
+        std::cout << __LINE__ << " " << __FUNCTION__ << std::endl;
         const auto rc = gtk_native_dialog_run(GTK_NATIVE_DIALOG(native));
-        std::cout << __LINE__ << " " << rc << std::endl;
+        std::cout << __LINE__ << " " << __FUNCTION__ << " " << rc << std::endl;
         if (rc == GTK_RESPONSE_ACCEPT) {
             std::cout << __LINE__ << std::endl;
             if (iface)
                 iface->save();
-            std::cout << __LINE__ << std::endl;
+            std::cout << __LINE__ << " " << __FUNCTION__ << std::endl;
             std::string fn = append_dot_json(chooser->get_filename());
-            std::cout << __LINE__ << std::endl;
+            std::cout << __LINE__ << " " << __FUNCTION__ << std::endl;
             s_signal_filename_changed.emit(fn);
-            std::cout << __LINE__ << std::endl;
+            std::cout << __LINE__ << " " << __FUNCTION__ << std::endl;
             store->save_as(fn);
-            std::cout << __LINE__ << std::endl;
+            std::cout << __LINE__ << " " << __FUNCTION__ << std::endl;
             saved_version = store->get_required_version();
-            std::cout << __LINE__ << std::endl;
+            std::cout << __LINE__ << " " << __FUNCTION__ << std::endl;
             s_signal_saved.emit(store->filename);
-            std::cout << __LINE__ << std::endl;
+            std::cout << __LINE__ << " " << __FUNCTION__ << std::endl;
             save_button->set_label("Save");
-            std::cout << __LINE__ << std::endl;
+            std::cout << __LINE__ << " " << __FUNCTION__ << std::endl;
             need_update = true;
-            std::cout << __LINE__ << std::endl;
+            std::cout << __LINE__ << " " << __FUNCTION__ << std::endl;
         }
     }
     if (info_bar)
@@ -454,6 +458,11 @@ void EditorWindow::run_checks()
     }
     trim(s);
     check_label->set_text(s);
+}
+
+EditorWindow::~EditorWindow()
+{
+    std::cout << __FUNCTION__ << std::endl;
 }
 
 } // namespace horizon

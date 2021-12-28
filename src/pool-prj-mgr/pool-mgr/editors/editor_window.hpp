@@ -53,6 +53,8 @@ public:
         return s_signal_saved;
     }
 
+    ~EditorWindow();
+
 private:
     ObjectType type;
     std::unique_ptr<EditorWindowStore> store = nullptr;
