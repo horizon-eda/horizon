@@ -39,6 +39,9 @@ jobs:
           make
           git
           dos2unix
+    - name: Downgrade librsvg
+      shell: msys2 {0}
+      run: pacman -U https://mirror.selfnet.de/msys2/mingw/mingw64/mingw-w64-x86_64-librsvg-2.50.3-3-any.pkg.tar.zst --noconfirm
     - name: Build
       shell: msys2 {0}
       run: make -j2 WARNFLAGS="-Wall -Wshadow -Wno-attributes"
