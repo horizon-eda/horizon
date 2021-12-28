@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - '*'
-      - '!appveyor-*'
+      - '!win32-*'
       - '!freebsd-*'
     tags: [ '*' ]
   pull_request:
