@@ -348,7 +348,6 @@ void EditorWindow::set_original_filename(const std::string &s)
 void EditorWindow::save()
 {
     std::cout << __LINE__ << " " << __FUNCTION__ << " " << iface << std::endl;
-
     if (read_only)
         return;
     if (store->filename.size()) {
@@ -381,7 +380,13 @@ void EditorWindow::save()
             chooser->set_current_folder(Glib::path_get_dirname(original_filename));
 
         std::cout << __LINE__ << " " << __FUNCTION__ << std::endl;
+#ifdef G_OS_WIN32
+        set_sensitive(false);
+#endif
         const auto rc = gtk_native_dialog_run(GTK_NATIVE_DIALOG(native));
+#ifdef G_OS_WIN32
+        set_sensitive(true);
+#endif
         std::cout << __LINE__ << " " << __FUNCTION__ << " " << rc << std::endl;
         if (rc == GTK_RESPONSE_ACCEPT) {
             std::cout << __LINE__ << std::endl;
