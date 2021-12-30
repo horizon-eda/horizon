@@ -39,6 +39,17 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+    <release version="2.1.90" date="2021-12-30">
+      <url>https://github.com/horizon-eda/horizon/releases/tag/v2.1.90</url>
+      <description>
+        <p>What's new</p>
+        <ul>
+          <li>Hierarchical schematics</li>
+          <li>Align and distribute tool</li>
+          <li>Improved undo/redo</li>
+        </ul>
+      </description>
+    </release>
     <release version="2.1.0" date="2021-09-07">
       <url>https://github.com/horizon-eda/horizon/releases/tag/v2.1.0</url>
       <description>
