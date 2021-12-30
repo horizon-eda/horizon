@@ -23,6 +23,7 @@
 #include "util/fs_util.hpp"
 #include "duplicate/duplicate_unit.hpp"
 #include "move_window.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 
@@ -142,7 +143,7 @@ void PoolNotebook::handle_duplicate_item(ObjectType ty, const UUID &uu)
     chooser->set_current_folder(it_dirname);
     chooser->set_current_name(DuplicateUnitWidget::insert_filename(it_basename, "-copy"));
 
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+    if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         std::string fn = append_dot_json(chooser->get_filename());
         switch (ty) {
         case ObjectType::DECAL: {
@@ -471,7 +472,7 @@ void PoolNotebook::handle_move_rename(ObjectType ty, const UUID &uu)
     chooser->set_current_name(Glib::path_get_basename(filename));
     while (1) {
         chooser->set_current_folder(Glib::path_get_dirname(filename));
-        auto resp = gtk_native_dialog_run(GTK_NATIVE_DIALOG(native));
+        auto resp = native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native));
         if (resp == GTK_RESPONSE_ACCEPT) {
             const std::string new_filename = chooser->get_filename();
             try {

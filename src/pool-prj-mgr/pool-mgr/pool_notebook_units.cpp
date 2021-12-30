@@ -5,6 +5,7 @@
 #include "widgets/pool_browser_unit.hpp"
 #include "widgets/unit_preview.hpp"
 #include "widgets/unit_info_box.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 void PoolNotebook::handle_create_unit()
@@ -37,7 +38,7 @@ void PoolNotebook::handle_create_symbol_for_unit(const UUID &uu)
         chooser->set_current_name(Glib::path_get_basename(unit_filename));
     }
 
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+    if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         std::string fn = append_dot_json(chooser->get_filename());
         Symbol sym(horizon::UUID::random());
         auto unit = pool.get_unit(uu);
@@ -69,7 +70,7 @@ void PoolNotebook::handle_create_entity_for_unit(const UUID &uu)
         chooser->set_current_name(Glib::path_get_basename(unit_filename));
     }
 
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+    if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         std::string fn = append_dot_json(chooser->get_filename());
         Entity entity(horizon::UUID::random());
         auto unit = pool.get_unit(uu);

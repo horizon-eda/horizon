@@ -5,6 +5,7 @@
 #include "widgets/entity_preview.hpp"
 #include "widgets/entity_info_box.hpp"
 #include "pool-prj-mgr/pool-mgr/kicad_symbol_import_wizard/kicad_symbol_import_wizard.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 void PoolNotebook::handle_edit_entity(const UUID &uu)
@@ -36,7 +37,7 @@ void PoolNotebook::handle_kicad_symbol_import_wizard()
         filter->add_pattern("*.lib");
         chooser->add_filter(filter);
 
-        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+        if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
             kicad_symbol_import_wizard =
                     KiCadSymbolImportWizard::create(package_uuid, pool, appwin, chooser->get_filename());
             kicad_symbol_import_wizard->present();

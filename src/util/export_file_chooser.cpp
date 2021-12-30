@@ -1,5 +1,6 @@
 #include "export_file_chooser.hpp"
 #include "util/util.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 ExportFileChooser::ExportFileChooser()
@@ -36,7 +37,7 @@ void ExportFileChooser::attach(Gtk::Entry *en, Gtk::Button *bu, Gtk::Window *w)
         else {
             chooser->set_current_folder(project_dir);
         }
-        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+        if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
             std::string filename = chooser->get_filename();
             prepare_filename(filename);
             auto fi = Gio::File::create_for_path(filename);

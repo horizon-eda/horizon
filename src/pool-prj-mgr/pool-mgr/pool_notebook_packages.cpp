@@ -9,6 +9,7 @@
 #include "util/win32_undef.hpp"
 #include "widgets/preview_canvas.hpp"
 #include "import_kicad_package_window.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 void PoolNotebook::handle_edit_package(const UUID &uu)
@@ -29,7 +30,7 @@ void PoolNotebook::handle_create_package()
 
     while (true) {
         chooser->set_current_folder(Glib::build_filename(base_path, "packages"));
-        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+        if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
             std::string fn = chooser->get_filename();
             Glib::Dir dir(fn);
             int n = 0;
@@ -71,7 +72,7 @@ void PoolNotebook::handle_create_padstack_for_package(const UUID &uu)
     auto pkg_dir = Glib::path_get_dirname(pkg_filename);
     chooser->set_current_folder(Glib::build_filename(pkg_dir, "padstacks"));
 
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+    if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         std::string fn = append_dot_json(chooser->get_filename());
         Padstack ps(horizon::UUID::random());
         ps.name = "Pad";
@@ -99,7 +100,7 @@ void PoolNotebook::handle_duplicate_package(const UUID &uu)
 
     while (true) {
         chooser->set_current_folder(pkg_dirname);
-        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+        if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
             std::string fn = chooser->get_filename();
 
             Glib::Dir dir(fn);

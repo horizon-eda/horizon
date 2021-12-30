@@ -154,7 +154,7 @@ std::string ManageIncludedBoardsDialog::ask_filename(const std::string &fn)
     if (fn.size())
         chooser->set_filename(fn);
 
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+    if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         return chooser->get_filename();
     }
     else {

@@ -733,7 +733,7 @@ void PoolProjectManagerAppWindow::handle_open()
     filter->add_pattern("*.hprj");
     chooser->add_filter(filter);
 
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+    if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         auto file = chooser->get_file();
         open_file_view(file);
     }

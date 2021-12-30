@@ -92,7 +92,7 @@ PoolDownloadWindow::PoolDownloadWindow(BaseObjectType *cobject, const Glib::RefP
         auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
         chooser->set_filename(download_dest_dir_entry->get_text());
 
-        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+        if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
             download_dest_dir_entry->set_text(chooser->get_filename());
         }
     });

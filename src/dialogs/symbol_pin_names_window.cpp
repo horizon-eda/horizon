@@ -193,7 +193,7 @@ void SymbolPinNamesWindow::handle_import()
     filter->add_pattern("*.CSV");
     chooser->add_filter(filter);
 
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+    if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         auto filename = chooser->get_filename();
         try {
             auto ifs = make_ifstream(filename);

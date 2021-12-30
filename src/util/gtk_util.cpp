@@ -388,4 +388,23 @@ void open_directory(Gtk::Window &win, const std::string &filename)
 #endif
 }
 
+// workaround for https://gitlab.gnome.org/GNOME/gtk/-/issues/4582
+#ifdef G_OS_WIN32
+gint native_dialog_run_and_set_parent_insensitive(GtkNativeDialog *dia)
+{
+    auto parent = GTK_WIDGET(gtk_native_dialog_get_transient_for(dia));
+    if (parent)
+        gtk_widget_set_sensitive(parent, FALSE);
+    const auto rc = gtk_native_dialog_run(dia);
+    if (parent)
+        gtk_widget_set_sensitive(parent, TRUE);
+    return rc;
+}
+#else
+gint native_dialog_run_and_set_parent_insensitive(GtkNativeDialog *dia)
+{
+    return gtk_native_dialog_run(dia);
+}
+#endif
+
 } // namespace horizon

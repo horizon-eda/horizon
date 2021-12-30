@@ -142,7 +142,7 @@ void ImportKiCadPackageWindow::handle_import()
     const auto base_path = appwin.pool->get_base_path();
     while (true) {
         chooser->set_current_folder(Glib::build_filename(base_path, "packages"));
-        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+        if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
             std::string fn = chooser->get_filename();
 
             Glib::Dir dir(fn);

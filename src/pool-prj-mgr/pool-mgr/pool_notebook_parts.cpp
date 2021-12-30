@@ -7,6 +7,7 @@
 #include "widgets/part_preview.hpp"
 #include "widgets/where_used_box.hpp"
 #include "part_wizard/part_wizard.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 void PoolNotebook::handle_edit_part(const UUID &uu)

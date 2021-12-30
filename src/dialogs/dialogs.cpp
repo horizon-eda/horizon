@@ -43,6 +43,7 @@
 #include "manage_ports.hpp"
 #include "select_block.hpp"
 #include "align_and_distribute_window.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 void Dialogs::set_parent(Gtk::Window *w)
@@ -456,7 +457,7 @@ std::optional<std::string> Dialogs::ask_dxf_filename()
     filter->add_pattern("*.DXF");
     chooser->add_filter(filter);
 
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+    if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         return chooser->get_filename();
     }
     else {
@@ -474,7 +475,7 @@ std::optional<std::string> Dialogs::ask_kicad_package_filename()
     filter->add_pattern("*.kicad_mod");
     chooser->add_filter(filter);
 
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+    if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         return chooser->get_filename();
     }
     else {
@@ -492,7 +493,7 @@ std::optional<std::string> Dialogs::ask_picture_filename()
     filter->add_pixbuf_formats();
     chooser->add_filter(filter);
 
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+    if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         return chooser->get_filename();
     }
     else {

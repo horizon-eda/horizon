@@ -309,7 +309,7 @@ void PoolsWindow::add_pool(const std::string &path)
     if (path.size())
         chooser->set_filename(path);
 
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+    if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         auto cpath = chooser->get_file()->get_parent()->get_path();
         pool_check_schema_update(cpath, *this);
         mgr.add_pool(cpath);

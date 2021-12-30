@@ -1,5 +1,6 @@
 #include "location_entry.hpp"
 #include "util/util.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 
@@ -74,7 +75,7 @@ void LocationEntry::handle_button()
     chooser->set_filename(get_filename());
     chooser->set_current_name(Glib::path_get_basename(get_filename()));
 
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+    if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         auto filename = chooser->get_filename();
         if (relative_to.size()) {
             const auto rel = get_rel_filename(filename);

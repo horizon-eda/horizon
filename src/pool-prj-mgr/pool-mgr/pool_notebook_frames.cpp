@@ -5,6 +5,7 @@
 #include "widgets/pool_browser_frame.hpp"
 #include "util/win32_undef.hpp"
 #include "widgets/preview_canvas.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 void PoolNotebook::handle_edit_frame(const UUID &uu)
@@ -23,7 +24,7 @@ void PoolNotebook::handle_create_frame()
     chooser->set_do_overwrite_confirmation(true);
     chooser->set_current_folder(Glib::build_filename(base_path, "frames"));
 
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+    if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         std::string fn = append_dot_json(chooser->get_filename());
         Frame fr(horizon::UUID::random());
         fr.name = "fixme";

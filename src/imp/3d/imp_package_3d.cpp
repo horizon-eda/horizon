@@ -62,7 +62,7 @@ std::string ImpPackage::ask_3d_model_filename(const std::string &current_filenam
     }
 
     while (1) {
-        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+        if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
             auto base_path = Gio::File::create_for_path(pool->get_base_path());
             std::string rel = base_path->get_relative_path(chooser->get_file());
             if (rel.size()) {

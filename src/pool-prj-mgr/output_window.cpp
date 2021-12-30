@@ -1,5 +1,6 @@
 #include "output_window.hpp"
 #include "util/util.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 OutputWindow *OutputWindow::create()
@@ -34,7 +35,7 @@ OutputWindow::OutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
             chooser->set_do_overwrite_confirmation(true);
             chooser->set_current_name(stack->get_visible_child_name() + ".txt");
 
-            if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+            if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
                 filename = chooser->get_filename();
             }
         }

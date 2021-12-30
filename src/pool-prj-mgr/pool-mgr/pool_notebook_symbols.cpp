@@ -6,6 +6,7 @@
 #include "widgets/symbol_preview.hpp"
 #include "nlohmann/json.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 void PoolNotebook::handle_edit_symbol(const UUID &uu)
@@ -35,7 +36,7 @@ void PoolNotebook::handle_create_symbol()
         chooser->set_current_folder(Glib::build_filename(base_path, "symbols"));
         chooser->set_current_name(basename);
 
-        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+        if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
             std::string fn = append_dot_json(chooser->get_filename());
             Symbol sym(horizon::UUID::random());
             auto unit = pool.get_unit(unit_uuid);
@@ -63,7 +64,7 @@ void PoolNotebook::handle_duplicate_symbol(const UUID &uu)
     chooser->set_current_folder(sym_dirname);
     chooser->set_current_name(DuplicateUnitWidget::insert_filename(sym_basename, "-copy"));
 
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+    if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         std::string fn = append_dot_json(chooser->get_filename());
         Symbol sym(*pool.get_symbol(uu));
         sym.name += " (Copy)";

@@ -375,7 +375,7 @@ void EditorWindow::save()
         if (original_filename.size())
             chooser->set_current_folder(Glib::path_get_dirname(original_filename));
 
-        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+        if (native_dialog_run_and_set_parent_insensitive(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
             if (iface)
                 iface->save();
             std::string fn = append_dot_json(chooser->get_filename());

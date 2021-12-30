@@ -87,4 +87,6 @@ void open_directory(Gtk::Window &win, const std::string &filename);
         name = name.cast_dynamic(x->get_object(#name));                                                                \
     } while (0)
 
+gint native_dialog_run_and_set_parent_insensitive(GtkNativeDialog *dia);
+
 } // namespace horizon
