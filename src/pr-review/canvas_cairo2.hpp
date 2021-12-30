@@ -18,6 +18,7 @@ public:
     }
     void load(const class Symbol &sym, const Placement &placement = Placement());
     void load(const class Package &pkg);
+    void load(const class Decal &dec);
     Cairo::RefPtr<Cairo::Surface> get_image_surface(double scale = 1, double grid = -1);
 
 private:

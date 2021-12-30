@@ -194,6 +194,30 @@ void CanvasCairo2::load(const class Package &pkg)
     }
 }
 
+
+void CanvasCairo2::load(const class Decal &dec)
+{
+    static const std::vector<LayerInfo> layers = {
+            {BoardLayers::TOP_MASK, LayerInfo::Mode::FILL, 0xF07A7A'ff},
+            {BoardLayers::TOP_COPPER, LayerInfo::Mode::FILL, 0xcc'00'00'ff},
+            //{BoardLayers::TOP_PASTE, LayerInfo::Mode::STROKE, 0xeeeeec'ff},
+            {BoardLayers::TOP_SILKSCREEN, LayerInfo::Mode::FILL, 0xc4a000'ff},
+            {BoardLayers::TOP_PACKAGE, LayerInfo::Mode::STROKE, 0x729fcf'ff},
+            {BoardLayers::TOP_COURTYARD, LayerInfo::Mode::STROKE, 0x5c3566'80},
+            {10001, LayerInfo::Mode::FILL, 0}, // holes
+            {BoardLayers::TOP_ASSEMBLY, LayerInfo::Mode::STROKE, 0x73d216'ff},
+    };
+    layer_filter = true;
+    for (const auto &layer_info : layers) {
+        current_layer = layer_info.layer;
+        min_line_width = 0.025_mm;
+        fill = layer_info.mode != LayerInfo::Mode::STROKE;
+        set_source_from_hex(cr, layer_info.color);
+        clear();
+        update(dec, false);
+    }
+}
+
 void CanvasCairo2::render_pad_names(const Package &pkg)
 {
     for (const auto &it : pkg.pads) {

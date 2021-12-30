@@ -1047,6 +1047,27 @@ int Reviewer::main(int c_argc, char *c_argv[])
             }
         }
     }
+
+    {
+        SQLite::Query q(pool->db, "SELECT DISTINCT uuid from git_files_view where type = 'decal'");
+        Once once;
+        while (q.step()) {
+            if (once()) {
+                ofs << "## Decals\n";
+            }
+            const auto uu = q.get<UUID>(0);
+            const auto &decal = *pool->get_decal(uu);
+
+            ofs << "### " << decal.name << "\n";
+            {
+                CanvasCairo2 ca;
+                ca.load(decal);
+                const std::string img_filename = "dec_" + static_cast<std::string>(decal.uuid) + ".png";
+                ca.get_image_surface(5)->write_to_png(Glib::build_filename(images_dir, img_filename));
+                ofs << "![Decal](" << images_prefix << img_filename << ")\n";
+            }
+        }
+    }
     return 0;
 }
 
