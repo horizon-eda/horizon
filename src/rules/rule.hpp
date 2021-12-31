@@ -88,6 +88,8 @@ public:
 protected:
     Rule();
 
+    static std::string layer_to_string(int layer);
+
 private:
     int order = -1;
 };

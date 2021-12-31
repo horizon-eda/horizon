@@ -1,5 +1,6 @@
 #include "rule.hpp"
 #include "nlohmann/json.hpp"
+#include "board/board_layers.hpp"
 
 namespace horizon {
 Rule::Rule()
@@ -56,5 +57,13 @@ const LutEnumStr<RuleID> rule_id_lut = {
         {"preflight_checks", RuleID::PREFLIGHT_CHECKS},
         {"clearance_copper_keepout", RuleID::CLEARANCE_COPPER_KEEPOUT},
 };
+
+std::string Rule::layer_to_string(int layer)
+{
+    if (layer == 10000)
+        return "Any Layer";
+    else
+        return BoardLayers::get_layer_name(layer);
+}
 
 } // namespace horizon

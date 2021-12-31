@@ -92,7 +92,7 @@ std::string RuleClearanceCopper::get_brief(const class Block *block, class IPool
     std::stringstream ss;
     ss << "1<sup>st</sup> Match " << match_1.get_brief(block) << "\n";
     ss << "2<sup>nd</sup> Match " << match_2.get_brief(block) << "\n";
-    ss << "Layer " << layer;
+    ss << layer_to_string(layer);
     return ss.str();
 }
 

@@ -69,7 +69,7 @@ std::string RuleClearanceSameNet::get_brief(const class Block *block, class IPoo
 {
     std::stringstream ss;
     ss << "Match " << match.get_brief(block) << "\n";
-    ss << "Layer " << layer;
+    ss << layer_to_string(layer);
     return ss.str();
 }
 

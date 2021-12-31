@@ -32,7 +32,7 @@ std::string RuleShortedPads::get_brief(const class Block *block, class IPool *po
 {
     std::stringstream ss;
     ss << "Match " << match_component.get_brief(block, pool) << "\n";
-    ss << "  " << match.get_brief(block);
+    ss << match.get_brief(block);
     return ss.str();
 }
 

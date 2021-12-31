@@ -24,7 +24,7 @@ json RulePlane::serialize() const
 
 std::string RulePlane::get_brief(const class Block *block, class IPool *pool) const
 {
-    return "Match " + match.get_brief(block) + "\nLayer " + std::to_string(layer);
+    return "Match " + match.get_brief(block) + "\n" + layer_to_string(layer);
 }
 
 bool RulePlane::is_match_all() const

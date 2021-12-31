@@ -28,6 +28,6 @@ json RuleDiffpair::serialize() const
 
 std::string RuleDiffpair::get_brief(const class Block *block, class IPool *pool) const
 {
-    return "Net class " + (net_class ? block->net_classes.at(net_class).name : "?");
+    return "Net class " + (net_class ? block->net_classes.at(net_class).name : "?") + "\n" + layer_to_string(layer);
 }
 } // namespace horizon
