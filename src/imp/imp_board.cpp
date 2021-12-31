@@ -484,6 +484,9 @@ void ImpBoard::construct()
     hamburger_menu->append("Length tuning", "win.tuning");
     main_window->add_action("tuning", [this] { trigger_action(ActionID::TUNING); });
 
+    hamburger_menu->append("Open parts window", "win.parts_window");
+    main_window->add_action("parts_window", [this] { trigger_action(ActionID::PARTS_WINDOW); });
+
     add_tool_action(ActionID::AIRWIRE_FILTER_WINDOW, "airwire_filter");
     view_options_menu_append_action("Nets…", "win.airwire_filter");
 
