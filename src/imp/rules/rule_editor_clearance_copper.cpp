@@ -46,7 +46,6 @@ void RuleEditorClearanceCopper::populate()
 
     auto sp_routing_offset = create_spinbutton("routing_offset_box");
     sp_routing_offset->set_range(0, 10_mm);
-    sp_routing_offset->set_width_chars(8);
     sp_routing_offset->set_value(rule2->routing_offset);
     sp_routing_offset->signal_value_changed().connect([this, sp_routing_offset] {
         rule2->routing_offset = sp_routing_offset->get_value_as_int();
@@ -109,6 +108,7 @@ void RuleEditorClearanceCopper::populate()
                     auto *sp = Gtk::manage(new SpinButtonDim());
                     sp->set_range(0, 100_mm);
                     sp->set_width_chars(8);
+                    sp->set_hexpand(true);
                     sp->set_value(rule2->get_clearance(it_col, it_row));
                     sp->signal_value_changed().connect([this, sp, it_row, it_col] {
                         rule2->set_clearance(it_col, it_row, sp->get_value_as_int());

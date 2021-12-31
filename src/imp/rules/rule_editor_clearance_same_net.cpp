@@ -114,6 +114,7 @@ void RuleEditorClearanceSameNet::populate()
                     auto *sp = Gtk::manage(new SpinButtonDim());
                     sp->set_range(0, 100_mm);
                     sp->set_width_chars(8);
+                    sp->set_hexpand(true);
                     auto cl = rule2->get_clearance(it_col, it_row);
                     if (cl >= 0) {
                         sp->set_value(cl);
