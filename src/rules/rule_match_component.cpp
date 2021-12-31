@@ -68,7 +68,7 @@ std::string RuleMatchComponent::get_brief(const Block *block, IPool *pool) const
     switch (mode) {
     case Mode::COMPONENT:
         if (block) {
-            return "Component " + (component ? block->components.at(component).refdes : "?");
+            return "Component " + (component ? Glib::Markup::escape_text(block->components.at(component).refdes) : "?");
         }
         else {
             return "Component";
@@ -76,7 +76,7 @@ std::string RuleMatchComponent::get_brief(const Block *block, IPool *pool) const
     case Mode::PART:
         if (pool) {
             try {
-                return "Part " + (part ? pool->get_part(part)->get_MPN() : "?");
+                return "Part " + (part ? Glib::Markup::escape_text(pool->get_part(part)->get_MPN()) : "?");
             }
             catch (std::exception &) {
                 return "Part ?";

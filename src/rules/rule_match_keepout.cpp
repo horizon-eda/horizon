@@ -65,10 +65,10 @@ std::string RuleMatchKeepout::get_brief(const Block *block, class IPool *pool) c
             return "All";
 
         case Mode::KEEPOUT_CLASS:
-            return "Keepout class " + keepout_class;
+            return "Keepout class " + Glib::Markup::escape_text(keepout_class);
 
         case Mode::COMPONENT:
-            return "Component " + (component ? block->components.at(component).refdes : "?");
+            return "Component " + (component ? Glib::Markup::escape_text(block->components.at(component).refdes) : "?");
         }
     }
     else {

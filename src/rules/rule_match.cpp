@@ -87,10 +87,10 @@ std::string RuleMatch::get_brief(const Block *block) const
             return "All";
 
         case Mode::NET:
-            return "Net " + (net ? block->nets.at(net).name : "?");
+            return "Net " + (net ? Glib::Markup::escape_text(block->nets.at(net).name) : "?");
 
         case Mode::NET_CLASS:
-            return "Net class " + (net_class ? block->net_classes.at(net_class).name : "?");
+            return "Net class " + (net_class ? Glib::Markup::escape_text(block->net_classes.at(net_class).name) : "?");
 
         case Mode::NET_NAME_REGEX:
             return "Net name regex";
