@@ -460,26 +460,26 @@ void ImpBoard::construct()
     hamburger_menu->append("Fabrication output", "win.fab_out");
     main_window->add_action("fab_out", [this] { trigger_action(ActionID::FAB_OUTPUT_WINDOW); });
 
-    hamburger_menu->append("PDF Export", "win.export_pdf");
+    hamburger_menu->append("Export Pick & place…", "win.export_pnp");
+    main_window->add_action("export_pnp", [this] { trigger_action(ActionID::PNP_EXPORT_WINDOW); });
+
+    hamburger_menu->append("Export STEP…", "win.export_step");
+    main_window->add_action("export_step", [this] { trigger_action(ActionID::STEP_EXPORT_WINDOW); });
+
+    hamburger_menu->append("Export PDF…", "win.export_pdf");
     main_window->add_action("export_pdf", [this] { trigger_action(ActionID::PDF_EXPORT_WINDOW); });
 
-    hamburger_menu->append("Stackup…", "win.edit_stackup");
+    hamburger_menu->append("Import DXF…", "win.import_dxf");
+    add_tool_action(ToolID::IMPORT_DXF, "import_dxf");
+
+    hamburger_menu->append("Stackup", "win.edit_stackup");
     add_tool_action(ToolID::EDIT_STACKUP, "edit_stackup");
 
     hamburger_menu->append("Update all planes", "win.update_all_planes");
     add_tool_action(ToolID::UPDATE_ALL_PLANES, "update_all_planes");
 
-    hamburger_menu->append("Clear all planes", "win.clear_all_planes");
-    add_tool_action(ToolID::CLEAR_ALL_PLANES, "clear_all_planes");
-
-    hamburger_menu->append("Import DXF", "win.import_dxf");
-    add_tool_action(ToolID::IMPORT_DXF, "import_dxf");
-
-    hamburger_menu->append("Export STEP", "win.export_step");
-    main_window->add_action("export_step", [this] { trigger_action(ActionID::STEP_EXPORT_WINDOW); });
-
-    hamburger_menu->append("Export Pick & place", "win.export_pnp");
-    main_window->add_action("export_pnp", [this] { trigger_action(ActionID::PNP_EXPORT_WINDOW); });
+    hamburger_menu->append("Part list", "win.part_list");
+    main_window->add_action("part_list", [this] { trigger_action(ActionID::PARTS_WINDOW); });
 
     hamburger_menu->append("Length tuning", "win.tuning");
     main_window->add_action("tuning", [this] { trigger_action(ActionID::TUNING); });

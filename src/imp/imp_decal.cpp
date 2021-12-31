@@ -28,10 +28,10 @@ void ImpDecal::construct()
     main_window->set_title("Decal - Interactive Manipulator");
     state_store = std::make_unique<WindowStateStore>(main_window, "imp-decal");
 
-    hamburger_menu->append("Import DXF", "win.import_dxf");
+    hamburger_menu->append("Import DXF…", "win.import_dxf");
     add_tool_action(ToolID::IMPORT_DXF, "import_dxf");
 
-    hamburger_menu->append("Import KiCad package", "win.import_kicad");
+    hamburger_menu->append("Import KiCad package…", "win.import_kicad");
     add_tool_action(ToolID::IMPORT_KICAD_PACKAGE, "import_kicad");
 
     header_button = Gtk::manage(new HeaderButton);

@@ -292,10 +292,10 @@ void ImpPackage::construct()
         entry_name->set_text(Glib::path_get_basename(Glib::path_get_dirname(core_package.get_filename())));
     }
 
-    hamburger_menu->append("Import DXF", "win.import_dxf");
+    hamburger_menu->append("Import DXF…", "win.import_dxf");
     add_tool_action(ToolID::IMPORT_DXF, "import_dxf");
 
-    hamburger_menu->append("Import KiCad package", "win.import_kicad");
+    hamburger_menu->append("Import KiCad package…", "win.import_kicad");
     add_tool_action(ToolID::IMPORT_KICAD_PACKAGE, "import_kicad");
 
     hamburger_menu->append("Reload pool", "win.reload_pool");

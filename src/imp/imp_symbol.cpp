@@ -199,7 +199,7 @@ void ImpSymbol::construct()
                    [this](const auto &a) { this->edit_pool_item(ObjectType::UNIT, symbol.unit->uuid); });
     set_action_sensitive(ActionID::EDIT_UNIT, sockets_connected);
 
-    hamburger_menu->append("Change unit", "win.change_unit");
+    hamburger_menu->append("Change unit…", "win.change_unit");
     add_tool_action(ToolID::CHANGE_UNIT, "change_unit");
 
     if (sockets_connected) {

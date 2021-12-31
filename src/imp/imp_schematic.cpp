@@ -541,26 +541,25 @@ void ImpSchematic::construct()
             [this] { trigger_action(ActionID::GO_TO_BLOCK_SYMBOL); });
     main_window->ports_button->signal_clicked().connect([this] { trigger_action(ToolID::MANAGE_PORTS); });
 
-    hamburger_menu->append("Annotate", "win.annotate");
+    hamburger_menu->append("Annotate…", "win.annotate");
     add_tool_action(ToolID::ANNOTATE, "annotate");
 
-    hamburger_menu->append("Buses…", "win.manage_buses");
+    hamburger_menu->append("Buses", "win.manage_buses");
     add_tool_action(ToolID::MANAGE_BUSES, "manage_buses");
 
-    hamburger_menu->append("Net classes…", "win.manage_nc");
+    hamburger_menu->append("Net classes", "win.manage_nc");
     add_tool_action(ToolID::MANAGE_NET_CLASSES, "manage_nc");
 
-    hamburger_menu->append("Power Nets…", "win.manage_pn");
+    hamburger_menu->append("Power Nets", "win.manage_pn");
     add_tool_action(ToolID::MANAGE_POWER_NETS, "manage_pn");
 
     hamburger_menu->append("Schematic properties", "win.sch_properties");
     add_tool_action(ToolID::EDIT_SCHEMATIC_PROPERTIES, "sch_properties");
 
-    hamburger_menu->append("BOM Export", "win.bom_export");
+    hamburger_menu->append("Export BOM…", "win.bom_export");
     main_window->add_action("bom_export", [this] { trigger_action(ActionID::BOM_EXPORT_WINDOW); });
 
-    hamburger_menu->append("PDF Export", "win.export_pdf");
-
+    hamburger_menu->append("Export PDF…", "win.export_pdf");
     main_window->add_action("export_pdf", [this] { trigger_action(ActionID::PDF_EXPORT_WINDOW); });
 
     if (sockets_connected) {
