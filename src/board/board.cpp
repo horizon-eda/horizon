@@ -293,6 +293,7 @@ Board::Board(const UUID &uu, Block &bl) : uuid(uu), block(&bl), version(app_vers
 {
     rules.add_rule(RuleID::CLEARANCE_COPPER);
     rules.add_rule(RuleID::CLEARANCE_COPPER_OTHER);
+    rules.add_rule(RuleID::CLEARANCE_COPPER_KEEPOUT);
     rules.add_rule(RuleID::PLANE);
     {
         auto &r = rules.add_rule_t<RuleTrackWidth>();
