@@ -294,20 +294,23 @@ json BoardRules::serialize() const
 std::vector<RuleID> BoardRules::get_rule_ids() const
 {
     return {
-            RuleID::HOLE_SIZE,
-            RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER,
-            RuleID::TRACK_WIDTH,
             RuleID::CLEARANCE_COPPER,
-            RuleID::PARAMETERS,
-            RuleID::VIA,
             RuleID::CLEARANCE_COPPER_OTHER,
+            RuleID::CLEARANCE_COPPER_KEEPOUT,
+            RuleID::CLEARANCE_SAME_NET,
+            RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER,
+
+            RuleID::TRACK_WIDTH,
+            RuleID::HOLE_SIZE,
+
+            RuleID::VIA,
             RuleID::PLANE,
             RuleID::DIFFPAIR,
+            RuleID::PARAMETERS,
+
             RuleID::SHORTED_PADS,
-            RuleID::PREFLIGHT_CHECKS,
-            RuleID::CLEARANCE_COPPER_KEEPOUT,
             RuleID::LAYER_PAIR,
-            RuleID::CLEARANCE_SAME_NET,
+            RuleID::PREFLIGHT_CHECKS,
     };
 }
 
