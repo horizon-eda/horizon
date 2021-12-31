@@ -30,7 +30,7 @@ json PackageRules::serialize() const
     return j;
 }
 
-std::set<RuleID> PackageRules::get_rule_ids() const
+std::vector<RuleID> PackageRules::get_rule_ids() const
 {
     return {RuleID::PACKAGE_CHECKS, RuleID::CLEARANCE_PACKAGE};
 }

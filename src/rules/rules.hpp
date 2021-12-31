@@ -59,7 +59,7 @@ public:
 
 
     virtual json serialize() const = 0;
-    virtual std::set<RuleID> get_rule_ids() const = 0;
+    virtual std::vector<RuleID> get_rule_ids() const = 0;
 
     virtual const Rule &get_rule(RuleID id) const = 0;
     Rule &get_rule(RuleID id);

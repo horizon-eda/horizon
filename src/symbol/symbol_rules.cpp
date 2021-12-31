@@ -24,7 +24,7 @@ json SymbolRules::serialize() const
     return j;
 }
 
-std::set<RuleID> SymbolRules::get_rule_ids() const
+std::vector<RuleID> SymbolRules::get_rule_ids() const
 {
     return {RuleID::SYMBOL_CHECKS};
 }

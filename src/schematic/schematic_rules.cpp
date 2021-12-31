@@ -29,7 +29,7 @@ json SchematicRules::serialize() const
     return j;
 }
 
-std::set<RuleID> SchematicRules::get_rule_ids() const
+std::vector<RuleID> SchematicRules::get_rule_ids() const
 {
     return {RuleID::SINGLE_PIN_NET};
 }

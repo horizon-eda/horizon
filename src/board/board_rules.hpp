@@ -31,7 +31,7 @@ public:
                            check_status_cb_t status_cb) const;
     void apply(RuleID id, class Board &b, class IPool &pool) const;
     json serialize() const override;
-    std::set<RuleID> get_rule_ids() const override;
+    std::vector<RuleID> get_rule_ids() const override;
     const Rule &get_rule(RuleID id) const override;
     const Rule &get_rule(RuleID id, const UUID &uu) const override;
     std::map<UUID, const Rule *> get_rules(RuleID id) const override;

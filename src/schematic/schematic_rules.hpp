@@ -15,7 +15,7 @@ public:
     RulesCheckResult check(RuleID id, const class Schematic &sch, class RulesCheckCache &cache) const;
     void apply(RuleID id, class Schematic *sch);
     json serialize() const override;
-    std::set<RuleID> get_rule_ids() const override;
+    std::vector<RuleID> get_rule_ids() const override;
     const Rule &get_rule(RuleID id) const override;
     const Rule &get_rule(RuleID id, const UUID &uu) const override;
     std::map<UUID, const Rule *> get_rules(RuleID id) const override;

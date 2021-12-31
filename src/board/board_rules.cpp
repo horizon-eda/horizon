@@ -291,7 +291,7 @@ json BoardRules::serialize() const
     return serialize_or_export(Rule::SerializeMode::SERIALIZE);
 }
 
-std::set<RuleID> BoardRules::get_rule_ids() const
+std::vector<RuleID> BoardRules::get_rule_ids() const
 {
     return {
             RuleID::HOLE_SIZE,
