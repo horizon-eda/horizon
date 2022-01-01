@@ -10,7 +10,7 @@
 #include "bitmap_font_util.hpp"
 
 namespace horizon {
-std::pair<float, Coordf> CanvasGL::get_scale_and_offset()
+std::pair<float, Coordf> CanvasGL::get_scale_and_offset() const
 {
     return std::make_pair(scale, offset);
 }
@@ -554,7 +554,7 @@ Coordf CanvasGL::canvas2screen(const Coordf &p) const
     return {cp.x, cp.y};
 }
 
-std::set<SelectableRef> CanvasGL::get_selection()
+std::set<SelectableRef> CanvasGL::get_selection() const
 {
     std::set<SelectableRef> r;
     unsigned int i = 0;
@@ -598,7 +598,7 @@ void CanvasGL::select_all()
     request_push(PF_SELECTABLES);
 }
 
-std::set<SelectableRef> CanvasGL::get_selection_at(const Coordi &c)
+std::set<SelectableRef> CanvasGL::get_selection_at(const Coordi &c) const
 {
 
     std::list<std::pair<const Selectable &, const SelectableRef &>> sel;
@@ -751,7 +751,7 @@ void CanvasGL::set_cursor_external(bool v)
     cursor_external = v;
 }
 
-Coordi CanvasGL::get_cursor_pos()
+Coordi CanvasGL::get_cursor_pos() const
 {
     if (cursor_external)
         return Coordi(cursor_pos.x, cursor_pos.y);
@@ -759,13 +759,13 @@ Coordi CanvasGL::get_cursor_pos()
         return cursor_pos_grid;
 }
 
-Coordf CanvasGL::get_cursor_pos_win()
+Coordf CanvasGL::get_cursor_pos_win() const
 {
     auto cp = viewmat * glm::vec3(cursor_pos.x, cursor_pos.y, 1);
     return {cp.x, cp.y};
 }
 
-Target CanvasGL::get_current_target()
+Target CanvasGL::get_current_target() const
 {
     return target_current;
 }

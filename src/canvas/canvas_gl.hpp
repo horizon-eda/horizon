@@ -52,16 +52,16 @@ public:
     enum class LayerMode { AS_IS, WORK_ONLY, SHADOW_OTHER };
     void set_layer_mode(LayerMode mode);
 
-    std::set<SelectableRef> get_selection();
+    std::set<SelectableRef> get_selection() const;
     void set_selection(const std::set<SelectableRef> &sel, bool emit = true);
     void select_all();
     void set_cursor_pos(const Coordi &c);
     void set_cursor_external(bool v);
-    Coordi get_cursor_pos();
-    Coordf get_cursor_pos_win();
-    Target get_current_target();
+    Coordi get_cursor_pos() const;
+    Coordf get_cursor_pos_win() const;
+    Target get_current_target() const;
     void set_selection_allowed(bool a);
-    std::pair<float, Coordf> get_scale_and_offset();
+    std::pair<float, Coordf> get_scale_and_offset() const;
     void set_scale_and_offset(float sc, Coordf ofs);
     Coordi snap_to_grid(const Coordi &c, unsigned int div = 1) const;
 
@@ -142,7 +142,7 @@ public:
     Markers markers;
     void update_markers() override;
 
-    std::set<SelectableRef> get_selection_at(const Coordi &c);
+    std::set<SelectableRef> get_selection_at(const Coordi &c) const;
     Coordf screen2canvas(const Coordf &p) const;
     void update_cursor_pos(double x, double y);
 
