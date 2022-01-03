@@ -1785,7 +1785,23 @@ void Canvas::render(const class BlockSymbolPort &port, bool interactive)
     ColorP c_port = ColorP::PIN;
 
     img_auto_line = img_mode;
-    draw_text(p_name, 1.5_mm, port.name, orientation_to_angle(name_orientation), TextOrigin::CENTER, c_name, 0, {});
+
+    const bool draw_in_line = port.name_orientation == PinNameOrientation::IN_LINE
+                              || (port.name_orientation == PinNameOrientation::HORIZONTAL
+                                  && (port_orientation == Orientation::LEFT || port_orientation == Orientation::RIGHT));
+
+    if (draw_in_line) {
+        draw_text(p_name, 1.5_mm, port.name, orientation_to_angle(name_orientation), TextOrigin::CENTER, c_name, 0, {});
+    }
+    else { // draw perp
+        Placement tr;
+        tr.set_angle(orientation_to_angle(port_orientation));
+        auto shift = tr.transform(Coordi(-1_mm, 0));
+        TextOptions opts;
+        opts.center = true;
+        draw_text(p_name + shift, 1.5_mm, port.name, orientation_to_angle(name_orientation) + 16384, TextOrigin::CENTER,
+                  c_name, 0, opts);
+    }
 
 
     transform_save();

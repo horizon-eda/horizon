@@ -195,7 +195,6 @@ bool CoreSchematic::get_property(ObjectType type, const UUID &uu, ObjectProperty
 {
     if (Core::get_property(type, uu, property, value))
         return true;
-    auto &sheet = *get_sheet();
     switch (type) {
     case ObjectType::NET: {
         auto &net = get_current_block()->nets.at(uu);
@@ -234,7 +233,7 @@ bool CoreSchematic::get_property(ObjectType type, const UUID &uu, ObjectProperty
     } break;
 
     case ObjectType::NET_LABEL: {
-        auto label = &sheet.net_labels.at(uu);
+        auto label = &get_sheet()->net_labels.at(uu);
         switch (property) {
         case ObjectProperty::ID::NAME:
             if (label->junction->net)
@@ -325,7 +324,7 @@ bool CoreSchematic::get_property(ObjectType type, const UUID &uu, ObjectProperty
 
 
     case ObjectType::SCHEMATIC_SYMBOL: {
-        auto sym = &sheet.symbols.at(uu);
+        auto sym = &get_sheet()->symbols.at(uu);
         switch (property) {
         case ObjectProperty::ID::DISPLAY_DIRECTIONS:
             dynamic_cast<PropertyValueBool &>(value).value = sym->display_directions;
@@ -356,6 +355,27 @@ bool CoreSchematic::get_property(ObjectType type, const UUID &uu, ObjectProperty
         }
     } break;
 
+    case ObjectType::BLOCK_SYMBOL_PORT: {
+        const auto &sym = get_block_symbol();
+        const auto &port = sym.ports.at(uu);
+        switch (property) {
+        case ObjectProperty::ID::NAME:
+            dynamic_cast<PropertyValueString &>(value).value = port.name;
+            return true;
+
+        case ObjectProperty::ID::LENGTH:
+            dynamic_cast<PropertyValueInt &>(value).value = port.length;
+            return true;
+
+        case ObjectProperty::ID::PIN_NAME_ORIENTATION:
+            dynamic_cast<PropertyValueInt &>(value).value = static_cast<int>(port.name_orientation);
+            return true;
+
+        default:
+            return false;
+        }
+    } break;
+
     default:
         return false;
     }
@@ -366,7 +386,6 @@ bool CoreSchematic::set_property(ObjectType type, const UUID &uu, ObjectProperty
 {
     if (Core::set_property(type, uu, property, value))
         return true;
-    auto &sheet = *get_sheet();
     switch (type) {
     case ObjectType::COMPONENT: {
         auto comp = &get_current_block()->components.at(uu);
@@ -439,7 +458,7 @@ bool CoreSchematic::set_property(ObjectType type, const UUID &uu, ObjectProperty
     } break;
 
     case ObjectType::SCHEMATIC_SYMBOL: {
-        auto sym = &sheet.symbols.at(uu);
+        auto sym = &get_sheet()->symbols.at(uu);
         switch (property) {
         case ObjectProperty::ID::DISPLAY_DIRECTIONS:
             sym->display_directions = dynamic_cast<const PropertyValueBool &>(value).value;
@@ -470,7 +489,7 @@ bool CoreSchematic::set_property(ObjectType type, const UUID &uu, ObjectProperty
     } break;
 
     case ObjectType::NET_LABEL: {
-        auto label = &sheet.net_labels.at(uu);
+        auto label = &get_sheet()->net_labels.at(uu);
         switch (property) {
         case ObjectProperty::ID::OFFSHEET_REFS:
             label->offsheet_refs = dynamic_cast<const PropertyValueBool &>(value).value;
@@ -482,6 +501,28 @@ bool CoreSchematic::set_property(ObjectType type, const UUID &uu, ObjectProperty
 
         case ObjectProperty::ID::IS_PORT:
             label->show_port = dynamic_cast<const PropertyValueBool &>(value).value;
+            break;
+
+        default:
+            return false;
+        }
+    } break;
+
+    case ObjectType::BLOCK_SYMBOL_PORT: {
+        auto &sym = get_block_symbol();
+        auto &port = sym.ports.at(uu);
+        switch (property) {
+        case ObjectProperty::ID::NAME:
+            port.name = dynamic_cast<const PropertyValueString &>(value).value;
+            break;
+
+        case ObjectProperty::ID::LENGTH:
+            port.length = dynamic_cast<const PropertyValueInt &>(value).value;
+            break;
+
+        case ObjectProperty::ID::PIN_NAME_ORIENTATION:
+            port.name_orientation =
+                    static_cast<PinNameOrientation>(dynamic_cast<const PropertyValueInt &>(value).value);
             break;
 
         default:
@@ -658,6 +699,9 @@ std::string CoreSchematic::get_display_name(ObjectType type, const UUID &uu, con
             return get_current_schematic()->sheets.at(sh).texts.at(uu).text;
         else
             return Core::get_display_name(type, uu);
+
+    case ObjectType::BLOCK_SYMBOL_PORT:
+        return get_block_symbol().ports.at(uu).name;
 
     default:
         return Core::get_display_name(type, uu);

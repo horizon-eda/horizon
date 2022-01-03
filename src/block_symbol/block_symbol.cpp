@@ -20,6 +20,9 @@ BlockSymbolPort::BlockSymbolPort(const UUID &uu, const json &j)
     : uuid(uu), net(j.at("net").get<std::string>()), position(j["position"].get<std::vector<int64_t>>()),
       length(j["length"]), orientation(orientation_lut.lookup(j["orientation"]))
 {
+    if (j.count("name_orientation")) {
+        name_orientation = pin_name_orientation_lut.lookup(j.at("name_orientation"));
+    }
 }
 
 BlockSymbolPort::BlockSymbolPort(UUID uu) : uuid(uu)
@@ -38,6 +41,7 @@ json BlockSymbolPort::serialize() const
     j["length"] = length;
     j["net"] = (std::string)net;
     j["orientation"] = orientation_lut.lookup_reverse(orientation);
+    j["name_orientation"] = pin_name_orientation_lut.lookup_reverse(name_orientation);
     return j;
 }
 

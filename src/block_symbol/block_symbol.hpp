@@ -11,6 +11,7 @@
 #include "util/uuid.hpp"
 #include "util/placement.hpp"
 #include "pool/unit.hpp"
+#include "common/pin_name_orientation.hpp"
 #include <map>
 
 namespace horizon {
@@ -32,6 +33,9 @@ public:
 
     Orientation orientation = Orientation::RIGHT;
     Orientation get_orientation_for_placement(const Placement &p) const;
+
+    using NameOrientation = PinNameOrientation;
+    NameOrientation name_orientation = NameOrientation::IN_LINE;
 
     // not stored
     std::string name;
