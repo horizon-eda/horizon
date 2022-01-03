@@ -125,11 +125,24 @@ void PoolBrowser::install_column_tooltip(Gtk::TreeViewColumn &tvc, const Gtk::Tr
                     Gtk::TreeIter iter(treeview->get_model()->get_iter(path));
                     if (!iter)
                         return false;
-                    Glib::ustring val;
-                    iter->get_value(col.index(), val);
-                    tooltip->set_text(val);
-                    treeview->set_tooltip_row(tooltip, path);
-                    return true;
+
+                    auto cells = column->get_cells();
+                    for (auto cell : cells) {
+                        int start, width;
+                        if (column->get_cell_position(*cell, start, width)) {
+                            if ((cell_x >= start) && (cell_x < (start + width))) {
+                                // only show tooltip when on text, avoids conflict with item source cell renderer
+                                if (dynamic_cast<Gtk::CellRendererText *>(cell)) {
+                                    Glib::ustring val;
+                                    iter->get_value(col.index(), val);
+                                    tooltip->set_text(val);
+                                    treeview->set_tooltip_row(tooltip, path);
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                    return false;
                 }
                 return false;
             });
