@@ -19,12 +19,6 @@ static const LutEnumStr<SymbolPin::Decoration::Driver> decoration_driver_lut = {
         {"tristate", SymbolPin::Decoration::Driver::TRISTATE},
 };
 
-static const LutEnumStr<SymbolPin::NameOrientation> name_orientation_lut = {
-        {"in_line", SymbolPin::NameOrientation::IN_LINE},
-        {"perpendicular", SymbolPin::NameOrientation::PERPENDICULAR},
-        {"horizontal", SymbolPin::NameOrientation::HORIZONTAL},
-};
-
 SymbolPin::Decoration::Decoration()
 {
 }
@@ -58,7 +52,7 @@ SymbolPin::SymbolPin(const UUID &uu, const json &j)
         }
     }
     else if (j.count("name_orientation")) {
-        name_orientation = name_orientation_lut.lookup(j.at("name_orientation"));
+        name_orientation = pin_name_orientation_lut.lookup(j.at("name_orientation"));
     }
 }
 
@@ -79,7 +73,7 @@ json SymbolPin::serialize() const
     j["orientation"] = orientation_lut.lookup_reverse(orientation);
     j["name_visible"] = name_visible;
     j["pad_visible"] = pad_visible;
-    j["name_orientation"] = name_orientation_lut.lookup_reverse(name_orientation);
+    j["name_orientation"] = pin_name_orientation_lut.lookup_reverse(name_orientation);
     j["decoration"] = decoration.serialize();
     return j;
 }

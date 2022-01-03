@@ -135,6 +135,7 @@ SRC_COMMON = \
 	src/rules/rule_match_component.cpp\
 	src/board/rule_shorted_pads.cpp\
 	src/rules/rule_match_component.cpp\
+	src/common/pin_name_orientation.cpp\
 
 
 ifeq ($(OS),Windows_NT)

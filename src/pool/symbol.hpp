@@ -12,6 +12,7 @@
 #include "util/uuid.hpp"
 #include "symbol/symbol_rules.hpp"
 #include "util/file_version.hpp"
+#include "common/pin_name_orientation.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -29,7 +30,7 @@ public:
     bool name_visible = true;
     bool pad_visible = true;
 
-    enum class NameOrientation { IN_LINE, PERPENDICULAR, HORIZONTAL };
+    using NameOrientation = PinNameOrientation;
     NameOrientation name_orientation = NameOrientation::IN_LINE;
 
     Orientation orientation = Orientation::RIGHT;
