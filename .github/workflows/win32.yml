@@ -37,12 +37,19 @@ jobs:
           mingw-w64-x86_64-curl-winssl
           mingw-w64-x86_64-jq
           zip
+          unzip
           make
           git
           dos2unix
     - name: Downgrade librsvg
       shell: msys2 {0}
       run: pacman -U https://mirror.selfnet.de/msys2/mingw/mingw64/mingw-w64-x86_64-librsvg-2.50.3-3-any.pkg.tar.zst --noconfirm
+    - name: Install patched gtk
+      shell: msys2 {0}
+      run: |
+        curl --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' --header "Accept: application/vnd.github.v3+json" -L https://api.github.com/repos/carrotIndustries/gtk3-horizon/actions/artifacts/135986951/zip > artifact.zip
+        unzip artifact.zip
+        pacman -U --noconfirm mingw-w64-x86_64-gtk*.pkg.tar.zst 
     - name: Build
       shell: msys2 {0}
       run: make -j2 WARNFLAGS="-Wall -Wshadow -Wno-attributes"
