@@ -1571,7 +1571,7 @@ bool PoolProjectManagerAppWindow::cleanup_pool_cache(Gtk::Window *parent)
     for (auto &[uu, block] : blocks.blocks) {
         block.schematic.expand();
         {
-            ItemSet items = block.schematic.get_pool_items_used();
+            ItemSet items = block.block.get_pool_items_used();
             items_needed.insert(items.begin(), items.end());
         }
         {
