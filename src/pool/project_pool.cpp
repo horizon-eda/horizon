@@ -103,6 +103,7 @@ std::string ProjectPool::get_filename(ObjectType type, const UUID &uu, UUID *poo
         q.bind(3, item_pool_uuid);
         q.bind(4, uu);
         q.step();
+        pool_uuid_cache[{type, uu}] = pool_info.uuid;
 
         if (pool_uuid_out)
             *pool_uuid_out = pool_info.uuid;
