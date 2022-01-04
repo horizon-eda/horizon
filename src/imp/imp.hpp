@@ -81,7 +81,11 @@ protected:
     class GridsWindow *grids_window = nullptr;
 
     std::unique_ptr<Pool> pool;
+
+private:
     std::unique_ptr<Pool> real_pool_caching;
+
+protected:
     Pool *pool_caching;
     class Core *core = nullptr;
     std::unique_ptr<ClipboardBase> clipboard = nullptr;
