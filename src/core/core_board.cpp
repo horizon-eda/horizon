@@ -45,7 +45,7 @@ static Block get_flattend_block(const std::string &blocks_filename, IPool &pool)
 
 CoreBoard::CoreBoard(const std::string &board_filename, const std::string &blocks_filename,
                      const std::string &pictures_dir, IPool &pool, IPool &pool_caching)
-    : Core(pool, &pool_caching), block(get_flattend_block(blocks_filename, pool)),
+    : Core(pool, &pool_caching), block(get_flattend_block(blocks_filename, pool_caching)),
       brd(Board::new_from_file(board_filename, *block, pool_caching)), rules(brd->rules),
       fab_output_settings(brd->fab_output_settings), pdf_export_settings(brd->pdf_export_settings),
       step_export_settings(brd->step_export_settings), pnp_export_settings(brd->pnp_export_settings),
