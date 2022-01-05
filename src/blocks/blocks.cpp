@@ -96,6 +96,9 @@ BlocksBase::BlockItem::BlockItem(const BlocksBase::BlockItemInfo &inf, const std
     : BlocksBase::BlockItemInfo(inf),
       block(Block::new_from_file((fs::u8path(base_path) / fs::u8path(block_filename)).u8string(), pool, blocks))
 {
+    if (uuid != block.uuid)
+        Logger::log_critical("Block UUID mismatch", Logger::Domain::BLOCKS,
+                             "blocks=" + (std::string)uuid + " block=" + (std::string)block.uuid);
 }
 
 BlocksBase::BlockItem::BlockItem(const BlockItemInfo &inf, const json &j, IPool &pool, class IBlockProvider &blocks)
