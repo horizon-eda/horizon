@@ -12,6 +12,7 @@
 #include <algorithm>
 #include "dialogs/dialogs.hpp"
 #include "util/changeable.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 
@@ -87,6 +88,47 @@ SheetEditor::SheetEditor(Sheet &s, Block &b, IPool &pool, class IPool &pool_cach
 std::pair<UUID, UUID> SheetEditor::get_sheet_and_block() const
 {
     return {sheet.uuid, block.uuid};
+}
+
+class BlockEditor : public Gtk::Box, public Changeable {
+public:
+    BlockEditor(Block &b);
+    UUID get_block() const;
+
+private:
+    Gtk::Grid *grid = nullptr;
+    Block &block;
+};
+
+BlockEditor::BlockEditor(Block &b) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), block(b)
+{
+    grid = Gtk::manage(new Gtk::Grid);
+    grid->set_column_spacing(10);
+    grid->set_row_spacing(10);
+    grid->set_margin_bottom(20);
+    grid->set_margin_top(20);
+    grid->set_margin_end(20);
+    grid->set_margin_start(20);
+
+    auto title_entry = Gtk::manage(new Gtk::Entry());
+    title_entry->set_hexpand(true);
+    title_entry->set_text(b.name);
+    title_entry->signal_changed().connect([this, title_entry] {
+        auto ti = title_entry->get_text();
+        block.name = ti;
+        s_signal_changed.emit();
+    });
+
+    int top = 0;
+    grid_attach_label_and_widget(grid, "Title", title_entry, top);
+
+    pack_start(*grid, false, false, 0);
+    grid->show();
+}
+
+UUID BlockEditor::get_block() const
+{
+    return block.uuid;
 }
 
 SchematicPropertiesDialog::SchematicPropertiesDialog(Gtk::Window *parent, IDocumentSchematicBlockSymbol &adoc)
@@ -250,8 +292,16 @@ void SchematicPropertiesDialog::selection_changed()
             remove_button->set_sensitive(sh.can_be_removed() && b.schematic.sheets.size() > 1);
         }
         else if (!sheet && block) {
+            const auto is_top = block == doc.get_blocks().top_block;
+            if (!is_top) {
+                auto w = Gtk::manage(new BlockEditor(doc.get_blocks().blocks.at(block).block));
+                current = w;
+                block_editor = w;
+                w->signal_changed().connect(sigc::mem_fun(*this, &SchematicPropertiesDialog::update_for_block));
+            }
+
             bool can_be_removed = true;
-            if (block == doc.get_blocks().top_block) {
+            if (is_top) {
                 can_be_removed = false;
             }
             else {
@@ -287,6 +337,21 @@ void SchematicPropertiesDialog::update_for_sheet()
         return false;
     });
 }
+
+
+void SchematicPropertiesDialog::update_for_block()
+{
+    const auto block = block_editor->get_block();
+    store->foreach_iter([this, block](const Gtk::TreeIter &it) {
+        Gtk::TreeModel::Row row = *it;
+        if (row[tree_columns.sheet] == UUID() && row[tree_columns.block] == block) {
+            row[tree_columns.name] = doc.get_blocks().blocks.at(block).block.name;
+            return true;
+        }
+        return false;
+    });
+}
+
 
 void SchematicPropertiesDialog::add_block()
 {

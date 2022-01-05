@@ -39,6 +39,7 @@ private:
 
     Gtk::Widget *current = nullptr;
     class SheetEditor *sheet_editor = nullptr;
+    class BlockEditor *block_editor = nullptr;
 
     Gtk::Button *remove_button = nullptr;
 
@@ -48,6 +49,7 @@ private:
     void handle_remove();
     void update_view();
     void update_for_sheet();
+    void update_for_block();
     Gtk::Menu add_menu;
     Gtk::MenuItem *add_sheet_menu_item = nullptr;
 };
