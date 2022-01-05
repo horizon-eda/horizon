@@ -41,33 +41,34 @@ ToolResponse ToolMapPort::begin(const ToolArgs &args)
     for (const auto &it : args.selection) {
         if (it.type == ObjectType::BLOCK_SYMBOL_PORT) {
             if (doc.o->get_block_symbol().get_port_for_net(it.uuid) == nullptr) { // unplaced port
-                ports.emplace_back(&doc.o->get_block_symbol().block->nets.at(it.uuid), false);
+                port_nets.emplace_back(&doc.o->get_block_symbol().block->nets.at(it.uuid), false);
                 from_sidebar = true;
             }
         }
     }
-    if (ports.size() == 0) {
+    if (port_nets.size() == 0) {
         for (const auto &[uu, net] : doc.o->get_block_symbol().block->nets) {
             if (net.is_port)
-                ports.emplace_back(&net, false);
+                port_nets.emplace_back(&net, false);
         }
     }
-    std::sort(ports.begin(), ports.end(),
+    std::sort(port_nets.begin(), port_nets.end(),
               [](const auto &a, const auto &b) { return strcmp_natural(a.first->name, b.first->name) < 0; });
 
-    for (auto &it : ports) {
+    for (auto &it : port_nets) {
         if (doc.o->get_block_symbol().ports.count(it.first->uuid)) {
             it.second = true;
         }
     }
-    auto ports_unplaced = std::count_if(ports.begin(), ports.end(), [](const auto &a) { return a.second == false; });
-    if (ports_unplaced == 0) {
+    auto net_ports_unplaced =
+            std::count_if(port_nets.begin(), port_nets.end(), [](const auto &a) { return a.second == false; });
+    if (net_ports_unplaced == 0) {
         imp->tool_bar_flash("No ports left to place");
         return ToolResponse::end();
     }
 
     UUID selected_port;
-    if (ports_unplaced > 1 && from_sidebar == false) {
+    if (net_ports_unplaced > 1 && from_sidebar == false) {
         if (auto r = map_port_dialog()) {
             selected_port = *r;
         }
@@ -76,15 +77,16 @@ ToolResponse ToolMapPort::begin(const ToolArgs &args)
         }
     }
     else {
-        selected_port =
-                std::find_if(ports.begin(), ports.end(), [](const auto &a) { return a.second == false; })->first->uuid;
+        selected_port = std::find_if(port_nets.begin(), port_nets.end(), [](const auto &a) {
+                            return a.second == false;
+                        })->first->uuid;
     }
 
 
-    auto x = std::find_if(ports.begin(), ports.end(),
+    auto x = std::find_if(port_nets.begin(), port_nets.end(),
                           [selected_port](const auto &a) { return a.first->uuid == selected_port; });
-    assert(x != ports.end());
-    port_index = x - ports.begin();
+    assert(x != port_nets.end());
+    port_index = x - port_nets.begin();
 
     annotation = imp->get_canvas()->create_annotation();
     annotation->set_visible(true);
@@ -157,17 +159,17 @@ ToolResponse ToolMapPort::update(const ToolArgs &args)
     else if (args.type == ToolEventType::ACTION) {
         switch (args.action) {
         case InToolActionID::LMB:
-            ports.at(port_index).second = true;
+            port_nets.at(port_index).second = true;
             port_index++;
-            while (port_index < ports.size()) {
-                if (ports.at(port_index).second == false)
+            while (port_index < port_nets.size()) {
+                if (port_nets.at(port_index).second == false)
                     break;
                 port_index++;
             }
-            if (port_index == ports.size()) {
+            if (port_index == port_nets.size()) {
                 return ToolResponse::commit();
             }
-            create_port(ports.at(port_index).first->uuid);
+            create_port(port_nets.at(port_index).first->uuid);
             port->position = args.coords;
             break;
 
@@ -185,17 +187,17 @@ ToolResponse ToolMapPort::update(const ToolArgs &args)
                 while (1) {
                     port->position = port_last->position + shift;
 
-                    ports.at(port_index).second = true;
+                    port_nets.at(port_index).second = true;
                     port_index++;
-                    while (port_index < ports.size()) {
-                        if (ports.at(port_index).second == false)
+                    while (port_index < port_nets.size()) {
+                        if (port_nets.at(port_index).second == false)
                             break;
                         port_index++;
                     }
-                    if (port_index == ports.size()) {
+                    if (port_index == port_nets.size()) {
                         return ToolResponse::commit();
                     }
-                    create_port(ports.at(port_index).first->uuid);
+                    create_port(port_nets.at(port_index).first->uuid);
                     port->position = args.coords;
 
                     if (args.action == InToolActionID::AUTOPLACE_NEXT_PIN)
@@ -209,10 +211,10 @@ ToolResponse ToolMapPort::update(const ToolArgs &args)
                 UUID selected_port = *r;
                 doc.o->get_block_symbol().ports.erase(port->uuid);
 
-                auto x = std::find_if(ports.begin(), ports.end(),
+                auto x = std::find_if(port_nets.begin(), port_nets.end(),
                                       [selected_port](const auto &a) { return a.first->uuid == selected_port; });
-                assert(x != ports.end());
-                port_index = x - ports.begin();
+                assert(x != port_nets.end());
+                port_index = x - port_nets.begin();
 
                 auto p1 = port_last;
                 auto p2 = port_last2;
@@ -239,7 +241,7 @@ ToolResponse ToolMapPort::update(const ToolArgs &args)
 std::optional<UUID> ToolMapPort::map_port_dialog()
 {
     std::map<UUIDPath<2>, std::string> items_for_dialog;
-    for (const auto &[it, mapped] : ports) {
+    for (const auto &[it, mapped] : port_nets) {
         if (!mapped)
             items_for_dialog.emplace(std::piecewise_construct, std::forward_as_tuple(it->uuid),
                                      std::forward_as_tuple(it->name));

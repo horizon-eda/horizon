@@ -18,7 +18,7 @@ public:
     }
 
 private:
-    std::vector<std::pair<const class Net *, bool>> ports;
+    std::vector<std::pair<const class Net *, bool>> port_nets;
     unsigned int port_index = 0;
     class BlockSymbolPort *port = nullptr;
     BlockSymbolPort *port_last = nullptr;
