@@ -1042,6 +1042,7 @@ void ImpSchematic::handle_tool_change(ToolID id)
 {
     ImpBase::handle_tool_change(id);
     sheet_box->set_sensitive(id == ToolID::NONE);
+    main_window->instance_path_revealer->set_sensitive(id == ToolID::NONE);
 }
 
 void ImpSchematic::handle_highlight_group_tag(const ActionConnection &a)
