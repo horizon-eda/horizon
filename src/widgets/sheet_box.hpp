@@ -61,6 +61,7 @@ private:
     TreeColumns tree_columns;
 
     CoreSchematic &core;
+    Gtk::Button *add_button = nullptr;
     Gtk::Button *remove_button = nullptr;
     Gtk::Button *move_up_button = nullptr;
     Gtk::Button *move_down_button = nullptr;

@@ -198,6 +198,7 @@ SheetBox::SheetBox(CoreSchematic &c) : Gtk::Box(Gtk::Orientation::ORIENTATION_VE
                 tbo->set_image_from_icon_name("list-add-symbolic");
                 tbo->signal_clicked().connect([this] { core.add_sheet(); });
                 box->pack_start(*tbo, false, false, 0);
+                add_button = tbo;
             }
             {
                 auto tbo = Gtk::manage(new Gtk::Button());
@@ -228,7 +229,7 @@ SheetBox::SheetBox(CoreSchematic &c) : Gtk::Box(Gtk::Orientation::ORIENTATION_VE
             auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0));
             tb->pack_end(*box, false, false, 0);
             auto tbo = Gtk::manage(new Gtk::Button());
-            tbo->set_tooltip_text("Schematic properties…");
+            tbo->set_tooltip_text("Schematic properties");
             tbo->set_image_from_icon_name("view-more-symbolic");
             tbo->signal_clicked().connect([this] { s_signal_edit_more.emit(); });
             box->pack_start(*tbo, false, false, 0);
@@ -286,8 +287,12 @@ void SheetBox::selection_changed()
         const auto &sheets = core.get_blocks().blocks.at(row[tree_columns.block]).schematic.sheets;
         const auto sheet_uu = row.get_value(tree_columns.sheet);
         cr_place_block->set_sensitive(sheet_uu);
-        if (sheet_uu == UUID()) {
+        if (sheet_uu == UUID()) { // block symbol
             signal_select_sheet().emit(UUID(), row[tree_columns.block], {});
+            remove_button->set_sensitive(false);
+            move_up_button->set_sensitive(false);
+            move_down_button->set_sensitive(false);
+            add_button->set_sensitive(false);
         }
         else if (sheets.count(sheet_uu)) {
             const auto &sh = sheets.at(row[tree_columns.sheet]);
@@ -295,6 +300,7 @@ void SheetBox::selection_changed()
             remove_button->set_sensitive(sh.can_be_removed() && sheets.size() > 1);
             move_up_button->set_sensitive(sh.index != 1);
             move_down_button->set_sensitive(sh.index != sheets.size());
+            add_button->set_sensitive(true);
         }
     }
 }
