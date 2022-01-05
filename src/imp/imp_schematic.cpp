@@ -890,7 +890,7 @@ void ImpSchematic::update_action_sensitivity()
         set_action_sensitive(ActionID::SHOW_IN_POOL_MANAGER, false);
         set_action_sensitive(ActionID::SHOW_IN_PROJECT_POOL_MANAGER, false);
     }
-    set_action_sensitive(ActionID::MOVE_TO_OTHER_SHEET, sel.size() > 0);
+    set_action_sensitive(ActionID::MOVE_TO_OTHER_SHEET, sel.size() > 0 && !core_schematic.get_block_symbol_mode());
     set_action_sensitive(ActionID::GO_TO_BOARD, sockets_connected);
     set_action_sensitive(ActionID::GO_TO_PROJECT_MANAGER, sockets_connected);
 
