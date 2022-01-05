@@ -55,9 +55,9 @@ ToolResponse ToolMapPort::begin(const ToolArgs &args)
     std::sort(port_nets.begin(), port_nets.end(),
               [](const auto &a, const auto &b) { return strcmp_natural(a.first->name, b.first->name) < 0; });
 
-    for (auto &it : port_nets) {
-        if (doc.o->get_block_symbol().ports.count(it.first->uuid)) {
-            it.second = true;
+    for (auto &[net, placed] : port_nets) {
+        if (doc.o->get_block_symbol().ports.count(BlockSymbolPort::get_uuid_for_net(net->uuid))) {
+            placed = true;
         }
     }
     auto net_ports_unplaced =
