@@ -540,7 +540,7 @@ RulesCheckResult BoardRules::check_clearance_silkscreen_exposed_copper(const Boa
                 && (!rule.pads_only || key.type == PatchType::PAD || key.type == PatchType::PAD_TH)) {
                 copper_outline.AddPaths(paths, ClipperLib::ptSubject, true);
             }
-            else if (key.layer == BoardLayers::TOP_MASK) {
+            else if (key.layer == side.mask) {
                 copper_outline.AddPaths(paths, ClipperLib::ptClip, true);
             }
         }
