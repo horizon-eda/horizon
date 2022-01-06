@@ -7,7 +7,6 @@
  - Hierarchical schematics (16b925a3605fbac0f77c9b453131df6e3dda0ad0)
  - Exchange gates tool (6df1b9f9412099eb0673026cd8a7d3e603f5f638)
 
-
 ### Editors
 
  - Align & distribute tool (30615c8014407c8cac9f099e858cac1190cc32d2)
@@ -27,11 +26,12 @@
 ### General
 
  - Dark theme option in preferences (b2bfa20b3e6cad837906cf3aea2812e387b861e4)
- - Closing a project now also closes the project's pool manager (93e52cd01ce38c2aeadbc0c9b09cdba840963dcf)
+ - Closing a project also closes the project's pool manager (93e52cd01ce38c2aeadbc0c9b09cdba840963dcf)
  - EditorWindow: improve version update warning (5578faa4dcf33522e4f44d76e04b189943723eab)
  - Prevent using pools from other installations (21133cd3cf6ad9211b90b9e7a51b4a1c8fbde1df)
  - Validate parametric column and table names to protect against SQL injections (437000ad41b3276372d2cb855cde8e7c5b822869)
  - Pool browsers support sorting by modification time (14919887743feef58abb7f01707fcec49bccf433)
+ - Authenticate inter-process communication (42b8b79eacbfa0faa844816721e064b758722144)
 
 ### Editors
 
@@ -47,14 +47,11 @@
 
  - Pressing escape in the part browser goes back to schematic (49e0ae7fac482adbcdd3ae93d75ea98049ad9595)
 
-
 ### Board Editor
 
  - Place package tool remembers flipped state (9823b8dd28689f434a3ec4fbaffaa155e738f2f2)
  - Display keepouts in outline mode by default (4f84530afc7d24dad9dda3d51725d44a2cbe80d7)
  - Actually implement silkscreen/exposed copper clearance (df003e59f3a01d856eb079f5a2804882ac95983a)
- - Support planes with unnamed nets (d16117f9b078330b7863b8683119080246846764)
-
 
 ### Package editor
 
@@ -88,6 +85,7 @@
  - Copy placement tool: properly handle flipped packages (3b7ce85ecf6917bd6dd592dc7e2b28fe67a94703)
  - Don't crash if net used in plane is gone (4a389f0eaefbb7b375f112dc6b71c26a0026caac)
  - Update selection when reloading netlist (ed241bd0eb46e0189113ebfa5d2c4ed372395eae)
+ - Fix crash when opening 3D view after selecting an alternate package (d171ca6d0f045c0fead4ec8000187f9839007fc6)
 
 
 ### Schematic editor
@@ -115,6 +113,7 @@
  - Move to other pool window: really check if filenames end in .json (162678740c0f10dabb11b9a5d61cb65945bc7209)
  - Move to other pool window: show names instead of UUIDs and make it work for items other than parts (e5582edf9a6040cfac53122b9c2b577d21cbdbd5)
  - Symbol pool browser: correctly store treeview column widths (3ca8b80f447ff0b301c967bc7729470b1c5ad1ca)
+ - Show item status tooltip also if there's a row tooltip (b6e60451c809172818d2397cf31ffb7a5db04a73)
 
 
 ### Project manager
@@ -123,7 +122,7 @@
 
 ### Windows-specific
 
- - Avoid crashes when network drives are inaccessible (b31f63d9398b361913192b4d6e0934c0751a4fcb)
+ - Avoid crashes when network drives are inaccessible (d44f402efe9e4f3a7e626805598a67858dd4751b)
 
 # Version 2.1.0
 
