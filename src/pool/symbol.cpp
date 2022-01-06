@@ -315,15 +315,24 @@ void Symbol::apply_expand(const Symbol &ref, unsigned int n_expand)
     }
 }
 
+unsigned int Symbol::get_required_version() const
+{
+    if (text_placements.size())
+        return 1;
+    else
+        return 0;
+}
+
 json Symbol::serialize() const
 {
     json j;
-    version.serialize(j);
     j["type"] = "symbol";
     j["name"] = name;
     j["uuid"] = (std::string)uuid;
     j["unit"] = (std::string)unit->uuid;
     j["can_expand"] = can_expand;
+    if (const auto v = get_required_version())
+        j["version"] = v;
     j["junctions"] = json::object();
     for (const auto &it : junctions) {
         j["junctions"][(std::string)it.first] = it.second.serialize();

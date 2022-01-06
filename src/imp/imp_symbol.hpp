@@ -23,6 +23,13 @@ protected:
         return &searcher;
     };
 
+    bool uses_dynamic_version() const override
+    {
+        return true;
+    }
+
+    unsigned int get_required_version() const override;
+
 private:
     void canvas_update() override;
     void apply_preferences() override;

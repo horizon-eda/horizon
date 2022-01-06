@@ -509,7 +509,14 @@ void ImpBase::run(int argc, char *argv[])
             if (!j.is_null()) {
                 save_json_to_file(core->get_filename() + meta_suffix, j);
             }
-            main_window->set_version_info("");
+
+            if (uses_dynamic_version()) {
+                saved_version = get_required_version();
+                check_version();
+            }
+            else {
+                main_window->set_version_info("");
+            }
         }
     });
     connect_action_with_source(ActionID::UNDO, [this](const auto &a, auto src) {
@@ -905,7 +912,16 @@ void ImpBase::run(int argc, char *argv[])
 
     reset_tool_hint_label();
 
+    saved_version = core->get_version().get_file();
+    {
+        const auto &version = core->get_version();
+        if (version.get_app() < version.get_file()) {
+            set_read_only(true);
+        }
+    }
     check_version();
+    if (uses_dynamic_version())
+        core->signal_modified().connect(sigc::mem_fun(*this, &ImpBase::check_version));
 
     {
         json j;
@@ -1740,10 +1756,20 @@ ObjectType ImpBase::get_editor_type() const
 
 void ImpBase::check_version()
 {
-    const auto &version = core->get_version();
-    main_window->set_version_info(version.get_message(core->get_object_type()));
-    if (version.get_app() < version.get_file()) {
-        set_read_only(true);
+    const auto dyn = uses_dynamic_version();
+    if (dyn && !read_only) {
+        if (get_required_version() > saved_version) {
+            const auto &t = object_descriptions.at(core->get_object_type()).name;
+            main_window->set_version_info(
+                    "Saving this " + t + " will update it from version " + std::to_string(saved_version) + " to "
+                    + std::to_string(get_required_version()) + " . " + FileVersion::learn_more_markup);
+        }
+        else {
+            main_window->set_version_info("");
+        }
+    }
+    else {
+        main_window->set_version_info(core->get_version().get_message(core->get_object_type()));
     }
 }
 

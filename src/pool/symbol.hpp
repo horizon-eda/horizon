@@ -107,6 +107,8 @@ public:
     SymbolRules rules;
     FileVersion version;
 
+    unsigned int get_required_version() const;
+
 private:
     void update_refs();
 };

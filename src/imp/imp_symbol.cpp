@@ -277,4 +277,13 @@ void ImpSymbol::handle_selection_cross_probe()
     j["pins"] = pins;
     send_json(j);
 }
+
+unsigned int ImpSymbol::get_required_version() const
+{
+    if (symbol_preview_window->get_text_placements().size())
+        return 1;
+    else
+        return 0;
+}
+
 } // namespace horizon

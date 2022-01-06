@@ -250,6 +250,16 @@ protected:
     enum class ShowInPoolManagerPool { CURRENT, LAST };
     void show_in_pool_manager(ObjectType type, const UUID &uu, ShowInPoolManagerPool p);
 
+    virtual bool uses_dynamic_version() const
+    {
+        return false;
+    }
+
+    virtual unsigned int get_required_version() const
+    {
+        throw std::runtime_error("not implemented");
+    }
+
 private:
     void fix_cursor_pos();
     Glib::RefPtr<Gio::FileMonitor> preferences_monitor;
@@ -337,5 +347,7 @@ private:
 
     Gtk::Button *undo_button = nullptr;
     Gtk::Button *redo_button = nullptr;
+
+    unsigned int saved_version = 0;
 };
 } // namespace horizon
