@@ -12,6 +12,7 @@
 
  - Align & distribute tool (30615c8014407c8cac9f099e858cac1190cc32d2)
  - Show what's been undone/redone (ecab1deea642c2f138b8a97a61c9e9fb27dbf604)
+ - Dotted layer display mode (1c4eea61f590549ea29d801215f2e15fe532fa70)
 
 ### Pool manager
 
@@ -20,7 +21,6 @@
 ### Board editor
 
  - Shorted pads rule (f57c1f5bde600bdbb1ad48ce86a99de3adbd7ec2)
-
 
 ## Enhancements
 
@@ -42,8 +42,6 @@
  - Make undo/redo depth configurable (1f7a6e9aab40369df4a7084ec6812ac80088f1d4)
  - Show part in project pool manager action (848f1495b7ab187ddf162fa4ddedf95103a05c34)
  - Go to project manager action (7fdc1fa1d4f3c691c0b651a75ed42be13991a593)
- - Dotted layer display mode (1c4eea61f590549ea29d801215f2e15fe532fa70)
-
 
 ### Schematic editor
 
