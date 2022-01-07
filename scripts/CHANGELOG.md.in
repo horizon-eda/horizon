@@ -1,4 +1,4 @@
-# Version 2.1.90 (Will become 2.2.0)
+# Version 2.1.91 (Will become 2.2.0)
 
 ## New features
 
@@ -11,7 +11,7 @@
 
  - Align & distribute tool (30615c8014407c8cac9f099e858cac1190cc32d2)
  - Show what's been undone/redone (ecab1deea642c2f138b8a97a61c9e9fb27dbf604)
- - Dotted layer display mode (1c4eea61f590549ea29d801215f2e15fe532fa70)
+ - Dotted layer display mode (1c4eea61f590549ea29d801215f2e15fe532fa70 by @roohhh)
 
 ### Pool manager
 
@@ -19,7 +19,7 @@
 
 ### Board editor
 
- - Shorted pads rule (f57c1f5bde600bdbb1ad48ce86a99de3adbd7ec2)
+ - Shorted pads rule (f57c1f5bde600bdbb1ad48ce86a99de3adbd7ec2 by @guserav)
 
 ## Enhancements
 
@@ -29,16 +29,19 @@
  - Closing a project also closes the project's pool manager (93e52cd01ce38c2aeadbc0c9b09cdba840963dcf)
  - EditorWindow: improve version update warning (5578faa4dcf33522e4f44d76e04b189943723eab)
  - Prevent using pools from other installations (21133cd3cf6ad9211b90b9e7a51b4a1c8fbde1df)
- - Validate parametric column and table names to protect against SQL injections (437000ad41b3276372d2cb855cde8e7c5b822869)
  - Pool browsers support sorting by modification time (14919887743feef58abb7f01707fcec49bccf433)
+
+### Security
+
+ - Validate parametric column and table names to protect against SQL injections (437000ad41b3276372d2cb855cde8e7c5b822869)
  - Authenticate inter-process communication (42b8b79eacbfa0faa844816721e064b758722144)
 
 ### Editors
 
  - Drag polygon edge tool properly handles arc edges (d2158ab7be097398da27b3a916537463f295382c)
- - Add 45 degree restrict to draw line & polygon tools (b48a3443468f1546539396d831c524e2202d5d2b)
+ - Add 45 degree restrict to draw line & polygon tools (b48a3443468f1546539396d831c524e2202d5d2b by @kamtar)
  - Slightly faster rendering (987724c79949204b095990db0fae6349dabe1ac6, fa2a6d4a206c40de4692b5263908f274278cdda8, 56358df96761f7a75aebef5854b4fb905167c253, e77623774a5e2bc287a10a068e4a7e8f86ddc3ec)
- - Faster colored nets (02edcc308d096721537df8d011b78c3b0f7a1fba)
+ - Faster colored nets (02edcc308d096721537df8d011b78c3b0f7a1fba by @roohhh)
  - Make undo/redo depth configurable (1f7a6e9aab40369df4a7084ec6812ac80088f1d4)
  - Show part in project pool manager action (848f1495b7ab187ddf162fa4ddedf95103a05c34)
  - Go to project manager action (7fdc1fa1d4f3c691c0b651a75ed42be13991a593)
@@ -51,7 +54,7 @@
 
  - Place package tool remembers flipped state (9823b8dd28689f434a3ec4fbaffaa155e738f2f2)
  - Display keepouts in outline mode by default (4f84530afc7d24dad9dda3d51725d44a2cbe80d7)
- - Actually implement silkscreen/exposed copper clearance (df003e59f3a01d856eb079f5a2804882ac95983a)
+ - Actually implement silkscreen/exposed copper clearance (df003e59f3a01d856eb079f5a2804882ac95983a by @guserav)
 
 ### Package editor
 
@@ -80,7 +83,7 @@
  - PartsWindow: don't show unpopulated parts (f5b0c8a4f9b3440edbba1c4d8c4d80eeaa6bd2b6)
  - STEP export: don't crash if there are no holes (81d0fb83c740dd0812e132f334969640d58ff097)
  - Handle invalid projects in panelization more gracefully (c8260262218d99a1a7b2d7d9458aabb74fd1b84a)
- - 3D preview: correctly render silkscreen over tented vias (3f20f510636196a99ea177c6a7abd956f580fa95)
+ - 3D preview: correctly render silkscreen over tented vias (3f20f510636196a99ea177c6a7abd956f580fa95 by @frmdstryr)
  - Don't display notes layer by default (702a510042ea324c432388a41d362c2d13ee5e1e)
  - Copy placement tool: properly handle flipped packages (3b7ce85ecf6917bd6dd592dc7e2b28fe67a94703)
  - Don't crash if net used in plane is gone (4a389f0eaefbb7b375f112dc6b71c26a0026caac)
@@ -106,7 +109,7 @@
 ### Pool manager
 
  - Pools window: update pool if needed before using it (6c47b05efe05328a1d4fc9486c4cfc8985a3b458)
- - Fix KiCad symbol import on windows by treating coordinates as signed (5677df46b33a2476c4271ba886552a73f2c98c18)
+ - Fix KiCad symbol import on Windows by treating coordinates as signed (5677df46b33a2476c4271ba886552a73f2c98c18)
  - Entity pool browser: add tooltip to name column (a70fdd74b5b7bd56697b83fc34cd5fd9da3c3fa3)
  - Pools window: don't crash if pool is not compatible (a940f0310ed38d93883fdf6e33125bba21f14261)
  - Part wizard: validate entity filename (e52e0c287cf7e05a7bbfc7ab4fc8dada558b99a9)
