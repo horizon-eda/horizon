@@ -206,7 +206,7 @@ static Coordd pdf_arc_segment(PoDoFo::PdfPainter &painter, const Coordd c, const
 {
     const auto da = a0 - a1;
     assert(da != 0);
-    assert(std::abs(da) <= M_PI / 2);
+    assert(std::abs(da) <= M_PI / 2 + 1e-6);
 
     // Shift to bisect at x axis
     const auto theta = (a0 + a1) / 2;
