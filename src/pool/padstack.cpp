@@ -107,6 +107,16 @@ std::optional<std::string> Padstack::MyParameterProgram::set_hole(const TokenCom
             }
         }
     }
+    else if (shape == "position") {
+        int64_t x, y;
+        if (stack_pop(y) || stack_pop(x))
+            return "empty stack";
+        for (auto &it : ps->holes) {
+            if (it.second.parameter_class == pclass) {
+                it.second.placement.shift = {x, y};
+            }
+        }
+    }
 
     else {
         return "unknown shape " + shape;
