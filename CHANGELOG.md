@@ -1,3 +1,132 @@
+# Version 2.2.0
+
+## New features
+
+### Schematic Editor
+
+ - Hierarchical schematics ([16b925a](https://github.com/horizon-eda/horizon/commit/16b925a3605fbac0f77c9b453131df6e3dda0ad0))
+ - Exchange gates tool ([6df1b9f](https://github.com/horizon-eda/horizon/commit/6df1b9f9412099eb0673026cd8a7d3e603f5f638))
+
+### Editors
+
+ - Align & distribute tool ([30615c8](https://github.com/horizon-eda/horizon/commit/30615c8014407c8cac9f099e858cac1190cc32d2))
+ - Show what's been undone/redone ([ecab1de](https://github.com/horizon-eda/horizon/commit/ecab1deea642c2f138b8a97a61c9e9fb27dbf604))
+ - Dotted layer display mode ([1c4eea6](https://github.com/horizon-eda/horizon/commit/1c4eea61f590549ea29d801215f2e15fe532fa70) by [@rroohhh](https://github.com/rroohhh))
+
+### Pool manager
+
+ - Part: add prefix override ([c209c8a](https://github.com/horizon-eda/horizon/commit/c209c8a7206b84079956c753abf17f53a55a8793))
+
+### Board editor
+
+ - Shorted pads rule ([f57c1f5](https://github.com/horizon-eda/horizon/commit/f57c1f5bde600bdbb1ad48ce86a99de3adbd7ec2) by [@guserav](https://github.com/guserav))
+
+## Enhancements
+
+### General
+
+ - Dark theme option in preferences ([b2bfa20](https://github.com/horizon-eda/horizon/commit/b2bfa20b3e6cad837906cf3aea2812e387b861e4))
+ - Closing a project also closes the project's pool manager ([93e52cd](https://github.com/horizon-eda/horizon/commit/93e52cd01ce38c2aeadbc0c9b09cdba840963dcf))
+ - EditorWindow: improve version update warning ([5578faa](https://github.com/horizon-eda/horizon/commit/5578faa4dcf33522e4f44d76e04b189943723eab))
+ - Prevent using pools from other installations ([21133cd](https://github.com/horizon-eda/horizon/commit/21133cd3cf6ad9211b90b9e7a51b4a1c8fbde1df))
+ - Pool browsers support sorting by modification time ([1491988](https://github.com/horizon-eda/horizon/commit/14919887743feef58abb7f01707fcec49bccf433))
+
+### Security
+
+ - Validate parametric column and table names to protect against SQL injections ([437000a](https://github.com/horizon-eda/horizon/commit/437000ad41b3276372d2cb855cde8e7c5b822869))
+ - Authenticate inter-process communication ([42b8b79](https://github.com/horizon-eda/horizon/commit/42b8b79eacbfa0faa844816721e064b758722144))
+
+### Editors
+
+ - Drag polygon edge tool properly handles arc edges ([d2158ab](https://github.com/horizon-eda/horizon/commit/d2158ab7be097398da27b3a916537463f295382c))
+ - Add 45 degree restrict to draw line & polygon tools ([b48a344](https://github.com/horizon-eda/horizon/commit/b48a3443468f1546539396d831c524e2202d5d2b) by [@kamtar](https://github.com/kamtar))
+ - Slightly faster rendering ([987724c](https://github.com/horizon-eda/horizon/commit/987724c79949204b095990db0fae6349dabe1ac6), [fa2a6d4](https://github.com/horizon-eda/horizon/commit/fa2a6d4a206c40de4692b5263908f274278cdda8), [56358df](https://github.com/horizon-eda/horizon/commit/56358df96761f7a75aebef5854b4fb905167c253), [e776237](https://github.com/horizon-eda/horizon/commit/e77623774a5e2bc287a10a068e4a7e8f86ddc3ec))
+ - Faster colored nets ([02edcc3](https://github.com/horizon-eda/horizon/commit/02edcc308d096721537df8d011b78c3b0f7a1fba) by [@rroohhh](https://github.com/rroohhh))
+ - Make undo/redo depth configurable ([1f7a6e9](https://github.com/horizon-eda/horizon/commit/1f7a6e9aab40369df4a7084ec6812ac80088f1d4))
+ - Show part in project pool manager action ([848f149](https://github.com/horizon-eda/horizon/commit/848f1495b7ab187ddf162fa4ddedf95103a05c34))
+ - Go to project manager action ([7fdc1fa](https://github.com/horizon-eda/horizon/commit/7fdc1fa1d4f3c691c0b651a75ed42be13991a593))
+
+### Schematic editor
+
+ - Pressing escape in the part browser goes back to schematic ([49e0ae7](https://github.com/horizon-eda/horizon/commit/49e0ae7fac482adbcdd3ae93d75ea98049ad9595))
+
+### Board Editor
+
+ - Place package tool remembers flipped state ([9823b8d](https://github.com/horizon-eda/horizon/commit/9823b8dd28689f434a3ec4fbaffaa155e738f2f2))
+ - Display keepouts in outline mode by default ([4f84530](https://github.com/horizon-eda/horizon/commit/4f84530afc7d24dad9dda3d51725d44a2cbe80d7))
+ - Actually implement silkscreen/exposed copper clearance ([df003e5](https://github.com/horizon-eda/horizon/commit/df003e59f3a01d856eb079f5a2804882ac95983a) by [@guserav](https://github.com/guserav))
+
+### Package editor
+
+ - Footprint generator graphics matches light/dark theme ([d559b75](https://github.com/horizon-eda/horizon/commit/d559b754aeaeae49fd3c77629d8ee57ec3354896))
+
+
+### Pool manager
+
+ - Pool settings tab: prevent circular dependencies ([0fb3508](https://github.com/horizon-eda/horizon/commit/0fb3508207357f1e6a694b1d3b875c724bf25388), [83a198e](https://github.com/horizon-eda/horizon/commit/83a198eeaab009c868d1b78826e4e6e8cad1a5f7))
+ - Prevent duplicate filenames ([45c7296](https://github.com/horizon-eda/horizon/commit/45c729616fc589b18af3a92a8ee873f96141e807))
+ - Unit pool browser: store column widths ([b830ef9](https://github.com/horizon-eda/horizon/commit/b830ef970be819d8a01be9ce4d4269c45c5fff6f))
+
+
+### Windows-specific
+
+ - Correct version in executable metadata ([1bb2faf](https://github.com/horizon-eda/horizon/commit/1bb2faf517ea828d9202ee601dfc9877ba04a1e7))
+ - All network operations use the system's certificate store ([6994969](https://github.com/horizon-eda/horizon/commit/6994969a25ac22395b7abf0dd0b29bf191b7c50c))
+
+## Bugfixes
+
+### Board editor
+
+ - Store from rules option in planes ([ea54322](https://github.com/horizon-eda/horizon/commit/ea543228387eacbf5a0e079f5a011cf63f3af47c))
+ - Edit stackup dialog: don't crash on certain interactions ([e7f2d30](https://github.com/horizon-eda/horizon/commit/e7f2d300223f4459b55d7a7d0391ea018c92f561))
+ - Fix 3D models not being found in some cases ([584e972](https://github.com/horizon-eda/horizon/commit/584e9721becf4fa3933f864bcded1d30de4c72fd))
+ - PartsWindow: don't show unpopulated parts ([f5b0c8a](https://github.com/horizon-eda/horizon/commit/f5b0c8a4f9b3440edbba1c4d8c4d80eeaa6bd2b6))
+ - STEP export: don't crash if there are no holes ([81d0fb8](https://github.com/horizon-eda/horizon/commit/81d0fb83c740dd0812e132f334969640d58ff097))
+ - Handle invalid projects in panelization more gracefully ([c826026](https://github.com/horizon-eda/horizon/commit/c8260262218d99a1a7b2d7d9458aabb74fd1b84a))
+ - 3D preview: correctly render silkscreen over tented vias ([3f20f51](https://github.com/horizon-eda/horizon/commit/3f20f510636196a99ea177c6a7abd956f580fa95) by [@frmdstryr](https://github.com/frmdstryr))
+ - Don't display notes layer by default ([702a510](https://github.com/horizon-eda/horizon/commit/702a510042ea324c432388a41d362c2d13ee5e1e))
+ - Copy placement tool: properly handle flipped packages ([3b7ce85](https://github.com/horizon-eda/horizon/commit/3b7ce85ecf6917bd6dd592dc7e2b28fe67a94703))
+ - Don't crash if net used in plane is gone ([4a389f0](https://github.com/horizon-eda/horizon/commit/4a389f0eaefbb7b375f112dc6b71c26a0026caac))
+ - Update selection when reloading netlist ([ed241bd](https://github.com/horizon-eda/horizon/commit/ed241bd0eb46e0189113ebfa5d2c4ed372395eae))
+ - Fix crash when opening 3D view after selecting an alternate package ([d171ca6](https://github.com/horizon-eda/horizon/commit/d171ca6d0f045c0fead4ec8000187f9839007fc6))
+ - Fix crash in PDF export when exporting certain arcs ([ff47cbb](https://github.com/horizon-eda/horizon/commit/ff47cbb3d385141433111696b0cef75366fcc696))
+
+### Schematic editor
+
+ - Copy/paste: keep NC pins ([f9d6774](https://github.com/horizon-eda/horizon/commit/f9d67741fca37077ff3182915e924a23e6dec035))
+
+
+### Editors
+
+ - Don't break undo/redo when a tool crashes ([465edcc](https://github.com/horizon-eda/horizon/commit/465edcc0bf5eaf1be0a02db44a24c58bdd36f697))
+ - Don't clear selection after tool in hover select mode ([8d9f62a](https://github.com/horizon-eda/horizon/commit/8d9f62abbd90ca3a8a9b440eafb25f289ae1b5df))
+ - Rule export: check for filename ending in .json ([67a1513](https://github.com/horizon-eda/horizon/commit/67a15138c61d25b34b2f5d75c6621cd382899d14))
+ - Measure tool: don't require cursor movement ([2d03580](https://github.com/horizon-eda/horizon/commit/2d03580e0548543fd9b780cda284ee5cdd757de2))
+ - Correctly rotate mirrored text ([536ea35](https://github.com/horizon-eda/horizon/commit/536ea3525529ba898b3622b3fae07bb798c8b2b1))
+ - Really use tabular figures in view hints ([b79bbbe](https://github.com/horizon-eda/horizon/commit/b79bbbe31260ead2eae7367070ab8538872314d2))
+
+
+### Pool manager
+
+ - Pools window: update pool if needed before using it ([6c47b05](https://github.com/horizon-eda/horizon/commit/6c47b05efe05328a1d4fc9486c4cfc8985a3b458))
+ - Fix KiCad symbol import on Windows by treating coordinates as signed ([5677df4](https://github.com/horizon-eda/horizon/commit/5677df46b33a2476c4271ba886552a73f2c98c18))
+ - Entity pool browser: add tooltip to name column ([a70fdd7](https://github.com/horizon-eda/horizon/commit/a70fdd74b5b7bd56697b83fc34cd5fd9da3c3fa3))
+ - Pools window: don't crash if pool is not compatible ([a940f03](https://github.com/horizon-eda/horizon/commit/a940f0310ed38d93883fdf6e33125bba21f14261))
+ - Part wizard: validate entity filename ([e52e0c2](https://github.com/horizon-eda/horizon/commit/e52e0c287cf7e05a7bbfc7ab4fc8dada558b99a9))
+ - Move to other pool window: really check if filenames end in .json ([1626787](https://github.com/horizon-eda/horizon/commit/162678740c0f10dabb11b9a5d61cb65945bc7209))
+ - Move to other pool window: show names instead of UUIDs and make it work for items other than parts ([e5582ed](https://github.com/horizon-eda/horizon/commit/e5582edf9a6040cfac53122b9c2b577d21cbdbd5))
+ - Symbol pool browser: correctly store treeview column widths ([3ca8b80](https://github.com/horizon-eda/horizon/commit/3ca8b80f447ff0b301c967bc7729470b1c5ad1ca))
+ - Show item status tooltip also if there's a row tooltip ([b6e6045](https://github.com/horizon-eda/horizon/commit/b6e60451c809172818d2397cf31ffb7a5db04a73))
+
+
+### Project manager
+
+ - Don't crash if included pool isn't usable ([362b7ca](https://github.com/horizon-eda/horizon/commit/362b7cad1e348072770481feaaa857af6e4a46db))
+
+### Windows-specific
+
+ - Avoid crashes when network drives are inaccessible ([d44f402](https://github.com/horizon-eda/horizon/commit/d44f402efe9e4f3a7e626805598a67858dd4751b))
+
 # Version 2.1.0
 
 ## New features
