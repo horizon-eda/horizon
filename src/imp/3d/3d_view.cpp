@@ -535,6 +535,7 @@ ActionConnection &View3DWindow::connect_action(ActionID action_id, std::function
 void View3DWindow::apply_preferences(const Preferences &prefs)
 {
     canvas->smooth_zoom = prefs.zoom.smooth_zoom_3d;
+    canvas->touchpad_pan = prefs.zoom.touchpad_pan;
     canvas->set_appearance(prefs.canvas_layer.appearance);
     const auto av = ActionCatalogItem::AVAILABLE_IN_3D;
     for (auto &it : action_connections) {

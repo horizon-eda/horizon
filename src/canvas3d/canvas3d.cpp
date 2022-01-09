@@ -230,7 +230,49 @@ int Canvas3D::zoom_tick_cb(GtkWidget *cwidget, GdkFrameClock *frame_clock, gpoin
 
 bool Canvas3D::on_scroll_event(GdkEventScroll *scroll_event)
 {
+    auto *dev = gdk_event_get_source_device((GdkEvent *)scroll_event);
+    auto src = gdk_device_get_source(dev);
+    if (src == GDK_SOURCE_TRACKPOINT || (src == GDK_SOURCE_TOUCHPAD && touchpad_pan)) {
+        if (scroll_event->state & GDK_CONTROL_MASK) {
+            pan_zoom(scroll_event);
+        }
+        else if (scroll_event->state & GDK_SHIFT_MASK) {
+            pan_rotate(scroll_event);
+        }
+        else {
+            pan_drag_move(scroll_event);
+        }
+    }
+    else {
+        pan_zoom(scroll_event);
+    }
 
+    return Gtk::GLArea::on_scroll_event(scroll_event);
+}
+
+
+void Canvas3D::pan_drag_move(GdkEventScroll *scroll_event)
+{
+    gdouble dx, dy;
+    gdk_event_get_scroll_deltas((GdkEvent *)scroll_event, &dx, &dy);
+
+    auto delta = glm::vec2(dx * -50, dy * 50);
+
+    set_center(get_center() + get_center_shift(delta));
+}
+
+void Canvas3D::pan_rotate(GdkEventScroll *scroll_event)
+{
+    gdouble dx, dy;
+    gdk_event_get_scroll_deltas((GdkEvent *)scroll_event, &dx, &dy);
+
+    auto delta = -glm::vec2(dx, dy);
+
+    set_cam_azimuth(get_cam_azimuth() - delta.x * 9);
+    set_cam_elevation(get_cam_elevation() - delta.y * 9);
+}
+void Canvas3D::pan_zoom(GdkEventScroll *scroll_event)
+{
     float inc = 0;
     float factor = 1;
     if (scroll_event->state & Gdk::SHIFT_MASK)
@@ -249,7 +291,7 @@ bool Canvas3D::on_scroll_event(GdkEventScroll *scroll_event)
     inc *= factor;
     if (smooth_zoom) {
         if (inc == 0)
-            return Gtk::GLArea::on_scroll_event(scroll_event);
+            return;
         if (!zoom_animator.is_running()) {
             zoom_animator.start();
             zoom_animation_cam_dist_orig = cam_distance;
@@ -260,9 +302,6 @@ bool Canvas3D::on_scroll_event(GdkEventScroll *scroll_event)
     else {
         set_cam_distance(cam_distance * pow(1.5, inc));
     }
-
-
-    return Gtk::GLArea::on_scroll_event(scroll_event);
 }
 
 void Canvas3D::inc_cam_azimuth(float v)

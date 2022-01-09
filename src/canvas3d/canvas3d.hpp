@@ -25,6 +25,7 @@ public:
     float near;
 
     bool smooth_zoom = false;
+    bool touchpad_pan = false;
 
     void request_push();
     void update(const class Board &brd);
@@ -75,6 +76,10 @@ private:
     bool on_motion_notify_event(GdkEventMotion *motion_event) override;
     bool on_button_release_event(GdkEventButton *button_event) override;
     bool on_scroll_event(GdkEventScroll *scroll_event) override;
+
+    void pan_zoom(GdkEventScroll *scroll_event);
+    void pan_drag_move(GdkEventScroll *scroll_event);
+    void pan_rotate(GdkEventScroll *scroll_event);
 
     Glib::RefPtr<Gtk::GestureDrag> gesture_drag;
     glm::vec2 gesture_drag_center_orig;
