@@ -16,7 +16,7 @@ TextEditor::TextEditor(Lines mode)
         entry->signal_key_press_event().connect([this](GdkEventKey *ev) {
             if (ev->keyval == GDK_KEY_Return && (ev->state & Gdk::SHIFT_MASK)) {
                 entry_focus_out_conn.disconnect();
-                auto txt = get_text();
+                auto txt = entry->get_text();
                 auto pos = entry->get_position();
                 txt.insert(pos, "\n");
                 set_transition_duration(100);
@@ -97,7 +97,7 @@ void TextEditor::set_text(const std::string &text, Select select)
         set_visible_child("view");
     }
     else {
-        entry->set_text(Glib::strescape(text));
+        entry->set_text(text);
         if (select == Select::YES)
             entry->select_region(0, -1);
         set_visible_child("entry");
@@ -107,7 +107,7 @@ void TextEditor::set_text(const std::string &text, Select select)
 std::string TextEditor::get_text() const
 {
     if (get_visible_child_name() == "entry")
-        return Glib::strcompress(entry->get_text());
+        return entry->get_text();
     else
         return view->get_buffer()->get_text();
 }
