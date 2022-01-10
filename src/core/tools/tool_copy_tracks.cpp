@@ -12,7 +12,7 @@ bool ToolCopyTracks::can_begin()
     if (!doc.b)
         return false;
 
-    return sel_count_type(selection, ObjectType::TRACK) > 0;
+    return sel_has_type(selection, ObjectType::TRACK);
 }
 
 ToolResponse ToolCopyTracks::begin(const ToolArgs &args)

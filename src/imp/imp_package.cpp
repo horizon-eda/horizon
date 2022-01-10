@@ -158,7 +158,7 @@ void ImpPackage::construct()
 
     connect_action(ActionID::EDIT_PADSTACK, [this](const auto &a) {
         auto sel = canvas->get_selection();
-        if (sel_count_type(sel, ObjectType::PAD)) {
+        if (sel_has_type(sel, ObjectType::PAD)) {
             auto uu = sel_find_one(sel, ObjectType::PAD).uuid;
             this->edit_pool_item(ObjectType::PADSTACK, package.pads.at(uu).pool_padstack->uuid);
         }

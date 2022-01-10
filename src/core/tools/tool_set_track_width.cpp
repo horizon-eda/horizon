@@ -8,7 +8,7 @@ namespace horizon {
 
 bool ToolSetTrackWidth::can_begin()
 {
-    return sel_count_type(selection, ObjectType::TRACK);
+    return sel_has_type(selection, ObjectType::TRACK);
 }
 
 ToolResponse ToolSetTrackWidth::begin(const ToolArgs &args)

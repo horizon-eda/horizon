@@ -12,7 +12,7 @@ bool ToolCopyPlacement::can_begin()
     if (!doc.b)
         return false;
 
-    return sel_count_type(selection, ObjectType::BOARD_PACKAGE) > 0;
+    return sel_has_type(selection, ObjectType::BOARD_PACKAGE);
 }
 
 ToolResponse ToolCopyPlacement::begin(const ToolArgs &args)
