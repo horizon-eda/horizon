@@ -11,7 +11,7 @@
 
 namespace horizon {
 
-Canvas::Canvas() : selectables(*this)
+Canvas::Canvas() : selectables(*this), text_renderer(*this)
 {
     layer_display[10000] = LayerDisplay(true, LayerDisplay::Mode::FILL);
     layer_display[0] = LayerDisplay(true, LayerDisplay::Mode::FILL);

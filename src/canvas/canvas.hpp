@@ -18,13 +18,14 @@
 #include "picture.hpp"
 #include "pool/unit.hpp"
 #include "util/vector_pair.hpp"
-#include "util/text_data.hpp"
+#include "text_renderer.hpp"
 
 namespace horizon {
 class Canvas {
     friend Selectables;
     friend class SelectionFilter;
     friend class CanvasAnnotation;
+    friend CanvasTextRenderer;
 
 public:
     Canvas();
@@ -165,17 +166,9 @@ protected:
     void draw_arc0(const Coord<float> &center, float radius0, float a0, float a1, ColorP color, int layer,
                    uint64_t width);
 
-    struct TextOptions {
-        uint64_t width = 0;
-        bool flip = false;
-        bool mirror = false;
-        bool draw = true;
-        TextData::Font font = TextData::Font::SIMPLEX;
-        bool center = false;
-        bool allow_upside_down = false;
-    };
+
     std::pair<Coordf, Coordf> draw_text(const Coordf &p, float size, const std::string &rtext, int angle,
-                                        TextOrigin origin, ColorP color, int layer, const TextOptions &opts);
+                                        TextOrigin origin, ColorP color, int layer, const TextRenderer::Options &opts);
 
     virtual void draw_bitmap_text(const Coordf &p, float scale, const std::string &rtext, int angle, ColorP color,
                                   int layer)
@@ -264,6 +257,6 @@ private:
 
     void draw_direction(Pin::Direction dir, ColorP color);
 
-    TextData::Buffer text_data_buffer;
+    CanvasTextRenderer text_renderer;
 };
 } // namespace horizon

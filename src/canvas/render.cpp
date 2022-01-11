@@ -429,7 +429,7 @@ void Canvas::render(const SymbolPin &pin, bool interactive, ColorP co)
             Placement tr;
             tr.set_angle(orientation_to_angle(pin_orientation));
             auto shift = tr.transform(Coordi(-1_mm, 0));
-            TextOptions opts;
+            TextRenderer::Options opts;
             opts.center = true;
             draw_text(p_name + shift, 1.5_mm, pin.name, orientation_to_angle(name_orientation) + 16384,
                       TextOrigin::CENTER, c_name, 0, opts);
@@ -607,31 +607,13 @@ void Canvas::render(const SchematicSymbol &sym)
 
 void Canvas::render(const Text &text, bool interactive, ColorP co)
 {
-    bool rev = layer_provider->get_layers().at(text.layer).reverse;
-    transform_save();
-    const auto mirror_orig = transform.mirror;
-    const auto angle_orig = transform.get_angle();
-    transform.accumulate(text.placement);
-    const auto text_angle = text.placement.get_angle();
-    const auto angle =
-            (transform.mirror ^ rev ? 32768 - text_angle : text_angle) + (mirror_orig ^ rev ? -1 : 1) * angle_orig;
-
+    const bool rev = layer_provider->get_layers().at(text.layer).reverse;
     img_patch_type(PatchType::TEXT);
     triangle_type_current = TriangleInfo::Type::TEXT;
-
-    TextOptions opts;
-    opts.flip = rev;
-    opts.mirror = transform.mirror;
-    opts.font = text.font;
-    opts.width = text.width;
-    opts.allow_upside_down = text.allow_upside_down;
-
-    const auto extents = draw_text(transform.shift, text.size, text.overridden ? text.text_override : text.text, angle,
-                                   text.origin, co, text.layer, opts);
+    const auto extents = text_renderer.render(text, co, transform, rev);
     triangle_type_current = TriangleInfo::Type::NONE;
-    // img_text_extents(text, extents);
     img_patch_type(PatchType::OTHER);
-    transform_restore();
+
     if (interactive) {
         selectables.append(text.uuid, ObjectType::TEXT, text.placement.shift, extents.first, extents.second, 0,
                            text.layer);
@@ -1423,7 +1405,7 @@ void Canvas::render(const class Dimension &dim)
         auto length = v.mag();
         auto s = dim_to_string(length, false);
 
-        TextOptions opts;
+        TextRenderer::Options opts;
         opts.draw = false;
         const auto text_bb = draw_text({0, 0}, dim.label_size, s, 0, TextOrigin::CENTER, co, 10000, opts);
         auto text_width = std::abs(text_bb.second.x - text_bb.first.x);
@@ -1461,7 +1443,7 @@ void Canvas::render(const class Dimension &dim)
         transform_restore();
 
         const int angle_i = angle_from_rad(angle);
-        TextOptions opts2;
+        TextRenderer::Options opts2;
         opts2.flip = get_flip_view();
         const auto real_text_bb =
                 draw_text(Coordi(text_pos.x, text_pos.y), dim.label_size, s,
@@ -1795,7 +1777,7 @@ void Canvas::render(const class BlockSymbolPort &port, bool interactive)
         Placement tr;
         tr.set_angle(orientation_to_angle(port_orientation));
         auto shift = tr.transform(Coordi(-1_mm, 0));
-        TextOptions opts;
+        TextRenderer::Options opts;
         opts.center = true;
         draw_text(p_name + shift, 1.5_mm, port.name, orientation_to_angle(name_orientation) + 16384, TextOrigin::CENTER,
                   c_name, 0, opts);

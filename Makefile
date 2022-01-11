@@ -182,6 +182,8 @@ SRC_CANVAS = \
 	src/canvas/annotation.cpp \
 	src/canvas/fragment_cache.cpp \
 	src/util/text_data.cpp \
+	src/util/text_renderer.cpp \
+	src/canvas/text_renderer.cpp\
 	3rd_party/poly2tri/common/shapes.cpp\
 	3rd_party/poly2tri/sweep/cdt.cpp\
 	3rd_party/poly2tri/sweep/sweep.cpp\
@@ -793,6 +795,8 @@ SRC_PR_REVIEW = \
 	src/checks/check_part.cpp\
 	src/checks/check_item.cpp\
 	src/canvas/layer_display.cpp\
+	src/util/text_renderer.cpp \
+	src/canvas/text_renderer.cpp\
 
 SRC_OCE = \
 	src/import_step/step_importer.cpp\
@@ -909,6 +913,8 @@ SRC_SHARED = $(SRC_COMMON) \
 	src/rules/cache.cpp \
 	src/board/board_rules_check.cpp \
 	src/canvas/layer_display.cpp\
+	src/util/text_renderer.cpp \
+	src/canvas/text_renderer.cpp\
 	$(SRC_POOL_UPDATE)\
 	$(SRC_SHARED_3D)
 

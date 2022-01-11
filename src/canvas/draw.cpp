@@ -171,7 +171,7 @@ void Canvas::draw_error(const Coordf &center, float sc, const std::string &text,
     Coordf text_pos{x - 5 * sc, y - 1.5f * sc};
     if (tr)
         text_pos = transform.transform(text_pos);
-    TextOptions opts;
+    TextRenderer::Options opts;
     opts.flip = get_flip_view();
     draw_text(text_pos, 0.25_mm, text, get_flip_view() ? 32768 : 0, TextOrigin::BASELINE, c, layer, opts);
 }

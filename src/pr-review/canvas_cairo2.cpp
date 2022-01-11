@@ -261,7 +261,7 @@ void CanvasCairo2::draw_text_box(const Placement &q, float width, float height, 
     else if (mode == TextBoxMode::LOWER)
         text_pos.y = -height / 4;
 
-    TextOptions opts;
+    TextRenderer::Options opts;
     opts.width = text_width;
     opts.font = TextData::Font::COMPLEX_ITALIC;
     opts.draw = false;
