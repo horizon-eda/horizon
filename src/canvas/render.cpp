@@ -618,7 +618,6 @@ void Canvas::render(const Text &text, bool interactive, ColorP co)
 
     img_patch_type(PatchType::TEXT);
     triangle_type_current = TriangleInfo::Type::TEXT;
-    object_ref_push(ObjectType::TEXT, text.uuid);
 
     TextOptions opts;
     opts.flip = rev;
@@ -630,7 +629,6 @@ void Canvas::render(const Text &text, bool interactive, ColorP co)
     const auto extents = draw_text(transform.shift, text.size, text.overridden ? text.text_override : text.text, angle,
                                    text.origin, co, text.layer, opts);
     triangle_type_current = TriangleInfo::Type::NONE;
-    object_ref_pop();
     // img_text_extents(text, extents);
     img_patch_type(PatchType::OTHER);
     transform_restore();
