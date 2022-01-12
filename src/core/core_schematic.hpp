@@ -134,6 +134,7 @@ private:
     void rebuild_internal(bool from_undo, const std::string &comment) override;
     void history_push(const std::string &comment) override;
     void history_load(unsigned int i) override;
+    std::string get_history_comment_context() const override;
     void save(const std::string &suffix) override;
     void delete_autosave() override;
     void fix_current_block();

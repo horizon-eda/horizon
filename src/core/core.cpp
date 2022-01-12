@@ -159,12 +159,20 @@ void Core::rebuild_finish(bool from_undo, const std::string &comment)
             history.pop_back();
         }
         assert(history_current + 1 == (int)history.size());
-        history_push(comment);
+        if (const auto comment_ctx = get_history_comment_context(); comment_ctx.size())
+            history_push(comment + " " + comment_ctx);
+        else
+            history_push(comment);
         history_current++;
         history_trim();
     }
     s_signal_rebuilt.emit();
     signal_can_undo_redo().emit();
+}
+
+std::string Core::get_history_comment_context() const
+{
+    return {};
 }
 
 void Core::undo()

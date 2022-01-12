@@ -214,6 +214,7 @@ protected:
     size_t history_max = 50;
     virtual void history_push(const std::string &comment) = 0;
     virtual void history_load(unsigned int i) = 0;
+    virtual std::string get_history_comment_context() const;
     void history_clear();
     void history_trim();
 

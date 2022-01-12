@@ -957,6 +957,22 @@ void CoreSchematic::history_load(unsigned int i)
     s_signal_rebuilt.emit();
 }
 
+std::string CoreSchematic::get_history_comment_context() const
+{
+    if (get_block_symbol_mode()) {
+        return "on block symbol " + get_current_block()->name;
+    }
+    else if (instance_path.size()) {
+        return "on sheet " + get_top_block()->instance_path_to_string(instance_path) + "/" + get_sheet()->name;
+    }
+    else if (current_block_is_top()) {
+        return "on sheet " + get_sheet()->name;
+    }
+    else {
+        return "on sheet " + get_current_block()->name + "/" + get_sheet()->name;
+    }
+}
+
 void CoreSchematic::reload_pool()
 {
 
