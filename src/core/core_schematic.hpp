@@ -31,7 +31,9 @@ public:
     void delete_junction(const UUID &uu) override;
 
     class Block *get_top_block() override;
+    const Block *get_top_block() const;
     class Block *get_current_block() override;
+    const Block *get_current_block() const;
     class LayerProvider &get_layer_provider() override;
 
     bool set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property,

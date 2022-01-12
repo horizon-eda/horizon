@@ -66,7 +66,17 @@ Block *CoreSchematic::get_current_block()
     return &blocks->blocks.at(block_uuid).block;
 }
 
+const Block *CoreSchematic::get_current_block() const
+{
+    return &blocks->blocks.at(block_uuid).block;
+}
+
 Block *CoreSchematic::get_top_block()
+{
+    return &blocks->get_top_block_item().block;
+}
+
+const Block *CoreSchematic::get_top_block() const
 {
     return &blocks->get_top_block_item().block;
 }
