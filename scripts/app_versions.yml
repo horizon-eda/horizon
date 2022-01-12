@@ -11,6 +11,7 @@ versions:
     1: add custom values on symbols
     2: add hierarchy
     3: add name orientation to block symbol ports
+    4: add connectivity checks
   project:
     1: replace pool cache with project pool
     2: add hierarchy

@@ -1,26 +1,26 @@
-#include "rule_single_pin_net.hpp"
+#include "rule_connectivity.hpp"
 #include "util/util.hpp"
 #include <sstream>
 #include "nlohmann/json.hpp"
 
 namespace horizon {
-RuleSinglePinNet::RuleSinglePinNet() : Rule()
+RuleConnectivity::RuleConnectivity() : Rule()
 {
 }
 
-RuleSinglePinNet::RuleSinglePinNet(const json &j) : Rule(j)
+RuleConnectivity::RuleConnectivity(const json &j) : Rule(j)
 {
     include_unnamed = j.at("include_unnamed").get<bool>();
 }
 
-json RuleSinglePinNet::serialize() const
+json RuleConnectivity::serialize() const
 {
     json j = Rule::serialize();
     j["include_unnamed"] = include_unnamed;
     return j;
 }
 
-std::string RuleSinglePinNet::get_brief(const class Block *block, class IPool *pool) const
+std::string RuleConnectivity::get_brief(const class Block *block, class IPool *pool) const
 {
     return "";
 }

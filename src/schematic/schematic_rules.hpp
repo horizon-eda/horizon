@@ -2,7 +2,7 @@
 #include "util/uuid.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "rules/rules.hpp"
-#include "rule_single_pin_net.hpp"
+#include "rule_connectivity.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -23,8 +23,8 @@ public:
     Rule &add_rule(RuleID id) override;
 
 private:
-    RuleSinglePinNet rule_single_pin_net;
+    RuleConnectivity rule_connectivity;
 
-    RulesCheckResult check_single_pin_net(const class Schematic &sch, class RulesCheckCache &cache) const;
+    RulesCheckResult check_connectivity(const class Schematic &sch, class RulesCheckCache &cache) const;
 };
 } // namespace horizon

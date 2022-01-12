@@ -47,7 +47,7 @@ const LutEnumStr<RuleID> rule_id_lut = {
         {"clearance_silkscreen_exposed_copper", RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER},
         {"track_width", RuleID::TRACK_WIDTH},
         {"clearance_copper", RuleID::CLEARANCE_COPPER},
-        {"single_pin_net", RuleID::SINGLE_PIN_NET},
+        {"single_pin_net", RuleID::CONNECTIVITY},
         {"parameters", RuleID::PARAMETERS},
         {"via", RuleID::VIA},
         {"clearance_copper_other", RuleID::CLEARANCE_COPPER_OTHER},

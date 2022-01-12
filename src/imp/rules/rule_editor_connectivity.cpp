@@ -1,10 +1,10 @@
-#include "rule_editor_single_pin_net.hpp"
-#include "schematic/rule_single_pin_net.hpp"
+#include "rule_editor_connectivity.hpp"
+#include "schematic/rule_connectivity.hpp"
 
 namespace horizon {
-void RuleEditorSinglePinNet::populate()
+void RuleEditorConnectivity::populate()
 {
-    rule2 = &dynamic_cast<RuleSinglePinNet &>(rule);
+    rule2 = &dynamic_cast<RuleConnectivity &>(rule);
 
     Gtk::CheckButton *editor = Gtk::manage(new Gtk::CheckButton("Include unnamed nets"));
     editor->set_valign(Gtk::ALIGN_START);

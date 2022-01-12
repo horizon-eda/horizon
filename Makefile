@@ -45,7 +45,7 @@ SRC_COMMON = \
 	src/schematic/schematic_block_symbol.cpp\
 	src/schematic/power_symbol.cpp\
 	src/schematic/schematic_rules.cpp\
-	src/schematic/rule_single_pin_net.cpp\
+	src/schematic/rule_connectivity.cpp\
 	src/common/pdf_export_settings.cpp\
 	src/pool/padstack.cpp\
 	src/common/polygon.cpp\
@@ -448,7 +448,7 @@ SRC_IMP = \
 	src/imp/rules/rule_editor_clearance_silk_exp_copper.cpp\
 	src/imp/rules/rule_editor_track_width.cpp\
 	src/imp/rules/rule_editor_clearance_copper.cpp\
-	src/imp/rules/rule_editor_single_pin_net.cpp\
+	src/imp/rules/rule_editor_connectivity.cpp\
 	src/imp/rules/rule_editor_via.cpp\
 	src/imp/rules/rule_editor_clearance_copper_other.cpp\
 	src/imp/rules/rule_editor_plane.cpp\

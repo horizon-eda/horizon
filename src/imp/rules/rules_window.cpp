@@ -9,7 +9,7 @@
 #include "rule_editor_hole_size.hpp"
 #include "rule_editor_package_checks.hpp"
 #include "rule_editor_plane.hpp"
-#include "rule_editor_single_pin_net.hpp"
+#include "rule_editor_connectivity.hpp"
 #include "rule_editor_track_width.hpp"
 #include "rule_editor_via.hpp"
 #include "rule_editor_clearance_copper_keepout.hpp"
@@ -582,8 +582,8 @@ RuleEditor *RulesWindow::create_editor(Rule &r)
         e = new RuleEditorClearanceCopper(r, core);
         break;
 
-    case RuleID::SINGLE_PIN_NET:
-        e = new RuleEditorSinglePinNet(r, core);
+    case RuleID::CONNECTIVITY:
+        e = new RuleEditorConnectivity(r, core);
         break;
 
     case RuleID::VIA:

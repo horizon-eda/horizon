@@ -11,9 +11,12 @@ SchematicRules::SchematicRules()
 
 void SchematicRules::load_from_json(const json &j)
 {
-    if (j.count("single_pin_net")) {
+    if (j.count("connectivity")) {
+        rule_connectivity = RuleConnectivity(j.at("connectivity"));
+    }
+    else if (j.count("single_pin_net")) {
         const json &o = j["single_pin_net"];
-        rule_single_pin_net = RuleSinglePinNet(o);
+        rule_connectivity = RuleConnectivity(o);
     }
 }
 
@@ -24,20 +27,20 @@ void SchematicRules::apply(RuleID id, Schematic *sch)
 json SchematicRules::serialize() const
 {
     json j;
-    j["single_pin_net"] = rule_single_pin_net.serialize();
+    j["connectivity"] = rule_connectivity.serialize();
 
     return j;
 }
 
 std::vector<RuleID> SchematicRules::get_rule_ids() const
 {
-    return {RuleID::SINGLE_PIN_NET};
+    return {RuleID::CONNECTIVITY};
 }
 
 const Rule &SchematicRules::get_rule(RuleID id) const
 {
-    if (id == RuleID::SINGLE_PIN_NET) {
-        return rule_single_pin_net;
+    if (id == RuleID::CONNECTIVITY) {
+        return rule_connectivity;
     }
     throw std::runtime_error("rule does not exist");
 }

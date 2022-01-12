@@ -15,7 +15,7 @@ const std::map<RuleID, RD> rule_descriptions = {
 
         {RuleID::PARAMETERS, {"Parameters", RD::CAN_APPLY}},
 
-        {RuleID::SINGLE_PIN_NET, {"Single pin nets", RD::CAN_CHECK}},
+        {RuleID::CONNECTIVITY, {"Connectivity", RD::CAN_CHECK}},
 
         {RuleID::VIA, {"Vias", RD::IS_MULTI | RD::CAN_APPLY | RD::NEEDS_MATCH_ALL}},
 
