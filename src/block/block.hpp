@@ -119,6 +119,8 @@ public:
     std::vector<BlockItem<false>> get_instantiated_blocks_and_top();
     std::vector<BlockItem<true>> get_instantiated_blocks_and_top() const;
 
+    std::string instance_path_to_string(const UUIDVec &instance_path) const;
+
     bool can_delete_power_net(const UUID &uu) const;
 
     bool can_add_block_instance(const UUID &where, const UUID &block_inst) const;

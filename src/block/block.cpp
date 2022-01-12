@@ -788,10 +788,10 @@ static void update_net_map_for_instance(const BlockInstance &inst, const UUIDVec
     }
 }
 
-static std::string instance_path_to_string(const UUIDVec &instance_path, const Block &top)
+std::string Block::instance_path_to_string(const UUIDVec &instance_path) const
 {
     std::string r;
-    const Block *block = &top;
+    const Block *block = this;
     for (const auto &uu : instance_path) {
         if (r.size())
             r += "/";
@@ -816,7 +816,7 @@ static void visit_block_for_flatten(const Block &block, const UUIDVec &instance_
             if (ctx.net_map.emplace(v, flat_uu).second) {
                 auto &flat_net = ctx.flat.nets.emplace(flat_uu, flat_uu).first->second;
                 flat_net.net_class = ctx.flat.net_class_default;
-                flat_net.name = instance_path_to_string(instance_path, ctx.top) + "/" + block.get_net_name(uu);
+                flat_net.name = ctx.top.instance_path_to_string(instance_path) + "/" + block.get_net_name(uu);
                 if (ctx.flat.net_classes.count(net.net_class->uuid)) {
                     flat_net.net_class = &ctx.flat.net_classes.at(net.net_class->uuid);
                 }
@@ -848,10 +848,10 @@ static void visit_block_for_flatten(const Block &block, const UUIDVec &instance_
     }
     for (const auto &[uu, name] : block.group_names) {
         ctx.flat.group_names.emplace(uuid_vec_flatten(uuid_vec_append(instance_path, uu)),
-                                     instance_path_to_string(instance_path, ctx.top) + "/" + name);
+                                     ctx.top.instance_path_to_string(instance_path) + "/" + name);
     }
     for (const auto &[uu, name] : block.tag_names) {
-        ctx.flat.tag_names.emplace(uu, instance_path_to_string(instance_path, ctx.top) + "/" + name);
+        ctx.flat.tag_names.emplace(uu, ctx.top.instance_path_to_string(instance_path) + "/" + name);
     }
     for (const auto &[uu, inst] : block.block_instances) {
         update_net_map_for_instance(inst, instance_path, ctx);
