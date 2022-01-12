@@ -27,8 +27,8 @@ using json = nlohmann::json;
 
 class NetSegmentInfo {
 public:
-    NetSegmentInfo(LineNet *li);
-    NetSegmentInfo(SchematicJunction *ju);
+    NetSegmentInfo(const LineNet *li);
+    NetSegmentInfo(const SchematicJunction *ju);
     bool has_label = false;
     bool has_power_sym = false;
     Coordi position;
@@ -73,7 +73,7 @@ public:
     void vacuum_junctions();
     void delete_dependants();
     void propagate_net_segments();
-    std::map<UUID, NetSegmentInfo> analyze_net_segments();
+    std::map<UUID, NetSegmentInfo> analyze_net_segments() const;
     void place_warnings(const std::map<UUID, NetSegmentInfo> &nsinfo);
     Block::NetPinsAndPorts get_pins_connected_to_net_segment(const UUID &uu_segment);
     void update_junction_connections();

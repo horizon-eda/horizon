@@ -510,10 +510,10 @@ void Sheet::propagate_net_segments()
     }
 }
 
-NetSegmentInfo::NetSegmentInfo(SchematicJunction *ju) : position(ju->position), net(ju->net), bus(ju->bus)
+NetSegmentInfo::NetSegmentInfo(const SchematicJunction *ju) : position(ju->position), net(ju->net), bus(ju->bus)
 {
 }
-NetSegmentInfo::NetSegmentInfo(LineNet *li)
+NetSegmentInfo::NetSegmentInfo(const LineNet *li)
     : position((li->to.get_position() + li->from.get_position()) / 2), net(li->net), bus(li->bus)
 {
 }
@@ -526,7 +526,7 @@ bool NetSegmentInfo::is_bus() const
     return false;
 }
 
-std::map<UUID, NetSegmentInfo> Sheet::analyze_net_segments()
+std::map<UUID, NetSegmentInfo> Sheet::analyze_net_segments() const
 {
     std::map<UUID, NetSegmentInfo> net_segments;
     for (auto &it : net_lines) {
