@@ -43,7 +43,7 @@ bool PoolUpdater::update_part(const std::string &filename)
             status_cb(PoolUpdateStatus::FILE, filename, "");
             const auto rel = get_path_rel(filename);
             auto part = Part::new_from_json(load_json(filename), *pool);
-            const auto last_pool_uuid = handle_override(ObjectType::PART, part.uuid);
+            const auto last_pool_uuid = handle_override(ObjectType::PART, part.uuid, rel);
             if (!last_pool_uuid)
                 return false;
             std::string table;
@@ -91,6 +91,9 @@ bool PoolUpdater::update_part(const std::string &filename)
     }
     catch (const std::exception &e) {
         status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());
+    }
+    catch (const CompletePoolUpdateRequiredException &e) {
+        throw;
     }
     catch (...) {
         status_cb(PoolUpdateStatus::FILE_ERROR, filename, "unknown exception");

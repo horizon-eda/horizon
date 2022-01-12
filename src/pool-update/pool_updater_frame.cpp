@@ -24,7 +24,7 @@ void PoolUpdater::update_frame(const std::string &filename)
         status_cb(PoolUpdateStatus::FILE, filename, "");
         const auto rel = get_path_rel(filename);
         auto frame = Frame::new_from_file(filename);
-        const auto last_pool_uuid = handle_override(ObjectType::FRAME, frame.uuid);
+        const auto last_pool_uuid = handle_override(ObjectType::FRAME, frame.uuid, rel);
         if (!last_pool_uuid)
             return;
         SQLite::Query q(pool->db,
@@ -42,6 +42,9 @@ void PoolUpdater::update_frame(const std::string &filename)
     }
     catch (const std::exception &e) {
         status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());
+    }
+    catch (const CompletePoolUpdateRequiredException &e) {
+        throw;
     }
     catch (...) {
         status_cb(PoolUpdateStatus::FILE_ERROR, filename, "unknown exception");

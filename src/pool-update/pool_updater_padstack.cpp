@@ -60,7 +60,7 @@ void PoolUpdater::update_padstacks(const std::string &directory, const std::stri
                                 status_cb(PoolUpdateStatus::FILE, filename, "");
                                 auto padstack = Padstack::new_from_file(filename);
                                 const auto rel = Glib::build_filename("packages", prefix, it, "padstacks", it2);
-                                const auto last_pool_uuid = handle_override(ObjectType::PADSTACK, padstack.uuid);
+                                const auto last_pool_uuid = handle_override(ObjectType::PADSTACK, padstack.uuid, rel);
                                 if (!last_pool_uuid)
                                     throw std::runtime_error("shouldn't happen in complete pool update");
                                 add_padstack(padstack, pkg_uuid, *last_pool_uuid, rel, filename);
@@ -92,7 +92,7 @@ void PoolUpdater::update_padstacks_global(const std::string &directory, const st
                 status_cb(PoolUpdateStatus::FILE, filename, "");
                 const auto rel = Glib::build_filename("padstacks", prefix, it);
                 auto padstack = Padstack::new_from_file(filename);
-                const auto last_pool_uuid = handle_override(ObjectType::PADSTACK, padstack.uuid);
+                const auto last_pool_uuid = handle_override(ObjectType::PADSTACK, padstack.uuid, rel);
                 if (!last_pool_uuid)
                     throw std::runtime_error("shouldn't happen in complete pool update");
                 add_padstack(padstack, UUID(), *last_pool_uuid, rel, filename);
@@ -126,13 +126,16 @@ void PoolUpdater::update_padstack(const std::string &filename)
             }
         }
         const auto rel = get_path_rel(filename);
-        const auto last_pool_uuid = handle_override(ObjectType::PADSTACK, padstack.uuid);
+        const auto last_pool_uuid = handle_override(ObjectType::PADSTACK, padstack.uuid, rel);
         if (!last_pool_uuid)
             return;
         add_padstack(padstack, package_uuid, *last_pool_uuid, rel, filename);
     }
     catch (const std::exception &e) {
         status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());
+    }
+    catch (const CompletePoolUpdateRequiredException &e) {
+        throw;
     }
     catch (...) {
         status_cb(PoolUpdateStatus::FILE_ERROR, filename, "unknown exception");

@@ -87,6 +87,7 @@ PoolUpdater::PoolUpdater(const std::string &bp, pool_update_cb_t cb) : status_cb
         q.step();
     }
     q_exists.emplace(pool->db, "SELECT pool_uuid, last_pool_uuid FROM all_items_view WHERE uuid = ? AND type = ?");
+    q_exists_by_filename.emplace(pool->db, "SELECT uuid FROM all_items_view WHERE filename = ? AND type = ?");
     q_add_dependency.emplace(pool->db, "INSERT INTO dependencies VALUES (?, ?, ?, ?)");
     q_insert_part.emplace(
             pool->db,
@@ -181,7 +182,7 @@ void PoolUpdater::delete_item(ObjectType type, const UUID &uu)
     }
 }
 
-std::optional<UUID> PoolUpdater::handle_override(ObjectType type, const UUID &uu)
+std::optional<UUID> PoolUpdater::handle_override(ObjectType type, const UUID &uu, const std::string &filename)
 {
     std::optional<UUID> last_pool_uuid;
     if (auto l = exists(type, uu)) {
@@ -210,6 +211,17 @@ std::optional<UUID> PoolUpdater::handle_override(ObjectType type, const UUID &uu
         }
         delete_item(type, uu);
         return last_pool_uuid;
+    }
+    else if (is_partial_update) {
+        // item doesn't exist by UUID, make sure it doesn't exist by filename as well
+        // only need to check this in partial update
+        q_exists_by_filename->reset();
+        q_exists_by_filename->bind(1, filename);
+        q_exists_by_filename->bind(2, type);
+        if (q_exists_by_filename->step()) { // item exists
+            pool->db.execute("ROLLBACK");
+            throw CompletePoolUpdateRequiredException();
+        }
     }
     return UUID();
 }
@@ -352,6 +364,7 @@ std::vector<std::string> PoolUpdater::update_included_pools()
 
 void PoolUpdater::update()
 {
+    is_partial_update = false;
     const auto base_paths = update_included_pools();
 
     status_cb(PoolUpdateStatus::INFO, "", "Tags");

@@ -27,11 +27,16 @@ void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb, 
         updater.update();
     }
     else {
-        updater.update_some(filenames, parts_updated);
+        try {
+            updater.update_some(filenames, parts_updated);
+        }
+        catch (const PoolUpdater::CompletePoolUpdateRequiredException &e) {
+            updater.update();
+        }
     }
 
     if (parametric) {
-        if (filenames.size() == 0) // complete update
+        if (!updater.was_partial_update()) // complete update
             pool_update_parametric(updater.get_pool(), status_cb);
         else if (parts_updated.size())
             pool_update_parametric(updater.get_pool(), status_cb, parts_updated);

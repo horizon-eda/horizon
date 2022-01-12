@@ -25,7 +25,7 @@ void PoolUpdater::update_symbol(const std::string &filename)
         status_cb(PoolUpdateStatus::FILE, filename, "");
         const auto rel = get_path_rel(filename);
         auto symbol = Symbol::new_from_file(filename, *pool);
-        const auto last_pool_uuid = handle_override(ObjectType::SYMBOL, symbol.uuid);
+        const auto last_pool_uuid = handle_override(ObjectType::SYMBOL, symbol.uuid, rel);
         if (!last_pool_uuid)
             return;
         SQLite::Query q(pool->db,
@@ -45,6 +45,9 @@ void PoolUpdater::update_symbol(const std::string &filename)
     }
     catch (const std::exception &e) {
         status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());
+    }
+    catch (const CompletePoolUpdateRequiredException &e) {
+        throw;
     }
     catch (...) {
         status_cb(PoolUpdateStatus::FILE_ERROR, filename, "unknown exception");

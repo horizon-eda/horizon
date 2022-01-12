@@ -17,9 +17,19 @@ public:
         return *pool;
     }
 
+    bool was_partial_update() const
+    {
+        return is_partial_update;
+    }
+
+    class CompletePoolUpdateRequiredException {
+    public:
+    };
+
 private:
     std::optional<PoolUpdatePool> pool;
     std::optional<SQLite::Query> q_exists;
+    std::optional<SQLite::Query> q_exists_by_filename;
     std::optional<SQLite::Query> q_add_dependency;
     std::optional<SQLite::Query> q_insert_part;
     std::optional<SQLite::Query> q_add_tag;
@@ -46,7 +56,7 @@ private:
     void clear_tags(ObjectType type, const UUID &uu);
     std::optional<std::pair<UUID, UUID>> exists(ObjectType type, const UUID &uu);
     void delete_item(ObjectType type, const UUID &uu);
-    std::optional<UUID> handle_override(ObjectType type, const UUID &u);
+    std::optional<UUID> handle_override(ObjectType type, const UUID &u, const std::string &filename);
 
     void update_frame(const std::string &filename);
     void update_decal(const std::string &filename);
