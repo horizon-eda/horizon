@@ -321,7 +321,7 @@ void MainWindow::set_undo_redo_hint(const std::string &s)
                     undo_redo_hint_frame->set_visible(false);
                     return false;
                 },
-                1000);
+                1500);
     }
     else if (undo_redo_hint_frame->get_visible()) {
         undo_redo_hint_connection.disconnect();
