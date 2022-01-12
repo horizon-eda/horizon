@@ -3,6 +3,7 @@
 #include "document/idocument_package.hpp"
 #include "board/board.hpp"
 #include "pool/package.hpp"
+#include "util/text_renderer.hpp"
 
 namespace horizon {
 
@@ -54,8 +55,12 @@ void ToolHelperSavePlacements::save_placements()
             break;
         case ObjectType::TEXT: {
             const auto text = doc.r->get_text(it.uuid);
+            TextRenderer tr;
+            const bool rev = doc.r->get_layer_provider().get_layers().at(text->layer).reverse;
+            const auto extents = tr.render(*text, ColorP::FROM_LAYER, Placement(), rev);
+            const auto bb = std::make_pair(extents.first.to_coordi(), extents.second.to_coordi());
             placements.emplace(std::piecewise_construct, std::forward_as_tuple(it),
-                               std::forward_as_tuple(text->placement));
+                               std::forward_as_tuple(text->placement, bb));
         } break;
         case ObjectType::BOARD_PACKAGE: {
             const auto &pkg = doc.b->get_board()->packages.at(it.uuid);
