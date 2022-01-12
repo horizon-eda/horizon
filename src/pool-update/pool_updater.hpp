@@ -9,7 +9,7 @@ namespace horizon {
 class PoolUpdater {
 public:
     PoolUpdater(const std::string &bp, pool_update_cb_t status_cb);
-    void update(const std::vector<std::string> &base_paths);
+    void update();
     void update_some(const std::vector<std::string> &filenames, std::set<UUID> &all_parts_updated);
 
     PoolUpdatePool &get_pool()
@@ -65,6 +65,8 @@ private:
     bool is_partial_update = false;
     void set_pool_info(const std::string &bp);
     std::string get_path_rel(const std::string &filename) const;
+
+    std::vector<std::string> update_included_pools();
 
     static std::filesystem::file_time_type::duration::rep get_mtime(const std::string &filename);
 };
