@@ -2,14 +2,17 @@
 #include "util/util.hpp"
 #include "rules/cache.hpp"
 #include "util/accumulator.hpp"
+#include "blocks/blocks_schematic.hpp"
+
 
 namespace horizon {
-RulesCheckResult SchematicRules::check_connectivity(const class Schematic &sch, class RulesCheckCache &cache) const
+RulesCheckResult SchematicRules::check_connectivity(const BlocksSchematic &blocks, class RulesCheckCache &cache) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
     auto &rule = rule_connectivity;
     auto &c = dynamic_cast<RulesCheckCacheNetPins &>(cache.get_cache(RulesCheckCacheID::NET_PINS));
+    const auto &top = blocks.get_top_block_item().block;
 
     for (const auto &[net_uu, it] : c.get_net_pins()) {
         if (rule.include_unnamed || it.name.size()) {
@@ -19,9 +22,9 @@ RulesCheckResult SchematicRules::check_connectivity(const class Schematic &sch, 
                 auto &conn = it.pins.front();
                 std::string refdes;
                 if (conn.instance_path.size())
-                    refdes = sch.block->get_component_info(conn.comp, conn.instance_path).refdes;
+                    refdes = top.get_component_info(conn.comp, conn.instance_path).refdes;
                 else
-                    refdes = sch.block->components.at(conn.comp).refdes;
+                    refdes = top.components.at(conn.comp).refdes;
                 x.comment = "Net \"" + it.name + "\" only connected to " + refdes + conn.gate.suffix + "."
                             + conn.pin.primary_name;
                 x.sheet = conn.sheet;
@@ -35,11 +38,11 @@ RulesCheckResult SchematicRules::check_connectivity(const class Schematic &sch, 
     return r;
 }
 
-RulesCheckResult SchematicRules::check(RuleID id, const Schematic &sch, RulesCheckCache &cache) const
+RulesCheckResult SchematicRules::check(RuleID id, const BlocksSchematic &blocks, RulesCheckCache &cache) const
 {
     switch (id) {
     case RuleID::CONNECTIVITY:
-        return check_connectivity(sch, cache);
+        return check_connectivity(blocks, cache);
 
     default:
         return RulesCheckResult();

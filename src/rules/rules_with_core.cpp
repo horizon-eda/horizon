@@ -20,7 +20,7 @@ RulesCheckResult rules_check(Rules &r, RuleID id, class IDocument &c, RulesCheck
     }
     if (auto rules = dynamic_cast<SchematicRules *>(&r)) {
         auto &core = dynamic_cast<IDocumentSchematic &>(c);
-        return rules->check(id, *core.get_top_schematic(), cache);
+        return rules->check(id, core.get_blocks(), cache);
     }
     if (auto rules = dynamic_cast<PackageRules *>(&r)) {
         auto &core = dynamic_cast<IDocumentPackage &>(c);
