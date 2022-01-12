@@ -22,6 +22,7 @@ void PoolUpdater::update_frame(const std::string &filename)
 {
     try {
         status_cb(PoolUpdateStatus::FILE, filename, "");
+        const auto rel = get_path_rel(filename);
         auto frame = Frame::new_from_file(filename);
         const auto last_pool_uuid = handle_override(ObjectType::FRAME, frame.uuid);
         if (!last_pool_uuid)
@@ -33,7 +34,7 @@ void PoolUpdater::update_frame(const std::string &filename)
                         "($uuid, $name, $filename, $mtime, $pool_uuid, $last_pool_uuid)");
         q.bind("$uuid", frame.uuid);
         q.bind("$name", frame.name);
-        q.bind("$filename", get_path_rel(filename));
+        q.bind("$filename", rel);
         q.bind("$mtime", get_mtime(filename));
         q.bind("$pool_uuid", pool_uuid);
         q.bind("$last_pool_uuid", *last_pool_uuid);

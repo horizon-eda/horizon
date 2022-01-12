@@ -23,6 +23,7 @@ void PoolUpdater::update_unit(const std::string &filename)
 {
     try {
         status_cb(PoolUpdateStatus::FILE, filename, "");
+        const auto rel = get_path_rel(filename);
         auto unit = Unit::new_from_file(filename);
         const auto last_pool_uuid = handle_override(ObjectType::UNIT, unit.uuid);
         if (!last_pool_uuid)
@@ -35,7 +36,7 @@ void PoolUpdater::update_unit(const std::string &filename)
         q.bind("$uuid", unit.uuid);
         q.bind("$name", unit.name);
         q.bind("$manufacturer", unit.manufacturer);
-        q.bind("$filename", get_path_rel(filename));
+        q.bind("$filename", rel);
         q.bind_int64("$mtime", get_mtime(filename));
         q.bind("$pool_uuid", pool_uuid);
         q.bind("$last_pool_uuid", *last_pool_uuid);

@@ -85,6 +85,7 @@ void PoolUpdater::update_package(const std::string &filename)
 {
     try {
         status_cb(PoolUpdateStatus::FILE, filename, "");
+        const auto rel = get_path_rel(filename);
         auto package = Package::new_from_file(filename, *pool);
         const auto last_pool_uuid = handle_override(ObjectType::PACKAGE, package.uuid);
         if (!last_pool_uuid)
@@ -103,7 +104,7 @@ void PoolUpdater::update_package(const std::string &filename)
                }));
         q.bind("$alt_for", package.alternate_for ? package.alternate_for->uuid : UUID());
 
-        q.bind("$filename", get_path_rel(filename));
+        q.bind("$filename", rel);
         q.bind_int64("$mtime", get_mtime(filename));
         q.bind("$pool_uuid", pool_uuid);
         q.bind("$last_pool_uuid", *last_pool_uuid);

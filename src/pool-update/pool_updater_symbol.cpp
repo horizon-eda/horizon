@@ -23,6 +23,7 @@ void PoolUpdater::update_symbol(const std::string &filename)
 {
     try {
         status_cb(PoolUpdateStatus::FILE, filename, "");
+        const auto rel = get_path_rel(filename);
         auto symbol = Symbol::new_from_file(filename, *pool);
         const auto last_pool_uuid = handle_override(ObjectType::SYMBOL, symbol.uuid);
         if (!last_pool_uuid)
@@ -37,7 +38,7 @@ void PoolUpdater::update_symbol(const std::string &filename)
         q.bind("$unit", symbol.unit->uuid);
         q.bind("$pool_uuid", pool_uuid);
         q.bind("$last_pool_uuid", *last_pool_uuid);
-        q.bind("$filename", get_path_rel(filename));
+        q.bind("$filename", rel);
         q.bind_int64("$mtime", get_mtime(filename));
         q.step();
         add_dependency(ObjectType::SYMBOL, symbol.uuid, ObjectType::UNIT, symbol.unit->uuid);

@@ -59,11 +59,11 @@ void PoolUpdater::update_padstacks(const std::string &directory, const std::stri
                             try {
                                 status_cb(PoolUpdateStatus::FILE, filename, "");
                                 auto padstack = Padstack::new_from_file(filename);
+                                const auto rel = Glib::build_filename("packages", prefix, it, "padstacks", it2);
                                 const auto last_pool_uuid = handle_override(ObjectType::PADSTACK, padstack.uuid);
                                 if (!last_pool_uuid)
                                     throw std::runtime_error("shouldn't happen in complete pool update");
-                                add_padstack(padstack, pkg_uuid, *last_pool_uuid,
-                                             Glib::build_filename("packages", prefix, it, "padstacks", it2), filename);
+                                add_padstack(padstack, pkg_uuid, *last_pool_uuid, rel, filename);
                             }
                             catch (const std::exception &e) {
                                 status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());
@@ -90,12 +90,12 @@ void PoolUpdater::update_padstacks_global(const std::string &directory, const st
         if (endswith(it, ".json")) {
             try {
                 status_cb(PoolUpdateStatus::FILE, filename, "");
+                const auto rel = Glib::build_filename("padstacks", prefix, it);
                 auto padstack = Padstack::new_from_file(filename);
                 const auto last_pool_uuid = handle_override(ObjectType::PADSTACK, padstack.uuid);
                 if (!last_pool_uuid)
                     throw std::runtime_error("shouldn't happen in complete pool update");
-                add_padstack(padstack, UUID(), *last_pool_uuid, Glib::build_filename("padstacks", prefix, it),
-                             filename);
+                add_padstack(padstack, UUID(), *last_pool_uuid, rel, filename);
             }
             catch (const std::exception &e) {
                 status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());
@@ -125,10 +125,11 @@ void PoolUpdater::update_padstack(const std::string &filename)
                 package_uuid = j.at("uuid").get<std::string>();
             }
         }
+        const auto rel = get_path_rel(filename);
         const auto last_pool_uuid = handle_override(ObjectType::PADSTACK, padstack.uuid);
         if (!last_pool_uuid)
             return;
-        add_padstack(padstack, package_uuid, *last_pool_uuid, get_path_rel(filename), filename);
+        add_padstack(padstack, package_uuid, *last_pool_uuid, rel, filename);
     }
     catch (const std::exception &e) {
         status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());

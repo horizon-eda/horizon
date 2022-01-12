@@ -22,6 +22,7 @@ void PoolUpdater::update_decal(const std::string &filename)
 {
     try {
         status_cb(PoolUpdateStatus::FILE, filename, "");
+        const auto rel = get_path_rel(filename);
         auto decal = Decal::new_from_file(filename);
         const auto last_pool_uuid = handle_override(ObjectType::DECAL, decal.uuid);
         if (!last_pool_uuid)
@@ -33,7 +34,7 @@ void PoolUpdater::update_decal(const std::string &filename)
                         "($uuid, $name, $filename, $mtime, $pool_uuid, $last_pool_uuid)");
         q.bind("$uuid", decal.uuid);
         q.bind("$name", decal.name);
-        q.bind("$filename", get_path_rel(filename));
+        q.bind("$filename", rel);
         q.bind_int64("$mtime", get_mtime(filename));
         q.bind("$pool_uuid", pool_uuid);
         q.bind("$last_pool_uuid", *last_pool_uuid);
