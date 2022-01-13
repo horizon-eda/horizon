@@ -20,7 +20,7 @@ std::pair<Coordf, Coordf> CanvasTextRenderer::draw(const Coordf &p, float size, 
 
 void CanvasTextRenderer::draw_line(const Coordf &a, const Coordf &b, ColorP color, int layer, uint64_t width)
 {
-    ca.img_line(Coordi(a.x, b.y), Coordi(a.x, a.y), width, layer, false);
+    ca.img_line(a.to_coordi(), b.to_coordi(), width, layer, false);
     if (!ca.img_auto_line)
         ca.draw_line(a, b, color, layer, false, width);
 }
