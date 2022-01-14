@@ -21,10 +21,21 @@ RulesCheckResult SchematicRules::check_connectivity(const BlocksSchematic &block
                 auto &x = r.errors.back();
                 auto &conn = it.pins.front();
                 std::string refdes;
-                if (conn.instance_path.size())
-                    refdes = top.get_component_info(conn.comp, conn.instance_path).refdes;
-                else
+                if (conn.instance_path.size()) {
+                    auto &comps = top.block_instance_mappings.at(conn.instance_path).components;
+                    if (comps.count(conn.comp)) {
+                        refdes = comps.at(conn.comp).refdes;
+                    }
+                    else {
+                        const Block *block = &top;
+                        for (const auto &uu : conn.instance_path)
+                            block = block->block_instances.at(uu).block;
+                        refdes = block->components.at(conn.comp).refdes;
+                    }
+                }
+                else {
                     refdes = top.components.at(conn.comp).refdes;
+                }
                 x.comment = "Net \"" + it.name + "\" only connected to " + refdes + conn.gate.suffix + "."
                             + conn.pin.primary_name;
                 x.sheet = conn.sheet;
