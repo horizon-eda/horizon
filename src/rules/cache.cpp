@@ -70,8 +70,8 @@ const RulesCheckCacheNetPins::NetPins &RulesCheckCacheNetPins::get_net_pins() co
 
 RulesCheckCacheBase &RulesCheckCache::get_cache(RulesCheckCacheID id)
 {
+    std::lock_guard<std::mutex> guard(mutex);
     if (!cache.count(id)) {
-        std::lock_guard<std::mutex> guard(mutex);
         switch (id) {
         case RulesCheckCacheID::NONE:
             break;
