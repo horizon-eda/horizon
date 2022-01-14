@@ -256,6 +256,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::TOOL, ToolID::MAP_PIN},
          {"Place pin", ActionGroup::SYMBOL, ActionCatalogItem::AVAILABLE_IN_SYMBOL, ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::SELECT_CONNECTED_LINES},
+         {"Select connected lines", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TOOL, ToolID::SELECT_NET_SEGMENT},
          {"Select net segment", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},

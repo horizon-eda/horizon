@@ -46,6 +46,7 @@
 #include "tools/tool_place_via.hpp"
 #include "tools/tool_rotate_arbitrary.hpp"
 #include "tools/tool_route_track_interactive.hpp"
+#include "tools/tool_select_connected_lines.hpp"
 #include "tools/tool_set_diffpair.hpp"
 #include "tools/tool_set_via_net.hpp"
 #include "tools/tool_smash.hpp"
@@ -272,6 +273,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::DRAW_DIMENSION:
         return std::make_unique<ToolDrawDimension>(this, tool_id);
+
+    case ToolID::SELECT_CONNECTED_LINES:
+        return std::make_unique<ToolSelectConnectedLines>(this, tool_id);
 
     case ToolID::SET_DIFFPAIR:
     case ToolID::CLEAR_DIFFPAIR:

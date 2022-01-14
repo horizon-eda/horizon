@@ -282,6 +282,7 @@ SRC_IMP = \
 	src/core/tools/tool_edit_plane.cpp\
 	src/core/tools/tool_update_all_planes.cpp\
 	src/core/tools/tool_draw_dimension.cpp\
+	src/core/tools/tool_select_connected_lines.cpp\
 	src/core/tools/tool_set_diffpair.cpp\
 	src/core/tools/tool_set_via_net.cpp\
 	src/core/tools/tool_lock.cpp\
