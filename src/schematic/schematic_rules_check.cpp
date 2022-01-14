@@ -9,6 +9,8 @@ namespace horizon {
 RulesCheckResult SchematicRules::check_connectivity(const BlocksSchematic &blocks, class RulesCheckCache &cache) const
 {
     RulesCheckResult r;
+    if (r.check_disabled(rule_connectivity))
+        return r;
     r.level = RulesCheckErrorLevel::PASS;
     auto &rule = rule_connectivity;
     auto &c = dynamic_cast<RulesCheckCacheNetPins &>(cache.get_cache(RulesCheckCacheID::NET_PINS));
