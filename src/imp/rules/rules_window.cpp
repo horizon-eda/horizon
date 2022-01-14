@@ -313,13 +313,16 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
                         }
                     }
                 }
+                {
+                    auto path = check_result_store->get_path(it.second.row);
+                    check_result_treeview->expand_row(path, false);
+                }
             }
             else { // still running
                 it.second.row[tree_columns.status] = it.second.status;
             }
         }
         canvas.update_markers();
-        check_result_treeview->expand_all();
         map_erase_if(run_store, [](auto &a) { return a.second.result.level != RulesCheckErrorLevel::NOT_RUN; });
         if (run_store.size() == 0) {
             run_button->set_sensitive(true);
