@@ -285,7 +285,6 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     action_group->add_action("export", sigc::mem_fun(*this, &RulesWindow::export_rules));
     action_group->add_action("import", sigc::mem_fun(*this, &RulesWindow::import_rules));
 
-    Gtk::MenuButton *hamburger_menu_button;
     GET_WIDGET(hamburger_menu_button);
     if (rules.can_export()) {
         hamburger_menu = Gio::Menu::create();
@@ -359,6 +358,7 @@ bool RulesWindow::update_results()
         apply_button->set_sensitive(true);
         set_modal(false);
         stack_switcher->set_sensitive(true);
+        hamburger_menu_button->set_sensitive(true);
         dynamic_cast<Gtk::HeaderBar *>(get_titlebar())->set_show_close_button(true);
         return false;
     }
@@ -508,6 +508,7 @@ void RulesWindow::run_checks()
     set_modal(true);
     stack->set_visible_child("checks");
     stack_switcher->set_sensitive(false);
+    hamburger_menu_button->set_sensitive(false);
 
     dynamic_cast<Gtk::HeaderBar *>(get_titlebar())->set_show_close_button(false);
 }

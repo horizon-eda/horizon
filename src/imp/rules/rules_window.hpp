@@ -120,6 +120,7 @@ private:
     bool enabled = true;
 
     Glib::RefPtr<Gio::Menu> hamburger_menu;
+    Gtk::MenuButton *hamburger_menu_button = nullptr;
     Glib::RefPtr<Gio::SimpleActionGroup> action_group;
 
     bool update_results();
