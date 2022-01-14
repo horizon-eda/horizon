@@ -31,6 +31,8 @@ public:
     NetSegmentInfo(const SchematicJunction *ju);
     bool has_label = false;
     bool has_power_sym = false;
+    bool has_bus_ripper = false;
+    bool really_has_label() const;
     Coordi position;
     Net *net = nullptr;
     Bus *bus = nullptr;

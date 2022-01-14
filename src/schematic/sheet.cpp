@@ -526,6 +526,11 @@ bool NetSegmentInfo::is_bus() const
     return false;
 }
 
+bool NetSegmentInfo::really_has_label() const
+{
+    return has_label && !has_power_sym && !has_bus_ripper;
+}
+
 std::map<UUID, NetSegmentInfo> Sheet::analyze_net_segments() const
 {
     std::map<UUID, NetSegmentInfo> net_segments;
@@ -551,6 +556,7 @@ std::map<UUID, NetSegmentInfo> Sheet::analyze_net_segments() const
     for (const auto &it : bus_rippers) {
         if (net_segments.count(it.second.net_segment)) {
             net_segments.at(it.second.net_segment).has_label = true;
+            net_segments.at(it.second.net_segment).has_bus_ripper = true;
         }
     }
 
