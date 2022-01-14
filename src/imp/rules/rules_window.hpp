@@ -99,8 +99,6 @@ private:
     Glib::RefPtr<Gtk::TreeStore> check_result_store;
     Gtk::TreeView *check_result_treeview = nullptr;
 
-    Glib::Dispatcher dispatcher;
-
     class RuleRunInfo {
     public:
         RuleRunInfo(Gtk::TreeModel::Row &r) : row(r)
@@ -117,13 +115,14 @@ private:
     std::unique_ptr<RulesCheckCache> cache;
 
     void check_thread(RuleID id);
-    sigc::connection pulse_connection;
 
     WindowStateStore state_store;
     bool enabled = true;
 
     Glib::RefPtr<Gio::Menu> hamburger_menu;
     Glib::RefPtr<Gio::SimpleActionGroup> action_group;
+
+    bool update_results();
 
     void export_rules();
     void import_rules();

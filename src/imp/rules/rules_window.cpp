@@ -279,60 +279,6 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
                 }
             });
 
-    dispatcher.connect([this] {
-        std::lock_guard<std::mutex> guard(run_store_mutex);
-        auto &dom = canvas.markers.get_domain(MarkerDomain::CHECK);
-        for (const auto &it : run_store) {
-            if (it.second.result.level != RulesCheckErrorLevel::NOT_RUN) { // has completed
-                it.second.row[tree_columns.result] = it.second.result.level;
-                it.second.row[tree_columns.running] = false;
-                for (const auto &it_err : it.second.result.errors) {
-                    auto iter = check_result_store->append(it.second.row.children());
-                    Gtk::TreeModel::Row row_err = *iter;
-                    row_err[tree_columns.result] = it_err.level;
-                    row_err[tree_columns.name] = it_err.comment;
-                    row_err[tree_columns.has_location] = it_err.has_location;
-                    row_err[tree_columns.location] = it_err.location;
-                    row_err[tree_columns.sheet] = it_err.sheet;
-                    row_err[tree_columns.instance_path] = it_err.instance_path;
-                    row_err[tree_columns.running] = false;
-
-                    if (it_err.has_location) {
-                        UUIDVec sheet;
-                        if (it_err.sheet)
-                            sheet = uuid_vec_append(it_err.instance_path, it_err.sheet);
-                        dom.emplace_back(it_err.location, rules_check_error_level_to_color(it_err.level), sheet);
-                    }
-
-                    for (const auto &path : it_err.error_polygons) {
-                        ClipperLib::IntPoint last = path.back();
-                        for (const auto &pt : path) {
-                            annotation->draw_line(Coordf(last.X, last.Y), Coordf(pt.X, pt.Y), ColorP::FROM_LAYER,
-                                                  .01_mm);
-                            last = pt;
-                        }
-                    }
-                }
-                {
-                    auto path = check_result_store->get_path(it.second.row);
-                    check_result_treeview->expand_row(path, false);
-                }
-            }
-            else { // still running
-                it.second.row[tree_columns.status] = it.second.status;
-            }
-        }
-        canvas.update_markers();
-        map_erase_if(run_store, [](auto &a) { return a.second.result.level != RulesCheckErrorLevel::NOT_RUN; });
-        if (run_store.size() == 0) {
-            run_button->set_sensitive(true);
-            apply_button->set_sensitive(true);
-            set_modal(false);
-            pulse_connection.disconnect();
-            stack_switcher->set_sensitive(true);
-            dynamic_cast<Gtk::HeaderBar *>(get_titlebar())->set_show_close_button(true);
-        }
-    });
 
     action_group = Gio::SimpleActionGroup::create();
     insert_action_group("rules", action_group);
@@ -352,6 +298,72 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     }
 
     signal_delete_event().connect([this](GdkEventAny *ev) { return !run_button->get_sensitive(); });
+}
+
+bool RulesWindow::update_results()
+{
+    for (auto &ch : check_result_store->children()) {
+        ch[tree_columns.pulse] = ch[tree_columns.pulse] + 1;
+    }
+
+    decltype(run_store) my_run_store;
+    {
+        std::lock_guard<std::mutex> guard(run_store_mutex);
+        my_run_store = run_store;
+        map_erase_if(run_store, [](auto &a) { return a.second.result.level != RulesCheckErrorLevel::NOT_RUN; });
+    }
+
+    auto &dom = canvas.markers.get_domain(MarkerDomain::CHECK);
+    for (const auto &it : my_run_store) {
+        if (it.second.result.level != RulesCheckErrorLevel::NOT_RUN) { // has completed
+            it.second.row[tree_columns.result] = it.second.result.level;
+            it.second.row[tree_columns.running] = false;
+            for (const auto &it_err : it.second.result.errors) {
+                auto iter = check_result_store->append(it.second.row.children());
+                Gtk::TreeModel::Row row_err = *iter;
+                row_err[tree_columns.result] = it_err.level;
+                row_err[tree_columns.name] = it_err.comment;
+                row_err[tree_columns.has_location] = it_err.has_location;
+                row_err[tree_columns.location] = it_err.location;
+                row_err[tree_columns.sheet] = it_err.sheet;
+                row_err[tree_columns.instance_path] = it_err.instance_path;
+                row_err[tree_columns.running] = false;
+
+                if (it_err.has_location) {
+                    UUIDVec sheet;
+                    if (it_err.sheet)
+                        sheet = uuid_vec_append(it_err.instance_path, it_err.sheet);
+                    dom.emplace_back(it_err.location, rules_check_error_level_to_color(it_err.level), sheet);
+                }
+
+                for (const auto &path : it_err.error_polygons) {
+                    ClipperLib::IntPoint last = path.back();
+                    for (const auto &pt : path) {
+                        annotation->draw_line(Coordf(last.X, last.Y), Coordf(pt.X, pt.Y), ColorP::FROM_LAYER, .01_mm);
+                        last = pt;
+                    }
+                }
+            }
+            {
+                auto path = check_result_store->get_path(it.second.row);
+                check_result_treeview->expand_row(path, false);
+            }
+        }
+        else { // still running
+            it.second.row[tree_columns.status] = it.second.status;
+        }
+    }
+    canvas.update_markers();
+    if (my_run_store.size() == 0) {
+        run_button->set_sensitive(true);
+        apply_button->set_sensitive(true);
+        set_modal(false);
+        stack_switcher->set_sensitive(true);
+        dynamic_cast<Gtk::HeaderBar *>(get_titlebar())->set_show_close_button(true);
+        return false;
+    }
+
+    return true;
 }
 
 void RulesWindow::apply_rules()
@@ -444,11 +456,8 @@ void RulesWindow::check_thread(RuleID id)
     RulesCheckResult result;
     try {
         result = rules_check(rules, id, core, *cache.get(), [this, id](const std::string &status) {
-            {
-                std::lock_guard<std::mutex> guard(run_store_mutex);
-                run_store.at(id).status = status;
-            }
-            dispatcher.emit();
+            std::lock_guard<std::mutex> guard(run_store_mutex);
+            run_store.at(id).status = status;
         });
     }
 
@@ -467,11 +476,8 @@ void RulesWindow::check_thread(RuleID id)
         result.update();
     }
     {
-        {
-            std::lock_guard<std::mutex> guard(run_store_mutex);
-            run_store.at(id).result = result;
-        }
-        dispatcher.emit();
+        std::lock_guard<std::mutex> guard(run_store_mutex);
+        run_store.at(id).result = result;
     }
 }
 
@@ -483,16 +489,7 @@ void RulesWindow::run_checks()
     cache.reset(new RulesCheckCache(core));
     annotation->clear();
     run_store.clear();
-    pulse_connection = Glib::signal_timeout().connect(sigc::track_obj(
-                                                              [this] {
-                                                                  for (auto &ch : check_result_store->children()) {
-                                                                      ch[tree_columns.pulse] =
-                                                                              ch[tree_columns.pulse] + 1;
-                                                                  }
-                                                                  return true;
-                                                              },
-                                                              *this),
-                                                      750 / 12);
+    Glib::signal_timeout().connect(sigc::mem_fun(*this, &RulesWindow::update_results), 750 / 12);
     for (auto rule_id : rules.get_rule_ids()) {
         if (rule_descriptions.at(rule_id).can_check) {
             Gtk::TreeModel::iterator iter = check_result_store->append();
