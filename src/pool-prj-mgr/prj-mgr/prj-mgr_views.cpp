@@ -101,6 +101,39 @@ void PoolProjectManagerViewCreateProject::update()
     signal_valid_change().emit(valid);
 }
 
+class OpeningSpinner : public Gtk::Revealer {
+public:
+    OpeningSpinner();
+    void set_active(bool a);
+
+private:
+    Gtk::Spinner *spinner = nullptr;
+};
+
+OpeningSpinner::OpeningSpinner()
+{
+    set_transition_type(Gtk::REVEALER_TRANSITION_TYPE_CROSSFADE);
+    auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
+    spinner = Gtk::manage(new Gtk::Spinner());
+    box->pack_start(*spinner, false, false, 0);
+
+    auto la = Gtk::manage(new Gtk::Label("Opening…"));
+    box->pack_start(*la, false, false, 0);
+
+    box->show_all();
+    add(*box);
+}
+
+void OpeningSpinner::set_active(bool a)
+
+{
+    set_reveal_child(a);
+    if (a)
+        spinner->start();
+    else
+        spinner->stop();
+}
+
 PoolProjectManagerViewProject::PoolProjectManagerViewProject(const Glib::RefPtr<Gtk::Builder> &builder,
                                                              PoolProjectManagerAppWindow &w)
     : win(w)
@@ -113,6 +146,21 @@ PoolProjectManagerViewProject::PoolProjectManagerViewProject(const Glib::RefPtr<
     builder->get_widget("label_project_author", label_project_author);
     builder->get_widget("label_project_directory", label_project_directory);
     builder->get_widget("pool_cache_status_label", pool_cache_status_label);
+
+    {
+        Gtk::Box *board_opening_box;
+        builder->get_widget("board_opening_box", board_opening_box);
+        board_spinner = Gtk::manage(new OpeningSpinner());
+        board_opening_box->pack_start(*board_spinner, false, false, 0);
+        board_spinner->show();
+    }
+    {
+        Gtk::Box *schematic_opening_box;
+        builder->get_widget("schematic_opening_box", schematic_opening_box);
+        schematic_spinner = Gtk::manage(new OpeningSpinner());
+        schematic_opening_box->pack_start(*schematic_spinner, false, false, 0);
+        schematic_spinner->show();
+    }
 
     Gtk::Button *open_button;
     builder->get_widget("prj_open_dir_button", open_button);
@@ -147,14 +195,22 @@ void PoolProjectManagerViewProject::open_top_schematic()
 {
     auto prj = win.project.get();
     std::vector<std::string> args = {prj->blocks_filename, prj->pictures_directory};
-    win.spawn(PoolProjectManagerProcess::Type::IMP_SCHEMATIC, args);
+    auto proc = win.spawn(PoolProjectManagerProcess::Type::IMP_SCHEMATIC, args);
+    if (proc.spawned) {
+        schematic_spinner->set_active(true);
+        proc.proc->signal_ready().connect([this] { schematic_spinner->set_active(false); });
+    }
 }
 
 void PoolProjectManagerViewProject::open_board()
 {
     auto prj = win.project.get();
     std::vector<std::string> args = {prj->board_filename, prj->blocks_filename, prj->pictures_directory};
-    win.spawn(PoolProjectManagerProcess::Type::IMP_BOARD, args);
+    auto proc = win.spawn(PoolProjectManagerProcess::Type::IMP_BOARD, args);
+    if (proc.spawned) {
+        board_spinner->set_active(true);
+        proc.proc->signal_ready().connect([this] { board_spinner->set_active(false); });
+    }
 }
 
 void PoolProjectManagerViewProject::handle_button_part_browser()

@@ -51,6 +51,8 @@ private:
     Gtk::Button *button_project_pool = nullptr;
     Gtk::Label *pool_cache_status_label = nullptr;
 
+    class OpeningSpinner *board_spinner = nullptr;
+    class OpeningSpinner *schematic_spinner = nullptr;
 
     void handle_button_part_browser();
     void handle_button_project_pool();
