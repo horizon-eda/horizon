@@ -213,11 +213,16 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         tvc->set_cell_data_func(*cr2, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
             Gtk::TreeModel::Row row = *it;
             auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
-            if (row[tree_columns.running]) {
+            switch (row.get_value(tree_columns.state)) {
+            case CheckState::RUNNING:
                 mcr->property_text() = "Running";
-            }
-            else {
+                break;
+            case CheckState::NOT_RUNNING:
                 mcr->property_text() = rules_check_error_level_to_string(row[tree_columns.result]);
+                break;
+            case CheckState::CANCELLING:
+                mcr->property_text() = "Cancelling";
+                break;
             }
         });
         tvc->set_cell_data_func(*cr4, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
@@ -228,7 +233,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
             pango_attr_list_insert(attributes_list, attribute_font_features);
             g_object_set(G_OBJECT(mcr->gobj()), "attributes", attributes_list, NULL);
             pango_attr_list_unref(attributes_list);
-            if (row[tree_columns.running]) {
+            if (row[tree_columns.state] == CheckState::RUNNING) {
                 mcr->property_text() = static_cast<std::string>(row[tree_columns.status]);
             }
             else {
@@ -250,7 +255,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         tvc->set_cell_data_func(*cr3, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
             Gtk::TreeModel::Row row = *it;
             auto mcr = dynamic_cast<Gtk::CellRendererSpinner *>(tcr);
-            mcr->property_active() = row[tree_columns.running];
+            mcr->property_active() = row[tree_columns.state] != CheckState::NOT_RUNNING;
         });
 
         check_result_treeview->append_column(*tvc);
@@ -320,7 +325,7 @@ bool RulesWindow::update_results()
     for (const auto &it : my_run_store) {
         if (it.second.result.level != RulesCheckErrorLevel::NOT_RUN) { // has completed
             it.second.row[tree_columns.result] = it.second.result.level;
-            it.second.row[tree_columns.running] = false;
+            it.second.row[tree_columns.state] = CheckState::NOT_RUNNING;
             for (const auto &it_err : it.second.result.errors) {
                 auto iter = check_result_store->append(it.second.row.children());
                 Gtk::TreeModel::Row row_err = *iter;
@@ -330,7 +335,7 @@ bool RulesWindow::update_results()
                 row_err[tree_columns.location] = it_err.location;
                 row_err[tree_columns.sheet] = it_err.sheet;
                 row_err[tree_columns.instance_path] = it_err.instance_path;
-                row_err[tree_columns.running] = false;
+                row_err[tree_columns.state] = CheckState::NOT_RUNNING;
 
                 if (it_err.has_location) {
                     UUIDVec sheet;
@@ -504,7 +509,7 @@ void RulesWindow::run_checks()
             Gtk::TreeModel::iterator iter = check_result_store->append();
             Gtk::TreeModel::Row row = *iter;
             row[tree_columns.name] = rule_descriptions.at(rule_id).name;
-            row[tree_columns.running] = true;
+            row[tree_columns.state] = CheckState::RUNNING;
             row[tree_columns.has_location] = false;
             run_store.emplace(rule_id, row);
 
@@ -526,6 +531,11 @@ void RulesWindow::run_checks()
 void RulesWindow::cancel_checks()
 {
     cancel_flag = true;
+    for (auto &it : check_result_store->children()) {
+        Gtk::TreeModel::Row row = *it;
+        if (row[tree_columns.state] == CheckState::RUNNING)
+            row[tree_columns.state] = CheckState::CANCELLING;
+    }
 }
 
 void RulesWindow::rule_selected(RuleID id)

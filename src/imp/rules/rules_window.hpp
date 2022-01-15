@@ -73,6 +73,8 @@ private:
     RuleEditor *create_editor(Rule &r);
     void reload_editor();
 
+    enum class CheckState { NOT_RUNNING, RUNNING, CANCELLING };
+
     class TreeColumns : public Gtk::TreeModelColumnRecord {
     public:
         TreeColumns()
@@ -83,7 +85,7 @@ private:
             Gtk::TreeModelColumnRecord::add(location);
             Gtk::TreeModelColumnRecord::add(sheet);
             Gtk::TreeModelColumnRecord::add(instance_path);
-            Gtk::TreeModelColumnRecord::add(running);
+            Gtk::TreeModelColumnRecord::add(state);
             Gtk::TreeModelColumnRecord::add(status);
             Gtk::TreeModelColumnRecord::add(pulse);
         }
@@ -93,7 +95,7 @@ private:
         Gtk::TreeModelColumn<Coordi> location;
         Gtk::TreeModelColumn<UUID> sheet;
         Gtk::TreeModelColumn<UUIDVec> instance_path;
-        Gtk::TreeModelColumn<bool> running;
+        Gtk::TreeModelColumn<CheckState> state;
         Gtk::TreeModelColumn<std::string> status;
         Gtk::TreeModelColumn<int> pulse;
     };
