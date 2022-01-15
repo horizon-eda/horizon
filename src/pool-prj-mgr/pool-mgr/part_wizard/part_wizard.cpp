@@ -737,18 +737,21 @@ void PartWizard::prepare_edit()
                 }
 
                 auto proc = appwin.spawn(PoolProjectManagerProcess::Type::IMP_SYMBOL, {symbol_filename});
-                processes.emplace(symbol_filename, proc);
-                symbols_open.emplace(symbol_uuid);
-                proc->signal_exited().connect([this, symbol_filename, symbol_uuid, ed](int status, bool modified) {
-                    processes.erase(symbol_filename);
-                    symbols_open.erase(symbol_uuid);
-                    {
-                        auto sym = Symbol::new_from_file(symbol_filename, pool);
-                        ed->symbol_name_entry->set_text(sym.name);
-                    }
-                    update_can_finish();
-                    update_symbol_pins_mapped();
-                });
+                if (proc.spawned) {
+                    processes.emplace(symbol_filename, proc.proc);
+                    symbols_open.emplace(symbol_uuid);
+                    proc.proc->signal_exited().connect(
+                            [this, symbol_filename, symbol_uuid, ed](int status, bool modified) {
+                                processes.erase(symbol_filename);
+                                symbols_open.erase(symbol_uuid);
+                                {
+                                    auto sym = Symbol::new_from_file(symbol_filename, pool);
+                                    ed->symbol_name_entry->set_text(sym.name);
+                                }
+                                update_can_finish();
+                                update_symbol_pins_mapped();
+                            });
+                }
                 update_can_finish();
             });
 

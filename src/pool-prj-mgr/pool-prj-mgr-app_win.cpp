@@ -1316,8 +1316,9 @@ std::string PoolProjectManagerAppWindow::get_pool_base_path() const
         throw std::runtime_error("can't locate pool");
 }
 
-PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManagerProcess::Type type,
-                                                              const std::vector<std::string> &args, SpawnFlags flags)
+PoolProjectManagerAppWindow::SpawnResult PoolProjectManagerAppWindow::spawn(PoolProjectManagerProcess::Type type,
+                                                                            const std::vector<std::string> &args,
+                                                                            SpawnFlags flags)
 {
     const auto pool_base_path = get_pool_base_path();
 
@@ -1335,12 +1336,12 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
                                       Gtk::BUTTONS_OK);
                 md.set_secondary_text("Try updating the pool");
                 md.run();
-                return nullptr;
+                return {nullptr, false};
             }
         }
 
         if (!check_autosave(type, args))
-            return nullptr;
+            return {nullptr, false};
 
         auto uu = UUID::random();
         const bool read_only = static_cast<int>(flags) & static_cast<int>(SpawnFlags::READ_ONLY);
@@ -1378,7 +1379,7 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
         if (proc.win)
             proc.win->signal_saved().connect([this](auto fn) { s_signal_process_saved.emit(fn); });
 
-        return &proc;
+        return {&proc, true};
     }
     else { // present imp
         auto proc = find_process(args.at(0));
@@ -1390,7 +1391,7 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
         else {
             proc->win->present();
         }
-        return proc;
+        return {proc, false};
     }
 }
 

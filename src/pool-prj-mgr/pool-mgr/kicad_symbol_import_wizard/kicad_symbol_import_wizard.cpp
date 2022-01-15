@@ -456,22 +456,24 @@ void KiCadSymbolImportWizard::handle_edit_entity()
 {
     std::string entity_filename = pool.get_tmp_filename(ObjectType::ENTITY, entity_uuid);
     auto proc = appwin.spawn(PoolProjectManagerProcess::Type::ENTITY, {entity_filename});
-    processes.emplace(entity_filename, proc);
-    proc->signal_exited().connect([this, entity_filename](int status, bool modified) {
-        processes.erase(entity_filename);
-        update_can_finish();
-    });
-    proc->win->signal_goto().connect([this](ObjectType type, UUID uu) {
-        if (type == ObjectType::UNIT) {
-            for (auto ch : edit_gates_box->get_children()) {
-                if (auto c = dynamic_cast<GateEditorImportWizard *>(ch)) {
-                    if (c->unit_uu == uu) {
-                        c->handle_edit_unit();
+    if (proc.spawned) {
+        processes.emplace(entity_filename, proc.proc);
+        proc.proc->signal_exited().connect([this, entity_filename](int status, bool modified) {
+            processes.erase(entity_filename);
+            update_can_finish();
+        });
+        proc.proc->win->signal_goto().connect([this](ObjectType type, UUID uu) {
+            if (type == ObjectType::UNIT) {
+                for (auto ch : edit_gates_box->get_children()) {
+                    if (auto c = dynamic_cast<GateEditorImportWizard *>(ch)) {
+                        if (c->unit_uu == uu) {
+                            c->handle_edit_unit();
+                        }
                     }
                 }
             }
-        }
-    });
+        });
+    }
     update_can_finish();
 }
 
@@ -479,16 +481,18 @@ void KiCadSymbolImportWizard::handle_edit_part()
 {
     std::string part_filename = pool.get_tmp_filename(ObjectType::PART, part_uuid);
     auto proc = appwin.spawn(PoolProjectManagerProcess::Type::PART, {part_filename});
-    processes.emplace(part_filename, proc);
-    proc->signal_exited().connect([this, part_filename](int status, bool modified) {
-        processes.erase(part_filename);
-        update_can_finish();
-    });
-    proc->win->signal_goto().connect([this](ObjectType type, UUID uu) {
-        if (type == ObjectType::ENTITY) { // only one entity
-            handle_edit_entity();
-        }
-    });
+    if (proc.spawned) {
+        processes.emplace(part_filename, proc.proc);
+        proc.proc->signal_exited().connect([this, part_filename](int status, bool modified) {
+            processes.erase(part_filename);
+            update_can_finish();
+        });
+        proc.proc->win->signal_goto().connect([this](ObjectType type, UUID uu) {
+            if (type == ObjectType::ENTITY) { // only one entity
+                handle_edit_entity();
+            }
+        });
+    }
     update_can_finish();
 }
 

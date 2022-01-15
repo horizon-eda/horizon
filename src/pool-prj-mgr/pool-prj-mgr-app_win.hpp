@@ -38,8 +38,13 @@ public:
 
     enum class SpawnFlags { NONE = 0, READ_ONLY = (1 << 0), TEMP = (1 << 1) };
 
-    PoolProjectManagerProcess *spawn(PoolProjectManagerProcess::Type type, const std::vector<std::string> &args,
-                                     SpawnFlags flags = SpawnFlags::NONE);
+    struct SpawnResult {
+        PoolProjectManagerProcess *proc;
+        bool spawned; // if false, an existing window got raised
+    };
+
+    SpawnResult spawn(PoolProjectManagerProcess::Type type, const std::vector<std::string> &args,
+                      SpawnFlags flags = SpawnFlags::NONE);
 
     std::map<UUID, PoolProjectManagerProcess *> get_processes();
 
