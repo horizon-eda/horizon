@@ -305,7 +305,16 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     cancel_button->set_visible(false);
     cancel_button->signal_clicked().connect(sigc::mem_fun(*this, &RulesWindow::cancel_checks));
 
-    signal_delete_event().connect([this](GdkEventAny *ev) { return !run_button->get_sensitive(); });
+    signal_delete_event().connect([this](GdkEventAny *ev) {
+        if (run_button->get_sensitive()) {
+            return false;
+        }
+        else {
+            queue_close = true;
+            cancel_checks();
+            return true;
+        }
+    });
 }
 
 bool RulesWindow::update_results()
@@ -369,7 +378,8 @@ bool RulesWindow::update_results()
         stack_switcher->set_sensitive(true);
         hamburger_menu_button->set_sensitive(true);
         cancel_button->set_visible(false);
-        dynamic_cast<Gtk::HeaderBar *>(get_titlebar())->set_show_close_button(true);
+        if (queue_close)
+            hide();
         return false;
     }
 
@@ -503,6 +513,7 @@ void RulesWindow::run_checks()
     annotation->clear();
     run_store.clear();
     cancel_flag = false;
+    queue_close = false;
     Glib::signal_timeout().connect(sigc::mem_fun(*this, &RulesWindow::update_results), 750 / 12);
     for (auto rule_id : rules.get_rule_ids()) {
         if (rule_descriptions.at(rule_id).can_check) {
@@ -524,8 +535,6 @@ void RulesWindow::run_checks()
     stack_switcher->set_sensitive(false);
     hamburger_menu_button->set_sensitive(false);
     cancel_button->set_visible(true);
-
-    dynamic_cast<Gtk::HeaderBar *>(get_titlebar())->set_show_close_button(false);
 }
 
 void RulesWindow::cancel_checks()

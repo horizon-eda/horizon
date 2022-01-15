@@ -131,6 +131,7 @@ private:
     bool update_results();
 
     std::atomic_bool cancel_flag;
+    bool queue_close = false;
 
     void export_rules();
     void import_rules();
