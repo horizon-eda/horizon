@@ -12,7 +12,7 @@
 namespace horizon {
 using json = nlohmann::json;
 
-enum class RulesCheckErrorLevel { NOT_RUN, PASS, WARN, FAIL, DISABLED };
+enum class RulesCheckErrorLevel { NOT_RUN, PASS, WARN, FAIL, DISABLED, CANCELLED };
 
 Color rules_check_error_level_to_color(RulesCheckErrorLevel lev);
 std::string rules_check_error_level_to_string(RulesCheckErrorLevel lev);
@@ -39,6 +39,8 @@ public:
     void update();
     json serialize() const;
     bool check_disabled(const Rule &rule);
+    bool check_cancelled(bool cancel);
+
 
     RulesCheckErrorLevel level = RulesCheckErrorLevel::NOT_RUN;
     std::string comment;

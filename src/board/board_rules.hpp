@@ -16,6 +16,7 @@
 #include "rule_shorted_pads.hpp"
 #include "rules/rules.hpp"
 #include "util/uuid.hpp"
+#include <atomic>
 
 namespace horizon {
 using json = nlohmann::json;
@@ -27,8 +28,8 @@ public:
     void operator=(const BoardRules &other);
 
     void load_from_json(const json &j) override;
-    RulesCheckResult check(RuleID id, const class Board &b, class RulesCheckCache &cache,
-                           check_status_cb_t status_cb) const;
+    RulesCheckResult check(RuleID id, const class Board &b, class RulesCheckCache &cache, check_status_cb_t status_cb,
+                           const std::atomic_bool &cancel = std::atomic_bool(false)) const;
     void apply(RuleID id, class Board &b, class IPool &pool) const;
     json serialize() const override;
     std::vector<RuleID> get_rule_ids() const override;
@@ -87,16 +88,18 @@ private:
     RulesCheckResult check_track_width(const class Board &b) const;
     RulesCheckResult check_hole_size(const class Board &b) const;
     RulesCheckResult check_clearance_copper(const class Board &b, class RulesCheckCache &cache,
-                                            check_status_cb_t status_cb) const;
+                                            check_status_cb_t status_cb, const std::atomic_bool &cancel) const;
     RulesCheckResult check_clearance_copper_non_copper(const class Board &b, class RulesCheckCache &cache,
-                                                       check_status_cb_t status_cb) const;
+                                                       check_status_cb_t status_cb,
+                                                       const std::atomic_bool &cancel) const;
     RulesCheckResult check_clearance_silkscreen_exposed_copper(const class Board &b, class RulesCheckCache &cache,
-                                                               check_status_cb_t status_cb) const;
+                                                               check_status_cb_t status_cb,
+                                                               const std::atomic_bool &cancel) const;
     RulesCheckResult check_preflight(const class Board &b) const;
     RulesCheckResult check_clearance_copper_keepout(const class Board &b, class RulesCheckCache &cache,
-                                                    check_status_cb_t status_cb) const;
+                                                    check_status_cb_t status_cb, const std::atomic_bool &cancel) const;
     RulesCheckResult check_clearance_same_net(const class Board &b, class RulesCheckCache &cache,
-                                              check_status_cb_t status_cb) const;
+                                              check_status_cb_t status_cb, const std::atomic_bool &cancel) const;
     RulesCheckResult check_plane_priorities(const class Board &b) const;
 
     json serialize_or_export(Rule::SerializeMode mode) const;

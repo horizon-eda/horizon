@@ -12,11 +12,11 @@
 
 namespace horizon {
 RulesCheckResult rules_check(Rules &r, RuleID id, class IDocument &c, RulesCheckCache &cache,
-                             check_status_cb_t status_cb)
+                             check_status_cb_t status_cb, const std::atomic_bool &cancel)
 {
     if (auto rules = dynamic_cast<BoardRules *>(&r)) {
         auto &core = dynamic_cast<IDocumentBoard &>(c);
-        return rules->check(id, *core.get_board(), cache, status_cb);
+        return rules->check(id, *core.get_board(), cache, status_cb, cancel);
     }
     if (auto rules = dynamic_cast<SchematicRules *>(&r)) {
         auto &core = dynamic_cast<IDocumentSchematic &>(c);

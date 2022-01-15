@@ -22,7 +22,7 @@ void RulesCheckResult::update()
 static const std::map<RulesCheckErrorLevel, std::string> level_names = {
         {RulesCheckErrorLevel::DISABLED, "disabled"}, {RulesCheckErrorLevel::FAIL, "fail"},
         {RulesCheckErrorLevel::NOT_RUN, "not_run"},   {RulesCheckErrorLevel::PASS, "pass"},
-        {RulesCheckErrorLevel::WARN, "warn"},
+        {RulesCheckErrorLevel::WARN, "warn"},         {RulesCheckErrorLevel::CANCELLED, "cancelled"},
 };
 
 json RulesCheckResult::serialize() const
@@ -61,6 +61,7 @@ Color rules_check_error_level_to_color(RulesCheckErrorLevel lev)
 {
     switch (lev) {
     case RulesCheckErrorLevel::NOT_RUN:
+    case RulesCheckErrorLevel::CANCELLED:
         return Color::new_from_int(136, 138, 133);
     case RulesCheckErrorLevel::PASS:
         return Color::new_from_int(138, 226, 52);
@@ -87,6 +88,8 @@ std::string rules_check_error_level_to_string(RulesCheckErrorLevel lev)
         return "Fail";
     case RulesCheckErrorLevel::DISABLED:
         return "Disabled";
+    case RulesCheckErrorLevel::CANCELLED:
+        return "Cancelled";
     default:
         return "invalid";
     }
@@ -150,6 +153,17 @@ bool RulesCheckResult::check_disabled(const Rule &rule)
 {
     if (!rule.enabled) {
         level = RulesCheckErrorLevel::DISABLED;
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+bool RulesCheckResult::check_cancelled(bool cancel)
+{
+    if (cancel) {
+        level = RulesCheckErrorLevel::CANCELLED;
         return true;
     }
     else {

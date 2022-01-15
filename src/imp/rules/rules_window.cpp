@@ -296,6 +296,10 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         hamburger_menu_button->hide();
     }
 
+    GET_WIDGET(cancel_button);
+    cancel_button->set_visible(false);
+    cancel_button->signal_clicked().connect(sigc::mem_fun(*this, &RulesWindow::cancel_checks));
+
     signal_delete_event().connect([this](GdkEventAny *ev) { return !run_button->get_sensitive(); });
 }
 
@@ -359,6 +363,7 @@ bool RulesWindow::update_results()
         set_modal(false);
         stack_switcher->set_sensitive(true);
         hamburger_menu_button->set_sensitive(true);
+        cancel_button->set_visible(false);
         dynamic_cast<Gtk::HeaderBar *>(get_titlebar())->set_show_close_button(true);
         return false;
     }
@@ -455,10 +460,13 @@ void RulesWindow::check_thread(RuleID id)
 {
     RulesCheckResult result;
     try {
-        result = rules_check(rules, id, core, *cache.get(), [this, id](const std::string &status) {
-            std::lock_guard<std::mutex> guard(run_store_mutex);
-            run_store.at(id).status = status;
-        });
+        result = rules_check(
+                rules, id, core, *cache.get(),
+                [this, id](const std::string &status) {
+                    std::lock_guard<std::mutex> guard(run_store_mutex);
+                    run_store.at(id).status = status;
+                },
+                cancel_flag);
     }
 
     catch (const std::exception &ex) {
@@ -489,6 +497,7 @@ void RulesWindow::run_checks()
     cache.reset(new RulesCheckCache(core));
     annotation->clear();
     run_store.clear();
+    cancel_flag = false;
     Glib::signal_timeout().connect(sigc::mem_fun(*this, &RulesWindow::update_results), 750 / 12);
     for (auto rule_id : rules.get_rule_ids()) {
         if (rule_descriptions.at(rule_id).can_check) {
@@ -509,8 +518,14 @@ void RulesWindow::run_checks()
     stack->set_visible_child("checks");
     stack_switcher->set_sensitive(false);
     hamburger_menu_button->set_sensitive(false);
+    cancel_button->set_visible(true);
 
     dynamic_cast<Gtk::HeaderBar *>(get_titlebar())->set_show_close_button(false);
+}
+
+void RulesWindow::cancel_checks()
+{
+    cancel_flag = true;
 }
 
 void RulesWindow::rule_selected(RuleID id)

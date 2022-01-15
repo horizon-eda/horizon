@@ -8,6 +8,7 @@
 #include <array>
 #include <gtkmm.h>
 #include <set>
+#include <atomic>
 namespace horizon {
 
 class RulesWindow : public Gtk::Window, public Changeable {
@@ -42,6 +43,7 @@ private:
     Gtk::Box *rule_editor_box = nullptr;
     Gtk::Button *run_button = nullptr;
     Gtk::Button *apply_button = nullptr;
+    Gtk::Button *cancel_button = nullptr;
     Gtk::Stack *stack = nullptr;
     Gtk::StackSwitcher *stack_switcher = nullptr;
     Gtk::Revealer *rev_warn = nullptr;
@@ -53,6 +55,7 @@ private:
     void update_rule_instance_labels();
     void update_rule_labels();
     void update_warning();
+    void cancel_checks();
 
 
     CanvasGL &canvas;
@@ -124,6 +127,8 @@ private:
     Glib::RefPtr<Gio::SimpleActionGroup> action_group;
 
     bool update_results();
+
+    std::atomic_bool cancel_flag;
 
     void export_rules();
     void import_rules();

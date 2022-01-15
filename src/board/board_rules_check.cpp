@@ -154,7 +154,8 @@ static std::pair<ClipperLib::IntPoint, ClipperLib::IntPoint> get_patch_bb(const 
 static std::deque<RulesCheckError>
 clearance_cu_worker(std::set<std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey>> &patch_pairs,
                     std::mutex &patch_pair_mutex, const std::map<CanvasPatch::PatchKey, ClipperLib::Paths> &patches,
-                    const Board &brd, const BoardRules &rules, int n_patch_pairs, check_status_cb_t status_cb)
+                    const Board &brd, const BoardRules &rules, int n_patch_pairs, check_status_cb_t status_cb,
+                    const std::atomic_bool &cancel)
 {
     std::deque<RulesCheckError> r_errors;
     while (true) {
@@ -173,6 +174,8 @@ clearance_cu_worker(std::set<std::pair<CanvasPatch::PatchKey, CanvasPatch::Patch
                 status_cb(ss.str());
             }
         }
+        if (cancel)
+            return {};
 
         auto p1 = patch_pair.first;
         auto p2 = patch_pair.second;
@@ -236,7 +239,7 @@ clearance_cu_worker(std::set<std::pair<CanvasPatch::PatchKey, CanvasPatch::Patch
 }
 
 RulesCheckResult BoardRules::check_clearance_copper(const Board &brd, RulesCheckCache &cache,
-                                                    check_status_cb_t status_cb) const
+                                                    check_status_cb_t status_cb, const std::atomic_bool &cancel) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
@@ -249,6 +252,9 @@ RulesCheckResult BoardRules::check_clearance_copper(const Board &brd, RulesCheck
             layers.emplace(it.first.layer);
         }
     }
+
+    if (r.check_cancelled(cancel))
+        return r;
 
     // assemble a list of patch pairs we'll need to check
     std::set<std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey>> patch_pairs;
@@ -282,6 +288,8 @@ RulesCheckResult BoardRules::check_clearance_copper(const Board &brd, RulesCheck
                     }
                 }
             }
+            if (r.check_cancelled(cancel))
+                return r;
         }
     }
 
@@ -292,10 +300,12 @@ RulesCheckResult BoardRules::check_clearance_copper(const Board &brd, RulesCheck
     for (size_t i = 0; i < std::thread::hardware_concurrency(); i++) {
         results.push_back(std::async(std::launch::async, clearance_cu_worker, std::ref(patch_pairs),
                                      std::ref(patch_pair_mutex), std::ref(patches), std::ref(brd), std::ref(*this),
-                                     n_patch_pairs, status_cb));
+                                     n_patch_pairs, status_cb, std::ref(cancel)));
     }
     for (auto &it : results) {
         auto res = it.get();
+        if (r.check_cancelled(cancel))
+            return r;
         std::copy(res.begin(), res.end(), std::back_inserter(r.errors));
     }
 
@@ -304,7 +314,8 @@ RulesCheckResult BoardRules::check_clearance_copper(const Board &brd, RulesCheck
 }
 
 RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board &brd, RulesCheckCache &cache,
-                                                               check_status_cb_t status_cb) const
+                                                               check_status_cb_t status_cb,
+                                                               const std::atomic_bool &cancel) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
@@ -320,6 +331,9 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board &brd,
         for (const auto &it : patches) {
             if (brd.get_layers().count(it.first.layer)
                 && brd.get_layers().at(it.first.layer).copper) { // need to check copper layer
+                if (r.check_cancelled(cancel))
+                    return r;
+
                 Net *net = it.first.net ? &brd.block->nets.at(it.first.net) : nullptr;
 
                 auto clearance = get_clearance_copper_other(net, it.first.layer)
@@ -386,9 +400,13 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board &brd,
                     }
                 }
             }
+            if (r.check_cancelled(cancel))
+                return r;
         }
 
         for (const auto &it : patch_pairs) {
+            if (r.check_cancelled(cancel))
+                return r;
             auto p_other = it.first;
             auto p_non_other = it.second;
             if (!is_other(p_other.type))
@@ -456,6 +474,9 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board &brd,
     for (const auto &it : patches) {
         if (brd.get_layers().count(it.first.layer)
             && brd.get_layers().at(it.first.layer).copper) { // need to check copper layer
+            if (r.check_cancelled(cancel))
+                return r;
+
             Net *net = it.first.net ? &brd.block->nets.at(it.first.net) : nullptr;
 
             auto clearance = get_clearance_copper_other(net, it.first.layer)
@@ -498,7 +519,8 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board &brd,
 }
 
 RulesCheckResult BoardRules::check_clearance_silkscreen_exposed_copper(const Board &brd, RulesCheckCache &cache,
-                                                                       check_status_cb_t status_cb) const
+                                                                       check_status_cb_t status_cb,
+                                                                       const std::atomic_bool &cancel) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
@@ -507,10 +529,11 @@ RulesCheckResult BoardRules::check_clearance_silkscreen_exposed_copper(const Boa
 
     const auto &rule = rule_clearance_silkscreen_exposed_copper;
 
-    if (!rule.enabled) {
-        r.level = RulesCheckErrorLevel::DISABLED;
+    if (r.check_disabled(rule))
         return r;
-    }
+
+    if (r.check_cancelled(cancel))
+        return r;
 
     struct { // Store layers to avoid redundancies for top and bottom side
         BoardLayers::Layer copper;
@@ -547,6 +570,9 @@ RulesCheckResult BoardRules::check_clearance_silkscreen_exposed_copper(const Boa
         ClipperLib::Paths exposed_copper;
         copper_outline.Execute(ClipperLib::ctIntersection, exposed_copper, ClipperLib::pftNonZero);
 
+        if (r.check_cancelled(cancel))
+            return r;
+
         // Expand exposed copper as this should be faster then expanding silkscreen
         ClipperLib::ClipperOffset ofs;
         ofs.ArcTolerance = 10e3;
@@ -556,6 +582,9 @@ RulesCheckResult BoardRules::check_clearance_silkscreen_exposed_copper(const Boa
 
         // Check everything on the silkscreen for overlap with the expanded exposed copper
         for (const auto &[key, paths] : patches) {
+            if (r.check_cancelled(cancel))
+                return r;
+
             if (key.layer == side.silkscreen) {
                 ClipperLib::Clipper clipper;
                 clipper.AddPaths(exposed_copper_expanded, ClipperLib::ptClip, true);
@@ -700,7 +729,8 @@ RulesCheckResult BoardRules::check_preflight(const Board &brd) const
 
 
 RulesCheckResult BoardRules::check_clearance_copper_keepout(const Board &brd, RulesCheckCache &cache,
-                                                            check_status_cb_t status_cb) const
+                                                            check_status_cb_t status_cb,
+                                                            const std::atomic_bool &cancel) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
@@ -725,6 +755,8 @@ RulesCheckResult BoardRules::check_clearance_copper_keepout(const Board &brd, Ru
 
         int i_patch = 0;
         for (const auto &it : patches) {
+            if (r.check_cancelled(cancel))
+                return r;
             i_patch++;
             {
                 std::stringstream ss;
@@ -788,7 +820,7 @@ RulesCheckResult BoardRules::check_clearance_copper_keepout(const Board &brd, Ru
 }
 
 RulesCheckResult BoardRules::check_clearance_same_net(const Board &brd, RulesCheckCache &cache,
-                                                      check_status_cb_t status_cb) const
+                                                      check_status_cb_t status_cb, const std::atomic_bool &cancel) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
@@ -802,6 +834,8 @@ RulesCheckResult BoardRules::check_clearance_same_net(const Board &brd, RulesChe
             layers.emplace(it.first.layer);
         }
     }
+    if (r.check_cancelled(cancel))
+        return r;
     status_cb("Building patch pairs");
 
     static const std::set<PatchType> patch_types = {PatchType::PAD, PatchType::PAD_TH, PatchType::VIA,
@@ -823,9 +857,13 @@ RulesCheckResult BoardRules::check_clearance_same_net(const Board &brd, RulesChe
                     }
                 }
             }
+            if (r.check_cancelled(cancel))
+                return r;
         }
 
         for (const auto &[p1, p2] : patch_pairs) {
+            if (r.check_cancelled(cancel))
+                return r;
             const Net *net = p1.net ? &brd.block->nets.at(p1.net) : nullptr;
             auto rule = get_clearance_same_net(net, layer);
             auto clearance = rule->get_clearance(p1.type, p2.type);
@@ -1000,8 +1038,8 @@ RulesCheckResult BoardRules::check_plane_priorities(const Board &brd) const
 }
 
 
-RulesCheckResult BoardRules::check(RuleID id, const Board &brd, RulesCheckCache &cache,
-                                   check_status_cb_t status_cb) const
+RulesCheckResult BoardRules::check(RuleID id, const Board &brd, RulesCheckCache &cache, check_status_cb_t status_cb,
+                                   const std::atomic_bool &cancel) const
 {
     switch (id) {
     case RuleID::TRACK_WIDTH:
@@ -1011,22 +1049,22 @@ RulesCheckResult BoardRules::check(RuleID id, const Board &brd, RulesCheckCache 
         return BoardRules::check_hole_size(brd);
 
     case RuleID::CLEARANCE_COPPER:
-        return BoardRules::check_clearance_copper(brd, cache, status_cb);
+        return BoardRules::check_clearance_copper(brd, cache, status_cb, cancel);
 
     case RuleID::CLEARANCE_COPPER_OTHER:
-        return BoardRules::check_clearance_copper_non_copper(brd, cache, status_cb);
+        return BoardRules::check_clearance_copper_non_copper(brd, cache, status_cb, cancel);
 
     case RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER:
-        return BoardRules::check_clearance_silkscreen_exposed_copper(brd, cache, status_cb);
+        return BoardRules::check_clearance_silkscreen_exposed_copper(brd, cache, status_cb, cancel);
 
     case RuleID::CLEARANCE_COPPER_KEEPOUT:
-        return BoardRules::check_clearance_copper_keepout(brd, cache, status_cb);
+        return BoardRules::check_clearance_copper_keepout(brd, cache, status_cb, cancel);
 
     case RuleID::PREFLIGHT_CHECKS:
         return BoardRules::check_preflight(brd);
 
     case RuleID::CLEARANCE_SAME_NET:
-        return BoardRules::check_clearance_same_net(brd, cache, status_cb);
+        return BoardRules::check_clearance_same_net(brd, cache, status_cb, cancel);
 
     case RuleID::PLANE:
         return BoardRules::check_plane_priorities(brd);
