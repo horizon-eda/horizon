@@ -2,6 +2,7 @@
 #include <gtkmm.h>
 #include <memory>
 #include <zmq.hpp>
+#include <optional>
 
 namespace horizon {
 
@@ -9,7 +10,7 @@ class PoolProjectManagerViewCreatePool {
 public:
     PoolProjectManagerViewCreatePool(const Glib::RefPtr<Gtk::Builder> &refBuilder);
     void clear();
-    std::pair<bool, std::string> create();
+    std::optional<std::string> create();
     typedef sigc::signal<void, bool> type_signal_valid_change;
     type_signal_valid_change signal_valid_change()
     {

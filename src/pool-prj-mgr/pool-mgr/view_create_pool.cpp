@@ -33,12 +33,9 @@ static void mkdir_pool(const std::string &bp, const std::string &p)
     ofs.close();
 }
 
-std::pair<bool, std::string> PoolProjectManagerViewCreatePool::create()
+std::optional<std::string> PoolProjectManagerViewCreatePool::create()
 {
-    bool r = false;
-    std::string s;
     auto base_path = pool_path_chooser->get_filename();
-
 
     try {
         {
@@ -72,26 +69,23 @@ std::pair<bool, std::string> PoolProjectManagerViewCreatePool::create()
                    "*.bak";
         }
 
-        s = pool_json;
-        r = true;
+        return pool_json;
     }
     catch (const std::exception &e) {
-        r = false;
         auto top = dynamic_cast<Gtk::Window *>(pool_name_entry->get_ancestor(GTK_TYPE_WINDOW));
         Gtk::MessageDialog md(*top, "Error creating pool", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
         md.set_secondary_text(e.what());
         md.run();
     }
     catch (const Glib::Error &e) {
-        r = false;
         auto top = dynamic_cast<Gtk::Window *>(pool_name_entry->get_ancestor(GTK_TYPE_WINDOW));
         Gtk::MessageDialog md(*top, "Error creating pool", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
         md.set_secondary_text(e.what());
         md.run();
     }
 
-    return {r, s};
-} // namespace horizon
+    return {};
+}
 
 void PoolProjectManagerViewCreatePool::update()
 {

@@ -765,18 +765,18 @@ void PoolProjectManagerAppWindow::handle_new_pool()
 void PoolProjectManagerAppWindow::handle_create()
 {
     if (view_mode == ViewMode::CREATE_PROJECT) {
-        auto r = view_create_project.create();
-        if (r.first) {
+        const auto r = view_create_project.create();
+        if (r) {
             view_create_project.clear();
-            open_file_view(Gio::File::create_for_path(r.second));
+            open_file_view(Gio::File::create_for_path(*r));
         }
     }
     else if (view_mode == ViewMode::CREATE_POOL) {
-        auto r = view_create_pool.create();
-        if (r.first) {
+        const auto r = view_create_pool.create();
+        if (r) {
             view_create_pool.clear();
-            PoolManager::get().add_pool(Glib::path_get_dirname(r.second));
-            open_file_view(Gio::File::create_for_path(r.second));
+            PoolManager::get().add_pool(Glib::path_get_dirname(*r));
+            open_file_view(Gio::File::create_for_path(*r));
         }
     }
 }

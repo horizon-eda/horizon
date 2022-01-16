@@ -49,10 +49,8 @@ void PoolProjectManagerViewCreateProject::populate_pool_combo()
     project_pool_combo->set_active(0);
 }
 
-std::pair<bool, std::string> PoolProjectManagerViewCreateProject::create()
+std::optional<std::string> PoolProjectManagerViewCreateProject::create()
 {
-    bool r = false;
-    std::string s;
     try {
         Project prj(UUID::random());
         prj.base_path =
@@ -61,24 +59,21 @@ std::pair<bool, std::string> PoolProjectManagerViewCreateProject::create()
         auto pool = PoolManager::get().get_by_uuid(pool_uuid);
         if (!pool)
             throw std::runtime_error("pool not found");
-        s = prj.create(meta_values, *pool);
-        r = true;
+        return prj.create(meta_values, *pool);
     }
     catch (const std::exception &e) {
-        r = false;
         Gtk::MessageDialog md(win, "Error creating project", false /* use_markup */, Gtk::MESSAGE_ERROR,
                               Gtk::BUTTONS_OK);
         md.set_secondary_text(e.what());
         md.run();
     }
     catch (const Glib::Error &e) {
-        r = false;
         Gtk::MessageDialog md(win, "Error creating project", false /* use_markup */, Gtk::MESSAGE_ERROR,
                               Gtk::BUTTONS_OK);
         md.set_secondary_text(e.what());
         md.run();
     }
-    return {r, s};
+    return {};
 }
 
 void PoolProjectManagerViewCreateProject::update()
