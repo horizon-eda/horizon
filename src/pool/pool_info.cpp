@@ -10,7 +10,7 @@ namespace horizon {
 
 const UUID PoolInfo::project_pool_uuid = UUID("466088f9-3f15-420d-af8a-fff902537aed");
 
-const unsigned int app_version = 0;
+const unsigned int app_version = 1;
 
 unsigned int PoolInfo::get_app_version()
 {
@@ -35,6 +35,8 @@ PoolInfo::PoolInfo(const json &j, const std::string &bp)
             pools_included.emplace_back(it.get<std::string>());
         }
     }
+    if (j.count("default_frame"))
+        default_frame = j.at("default_frame").get<std::string>();
 }
 
 PoolInfo::PoolInfo() : version(app_version)
@@ -55,6 +57,7 @@ void PoolInfo::save() const
     json j;
     j["uuid"] = (std::string)uuid;
     j["default_via"] = (std::string)default_via;
+    j["default_frame"] = (std::string)default_frame;
     j["name"] = name;
     j["type"] = "pool";
     json o = json::array();

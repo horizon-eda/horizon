@@ -17,6 +17,7 @@ public:
     std::string base_path;
     UUID uuid;
     UUID default_via;
+    UUID default_frame;
     std::string name;
     std::vector<UUID> pools_included;
     void save() const;

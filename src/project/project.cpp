@@ -118,6 +118,10 @@ std::string Project::create(const std::map<std::string, std::string> &meta, cons
     auto &top_block = blocks.get_top_block_item();
 
     top_block.block.project_meta = meta;
+    {
+        auto &sheet = top_block.schematic.sheets.begin()->second;
+        sheet.frame.uuid = pool.default_frame;
+    }
     const auto top_block_filename = Glib::build_filename(blocks.base_path, top_block.block_filename);
     const auto top_sch_filename = Glib::build_filename(blocks.base_path, top_block.schematic_filename);
     save_json_to_file(top_block_filename, top_block.block.serialize());

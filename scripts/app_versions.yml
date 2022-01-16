@@ -20,3 +20,5 @@ versions:
     2: add prefix override
   symbol:
     1: fix orientation-specifix text placement
+  pool:
+    1: add default frame
