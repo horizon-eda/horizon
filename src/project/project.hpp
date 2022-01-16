@@ -19,7 +19,7 @@ public:
     Project(const UUID &uu);
     std::string peek_title() const;
 
-    std::string create(const std::map<std::string, std::string> &meta, const UUID &pool_uuid, const UUID &default_via);
+    std::string create(const std::map<std::string, std::string> &meta, const class PoolInfo &pool);
 
     static bool gitignore_needs_fixing(const std::string &filename);
     static void fix_gitignore(const std::string &filename);

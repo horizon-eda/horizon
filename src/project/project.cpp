@@ -12,6 +12,7 @@
 #include "util/str_util.hpp"
 #include "blocks/blocks_schematic.hpp"
 #include "logger/logger.hpp"
+#include "pool/pool_info.hpp"
 
 namespace horizon {
 
@@ -98,8 +99,7 @@ static const std::vector<std::string> gitignore_lines = {
         "pool/*.db", "pool/*.db-*", "*.imp_meta", "*.autosave", "*.bak",
 };
 
-std::string Project::create(const std::map<std::string, std::string> &meta, const UUID &pool_uuid,
-                            const UUID &default_via)
+std::string Project::create(const std::map<std::string, std::string> &meta, const PoolInfo &pool)
 {
     if (Glib::file_test(base_path, Glib::FILE_TEST_EXISTS)) {
         throw std::runtime_error("project directory already exists");
@@ -130,7 +130,7 @@ std::string Project::create(const std::map<std::string, std::string> &meta, cons
 
     pictures_directory = Glib::build_filename(base_path, "pictures");
     pool_cache_directory_old = Glib::build_filename(base_path, "cache");
-    pool_uuid_old = pool_uuid;
+    pool_uuid_old = pool.uuid;
     pool_directory = Glib::build_filename(base_path, "pool");
     {
         mkdir_if_not_exists(pool_directory, false);
@@ -138,15 +138,15 @@ std::string Project::create(const std::map<std::string, std::string> &meta, cons
         info.uuid = PoolInfo::project_pool_uuid;
         info.name = "Project pool";
         info.base_path = pool_directory;
-        info.pools_included = {pool_uuid};
+        info.pools_included = {pool.uuid};
         info.save();
         ProjectPool::create_directories(pool_directory);
     }
 
     Board board(UUID::random(), top_block.block);
-    if (default_via) {
+    if (pool.default_via) {
         auto &rule_via = board.rules.add_rule_t<RuleVia>();
-        rule_via.padstack = default_via;
+        rule_via.padstack = pool.default_via;
     }
     board.fab_output_settings.prefix = name;
 

@@ -58,8 +58,10 @@ std::pair<bool, std::string> PoolProjectManagerViewCreateProject::create()
         prj.base_path =
                 Glib::build_filename(project_path_chooser->get_file()->get_path(), meta_values.at("project_name"));
         auto pool_uuid = static_cast<std::string>(project_pool_combo->get_active_id());
-
-        s = prj.create(meta_values, pool_uuid, PoolManager::get().get_by_uuid(pool_uuid)->default_via);
+        auto pool = PoolManager::get().get_by_uuid(pool_uuid);
+        if (!pool)
+            throw std::runtime_error("pool not found");
+        s = prj.create(meta_values, *pool);
         r = true;
     }
     catch (const std::exception &e) {
