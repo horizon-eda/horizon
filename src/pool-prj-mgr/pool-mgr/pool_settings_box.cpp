@@ -4,6 +4,9 @@
 #include "pool/ipool.hpp"
 #include "pool/pool_info.hpp"
 #include "util/sqlite.hpp"
+#include "widgets/pool_browser_button.hpp"
+#include "widgets/pool_browser_padstack.hpp"
+#include "widgets/pool_browser_frame.hpp"
 
 namespace horizon {
 
@@ -48,6 +51,43 @@ PoolSettingsBox::PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk
             s_signal_open_pool.emit(it->base_path);
         });
         lb->signal_row_selected().connect([this](auto row) { update_button_sensitivity(); });
+    }
+
+    {
+        Gtk::Box *pool_misc_box;
+        x->get_widget("pool_misc_box", pool_misc_box);
+        {
+            auto la = Gtk::manage(new Gtk::Label("Default via"));
+            la->set_margin_start(10);
+            la->get_style_context()->add_class("dim-label");
+            pool_misc_box->pack_start(*la, false, false, 0);
+        }
+        {
+            auto br = Gtk::manage(new PoolBrowserButton(ObjectType::PADSTACK, pool));
+            br->property_selected_uuid() = pool.get_pool_info().default_via;
+            br->property_selected_uuid().signal_changed().connect(
+                    sigc::mem_fun(*this, &PoolSettingsBox::set_needs_save));
+            browser_via = &dynamic_cast<PoolBrowserPadstack &>(br->get_browser());
+            browser_via->set_padstacks_included({Padstack::Type::VIA});
+            pool_misc_box->pack_start(*br, true, true, 0);
+        }
+        {
+            auto la = Gtk::manage(new Gtk::Label("Default frame"));
+            la->set_margin_start(10);
+            la->get_style_context()->add_class("dim-label");
+            pool_misc_box->pack_start(*la, false, false, 0);
+        }
+        {
+            auto br = Gtk::manage(new PoolBrowserButton(ObjectType::FRAME, pool));
+            br->property_selected_uuid() = pool.get_pool_info().default_frame;
+            br->property_selected_uuid().signal_changed().connect(
+                    sigc::mem_fun(*this, &PoolSettingsBox::set_needs_save));
+            browser_frame = &dynamic_cast<PoolBrowserFrame &>(br->get_browser());
+            pool_misc_box->pack_start(*br, true, true, 0);
+        }
+
+
+        pool_misc_box->show_all();
     }
 
     update_pools();

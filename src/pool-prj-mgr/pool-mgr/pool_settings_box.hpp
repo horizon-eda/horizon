@@ -34,6 +34,8 @@ public:
 private:
     IPool &pool;
     Gtk::Entry *entry_name = nullptr;
+    class PoolBrowserPadstack *browser_via = nullptr;
+    class PoolBrowserFrame *browser_frame = nullptr;
     Gtk::Button *save_button = nullptr;
     Gtk::ListBox *pools_available_listbox = nullptr;
     Gtk::ListBox *pools_included_listbox = nullptr;

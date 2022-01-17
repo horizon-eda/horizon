@@ -1056,15 +1056,12 @@ In case of modifying an existing part, provide rationale for the modification.</
             <property name="orientation">vertical</property>
             <property name="spacing">20</property>
             <child>
-              <!-- n-columns=3 n-rows=3 -->
-              <object class="GtkGrid" id="grid2">
+              <object class="GtkBox" id="pool_misc_box">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="hexpand">False</property>
-                <property name="row-spacing">10</property>
-                <property name="column-spacing">10</property>
+                <property name="spacing">10</property>
                 <child>
-                  <object class="GtkLabel" id="label11">
+                  <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">end</property>
@@ -1074,8 +1071,9 @@ In case of modifying an existing part, provide rationale for the modification.</
                     </style>
                   </object>
                   <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">0</property>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
@@ -1086,27 +1084,10 @@ In case of modifying an existing part, provide rationale for the modification.</
                     <property name="width-chars">30</property>
                   </object>
                   <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">0</property>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
                   </packing>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
                 </child>
                 <child>
                   <placeholder/>
@@ -1115,7 +1096,7 @@ In case of modifying an existing part, provide rationale for the modification.</
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">0</property>
+                <property name="position">1</property>
               </packing>
             </child>
             <child>
@@ -1341,7 +1322,7 @@ In case of modifying an existing part, provide rationale for the modification.</
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </object>
