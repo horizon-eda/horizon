@@ -235,8 +235,8 @@ void Symbol::expand(PinDisplayMode mode)
             case PinDisplayMode::ALT:
             case PinDisplayMode::BOTH:
                 p.name = "";
-                for (auto &pin_name : unit->pins.at(uu).names) {
-                    p.name += pin_name + " ";
+                for (auto &[uu_alt, pin_name] : unit->pins.at(uu).names) {
+                    p.name += pin_name.name + " ";
                 }
                 if (mode == PinDisplayMode::BOTH) {
                     p.name += "(" + unit->pins.at(uu).primary_name + ")";

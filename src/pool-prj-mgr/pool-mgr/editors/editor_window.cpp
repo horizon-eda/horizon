@@ -59,6 +59,10 @@ public:
     {
         return unit.version;
     }
+    unsigned int get_required_version() const override
+    {
+        return unit.get_required_version();
+    }
     ObjectType get_type() const override
     {
         return ObjectType::UNIT;

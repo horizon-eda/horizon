@@ -12,6 +12,7 @@ versions:
     2: add hierarchy
     3: add name orientation to block symbol ports
     4: add connectivity checks
+    5: add support for UUID-based alternate pin names
   project:
     1: replace pool cache with project pool
     2: add hierarchy
@@ -22,3 +23,5 @@ versions:
     1: fix orientation-specifix text placement
   pool:
     1: add default frame
+  unit:
+    1: use UUIDs for alternate pin names

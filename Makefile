@@ -136,6 +136,7 @@ SRC_COMMON = \
 	src/board/rule_shorted_pads.cpp\
 	src/rules/rule_match_component.cpp\
 	src/common/pin_name_orientation.cpp\
+	src/util/pin_direction_accumulator.cpp\
 
 
 ifeq ($(OS),Windows_NT)
@@ -669,6 +670,7 @@ SRC_POOL_PRJ_MGR = \
 	src/widgets/project_meta_editor.cpp\
 	src/util/sort_controller.cpp\
 	src/util/editor_process.cpp\
+	src/widgets/pin_names_editor.cpp\
 	$(SRC_CANVAS)\
 	$(SRC_POOL_UPDATE)\
 	src/util/gtk_util.cpp\

@@ -30,16 +30,25 @@ RulesCheckResult check_unit(const Unit &unit)
                                   "Pin \"" + pin.primary_name + "\" has trailing/leading whitespace");
         }
         std::set<std::string> names;
-        for (const auto &name : pin.names) {
-            if (names.count(name)) {
-                r.errors.emplace_back(RulesCheckErrorLevel::FAIL,
-                                      "Alt. name \"" + name + "\" of pin \"" + pin.primary_name + "\" not unique");
+        for (const auto &[alt_uu, name] : pin.names) {
+            if (needs_trim(name.name)) {
+                r.errors.emplace_back(RulesCheckErrorLevel::FAIL, "Alt. name \"" + name.name + "\" of pin \""
+                                                                          + pin.primary_name
+                                                                          + "\" has trailing/leading whitespace");
             }
-            names.insert(name);
-            if (name.find(",") != std::string::npos || name.find(";") != std::string::npos) {
+            if (name.name.size() == 0) {
                 r.errors.emplace_back(RulesCheckErrorLevel::FAIL,
-                                      "Alt. name \"" + name + "\" of pin \"" + pin.primary_name
-                                              + "\"  contains comma or semicolon. Use spaces as separators.");
+                                      "Alt. name of pin \"" + pin.primary_name + "\" must not be empty");
+            }
+            if (names.count(name.name)) {
+                r.errors.emplace_back(RulesCheckErrorLevel::FAIL,
+                                      "Alt. name \"" + name.name + "\" of pin \"" + pin.primary_name + "\" not unique");
+            }
+            names.insert(name.name);
+            if (name.name.find(",") != std::string::npos || name.name.find(";") != std::string::npos) {
+                r.errors.emplace_back(RulesCheckErrorLevel::FAIL, "Alt. name \"" + name.name + "\" of pin \""
+                                                                          + pin.primary_name
+                                                                          + "\"  contains comma or semicolon");
             }
         }
         if (names.count(pin.primary_name)) {

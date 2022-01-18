@@ -118,8 +118,8 @@ void UnitInfoBox::load(const Unit *unit)
             row[list_columns.direction] = it.second.direction;
             row[list_columns.primary_name] = it.second.primary_name;
             std::string alts;
-            for (const auto &it_alt : it.second.names) {
-                alts += it_alt + ", ";
+            for (const auto &[alt_uu, alt] : it.second.names) {
+                alts += alt.name + ", ";
             }
             if (alts.size()) {
                 alts.pop_back();

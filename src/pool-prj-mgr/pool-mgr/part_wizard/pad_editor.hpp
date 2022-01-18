@@ -2,6 +2,7 @@
 #include <gtkmm.h>
 #include "common/common.hpp"
 #include <set>
+#include "widgets/pin_names_editor.hpp"
 
 
 namespace horizon {
@@ -23,9 +24,11 @@ private:
     std::vector<std::string> names;
     void update_names();
 
+    PinNamesEditor::PinNames pin_names;
+
     Gtk::Label *pad_names_label = nullptr;
     Gtk::Entry *pin_name_entry = nullptr;
-    Gtk::Entry *pin_names_entry = nullptr;
+    PinNamesEditor *pin_names_editor = nullptr;
     Gtk::ComboBoxText *dir_combo = nullptr;
     Gtk::SpinButton *swap_group_spin_button = nullptr;
     Gtk::ComboBox *combo_gate = nullptr;

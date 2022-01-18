@@ -185,6 +185,15 @@ static void append_pin_name(std::string &name, const std::string &x)
     name += append_tilde(x);
 }
 
+static const std::string &get_custom_pin_name(const Component &comp, const UUIDPath<2> &path)
+{
+    static const std::string empty;
+    if (comp.alt_pins.count(path))
+        return comp.alt_pins.at(path).custom_name;
+    else
+        return empty;
+}
+
 void SchematicSymbol::apply_pin_names()
 {
     for (auto &it_pin : symbol.pins) {
@@ -193,13 +202,14 @@ void SchematicSymbol::apply_pin_names()
     if (pin_display_mode == SchematicSymbol::PinDisplayMode::ALL) {
         for (auto &it_pin : symbol.pins) {
             auto pin_uuid = it_pin.first;
-            for (auto &pin_name : gate->unit->pins.at(pin_uuid).names) {
-                it_pin.second.name += append_tilde(pin_name) + " ";
+            for (auto &[alt_uu, pin_name] : gate->unit->pins.at(pin_uuid).names) {
+                it_pin.second.name += append_tilde(pin_name.name) + " ";
             }
             UUIDPath<2> path(gate->uuid, pin_uuid);
-            if (component->custom_pin_names.count(path)) {
-                it_pin.second.name += append_tilde(component->custom_pin_names.at(path)) + " ";
-            }
+
+            if (const auto &n = get_custom_pin_name(*component, path); n.size())
+                it_pin.second.name += append_tilde(n) + " ";
+
             it_pin.second.name += "(" + append_tilde(gate->unit->pins.at(pin_uuid).primary_name) + ")";
         }
     }
@@ -207,12 +217,10 @@ void SchematicSymbol::apply_pin_names()
         for (auto &it_pin : symbol.pins) {
             auto pin_uuid = it_pin.first;
             UUIDPath<2> path(gate->uuid, pin_uuid);
-            if (component->custom_pin_names.count(path) && component->custom_pin_names.at(path).size()) {
-                it_pin.second.name = append_tilde(component->custom_pin_names.at(path));
-            }
-            else {
+            if (const auto &n = get_custom_pin_name(*component, path); n.size())
+                it_pin.second.name = append_tilde(n);
+            else
                 it_pin.second.name = append_tilde(gate->unit->pins.at(pin_uuid).primary_name);
-            }
         }
     }
     else {
@@ -220,25 +228,26 @@ void SchematicSymbol::apply_pin_names()
             auto pin_uuid = it_pin.first;
             UUIDPath<2> path(gate->uuid, pin_uuid);
             const auto &pin = gate->unit->pins.at(pin_uuid);
-            if (component->pin_names.count(path) && component->pin_names.at(path).size()) {
-                const auto &names = component->pin_names.at(path);
-                if (names.count(-1) || (pin_display_mode == SchematicSymbol::PinDisplayMode::BOTH))
+            if (component->alt_pins.count(path)
+                && (component->alt_pins.at(path).pin_names.size() || component->alt_pins.at(path).use_custom_name
+                    || component->alt_pins.at(path).use_primary_name)) {
+                const auto &alt = component->alt_pins.at(path);
+
+                if (display_directions)
+                    it_pin.second.direction = Component::get_effective_direction(alt, pin);
+                else
+                    it_pin.second.direction = Pin::Direction::PASSIVE;
+
+                if (alt.use_primary_name || (pin_display_mode == SchematicSymbol::PinDisplayMode::BOTH))
                     it_pin.second.name = append_tilde(gate->unit->pins.at(pin_uuid).primary_name);
-                for (const auto &it : names) {
-                    if (it == -2) {
-                        // nop, see later
-                    }
-                    else if (it == -1) {
-                        // nop see before
-                    }
-                    else {
-                        if (it >= 0 && it < ((int)pin.names.size()))
-                            append_pin_name(it_pin.second.name, pin.names.at(it));
-                    }
+
+                for (const auto &it : alt.pin_names) {
+                    if (pin.names.count(it))
+                        append_pin_name(it_pin.second.name, pin.names.at(it).name);
                 }
-                if (names.count(-2) && component->custom_pin_names.count(path)) {
-                    append_pin_name(it_pin.second.name, component->custom_pin_names.at(path));
-                }
+
+                if (alt.use_custom_name)
+                    append_pin_name(it_pin.second.name, alt.custom_name);
             }
             else {
                 it_pin.second.name = append_tilde(gate->unit->pins.at(pin_uuid).primary_name);

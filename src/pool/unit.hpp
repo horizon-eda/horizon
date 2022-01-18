@@ -37,6 +37,7 @@ public:
     Direction direction = Direction::INPUT;
     static const LutEnumStr<Pin::Direction> direction_lut;
     static const std::vector<std::pair<Pin::Direction, std::string>> direction_names;
+    static const std::map<Pin::Direction, std::string> direction_abbreviations;
     /**
      * Pins of the same swap_group can be pinswapped.
      * The swap group 0 is for unswappable pins.
@@ -45,7 +46,19 @@ public:
     /**
      * The Pin's alternate names. i.e. UART_RX or I2C_SDA on an MCU.
      */
-    std::vector<std::string> names;
+    class AlternateName {
+    public:
+        explicit AlternateName() = default;
+        explicit AlternateName(const std::string &name, Direction dir);
+        explicit AlternateName(const json &j);
+        std::string name;
+        Direction direction = Direction::INPUT;
+
+        json serialize() const;
+    };
+    std::map<UUID, AlternateName> names;
+
+    static UUID alternate_name_uuid_from_index(int idx);
 
     json serialize() const;
     UUID get_uuid() const;
@@ -68,6 +81,8 @@ public:
     std::string manufacturer;
     std::map<UUID, Pin> pins;
     FileVersion version;
+
+    unsigned int get_required_version() const;
 
     json serialize() const;
     UUID get_uuid() const;

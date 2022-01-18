@@ -786,8 +786,8 @@ int Reviewer::main(int c_argc, char *c_argv[])
                 });
                 for (auto pin : pins_sorted) {
                     std::string alts;
-                    for (const auto &it_alt : pin->names) {
-                        alts += it_alt + ", ";
+                    for (const auto &[uu, alt] : pin->names) {
+                        alts += alt.name + " (" + Pin::direction_abbreviations.at(alt.direction) + "), ";
                     }
                     if (alts.size()) {
                         alts.pop_back();

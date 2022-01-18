@@ -1,6 +1,7 @@
 #include "pad_editor.hpp"
 #include "part_wizard.hpp"
 #include "util/util.hpp"
+#include "widgets/pin_names_editor.hpp"
 
 namespace horizon {
 void PadEditor::update_names()
@@ -29,9 +30,16 @@ PadEditor::PadEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &
 {
     x->get_widget("pad_names", pad_names_label);
     x->get_widget("pin_name", pin_name_entry);
-    x->get_widget("pin_names", pin_names_entry);
     x->get_widget("pin_direction", dir_combo);
     x->get_widget("combo_gate", combo_gate);
+
+    {
+        Gtk::Box *pin_names_box;
+        x->get_widget("pin_names_box", pin_names_box);
+        pin_names_editor = Gtk::manage(new PinNamesEditor(pin_names));
+        pin_names_box->pack_start(*pin_names_editor, true, true, 0);
+        pin_names_editor->show();
+    }
 
     auto propagate = [this](std::function<void(PadEditor *)> fn) {
         auto lb = dynamic_cast<Gtk::ListBox *>(get_ancestor(GTK_TYPE_LIST_BOX));

@@ -72,8 +72,25 @@ public:
     /**
      * used to select alternate pin names
      */
-    std::map<UUIDPath<2>, std::set<int>> pin_names; //-2:custom -1:primary 0...:alt
-    std::map<UUIDPath<2>, std::string> custom_pin_names;
+    class AltPinInfo {
+    public:
+        AltPinInfo() = default;
+        AltPinInfo(const json &j, const Pin &pin);
+        std::set<UUID> pin_names;
+        bool use_primary_name = false;
+        bool use_custom_name = false;
+
+        std::string custom_name;
+        Pin::Direction custom_direction = Pin::Direction::BIDIRECTIONAL;
+
+        void update_for_index(int index, const Pin &pin);
+
+        json serialize() const;
+    };
+    std::map<UUIDPath<2>, AltPinInfo> alt_pins;
+
+    static Pin::Direction get_effective_direction(const Component::AltPinInfo &alt, const Pin &pin);
+    Pin::Direction get_effective_direction(const UUIDPath<2> &path) const;
 
     std::string replace_text(const std::string &t, bool *replaced = nullptr) const;
 

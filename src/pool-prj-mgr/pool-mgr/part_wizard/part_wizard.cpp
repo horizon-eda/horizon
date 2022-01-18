@@ -654,13 +654,12 @@ void PartWizard::import_pads(const std::map<std::string, PadImportItem> &items)
             ed->pin_name_entry->set_text(pin_name);
             ed->dir_combo->set_active_id(std::to_string(static_cast<int>(it.direction)));
             ed->combo_gate_entry->set_text(gate_name);
-            {
-                std::stringstream ss;
-                for (auto &it2 : it.alt) {
-                    ss << it2 << " ";
-                }
-                ed->pin_names_entry->set_text(ss.str());
+            ed->pin_names.clear();
+            for (const auto &alt : it.alt) {
+                ed->pin_names.emplace(std::piecewise_construct, std::forward_as_tuple(UUID::random()),
+                                      std::forward_as_tuple(alt, Pin::Direction::BIDIRECTIONAL));
             }
+            ed->pin_names_editor->reload();
         }
     }
     autolink_pads();
@@ -827,13 +826,8 @@ void PartWizard::update_part()
             pins_used.insert(pin->uuid);
             pin->primary_name = pin_name;
             pin->direction = static_cast<Pin::Direction>(std::stoi(ed->dir_combo->get_active_id()));
-            {
-                std::stringstream ss(ed->pin_names_entry->get_text());
-                std::istream_iterator<std::string> begin(ss);
-                std::istream_iterator<std::string> end;
-                std::vector<std::string> tags(begin, end);
-                pin->names = tags;
-            }
+
+            pin->names = ed->pin_names;
 
             Gate *gate = nullptr;
             {

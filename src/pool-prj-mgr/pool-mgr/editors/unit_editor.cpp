@@ -8,6 +8,7 @@
 #include "util/gtk_util.hpp"
 #include "widgets/help_button.hpp"
 #include "help_texts.hpp"
+#include "widgets/pin_names_editor.hpp"
 
 namespace horizon {
 
@@ -21,7 +22,7 @@ public:
 
 private:
     Gtk::Entry *name_entry = nullptr;
-    Gtk::Entry *names_entry = nullptr;
+    PinNamesEditor *names_editor = nullptr;
     Gtk::ComboBoxText *dir_combo = nullptr;
 };
 
@@ -29,14 +30,21 @@ PinEditor::PinEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &
     : Gtk::Box(cobject), pin(p), parent(pa)
 {
     x->get_widget("pin_name", name_entry);
-    x->get_widget("pin_names", names_entry);
     x->get_widget("pin_direction", dir_combo);
     entry_add_sanitizer(name_entry);
-    entry_add_sanitizer(names_entry);
     parent->sg_name->add_widget(*name_entry);
     parent->sg_direction->add_widget(*dir_combo);
-    parent->sg_names->add_widget(*names_entry);
     widget_remove_scroll_events(*dir_combo);
+
+    {
+        Gtk::Box *pin_names_box;
+        x->get_widget("pin_names_box", pin_names_box);
+        names_editor = Gtk::manage(new PinNamesEditor(pin->names));
+        pin_names_box->pack_start(*names_editor, true, true, 0);
+        names_editor->show();
+    }
+    parent->sg_names->add_widget(*names_editor);
+
 
     for (const auto &it : Pin::direction_names) {
         dir_combo->append(std::to_string(static_cast<int>(it.first)), it.second);
@@ -58,22 +66,7 @@ PinEditor::PinEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &
         return false;
     });
 
-    {
-        std::stringstream ss;
-        std::copy(pin->names.begin(), pin->names.end(), std::ostream_iterator<std::string>(ss, " "));
-        std::string s(ss.str());
-        if (s.size())
-            s.pop_back();
-        names_entry->set_text(s);
-    }
-    names_entry->signal_changed().connect([this] {
-        std::stringstream ss(names_entry->get_text());
-        std::istream_iterator<std::string> begin(ss);
-        std::istream_iterator<std::string> end;
-        std::vector<std::string> names(begin, end);
-        pin->names = names;
-        parent->set_needs_save();
-    });
+    names_editor->signal_changed().connect([this] { parent->set_needs_save(); });
 
     auto propagate = [this](std::function<void(PinEditor *)> fn) {
         auto lb = dynamic_cast<Gtk::ListBox *>(get_ancestor(GTK_TYPE_LIST_BOX));

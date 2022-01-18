@@ -16,66 +16,88 @@
 
 namespace horizon {
 
-class PinNamesBox : public Gtk::FlowBox, public Changeable {
+class PinNamesBox : public Gtk::Box, public Changeable {
 public:
-    PinNamesBox(Component *c, const UUIDPath<2> &p, Glib::RefPtr<Gtk::SizeGroup> sg_combo)
-        : Gtk::FlowBox(), comp(c), path(p), pin(comp->entity->gates.at(path.at(0)).unit->pins.at(path.at(1)))
+    PinNamesBox(Component *c, const UUIDPath<2> &p)
+        : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 4), comp(c), path(p),
+          pin(comp->entity->gates.at(path.at(0)).unit->pins.at(path.at(1)))
     {
-        set_homogeneous(true);
-        set_selection_mode(Gtk::SELECTION_NONE);
-        set_min_children_per_line(2);
+        auto fbox = Gtk::manage(new Gtk::FlowBox);
+        fbox->set_homogeneous(true);
+        fbox->set_selection_mode(Gtk::SELECTION_NONE);
+        fbox->set_min_children_per_line(2);
+        pack_start(*fbox, true, true, 0);
 
         {
-            auto primary_button = Gtk::manage(new Gtk::CheckButton(pin.primary_name + " (primary)"));
-            if (comp->pin_names.count(path))
-                primary_button->set_active(comp->pin_names.at(path).count(-1));
+            auto primary_button = Gtk::manage(new Gtk::CheckButton(
+                    pin.primary_name + " (primary, " + Pin::direction_abbreviations.at(pin.direction) + ")"));
+            if (comp->alt_pins.count(path))
+                primary_button->set_active(comp->alt_pins.at(path).use_primary_name);
             primary_button->signal_toggled().connect([this, primary_button] {
-                add_remove_name(-1, primary_button->get_active());
+                comp->alt_pins[path].use_primary_name = primary_button->get_active();
                 s_signal_changed.emit();
             });
-            sg_combo->add_widget(*primary_button);
-            add(*primary_button);
+            fbox->add(*primary_button);
         }
 
         {
-            int i = 0;
-            for (const auto &pin_name : pin.names) {
-                auto cb = Gtk::manage(new Gtk::CheckButton(pin_name));
-                if (comp->pin_names.count(path))
-                    cb->set_active(comp->pin_names.at(path).count(i));
-                cb->signal_toggled().connect([this, i, cb] {
-                    add_remove_name(i, cb->get_active());
+            for (const auto &[uu, name] : pin.names) {
+                auto cb = Gtk::manage(
+                        new Gtk::CheckButton(name.name + " (" + Pin::direction_abbreviations.at(name.direction) + ")"));
+                if (comp->alt_pins.count(path))
+                    cb->set_active(comp->alt_pins.at(path).pin_names.count(uu));
+                cb->signal_toggled().connect([this, uu, cb] {
+                    add_remove_name(uu, cb->get_active());
                     s_signal_changed.emit();
                 });
-                i++;
-                sg_combo->add_widget(*cb);
-                add(*cb);
+
+                fbox->add(*cb);
             }
         }
 
         {
             auto cbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
+            cbox->set_margin_start(3);
             custom_cb = Gtk::manage(new Gtk::CheckButton(""));
+
             cbox->pack_start(*custom_cb, false, false, 0);
             custom_entry = Gtk::manage(new Gtk::Entry);
-            if (comp->custom_pin_names.count(path))
-                custom_entry->set_text(comp->custom_pin_names.at(path));
+            if (comp->alt_pins.count(path))
+                custom_entry->set_text(comp->alt_pins.at(path).custom_name);
             cbox->pack_start(*custom_entry, true, true, 0);
             custom_cb->signal_toggled().connect([this] {
                 custom_entry->set_sensitive(custom_cb->get_active());
-                add_remove_name(-2, custom_cb->get_active());
+                comp->alt_pins[path].use_custom_name = custom_cb->get_active();
                 s_signal_changed.emit();
             });
             custom_entry->set_sensitive(false);
             custom_entry->set_placeholder_text("Custom");
             custom_entry->signal_changed().connect([this] {
-                comp->custom_pin_names[path] = custom_entry->get_text();
+                comp->alt_pins[path].custom_name = custom_entry->get_text();
                 s_signal_changed.emit();
             });
-            if (comp->pin_names.count(path))
-                custom_cb->set_active(comp->pin_names.at(path).count(-2));
-            sg_combo->add_widget(*cbox);
-            add(*cbox);
+            if (comp->alt_pins.count(path))
+                custom_cb->set_active(comp->alt_pins.at(path).use_custom_name);
+
+            dir_combo = Gtk::manage(new Gtk::ComboBoxText);
+            dir_combo->set_margin_start(8);
+            widget_remove_scroll_events(*dir_combo);
+            for (const auto &it : Pin::direction_names) {
+                dir_combo->append(std::to_string(static_cast<int>(it.first)), it.second);
+            }
+            if (comp->alt_pins.count(path))
+                dir_combo->set_active_id(std::to_string(static_cast<int>(comp->alt_pins.at(path).custom_direction)));
+            else
+                dir_combo->set_active_id(std::to_string(static_cast<int>(Pin::Direction::BIDIRECTIONAL)));
+
+            dir_combo->signal_changed().connect([this] {
+                comp->alt_pins[path].custom_direction =
+                        static_cast<Pin::Direction>(std::stoi(dir_combo->get_active_id()));
+                s_signal_changed.emit();
+            });
+
+            cbox->pack_start(*dir_combo, true, true, 0);
+            pack_start(*cbox, false, false, 0);
         }
     }
 
@@ -98,15 +120,14 @@ private:
     const Pin &pin;
     Gtk::Entry *custom_entry = nullptr;
     Gtk::CheckButton *custom_cb = nullptr;
+    Gtk::ComboBoxText *dir_combo = nullptr;
 
-    void add_remove_name(int name, bool add)
+    void add_remove_name(const UUID &name, bool add)
     {
-        if (add) {
-            comp->pin_names[path].insert(name);
-        }
-        else {
-            comp->pin_names[path].erase(name);
-        }
+        if (add)
+            comp->alt_pins[path].pin_names.insert(name);
+        else
+            comp->alt_pins[path].pin_names.erase(name);
     }
 };
 
@@ -141,7 +162,6 @@ public:
     GatePinEditor(Component *c, const Gate *g) : Gtk::ListBox(), comp(c), gate(g)
     {
         sg = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
-        sg_combo = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
         set_header_func(&header_func_separator);
         set_selection_mode(Gtk::SELECTION_SINGLE);
         std::deque<const Pin *> pins_sorted;
@@ -154,7 +174,7 @@ public:
         for (const auto it : pins_sorted) {
             auto box = Gtk::manage(new GatePinRow(it->primary_name, sg));
 
-            auto bu = Gtk::manage(new PinNamesBox(comp, UUIDPath<2>(gate->uuid, it->uuid), sg_combo));
+            auto bu = Gtk::manage(new PinNamesBox(comp, UUIDPath<2>(gate->uuid, it->uuid)));
             bu->signal_changed().connect([this] { s_signal_changed.emit(); });
             bu->show();
             box->add_box(bu);
@@ -178,7 +198,6 @@ public:
 
 private:
     Glib::RefPtr<Gtk::SizeGroup> sg;
-    Glib::RefPtr<Gtk::SizeGroup> sg_combo;
     std::vector<PinNamesBox *> boxes;
 };
 
