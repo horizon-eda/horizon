@@ -1547,7 +1547,7 @@ void ImpSchematic::update_monitor()
     ItemSet mon_items;
     for (const auto &[uu, block] : core_schematic.get_blocks().blocks) {
         {
-            ItemSet items = block.schematic.get_pool_items_used();
+            ItemSet items = block.block.get_pool_items_used();
             mon_items.insert(items.begin(), items.end());
         }
         {
