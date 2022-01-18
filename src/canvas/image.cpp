@@ -4,12 +4,13 @@
 #include <iostream>
 
 namespace horizon {
-void Canvas::img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, int layer, bool tr)
+void Canvas::img_line(const Coordi &p0, const Coordi &p1, uint64_t width, int layer, bool tr)
 {
     if (!img_mode)
         return;
     if (!img_layer_is_visible(layer))
         return;
+    width = std::max(width, static_cast<uint64_t>(.001_mm));
     UUID uu;
     Polygon poly(uu);
     poly.layer = layer;
