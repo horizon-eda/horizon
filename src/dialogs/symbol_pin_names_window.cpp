@@ -46,8 +46,9 @@ public:
                         new Gtk::CheckButton(name.name + " (" + Pin::direction_abbreviations.at(name.direction) + ")"));
                 if (comp->alt_pins.count(path))
                     cb->set_active(comp->alt_pins.at(path).pin_names.count(uu));
-                cb->signal_toggled().connect([this, uu, cb] {
-                    add_remove_name(uu, cb->get_active());
+                const UUID alt_uu = uu;
+                cb->signal_toggled().connect([this, alt_uu, cb] {
+                    add_remove_name(alt_uu, cb->get_active());
                     s_signal_changed.emit();
                 });
 
