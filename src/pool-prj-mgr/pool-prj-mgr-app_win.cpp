@@ -7,6 +7,7 @@
 #include "pool/pool_manager.hpp"
 #include "pool/project_pool.hpp"
 #include "pool-mgr/pool_notebook.hpp"
+#include "pool-mgr/pool_settings_box.hpp"
 #include "util/pool_check_schema_update.hpp"
 #include "util/gtk_util.hpp"
 #include "util/recent_util.hpp"
@@ -1165,18 +1166,15 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
             if (!PoolManager::get().get_pools().count(pool_base_path) && !pool->get_pool_info().is_project_pool()) {
                 info_bar_show(info_bar_pool_not_added);
             }
-            pool_notebook->signal_saved().connect([this] { set_version_info(""); });
             pool_box->pack_start(*pool_notebook, true, true, 0);
             pool_notebook->show();
             header->set_subtitle(pool_base_path);
-            const auto &version = pool->get_pool_info().version;
-            const auto version_msg = version.get_message(ObjectType::POOL);
-            if (version_msg.size()) {
-                set_version_info(version_msg
-                                 + " This only applies to the pool.json file. Pool items have different versions.");
-            }
-            else {
-                set_version_info("");
+
+            {
+                auto &settings_box = pool_notebook->get_pool_settings_box();
+                set_version_info(settings_box.get_version_message());
+                settings_box.signal_changed().connect(
+                        [this, &settings_box] { set_version_info(settings_box.get_version_message()); });
             }
 
             if (pool->get_pool_info().is_project_pool()) {

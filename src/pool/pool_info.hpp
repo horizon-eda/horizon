@@ -26,6 +26,8 @@ public:
     static unsigned int get_app_version();
     FileVersion version;
 
+    unsigned int get_required_version() const;
+
 private:
     PoolInfo(const json &j, const std::string &bp);
 };

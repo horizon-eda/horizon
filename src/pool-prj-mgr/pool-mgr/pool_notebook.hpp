@@ -30,6 +30,7 @@ public:
     bool get_needs_save() const;
     void save();
     void go_to(ObjectType type, const UUID &uu);
+    class PoolSettingsBox &get_pool_settings_box();
     const UUID &get_pool_uuid() const;
     ~PoolNotebook();
     PoolProjectManagerAppWindow &appwin;

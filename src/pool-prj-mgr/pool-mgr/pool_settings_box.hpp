@@ -6,12 +6,13 @@
 #include "common/common.hpp"
 #include "nlohmann/json.hpp"
 #include "pool/pool_info.hpp"
+#include "util/changeable.hpp"
 #include <git2.h>
 
 namespace horizon {
 using json = nlohmann::json;
 
-class PoolSettingsBox : public Gtk::Box {
+class PoolSettingsBox : public Gtk::Box, public Changeable {
 public:
     PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class IPool &pool);
     static PoolSettingsBox *create(class IPool &pool);
@@ -19,6 +20,7 @@ public:
     void save();
     void pool_updated();
     void update_pools();
+    std::string get_version_message() const;
 
     typedef sigc::signal<void, std::string> type_signal_open_pool;
     type_signal_open_pool signal_open_pool()
@@ -56,6 +58,7 @@ private:
 
     bool needs_save = false;
     void set_needs_save();
+    unsigned int saved_version = 0;
 
     type_signal_open_pool s_signal_open_pool;
     type_signal_saved s_signal_saved;

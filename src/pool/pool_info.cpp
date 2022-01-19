@@ -65,7 +65,8 @@ void PoolInfo::save() const
         o.push_back((std::string)it);
     }
     j["pools_included"] = o;
-    version.serialize(j);
+    if (auto v = get_required_version())
+        j["version"] = v;
     save_json_to_file(Glib::build_filename(base_path, "pool.json"), j);
 }
 
@@ -81,5 +82,12 @@ bool PoolInfo::is_usable() const
     }
 }
 
+unsigned int PoolInfo::get_required_version() const
+{
+    if (default_frame)
+        return 1;
+    else
+        return 0;
+}
 
 } // namespace horizon

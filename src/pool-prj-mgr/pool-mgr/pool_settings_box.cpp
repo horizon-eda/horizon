@@ -94,6 +94,8 @@ PoolSettingsBox::PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk
         pool_misc_box->show_all();
     }
 
+    saved_version = pool.get_pool_info().version.get_file();
+
     update_pools();
     update_actual();
 }
@@ -114,22 +116,41 @@ void PoolSettingsBox::save()
     pool_info.save();
     if (PoolManager::get().get_pools().count(pool_info.base_path))
         PoolManager::get().update_pool(pool_info.base_path);
+    saved_version = pool_info.get_required_version();
     save_button->set_sensitive(false);
     hint_label->set_markup("Almost there! For the items of the included pool to show up, click <i>Update pool</i>.");
     needs_save = false;
     s_signal_saved.emit();
+    s_signal_changed.emit();
 }
 
 void PoolSettingsBox::set_needs_save()
 {
-    auto &version = pool.get_pool_info().version;
+    const auto &version = pool_info.version;
     if (version.get_file() > version.get_app()) {
         return;
     }
+    s_signal_changed.emit();
     needs_save = true;
     save_button->set_sensitive(true);
     hint_label->set_markup("For the items of the included pool to show up, click <i>Save</i> and <i>Update pool</i>.");
     hint_label->show();
+}
+
+std::string PoolSettingsBox::get_version_message() const
+{
+    const auto required_version = pool_info.get_required_version();
+    const auto &version = pool_info.version;
+    static const std::string suffix = " This only applies to the settings tab. Pool items have different versions.";
+    if (version.get_file() > version.get_app())
+        return version.get_message(ObjectType::POOL) + suffix;
+
+    else if (required_version > saved_version)
+        return "Saving this Pool will update it from version " + std::to_string(saved_version) + " to "
+               + std::to_string(required_version) + "." + suffix + " " + FileVersion::learn_more_markup;
+
+    else
+        return "";
 }
 
 bool PoolSettingsBox::get_needs_save() const

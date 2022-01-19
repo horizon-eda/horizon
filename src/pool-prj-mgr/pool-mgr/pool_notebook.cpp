@@ -603,4 +603,9 @@ void PoolNotebook::install_search_once(Gtk::Widget *widget, PoolBrowser *browser
             *widget, *browser));
 }
 
+class PoolSettingsBox &PoolNotebook::get_pool_settings_box()
+{
+    return *settings_box;
+}
+
 } // namespace horizon
