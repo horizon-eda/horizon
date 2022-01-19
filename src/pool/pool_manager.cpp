@@ -124,6 +124,7 @@ void PoolManager::update_pool(const std::string &base_path)
     PoolInfo settings(base_path);
     p.name = settings.name;
     p.default_via = settings.default_via;
+    p.default_frame = settings.default_frame;
     p.pools_included = settings.pools_included;
 }
 

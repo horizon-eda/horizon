@@ -20,7 +20,7 @@ public:
 };
 
 PoolSettingsBox::PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IPool &p)
-    : Gtk::Box(cobject), pool(p)
+    : Gtk::Box(cobject), pool(p), pool_info(pool.get_pool_info())
 {
     x->get_widget("button_save_pool", save_button);
     x->get_widget("pool_settings_name_entry", entry_name);
@@ -34,7 +34,10 @@ PoolSettingsBox::PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     x->get_widget("pool_settings_hint_label", hint_label);
     hint_label->hide();
     entry_name->set_text(pool.get_pool_info().name);
-    entry_name->signal_changed().connect(sigc::mem_fun(*this, &PoolSettingsBox::set_needs_save));
+    entry_name->signal_changed().connect([this] {
+        pool_info.name = entry_name->get_text();
+        set_needs_save();
+    });
     save_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolSettingsBox::save));
     save_button->set_sensitive(false);
 
@@ -42,8 +45,6 @@ PoolSettingsBox::PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     pool_excl_button->signal_clicked().connect([this] { inc_excl_pool(false); });
     pool_up_button->signal_clicked().connect([this] { pool_up_down(true); });
     pool_down_button->signal_clicked().connect([this] { pool_up_down(false); });
-
-    pools_included = pool.get_pool_info().pools_included;
 
     for (auto lb : {pools_available_listbox, pools_included_listbox, pools_actually_included_listbox}) {
         lb->signal_row_activated().connect([this](Gtk::ListBoxRow *row) {
@@ -63,13 +64,15 @@ PoolSettingsBox::PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk
             pool_misc_box->pack_start(*la, false, false, 0);
         }
         {
-            auto br = Gtk::manage(new PoolBrowserButton(ObjectType::PADSTACK, pool));
-            br->property_selected_uuid() = pool.get_pool_info().default_via;
-            br->property_selected_uuid().signal_changed().connect(
-                    sigc::mem_fun(*this, &PoolSettingsBox::set_needs_save));
-            browser_via = &dynamic_cast<PoolBrowserPadstack &>(br->get_browser());
-            browser_via->set_padstacks_included({Padstack::Type::VIA});
-            pool_misc_box->pack_start(*br, true, true, 0);
+            browser_button_via = Gtk::manage(new PoolBrowserButton(ObjectType::PADSTACK, pool));
+            browser_button_via->property_selected_uuid() = pool.get_pool_info().default_via;
+            browser_button_via->property_selected_uuid().signal_changed().connect([this] {
+                pool_info.default_via = browser_button_via->property_selected_uuid();
+                set_needs_save();
+            });
+            auto &br = dynamic_cast<PoolBrowserPadstack &>(browser_button_via->get_browser());
+            br.set_padstacks_included({Padstack::Type::VIA});
+            pool_misc_box->pack_start(*browser_button_via, true, true, 0);
         }
         {
             auto la = Gtk::manage(new Gtk::Label("Default frame"));
@@ -78,12 +81,13 @@ PoolSettingsBox::PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk
             pool_misc_box->pack_start(*la, false, false, 0);
         }
         {
-            auto br = Gtk::manage(new PoolBrowserButton(ObjectType::FRAME, pool));
-            br->property_selected_uuid() = pool.get_pool_info().default_frame;
-            br->property_selected_uuid().signal_changed().connect(
-                    sigc::mem_fun(*this, &PoolSettingsBox::set_needs_save));
-            browser_frame = &dynamic_cast<PoolBrowserFrame &>(br->get_browser());
-            pool_misc_box->pack_start(*br, true, true, 0);
+            browser_button_frame = Gtk::manage(new PoolBrowserButton(ObjectType::FRAME, pool));
+            browser_button_frame->property_selected_uuid() = pool.get_pool_info().default_frame;
+            browser_button_frame->property_selected_uuid().signal_changed().connect([this] {
+                pool_info.default_frame = browser_button_frame->property_selected_uuid();
+                set_needs_save();
+            });
+            pool_misc_box->pack_start(*browser_button_frame, true, true, 0);
         }
 
 
@@ -107,12 +111,9 @@ PoolSettingsBox *PoolSettingsBox::create(IPool &p)
 
 void PoolSettingsBox::save()
 {
-    PoolInfo p = pool.get_pool_info();
-    p.name = entry_name->get_text();
-    p.pools_included = pools_included;
-    p.save();
-    if (PoolManager::get().get_pools().count(p.base_path))
-        PoolManager::get().update_pool(p.base_path);
+    pool_info.save();
+    if (PoolManager::get().get_pools().count(pool_info.base_path))
+        PoolManager::get().update_pool(pool_info.base_path);
     save_button->set_sensitive(false);
     hint_label->set_markup("Almost there! For the items of the included pool to show up, click <i>Update pool</i>.");
     needs_save = false;
@@ -201,10 +202,12 @@ void PoolSettingsBox::inc_excl_pool(bool inc)
 
     if (const auto uu = pool_from_listbox(lb)) {
         if (inc) {
-            pools_included.push_back(*uu);
+            pool_info.pools_included.push_back(*uu);
         }
         else {
-            pools_included.erase(std::remove(pools_included.begin(), pools_included.end(), *uu), pools_included.end());
+            pool_info.pools_included.erase(
+                    std::remove(pool_info.pools_included.begin(), pool_info.pools_included.end(), *uu),
+                    pool_info.pools_included.end());
         }
         update_pools();
         set_needs_save();
@@ -215,15 +218,15 @@ void PoolSettingsBox::pool_up_down(bool up)
 {
     if (const auto sel = pool_from_listbox(pools_included_listbox)) {
         const auto uu = *sel;
-        auto it = std::find(pools_included.begin(), pools_included.end(), uu);
-        if (it == pools_included.end())
+        auto it = std::find(pool_info.pools_included.begin(), pool_info.pools_included.end(), uu);
+        if (it == pool_info.pools_included.end())
             throw std::logic_error("pool not found");
-        if (up && it != pools_included.begin()) {
+        if (up && it != pool_info.pools_included.begin()) {
             std::swap(*it, *(it - 1));
             update_pools();
             set_needs_save();
         }
-        else if (!up && (it != (pools_included.end() - 1))) {
+        else if (!up && (it != (pool_info.pools_included.end() - 1))) {
             std::swap(*it, *(it + 1));
             update_pools();
             set_needs_save();
@@ -240,7 +243,7 @@ void PoolSettingsBox::update_pools()
         }
         for (const auto &it : PoolManager::get().get_pools()) {
             if (it.second.enabled && it.second.uuid != pool.get_pool_info().uuid
-                && std::count(pools_included.begin(), pools_included.end(), it.second.uuid) == 0) {
+                && std::count(pool_info.pools_included.begin(), pool_info.pools_included.end(), it.second.uuid) == 0) {
                 bool usable = it.second.is_usable();
                 if (usable) {
                     Pool other_pool(it.second.base_path);
@@ -262,7 +265,7 @@ void PoolSettingsBox::update_pools()
         for (auto &it : pools_included_listbox->get_children()) {
             delete it;
         }
-        for (const auto &uu : pools_included) {
+        for (const auto &uu : pool_info.pools_included) {
             auto w = Gtk::manage(new PoolListItem(uu));
             pools_included_listbox->append(*w);
             w->show();
@@ -294,9 +297,9 @@ void PoolSettingsBox::update_button_sensitivity()
     const auto sel = pool_from_listbox(pools_included_listbox);
     pool_excl_button->set_sensitive(sel.has_value());
     if (sel.has_value()) {
-        auto it = std::find(pools_included.begin(), pools_included.end(), sel.value());
-        pool_up_button->set_sensitive(it != pools_included.begin());
-        pool_down_button->set_sensitive(it != (pools_included.end() - 1));
+        auto it = std::find(pool_info.pools_included.begin(), pool_info.pools_included.end(), sel.value());
+        pool_up_button->set_sensitive(it != pool_info.pools_included.begin());
+        pool_down_button->set_sensitive(it != (pool_info.pools_included.end() - 1));
     }
     else {
         pool_up_button->set_sensitive(false);

@@ -5,6 +5,7 @@
 #include "util/uuid.hpp"
 #include "common/common.hpp"
 #include "nlohmann/json.hpp"
+#include "pool/pool_info.hpp"
 #include <git2.h>
 
 namespace horizon {
@@ -33,9 +34,10 @@ public:
 
 private:
     IPool &pool;
+    PoolInfo pool_info;
     Gtk::Entry *entry_name = nullptr;
-    class PoolBrowserPadstack *browser_via = nullptr;
-    class PoolBrowserFrame *browser_frame = nullptr;
+    class PoolBrowserButton *browser_button_via = nullptr;
+    class PoolBrowserButton *browser_button_frame = nullptr;
     Gtk::Button *save_button = nullptr;
     Gtk::ListBox *pools_available_listbox = nullptr;
     Gtk::ListBox *pools_included_listbox = nullptr;
@@ -45,8 +47,6 @@ private:
     Gtk::Button *pool_up_button = nullptr;
     Gtk::Button *pool_down_button = nullptr;
     Gtk::Label *hint_label = nullptr;
-
-    std::vector<UUID> pools_included;
 
     void update_actual();
 
