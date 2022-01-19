@@ -124,6 +124,19 @@ ProjectMetaEditor::ProjectMetaEditor(std::map<std::string, std::string> &v) : va
     for (const auto &it : well_known_fields) {
         en = add_editor(it.label, it.description, it.key);
     }
+    name_entry = entries.at("project_name");
+    title_entry = entries.at("project_title");
+
+    name_entry->signal_focus_in_event().connect_notify([this](auto *ev) { use_automatic_name = false; });
+    title_entry->signal_changed().connect([this] {
+        if (!use_automatic_name)
+            return;
+        std::string n = title_entry->get_text();
+        std::replace(n.begin(), n.end(), ' ', '-');
+        name_entry->set_text(n);
+    });
+
+
     custom_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10));
     auto la_custom = grid_attach_label_and_widget(this, "Custom", custom_box, top);
     la_custom->set_valign(Gtk::ALIGN_START);
@@ -152,6 +165,12 @@ ProjectMetaEditor::ProjectMetaEditor(std::map<std::string, std::string> &v) : va
         }
     }
 }
+
+void ProjectMetaEditor::set_use_automatic_name()
+{
+    use_automatic_name = true;
+}
+
 
 static Gtk::Label *grid_attach_label_and_widget_with_description(Gtk::Grid *gr, const std::string &label,
                                                                  Gtk::Widget *w, const std::string &descr, int &top)
@@ -218,6 +237,11 @@ void ProjectMetaEditor::clear()
             delete w;
         }
     }
+}
+
+void ProjectMetaEditor::focus_title()
+{
+    title_entry->grab_focus();
 }
 
 void ProjectMetaEditor::preset()

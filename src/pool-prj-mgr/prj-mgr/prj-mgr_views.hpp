@@ -11,6 +11,7 @@ public:
     PoolProjectManagerViewCreateProject(const Glib::RefPtr<Gtk::Builder> &refBuilder,
                                         class PoolProjectManagerAppWindow &w);
     void clear();
+    void focus();
     std::optional<std::string> create();
     typedef sigc::signal<void, bool> type_signal_valid_change;
     type_signal_valid_change signal_valid_change()

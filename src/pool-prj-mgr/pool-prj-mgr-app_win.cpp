@@ -755,6 +755,7 @@ void PoolProjectManagerAppWindow::handle_new_project()
     if (!check_pools())
         return;
     view_create_project.clear();
+    view_create_project.focus();
     set_view_mode(ViewMode::CREATE_PROJECT);
 }
 

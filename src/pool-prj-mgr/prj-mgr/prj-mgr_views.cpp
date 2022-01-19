@@ -35,8 +35,14 @@ void PoolProjectManagerViewCreateProject::clear()
 {
     meta_editor->clear();
     meta_editor->preset();
+    meta_editor->set_use_automatic_name();
     project_dir_label->set_text("");
     project_path_chooser->unselect_all();
+}
+
+void PoolProjectManagerViewCreateProject::focus()
+{
+    meta_editor->focus_title();
 }
 
 void PoolProjectManagerViewCreateProject::populate_pool_combo()
