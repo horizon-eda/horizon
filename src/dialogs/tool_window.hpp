@@ -10,7 +10,7 @@ public:
     void set_use_ok(bool okay);
 
 protected:
-    virtual void on_event(ToolDataWindow::Event ev)
+    virtual void handle_event(ToolDataWindow::Event ev)
     {
     }
 

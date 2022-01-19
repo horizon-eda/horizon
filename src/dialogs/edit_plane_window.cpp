@@ -84,7 +84,7 @@ EditPlaneWindow::EditPlaneWindow(Gtk::Window *parent, ImpInterface *intf, Plane 
     box->show_all();
 }
 
-void EditPlaneWindow::on_event(ToolDataWindow::Event ev)
+void EditPlaneWindow::handle_event(ToolDataWindow::Event ev)
 {
     if (ev == ToolDataWindow::Event::OK) {
         if (brd.planes.count(plane_uuid)) { // may have been deleted

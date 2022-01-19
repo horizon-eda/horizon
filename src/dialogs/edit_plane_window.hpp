@@ -15,7 +15,7 @@ public:
     void set_net(const UUID &uu);
 
 private:
-    void on_event(ToolDataWindow::Event ev) override;
+    void handle_event(ToolDataWindow::Event ev) override;
     Gtk::ToggleButton *pick_button = nullptr;
     class NetButton *net_button = nullptr;
 
