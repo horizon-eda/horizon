@@ -10,7 +10,6 @@
 #include "pool-mgr/pool_settings_box.hpp"
 #include "util/pool_check_schema_update.hpp"
 #include "util/gtk_util.hpp"
-#include "util/recent_util.hpp"
 #include "widgets/recent_item_box.hpp"
 #include "nlohmann/json.hpp"
 #include "pool-mgr/editors/editor_window.hpp"
@@ -803,6 +802,20 @@ static std::optional<std::string> peek_name(const std::string &path)
         name = "error opening!";
     }
     return name;
+}
+
+static std::vector<std::pair<std::string, Glib::DateTime>>
+recent_sort(const std::map<std::string, Glib::DateTime> &recent_items)
+{
+    std::vector<std::pair<std::string, Glib::DateTime>> recent_items_sorted;
+
+    recent_items_sorted.reserve(recent_items.size());
+    for (const auto &it : recent_items) {
+        recent_items_sorted.emplace_back(it.first, it.second);
+    }
+    std::sort(recent_items_sorted.begin(), recent_items_sorted.end(),
+              [](const auto &a, const auto &b) { return a.second.to_unix() > b.second.to_unix(); });
+    return recent_items_sorted;
 }
 
 void PoolProjectManagerAppWindow::update_recent_items()

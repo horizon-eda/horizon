@@ -3,7 +3,6 @@
 #include <glibmm/miscutils.h>
 #include <fstream>
 #include "util/util.hpp"
-#include "util/recent_util.hpp"
 #include <git2.h>
 #include <curl/curl.h>
 #include "nlohmann/json.hpp"
@@ -100,7 +99,13 @@ void PoolProjectManagerApplication::UserConfig::load(const std::string &filename
         }
     }
     pool_doc_info_bar_dismissed = j.value("pool_doc_info_bar_dismissed", false);
-    recent_from_json(recent_items, j);
+    if (j.count("recent")) {
+        const json &o = j["recent"];
+        for (const auto &[fn, v] : o.items()) {
+            if (Glib::file_test(fn, Glib::FILE_TEST_IS_REGULAR))
+                recent_items.emplace(fn, Glib::DateTime::create_now_local(v.get<int64_t>()));
+        }
+    }
 }
 
 void PoolProjectManagerApplication::UserConfig::save(const std::string &filename)

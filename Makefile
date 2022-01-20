@@ -678,7 +678,6 @@ SRC_POOL_PRJ_MGR = \
 	src/util/http_client.cpp\
 	src/util/github_client.cpp\
 	src/widgets/recent_item_box.cpp\
-	src/util/recent_util.cpp\
 	src/widgets/part_preview.cpp\
 	src/widgets/entity_preview.cpp\
 	src/widgets/preview_canvas.cpp\
