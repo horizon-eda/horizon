@@ -128,7 +128,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     info_bar_pool_doc->signal_response().connect([this](int resp) {
         if (resp == Gtk::RESPONSE_OK) {
             info_bar_hide(info_bar_pool_doc);
-            app.pool_doc_info_bar_dismissed = true;
+            app.user_config.pool_doc_info_bar_dismissed = true;
         }
     });
     info_bar_hide(info_bar_pool_doc);
@@ -815,7 +815,7 @@ void PoolProjectManagerAppWindow::update_recent_items()
             }
         }
     }
-    std::vector<std::pair<std::string, Glib::DateTime>> recent_items_sorted = recent_sort(app.recent_items);
+    std::vector<std::pair<std::string, Glib::DateTime>> recent_items_sorted = recent_sort(app.user_config.recent_items);
     for (const auto &it : recent_items_sorted) {
         const std::string &path = it.first;
         if (const auto name = peek_name(path)) {
@@ -826,7 +826,7 @@ void PoolProjectManagerAppWindow::update_recent_items()
                 recent_projects_listbox->append(*box);
             box->show();
             box->signal_remove().connect([this, box] {
-                app.recent_items.erase(box->path);
+                app.user_config.recent_items.erase(box->path);
                 Glib::signal_idle().connect_once([this] { update_recent_items(); });
             });
         }
@@ -878,7 +878,7 @@ bool PoolProjectManagerAppWindow::really_close_pool_or_project()
         }
         if (pool_notebook)
             pool_notebook->prepare_close();
-        app.recent_items[Glib::build_filename(pool->get_base_path(), "pool.json")] = Glib::DateTime::create_now_local();
+        app.user_config.add_recent_item(Glib::build_filename(pool->get_base_path(), "pool.json"));
         delete pool_notebook;
         info_bar_hide(info_bar_pool_not_added);
         pool_notebook = nullptr;
@@ -892,7 +892,7 @@ bool PoolProjectManagerAppWindow::really_close_pool_or_project()
             md.run();
             return false;
         }
-        app.recent_items[project_filename] = Glib::DateTime::create_now_local();
+        app.user_config.add_recent_item(project_filename);
         info_bar_hide(info_bar_gitignore);
         project.reset();
         cleanup();
@@ -937,7 +937,7 @@ void PoolProjectManagerAppWindow::set_view_mode(ViewMode mode)
         button_update->show();
         hamburger_menu_button->show();
         header->set_title("Pool manager");
-        if (!app.pool_doc_info_bar_dismissed)
+        if (!app.user_config.pool_doc_info_bar_dismissed)
             info_bar_show(info_bar_pool_doc);
         break;
 
@@ -1142,7 +1142,7 @@ gboolean PoolProjectManagerAppWindow::part_browser_key_pressed(GtkEventControlle
 void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &file)
 {
     auto path = file->get_path();
-    app.recent_items[path] = Glib::DateTime::create_now_local();
+    app.user_config.add_recent_item(path);
 
     auto windows = dynamic_cast_vector<PoolProjectManagerAppWindow *>(app.get_windows());
     for (auto &win : windows) {
@@ -1245,7 +1245,7 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
 
         view_project.reset_pool_cache_status();
 
-        part_browser_window = PartBrowserWindow::create(this, project->pool_directory, app.part_favorites);
+        part_browser_window = PartBrowserWindow::create(this, project->pool_directory, app.user_config.part_favorites);
         part_browser_window->signal_place_part().connect(
                 sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_place_part));
         part_browser_window->signal_assign_part().connect(

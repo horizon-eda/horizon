@@ -90,9 +90,9 @@ std::string PoolProjectManagerApplication::get_config_filename()
     return Glib::build_filename(get_config_dir(), "pool-project-manager.json");
 }
 
-void PoolProjectManagerApplication::load_from_config(const std::string &config_filename)
+void PoolProjectManagerApplication::UserConfig::load(const std::string &filename)
 {
-    json j = load_json_from_file(config_filename);
+    json j = load_json_from_file(filename);
     if (j.count("part_favorites")) {
         const json &o = j.at("part_favorites");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -102,6 +102,29 @@ void PoolProjectManagerApplication::load_from_config(const std::string &config_f
     pool_doc_info_bar_dismissed = j.value("pool_doc_info_bar_dismissed", false);
     recent_from_json(recent_items, j);
 }
+
+void PoolProjectManagerApplication::UserConfig::save(const std::string &filename)
+{
+    json j;
+    {
+        json k;
+        for (const auto &it : part_favorites) {
+            k.push_back((std::string)it);
+        }
+        j["part_favorites"] = k;
+    }
+    for (const auto &it : recent_items) {
+        j["recent"][it.first] = it.second.to_unix();
+    }
+    j["pool_doc_info_bar_dismissed"] = pool_doc_info_bar_dismissed;
+    save_json_to_file(filename, j);
+}
+
+void PoolProjectManagerApplication::UserConfig::add_recent_item(const std::string &path)
+{
+    recent_items[path] = Glib::DateTime::create_now_local();
+}
+
 
 void PoolProjectManagerApplication::on_startup()
 {
@@ -120,9 +143,8 @@ void PoolProjectManagerApplication::on_startup()
     add_action("view_log", [this] { show_log_window(); });
     set_accel_for_action("app.quit", "<Ctrl>Q");
 
-    recent_items.clear();
     if (Glib::file_test(get_config_filename(), Glib::FILE_TEST_IS_REGULAR)) {
-        load_from_config(get_config_filename());
+        user_config.load(get_config_filename());
     }
     else {
         std::vector<std::string> old_configs;
@@ -130,7 +152,7 @@ void PoolProjectManagerApplication::on_startup()
         old_configs.push_back(Glib::build_filename(get_config_dir(), "project-manager.json"));
         for (const auto &it : old_configs) {
             if (Glib::file_test(it, Glib::FILE_TEST_IS_REGULAR))
-                load_from_config(it);
+                user_config.load(it);
         }
     }
 
@@ -196,21 +218,7 @@ LogWindow *PoolProjectManagerApplication::show_log_window(guint32 timestamp)
 
 void PoolProjectManagerApplication::on_shutdown()
 {
-    auto config_filename = get_config_filename();
-
-    json j;
-    {
-        json k;
-        for (const auto &it : part_favorites) {
-            k.push_back((std::string)it);
-        }
-        j["part_favorites"] = k;
-    }
-    for (const auto &it : recent_items) {
-        j["recent"][it.first] = it.second.to_unix();
-    }
-    j["pool_doc_info_bar_dismissed"] = pool_doc_info_bar_dismissed;
-    save_json_to_file(config_filename, j);
+    user_config.save(get_config_filename());
 
     StockInfoProvider::cleanup();
 }

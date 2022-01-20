@@ -19,15 +19,26 @@ protected:
 
 public:
     static Glib::RefPtr<PoolProjectManagerApplication> create();
-    std::string get_config_filename();
     const std::string &get_ep_broadcast() const;
     void send_json(int pid, const json &j);
     zmq::context_t zctx;
 
-    std::map<std::string, Glib::DateTime> recent_items;
+    class UserConfig {
+    private:
+        friend PoolProjectManagerApplication;
+        UserConfig() = default;
+        void load(const std::string &filename);
+        void save(const std::string &filename);
 
-    std::deque<UUID> part_favorites;
-    bool pool_doc_info_bar_dismissed = false;
+    public:
+        void add_recent_item(const std::string &path);
+
+        std::map<std::string, Glib::DateTime> recent_items;
+        std::deque<UUID> part_favorites;
+        bool pool_doc_info_bar_dismissed = false;
+    };
+
+    UserConfig user_config;
 
     void close_appwindows(std::set<Gtk::Window *> wins);
     Preferences &get_preferences();
@@ -73,7 +84,6 @@ private:
     void on_action_quit();
     void on_action_new_window();
     void on_action_about();
-    void load_from_config(const std::string &config_filename);
     Preferences preferences;
     class PreferencesWindow *preferences_window = nullptr;
     class PoolsWindow *pools_window = nullptr;
@@ -83,6 +93,8 @@ private:
 
     type_signal_pool_items_edited s_signal_pool_items_edited;
     type_signal_pool_updated s_signal_pool_updated;
+
+    std::string get_config_filename();
 
 public:
     const UUID ipc_cookie;
