@@ -9,7 +9,7 @@ class ProjectMetaEditor : public Gtk::Grid, public Changeable {
 public:
     ProjectMetaEditor(std::map<std::string, std::string> &v);
     void clear();
-    void preset();
+    void preset(const std::string &author);
     void focus_title();
     void set_use_automatic_name();
 

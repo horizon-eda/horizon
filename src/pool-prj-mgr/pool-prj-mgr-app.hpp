@@ -36,6 +36,8 @@ public:
         std::map<std::string, Glib::DateTime> recent_items;
         std::deque<UUID> part_favorites;
         bool pool_doc_info_bar_dismissed = false;
+        std::string project_author;
+        std::string project_base_path;
     };
 
     UserConfig user_config;

@@ -34,10 +34,12 @@ PoolProjectManagerViewCreateProject::PoolProjectManagerViewCreateProject(const G
 void PoolProjectManagerViewCreateProject::clear()
 {
     meta_editor->clear();
-    meta_editor->preset();
+    meta_editor->preset(win.app.user_config.project_author);
     meta_editor->set_use_automatic_name();
     project_dir_label->set_text("");
     project_path_chooser->unselect_all();
+    if (win.app.user_config.project_base_path.size())
+        project_path_chooser->set_filename(win.app.user_config.project_base_path);
 }
 
 void PoolProjectManagerViewCreateProject::focus()
@@ -59,12 +61,14 @@ std::optional<std::string> PoolProjectManagerViewCreateProject::create()
 {
     try {
         Project prj(UUID::random());
-        prj.base_path =
-                Glib::build_filename(project_path_chooser->get_file()->get_path(), meta_values.at("project_name"));
+        const auto base_path = project_path_chooser->get_file()->get_path();
+        prj.base_path = Glib::build_filename(base_path, meta_values.at("project_name"));
         auto pool_uuid = static_cast<std::string>(project_pool_combo->get_active_id());
         auto pool = PoolManager::get().get_by_uuid(pool_uuid);
         if (!pool)
             throw std::runtime_error("pool not found");
+        win.app.user_config.project_author = meta_values.at("author");
+        win.app.user_config.project_base_path = base_path;
         return prj.create(meta_values, *pool);
     }
     catch (const std::exception &e) {

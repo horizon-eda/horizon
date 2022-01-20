@@ -244,12 +244,15 @@ void ProjectMetaEditor::focus_title()
     title_entry->grab_focus();
 }
 
-void ProjectMetaEditor::preset()
+void ProjectMetaEditor::preset(const std::string &author)
 {
     if (entries.count("author")) {
-        auto name = Glib::get_real_name();
-        if (name == "Unknown")
-            name = Glib::get_user_name();
+        auto name = author;
+        if (!name.size()) {
+            name = Glib::get_real_name();
+            if (name == "Unknown")
+                name = Glib::get_user_name();
+        }
         entries.at("author")->set_text(name);
     }
     if (entries.count("rev"))
