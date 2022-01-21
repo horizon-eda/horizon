@@ -10,7 +10,7 @@ bool ToolDragKeepSlope::can_begin()
 {
     if (!doc.b)
         return false;
-    return sel_count_type(selection, ObjectType::TRACK) > 0;
+    return sel_has_type(selection, ObjectType::TRACK);
 }
 
 ToolDragKeepSlope::TrackInfo::TrackInfo(Track &tr, const Track &track_from, const Track &track_to) : track(tr)

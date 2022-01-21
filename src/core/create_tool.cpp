@@ -46,6 +46,7 @@
 #include "tools/tool_place_via.hpp"
 #include "tools/tool_rotate_arbitrary.hpp"
 #include "tools/tool_route_track_interactive.hpp"
+#include "tools/tool_select_connected_lines.hpp"
 #include "tools/tool_set_diffpair.hpp"
 #include "tools/tool_set_via_net.hpp"
 #include "tools/tool_smash.hpp"
@@ -57,6 +58,7 @@
 #include "tools/tool_copy_tracks.hpp"
 #include "tools/tool_swap_nets.hpp"
 #include "tools/tool_line_loop_to_polygon.hpp"
+#include "tools/tool_lines_to_tracks.hpp"
 #include "tools/tool_change_unit.hpp"
 #include "tools/tool_set_nc_all.hpp"
 #include "tools/tool_set_nc.hpp"
@@ -90,6 +92,7 @@
 #include "tools/tool_map_port.hpp"
 #include "tools/tool_add_block_instance.hpp"
 #include "tools/tool_align_and_distribute.hpp"
+#include "tools/tool_merge_duplicate_junctions.hpp"
 
 namespace horizon {
 
@@ -271,6 +274,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     case ToolID::DRAW_DIMENSION:
         return std::make_unique<ToolDrawDimension>(this, tool_id);
 
+    case ToolID::SELECT_CONNECTED_LINES:
+        return std::make_unique<ToolSelectConnectedLines>(this, tool_id);
+
     case ToolID::SET_DIFFPAIR:
     case ToolID::CLEAR_DIFFPAIR:
         return std::make_unique<ToolSetDiffpair>(this, tool_id);
@@ -320,6 +326,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::LINE_LOOP_TO_POLYGON:
         return std::make_unique<ToolLineLoopToPolygon>(this, tool_id);
+
+    case ToolID::LINES_TO_TRACKS:
+        return std::make_unique<ToolLinesToTracks>(this, tool_id);
 
     case ToolID::CHANGE_UNIT:
         return std::make_unique<ToolChangeUnit>(this, tool_id);
@@ -425,6 +434,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::ALIGN_AND_DISTRIBUTE:
         return std::make_unique<ToolAlignAndDistribute>(this, tool_id);
+
+    case ToolID::MERGE_DUPLICATE_JUNCTIONS:
+        return std::make_unique<ToolMergeDuplicateJunctions>(this, tool_id);
 
     default:
         return nullptr;

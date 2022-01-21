@@ -31,6 +31,7 @@ public:
     LayerRange layer = 10000;
     std::vector<UUID> connected_lines;
     std::vector<UUID> connected_arcs;
+    virtual bool only_lines_arcs_connected() const;
     void clear();
 
     json serialize() const;

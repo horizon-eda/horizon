@@ -13,5 +13,6 @@ public:
     std::vector<UUID> connected_vias;
     std::vector<UUID> connected_tracks;
     std::vector<UUID> connected_connection_lines;
+    bool only_lines_arcs_connected() const override;
 };
 } // namespace horizon

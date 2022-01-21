@@ -33,7 +33,7 @@ void ImpBase::hud_update()
 std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
 {
     std::string s;
-    if (sel_count_type(sel, ObjectType::LINE)) {
+    if (sel_has_type(sel, ObjectType::LINE)) {
         auto n = sel_count_type(sel, ObjectType::LINE);
         s += "\n\n<b>" + std::to_string(n) + " " + object_descriptions.at(ObjectType::LINE).get_name_for_n(n)
              + "</b>\n";

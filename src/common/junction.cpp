@@ -25,6 +25,11 @@ void Junction::clear()
     layer = 10000;
 }
 
+bool Junction::only_lines_arcs_connected() const
+{
+    return true;
+}
+
 json Junction::serialize() const
 {
     json j;

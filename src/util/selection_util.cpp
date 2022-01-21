@@ -8,6 +8,12 @@ size_t sel_count_type(const std::set<SelectableRef> &sel, ObjectType type)
     return std::count_if(sel.begin(), sel.end(), [type](const auto &a) { return a.type == type; });
 }
 
+bool sel_has_type(const std::set<SelectableRef> &sel, ObjectType type)
+{
+    auto r = std::find_if(sel.begin(), sel.end(), [type](const auto &a) { return a.type == type; });
+    return r != sel.end();
+}
+
 const SelectableRef &sel_find_one(const std::set<SelectableRef> &sel, ObjectType type)
 {
     auto r = std::find_if(sel.begin(), sel.end(), [type](const auto &a) { return a.type == type; });

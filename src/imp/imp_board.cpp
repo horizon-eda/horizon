@@ -929,7 +929,7 @@ void ImpBoard::update_text_owner_annotation()
 std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
 {
     std::string s;
-    if (sel_count_type(sel, ObjectType::TRACK)) {
+    if (sel_has_type(sel, ObjectType::TRACK)) {
         auto n = sel_count_type(sel, ObjectType::TRACK);
         s += "\n\n<b>" + std::to_string(n) + " " + object_descriptions.at(ObjectType::TRACK).get_name_for_n(n)
              + "</b>\n";
@@ -1010,9 +1010,9 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
     if (sel_count_type(sel, ObjectType::POLYGON_VERTEX) == 1 || sel_count_type(sel, ObjectType::POLYGON_EDGE) == 1) {
         const auto &brd = *core_board.get_board();
         const Polygon *poly = nullptr;
-        if (sel_count_type(sel, ObjectType::POLYGON_VERTEX))
+        if (sel_has_type(sel, ObjectType::POLYGON_VERTEX))
             poly = &brd.polygons.at(sel_find_one(sel, ObjectType::POLYGON_VERTEX).uuid);
-        if (sel_count_type(sel, ObjectType::POLYGON_EDGE))
+        if (sel_has_type(sel, ObjectType::POLYGON_EDGE))
             poly = &brd.polygons.at(sel_find_one(sel, ObjectType::POLYGON_EDGE).uuid);
         if (poly) {
             if (auto plane = dynamic_cast<const Plane *>(poly->usage.ptr)) {

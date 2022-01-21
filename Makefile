@@ -59,6 +59,7 @@ SRC_COMMON = \
 	src/package/rule_package_checks.cpp\
 	src/package/rule_clearance_package.cpp\
 	src/board/board.cpp\
+	src/board/board_junction.cpp\
 	src/board/board_package.cpp\
 	src/board/track.cpp\
 	src/board/airwire.cpp\
@@ -230,6 +231,7 @@ SRC_IMP = \
 	src/core/tool.cpp \
 	src/core/create_tool.cpp \
 	src/core/core_properties.cpp\
+	src/core/tools/tool_merge_duplicate_junctions.cpp\
 	src/core/tools/tool_move.cpp\
 	src/core/tools/tool_place_junction.cpp\
 	src/core/tools/tool_place_junction_schematic.cpp\
@@ -280,6 +282,7 @@ SRC_IMP = \
 	src/core/tools/tool_edit_plane.cpp\
 	src/core/tools/tool_update_all_planes.cpp\
 	src/core/tools/tool_draw_dimension.cpp\
+	src/core/tools/tool_select_connected_lines.cpp\
 	src/core/tools/tool_set_diffpair.cpp\
 	src/core/tools/tool_set_via_net.cpp\
 	src/core/tools/tool_lock.cpp\
@@ -293,6 +296,7 @@ SRC_IMP = \
 	src/core/tools/tool_copy_tracks.cpp\
 	src/core/tools/tool_swap_nets.cpp\
 	src/core/tools/tool_line_loop_to_polygon.cpp\
+	src/core/tools/tool_lines_to_tracks.cpp\
 	src/core/tools/tool_change_unit.cpp\
 	src/core/tools/tool_helper_line_width_setting.cpp\
 	src/core/tools/tool_set_nc_all.cpp\

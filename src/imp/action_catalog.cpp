@@ -256,6 +256,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::TOOL, ToolID::MAP_PIN},
          {"Place pin", ActionGroup::SYMBOL, ActionCatalogItem::AVAILABLE_IN_SYMBOL, ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::SELECT_CONNECTED_LINES},
+         {"Select connected lines", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TOOL, ToolID::SELECT_NET_SEGMENT},
          {"Select net segment", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
@@ -623,6 +627,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
 
         {{ActionID::TOOL, ToolID::LINE_LOOP_TO_POLYGON},
          {"Line loop to polygon", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::LINES_TO_TRACKS},
+         {"Lines to tracks", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::RELOAD_POOL, ToolID::NONE},
@@ -1009,6 +1017,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Align and distribute", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::MERGE_DUPLICATE_JUNCTIONS},
+         {"Merge duplicate junctions", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::GO_TO_PROJECT_MANAGER, ToolID::NONE},
          {"Go to project manager", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
@@ -1269,6 +1281,7 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(MOVE_KEY_FINE_RIGHT),
         TOOL_LUT_ITEM(SWAP_NETS),
         TOOL_LUT_ITEM(LINE_LOOP_TO_POLYGON),
+        TOOL_LUT_ITEM(LINES_TO_TRACKS),
         TOOL_LUT_ITEM(SCALE),
         TOOL_LUT_ITEM(CHANGE_UNIT),
         TOOL_LUT_ITEM(EDIT_FRAME_PROPERTIES),
@@ -1318,5 +1331,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(MAP_PORT),
         TOOL_LUT_ITEM(ADD_BLOCK_INSTANCE),
         TOOL_LUT_ITEM(ALIGN_AND_DISTRIBUTE),
+        TOOL_LUT_ITEM(MERGE_DUPLICATE_JUNCTIONS),
 };
 } // namespace horizon
