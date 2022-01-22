@@ -3,7 +3,9 @@
 #include "schematic/schematic.hpp"
 #include "imp/imp_interface.hpp"
 #include "tool_helper_move.hpp"
+#include "core/tool_id.hpp"
 #include <iostream>
+#include "tool_data_from_place_power_symbol.hpp"
 
 namespace horizon {
 
@@ -11,6 +13,18 @@ bool ToolPlacePowerSymbol::can_begin()
 {
     return doc.c;
 }
+
+ToolResponse ToolPlacePowerSymbol::begin(const ToolArgs &args)
+{
+    const auto &nets = doc.c->get_current_schematic()->block->nets;
+    const bool has_power_nets = std::count_if(nets.begin(), nets.end(), [](auto &x) { return x.second.is_power; });
+    if (has_power_nets)
+        return ToolPlaceJunctionSchematic::begin(args);
+    else
+        return ToolResponse::next(ToolResponse::Result::END, ToolID::MANAGE_POWER_NETS,
+                                  std::make_unique<ToolDataFromPlacePowerSymbol>());
+}
+
 
 bool ToolPlacePowerSymbol::begin_attached()
 {

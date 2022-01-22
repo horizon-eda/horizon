@@ -336,6 +336,7 @@ SRC_IMP = \
 	src/core/tools/tool_helper_save_placements.cpp\
 	src/core/tools/tool_align_and_distribute.cpp\
 	src/core/tools/tool_helper_edit_plane.cpp\
+	src/core/tools/tool_manage_power_nets.cpp\
 	src/document/documents.cpp\
 	src/core/clipboard/clipboard.cpp\
 	src/core/clipboard/clipboard_padstack.cpp\

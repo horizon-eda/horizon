@@ -93,6 +93,7 @@
 #include "tools/tool_add_block_instance.hpp"
 #include "tools/tool_align_and_distribute.hpp"
 #include "tools/tool_merge_duplicate_junctions.hpp"
+#include "tools/tool_manage_power_nets.hpp"
 
 namespace horizon {
 
@@ -177,12 +178,14 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     case ToolID::EDIT_STACKUP:
     case ToolID::ANNOTATE:
     case ToolID::EDIT_SCHEMATIC_PROPERTIES:
-    case ToolID::MANAGE_POWER_NETS:
     case ToolID::EDIT_FRAME_PROPERTIES:
     case ToolID::TOGGLE_GROUP_TAG_VISIBLE:
     case ToolID::MANAGE_INCLUDED_BOARDS:
     case ToolID::MANAGE_PORTS:
         return std::make_unique<ToolManageBuses>(this, tool_id);
+
+    case ToolID::MANAGE_POWER_NETS:
+        return std::make_unique<ToolManagePowerNets>(this, tool_id);
 
     case ToolID::DRAW_POLYGON:
         return std::make_unique<ToolDrawPolygon>(this, tool_id);

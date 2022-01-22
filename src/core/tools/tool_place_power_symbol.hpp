@@ -9,6 +9,8 @@ class ToolPlacePowerSymbol : public ToolPlaceJunctionSchematic {
 public:
     using ToolPlaceJunctionSchematic::ToolPlaceJunctionSchematic;
 
+    ToolResponse begin(const ToolArgs &args) override;
+
     bool can_begin() override;
     std::set<InToolActionID> get_actions() const override
     {
