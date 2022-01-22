@@ -771,12 +771,36 @@ void Schematic::expand_connectivity(bool careful)
                     sheet.warnings.emplace_back(pin_pos, "Pin on pin");
                 if (junction_coords.count(pin_pos))
                     sheet.warnings.emplace_back(pin_pos, "Pin on junction");
+                if (it_pin.second.connection_count == 0) {
+                    const auto path = UUIDPath<2>(schsym.gate->uuid, it_pin.second.uuid);
+                    if (schsym.component->connections.count(path)) {
+                        auto &c = schsym.component->connections.at(path);
+                        if (c.net)
+                            sheet.warnings.emplace_back(pin_pos,
+                                                        "Pin connected to net: " + block->get_net_name(c.net->uuid));
+                    }
+                }
 
                 for (auto &it_line : sheet.net_lines) {
                     LineNet &line = it_line.second;
                     if (line.coord_on_line(pin_pos)) {
                         if (!line.is_connected_to_symbol(it_sym.first, it_pin.first)) {
                             sheet.warnings.emplace_back(pin_pos, "Pin on Line");
+                        }
+                    }
+                }
+            }
+        }
+        for (const auto &[uu_sym, sym] : sheet.block_symbols) {
+            for (const auto &[uu_port, port] : sym.symbol.ports) {
+                if (port.net) {
+                    auto pin_pos = sym.placement.transform(port.position);
+                    if (port.connection_count == 0) {
+                        if (sym.block_instance->connections.count(port.net)) {
+                            auto &c = sym.block_instance->connections.at(port.net);
+                            if (c.net)
+                                sheet.warnings.emplace_back(pin_pos, "Port connected to net: "
+                                                                             + block->get_net_name(c.net->uuid));
                         }
                     }
                 }
