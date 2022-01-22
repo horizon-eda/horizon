@@ -304,10 +304,11 @@ RulesCheckResult BoardRules::check_clearance_copper(const Board &brd, RulesCheck
     }
     for (auto &it : results) {
         auto res = it.get();
-        if (r.check_cancelled(cancel))
-            return r;
         std::copy(res.begin(), res.end(), std::back_inserter(r.errors));
     }
+
+    if (r.check_cancelled(cancel))
+        return r;
 
     r.update();
     return r;
