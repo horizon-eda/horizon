@@ -151,6 +151,112 @@ static unsigned int codepoint_to_hershey(gunichar c, TextData::Font font)
         return font_data.at(x);
     }
     else {
+        switch (font) {
+        case TextData::Font::SIMPLEX:
+            switch (c) {
+            case 0xc4: //Ä
+                return 3300;
+            case 0xd6: //Ö
+                return 3301;
+            case 0xdc: //Ü
+                return 3302;
+            case 0xe4: //ä
+                return 3303;
+            case 0xf6: //ö
+                return 3304;
+            case 0xfc: //ü
+                return 3305;
+            }
+            break;
+
+        case TextData::Font::COMPLEX_ITALIC:
+            switch (c) {
+            case 0xc4: //Ä
+                return 3310;
+            case 0xd6: //Ö
+                return 3311;
+            case 0xdc: //Ü
+                return 3312;
+            case 0xe4: //ä
+                return 3313;
+            case 0xf6: //ö
+                return 3314;
+            case 0xfc: //ü
+                return 3315;
+            }
+            break;
+
+        case TextData::Font::DUPLEX:
+            switch (c) {
+            case 0xc4: //Ä
+                return 3320;
+            case 0xd6: //Ö
+                return 3321;
+            case 0xdc: //Ü
+                return 3322;
+            case 0xe4: //ä
+                return 3323;
+            case 0xf6: //ö
+                return 3324;
+            case 0xfc: //ü
+                return 3325;
+            }
+            break;
+
+        case TextData::Font::COMPLEX:
+            switch (c) {
+            case 0xc4: //Ä
+                return 3330;
+            case 0xd6: //Ö
+                return 3331;
+            case 0xdc: //Ü
+                return 3332;
+            case 0xe4: //ä
+                return 3333;
+            case 0xf6: //ö
+                return 3334;
+            case 0xfc: //ü
+                return 3335;
+            }
+            break;
+
+        case TextData::Font::TRIPLEX:
+            switch (c) {
+            case 0xc4: //Ä
+                return 3340;
+            case 0xd6: //Ö
+                return 3341;
+            case 0xdc: //Ü
+                return 3342;
+            case 0xe4: //ä
+                return 3343;
+            case 0xf6: //ö
+                return 3344;
+            case 0xfc: //ü
+                return 3345;
+            }
+            break;
+
+        case TextData::Font::TRIPLEX_ITALIC:
+            switch (c) {
+            case 0xc4: //Ä
+                return 3350;
+            case 0xd6: //Ö
+                return 3351;
+            case 0xdc: //Ü
+                return 3352;
+            case 0xe4: //ä
+                return 3353;
+            case 0xf6: //ö
+                return 3354;
+            case 0xfc: //ü
+                return 3355;
+            }
+            break;
+
+        default:;
+        }
+
         switch (c) {
         case 0x3bc: // U+03BC GREEK SMALL LETTER MU
         case 0xb5:  // U+00B5 MICRO SIGN
@@ -170,9 +276,9 @@ static unsigned int codepoint_to_hershey(gunichar c, TextData::Font font)
             return 718;
         case 0xb1: // U+00B1 PLUS MINUS SIGN
             return 2233;
-        default:
-            return 870; // palm tree
         }
+
+        return 870; // palm tree
     }
 }
 

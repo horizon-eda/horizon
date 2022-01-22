@@ -3800,6 +3800,72 @@ const char *hershey_glyphs[] = {"",
                                 "",
                                 "",
                                 "",
+                                //simplex
+                                "I[RFJ[ RFZ[ MTWT NCODPCOBNC TCUDVCUBTC", //Ä
+                                "G]PFNGLIKKJNJSKVLXNZP[T[VZXXYVZSZNYKXIVGTFPF NCODPCOBNC TCUDVCUBTC", //Ö
+                                "G]KFKULXNZQ[S[VZXXYUYF NCODPCOBNC TCUDVCUBTC", //Ü
+                                "I\\XMX[ XPVNTMQMONMPLSLUMXOZQ[T[VZXX NHOIPHOGNH THUIVHUGTH", //ä
+                                "I\\QMONMPLSLUMXOZQ[T[VZXXYUYSXPVNTMQM NHOIPHOGNH THUIVHUGTH", //ö
+                                "I\\MMMWNZP[S[UZXW XMX[ NHOIPHOGNH THUIVHUGTH", //ü
+                                "",
+                                "",
+                                "",
+                                "",
+                                //complex italic
+                                "H\\UFH[ UFV[ THU[ LUUU F[L[ R[X[ RCSDTCSBRC XCYDZCYBXC", //Ä
+                                "G]SFPGNILLKOJSJVKYLZN[Q[TZVXXUYRZNZKYHXGVFSF SFQGOIMLLOKSKVLYN[ Q[SZUXWUXRYNYKXHVF RCSDTCSBRC XCYDZCYBXC", //Ö
+                                "F_NFKQJUJXKZN[R[UZWXXU\\F OFLQKUKXLZN[ KFRF YF_F RCSDTCSBRC XCYDZCYBXC", //Ü
+                                "H]XMVTUXUZV[Y[[Y\\W YMWTVXVZW[ VTVQUNSMQMNNLQKTKWLYMZO[Q[SZUWVT QMONMQLTLXMZ PHQIRHQGPH VHWIXHWGVH", //ä
+                                "I[RMONMQLTLWMYNZP[R[UZWWXTXQWOVNTMRM RMPNNQMTMXNZ R[TZVWWTWPVN PHQIRHQGPH VHWIXHWGVH", //ö
+                                "F]GQHOJMMMNNNQLWLYN[ LMMNMQKWKYLZN[P[RZTXVT XMVTUXUZV[Y[[Y\\W YMWTVXVZW[ PHQIRHQGPH VHWIXHWGVH", //ü
+                                "",
+                                "",
+                                "",
+                                "",
+                                //duplex
+                                "H\\RFJ[ RIK[J[ RIY[Z[ RFZ[ MUWU LVXV N@MAMBNCOCPBPAO@N@ NANBOBOANA U@TATBUCVCWBWAV@U@ UAUBVBVAUA", //Ä
+                                "G]PFNGLIKKJNJSKVLXNZP[T[VZXXYVZSZNYKXIVGTFPF QGNHLKKNKSLVNYQZSZVYXVYSYNXKVHSGQG N@MAMBNCOCPBPAO@N@ NANBOBOANA U@TATBUCVCWBWAV@U@ UAUBVBVAUA", //Ö
+                                "G]KFKULXNZQ[S[VZXXYUYF KFLFLUMXNYQZSZVYWXXUXFYF N@MAMBNCOCPBPAO@N@ NANBOBOANA U@TATBUCVCWBWAV@U@ UAUBVBVAUA", //Ü
+                                "H\\WMW[X[ WMXMX[ WPUNSMPMNNLPKSKULXNZP[S[UZWX WPSNPNNOMPLSLUMXNYPZSZWX NFMGMHNIOIPHPGOFNF NGNHOHOGNG UFTGTHUIVIWHWGVFUF UGUHVHVGUG", //ä
+                                "I\\QMONMPLSLUMXOZQ[T[VZXXYUYSXPVNTMQM QNOONPMSMUNXOYQZTZVYWXXUXSWPVOTNQN NFMGMHNIOIPHPGOFNF NGNHOHOGNG UFTGTHUIVIWHWGVFUF UGUHVHVGUG", //ö
+                                "H\\LMLWMZO[R[TZWW LMMMMWNYPZRZTYWW WMW[X[ WMXMX[ NFMGMHNIOIPHPGOFNF NGNHOHOGNG UFTGTHUIVIWHWGVFUF UGUHVHVGUG", //ü
+                                "",
+                                "",
+                                "",
+                                "",
+                                //complex
+                                "H\\RFK[ RFY[ RIX[ MUVU I[O[ U[[[ NCODPCOBNC TCUDVCUBTC", //Ä
+                                "G]QFNGLIKKJOJRKVLXNZQ[S[VZXXYVZRZOYKXIVGSFQF QFOGMILKKOKRLVMXOZQ[ S[UZWXXVYRYOXKWIUGSF NCODPCOBNC TCUDVCUBTC", //Ö
+                                "F^KFKULXNZQ[S[VZXXYUYF LFLUMXOZQ[ HFOF VF\\F NCODPCOBNC TCUDVCUBTC", //Ü
+                                "I]NONPMPMONNPMTMVNWOXQXXYZZ[ WOWXXZZ[[[ WQVRPSMTLVLXMZP[S[UZWX PSNTMVMXNZP[ NHOIPHOGNH THUIVHUGTH", //ä
+                                "H\\QMNNLPKSKULXNZQ[S[VZXXYUYSXPVNSMQM QMONMPLSLUMXOZQ[ S[UZWXXUXSWPUNSM NHOIPHOGNH THUIVHUGTH", //ö
+                                "G]LMLXMZP[R[UZWX MMMXNZP[ WMW[ XMX[ IMMM TMXM W[[[ NHOIPHOGNH THUIVHUGTH", //ü
+                                "",
+                                "",
+                                "",
+                                "",
+                                //triplex
+                                "H\\RFKZ QIW[ RIX[ RFY[ MUVU I[O[ T[[[ KZJ[ KZM[ WZU[ WYV[ XYZ[ TATCVCVATA UAUC TBVB NANCPCPANA OAOC NBPB", //Ä
+                                "G]QFNGLIKKJOJRKVLXNZQ[S[VZXXYVZRZOYKXIVGSFQF MILKKNKSLVMX WXXVYSYNXKWI QFOGMJLNLSMWOZQ[ S[UZWWXSXNWJUGSF TATCVCVATA UAUC TBVB NANCPCPANA OAOC NBPB", //Ö
+                                "F^KFKULXNZQ[S[VZXXYUYG LGLVMX MFMVNYOZQ[ HFPF VF\\F IFKG JFKH NFMH OFMG WFYG [FYG TATCVCVATA UAUC TBVB NANCPCPANA OAOC NBPB", //Ü
+                                "I]NPNOOOOQMQMONNPMTMVNWOXQXXYZZ[ VOWQWXXZ TMUNVPVXWZZ[[[ VRUSPTMULWLXMZP[S[UZVX NUMWMXNZ USQTOUNWNXOZP[ TFTHVHVFTF UFUH TGVG NFNHPHPFNF OFOH NGPG", //ä
+                                "H\\QMNNLPKSKULXNZQ[S[VZXXYUYSXPVNSMQM MPLRLVMX WXXVXRWP QMONNOMRMVNYOZQ[ S[UZVYWVWRVOUNSM TFTHVHVFTF UFUH TGVG NFNHPHPFNF OFOH NGPG", //ö
+                                "G^LMLVMYNZP[S[UZVYWW MNMWNY IMNMNWOZP[ WMW[\\[ XNXZ TMYMY[ JMLN KMLO YYZ[ YZ[[ TFTHVHVFTF UFUH TGVG NFNHPHPFNF OFOH NGPG", //ü
+                                "",
+                                "",
+                                "",
+                                "",
+                                //triplex italic
+                                "H\\UFIZ SJT[ THUZ UFUHVYV[ LUTU F[L[ Q[X[ IZG[ IZK[ TZR[ TYS[ VYW[ XAXCZCZAXA YAYC XBZB RARCTCTARA SASC RBTB", //Ä
+                                "G]SFPGNILLKOJSJVKYLZN[Q[TZVXXUYRZNZKYHXGVFSF OIMLLOKSKWLY UXWUXRYNYJXH SFQGOJNLMOLSLXMZN[ Q[SZUWVUWRXNXIWGVF XAXCZCZAXA YAYC XBZB RARCTCTARA SASC RBTB", //Ö
+                                "F_NFKQJUJXKZN[R[UZWXXU\\G OFLQKUKYLZ PFMQLULYN[ KFSF YF_F LFOG MFNH QFOH RFOG ZF\\G ^F\\G XAXCZCZAXA YAYC XBZB RARCTCTARA SASC RBTB", //Ü
+                                "G]WMUTUXVZW[Y[[Y\\W XMVTVZ WMYMWTVX UTUQTNRMPMMNKQJTJVKYLZN[P[RZSYTWUT NNLQKTKWLY PMNOMQLTLWMZN[ UFUHWHWFUF VFVH UGWG OFOHQHQFOF PFPH OGQG", //ä
+                                "H\\QMNNLQKTKVLYMZP[S[VZXWYTYRXOWNTMQM NOMQLTLWMY VYWWXTXQWO QMOONQMTMWNZP[ S[UYVWWTWQVNTM UFUHWHWFUF VFVH UGWG OFOHQHQFOF PFPH OGQG", //ö
+                                "F^GQHOJMLMMNNPNSLX MNMRLVLZ MPKUKXLZN[P[RZTXVU XMVUVXWZX[Z[\\Y]W YMWUWZ XMZMXTWX UFUHWHWFUF VFVH UGWG OFOHQHQFOF PFPH OGQG", //ü
+                                "",
+                                "",
+                                "",
+                                "",
                                 0};
 }
 /* End of file. */
