@@ -51,5 +51,8 @@ private:
 
     class CanvasAnnotation *bbox_annotation = nullptr;
     void update_bbox_annotation();
+
+    Canvas::SymbolMode symbol_mode = Canvas::SymbolMode::EDIT_PREVIEW;
+    Glib::RefPtr<Gio::SimpleAction> toggle_junctions_and_hidden_names_action;
 };
 } // namespace horizon

@@ -312,8 +312,9 @@ void Canvas::render(const ConnectionLine &line)
                             0);
 }
 
-void Canvas::render(const SymbolPin &pin, bool interactive, ColorP co)
+void Canvas::render(const SymbolPin &pin, SymbolMode mode, ColorP co)
 {
+    const bool interactive = mode != SymbolMode::SHEET;
     Coordi p0 = transform.transform(pin.position);
     Coordi p1 = p0;
 
@@ -416,7 +417,7 @@ void Canvas::render(const SymbolPin &pin, bool interactive, ColorP co)
         c_pin = co;
     }
     img_auto_line = img_mode;
-    if (interactive || pin.name_visible) {
+    if (mode == SymbolMode::EDIT || pin.name_visible) {
         bool draw_in_line = pin.name_orientation == SymbolPin::NameOrientation::IN_LINE
                             || (pin.name_orientation == SymbolPin::NameOrientation::HORIZONTAL
                                 && (pin_orientation == Orientation::LEFT || pin_orientation == Orientation::RIGHT));
@@ -435,10 +436,18 @@ void Canvas::render(const SymbolPin &pin, bool interactive, ColorP co)
                       TextOrigin::CENTER, c_name, 0, opts);
         }
     }
-    std::pair<Coordf, Coordf> pad_extents;
-    if (interactive || pin.pad_visible) {
+    std::optional<std::pair<Coordf, Coordf>> pad_extents;
+    if (mode == SymbolMode::EDIT || pin.pad_visible) {
         pad_extents = draw_text(p_pad, 0.75_mm, pin.pad, orientation_to_angle(pad_orientation), TextOrigin::BASELINE,
                                 c_pad, 0, {});
+    }
+    if (interactive) {
+        if (pad_extents.has_value())
+            selectables.append(pin.uuid, ObjectType::SYMBOL_PIN, p0,
+                               Coordf::min(pad_extents->first, Coordf::min(p0, p1)),
+                               Coordf::max(pad_extents->second, Coordf::max(p0, p1)));
+        else
+            selectables.append_line(pin.uuid, ObjectType::SYMBOL_PIN, p0, p1, 0);
     }
 
     transform_save();
@@ -549,9 +558,6 @@ void Canvas::render(const SymbolPin &pin, bool interactive, ColorP co)
         draw_line(p0, p0 + Coordi(0, 10), c_main, 0, false, 0.75_mm);
     }
     draw_line(p0, p1, c_main, 0, false);
-    if (interactive)
-        selectables.append(pin.uuid, ObjectType::SYMBOL_PIN, p0, Coordf::min(pad_extents.first, Coordf::min(p0, p1)),
-                           Coordf::max(pad_extents.second, Coordf::max(p0, p1)));
     img_auto_line = false;
 }
 
@@ -578,7 +584,7 @@ void Canvas::render(const SchematicSymbol &sym)
 {
     transform = sym.placement;
     object_ref_push(ObjectType::SCHEMATIC_SYMBOL, sym.uuid);
-    render(sym.symbol, true, sym.smashed, ColorP::FROM_LAYER);
+    render(sym.symbol, SymbolMode::SHEET, sym.smashed, ColorP::FROM_LAYER);
     object_ref_pop();
     for (const auto &it : sym.symbol.pins) {
         targets.emplace_back(UUIDPath<2>(sym.uuid, it.second.uuid), ObjectType::SYMBOL_PIN,
@@ -995,12 +1001,13 @@ void Canvas::render(const Pad &pad)
     transform_restore();
 }
 
-void Canvas::render(const Symbol &sym, bool on_sheet, bool smashed, ColorP co)
+void Canvas::render(const Symbol &sym, SymbolMode mode, bool smashed, ColorP co)
 {
+    const bool on_sheet = mode == SymbolMode::SHEET;
     if (!on_sheet) {
         for (const auto &it : sym.junctions) {
             auto &junc = it.second;
-            selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, 10000, true);
+            selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, 10000, mode == SymbolMode::EDIT);
             targets.emplace_back(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position));
         }
     }
@@ -1013,13 +1020,13 @@ void Canvas::render(const Symbol &sym, bool on_sheet, bool smashed, ColorP co)
         auto sym_uuid = object_refs_current.back().uuid;
         for (const auto &it : sym.pins) {
             object_ref_push(ObjectType::SYMBOL_PIN, it.second.uuid, sym_uuid);
-            render(it.second, !on_sheet, co);
+            render(it.second, mode, co);
             object_ref_pop();
         }
     }
     else {
         for (const auto &it : sym.pins) {
-            render(it.second, !on_sheet, co);
+            render(it.second, mode, co);
         }
     }
 

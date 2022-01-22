@@ -61,7 +61,7 @@ void SymbolPreviewExpandWindow::update()
     sym_expanded.can_expand = true;
     sym_expanded.apply_expand(sym, sp_expand->get_value_as_int());
     sym_expanded.expand(Symbol::PinDisplayMode::PRIMARY);
-    canvas->update(sym_expanded, Placement(), false);
+    canvas->update(sym_expanded, Placement(), Canvas::SymbolMode::SHEET);
 }
 
 void SymbolPreviewExpandWindow::set_canvas_appearance(const Appearance &a)

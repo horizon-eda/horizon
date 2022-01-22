@@ -21,7 +21,7 @@ ImpSymbol::ImpSymbol(const std::string &symbol_filename, const std::string &pool
 
 void ImpSymbol::canvas_update()
 {
-    canvas->update(core_symbol.get_canvas_data());
+    canvas->update(core_symbol.get_canvas_data(), {}, symbol_mode);
     symbol_preview_window->update(core_symbol.get_canvas_data());
     update_bbox_annotation();
 }
@@ -206,6 +206,27 @@ void ImpSymbol::construct()
         hamburger_menu->append("Edit unit", "win.edit_unit");
         main_window->add_action("edit_unit", [this] { trigger_action(ActionID::EDIT_UNIT); });
     }
+
+    connect_action(ActionID::TOGGLE_JUNCTIONS_AND_HIDDEN_NAMES, [this](const ActionConnection &c) {
+        if (symbol_mode == Canvas::SymbolMode::EDIT_PREVIEW)
+            symbol_mode = Canvas::SymbolMode::EDIT;
+        else
+            symbol_mode = Canvas::SymbolMode::EDIT_PREVIEW;
+        canvas_update_from_pp();
+        g_simple_action_set_state(toggle_junctions_and_hidden_names_action->gobj(),
+                                  g_variant_new_boolean(symbol_mode == Canvas::SymbolMode::EDIT));
+    });
+    view_options_menu_append_action("Junctions and hidden names", "win.show_junctions_and_hidden_names");
+
+    toggle_junctions_and_hidden_names_action =
+            main_window->add_action_bool("show_junctions_and_hidden_names", symbol_mode == Canvas::SymbolMode::EDIT);
+    toggle_junctions_and_hidden_names_action->signal_change_state().connect([this](const Glib::VariantBase &v) {
+        auto b = Glib::VariantBase::cast_dynamic<Glib::Variant<bool>>(v).get();
+        if (b != (symbol_mode == Canvas::SymbolMode::EDIT)) {
+            trigger_action(ActionID::TOGGLE_JUNCTIONS_AND_HIDDEN_NAMES);
+        }
+    });
+
 
     update_header();
 

@@ -198,12 +198,12 @@ void Canvas::add_triangle(int layer, const Coordf &p0, const Coordf &p1, const C
     }
 }
 
-void Canvas::update(const Symbol &sym, const Placement &tr, bool edit)
+void Canvas::update(const Symbol &sym, const Placement &tr, SymbolMode mode)
 {
     clear();
     layer_provider = &sym;
     transform = tr;
-    render(sym, !edit);
+    render(sym, mode);
     request_push();
 }
 

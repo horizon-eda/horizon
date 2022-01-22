@@ -185,7 +185,7 @@ void KiCadSymbolImportWizard::update_symbol_preview_part()
     size_t idx = preview_part_sp->get_value_as_int();
     if (idx < symbols_for_preview.size()) {
         auto &sym = symbols_for_preview.at(idx);
-        symbol_preview->get_canvas().update(sym, Placement(), false);
+        symbol_preview->get_canvas().update(sym, Placement(), Canvas::SymbolMode::SHEET);
         auto bb = pad_bbox(sym.get_bbox(true), 1_mm);
         symbol_preview->get_canvas().zoom_to_bbox(bb);
     }

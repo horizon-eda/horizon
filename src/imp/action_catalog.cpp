@@ -1025,6 +1025,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Go to project manager", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOGGLE_JUNCTIONS_AND_HIDDEN_NAMES, ToolID::NONE},
+         {"Toggle junctions and hidden names", ActionGroup::SYMBOL, ActionCatalogItem::AVAILABLE_IN_SYMBOL,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1169,6 +1173,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(EDIT_BLOCK_SYMBOL),
         ACTION_LUT_ITEM(GO_TO_BLOCK_SYMBOL),
         ACTION_LUT_ITEM(GO_TO_PROJECT_MANAGER),
+        ACTION_LUT_ITEM(TOGGLE_JUNCTIONS_AND_HIDDEN_NAMES),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

@@ -33,7 +33,8 @@ public:
     {
     }
     virtual void clear();
-    void update(const class Symbol &sym, const Placement &transform = Placement(), bool edit = true);
+    enum class SymbolMode { SHEET, EDIT, EDIT_PREVIEW };
+    void update(const class Symbol &sym, const Placement &transform = Placement(), SymbolMode mode = SymbolMode::EDIT);
     void update(const class Sheet &sheet);
     void update(const class Padstack &padstack, bool edit = true);
     void update(const class Package &pkg, bool edit = true);
@@ -103,11 +104,12 @@ protected:
     }
     void object_ref_pop();
 
-    void render(const class Symbol &sym, bool on_sheet = false, bool smashed = false, ColorP co = ColorP::FROM_LAYER);
+    void render(const class Symbol &sym, SymbolMode mode = SymbolMode::SHEET, bool smashed = false,
+                ColorP co = ColorP::FROM_LAYER);
     void render(const class Junction &junc, bool interactive = true, ObjectType mode = ObjectType::INVALID);
     void render(const class SchematicJunction &junc);
     void render(const class Line &line, bool interactive = true, ColorP co = ColorP::FROM_LAYER);
-    void render(const class SymbolPin &pin, bool interactive = true, ColorP co = ColorP::FROM_LAYER);
+    void render(const class SymbolPin &pin, SymbolMode mode = SymbolMode::EDIT, ColorP co = ColorP::FROM_LAYER);
     void render(const class Arc &arc, bool interactive = true, ColorP co = ColorP::FROM_LAYER);
     void render(const class Sheet &sheet);
     void render(const class SchematicSymbol &sym);
