@@ -155,7 +155,7 @@ void CanvasCairo2::load(const class Symbol &sym, const Placement &placement)
     layer_filter = false;
     fill = true;
     min_line_width = 0.1_mm;
-    update(sym, placement, false);
+    update(sym, placement, Canvas::SymbolMode::SHEET);
 }
 
 struct LayerInfo {
