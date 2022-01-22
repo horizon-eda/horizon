@@ -81,8 +81,10 @@ public:
     void update_junction_connections();
     void update_bus_ripper_connections();
 
-    void replace_junction(SchematicJunction *j, SchematicSymbol *sym, SymbolPin *pin);
-    void replace_junction(SchematicJunction *j, SchematicBlockSymbol *sym, BlockSymbolPort *port);
+    bool replace_junction(SchematicJunction *j, SchematicSymbol *sym, SymbolPin *pin);
+    bool replace_junction_or_create_line(SchematicJunction *j, SchematicSymbol *sym, SymbolPin *pin);
+    bool replace_junction(SchematicJunction *j, SchematicBlockSymbol *sym, BlockSymbolPort *port);
+    bool replace_junction_or_create_line(SchematicJunction *j, SchematicBlockSymbol *sym, BlockSymbolPort *port);
     SchematicJunction &replace_bus_ripper(BusRipper &rip);
 
     void merge_junction(SchematicJunction *j,

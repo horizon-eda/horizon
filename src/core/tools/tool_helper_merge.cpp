@@ -155,13 +155,13 @@ void ToolHelperMerge::merge_and_connect()
                             if (!pin_connected) {
                                 if (ju->net) { // have net
                                     sym.component->connections.emplace(path, static_cast<Net *>(ju->net));
-                                    sheet.replace_junction(ju, &sym, &sym_pin);
+                                    sheet.replace_junction_or_create_line(ju, &sym, &sym_pin);
                                     merged = true;
                                 }
                                 else if (!ju->bus) {
                                     auto new_net = doc.c->get_current_block()->insert_net();
                                     sym.component->connections.emplace(path, new_net);
-                                    sheet.replace_junction(ju, &sym, &sym_pin);
+                                    sheet.replace_junction_or_create_line(ju, &sym, &sym_pin);
                                     doc.c->get_current_schematic()->expand(true);
                                     merged = true;
                                 }
@@ -178,13 +178,13 @@ void ToolHelperMerge::merge_and_connect()
                             if (!pin_connected) {
                                 if (ju->net) { // have net
                                     sym.block_instance->connections.emplace(sym_port.net, static_cast<Net *>(ju->net));
-                                    sheet.replace_junction(ju, &sym, &sym_port);
+                                    sheet.replace_junction_or_create_line(ju, &sym, &sym_port);
                                     merged = true;
                                 }
                                 else if (!ju->bus) {
                                     auto new_net = doc.c->get_current_block()->insert_net();
                                     sym.block_instance->connections.emplace(sym_port.net, new_net);
-                                    sheet.replace_junction(ju, &sym, &sym_port);
+                                    sheet.replace_junction_or_create_line(ju, &sym, &sym_port);
                                     doc.c->get_current_schematic()->expand(true);
                                     merged = true;
                                 }

@@ -626,26 +626,57 @@ Block::NetPinsAndPorts Sheet::get_pins_connected_to_net_segment(const UUID &uu_s
     return r;
 }
 
-void Sheet::replace_junction(SchematicJunction *j, SchematicSymbol *sym, SymbolPin *pin)
+bool Sheet::replace_junction(SchematicJunction *j, SchematicSymbol *sym, SymbolPin *pin)
 {
+    bool connected = false;
     for (auto &it_line : net_lines) {
         for (auto it_ft : {&it_line.second.from, &it_line.second.to}) {
             if (it_ft->junc == j) {
                 it_ft->connect(sym, pin);
+                connected = true;
             }
         }
     }
+    return connected;
 }
 
-void Sheet::replace_junction(SchematicJunction *j, SchematicBlockSymbol *sym, BlockSymbolPort *port)
+bool Sheet::replace_junction_or_create_line(SchematicJunction *j, SchematicSymbol *sym, SymbolPin *pin)
 {
+    if (!replace_junction(j, sym, pin)) {
+        const auto li_uu = UUID::random();
+        auto &li = net_lines.emplace(li_uu, li_uu).first->second;
+        li.from.connect(j);
+        li.to.connect(sym, pin);
+        return false;
+    }
+    return true;
+}
+
+
+bool Sheet::replace_junction(SchematicJunction *j, SchematicBlockSymbol *sym, BlockSymbolPort *port)
+{
+    bool connected = false;
     for (auto &it_line : net_lines) {
         for (auto it_ft : {&it_line.second.from, &it_line.second.to}) {
             if (it_ft->junc == j) {
                 it_ft->connect(sym, port);
+                connected = true;
             }
         }
     }
+    return connected;
+}
+
+bool Sheet::replace_junction_or_create_line(SchematicJunction *j, SchematicBlockSymbol *sym, BlockSymbolPort *port)
+{
+    if (!replace_junction(j, sym, port)) {
+        const auto li_uu = UUID::random();
+        auto &li = net_lines.emplace(li_uu, li_uu).first->second;
+        li.from.connect(j);
+        li.to.connect(sym, port);
+        return false;
+    }
+    return true;
 }
 
 void Sheet::merge_junction(SchematicJunction *j, SchematicJunction *into)
