@@ -337,6 +337,7 @@ SRC_IMP = \
 	src/core/tools/tool_align_and_distribute.cpp\
 	src/core/tools/tool_helper_edit_plane.cpp\
 	src/core/tools/tool_manage_power_nets.cpp\
+	src/core/tools/tool_edit_text.cpp\
 	src/document/documents.cpp\
 	src/core/clipboard/clipboard.cpp\
 	src/core/clipboard/clipboard_padstack.cpp\
@@ -381,6 +382,7 @@ SRC_IMP = \
 	src/dialogs/manage_ports.cpp\
 	src/dialogs/select_block.cpp\
 	src/dialogs/align_and_distribute_window.cpp\
+	src/dialogs/edit_text_window.cpp\
 	src/util/sort_controller.cpp\
 	src/core/core_symbol.cpp\
 	src/core/core_schematic.cpp\

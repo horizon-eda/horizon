@@ -94,6 +94,7 @@
 #include "tools/tool_align_and_distribute.hpp"
 #include "tools/tool_merge_duplicate_junctions.hpp"
 #include "tools/tool_manage_power_nets.hpp"
+#include "tools/tool_edit_text.hpp"
 
 namespace horizon {
 
@@ -440,6 +441,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::MERGE_DUPLICATE_JUNCTIONS:
         return std::make_unique<ToolMergeDuplicateJunctions>(this, tool_id);
+
+    case ToolID::EDIT_TEXT:
+        return std::make_unique<ToolEditText>(this, tool_id);
 
     default:
         return nullptr;

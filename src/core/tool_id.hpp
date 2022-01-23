@@ -162,5 +162,6 @@ enum class ToolID {
     ADD_BLOCK_INSTANCE,
     ALIGN_AND_DISTRIBUTE,
     MERGE_DUPLICATE_JUNCTIONS,
+    EDIT_TEXT,
 };
 } // namespace horizon

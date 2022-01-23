@@ -1,10 +1,8 @@
 #pragma once
 #include "core/tool.hpp"
-#include "tool_helper_collect_nets.hpp"
 
 namespace horizon {
-
-class ToolEnterDatum : public virtual ToolBase, public ToolHelperCollectNets {
+class ToolEditText : public ToolBase {
 public:
     using ToolBase::ToolBase;
     ToolResponse begin(const ToolArgs &args) override;
@@ -14,9 +12,5 @@ public:
     {
         return true;
     }
-
-private:
-    enum class Mode { INVALID, POLYGON_EDGE, POLYGON_VERTEX, NET, PAD, DIMENSION, LINE, TRACK, JUNCTION };
-    Mode get_mode() const;
 };
 } // namespace horizon

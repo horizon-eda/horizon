@@ -37,8 +37,6 @@ static bool sel_only_has_types(const std::set<SelectableRef> &sel, const std::se
 
 ToolEnterDatum::Mode ToolEnterDatum::get_mode() const
 {
-    if (sel_find_exactly_one(selection, ObjectType::TEXT))
-        return Mode::TEXT;
     if (sel_find_exactly_one(selection, ObjectType::DIMENSION))
         return Mode::DIMENSION;
     if (sel_find_exactly_one(selection, ObjectType::PAD))
@@ -76,14 +74,6 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
             pad.name = *r;
             return ToolResponse::commit();
         }
-    } break;
-
-    case Mode::TEXT: {
-        const auto text_uu = sel_find_one(selection, ObjectType::TEXT).uuid;
-        auto &txt = *doc.r->get_text(text_uu);
-        if (auto r = imp->dialogs.ask_datum_string_multiline("Enter text", txt.text))
-            txt.text = *r;
-        return ToolResponse::commit();
     } break;
 
     case Mode::POLYGON_VERTEX: {

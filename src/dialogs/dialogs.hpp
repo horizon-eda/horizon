@@ -53,7 +53,6 @@ public:
     std::optional<Coordi> ask_datum_coord(const std::string &label, Coordi def = Coordi());
     std::optional<std::pair<Coordi, std::pair<bool, bool>>> ask_datum_coord2(const std::string &label,
                                                                              Coordi def = Coordi());
-    std::optional<std::string> ask_datum_string_multiline(const std::string &label, const std::string &def);
     std::optional<std::string> ask_datum_string(const std::string &label, const std::string &def);
     std::optional<int> ask_datum_angle(const std::string &label, int def = 0);
     bool edit_shapes(std::set<class Shape *> shapes);
@@ -75,6 +74,7 @@ public:
                                                                class Package &pkg);
     class AlignAndDistributeWindow *show_align_and_distribute_window();
     class EditPlaneWindow *show_edit_plane_window(class Plane &plane, class Board &brd);
+    class EditTextWindow *show_edit_text_window(class Text &text, bool use_ok);
 
     void close_nonmodal();
     class ToolWindow *get_nonmodal();

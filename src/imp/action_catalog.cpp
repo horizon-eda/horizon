@@ -1029,6 +1029,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Toggle junctions and hidden names", ActionGroup::SYMBOL, ActionCatalogItem::AVAILABLE_IN_SYMBOL,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::EDIT_TEXT},
+         {"Edit text", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1337,5 +1341,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(ADD_BLOCK_INSTANCE),
         TOOL_LUT_ITEM(ALIGN_AND_DISTRIBUTE),
         TOOL_LUT_ITEM(MERGE_DUPLICATE_JUNCTIONS),
+        TOOL_LUT_ITEM(EDIT_TEXT),
 };
 } // namespace horizon

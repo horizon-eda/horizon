@@ -43,6 +43,7 @@
 #include "manage_ports.hpp"
 #include "select_block.hpp"
 #include "align_and_distribute_window.hpp"
+#include "edit_text_window.hpp"
 
 namespace horizon {
 void Dialogs::set_parent(Gtk::Window *w)
@@ -300,19 +301,6 @@ std::optional<int64_t> Dialogs::ask_datum(const std::string &label, int64_t def)
 std::optional<std::string> Dialogs::ask_datum_string(const std::string &label, const std::string &def)
 {
     AskDatumStringDialog dia(parent, label, TextEditor::Lines::SINGLE);
-    dia.set_text(def);
-    auto r = dia.run();
-    if (r == Gtk::RESPONSE_OK) {
-        return dia.get_text();
-    }
-    else {
-        return {};
-    }
-}
-
-std::optional<std::string> Dialogs::ask_datum_string_multiline(const std::string &label, const std::string &def)
-{
-    AskDatumStringDialog dia(parent, label, TextEditor::Lines::MULTI);
     dia.set_text(def);
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK) {
@@ -617,6 +605,20 @@ EditPlaneWindow *Dialogs::show_edit_plane_window(class Plane &plane, class Board
         return win;
     }
     auto win = new EditPlaneWindow(parent, interface, plane, brd);
+    window_nonmodal = win;
+    win->signal_hide().connect([this] { close_nonmodal(); });
+    win->present();
+    return win;
+}
+
+
+EditTextWindow *Dialogs::show_edit_text_window(class Text &text, bool use_ok)
+{
+    if (auto win = dynamic_cast<EditTextWindow *>(window_nonmodal)) {
+        win->present();
+        return win;
+    }
+    auto win = new EditTextWindow(parent, interface, text, use_ok);
     window_nonmodal = win;
     win->signal_hide().connect([this] { close_nonmodal(); });
     win->present();

@@ -1639,7 +1639,7 @@ ActionToolID ImpBase::get_doubleclick_action(ObjectType type, const UUID &uu)
 {
     switch (type) {
     case ObjectType::TEXT:
-        return ToolID::ENTER_DATUM;
+        return ToolID::EDIT_TEXT;
 
     case ObjectType::POLYGON_ARC_CENTER:
     case ObjectType::POLYGON_VERTEX:

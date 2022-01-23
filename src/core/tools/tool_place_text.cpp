@@ -9,6 +9,8 @@
 #include "util/selection_util.hpp"
 #include "board/board.hpp"
 #include "board/board_layers.hpp"
+#include "core/tool_data_window.hpp"
+#include "dialogs/edit_text_window.hpp"
 
 namespace horizon {
 
@@ -34,6 +36,8 @@ void ToolPlaceText::Settings::load_from_json(const json &j)
             layers.emplace(std::piecewise_construct, std::forward_as_tuple(k), std::forward_as_tuple(it.value()));
         }
     }
+    if (j.count("font"))
+        font = TextData::font_lut.lookup(j.at("font").get<std::string>());
 }
 
 static const ToolPlaceText::Settings::LayerSettings settings_default;
@@ -54,6 +58,7 @@ json ToolPlaceText::Settings::serialize() const
     for (const auto &it : layers) {
         j["layers"][std::to_string(it.first)] = it.second.serialize();
     }
+    j["font"] = TextData::font_lut.lookup_reverse(font);
     return j;
 }
 
@@ -78,6 +83,7 @@ void ToolPlaceText::apply_settings()
         const auto &s = settings.get_layer(temp->layer);
         temp->width = s.width;
         temp->size = s.size;
+        temp->font = settings.font;
     }
 }
 
@@ -115,14 +121,8 @@ ToolResponse ToolPlaceText::begin(const ToolArgs &args)
             {InToolActionID::EDIT, "change text"},
     });
     if (!pkg) {
-        if (auto r = imp->dialogs.ask_datum_string_multiline("Enter text", temp->text)) {
-            temp->text = *r;
-        }
-        else {
-            doc.r->delete_text(temp->uuid);
-            selection.clear();
-            return ToolResponse::end();
-        }
+        auto dia = imp->dialogs.show_edit_text_window(*temp, false);
+        dia->focus_text();
     }
     else {
         pkg->texts.push_back(temp);
@@ -135,58 +135,49 @@ ToolResponse ToolPlaceText::update(const ToolArgs &args)
     std::string *text;
 
     if (args.type == ToolEventType::MOVE) {
-        temp->placement.shift = args.coords;
+        if (imp->dialogs.get_nonmodal() == nullptr)
+            temp->placement.shift = args.coords;
     }
     else if (args.type == ToolEventType::ACTION) {
         switch (args.action) {
         case InToolActionID::LMB: {
-            if (tool_id == ToolID::ADD_TEXT) {
-                selection = {{temp->uuid, ObjectType::TEXT}};
-                return ToolResponse::commit();
-            }
+            if (imp->dialogs.get_nonmodal() == nullptr) {
+                if (tool_id == ToolID::ADD_TEXT) {
+                    selection = {{temp->uuid, ObjectType::TEXT}};
+                    return ToolResponse::commit();
+                }
 
-            text = &temp->text;
-            texts_placed.push_front(temp);
-            auto old_text = temp;
-            temp = doc.r->insert_text(UUID::random());
-            imp->set_snap_filter({{ObjectType::TEXT, temp->uuid}});
-            temp->text = *text;
-            temp->layer = old_text->layer;
-            temp->placement = old_text->placement;
-            temp->placement.shift = args.coords;
-            selection = {{temp->uuid, ObjectType::TEXT}};
-            apply_settings();
+                text = &temp->text;
+                texts_placed.push_front(temp);
+                auto old_text = temp;
+                temp = doc.r->insert_text(UUID::random());
+                imp->set_snap_filter({{ObjectType::TEXT, temp->uuid}});
+                temp->text = *text;
+                temp->layer = old_text->layer;
+                temp->placement = old_text->placement;
+                temp->placement.shift = args.coords;
+                selection = {{temp->uuid, ObjectType::TEXT}};
+                apply_settings();
+            }
         } break;
 
         case InToolActionID::RMB:
         case InToolActionID::CANCEL:
-            doc.r->delete_text(temp->uuid);
-            selection.clear();
-            for (auto it : texts_placed) {
-                selection.emplace(it->uuid, ObjectType::TEXT);
-            }
-            return ToolResponse::commit();
+            return finish();
 
         case InToolActionID::EDIT: {
-            if (auto r = imp->dialogs.ask_datum_string_multiline("Enter text", temp->text)) {
-                temp->text = *r;
-                if (pkg)
-                    temp->text_override = pkg->replace_text(temp->text, &temp->overridden);
-            }
+            auto dia = imp->dialogs.show_edit_text_window(*temp, false);
+            dia->focus_text();
         } break;
 
         case InToolActionID::ENTER_WIDTH: {
-            if (auto r = imp->dialogs.ask_datum("Enter width", settings.get_layer(temp->layer).width)) {
-                settings.layers[temp->layer].width = std::max(*r, (int64_t)0);
-                apply_settings();
-            }
+            auto dia = imp->dialogs.show_edit_text_window(*temp, false);
+            dia->focus_width();
         } break;
 
         case InToolActionID::ENTER_SIZE: {
-            if (auto r = imp->dialogs.ask_datum("Enter size", settings.get_layer(temp->layer).size)) {
-                settings.layers[temp->layer].size = std::max(*r, (int64_t)0);
-                apply_settings();
-            }
+            auto dia = imp->dialogs.show_edit_text_window(*temp, false);
+            dia->focus_size();
         } break;
 
         case InToolActionID::ROTATE:
@@ -200,7 +191,38 @@ ToolResponse ToolPlaceText::update(const ToolArgs &args)
     else if (args.type == ToolEventType::LAYER_CHANGE) {
         temp->layer = args.work_layer;
         apply_settings();
+        if (auto win = dynamic_cast<EditTextWindow *>(imp->dialogs.get_nonmodal())) {
+            win->set_dims(temp->size, temp->width);
+        }
+    }
+    else if (args.type == ToolEventType::DATA) {
+        if (auto data = dynamic_cast<const ToolDataWindow *>(args.data.get())) {
+            if (data->event == ToolDataWindow::Event::OK || data->event == ToolDataWindow::Event::CLOSE) {
+                if (data->event == ToolDataWindow::Event::OK)
+                    imp->dialogs.close_nonmodal();
+                if (temp->text.size() == 0)
+                    return finish();
+            }
+            else if (data->event == ToolDataWindow::Event::UPDATE) {
+                if (pkg)
+                    temp->text_override = pkg->replace_text(temp->text, &temp->overridden);
+                settings.layers[temp->layer].width = temp->width;
+                settings.layers[temp->layer].size = temp->size;
+                settings.font = temp->font;
+            }
+        }
     }
     return ToolResponse();
 }
+
+ToolResponse ToolPlaceText::finish()
+{
+    doc.r->delete_text(temp->uuid);
+    selection.clear();
+    for (auto it : texts_placed) {
+        selection.emplace(it->uuid, ObjectType::TEXT);
+    }
+    return ToolResponse::commit();
+}
+
 } // namespace horizon

@@ -1,6 +1,7 @@
 #pragma once
 #include "core/tool.hpp"
 #include "tool_helper_move.hpp"
+#include "util/text_data.hpp"
 #include <forward_list>
 #include <map>
 
@@ -30,6 +31,7 @@ public:
         };
         const LayerSettings &get_layer(int l) const;
         std::map<int, LayerSettings> layers;
+        TextData::Font font = TextData::Font::SIMPLEX;
     };
 
     ToolSettings *get_settings() override
@@ -52,5 +54,6 @@ private:
     class BoardPackage *pkg = nullptr;
     std::forward_list<Text *> texts_placed;
     Settings settings;
+    ToolResponse finish();
 };
 } // namespace horizon
