@@ -1,7 +1,7 @@
 #pragma once
 #include "common/common.hpp"
 #include <vector>
-
+#include "common/lut.hpp"
 
 namespace horizon {
 class TextData {
@@ -20,6 +20,8 @@ public:
         SCRIPT_SIMPLEX,
         SCRIPT_COMPLEX
     };
+    static const LutEnumStr<TextData::Font> font_lut;
+
     using Buffer = std::vector<std::pair<Coordi, Coordi>>;
     TextData(Buffer &buf, const std::string &s, Font font = Font::SIMPLEX);
     Buffer &lines;

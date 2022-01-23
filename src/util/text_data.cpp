@@ -3,6 +3,21 @@
 
 namespace horizon {
 
+const LutEnumStr<TextData::Font> TextData::font_lut = {
+        {"simplex", TextData::Font::SIMPLEX},
+        {"complex", TextData::Font::COMPLEX},
+        {"complex_italic", TextData::Font::COMPLEX_ITALIC},
+        {"complex_small", TextData::Font::COMPLEX_SMALL},
+        {"complex_small_italic", TextData::Font::COMPLEX_SMALL_ITALIC},
+        {"duplex", TextData::Font::DUPLEX},
+        {"triplex", TextData::Font::TRIPLEX},
+        {"triplex_italic", TextData::Font::TRIPLEX_ITALIC},
+        {"small", TextData::Font::SMALL},
+        {"small_italic", TextData::Font::SMALL_ITALIC},
+        {"script_simplex", TextData::Font::SCRIPT_SIMPLEX},
+        {"script_complex", TextData::Font::SCRIPT_COMPLEX},
+};
+
 static const std::vector<unsigned int> font_hershey_plain = {
         199, 214, 217, 233, 219, 197, 234, 216, 221, 222, 228, 225, 211, 224, 210, 220, 200, 201, 202,
         203, 204, 205, 206, 207, 208, 209, 212, 213, 191, 226, 192, 215, 190, 1,   2,   3,   4,   5,
