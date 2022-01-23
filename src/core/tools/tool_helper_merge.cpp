@@ -120,81 +120,89 @@ bool ToolHelperMerge::merge_bus_net(class Net *net, class Bus *bus, class Net *n
     return false;
 }
 
-void ToolHelperMerge::merge_and_connect()
+void ToolHelperMerge::merge_and_connect(const std::set<UUID> &extra_junctions)
 {
     if (!doc.c)
         return;
-    auto &sheet = *doc.c->get_sheet();
+    std::set<UUID> junctions;
     for (const auto &it : selection) {
-        if (it.type == ObjectType::JUNCTION) {
-            auto ju = &sheet.junctions.at(it.uuid);
-            bool merged = false;
-            for (auto &it_other : doc.c->get_sheet()->junctions) {
-                auto ju_other = &it_other.second;
-                if (!selection.count(SelectableRef(ju_other->uuid, ObjectType::JUNCTION))) { // not in selection
-                    if (ju_other->position == ju->position) {                                // need to merge junctions
-                        std::cout << "maybe merge junction" << std::endl;
-                        Net *net = ju->net;
-                        Bus *bus = ju->bus;
-                        Net *net_other = ju_other->net;
-                        Bus *bus_other = ju_other->bus;
-                        auto do_merge = merge_bus_net(net, bus, net_other, bus_other);
-                        if (do_merge) {
-                            doc.c->get_sheet()->merge_junction(ju, ju_other);
-                            merged = true;
-                        }
+        if (it.type == ObjectType::JUNCTION)
+            junctions.emplace(it.uuid);
+    }
+    for (const auto &uu : extra_junctions) {
+        junctions.emplace(uu);
+    }
+    auto &sheet = *doc.c->get_sheet();
+    for (const auto &j_uu : junctions) {
+        auto ju = &sheet.junctions.at(j_uu);
+        bool merged = false;
+        for (auto &it_other : doc.c->get_sheet()->junctions) {
+            auto ju_other = &it_other.second;
+            if (!junctions.count(ju_other->uuid)) {       // not in selection
+                if (ju_other->position == ju->position) { // need to merge junctions
+                    std::cout << "maybe merge junction" << std::endl;
+                    Net *net = ju->net;
+                    Bus *bus = ju->bus;
+                    Net *net_other = ju_other->net;
+                    Bus *bus_other = ju_other->bus;
+                    auto do_merge = merge_bus_net(net, bus, net_other, bus_other);
+                    if (do_merge) {
+                        doc.c->get_sheet()->merge_junction(ju, ju_other);
+                        merged = true;
                     }
                 }
             }
-            if (!merged) { // still not merged, maybe we can connect a symbol pin
-                for (auto &[sym_uu, sym] : sheet.symbols) {
-                    for (auto &[pin_uu, sym_pin] : sym.symbol.pins) {
-                        if (sym.placement.transform(sym_pin.position) == ju->position) {
-                            const auto path = UUIDPath<2>(sym.gate->uuid, pin_uu);
-                            const bool pin_connected = sym.component->connections.count(path);
-                            if (!pin_connected) {
-                                if (ju->net) { // have net
-                                    sym.component->connections.emplace(path, static_cast<Net *>(ju->net));
-                                    sheet.replace_junction_or_create_line(ju, &sym, &sym_pin);
-                                    merged = true;
-                                }
-                                else if (!ju->bus) {
-                                    auto new_net = doc.c->get_current_block()->insert_net();
-                                    sym.component->connections.emplace(path, new_net);
-                                    sheet.replace_junction_or_create_line(ju, &sym, &sym_pin);
-                                    doc.c->get_current_schematic()->expand(true);
-                                    merged = true;
-                                }
+        }
+        if (!merged) { // still not merged, maybe we can connect a symbol pin
+            for (auto &[sym_uu, sym] : sheet.symbols) {
+                for (auto &[pin_uu, sym_pin] : sym.symbol.pins) {
+                    if (sym.placement.transform(sym_pin.position) == ju->position) {
+                        const auto path = UUIDPath<2>(sym.gate->uuid, pin_uu);
+                        const bool pin_connected = sym.component->connections.count(path);
+                        if (!pin_connected) {
+                            if (ju->net) { // have net
+                                sym.component->connections.emplace(path, static_cast<Net *>(ju->net));
+                                sheet.replace_junction_or_create_line(ju, &sym, &sym_pin);
+                                merged = true;
                             }
-                        }
-                    }
-                }
-            }
-            if (!merged) { // still not merged, maybe we can connect a block symbol port
-                for (auto &[sym_uu, sym] : sheet.block_symbols) {
-                    for (auto &[port_uuz, sym_port] : sym.symbol.ports) {
-                        if (sym.placement.transform(sym_port.position) == ju->position) {
-                            const bool pin_connected = sym.block_instance->connections.count(sym_port.net);
-                            if (!pin_connected) {
-                                if (ju->net) { // have net
-                                    sym.block_instance->connections.emplace(sym_port.net, static_cast<Net *>(ju->net));
-                                    sheet.replace_junction_or_create_line(ju, &sym, &sym_port);
-                                    merged = true;
-                                }
-                                else if (!ju->bus) {
-                                    auto new_net = doc.c->get_current_block()->insert_net();
-                                    sym.block_instance->connections.emplace(sym_port.net, new_net);
-                                    sheet.replace_junction_or_create_line(ju, &sym, &sym_port);
-                                    doc.c->get_current_schematic()->expand(true);
-                                    merged = true;
-                                }
+                            else if (!ju->bus) {
+                                auto new_net = doc.c->get_current_block()->insert_net();
+                                sym.component->connections.emplace(path, new_net);
+                                sheet.replace_junction_or_create_line(ju, &sym, &sym_pin);
+                                doc.c->get_current_schematic()->expand(true);
+                                merged = true;
                             }
                         }
                     }
                 }
             }
         }
-        else if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
+        if (!merged) { // still not merged, maybe we can connect a block symbol port
+            for (auto &[sym_uu, sym] : sheet.block_symbols) {
+                for (auto &[port_uuz, sym_port] : sym.symbol.ports) {
+                    if (sym.placement.transform(sym_port.position) == ju->position) {
+                        const bool pin_connected = sym.block_instance->connections.count(sym_port.net);
+                        if (!pin_connected) {
+                            if (ju->net) { // have net
+                                sym.block_instance->connections.emplace(sym_port.net, static_cast<Net *>(ju->net));
+                                sheet.replace_junction_or_create_line(ju, &sym, &sym_port);
+                                merged = true;
+                            }
+                            else if (!ju->bus) {
+                                auto new_net = doc.c->get_current_block()->insert_net();
+                                sym.block_instance->connections.emplace(sym_port.net, new_net);
+                                sheet.replace_junction_or_create_line(ju, &sym, &sym_port);
+                                doc.c->get_current_schematic()->expand(true);
+                                merged = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    for (const auto &it : selection) {
+        if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
             auto &sym = doc.c->get_sheet()->symbols.at(it.uuid);
             doc.c->get_current_schematic()->autoconnect_symbol(doc.c->get_sheet(), &sym);
             if (sym.component->connections.size() == 0) {

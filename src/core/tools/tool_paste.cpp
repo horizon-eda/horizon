@@ -626,7 +626,7 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
                 if (pic) {
                     return ToolResponse::commit();
                 }
-                merge_and_connect();
+                merge_and_connect({});
                 return ToolResponse::next(ToolResponse::Result::COMMIT, tool_id,
                                           std::make_unique<ToolDataPaste>(paste_data));
             }

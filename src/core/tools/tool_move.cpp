@@ -445,7 +445,10 @@ void ToolMove::do_move(const Coordi &d)
 
 void ToolMove::finish()
 {
-    merge_and_connect();
+    std::set<UUID> junctions;
+    for (const auto &[uu, ax] : extra_junctions)
+        junctions.emplace(uu);
+    merge_and_connect(junctions);
     if (doc.b) {
         auto brd = doc.b->get_board();
         for (auto plane : planes) {
