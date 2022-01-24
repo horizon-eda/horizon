@@ -62,7 +62,20 @@ Canvas3D::Canvas3D() : i_model_loading(0), stop_model_load_thread(false)
     });
 
     set_can_focus(true);
+    animators.push_back(&azimuth_animator);
+    animators.push_back(&elevation_animator);
+    animators.push_back(&zoom_animator);
+    animators.push_back(&cx_animator);
+    animators.push_back(&cy_animator);
 }
+
+void Canvas3D::set_msd_params(const MSD::Params &params)
+{
+    for (auto anim : animators) {
+        anim->set_params(params);
+    }
+}
+
 
 glm::vec2 Canvas3D::get_center_shift(const glm::vec2 &shift) const
 {
@@ -83,7 +96,8 @@ void Canvas3D::on_size_allocate(Gtk::Allocation &alloc)
     height = alloc.get_height();
     needs_resize = true;
     if (needs_view_all) {
-        view_all();
+        Canvas3DBase::view_all(); // don't use animation
+        queue_draw();
         needs_view_all = false;
     }
 
@@ -192,35 +206,12 @@ void Canvas3D::rotate_gesture_update_cb(GdkEventSequence *seq)
     auto delta = gesture_rotate->get_angle_delta();
     if (cam_elevation < 0)
         delta *= -1;
-    cam_azimuth = gesture_rotate_cam_azimuth_orig + glm::degrees(delta);
-    inc_cam_azimuth(0);
+    set_cam_azimuth(gesture_rotate_cam_azimuth_orig + glm::degrees(delta));
     double cx, cy;
     gesture_rotate->get_bounding_box_center(cx, cy);
     auto dy = cy - gesture_rotate_pos_orig.y;
     set_cam_elevation(gesture_rotate_cam_elevation_orig + (dy / height) * 180);
 }
-
-int Canvas3D::zoom_animate_step(GdkFrameClock *frame_clock)
-{
-    const auto r = zoom_animator.step(gdk_frame_clock_get_frame_time(frame_clock) / 1e6);
-
-    auto s = zoom_animator.get_s();
-
-    set_cam_distance(zoom_animation_cam_dist_orig * pow(1.5, s));
-
-    if (!r) // should stop
-        return G_SOURCE_REMOVE;
-    else
-        return G_SOURCE_CONTINUE;
-}
-
-int Canvas3D::zoom_tick_cb(GtkWidget *cwidget, GdkFrameClock *frame_clock, gpointer user_data)
-{
-    Gtk::Widget *widget = Glib::wrap(cwidget);
-    auto canvas = dynamic_cast<Canvas3D *>(widget);
-    return canvas->zoom_animate_step(frame_clock);
-}
-
 
 bool Canvas3D::on_scroll_event(GdkEventScroll *scroll_event)
 {
@@ -265,6 +256,20 @@ void Canvas3D::pan_rotate(GdkEventScroll *scroll_event)
     set_cam_azimuth(get_cam_azimuth() - delta.x * 9);
     set_cam_elevation(get_cam_elevation() - delta.y * 9);
 }
+
+
+static const float zoom_base = 1.5;
+
+static float cam_dist_to_anim(float d)
+{
+    return log(d) / log(zoom_base);
+}
+
+static float cam_dist_from_anim(float d)
+{
+    return pow(zoom_base, d);
+}
+
 void Canvas3D::pan_zoom(GdkEventScroll *scroll_event)
 {
     float inc = 0;
@@ -286,27 +291,127 @@ void Canvas3D::pan_zoom(GdkEventScroll *scroll_event)
     if (smooth_zoom) {
         if (inc == 0)
             return;
-        if (!zoom_animator.is_running()) {
-            zoom_animator.start();
-            zoom_animation_cam_dist_orig = cam_distance;
-            gtk_widget_add_tick_callback(GTK_WIDGET(gobj()), &zoom_tick_cb, nullptr, nullptr);
-        }
+        start_anim();
         zoom_animator.target += inc;
     }
     else {
-        set_cam_distance(cam_distance * pow(1.5, inc));
+        set_cam_distance(cam_distance * pow(zoom_base, inc));
     }
 }
 
-void Canvas3D::inc_cam_azimuth(float v)
+int Canvas3D::animate_step(GdkFrameClock *frame_clock)
 {
-    set_cam_azimuth(get_cam_azimuth() + v);
+    bool stop = true;
+    for (auto anim : animators) {
+        if (anim->step(gdk_frame_clock_get_frame_time(frame_clock) / 1e6))
+            stop = false;
+    }
+
+    set_cam_azimuth(azimuth_animator.get_s());
+    set_cam_elevation(elevation_animator.get_s());
+    set_cam_distance(cam_dist_from_anim(zoom_animator.get_s()));
+    set_center({cx_animator.get_s(), cy_animator.get_s()});
+
+    if (stop)
+        return G_SOURCE_REMOVE;
+    else
+        return G_SOURCE_CONTINUE;
+}
+
+int Canvas3D::anim_tick_cb(GtkWidget *cwidget, GdkFrameClock *frame_clock, gpointer user_data)
+{
+    Gtk::Widget *widget = Glib::wrap(cwidget);
+    auto canvas = dynamic_cast<Canvas3D *>(widget);
+    return canvas->animate_step(frame_clock);
+}
+
+
+void Canvas3D::start_anim()
+{
+    const bool was_stopped = !std::any_of(animators.begin(), animators.end(), [](auto x) { return x->is_running(); });
+
+    if (!azimuth_animator.is_running())
+        azimuth_animator.start(cam_azimuth);
+
+    if (!elevation_animator.is_running())
+        elevation_animator.start(cam_elevation);
+
+    if (!zoom_animator.is_running())
+        zoom_animator.start(cam_dist_to_anim(cam_distance));
+
+    if (!cx_animator.is_running())
+        cx_animator.start(center.x);
+
+    if (!cy_animator.is_running())
+        cy_animator.start(center.y);
+
+    if (was_stopped)
+        gtk_widget_add_tick_callback(GTK_WIDGET(gobj()), &Canvas3D::anim_tick_cb, nullptr, nullptr);
+}
+
+void Canvas3D::animate_to_azimuth_elevation_abs(float az, float el)
+{
+    if (!smooth_zoom) {
+        set_cam_azimuth(az);
+        set_cam_elevation(el);
+        return;
+    }
+    start_anim();
+
+    azimuth_animator.target = az;
+    elevation_animator.target = el;
+}
+
+void Canvas3D::animate_to_azimuth_elevation_rel(float az, float el)
+{
+    if (!smooth_zoom) {
+        set_cam_azimuth(get_cam_azimuth() + az);
+        set_cam_elevation(get_cam_elevation() + el);
+        return;
+    }
+    start_anim();
+
+    azimuth_animator.target += az;
+    elevation_animator.target += el;
+}
+
+void Canvas3D::animate_zoom_step(int inc)
+{
+    if (!smooth_zoom) {
+        set_cam_distance(get_cam_distance() * pow(zoom_base, inc));
+        return;
+    }
+    start_anim();
+
+    zoom_animator.target += inc;
+}
+
+void Canvas3D::animate_center_rel(const glm::vec2 &d)
+{
+    if (!smooth_zoom) {
+        set_center(get_center() + d);
+        return;
+    }
+    start_anim();
+    cx_animator.target += d.x;
+    cy_animator.target += d.y;
 }
 
 void Canvas3D::view_all()
 {
-    Canvas3DBase::view_all();
-    queue_draw();
+    if (!smooth_zoom) {
+        Canvas3DBase::view_all();
+        queue_draw();
+        return;
+    }
+    if (const auto p = get_view_all_params()) {
+        start_anim();
+        azimuth_animator.target = p->cam_azimuth;
+        elevation_animator.target = p->cam_elevation;
+        zoom_animator.target = cam_dist_to_anim(p->cam_distance);
+        cx_animator.target = p->cx;
+        cy_animator.target = p->cy;
+    }
 }
 
 void Canvas3D::request_push()

@@ -251,9 +251,10 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
             gr->add_row(*r);
         }
         {
-            auto r = Gtk::manage(new PreferencesRowBool("Smooth zoom 3D views",
-                                                        "Use mass spring damper model to smooth zooming", preferences,
-                                                        preferences.zoom.smooth_zoom_3d));
+            auto r = Gtk::manage(new PreferencesRowBool(
+                    "Smooth zoom 3D views",
+                    "Use mass spring damper model to smooth zooming and other transitions such as rotation",
+                    preferences, preferences.zoom.smooth_zoom_3d));
             gr->add_row(*r);
         }
         {

@@ -32,7 +32,10 @@ public:
     void update_packages();
     void set_highlights(const std::set<UUID> &pkgs);
 
-    void inc_cam_azimuth(float v);
+    void animate_to_azimuth_elevation_abs(float az, float el);
+    void animate_to_azimuth_elevation_rel(float az, float el);
+    void animate_zoom_step(int inc);
+    void animate_center_rel(const glm::vec2 &d);
     void set_appearance(const Appearance &a);
 
     void set_msaa(unsigned int samples);
@@ -40,6 +43,8 @@ public:
     void load_models_async(class IPool &pool);
 
     void view_all();
+
+    void set_msd_params(const MSD::Params &params);
 
     glm::vec2 get_center_shift(const glm::vec2 &shift) const;
 
@@ -107,14 +112,19 @@ private:
     enum class PanMode { NONE, MOVE, ROTATE };
     PanMode pan_mode = PanMode::NONE;
 
-    MSDAnimator zoom_animator;
-    float zoom_animation_cam_dist_orig = 1;
-
-    static int zoom_tick_cb(GtkWidget *cwidget, GdkFrameClock *frame_clock, gpointer user_data);
-    int zoom_animate_step(GdkFrameClock *frame_clock);
 
     bool needs_resize = false;
 
+    MSDAnimator azimuth_animator;
+    MSDAnimator elevation_animator;
+    MSDAnimator zoom_animator;
+    MSDAnimator cx_animator;
+    MSDAnimator cy_animator;
+
+    std::vector<MSDAnimator *> animators;
+    int animate_step(GdkFrameClock *frame_clock);
+    static int anim_tick_cb(GtkWidget *cwidget, GdkFrameClock *frame_clock, gpointer user_data);
+    void start_anim();
 
     void prepare();
 

@@ -90,10 +90,7 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
             b->show();
             float az = it.azimuth;
             float el = it.elevation;
-            b->signal_clicked().connect([this, az, el] {
-                canvas->set_cam_azimuth(az);
-                canvas->set_cam_elevation(el);
-            });
+            b->signal_clicked().connect([this, az, el] { canvas->animate_to_azimuth_elevation_abs(az, el); });
             view_buttons_box->pack_start(*b, false, false, 0);
         }
     }
@@ -102,8 +99,8 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     Gtk::Button *rotate_right_button;
     GET_WIDGET(rotate_left_button);
     GET_WIDGET(rotate_right_button);
-    rotate_left_button->signal_clicked().connect([this] { canvas->inc_cam_azimuth(-90); });
-    rotate_right_button->signal_clicked().connect([this] { canvas->inc_cam_azimuth(90); });
+    rotate_left_button->signal_clicked().connect([this] { canvas->animate_to_azimuth_elevation_rel(-90, 0); });
+    rotate_right_button->signal_clicked().connect([this] { canvas->animate_to_azimuth_elevation_rel(+90, 0); });
 
     Gtk::Button *view_all_button;
     GET_WIDGET(view_all_button);
@@ -583,9 +580,8 @@ void View3DWindow::handle_pan_action(const ActionConnection &c)
         return;
     }
     d = d * 50;
-    auto center = canvas->get_center();
     auto shift = canvas->get_center_shift({d.x, d.y});
-    canvas->set_center(center + shift);
+    canvas->animate_center_rel(shift);
 }
 
 void View3DWindow::handle_zoom_action(const ActionConnection &conn)
@@ -594,7 +590,7 @@ void View3DWindow::handle_zoom_action(const ActionConnection &conn)
     if (conn.id.action == ActionID::ZOOM_IN)
         inc = -1;
 
-    canvas->set_cam_distance(canvas->get_cam_distance() * pow(1.5, inc));
+    canvas->animate_zoom_step(inc);
 }
 
 void View3DWindow::handle_rotate_action(const ActionConnection &conn)
@@ -602,15 +598,14 @@ void View3DWindow::handle_rotate_action(const ActionConnection &conn)
     auto inc = 90;
     if (conn.id.action == ActionID::ROTATE_VIEW_LEFT)
         inc = -90;
-    canvas->inc_cam_azimuth(inc);
+    canvas->animate_to_azimuth_elevation_rel(inc, 0);
 }
 
 void View3DWindow::handle_view_action(const ActionConnection &conn)
 {
     for (const auto &it : views) {
         if (it.action == conn.id.action) {
-            canvas->set_cam_azimuth(it.azimuth);
-            canvas->set_cam_elevation(it.elevation);
+            canvas->animate_to_azimuth_elevation_abs(it.azimuth, it.elevation);
             return;
         }
     }
