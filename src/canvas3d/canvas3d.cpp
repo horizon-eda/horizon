@@ -202,22 +202,16 @@ void Canvas3D::rotate_gesture_update_cb(GdkEventSequence *seq)
 
 int Canvas3D::zoom_animate_step(GdkFrameClock *frame_clock)
 {
-    auto r = zoom_animator.step(gdk_frame_clock_get_frame_time(frame_clock) / 1e6);
-    if (!r) { // should stop
-        return G_SOURCE_REMOVE;
-    }
+    const auto r = zoom_animator.step(gdk_frame_clock_get_frame_time(frame_clock) / 1e6);
+
     auto s = zoom_animator.get_s();
 
     set_cam_distance(zoom_animation_cam_dist_orig * pow(1.5, s));
 
-
-    if (std::abs((s - zoom_animator.target) / std::max(std::abs(zoom_animator.target), 1.f)) < .005) {
-        set_cam_distance(zoom_animation_cam_dist_orig * pow(1.5, zoom_animator.target));
-        zoom_animator.stop();
+    if (!r) // should stop
         return G_SOURCE_REMOVE;
-    }
-
-    return G_SOURCE_CONTINUE;
+    else
+        return G_SOURCE_CONTINUE;
 }
 
 int Canvas3D::zoom_tick_cb(GtkWidget *cwidget, GdkFrameClock *frame_clock, gpointer user_data)

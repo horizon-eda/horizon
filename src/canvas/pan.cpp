@@ -74,21 +74,14 @@ void CanvasGL::set_scale(float x, float y, float scale_new)
 int CanvasGL::_animate_step(GdkFrameClock *frame_clock)
 {
     auto r = zoom_animator.step(gdk_frame_clock_get_frame_time(frame_clock) / 1e6);
-    if (!r) { // should stop
-        return G_SOURCE_REMOVE;
-    }
     auto s = zoom_animator.get_s();
 
     set_scale(zoom_animation_pos.x, zoom_animation_pos.y, zoom_animation_scale_orig * pow(zoom_base, s));
 
-    if (std::abs((s - zoom_animator.target) / std::max(std::abs(zoom_animator.target), 1.f)) < .005) {
-        set_scale(zoom_animation_pos.x, zoom_animation_pos.y,
-                  zoom_animation_scale_orig * pow(zoom_base, zoom_animator.target));
-        zoom_animator.stop();
+    if (!r) // should stop
         return G_SOURCE_REMOVE;
-    }
-
-    return G_SOURCE_CONTINUE;
+    else
+        return G_SOURCE_CONTINUE;
 }
 
 static int tick_cb(GtkWidget *cwidget, GdkFrameClock *frame_clock, gpointer user_data)
@@ -97,7 +90,6 @@ static int tick_cb(GtkWidget *cwidget, GdkFrameClock *frame_clock, gpointer user
     auto canvas = dynamic_cast<CanvasGL *>(widget);
     return canvas->_animate_step(frame_clock);
 }
-
 
 void CanvasGL::pan_zoom(GdkEventScroll *scroll_event, bool to_cursor)
 {

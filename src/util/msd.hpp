@@ -4,15 +4,19 @@ namespace horizon {
 class MSD { // mass spring damper system simulation
 public:
     MSD();
-    void run_to(double time, double ts);
-    void step(double ts);
-    void reset();
+    bool run_to(double time, double ts);
+    bool step(double ts);
+    void reset(double init = 0);
     double get_s() const;
     double get_t() const;
 
-    double mass = 0.003;      // kg
-    double damping = .21;     // kg/s
-    double springyness = .25; // newton/m
+    struct Params {
+        double mass = 0.003;      // kg
+        double damping = .21;     // kg/s
+        double springyness = .25; // newton/m
+    };
+
+    Params params;
 
     double target = 0; // m
 private:

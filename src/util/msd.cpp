@@ -1,34 +1,45 @@
 #include "msd.hpp"
+#include <cmath>
 
 namespace horizon {
-MSD::MSD() : mass(0.002), damping(.2), springyness(.15)
+MSD::MSD()
 {
+    params.mass = 0.002;
+    params.damping = .2;
+    params.springyness = .15;
 }
 
-void MSD::reset()
+void MSD::reset(double init)
 {
     t = 0;
     a = 0;
     v = 0;
-    s = 0;
-    target = 0;
+    s = init;
+    target = init;
 }
 
-void MSD::step(double ts)
+bool MSD::step(double ts)
 {
-    auto f_friction = -v * damping;
-    auto f_spring = (target - s) / springyness;
-    a = (f_spring + f_friction) / mass;
+    auto f_friction = -v * params.damping;
+    auto f_spring = (target - s) / params.springyness;
+    a = (f_spring + f_friction) / params.mass;
     v += a * ts;
     s += v * ts;
     t += ts;
+    if ((std::abs(target - s) < 1e-3) && (std::abs(v) < 1e-2)) {
+        s = target;
+        return false;
+    }
+    return true;
 }
 
-void MSD::run_to(double time, double ts)
+bool MSD::run_to(double time, double ts)
 {
     while (t < time) {
-        step(ts);
+        if (!step(ts))
+            return false;
     }
+    return true;
 }
 
 

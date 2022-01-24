@@ -11,15 +11,11 @@ bool MSDAnimator::step(double frame_time)
     }
     double t = (frame_time - start_time);
     msd.target = target;
-    msd.run_to(t + (1. / 60.), 5e-3);
-
+    if (!msd.run_to(t + (1. / 60.), 5e-3)) {
+        running = false;
+        return false;
+    }
     return true;
-}
-
-
-void MSDAnimator::stop()
-{
-    running = false;
 }
 
 double MSDAnimator::get_s() const
@@ -32,14 +28,24 @@ bool MSDAnimator::is_running() const
     return running;
 }
 
-void MSDAnimator::start()
+void MSDAnimator::start(double init)
 {
     if (running)
         return;
-    msd.reset();
+    msd.reset(init);
     running = true;
     start_time = 0;
-    target = 0;
+    target = init;
+}
+
+void MSDAnimator::set_params(const MSD::Params &p)
+{
+    msd.params = p;
+}
+
+const MSD::Params &MSDAnimator::get_params() const
+{
+    return msd.params;
 }
 
 } // namespace horizon
