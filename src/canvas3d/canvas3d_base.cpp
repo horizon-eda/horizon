@@ -332,11 +332,11 @@ void Canvas3DBase::render(RenderBackground mode)
     glFlush();
 }
 
-void Canvas3DBase::view_all()
+std::optional<Canvas3DBase::ViewParams> Canvas3DBase::get_view_all_params() const
 {
     if (!brd)
-        return;
-
+        return {};
+    ViewParams r;
     const auto &vertices = ca.get_layer(BoardLayers::L_OUTLINE).walls;
     MinMaxAccumulator<float> acc_x, acc_y;
 
@@ -354,14 +354,26 @@ void Canvas3DBase::view_all()
     float board_height = (ymax - ymin) / 1e6;
 
     if (board_height < 1 || board_width < 1)
-        return;
+        return {};
 
-    set_center({(xmin + xmax) / 2e6, (ymin + ymax) / 2e6});
+    r.cx = (xmin + xmax) / 2e6;
+    r.cy = (ymin + ymax) / 2e6;
 
+    r.cam_distance = std::max(board_width / width, board_height / height) / (2 * get_magic_number() / height) * 1.1;
+    r.cam_azimuth = 270;
+    r.cam_elevation = 89.99;
 
-    set_cam_distance(std::max(board_width / width, board_height / height) / (2 * get_magic_number() / height) * 1.1);
-    set_cam_azimuth(270);
-    set_cam_elevation(89.99);
+    return r;
+}
+
+void Canvas3DBase::view_all()
+{
+    if (const auto p = get_view_all_params()) {
+        set_center({p->cx, p->cy});
+        set_cam_distance(p->cam_distance);
+        set_cam_azimuth(p->cam_azimuth);
+        set_cam_elevation(p->cam_elevation);
+    }
 }
 
 void Canvas3DBase::prepare()

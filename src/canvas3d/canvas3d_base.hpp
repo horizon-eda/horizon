@@ -80,8 +80,16 @@ public:
     }
     void set_cam_azimuth(const float &az);
 
-
+    struct ViewParams {
+        float cx;
+        float cy;
+        float cam_distance;
+        float cam_azimuth;
+        float cam_elevation;
+    };
+    std::optional<ViewParams> get_view_all_params() const;
     void view_all();
+
     void clear_3d_models();
     void set_point_transform(const glm::dmat4 &mat);
     void set_points(const std::vector<Point3D> &points);
