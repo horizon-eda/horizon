@@ -192,6 +192,8 @@ public:
 
     void append_target(const Target &target);
 
+    void set_msd_params(const MSD::Params &params);
+
 protected:
     void push() override;
     void request_push() override;

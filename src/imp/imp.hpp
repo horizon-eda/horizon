@@ -349,5 +349,7 @@ private:
     Gtk::Button *redo_button = nullptr;
 
     unsigned int saved_version = 0;
+
+    class MSDTuningWindow *msd_tuning_window = nullptr;
 };
 } // namespace horizon

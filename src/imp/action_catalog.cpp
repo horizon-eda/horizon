@@ -1033,6 +1033,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Edit text", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::MSD_TUNING_WINDOW, ToolID::NONE},
+         {"Tune MSD", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE_3D,
+          ActionCatalogItem::FLAGS_NO_POPOVER}},
+
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1178,6 +1182,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(GO_TO_BLOCK_SYMBOL),
         ACTION_LUT_ITEM(GO_TO_PROJECT_MANAGER),
         ACTION_LUT_ITEM(TOGGLE_JUNCTIONS_AND_HIDDEN_NAMES),
+        ACTION_LUT_ITEM(MSD_TUNING_WINDOW),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

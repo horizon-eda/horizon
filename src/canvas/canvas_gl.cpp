@@ -815,6 +815,10 @@ void CanvasGL::set_colors2(const std::vector<ColorI> &c)
     request_push();
 }
 
+void CanvasGL::set_msd_params(const MSD::Params &p)
+{
+    zoom_animator.set_params(p);
+}
 
 static const float char_space = 1;
 

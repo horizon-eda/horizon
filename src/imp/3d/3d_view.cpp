@@ -9,6 +9,7 @@
 #include "imp/action_catalog.hpp"
 #include "imp/actions.hpp"
 #include "preferences/preferences.hpp"
+#include "widgets/msd_tuning_window.hpp"
 
 namespace horizon {
 
@@ -315,6 +316,12 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
         }
     });
 
+    msd_tuning_window = new MSDTuningWindow();
+    msd_tuning_window->set_transient_for(*this);
+    msd_tuning_window->signal_changed().connect(
+            [this] { canvas->set_msd_params(msd_tuning_window->get_msd_params()); });
+
+
     connect_action(ActionID::VIEW_ALL, [this](const auto &conn) { canvas->view_all(); });
     connect_action(ActionID::PAN_LEFT, sigc::mem_fun(*this, &View3DWindow::handle_pan_action));
     connect_action(ActionID::PAN_RIGHT, sigc::mem_fun(*this, &View3DWindow::handle_pan_action));
@@ -337,6 +344,7 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     connect_action(ActionID::VIEW_3D_ORTHO, sigc::mem_fun(*this, &View3DWindow::handle_proj_action));
     connect_action(ActionID::VIEW_3D_PERSP, sigc::mem_fun(*this, &View3DWindow::handle_proj_action));
 
+    connect_action(ActionID::MSD_TUNING_WINDOW, [this](const auto &conn) { msd_tuning_window->present(); });
 
     GET_WIDGET(main_box);
 }

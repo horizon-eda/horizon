@@ -35,6 +35,7 @@
 #include "pool/pool_parametric.hpp"
 #include "action_icon.hpp"
 #include "grids_window.hpp"
+#include "widgets/msd_tuning_window.hpp"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>
@@ -730,6 +731,12 @@ void ImpBase::run(int argc, char *argv[])
             button->show();
         }
     }
+
+    msd_tuning_window = new MSDTuningWindow();
+    msd_tuning_window->set_transient_for(*main_window);
+    msd_tuning_window->signal_changed().connect(
+            [this] { canvas->set_msd_params(msd_tuning_window->get_msd_params()); });
+    connect_action(ActionID::MSD_TUNING_WINDOW, [this](const auto &conn) { msd_tuning_window->present(); });
 
     tool_popover = Gtk::manage(new ToolPopover(canvas, get_editor_type_for_action()));
     tool_popover->set_position(Gtk::POS_BOTTOM);
