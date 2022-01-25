@@ -445,9 +445,6 @@ void CanvasGL::zoom_to_bbox(const std::pair<Coordf, Coordf> &bb)
 
 void CanvasGL::zoom_to(const Coordf &c, float inc)
 {
-    if (!can_set_scale())
-        return;
-
     if (smooth_zoom)
         start_smooth_zoom(c, inc);
     else
