@@ -2,6 +2,7 @@
 #include "common/polygon.hpp"
 #include "board/board_layers.hpp"
 #include "pool/package.hpp"
+#include "frame/frame.hpp"
 
 namespace horizon {
 CanvasCairo2::CanvasCairo2()
@@ -216,6 +217,19 @@ void CanvasCairo2::load(const class Decal &dec)
         clear();
         update(dec, false);
     }
+}
+
+void CanvasCairo2::load(const class Frame &frame)
+{
+    clear();
+    layer_filter = false;
+    fill = true;
+    min_line_width = 0.1_mm;
+    update(frame, false);
+    cr->set_source_rgb(0, .5, 0);
+    cr->set_line_width(.2_mm);
+    cr->rectangle(0, 0, frame.width, frame.height);
+    cr->stroke();
 }
 
 void CanvasCairo2::render_pad_names(const Package &pkg)

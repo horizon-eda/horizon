@@ -1068,6 +1068,28 @@ int Reviewer::main(int c_argc, char *c_argv[])
             }
         }
     }
+
+    {
+        SQLite::Query q(pool->db, "SELECT DISTINCT uuid from git_files_view where type = 'frame'");
+        Once once;
+        while (q.step()) {
+            if (once()) {
+                ofs << "## Frames\n";
+            }
+            const auto uu = q.get<UUID>(0);
+            const auto &frame = *pool->get_frame(uu);
+
+            ofs << "### " << frame.name << "\n";
+            ofs << dim_to_string(frame.width, false) << "×" << dim_to_string(frame.height, false) << "\n";
+            {
+                CanvasCairo2 ca;
+                ca.load(frame);
+                const std::string img_filename = "frame_" + static_cast<std::string>(frame.uuid) + ".png";
+                ca.get_image_surface(0.5)->write_to_png(Glib::build_filename(images_dir, img_filename));
+                ofs << "![Frame](" << images_prefix << img_filename << ")\n";
+            }
+        }
+    }
     return 0;
 }
 
