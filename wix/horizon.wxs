@@ -53,15 +53,20 @@
 			</Feature>
 		</Feature>
 
-	
-		<!-- set license text -->
-		<WixVariable Id="WixUILicenseRtf" Value="gpl-3.0.rtf" />
+
 		<!-- set dialog custom bitmaps -->
 		<WixVariable Id="WixUIDialogBmp" Value="Bitmaps\dialog.bmp"/>
 		<WixVariable Id="WixUIBannerBmp" Value="Bitmaps\banner.bmp"/>
 
-		<UIRef Id="WixUI_Mondo" />
-		<UIRef Id="WixUI_ErrorProgressText" />
+		<UI Id='Mondo'>
+			<UIRef Id="WixUI_Mondo" />
+			<UIRef Id="WixUI_ErrorProgressText" />
+			<!-- skip EULA, see https://stackoverflow.com/a/27443137 -->
+			<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="SetupTypeDlg"  Order="3">1</Publish>
+			<!-- skip the page on the way back too -->
+			<Publish Dialog="SetupTypeDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg"  Order="3">1</Publish>
+		</UI>
+
 
 		<Icon Id="horizon_eda.ico" SourceFile="..\src\icons\horizon-eda.ico" />
 		<Property Id="ARPPRODUCTICON" Value="horizon_eda.ico" />
