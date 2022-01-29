@@ -980,7 +980,7 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
     trim(s);
     if (auto it_sel = sel_find_exactly_one(sel, ObjectType::BOARD_PACKAGE)) {
         const auto &pkg = core_board.get_board()->packages.at(it_sel->uuid);
-        s += "\n\n<b>Package " + pkg.component->refdes + "</b>";
+        s += "\n\n<b>Package " + Glib::Markup::escape_text(pkg.component->refdes) + "</b>";
         if (pkg.fixed) {
             s += " (not movable)";
         }
@@ -1016,7 +1016,7 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
             poly = &brd.polygons.at(sel_find_one(sel, ObjectType::POLYGON_EDGE).uuid);
         if (poly) {
             if (auto plane = dynamic_cast<const Plane *>(poly->usage.ptr)) {
-                s += "\n\n<b>Plane " + plane->net->name + "</b>\n";
+                s += "\n\n<b>Plane " + Glib::Markup::escape_text(plane->net->name) + "</b>\n";
                 s += "Fill order: " + std::to_string(plane->priority) + "\n";
                 s += "Layer: ";
                 s += core_board.get_layer_provider().get_layers().at(poly->layer).name + "\n";

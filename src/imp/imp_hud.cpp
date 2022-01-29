@@ -182,8 +182,8 @@ std::string ImpBase::get_hud_text_for_net(const Net *net)
     if (!net)
         return "No net";
 
-    std::string s = "Net: " + core->get_top_block()->get_net_name(net->uuid) + "\n";
-    s += "Net class " + net->net_class->name + "\n";
+    std::string s = "Net: " + Glib::Markup::escape_text(core->get_top_block()->get_net_name(net->uuid)) + "\n";
+    s += "Net class " + Glib::Markup::escape_text(net->net_class->name) + "\n";
     if (net->is_power)
         s += "is power net";
 
@@ -201,7 +201,7 @@ std::string ImpBase::get_hud_text_for_component(const Component *comp)
     const Part *part = comp->part;
     if (!part) {
         std::string s = "No part\n";
-        s += "Entity: " + comp->entity->name;
+        s += "Entity: " + Glib::Markup::escape_text(comp->entity->name);
         return s;
     }
     else {
