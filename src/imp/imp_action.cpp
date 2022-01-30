@@ -29,8 +29,8 @@ ActionButton &ImpBase::add_action_button(ActionToolID action)
     auto ab = Gtk::manage(new ActionButton(action, action_connections));
     ab->show();
     ab->signal_action().connect([this](auto act) {
-        force_end_tool();
-        this->trigger_action(act);
+        if (force_end_tool())
+            this->trigger_action(act);
     });
     main_window->action_bar_box->pack_start(*ab, false, false, 0);
     action_buttons.push_back(ab);
@@ -43,8 +43,8 @@ ActionButtonMenu &ImpBase::add_action_button_menu(const char *icon_name)
     auto ab = Gtk::manage(new ActionButtonMenu(icon_name, action_connections));
     ab->show();
     ab->signal_action().connect([this](auto act) {
-        force_end_tool();
-        this->trigger_action(act);
+        if (force_end_tool())
+            this->trigger_action(act);
     });
     main_window->action_bar_box->pack_start(*ab, false, false, 0);
     action_buttons.push_back(ab);
@@ -298,10 +298,10 @@ void ImpBase::handle_zoom_action(const ActionConnection &conn)
     canvas->zoom_to(c, inc);
 }
 
-void ImpBase::force_end_tool()
+bool ImpBase::force_end_tool()
 {
     if (!core->tool_is_active())
-        return;
+        return true;
 
     for (auto i = 0; i < 5; i++) {
         ToolArgs args;
@@ -312,9 +312,10 @@ void ImpBase::force_end_tool()
         ToolResponse r = core->tool_update(args);
         tool_process(r);
         if (!core->tool_is_active())
-            return;
+            return true;
     }
     Logger::get().log_critical("Tool didn't end", Logger::Domain::IMP, "end the tool and repeat the last action");
+    return false;
 }
 
 void ImpBase::connect_go_to_project_manager_action()

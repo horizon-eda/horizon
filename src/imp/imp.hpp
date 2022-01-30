@@ -237,7 +237,7 @@ protected:
     class ActionButton &add_action_button_line();
 
     virtual ToolID get_tool_for_drag_move(bool ctrl, const std::set<SelectableRef> &sel) const;
-    void force_end_tool();
+    bool force_end_tool();
     void reset_tool_hint_label();
 
     std::set<ObjectRef> highlights;

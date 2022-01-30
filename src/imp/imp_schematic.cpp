@@ -373,15 +373,18 @@ bool ImpSchematic::handle_broadcast(const json &j)
         const auto op = j.at("op").get<std::string>();
         guint32 timestamp = j.value("time", 0);
         if (op == "place-part") {
-            force_end_tool();
             main_window->present(timestamp);
-            auto data = std::make_unique<ToolAddPart::ToolDataAddPart>(j.at("part").get<std::string>());
-            tool_begin(ToolID::ADD_PART, false, {}, std::move(data));
+            if (force_end_tool()) {
+                auto data = std::make_unique<ToolAddPart::ToolDataAddPart>(j.at("part").get<std::string>());
+                tool_begin(ToolID::ADD_PART, false, {}, std::move(data));
+            }
         }
         else if (op == "assign-part" && !core->tool_is_active()) {
             main_window->present(timestamp);
-            auto data = std::make_unique<ToolAddPart::ToolDataAddPart>(j.at("part").get<std::string>());
-            tool_begin(ToolID::ASSIGN_PART, false, {}, std::move(data));
+            if (force_end_tool()) {
+                auto data = std::make_unique<ToolAddPart::ToolDataAddPart>(j.at("part").get<std::string>());
+                tool_begin(ToolID::ASSIGN_PART, false, {}, std::move(data));
+            }
         }
         else if (op == "highlight" && cross_probing_enabled && !core->tool_is_active()) {
             clear_highlights();
@@ -417,15 +420,15 @@ bool ImpSchematic::handle_broadcast(const json &j)
                     data->connections.push_back(item);
             }
             if (data->connections.size()) {
-                force_end_tool();
                 main_window->present(timestamp);
-                tool_begin(ToolID::BACKANNOTATE_CONNECTION_LINES, true, {}, std::move(data));
+                if (force_end_tool())
+                    tool_begin(ToolID::BACKANNOTATE_CONNECTION_LINES, true, {}, std::move(data));
             }
         }
         else if (op == "edit-meta") {
-            force_end_tool();
             main_window->present(timestamp);
-            tool_begin(ToolID::EDIT_SCHEMATIC_PROPERTIES);
+            if (force_end_tool())
+                tool_begin(ToolID::EDIT_SCHEMATIC_PROPERTIES);
         }
     }
     return true;
