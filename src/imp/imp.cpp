@@ -223,10 +223,15 @@ bool ImpBase::handle_close(const GdkEventAny *ev)
             return false; // close
 
         case 2:
-            force_end_tool();
-            trigger_action(ActionID::SAVE);
-            core->delete_autosave();
-            return false; // close
+            if (force_end_tool()) {
+                trigger_action(ActionID::SAVE);
+                core->delete_autosave();
+                return false; // close
+            }
+            else {
+                return true;
+            }
+
 
         default:
             return true; // keep window open
@@ -1571,8 +1576,8 @@ bool ImpBase::handle_broadcast(const json &j)
         return true;
     }
     else if (op == "save") {
-        force_end_tool();
-        trigger_action(ActionID::SAVE);
+        if (force_end_tool())
+            trigger_action(ActionID::SAVE);
         return true;
     }
     else if (op == "close") {

@@ -167,23 +167,24 @@ bool ImpBoard::handle_broadcast(const json &j)
             update_highlights();
         }
         else if (op == "place") {
-            force_end_tool();
             main_window->present(timestamp);
-            std::set<SelectableRef> components;
-            const json &o = j["components"];
-            for (auto it = o.cbegin(); it != o.cend(); ++it) {
-                auto type = static_cast<ObjectType>(it.value().at("type").get<int>());
-                if (type == ObjectType::COMPONENT) {
-                    UUID uu(it.value().at("uuid").get<std::string>());
-                    components.emplace(uu, type);
+            if (force_end_tool()) {
+                std::set<SelectableRef> components;
+                const json &o = j["components"];
+                for (auto it = o.cbegin(); it != o.cend(); ++it) {
+                    auto type = static_cast<ObjectType>(it.value().at("type").get<int>());
+                    if (type == ObjectType::COMPONENT) {
+                        UUID uu(it.value().at("uuid").get<std::string>());
+                        components.emplace(uu, type);
+                    }
                 }
+                tool_begin(ToolID::MAP_PACKAGE, true, components);
             }
-            tool_begin(ToolID::MAP_PACKAGE, true, components);
         }
         else if (op == "reload-netlist") {
-            force_end_tool();
             main_window->present(timestamp);
-            trigger_action(ActionID::RELOAD_NETLIST);
+            if (force_end_tool())
+                trigger_action(ActionID::RELOAD_NETLIST);
         }
         else if (op == "reload-netlist-hint" && !core->tool_is_active()) {
             reload_netlist_delay_conn = Glib::signal_timeout().connect(
