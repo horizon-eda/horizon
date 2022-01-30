@@ -750,8 +750,8 @@ void ImpBase::run(int argc, char *argv[])
 
     log_window = new LogWindow();
     log_window->set_transient_for(*main_window);
-    Logger::get().set_log_handler([this](const Logger::Item &it) { log_window->get_view()->push_log(it); });
-
+    log_dispatcher.set_handler([this](const auto &it) { log_window->get_view()->push_log(it); });
+    Logger::get().set_log_handler([this](const Logger::Item &it) { log_dispatcher.log(it); });
     main_window->add_action("view_log", [this] { log_window->present(); });
 
     main_window->signal_delete_event().connect(sigc::mem_fun(*this, &ImpBase::handle_close));

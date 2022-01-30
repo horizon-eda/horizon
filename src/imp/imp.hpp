@@ -21,6 +21,7 @@
 #include "core/clipboard/clipboard.hpp"
 #include "clipboard_handler.hpp"
 #include "util/win32_undef.hpp"
+#include "logger/log_dispatcher.hpp"
 
 namespace horizon {
 
@@ -293,6 +294,7 @@ private:
     void set_search_mode(bool enabled, bool focus = true);
     std::map<Searcher::Type, Gtk::CheckButton *> search_check_buttons;
 
+    LogDispatcher log_dispatcher;
     class LogWindow *log_window = nullptr;
     std::set<SelectableRef> selection_for_drag_move;
     ToolID drag_tool;

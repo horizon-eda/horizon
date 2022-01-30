@@ -504,6 +504,7 @@ SRC_IMP = \
 	src/widgets/board_display_options.cpp\
 	src/widgets/log_window.cpp\
 	src/widgets/log_view.cpp\
+	src/logger/log_dispatcher.cpp\
 	src/util/selection_util.cpp\
 	src/util/pool_completion.cpp\
 	src/export_bom/export_bom.cpp\
