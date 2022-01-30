@@ -8,9 +8,8 @@
 namespace horizon {
 void CanvasMesh::update(const Board &b)
 {
-    brd = &b;
     ca.update(b);
-    prepare();
+    prepare(b);
 }
 
 const CanvasMesh::Layer3D &CanvasMesh::get_layer(int l) const
@@ -23,63 +22,61 @@ const std::map<int, CanvasMesh::Layer3D> &CanvasMesh::get_layers() const
     return layers;
 }
 
-void CanvasMesh::prepare()
+void CanvasMesh::prepare(const Board &brd)
 {
-    if (!brd)
-        return;
     layers.clear();
 
-    float board_thickness = -((float)brd->stackup.at(0).thickness);
-    int n_inner_layers = brd->get_n_inner_layers();
-    for (const auto &it : brd->stackup) {
+    float board_thickness = -((float)brd.stackup.at(0).thickness);
+    int n_inner_layers = brd.get_n_inner_layers();
+    for (const auto &it : brd.stackup) {
         board_thickness += it.second.thickness + it.second.substrate_thickness;
     }
     board_thickness /= 1e6;
 
     int layer = BoardLayers::TOP_COPPER;
     layers[layer].offset = 0;
-    layers[layer].thickness = brd->stackup.at(0).thickness / 1e6;
+    layers[layer].thickness = brd.stackup.at(0).thickness / 1e6;
     layers[layer].explode_mul = 1;
     prepare_layer(layer);
 
     layer = BoardLayers::BOTTOM_COPPER;
     layers[layer].offset = -board_thickness;
-    layers[layer].thickness = +(brd->stackup.at(layer).thickness / 1e6);
+    layers[layer].thickness = +(brd.stackup.at(layer).thickness / 1e6);
     layers[layer].explode_mul = -2 * n_inner_layers - 1;
     prepare_layer(layer);
 
     {
-        float offset = -(brd->stackup.at(0).substrate_thickness / 1e6);
+        float offset = -(brd.stackup.at(0).substrate_thickness / 1e6);
         for (int i = 0; i < n_inner_layers; i++) {
             layer = -i - 1;
             layers[layer].offset = offset;
-            layers[layer].thickness = -(brd->stackup.at(layer).thickness / 1e6);
+            layers[layer].thickness = -(brd.stackup.at(layer).thickness / 1e6);
             layers[layer].explode_mul = -1 - 2 * i;
-            offset -= brd->stackup.at(layer).thickness / 1e6 + brd->stackup.at(layer).substrate_thickness / 1e6;
+            offset -= brd.stackup.at(layer).thickness / 1e6 + brd.stackup.at(layer).substrate_thickness / 1e6;
             prepare_layer(layer);
         }
     }
 
     layer = BoardLayers::L_OUTLINE;
     layers[layer].offset = 0;
-    layers[layer].thickness = -(brd->stackup.at(0).substrate_thickness / 1e6);
+    layers[layer].thickness = -(brd.stackup.at(0).substrate_thickness / 1e6);
     layers[layer].explode_mul = 0;
     prepare_layer(layer);
 
-    float offset = -(brd->stackup.at(0).substrate_thickness / 1e6);
+    float offset = -(brd.stackup.at(0).substrate_thickness / 1e6);
     for (int i = 0; i < n_inner_layers; i++) {
         int l = 10000 + i;
-        offset -= brd->stackup.at(-i - 1).thickness / 1e6;
+        offset -= brd.stackup.at(-i - 1).thickness / 1e6;
         layers[l] = layers[layer];
         layers[l].offset = offset;
-        layers[l].thickness = -(brd->stackup.at(-i - 1).substrate_thickness / 1e6);
+        layers[l].thickness = -(brd.stackup.at(-i - 1).substrate_thickness / 1e6);
         layers[l].explode_mul = -2 - 2 * i;
 
-        offset -= brd->stackup.at(-i - 1).substrate_thickness / 1e6;
+        offset -= brd.stackup.at(-i - 1).substrate_thickness / 1e6;
     }
 
     layer = BoardLayers::TOP_MASK;
-    layers[layer].offset = brd->stackup.at(0).thickness / 1e6 + 1e-3;
+    layers[layer].offset = brd.stackup.at(0).thickness / 1e6 + 1e-3;
     layers[layer].thickness = 0.01;
     layers[layer].alpha = .8;
     layers[layer].explode_mul = 3;
@@ -93,7 +90,7 @@ void CanvasMesh::prepare()
     prepare_soldermask(layer);
 
     layer = BoardLayers::TOP_SILKSCREEN;
-    layers[layer].offset = brd->stackup.at(0).thickness / 1e6 + 1e-3;
+    layers[layer].offset = brd.stackup.at(0).thickness / 1e6 + 1e-3;
     layers[layer].thickness = 0.035;
     layers[layer].explode_mul = 4;
     prepare_silkscreen(layer, BoardLayers::TOP_MASK);
@@ -105,7 +102,7 @@ void CanvasMesh::prepare()
     prepare_silkscreen(layer, BoardLayers::BOTTOM_MASK);
 
     layer = BoardLayers::TOP_PASTE;
-    layers[layer].offset = brd->stackup.at(0).thickness / 1e6 + 1e-3;
+    layers[layer].offset = brd.stackup.at(0).thickness / 1e6 + 1e-3;
     layers[layer].thickness = 0.035;
     layers[layer].explode_mul = 2;
     prepare_layer(layer);
@@ -326,11 +323,11 @@ void CanvasMesh::polynode_to_tris(const ClipperLib::PolyNode *node, int layer)
         }
     }
     catch (const std::runtime_error &e) {
-        Logger::log_critical("error triangulating layer " + brd->get_layers().at(layer).name, Logger::Domain::BOARD,
+        Logger::log_critical("error triangulating layer " + BoardLayers::get_layer_name(layer), Logger::Domain::BOARD,
                              e.what());
     }
     catch (...) {
-        Logger::log_critical("error triangulating layer" + brd->get_layers().at(layer).name, Logger::Domain::BOARD,
+        Logger::log_critical("error triangulating layer" + BoardLayers::get_layer_name(layer), Logger::Domain::BOARD,
                              "unspecified error");
     }
 
