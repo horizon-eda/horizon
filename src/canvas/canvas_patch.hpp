@@ -32,13 +32,17 @@ public:
 
     void append_polygon(const Polygon &poly);
 
-    CanvasPatch();
+    enum class SimplifyOnUpdate { YES, NO };
+    CanvasPatch(SimplifyOnUpdate simplify_on_update = SimplifyOnUpdate::YES);
+
     void push() override
     {
     }
     void request_push() override;
+    void simplify();
 
 private:
+    const SimplifyOnUpdate simplify_on_update;
     const Net *net = nullptr;
     PatchType patch_type = PatchType::OTHER;
     virtual void img_net(const Net *net) override;

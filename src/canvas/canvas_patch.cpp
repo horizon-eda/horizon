@@ -8,7 +8,7 @@
 #include <thread>
 
 namespace horizon {
-CanvasPatch::CanvasPatch() : Canvas::Canvas()
+CanvasPatch::CanvasPatch(SimplifyOnUpdate simp) : Canvas::Canvas(), simplify_on_update(simp)
 {
     img_mode = true;
 }
@@ -22,7 +22,7 @@ static void simplify_worker(std::vector<ClipperLib::Paths *> patches, std::atomi
     }
 }
 
-void CanvasPatch::request_push()
+void CanvasPatch::simplify()
 {
     std::vector<ClipperLib::Paths *> patches_to_simplify;
     patches_to_simplify.reserve(patches.size());
@@ -42,6 +42,12 @@ void CanvasPatch::request_push()
             it.wait();
         }
     }
+}
+
+void CanvasPatch::request_push()
+{
+    if (simplify_on_update == SimplifyOnUpdate::YES)
+        simplify();
 }
 
 void CanvasPatch::img_net(const Net *n)
