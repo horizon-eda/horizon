@@ -34,9 +34,8 @@ public:
 private:
     CanvasPatch ca;
     std::map<int, Layer3D> layers;
-    const class Board *brd = nullptr;
 
-    void prepare();
+    void prepare(const class Board &brd);
     void polynode_to_tris(const ClipperLib::PolyNode *node, int layer);
     void prepare_layer(int layer);
     void prepare_soldermask(int layer);
