@@ -534,9 +534,11 @@ void Board::update_planes()
         std::mutex plane_update_mutex;
         std::set<Plane *> planes_for_workers = planes_by_priority.at(priority);
 
-        if (planes_for_workers.size() >= std::thread::hardware_concurrency()) {
+        {
             std::vector<std::thread> threads;
-            for (size_t i = 0; i < std::thread::hardware_concurrency(); i++) {
+            const auto n_threads =
+                    std::min(static_cast<size_t>(std::thread::hardware_concurrency()), planes_for_workers.size());
+            for (size_t i = 0; i < n_threads; i++) {
                 threads.emplace_back(plane_update_worker, std::ref(plane_update_mutex), std::ref(planes_for_workers),
                                      this, &ca, &cp);
             }
@@ -544,11 +546,7 @@ void Board::update_planes()
                 thr.join();
             }
         }
-        else {
-            for (auto plane : planes_by_priority.at(priority)) {
-                update_plane(plane, &ca, &cp);
-            }
-        }
+
         for (auto plane : planes_by_priority.at(priority)) {
             ca.append_polygon(*(plane->polygon));
         }
