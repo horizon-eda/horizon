@@ -9,6 +9,8 @@
 #include <thread>
 #include <future>
 #include <sstream>
+#include "util/named_vector.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 
@@ -134,183 +136,347 @@ RulesCheckResult BoardRules::check_hole_size(const Board &brd) const
     return r;
 }
 
-static std::pair<ClipperLib::IntPoint, ClipperLib::IntPoint> get_patch_bb(const ClipperLib::Paths &patch)
+static auto get_patch_bb(const ClipperLib::Paths &patch)
 {
-    std::pair<ClipperLib::IntPoint, ClipperLib::IntPoint> bb;
-    bb.first = patch.front().front();
-    bb.second = bb.first;
+    auto p = patch.front().front();
+    ClipperLib::IntRect rect;
+    rect.left = rect.right = p.X;
+    rect.top = rect.bottom = p.Y;
     for (const auto &path : patch) {
         for (const auto &pt : path) {
-            bb.first.X = std::min(bb.first.X, pt.X);
-            bb.first.Y = std::min(bb.first.Y, pt.Y);
-            bb.second.X = std::max(bb.second.X, pt.X);
-            bb.second.Y = std::max(bb.second.Y, pt.Y);
+            rect.left = std::min(rect.left, pt.X);
+            rect.bottom = std::min(rect.bottom, pt.Y);
+            rect.right = std::max(rect.right, pt.X);
+            rect.top = std::max(rect.top, pt.Y);
         }
     }
-    return bb;
+    return rect;
+}
+
+static bool bbox_test_overlap(const ClipperLib::IntRect &bb1, const ClipperLib::IntRect &bb2, uint64_t clearance)
+{
+    const int64_t offset = clearance + 10; // just to be safe
+    return (((bb1.right + offset) >= bb2.left && bb2.right >= (bb1.left - offset))
+            && ((bb1.top + offset) >= bb2.bottom && bb2.top >= (bb1.bottom - offset)));
+}
+
+class PatchInfo;
+
+using PatchesVector = NamedVector<PatchInfo, PatchInfo>;
+
+
+class PatchExpanded {
+public:
+    const PatchesVector::index_type patch;
+    const uint64_t clearance;
+    ClipperLib::Paths paths;
+
+    void expand(const PatchesVector &patches);
+};
+
+using PatchesExpandedVector = NamedVector<PatchExpanded, PatchExpanded>;
+
+class ClearanceInfo {
+public:
+    size_t n_neighbors = 0;
+    PatchesExpandedVector::index_type expanded;
+};
+
+class PatchInfo {
+public:
+    const CanvasPatch::PatchKey &key;
+    const ClipperLib::Paths &paths;
+    ClipperLib::IntRect bbox;
+    std::map<uint64_t, ClearanceInfo> clearances;
+    void increment_neighbor_count(uint64_t clearance);
+
+    void update_bbox();
+};
+
+void PatchInfo::update_bbox()
+{
+    bbox = get_patch_bb(paths);
+}
+
+void PatchInfo::increment_neighbor_count(uint64_t clearance)
+{
+    clearances[clearance].n_neighbors++;
+}
+
+void PatchExpanded::expand(const PatchesVector &patches)
+{
+    ClipperLib::ClipperOffset ofs;
+    ofs.ArcTolerance = 10e3;
+    ofs.AddPaths(patches.at(patch).paths, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
+    ofs.Execute(paths, clearance);
+}
+
+static void clearance_cu_worker_bounding_boxes(PatchesVector &patch_infos, std::atomic_size_t &patch_counter,
+                                               const std::atomic_bool &cancel)
+{
+    PatchesVector::index_type i;
+    const auto n = patch_infos.size();
+    while ((i = patch_infos.make_index(patch_counter.fetch_add(1, std::memory_order_relaxed))) < n) {
+        if (cancel)
+            return;
+        patch_infos.at(i).update_bbox();
+    }
+}
+
+static void format_progress(std::ostringstream &oss, size_t i, size_t n)
+{
+    const unsigned int percentage = (i * 100) / n;
+    oss << format_m_of_n(i, n) << "  ";
+    if (percentage < 10)
+        oss << " ";
+    oss << percentage << "%";
+}
+
+static void clearance_cu_worker_expand(const PatchesVector &patches, PatchesExpandedVector &patches_expanded,
+                                       std::atomic_size_t &patch_counter, const std::atomic_bool &cancel,
+                                       check_status_cb_t status_cb)
+{
+    PatchesExpandedVector::index_type i;
+    auto n = patches_expanded.size();
+    while ((i = patches_expanded.make_index(patch_counter.fetch_add(1, std::memory_order_relaxed))) < n) {
+        if (cancel)
+            return;
+        {
+            std::ostringstream ss;
+            ss << "4/5 Expanding patch ";
+            format_progress(ss, 1 + i.get(), n.get());
+            status_cb(ss.str());
+        }
+        patches_expanded.at(i).expand(patches);
+    }
+}
+
+inline bool check_clearance_copper_filter_patches(const CanvasPatch::PatchKey &key)
+{
+    if (key.type == PatchType::OTHER || key.type == PatchType::TEXT) {
+        return false;
+    }
+    return BoardLayers::is_copper(key.layer) || (key.type == PatchType::HOLE_PTH && key.layer == 10000);
 }
 
 
+class PatchPair {
+public:
+    const PatchesVector::index_type first;  // index into patches
+    const PatchesVector::index_type second; // index into patches
+    const uint64_t clearance;
+
+    PatchesExpandedVector::index_type expanded;
+    PatchesVector::index_type non_expanded;
+};
+
+using PatchPairsVector = std::vector<PatchPair>; // not referenced anywhere
+
+
 static std::deque<RulesCheckError>
-clearance_cu_worker(std::set<std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey>> &patch_pairs,
-                    std::mutex &patch_pair_mutex, const std::map<CanvasPatch::PatchKey, ClipperLib::Paths> &patches,
-                    const Board &brd, const BoardRules &rules, int n_patch_pairs, check_status_cb_t status_cb,
-                    const std::atomic_bool &cancel)
+clearance_cu_worker_intersect(const PatchesVector &patches, const PatchesExpandedVector &patches_expanded,
+                              const PatchPairsVector &patch_pairs, const Board &brd, const std::atomic_bool &cancel,
+                              std::atomic_size_t &patch_counter, check_status_cb_t status_cb)
 {
     std::deque<RulesCheckError> r_errors;
-    while (true) {
-        std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey> patch_pair;
-        {
-            std::lock_guard<std::mutex> guard(patch_pair_mutex);
-            if (patch_pairs.size() == 0)
-                break;
-            auto it = patch_pairs.begin();
-            patch_pair = *it;
-            patch_pairs.erase(it);
 
-            {
-                std::stringstream ss;
-                ss << "Patch pair " << (n_patch_pairs - patch_pairs.size()) << "/" << n_patch_pairs;
-                status_cb(ss.str());
-            }
-        }
+    size_t i;
+    const auto n = patch_pairs.size();
+    while ((i = patch_counter.fetch_add(1, std::memory_order_relaxed)) < n) {
         if (cancel)
             return {};
 
-        auto p1 = patch_pair.first;
-        auto p2 = patch_pair.second;
-
-        Net *net1 = p1.net ? &brd.block->nets.at(p1.net) : nullptr;
-        Net *net2 = p2.net ? &brd.block->nets.at(p2.net) : nullptr;
-
-        // figure out the clearance between this patch pair
-        uint64_t clearance = 0;
-        auto rule_clearance = rules.get_clearance_copper(net1, net2, p1.layer);
-        if (rule_clearance) {
-            clearance = rule_clearance->get_clearance(p1.type, p2.type);
+        {
+            std::ostringstream ss;
+            ss << "5/5 Checking patch pair ";
+            format_progress(ss, i + 1, n);
+            status_cb(ss.str());
         }
 
-        if (patches.at(p1).size() && patches.at(p2).size()) {
-            auto bb1 = get_patch_bb(patches.at(p1));
-            bb1.first.X -= 2 * clearance; // just to be safe
-            bb1.first.Y -= 2 * clearance;
-            bb1.second.X += 2 * clearance;
-            bb1.second.Y += 2 * clearance;
+        const auto &pair = patch_pairs.at(i);
+        auto &p1 = patches_expanded.at(pair.expanded);
+        auto &p2 = patches.at(pair.non_expanded);
 
-            auto bb2 = get_patch_bb(patches.at(p2));
+        if (pair.non_expanded == pair.first)
+            assert(p1.patch == pair.second);
+        if (pair.non_expanded == pair.second)
+            assert(p1.patch == pair.first);
+        assert(p1.clearance == pair.clearance);
 
-            if ((bb1.second.X >= bb2.first.X && bb2.second.X >= bb1.first.X)
-                && (bb1.second.Y >= bb2.first.Y && bb2.second.Y >= bb1.first.Y)) { // bbs overlap
-                // expand one of them by the clearance
-                ClipperLib::ClipperOffset ofs;
-                ofs.ArcTolerance = 10e3;
-                ofs.AddPaths(patches.at(p1), ClipperLib::jtRound, ClipperLib::etClosedPolygon);
-                ClipperLib::Paths paths_ofs;
-                ofs.Execute(paths_ofs, clearance);
+        // intersect expanded and other patches
+        ClipperLib::Clipper clipper;
+        clipper.AddPaths(p1.paths, ClipperLib::ptClip, true);
+        clipper.AddPaths(p2.paths, ClipperLib::ptSubject, true);
+        ClipperLib::Paths errors;
+        clipper.Execute(ClipperLib::ctIntersection, errors, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
 
-                // intersect expanded and other patches
-                ClipperLib::Clipper clipper;
-                clipper.AddPaths(paths_ofs, ClipperLib::ptClip, true);
-                clipper.AddPaths(patches.at(p2), ClipperLib::ptSubject, true);
-                ClipperLib::Paths errors;
-                clipper.Execute(ClipperLib::ctIntersection, errors, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
-
-                // no intersection: no clearance violation
-                if (errors.size() > 0) {
-                    for (const auto &ite : errors) {
-                        r_errors.emplace_back(RulesCheckErrorLevel::FAIL);
-                        auto &e = r_errors.back();
-                        e.has_location = true;
-                        Accumulator<Coordi> acc;
-                        for (const auto &ite2 : ite) {
-                            acc.accumulate({ite2.X, ite2.Y});
-                        }
-                        e.location = acc.get();
-                        e.comment = patch_type_names.at(p1.type) + "(" + (net1 ? net1->name : "") + ") near "
-                                    + patch_type_names.at(p2.type) + "(" + (net2 ? net2->name : "") + ") on layer "
-                                    + BoardLayers::get_layer_name(p1.layer);
-                        e.error_polygons = {ite};
-                    }
+        // no intersection: no clearance violation
+        if (errors.size() > 0) {
+            for (const auto &ite : errors) {
+                r_errors.emplace_back(RulesCheckErrorLevel::FAIL);
+                auto &e = r_errors.back();
+                e.has_location = true;
+                Accumulator<Coordi> acc;
+                for (const auto &ite2 : ite) {
+                    acc.accumulate({ite2.X, ite2.Y});
                 }
+                e.location = acc.get();
+                const auto &key1 = patches.at(pair.first).key;
+                const auto &key2 = patches.at(pair.second).key;
+                const Net *net1 = key1.net ? &brd.block->nets.at(key1.net) : nullptr;
+                const Net *net2 = key2.net ? &brd.block->nets.at(key2.net) : nullptr;
+                e.comment = patch_type_names.at(key1.type) + get_net_name(net1) + " near "
+                            + patch_type_names.at(key2.type) + get_net_name(net2) + " on layer "
+                            + BoardLayers::get_layer_name(BoardLayers::is_copper(key1.layer) ? key1.layer : key2.layer);
+                e.error_polygons = {ite};
             }
         }
     }
     return r_errors;
 }
 
+
 RulesCheckResult BoardRules::check_clearance_copper(const Board &brd, RulesCheckCache &cache,
                                                     check_status_cb_t status_cb, const std::atomic_bool &cancel) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
-    status_cb("Getting patches");
-    auto &c = dynamic_cast<RulesCheckCacheBoardImage &>(cache.get_cache(RulesCheckCacheID::BOARD_IMAGE));
-    std::set<int> layers;
-    const auto &patches = c.get_canvas().get_patches();
-    for (const auto &it : patches) { // collect copper layers
-        if (brd.get_layers().count(it.first.layer) && brd.get_layers().at(it.first.layer).copper) {
-            layers.emplace(it.first.layer);
+    status_cb("1/5 Getting patches");
+    auto begin = std::chrono::steady_clock::now();
+
+    PatchesVector patches;
+    {
+        auto &c = dynamic_cast<RulesCheckCacheBoardImage &>(cache.get_cache(RulesCheckCacheID::BOARD_IMAGE));
+        const auto &patches_from_canvas = c.get_canvas().get_patches();
+        patches.reserve(patches_from_canvas.size());
+
+        for (const auto &[key, patch] : patches_from_canvas) {
+            if (check_clearance_copper_filter_patches(key))
+                patches.push_back({key, patch});
         }
     }
+    const auto n_patches = patches.size();
+    status_cb("2/5 Calculating bounding boxes");
 
+    {
+        std::atomic_size_t patch_counter = 0;
+        std::vector<std::future<void>> results;
+        for (size_t i = 0; i < std::thread::hardware_concurrency(); i++) {
+            results.push_back(std::async(std::launch::async, clearance_cu_worker_bounding_boxes, std::ref(patches),
+                                         std::ref(patch_counter), std::ref(cancel)));
+        }
+        for (auto &it : results) {
+            it.wait();
+        }
+    }
     if (r.check_cancelled(cancel))
         return r;
 
-    // assemble a list of patch pairs we'll need to check
-    std::set<std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey>> patch_pairs;
+    status_cb("3/5 Creating patch pairs");
+    PatchPairsVector patch_pairs;
+    {
+        const auto n = n_patches.get();
+        patch_pairs.reserve((n * n - n) / 2);
+    }
 
-    status_cb("Building patch pairs");
-    for (const auto layer : layers) { // check each layer individually
-        for (const auto &it : patches) {
-            for (const auto &it_other : patches) {
-                if (layer == it.first.layer && it.first.layer == it_other.first.layer
-                    && it.first.net != it_other.first.net && it.first.type != PatchType::OTHER
-                    && it.first.type != PatchType::TEXT && it_other.first.type != PatchType::OTHER
-                    && it_other.first.type != PatchType::TEXT) { // see if it needs to be
-                    // checked against it_other
-                    std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey> k = {it.first, it_other.first};
-                    auto k2 = k;
-                    std::swap(k2.first, k2.second);
-                    if (patch_pairs.count(k) == 0 && patch_pairs.count(k2) == 0) {
-                        patch_pairs.emplace(k);
-                    }
-                }
-                else if (layer == it.first.layer && it.first.net != it_other.first.net
-                         && it.first.type != PatchType::OTHER && it.first.type != PatchType::TEXT
-                         && it_other.first.type == PatchType::HOLE_PTH
-                         && (BoardLayers::is_copper(it_other.first.layer) || it_other.first.layer == 10000)) {
-                    // ignore layer of plated holes, as it's expected to be different from current layer
-                    std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey> k = {it.first, it_other.first};
-                    auto k2 = k;
-                    std::swap(k2.first, k2.second);
-                    if (patch_pairs.count(k) == 0 && patch_pairs.count(k2) == 0) {
-                        patch_pairs.emplace(k);
+    for (auto i = PatchesVector::index_type{0}; i < n_patches; i++) {
+        auto &it = patches.at(i);
+        // If it_is_copper is false it must be PTH on layer 10000
+        const bool it_is_copper = BoardLayers::is_copper(it.key.layer);
+        const bool it_is_barrel = !it_is_copper;
+        const Net *net_it = it.key.net ? &brd.block->nets.at(it.key.net) : nullptr;
+        for (auto j = i + 1; j < n_patches; j++) {
+            auto &other = patches.at(j);
+
+            if (it.key.net != other.key.net) {
+                const bool other_is_copper = BoardLayers::is_copper(other.key.layer);
+                const bool other_is_barrel = !other_is_copper;
+                const Net *net_other = other.key.net ? &brd.block->nets.at(other.key.net) : nullptr;
+
+                if ((it_is_copper && it.key.layer == other.key.layer) || (it_is_barrel || other_is_barrel)) {
+                    const int layer = it_is_copper ? it.key.layer : other.key.layer;
+                    const auto clearance =
+                            get_clearance_copper(net_it, net_other, layer)->get_clearance(it.key.type, other.key.type);
+
+                    if (bbox_test_overlap(it.bbox, other.bbox, clearance)) {
+                        patch_pairs.push_back({i, j, clearance});
+                        it.increment_neighbor_count(clearance);
+                        other.increment_neighbor_count(clearance);
                     }
                 }
             }
-            if (r.check_cancelled(cancel))
-                return r;
         }
     }
 
-    auto n_patch_pairs = patch_pairs.size();
+    PatchesExpandedVector patches_expanded;
 
-    std::vector<std::future<std::deque<RulesCheckError>>> results;
-    std::mutex patch_pair_mutex;
-    for (size_t i = 0; i < std::thread::hardware_concurrency(); i++) {
-        results.push_back(std::async(std::launch::async, clearance_cu_worker, std::ref(patch_pairs),
-                                     std::ref(patch_pair_mutex), std::ref(patches), std::ref(brd), std::ref(*this),
-                                     n_patch_pairs, status_cb, std::ref(cancel)));
-    }
-    for (auto &it : results) {
-        auto res = it.get();
-        std::copy(res.begin(), res.end(), std::back_inserter(r.errors));
+    for (auto &pair : patch_pairs) {
+        auto &p1 = patches.at(pair.first);
+        auto &p2 = patches.at(pair.second);
+        auto &pc1 = p1.clearances.at(pair.clearance);
+        auto &pc2 = p2.clearances.at(pair.clearance);
+        if (pc1.expanded.has_value()) { // p1 is already expanded
+            pair.expanded = pc1.expanded;
+            pair.non_expanded = pair.second;
+        }
+        else if (pc2.expanded.has_value()) {
+            pair.expanded = pc2.expanded;
+            pair.non_expanded = pair.first;
+        }
+        else {
+            const auto n1 = pc1.n_neighbors;
+            const auto n2 = pc2.n_neighbors;
+            const auto idx = patches_expanded.size();
+            if (n2 < n1) { // expand the one with fewer neighbors, is slightly faster
+                patches_expanded.push_back({pair.second, pair.clearance});
+                pc2.expanded = idx;
+                pair.expanded = idx;
+                pair.non_expanded = pair.first;
+            }
+            else {
+                patches_expanded.push_back({pair.first, pair.clearance});
+                pc1.expanded = idx;
+                pair.expanded = idx;
+                pair.non_expanded = pair.second;
+            }
+        }
     }
 
+    {
+        std::atomic_size_t patch_counter = 0;
+        std::vector<std::future<void>> results;
+        for (size_t i = 0; i < std::thread::hardware_concurrency(); i++) {
+            results.push_back(std::async(std::launch::async, clearance_cu_worker_expand, std::ref(patches),
+                                         std::ref(patches_expanded), std::ref(patch_counter), std::ref(cancel),
+                                         status_cb));
+        }
+        for (auto &it : results) {
+            it.wait();
+        }
+    }
+    if (r.check_cancelled(cancel))
+        return r;
+
+    {
+        std::vector<std::future<std::deque<RulesCheckError>>> results;
+        std::atomic_size_t patch_counter = 0;
+        for (size_t i = 0; i < std::thread::hardware_concurrency(); i++) {
+            results.push_back(std::async(std::launch::async, clearance_cu_worker_intersect, std::ref(patches),
+                                         std::ref(patches_expanded), std::ref(patch_pairs), std::ref(brd),
+                                         std::ref(cancel), std::ref(patch_counter), status_cb));
+        }
+        for (auto &it : results) {
+            auto res = it.get();
+            std::copy(res.begin(), res.end(), std::back_inserter(r.errors));
+        }
+    }
     if (r.check_cancelled(cancel))
         return r;
 
     r.update();
+    auto end = std::chrono::steady_clock::now();
+    double elapsed_secs = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / 1e3;
+    std::cout << "check took " << elapsed_secs << std::endl;
     return r;
 }
 
