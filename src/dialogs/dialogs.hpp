@@ -62,6 +62,7 @@ public:
     std::optional<std::string> ask_kicad_package_filename();
     std::optional<std::string> ask_picture_filename();
     bool manage_ports(class Block &block);
+    bool update_plane(class Board &brd, class Plane *plane);
 
     class SymbolPinNamesWindow *show_symbol_pin_names_window(class SchematicSymbol &symbol);
     class RenumberPadsWindow *show_renumber_pads_window(class Package &pkg, const std::set<UUID> &pads);

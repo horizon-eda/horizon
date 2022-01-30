@@ -97,7 +97,8 @@ static bool bb_isect(const std::pair<ClipperLib::IntPoint, ClipperLib::IntPoint>
            && (bb1.second.Y >= bb2.first.Y && bb2.second.Y >= bb1.first.Y);
 }
 
-void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPads *ca_pads_ext)
+void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPads *ca_pads_ext,
+                         plane_update_status_cb_t status_cb, const std::atomic_bool &cancel)
 {
     MyCanvasPatch ca_my;
     const CanvasPatch *ca = ca_ext;
@@ -131,7 +132,8 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
     }
     const double twiddle = .005_mm;
     ClipperLib::Paths out; // the plane before expanding by min_width
-
+    if (status_cb)
+        status_cb(*plane, "Starting…");
 
     {
         ClipperLib::Clipper cl_plane;
@@ -144,7 +146,11 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
 
         auto poly_bb = get_path_bb(poly_path);
 
+        if (cancel)
+            return;
 
+        if (status_cb)
+            status_cb(*plane, "Shrinking outline…");
         {
             ClipperLib::ClipperOffset ofs_poly; // shrink polygon contour by min_width/2
             ofs_poly.ArcTolerance = 2e3;
@@ -154,14 +160,16 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
             cl_plane.AddPaths(poly_shrink, ClipperLib::ptSubject, true);
         }
 
-
+        if (status_cb)
+            status_cb(*plane, "Adding cutouts…");
         for (const auto &patch : ca->get_patches()) { // add cutouts
             if ((patch.first.layer == poly.layer && patch.first.net != plane->net->uuid && patch.second.size()
                  && patch.first.type != PatchType::OTHER && patch.first.type != PatchType::TEXT)
                 || ((patch.first.layer == 10000)
                     && ((patch.first.type == PatchType::HOLE_NPTH)
                         || ((patch.first.type == PatchType::HOLE_PTH) && (patch.first.net != plane->net->uuid))))) {
-
+                if (cancel)
+                    return;
                 int64_t clearance = 0;
                 if (patch.first.type != PatchType::HOLE_NPTH) { // copper
                     auto patch_net = patch.first.net ? &block->nets.at(patch.first.net) : nullptr;
@@ -197,7 +205,8 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
 
         auto text_clearance = rules.get_clearance_copper_other(plane->net, poly.layer)
                                       ->get_clearance(PatchType::PLANE, PatchType::TEXT);
-
+        if (status_cb)
+            status_cb(*plane, "Adding text cutouts…");
         // add text cutouts
         if (plane->settings.text_style == PlaneSettings::TextStyle::EXPAND) {
             for (const auto &patch : ca->get_patches()) { // add cutouts
@@ -235,6 +244,8 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
             }
         }
 
+        if (status_cb)
+            status_cb(*plane, "Adding keepouts…");
         // add keepouts
         {
             auto keepout_rules = rules.get_rules_sorted<RuleClearanceCopperKeepout>();
@@ -243,6 +254,8 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
                 const auto keepout = it_keepout.keepout;
                 if ((plane->polygon->layer == keepout->polygon->layer || keepout->all_cu_layers)
                     && keepout->patch_types_cu.count(PatchType::PLANE)) {
+                    if (cancel)
+                        return;
                     auto clearance = rules.get_clearance_copper_keepout(plane->net, &it_keepout)
                                              ->get_clearance(PatchType::PLANE);
 
@@ -259,6 +272,8 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
         cl_plane.Execute(ClipperLib::ctDifference, out, ClipperLib::pftNonZero); // do cutouts
     }
 
+    if (status_cb)
+        status_cb(*plane, "Clipping to board outline…");
     // do board outline clearance
     CanvasPatch::PatchKey outline_key;
     outline_key.layer = BoardLayers::L_OUTLINE;
@@ -303,6 +318,8 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
     if (plane->settings.connect_style == PlaneSettings::ConnectStyle::THERMAL) {
         ClipperLib::Paths plane_with_thermal_cutouts;
         {
+            if (status_cb)
+                status_cb(*plane, "Adding thermal cutouts …");
             ClipperLib::Clipper cl_plane;
             cl_plane.AddPaths(out, ClipperLib::ptSubject, true);
 
@@ -310,6 +327,8 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
             for (const auto &patch : ca->get_patches()) {
                 if ((patch.first.layer == poly.layer && patch.first.net == plane->net->uuid
                      && (patch.first.type == PatchType::PAD || patch.first.type == PatchType::PAD_TH))) {
+                    if (cancel)
+                        return;
                     ClipperLib::ClipperOffset ofs; // expand patch for cutout
                     ofs.ArcTolerance = 2e3;
                     ClipperLib::Paths pad;
@@ -331,10 +350,14 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
 
         ClipperLib::Paths before_expand;
         {
+            if (status_cb)
+                status_cb(*plane, "Adding thermal spokes …");
             ClipperLib::Clipper cl_add_spokes;
             cl_add_spokes.AddPaths(plane_with_thermal_cutouts, ClipperLib::ptSubject, true);
             auto thermals = get_thermals(plane, ca_pads);
             for (const auto &spoke : thermals) {
+                if (cancel)
+                    return;
                 ClipperLib::Paths test_result;
                 ClipperLib::Clipper cl_test;
                 cl_test.AddPaths(plane_with_thermal_cutouts, ClipperLib::ptSubject, true);
@@ -350,6 +373,8 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
 
         ClipperLib::Paths clipped_to_orig;
         {
+            if (status_cb)
+                status_cb(*plane, "Clipping thermal spokes…");
             ClipperLib::Clipper cl_clip_to_orig;
             cl_clip_to_orig.AddPaths(before_expand, ClipperLib::ptSubject, true);
             cl_clip_to_orig.AddPaths(out, ClipperLib::ptClip, true);
@@ -358,6 +383,8 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
 
 
         {
+            if (status_cb)
+                status_cb(*plane, "Expanding for minimum width…");
             ClipperLib::ClipperOffset ofs;
             ofs.ArcTolerance = 2e3;
             ofs.AddPaths(clipped_to_orig, jt, ClipperLib::etClosedPolygon);
@@ -370,6 +397,8 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
         }
     }
     else {
+        if (status_cb)
+            status_cb(*plane, "Expanding for minimum width…");
         ClipperLib::ClipperOffset ofs;
         ofs.ArcTolerance = 2e3;
         ofs.AddPaths(out, jt, ClipperLib::etClosedPolygon);
@@ -382,6 +411,8 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
     }
 
     if (plane->settings.fill_style == PlaneSettings::FillStyle::HATCH) {
+        if (status_cb)
+            status_cb(*plane, "Computing hatch…");
         ClipperLib::Paths contracted;
         {
             ClipperLib::ClipperOffset cl;
@@ -440,11 +471,13 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
             cl.Execute(ClipperLib::ctUnion, tree, ClipperLib::pftNonZero);
         }
     }
-
+    if (status_cb)
+        status_cb(*plane, "Creating fragments…");
     for (const auto node : tree.Childs) {
         polynode_to_fragment(plane, node);
     }
-
+    if (status_cb)
+        status_cb(*plane, "Finding orphans…");
     // orphan all
     for (auto &it : plane->fragments) {
         it.orphan = true;
@@ -452,6 +485,8 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
 
     // find orphans
     for (auto &frag : plane->fragments) {
+        if (cancel)
+            return;
         for (const auto &it : junctions) {
             if (it.second.net == plane->net && (it.second.layer == plane->polygon->layer || it.second.has_via)
                 && frag.contains(it.second.position)) {
@@ -490,10 +525,13 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
                                               [](const auto &x) { return x.orphan; }),
                                plane->fragments.end());
     }
+    if (status_cb)
+        status_cb(*plane, "Done");
 }
 
 static void plane_update_worker(std::mutex &mutex, std::set<Plane *> &planes, Board *brd, const CanvasPatch *ca_patch,
-                                const CanvasPads *ca_pads)
+                                const CanvasPads *ca_pads, plane_update_status_cb_t status_cb,
+                                const std::atomic_bool &cancel)
 {
     while (true) {
         Plane *plane = nullptr;
@@ -506,11 +544,11 @@ static void plane_update_worker(std::mutex &mutex, std::set<Plane *> &planes, Bo
             planes.erase(it);
         }
         assert(plane);
-        brd->update_plane(plane, ca_patch, ca_pads);
+        brd->update_plane(plane, ca_patch, ca_pads, status_cb, cancel);
     }
 }
 
-void Board::update_planes()
+void Board::update_planes(plane_update_status_cb_t status_cb, const std::atomic_bool &cancel)
 {
     std::map<int, std::set<Plane *>> planes_by_priority;
     std::set<UUID> nets;
@@ -540,7 +578,7 @@ void Board::update_planes()
                     std::min(static_cast<size_t>(std::thread::hardware_concurrency()), planes_for_workers.size());
             for (size_t i = 0; i < n_threads; i++) {
                 threads.emplace_back(plane_update_worker, std::ref(plane_update_mutex), std::ref(planes_for_workers),
-                                     this, &ca, &cp);
+                                     this, &ca, &cp, status_cb, std::ref(cancel));
             }
             for (auto &thr : threads) {
                 thr.join();

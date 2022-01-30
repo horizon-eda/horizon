@@ -2,6 +2,7 @@
 #include "document/idocument_board.hpp"
 #include "board/board.hpp"
 #include "core/tool_id.hpp"
+#include "imp/imp_interface.hpp"
 
 namespace horizon {
 
@@ -14,7 +15,10 @@ ToolResponse ToolUpdateAllPlanes::begin(const ToolArgs &args)
 {
     auto &brd = *doc.b->get_board();
     if (tool_id == ToolID::UPDATE_ALL_PLANES) {
-        brd.update_planes();
+        if (imp->dialogs.update_plane(brd, nullptr))
+            return ToolResponse::commit();
+        else
+            return ToolResponse::revert();
     }
     else if (tool_id == ToolID::CLEAR_ALL_PLANES) {
         std::set<UUID> nets;

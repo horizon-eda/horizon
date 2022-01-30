@@ -44,6 +44,7 @@
 #include "select_block.hpp"
 #include "align_and_distribute_window.hpp"
 #include "edit_text_window.hpp"
+#include "plane_update.hpp"
 
 namespace horizon {
 void Dialogs::set_parent(Gtk::Window *w)
@@ -487,6 +488,15 @@ bool Dialogs::manage_ports(Block &b)
     ManagePortsDialog dia(parent, b);
     return dia.run() == Gtk::RESPONSE_OK;
 }
+
+bool Dialogs::update_plane(class Board &brd, class Plane *plane)
+{
+    PlaneUpdateDialog dia(*parent, brd, plane);
+    while (dia.run() != 1) {
+    }
+    return !dia.was_cancelled();
+}
+
 
 class SymbolPinNamesWindow *Dialogs::show_symbol_pin_names_window(class SchematicSymbol &symbol)
 {

@@ -61,9 +61,13 @@ ToolResponse ToolEditPlane::begin(const ToolArgs &args)
     if (tool_id == ToolID::EDIT_PLANE || tool_id == ToolID::UPDATE_PLANE || tool_id == ToolID::CLEAR_PLANE) {
         plane = dynamic_cast<Plane *>(poly->usage.ptr);
         if (tool_id == ToolID::UPDATE_PLANE) {
-            brd->update_plane(plane);
-            brd->update_airwires(false, {plane->net->uuid});
-            return ToolResponse::commit();
+            if (imp->dialogs.update_plane(*brd, plane)) {
+                brd->update_airwires(false, {plane->net->uuid});
+                return ToolResponse::commit();
+            }
+            else {
+                return ToolResponse::revert();
+            }
         }
         else if (tool_id == ToolID::CLEAR_PLANE) {
             plane->clear();

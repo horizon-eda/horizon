@@ -383,6 +383,7 @@ SRC_IMP = \
 	src/dialogs/select_block.cpp\
 	src/dialogs/align_and_distribute_window.cpp\
 	src/dialogs/edit_text_window.cpp\
+	src/dialogs/plane_update.cpp\
 	src/util/sort_controller.cpp\
 	src/core/core_symbol.cpp\
 	src/core/core_schematic.cpp\
