@@ -5,22 +5,98 @@
 #include "logger/logger.hpp"
 #include "util/geom_util.hpp"
 #include "util/min_max_accumulator.hpp"
+#include <future>
+#include <thread>
+#include <atomic>
 
 namespace horizon {
+CanvasMesh::CanvasMesh() : ca(CanvasPatch::SimplifyOnUpdate::NO)
+{
+}
+
 void CanvasMesh::update(const Board &b)
+{
+    update_only(b);
+    prepare_only();
+}
+
+void CanvasMesh::update_only(const Board &b)
 {
     ca.update(b);
     prepare(b);
 }
 
-const CanvasMesh::Layer3D &CanvasMesh::get_layer(int l) const
+void CanvasMesh::prepare_only(std::function<void()> cb)
 {
-    return layers.at(l);
+    cancel = false;
+    ca.simplify();
+    if (cb)
+        cb();
+    prepare_work(cb);
 }
 
-const std::map<int, CanvasMesh::Layer3D> &CanvasMesh::get_layers() const
+void CanvasMesh::Layer3D::move_from(Layer3D &&other)
 {
-    return layers;
+    tris = std::move(other.tris);
+    walls = std::move(other.walls);
+}
+
+void CanvasMesh::Layer3D::copy_sizes_from(const Layer3D &other)
+{
+    alpha = other.alpha;
+    offset = other.offset;
+    thickness = other.thickness;
+    explode_mul = other.explode_mul;
+}
+
+void CanvasMesh::prepare_worker(std::atomic_size_t &layer_counter, std::function<void()> cb)
+{
+    size_t i;
+    const auto n = layers_to_prepare.size();
+    while ((i = layer_counter.fetch_add(1, std::memory_order_relaxed)) < n) {
+        if (cancel)
+            return;
+        const auto layer = layers_to_prepare.at(i);
+        if (layer == BoardLayers::TOP_MASK || layer == BoardLayers::BOTTOM_MASK) {
+            prepare_soldermask(layer);
+        }
+        else if (layer == BoardLayers::TOP_SILKSCREEN) {
+            prepare_silkscreen(layer, BoardLayers::TOP_MASK);
+        }
+        else if (layer == BoardLayers::BOTTOM_SILKSCREEN) {
+            prepare_silkscreen(layer, BoardLayers::BOTTOM_MASK);
+        }
+        else if (layer == 20000) {
+            for (const auto &it : ca.get_patches()) {
+                if (it.first.layer == 10000 && it.first.type == PatchType::HOLE_PTH) {
+                    ClipperLib::ClipperOffset ofs;
+                    ofs.AddPaths(it.second, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
+                    ClipperLib::Paths res;
+                    ofs.Execute(res, -.001_mm);
+                    for (const auto &path : res) {
+                        add_path(layer, path);
+                    }
+                }
+            }
+        }
+        else if (layer >= 10000) {
+            // nop will be cloned from outline layer
+        }
+        else {
+            prepare_layer(layer);
+            if (layer == BoardLayers::L_OUTLINE) {
+                for (auto l : layers_to_prepare) {
+                    if (l >= 10'000 && l < 11'000) {
+                        layers.at(l).tris = layers.at(layer).tris;
+                        layers.at(l).walls = layers.at(layer).walls;
+                    }
+                }
+            }
+        }
+        layers.at(layer).done = true;
+        if (cb)
+            cb();
+    }
 }
 
 void CanvasMesh::prepare(const Board &brd)
@@ -34,17 +110,18 @@ void CanvasMesh::prepare(const Board &brd)
     }
     board_thickness /= 1e6;
 
+    layers_to_prepare.clear();
     int layer = BoardLayers::TOP_COPPER;
     layers[layer].offset = 0;
     layers[layer].thickness = brd.stackup.at(0).thickness / 1e6;
     layers[layer].explode_mul = 1;
-    prepare_layer(layer);
+    layers_to_prepare.push_back(layer);
 
     layer = BoardLayers::BOTTOM_COPPER;
     layers[layer].offset = -board_thickness;
     layers[layer].thickness = +(brd.stackup.at(layer).thickness / 1e6);
     layers[layer].explode_mul = -2 * n_inner_layers - 1;
-    prepare_layer(layer);
+    layers_to_prepare.push_back(layer);
 
     {
         float offset = -(brd.stackup.at(0).substrate_thickness / 1e6);
@@ -54,7 +131,7 @@ void CanvasMesh::prepare(const Board &brd)
             layers[layer].thickness = -(brd.stackup.at(layer).thickness / 1e6);
             layers[layer].explode_mul = -1 - 2 * i;
             offset -= brd.stackup.at(layer).thickness / 1e6 + brd.stackup.at(layer).substrate_thickness / 1e6;
-            prepare_layer(layer);
+            layers_to_prepare.push_back(layer);
         }
     }
 
@@ -62,18 +139,18 @@ void CanvasMesh::prepare(const Board &brd)
     layers[layer].offset = 0;
     layers[layer].thickness = -(brd.stackup.at(0).substrate_thickness / 1e6);
     layers[layer].explode_mul = 0;
-    prepare_layer(layer);
+    layers_to_prepare.push_back(layer);
 
     float offset = -(brd.stackup.at(0).substrate_thickness / 1e6);
     for (int i = 0; i < n_inner_layers; i++) {
         int l = 10000 + i;
         offset -= brd.stackup.at(-i - 1).thickness / 1e6;
-        layers[l] = layers[layer];
         layers[l].offset = offset;
         layers[l].thickness = -(brd.stackup.at(-i - 1).substrate_thickness / 1e6);
         layers[l].explode_mul = -2 - 2 * i;
 
         offset -= brd.stackup.at(-i - 1).substrate_thickness / 1e6;
+        layers_to_prepare.push_back(l);
     }
 
     layer = BoardLayers::TOP_MASK;
@@ -81,53 +158,56 @@ void CanvasMesh::prepare(const Board &brd)
     layers[layer].thickness = 0.01;
     layers[layer].alpha = .8;
     layers[layer].explode_mul = 3;
-    prepare_soldermask(layer);
+    layers_to_prepare.push_back(layer);
 
     layer = BoardLayers::BOTTOM_MASK;
     layers[layer].offset = -board_thickness - 1e-3;
     layers[layer].thickness = 0.035;
     layers[layer].alpha = .8;
     layers[layer].explode_mul = -2 * n_inner_layers - 3;
-    prepare_soldermask(layer);
+    layers_to_prepare.push_back(layer);
 
     layer = BoardLayers::TOP_SILKSCREEN;
     layers[layer].offset = brd.stackup.at(0).thickness / 1e6 + 1e-3;
     layers[layer].thickness = 0.035;
     layers[layer].explode_mul = 4;
-    prepare_silkscreen(layer, BoardLayers::TOP_MASK);
+    layers_to_prepare.push_back(layer);
 
     layer = BoardLayers::BOTTOM_SILKSCREEN;
     layers[layer].offset = -board_thickness - .1e-3;
     layers[layer].thickness = -0.035;
     layers[layer].explode_mul = -2 * n_inner_layers - 4;
-    prepare_silkscreen(layer, BoardLayers::BOTTOM_MASK);
+    layers_to_prepare.push_back(layer);
 
     layer = BoardLayers::TOP_PASTE;
     layers[layer].offset = brd.stackup.at(0).thickness / 1e6 + 1e-3;
     layers[layer].thickness = 0.035;
     layers[layer].explode_mul = 2;
-    prepare_layer(layer);
+    layers_to_prepare.push_back(layer);
 
     layer = BoardLayers::BOTTOM_PASTE;
     layers[layer].offset = -board_thickness;
     layers[layer].thickness = -0.035;
     layers[layer].explode_mul = -2 * n_inner_layers - 2;
-    prepare_layer(layer);
+    layers_to_prepare.push_back(layer);
+
 
     layer = 20000; // pth holes
     layers[layer].offset = 0;
     layers[layer].thickness = -board_thickness;
+    layers_to_prepare.push_back(layer);
+}
 
-    for (const auto &it : ca.get_patches()) {
-        if (it.first.layer == 10000 && it.first.type == PatchType::HOLE_PTH) {
-            ClipperLib::ClipperOffset ofs;
-            ofs.AddPaths(it.second, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
-            ClipperLib::Paths res;
-            ofs.Execute(res, -.001_mm);
-            for (const auto &path : res) {
-                add_path(layer, path);
-            }
-        }
+void CanvasMesh::prepare_work(std::function<void()> cb)
+{
+    std::atomic_size_t layer_counter = 0;
+    std::vector<std::future<void>> results;
+    for (size_t i = 0; i < std::thread::hardware_concurrency(); i++) {
+        results.push_back(
+                std::async(std::launch::async, &CanvasMesh::prepare_worker, this, std::ref(layer_counter), cb));
+    }
+    for (auto &it : results) {
+        it.wait();
     }
 }
 
@@ -255,13 +335,13 @@ void CanvasMesh::prepare_layer(int layer)
 void CanvasMesh::add_path(int layer, const ClipperLib::Path &path)
 {
     if (path.size() >= 3) {
-        layers[layer].walls.emplace_back(path.back().X, path.back().Y);
+        layers.at(layer).walls.emplace_back(path.back().X, path.back().Y);
         for (size_t i = 0; i < path.size(); i++) {
-            layers[layer].walls.emplace_back(path[i].X, path[i].Y);
+            layers.at(layer).walls.emplace_back(path[i].X, path[i].Y);
         }
-        layers[layer].walls.emplace_back(path[0].X, path[0].Y);
-        layers[layer].walls.emplace_back(path[1].X, path[1].Y);
-        layers[layer].walls.emplace_back(NAN, NAN);
+        layers.at(layer).walls.emplace_back(path[0].X, path[0].Y);
+        layers.at(layer).walls.emplace_back(path[1].X, path[1].Y);
+        layers.at(layer).walls.emplace_back(NAN, NAN);
     }
 }
 
@@ -319,7 +399,7 @@ void CanvasMesh::polynode_to_tris(const ClipperLib::PolyNode *node, int layer)
         for (const auto &tri : tris) {
             for (int i = 0; i < 3; i++) {
                 auto p = tri->GetPoint(i);
-                layers[layer].tris.emplace_back(p->x, p->y);
+                layers.at(layer).tris.emplace_back(p->x, p->y);
             }
         }
     }
@@ -332,7 +412,7 @@ void CanvasMesh::polynode_to_tris(const ClipperLib::PolyNode *node, int layer)
                              "unspecified error");
     }
 
-    layers[layer].walls.reserve(pts_total);
+    layers.at(layer).walls.reserve(pts_total);
     add_path(layer, node->Contour);
     for (auto child : node->Childs) {
         add_path(layer, child->Contour);
