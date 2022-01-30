@@ -40,6 +40,8 @@ public:
     Color substrate;
 };
 
+using plane_update_status_cb_t = std::function<void(const Plane &plane, const std::string &)>;
+
 class Board : public ObjectProvider, public LayerProvider {
 private:
     // unsigned int update_nets();
@@ -78,9 +80,12 @@ public:
     const std::map<int, Layer> &get_layers() const override;
     void set_n_inner_layers(unsigned int n);
     unsigned int get_n_inner_layers() const;
-    void update_plane(Plane *plane, const class CanvasPatch *ca = nullptr,
-                      const class CanvasPads *ca_pads = nullptr); // when ca is given, patches will be read from it
-    void update_planes();
+    void update_plane(
+            Plane *plane, const class CanvasPatch *ca = nullptr, const class CanvasPads *ca_pads = nullptr,
+            plane_update_status_cb_t status_cb = nullptr,
+            const std::atomic_bool &cancel = std::atomic_bool(false)); // when ca is given, patches will be read from it
+    void update_planes(plane_update_status_cb_t status_cb = nullptr,
+                       const std::atomic_bool &cancel = std::atomic_bool(false));
     std::vector<KeepoutContour> get_keepout_contours() const;
     std::pair<Coordi, Coordi> get_bbox() const;
     void update_pdf_export_settings(PDFExportSettings &settings);
