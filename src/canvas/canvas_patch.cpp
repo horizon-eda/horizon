@@ -3,17 +3,44 @@
 #include "common/hole.hpp"
 #include "board/board_layers.hpp"
 #include "util/clipper_util.hpp"
+#include <atomic>
+#include <future>
+#include <thread>
 
 namespace horizon {
 CanvasPatch::CanvasPatch() : Canvas::Canvas()
 {
     img_mode = true;
 }
+
+static void simplify_worker(std::vector<ClipperLib::Paths *> patches, std::atomic_size_t &patch_counter)
+{
+    size_t i;
+    const auto n = patches.size();
+    while ((i = patch_counter.fetch_add(1, std::memory_order_relaxed)) < n) {
+        ClipperLib::SimplifyPolygons(*patches.at(i), ClipperLib::pftNonZero);
+    }
+}
+
 void CanvasPatch::request_push()
 {
-    for (auto &patch : patches) {
-        if (patch.first.layer != BoardLayers::L_OUTLINE)
-            ClipperLib::SimplifyPolygons(patch.second, ClipperLib::pftNonZero);
+    std::vector<ClipperLib::Paths *> patches_to_simplify;
+    patches_to_simplify.reserve(patches.size());
+
+    for (auto &[key, patch] : patches) {
+        if (key.layer != BoardLayers::L_OUTLINE)
+            patches_to_simplify.push_back(&patch);
+    }
+    {
+        std::atomic_size_t patch_counter = 0;
+        std::vector<std::future<void>> results;
+        for (size_t i = 0; i < std::thread::hardware_concurrency(); i++) {
+            results.push_back(std::async(std::launch::async, simplify_worker, std::ref(patches_to_simplify),
+                                         std::ref(patch_counter)));
+        }
+        for (auto &it : results) {
+            it.wait();
+        }
     }
 }
 
