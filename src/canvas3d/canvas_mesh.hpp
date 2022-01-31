@@ -29,7 +29,7 @@ public:
 
     const Layer3D &get_layer(int l) const;
     const std::map<int, Layer3D> &get_layers() const;
-    const std::map<CanvasPatch::PatchKey, ClipperLib::Paths> &get_patches() const;
+    std::pair<Coordi, Coordi> get_bbox() const;
 
 private:
     CanvasPatch ca;

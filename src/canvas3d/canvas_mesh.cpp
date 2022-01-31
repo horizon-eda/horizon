@@ -4,6 +4,7 @@
 #include "poly2tri/poly2tri.h"
 #include "logger/logger.hpp"
 #include "util/geom_util.hpp"
+#include "util/min_max_accumulator.hpp"
 
 namespace horizon {
 void CanvasMesh::update(const Board &b)
@@ -345,9 +346,18 @@ void CanvasMesh::polynode_to_tris(const ClipperLib::PolyNode *node, int layer)
     }
 }
 
-const std::map<CanvasPatch::PatchKey, ClipperLib::Paths> &CanvasMesh::get_patches() const
+std::pair<Coordi, Coordi> CanvasMesh::get_bbox() const
 {
-    return ca.get_patches();
+    MinMaxAccumulator<int64_t> acc_x, acc_y;
+    for (const auto &[key, paths] : ca.get_patches()) {
+        for (const auto &path : paths) {
+            for (const auto &p : path) {
+                acc_x.accumulate(p.X);
+                acc_y.accumulate(p.Y);
+            }
+        }
+    }
+    return {{acc_x.get_min(), acc_y.get_min()}, {acc_x.get_max(), acc_y.get_max()}};
 }
 
 } // namespace horizon
