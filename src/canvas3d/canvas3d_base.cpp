@@ -378,17 +378,9 @@ void Canvas3DBase::view_all()
 
 void Canvas3DBase::prepare()
 {
-    bbox.first = glm::vec3();
-    bbox.second = glm::vec3();
-    for (const auto &it : ca.get_patches()) {
-        for (const auto &path : it.second) {
-            for (const auto &p : path) {
-                glm::vec3 q(p.X / 1e6, p.Y / 1e6, 0);
-                bbox.first = glm::min(bbox.first, q);
-                bbox.second = glm::max(bbox.second, q);
-            }
-        }
-    }
+    const auto bb = ca.get_bbox();
+    bbox.first = glm::vec3(bb.first.x / 1e6, bb.first.y / 1e6, 0);
+    bbox.second = glm::vec3(bb.second.x / 1e6, bb.second.y / 1e6, 0);
 }
 
 int Canvas3DBase::a_get_scale_factor() const
