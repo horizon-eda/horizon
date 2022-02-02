@@ -22,6 +22,16 @@ Canvas3DBase::Canvas3DBase()
 {
 }
 
+const std::map<int, CanvasMesh::Layer3D> &Canvas3DBase::get_layers() const
+{
+    return ca.get_layers();
+}
+
+const CanvasMesh::Layer3D &Canvas3DBase::get_layer(int layer) const
+{
+    return get_layers().at(layer);
+}
+
 Color Canvas3DBase::get_layer_color(int layer) const
 {
     if (layer == 20000 || BoardLayers::is_copper(layer)) { // pth or cu
@@ -51,19 +61,19 @@ float Canvas3DBase::get_layer_offset(int layer) const
         return get_layer_offset(BoardLayers::TOP_COPPER);
 
     else
-        return ca.get_layer(layer).offset + ca.get_layer(layer).explode_mul * explode;
+        return get_layer(layer).offset + get_layer(layer).explode_mul * explode;
 }
 
 float Canvas3DBase::get_layer_thickness(int layer) const
 {
     if (layer == BoardLayers::L_OUTLINE && explode == 0) {
-        return ca.get_layer(BoardLayers::BOTTOM_COPPER).offset + ca.get_layer(BoardLayers::BOTTOM_COPPER).thickness;
+        return get_layer(BoardLayers::BOTTOM_COPPER).offset + get_layer(BoardLayers::BOTTOM_COPPER).thickness;
     }
     else if (layer == 20000) {
         return -(get_layer_offset(BoardLayers::TOP_COPPER) - get_layer_offset(BoardLayers::BOTTOM_COPPER));
     }
     else {
-        return ca.get_layer(layer).thickness;
+        return get_layer(layer).thickness;
     }
 }
 
@@ -337,7 +347,7 @@ std::optional<Canvas3DBase::ViewParams> Canvas3DBase::get_view_all_params() cons
     if (!brd)
         return {};
     ViewParams r;
-    const auto &vertices = ca.get_layer(BoardLayers::L_OUTLINE).walls;
+    const auto &vertices = get_layer(BoardLayers::L_OUTLINE).walls;
     MinMaxAccumulator<float> acc_x, acc_y;
 
     for (const auto &it : vertices) {
