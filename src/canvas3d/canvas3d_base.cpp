@@ -347,18 +347,13 @@ std::optional<Canvas3DBase::ViewParams> Canvas3DBase::get_view_all_params() cons
     if (!brd)
         return {};
     ViewParams r;
-    const auto &vertices = get_layer(BoardLayers::L_OUTLINE).walls;
-    MinMaxAccumulator<float> acc_x, acc_y;
 
-    for (const auto &it : vertices) {
-        acc_x.accumulate(it.x);
-        acc_y.accumulate(it.y);
-    }
+    auto bb = ca.get_bbox();
 
-    float xmin = acc_x.get_min();
-    float xmax = acc_x.get_max();
-    float ymin = acc_y.get_min();
-    float ymax = acc_y.get_max();
+    float xmin = bb.first.x;
+    float xmax = bb.second.x;
+    float ymin = bb.first.y;
+    float ymax = bb.second.y;
 
     float board_width = (xmax - xmin) / 1e6;
     float board_height = (ymax - ymin) / 1e6;
