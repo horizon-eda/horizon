@@ -188,6 +188,9 @@ protected:
     virtual std::optional<std::pair<std::string, std::string>> get_model_filename(const class BoardPackage &pkg,
                                                                                   IPool &pool);
 
+    virtual const std::map<int, CanvasMesh::Layer3D> &get_layers() const;
+    const CanvasMesh::Layer3D &get_layer(int layer) const;
+
 private:
     class FaceVertex {
     public:

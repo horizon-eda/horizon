@@ -85,8 +85,8 @@ void PointRenderer::render()
     glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model_mat));
     glUniform1ui(pick_base_loc, ca.point_pick_base);
 
-    glUniform1f(z_offset_loc, ca.ca.get_layer(BoardLayers::TOP_COPPER).offset + 5 * ca.explode
-                                      + ca.ca.get_layer(BoardLayers::TOP_COPPER).thickness);
+    glUniform1f(z_offset_loc, ca.get_layer(BoardLayers::TOP_COPPER).offset + 5 * ca.explode
+                                      + ca.get_layer(BoardLayers::TOP_COPPER).thickness);
 
     glPointSize(10);
     glDrawArrays(GL_POINTS, 0, ca.n_points);
