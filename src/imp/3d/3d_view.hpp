@@ -53,9 +53,23 @@ private:
     class IPool &pool;
     const Mode mode;
     Gtk::Box *main_box = nullptr;
-    Gtk::Revealer *model_loading_revealer = nullptr;
-    Gtk::Spinner *model_loading_spinner = nullptr;
+
+    Gtk::Button *update_button = nullptr;
+
+    Gtk::Revealer *loading_revealer = nullptr;
+    Gtk::Spinner *loading_spinner = nullptr;
+
     Gtk::ProgressBar *model_loading_progress = nullptr;
+    Gtk::Box *model_loading_box = nullptr;
+    Gtk::ProgressBar *layer_loading_progress = nullptr;
+    Gtk::Box *layer_loading_box = nullptr;
+
+    size_t model_loading_i = 0;
+    size_t model_loading_n = 0;
+    size_t layer_loading_i = 0;
+    size_t layer_loading_n = 0;
+
+    void update_loading();
 
     Gtk::ColorButton *background_top_color_button = nullptr;
     Gtk::ColorButton *background_bottom_color_button = nullptr;

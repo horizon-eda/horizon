@@ -76,7 +76,6 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     settings_button->signal_toggled().connect(
             [settings_button, revealer] { revealer->set_reveal_child(settings_button->get_active()); });
 
-    Gtk::Button *update_button;
     GET_WIDGET(update_button);
     update_button->signal_clicked().connect([this] { update(); });
 
@@ -253,15 +252,24 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
         }
     });
 
-    GET_WIDGET(model_loading_revealer);
-    GET_WIDGET(model_loading_spinner);
+    GET_WIDGET(loading_revealer);
+    GET_WIDGET(loading_spinner);
     GET_WIDGET(model_loading_progress);
+    GET_WIDGET(model_loading_box);
+    GET_WIDGET(layer_loading_progress);
+    GET_WIDGET(layer_loading_box);
     canvas->signal_models_loading().connect([this](unsigned int i, unsigned int n) {
-        bool loading = i < n;
-        model_loading_revealer->set_reveal_child(loading);
-        model_loading_spinner->property_active() = loading;
-        model_loading_progress->set_visible(n > 1);
-        model_loading_progress->set_fraction(i / (n * 1.0));
+        model_loading_i = i;
+        model_loading_n = n;
+        update_loading();
+    });
+    canvas->signal_layers_loading().connect([this](unsigned int i, unsigned int n) {
+        layer_loading_i = i;
+        layer_loading_n = n;
+        if (i >= n)
+            update_button->set_sensitive(true);
+
+        update_loading();
     });
 
     Gtk::ComboBoxText *msaa_combo;
@@ -349,6 +357,23 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     GET_WIDGET(main_box);
 }
 
+void View3DWindow::update_loading()
+{
+    const bool model_loading = model_loading_i < model_loading_n;
+    const bool layer_loading = layer_loading_i < layer_loading_n;
+    const bool loading = model_loading || layer_loading;
+    loading_revealer->set_reveal_child(loading);
+    loading_spinner->property_active() = loading;
+
+    if (loading)
+        model_loading_box->set_visible(model_loading);
+    model_loading_progress->set_visible(model_loading_n > 1);
+    model_loading_progress->set_fraction(model_loading_i / (model_loading_n * 1.0));
+
+    if (loading)
+        layer_loading_box->set_visible(layer_loading);
+    layer_loading_progress->set_fraction(layer_loading_i / (layer_loading_n * 1.0));
+}
 void View3DWindow::add_widget(Gtk::Widget *w)
 {
     main_box->pack_start(*w, false, false, 0);
@@ -361,6 +386,7 @@ void View3DWindow::update(bool clear)
     if (clear)
         canvas->clear_3d_models();
     canvas->load_models_async(pool);
+    update_button->set_sensitive(false);
 }
 
 void View3DWindow::set_highlights(const std::set<UUID> &pkgs)

@@ -53,6 +53,10 @@ public:
     {
         return s_signal_models_loading;
     }
+    type_signal_models_loading signal_layers_loading()
+    {
+        return s_signal_layers_loading;
+    }
 
     typedef sigc::signal<void, UUID> type_signal_package_select;
     type_signal_package_select signal_package_select()
@@ -134,6 +138,7 @@ private:
     Glib::Dispatcher models_loading_dispatcher;
 
     type_signal_models_loading s_signal_models_loading;
+    type_signal_models_loading s_signal_layers_loading;
     unsigned int n_models_loading = 0;
     std::atomic<unsigned int> i_model_loading;
 
@@ -143,5 +148,13 @@ private:
     type_signal_package_select s_signal_package_select;
     type_signal_point_select s_signal_point_select;
     int pick_x, pick_y;
+
+    std::map<int, CanvasMesh::Layer3D> layers_local;
+    std::set<int> layers_to_be_moved;
+    const std::map<int, CanvasMesh::Layer3D> &get_layers() const override;
+
+    Glib::Dispatcher prepare_dispatcher;
+    std::thread prepare_thread;
+    void prepare_thread_worker();
 };
 } // namespace horizon

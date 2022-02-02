@@ -20,6 +20,11 @@
 
 namespace horizon {
 
+static bool layer_counts(int layer)
+{
+    return layer < 10000 /* not cloned substrate */ || layer == 20000 /*pth*/;
+}
+
 Canvas3D::Canvas3D() : i_model_loading(0), stop_model_load_thread(false)
 {
     add_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::BUTTON_MOTION_MASK | Gdk::SCROLL_MASK
@@ -32,6 +37,27 @@ Canvas3D::Canvas3D() : i_model_loading(0), stop_model_load_thread(false)
         s_signal_models_loading.emit(i_model_loading, n_models_loading);
         if ((i_model_loading >= n_models_loading) && model_load_thread.joinable()) {
             model_load_thread.join();
+        }
+    });
+
+    prepare_dispatcher.connect([this] {
+        for (auto &[i, l] : ca.get_layers()) {
+            if (l.done && layers_to_be_moved.count(i)) {
+                layers_local.at(i).move_from(std::move(l));
+                layers_to_be_moved.erase(i);
+                request_push();
+                invalidate_pick();
+            }
+        }
+        {
+            const size_t layers_total = std::count_if(layers_local.begin(), layers_local.end(),
+                                                      [](auto &x) { return layer_counts(x.first); });
+            const size_t layers_left = std::count_if(layers_to_be_moved.begin(), layers_to_be_moved.end(),
+                                                     [](auto x) { return layer_counts(x); });
+            s_signal_layers_loading.emit(layers_total - layers_left, layers_total);
+        }
+        if (layers_to_be_moved.size() == 0 && prepare_thread.joinable()) {
+            prepare_thread.join();
         }
     });
 
@@ -432,13 +458,35 @@ void Canvas3D::on_realize()
     a_realize();
 }
 
+const std::map<int, CanvasMesh::Layer3D> &Canvas3D::get_layers() const
+{
+    return layers_local;
+}
+
 void Canvas3D::update(const Board &b)
 {
+    if (prepare_thread.joinable())
+        return;
     needs_view_all = brd == nullptr;
     brd = &b;
-    ca.update(*brd);
+    ca.update_only(*brd);
+    for (const auto &[i, l] : ca.get_layers()) {
+        layers_local[i].copy_sizes_from(l);
+    }
+    map_erase_if(layers_local, [this](auto &x) { return ca.get_layers().count(x.first) == 0; });
     prepare_packages();
     prepare();
+    layers_to_be_moved.clear();
+    for (auto &[i, l] : layers_local) {
+        layers_to_be_moved.insert(i);
+    }
+    s_signal_layers_loading.emit(0, 1); // something to get it to show up
+    prepare_thread = std::thread(&Canvas3D::prepare_thread_worker, this);
+}
+
+void Canvas3D::prepare_thread_worker()
+{
+    ca.prepare_only([this] { prepare_dispatcher.emit(); });
 }
 
 void Canvas3D::prepare()
@@ -539,6 +587,10 @@ Canvas3D::~Canvas3D()
     stop_model_load_thread = true;
     if (model_load_thread.joinable()) {
         model_load_thread.join();
+    }
+    ca.cancel_prepare();
+    if (prepare_thread.joinable()) {
+        prepare_thread.join();
     }
 }
 
