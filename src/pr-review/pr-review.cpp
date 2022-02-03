@@ -116,9 +116,12 @@ private:
     std::string images_dir;
     std::string images_prefix;
     std::string labels_filename;
+    std::string versions_filename;
     std::string pool_base_path;
     std::string output_filename;
     bool do_pool_update = false;
+
+    std::map<ObjectType, unsigned int> max_versions;
 };
 
 int Reviewer::count_manufactuer(const std::string &mfr)
@@ -260,6 +263,12 @@ int Reviewer::parse_options(int c_argc, char *c_argv[])
     entry_labels_filename.set_description("labels filename");
     group.add_entry_filename(entry_labels_filename, labels_filename);
 
+    Glib::OptionEntry entry_versions_filename;
+    entry_versions_filename.set_long_name("versions-file");
+    entry_versions_filename.set_short_name('v');
+    entry_versions_filename.set_description("versions filename");
+    group.add_entry_filename(entry_versions_filename, versions_filename);
+
 
     std::vector<std::string> filenames;
     Glib::OptionEntry entry_f;
@@ -362,16 +371,26 @@ int Reviewer::main(int c_argc, char *c_argv[])
             "(SELECT type, uuid, name, filename FROM all_items_view UNION ALL SELECT DISTINCT 'model_3d' AS type, "
             "'00000000-0000-0000-0000-000000000000' as uuid, '' as name, model_filename as filename FROM models) "
             "ON filename=git_filename");
-
+    {
+        if (versions_filename.size()) {
+            const auto j = load_json_from_file(versions_filename);
+            for (const auto &[k, v] : j.at("versions").items()) {
+                const auto type = object_type_lut.lookup(k);
+                const auto version = v.get<unsigned int>();
+                max_versions.emplace(type, version);
+            }
+        }
+    }
     {
         RulesCheckErrorLevel overall_result = RulesCheckErrorLevel::PASS;
         ofs << "# Items in this PR\n";
-        ofs << "| State | Type | Name | Checks | Filename |\n";
-        ofs << "| --- | --- | --- | --- | --- |\n";
+        ofs << "| State | Type | Name | Checks | Version | Filename |\n";
+        ofs << "| --- | --- | --- | --- | --- | --- |\n";
         SQLite::Query q(pool->db, "SELECT type, uuid, name, filename, status FROM git_files_view");
         while (q.step()) {
             const auto type = q.get<ObjectType>(0);
             const auto name = q.get<std::string>(2);
+            const auto filename = q.get<std::string>(3);
             ofs << "|" << delta_to_string(static_cast<git_delta_t>(q.get<int>(4))) << " | "
                 << object_descriptions.at(type).name << " | " << name;
             if (needs_trim(name))
@@ -391,8 +410,33 @@ int Reviewer::main(int c_argc, char *c_argv[])
                 break;
             default:;
             }
-            ofs << rules_check_error_level_to_string(r.level);
-            ofs << " | " << q.get<std::string>(3) << "\n";
+            ofs << rules_check_error_level_to_string(r.level) << " | ";
+            switch (type) {
+            case ObjectType::UNIT:
+            case ObjectType::SYMBOL:
+            case ObjectType::ENTITY:
+            case ObjectType::PADSTACK:
+            case ObjectType::PACKAGE:
+            case ObjectType::PART:
+            case ObjectType::DECAL:
+            case ObjectType::FRAME: {
+                const auto item_j = load_json_from_file(Glib::build_filename(pool_base_path, filename));
+                const auto version = item_j.value("version", 0U);
+                unsigned int max_version = 0;
+                if (max_versions.count(type))
+                    max_version = max_versions.at(type);
+
+                ofs << version << " ";
+                if (version > max_version)
+                    ofs << ":x: (>" << max_version << ")";
+                else
+                    ofs << ":heavy_check_mark:";
+            } break;
+
+            default:
+                ofs << "N/A";
+            }
+            ofs << " | " << filename << "\n";
         }
         ofs << "\n";
         if (labels_filename.size()) {
