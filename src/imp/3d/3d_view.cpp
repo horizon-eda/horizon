@@ -266,9 +266,6 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     canvas->signal_layers_loading().connect([this](unsigned int i, unsigned int n) {
         layer_loading_i = i;
         layer_loading_n = n;
-        if (i >= n)
-            update_button->set_sensitive(true);
-
         update_loading();
     });
 
@@ -381,12 +378,21 @@ void View3DWindow::add_widget(Gtk::Widget *w)
 
 void View3DWindow::update(bool clear)
 {
+    if (!needs_update)
+        return;
     s_signal_request_update.emit();
     canvas->update(board);
     if (clear)
         canvas->clear_3d_models();
     canvas->load_models_async(pool);
     update_button->set_sensitive(false);
+    needs_update = false;
+}
+
+void View3DWindow::set_needs_update()
+{
+    needs_update = true;
+    update_button->set_sensitive(true);
 }
 
 void View3DWindow::set_highlights(const std::set<UUID> &pkgs)
