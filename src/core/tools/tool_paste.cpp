@@ -623,6 +623,11 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
         }
         else if (args.type == ToolEventType::ACTION) {
             if (args.action == InToolActionID::LMB || (is_transient && args.action == InToolActionID::LMB_RELEASE)) {
+                if (doc.b) {
+                    auto &brd = *doc.b->get_board();
+                    brd.airwires_expand = nets;
+                    brd.expand_flags |= Board::EXPAND_AIRWIRES;
+                }
                 if (pic) {
                     return ToolResponse::commit();
                 }
