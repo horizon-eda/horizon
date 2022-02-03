@@ -136,6 +136,7 @@ void ImpPackage::construct_3d()
     view_3d_window = View3DWindow::create(fake_board, *pool.get(), View3DWindow::Mode::PACKAGE, canvas_3d);
     view_3d_window->signal_request_update().connect(sigc::mem_fun(*this, &ImpPackage::update_fake_board));
     view_3d_window->signal_present_imp().connect([this] { main_window->present(); });
+    core_package.signal_rebuilt().connect([this] { view_3d_window->set_needs_update(); });
 
     auto models_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
     {

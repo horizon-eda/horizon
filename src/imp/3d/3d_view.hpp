@@ -15,6 +15,7 @@ public:
                  Mode mode, class Canvas3D *ca_custom);
     static View3DWindow *create(const class Board &b, class IPool &p, Mode mode, class Canvas3D *ca_custom = nullptr);
     void update(bool clear = false);
+    void set_needs_update();
     void set_highlights(const std::set<UUID> &pkgs);
     void add_widget(Gtk::Widget *w);
 
@@ -51,6 +52,7 @@ private:
     class Canvas3D *canvas = nullptr;
     const class Board &board;
     class IPool &pool;
+    bool needs_update = true;
     const Mode mode;
     Gtk::Box *main_box = nullptr;
 

@@ -614,6 +614,7 @@ void ImpBoard::construct()
                 canvas->set_selection({});
         }
     });
+    core_board.signal_rebuilt().connect([this] { view_3d_window->set_needs_update(); });
 
     step_export_window = StepExportWindow::create(main_window, core_board, project_dir);
     step_export_window->signal_changed().connect([this] { core_board.set_needs_save(); });
