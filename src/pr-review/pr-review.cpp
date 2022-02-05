@@ -823,8 +823,17 @@ int Reviewer::main(int c_argc, char *c_argv[])
                 pins_sorted.emplace_back(&it.second);
             }
             if (pins_sorted.size()) {
-                ofs << "| Pin | Direction | Alternate names |\n";
-                ofs << "| --- | --- | --- |\n";
+                const auto has_alts =
+                        std::any_of(pins_sorted.begin(), pins_sorted.end(), [](auto x) { return x->names.size(); });
+
+                ofs << "| Pin | Direction ";
+                if (has_alts)
+                    ofs << "| Alternate names ";
+                ofs << "|\n";
+                ofs << "| --- | --- ";
+                if (has_alts)
+                    ofs << "| --- ";
+                ofs << "|\n";
                 std::sort(pins_sorted.begin(), pins_sorted.end(), [](const auto a, const auto b) {
                     return strcmp_natural(a->primary_name, b->primary_name) < 0;
                 });
@@ -837,8 +846,10 @@ int Reviewer::main(int c_argc, char *c_argv[])
                         alts.pop_back();
                         alts.pop_back();
                     }
-                    ofs << "|" << pin->primary_name << " | " << pin_direction_map.get().at(pin->direction) << " | "
-                        << alts << "\n";
+                    ofs << "|" << pin->primary_name << " | " << pin_direction_map.get().at(pin->direction); //| "
+                    if (has_alts)
+                        ofs << " | " << alts;
+                    ofs << " |\n";
                 }
             }
             else {
