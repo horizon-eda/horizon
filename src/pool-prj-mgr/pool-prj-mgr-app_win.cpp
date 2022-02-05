@@ -657,6 +657,8 @@ void PoolProjectManagerAppWindow::set_pool_updating(bool v, bool success)
                     500);
         }
     }
+    if (!get_realized())
+        return;
     auto win = get_window();
     if (v)
         win->set_cursor(Gdk::Cursor::create(win->get_display(), "progress"));
