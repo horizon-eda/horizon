@@ -954,6 +954,45 @@ int Reviewer::main(int c_argc, char *c_argv[])
             ofs << "\n```\n\n";
             ofs << "</details>\n\n";
 
+            ofs << "<details>\n<summary>Pads</summary>\n\n";
+            {
+                std::set<ParameterID> params;
+                std::vector<const Pad *> pads_sorted;
+                for (const auto &[pad_uu, pad] : pkg.pads) {
+                    pads_sorted.push_back(&pad);
+                }
+                std::sort(pads_sorted.begin(), pads_sorted.end(),
+                          [](const auto a, const auto b) { return strcmp_natural(a->name, b->name) < 0; });
+                for (auto pad : pads_sorted) {
+                    for (const auto &[param, v] : pad->parameter_set) {
+                        params.insert(param);
+                    }
+                }
+                ofs << "| Pad | Padstack";
+                for (const auto param : params) {
+                    ofs << " | " << parameter_id_to_name(param);
+                }
+                ofs << " |\n";
+                ofs << "| --- | ---";
+                for (const auto param : params) {
+                    (void)param;
+                    ofs << " | ---";
+                }
+                ofs << " |\n";
+                for (auto pad : pads_sorted) {
+                    ofs << "| " << pad->name << " | " << pad->padstack.name;
+                    for (const auto param : params) {
+                        (void)param;
+                        if (pad->parameter_set.count(param))
+                            ofs << " | " << dim_to_string(pad->parameter_set.at(param), false);
+                        else
+                            ofs << " | -";
+                    }
+                    ofs << " |\n";
+                }
+            }
+            ofs << "</details>\n\n";
+
 
             ofs << "<details>\n<summary>3D views (";
             {
