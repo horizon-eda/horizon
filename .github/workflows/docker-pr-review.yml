@@ -2,20 +2,29 @@ name: Build docker image for PR review
 
 on:
   push:
-    branches: [ pr-review ]
+    branches: [ pr-review, pr-review-dev ]
 
 jobs:
   docker-pr-review:
     runs-on: ubuntu-latest
     steps:
+    - name: set tag
+      run: |
+        if [ "${{github.ref}}" = "refs/heads/pr-review" ] ; then
+          echo "docker_tag=latest" >> $GITHUB_ENV
+        else
+          echo "docker_tag=dev" >> $GITHUB_ENV
+        fi
+    - name: print tag
+      run: echo ${{env.docker_tag}}
     - name: login to docker
       run: echo ${{ secrets.DOCKER_TOKEN }} | docker login -u carrotindustries --password-stdin
     - uses: actions/checkout@v2
       with:
         path: src
     - name: build docker image
-      run: docker build . -f src/Dockerfile-pr-review --network=host -t horizoneda/horizon-pr-review:latest
+      run: docker build . -f src/Dockerfile-pr-review --network=host -t horizoneda/horizon-pr-review:${{env.docker_tag}}
     - name: test docker image
-      run: docker run horizoneda/horizon-pr-review:latest
+      run: docker run horizoneda/horizon-pr-review:${{env.docker_tag}}
     - name: publish docker image
-      run: docker push horizoneda/horizon-pr-review:latest
+      run: docker push horizoneda/horizon-pr-review:${{env.docker_tag}}

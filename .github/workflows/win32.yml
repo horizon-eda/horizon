@@ -6,7 +6,7 @@ on:
       - '*'
       - '!appveyor-*'
       - '!freebsd-*'
-      - '!pr-review'
+      - '!pr-review*'
     tags: [ '*' ]
   pull_request:
     branches: [ master ]
