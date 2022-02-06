@@ -238,18 +238,26 @@ void PoolProjectManagerApplication::on_open(const Gio::Application::type_vec_fil
 
     // The application has been asked to open some files,
     // so let's open a new view for each one.
-    PoolProjectManagerAppWindow *appwindow = nullptr;
-    auto windows = get_windows();
-    if (windows.size() > 0)
-        appwindow = dynamic_cast<PoolProjectManagerAppWindow *>(windows[0]);
 
-    if (!appwindow)
-        appwindow = create_appwindow();
+    for (const auto &file : files) {
+        if (!present_existing_window(file->get_path())) { // not opened anywhere
+            auto appwindow = create_appwindow();
+            appwindow->open_file_view(file);
+            appwindow->present();
+        }
+    }
+}
 
-    for (const auto &file : files)
-        appwindow->open_file_view(file);
-
-    appwindow->present();
+bool PoolProjectManagerApplication::present_existing_window(const std::string &path)
+{
+    auto windows = dynamic_cast_vector<PoolProjectManagerAppWindow *>(get_windows());
+    for (auto &win : windows) {
+        if (win->get_filename() == path) {
+            win->present();
+            return true;
+        }
+    }
+    return false;
 }
 
 void PoolProjectManagerApplication::open_pool(const std::string &pool_json, ObjectType type, const UUID &uu,

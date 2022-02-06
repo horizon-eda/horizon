@@ -70,6 +70,8 @@ public:
     };
     bool close_windows(std::vector<CloseOrHomeWindow> windows);
 
+    bool present_existing_window(const std::string &path);
+
 protected:
     // Override default signal handlers:
     void on_activate() override;

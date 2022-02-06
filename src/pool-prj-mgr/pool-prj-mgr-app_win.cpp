@@ -1159,13 +1159,8 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
     auto path = file->get_path();
     app.user_config.add_recent_item(path);
 
-    auto windows = dynamic_cast_vector<PoolProjectManagerAppWindow *>(app.get_windows());
-    for (auto &win : windows) {
-        if (win->get_filename() == path) {
-            win->present();
-            return;
-        }
-    }
+    if (app.present_existing_window(path))
+        return;
 
     pool_update_n_files_last = 0;
 
