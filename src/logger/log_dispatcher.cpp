@@ -1,7 +1,7 @@
 #include "log_dispatcher.hpp"
 
 namespace horizon {
-LogDispatcher::LogDispatcher()
+LogDispatcher::LogDispatcher() : main_thread_id(std::this_thread::get_id())
 {
     dispatcher.connect([this] {
         if (!handler)
@@ -24,11 +24,17 @@ void LogDispatcher::set_handler(Logger::log_handler_t h)
 
 void LogDispatcher::log(const Logger::Item &item)
 {
-    {
-        std::lock_guard<std::mutex> guard(mutex);
-        items.push_front(item);
+    if (std::this_thread::get_id() == main_thread_id) {
+        if (handler)
+            handler(item);
     }
-    dispatcher.emit();
+    else {
+        {
+            std::lock_guard<std::mutex> guard(mutex);
+            items.push_front(item);
+        }
+        dispatcher.emit();
+    }
 }
 
 } // namespace horizon

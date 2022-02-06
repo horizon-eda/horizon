@@ -2,6 +2,7 @@
 #include <glibmm/dispatcher.h>
 #include "logger.hpp"
 #include <mutex>
+#include <thread>
 
 namespace horizon {
 
@@ -14,6 +15,7 @@ public:
 private:
     Glib::Dispatcher dispatcher;
     Logger::log_handler_t handler;
+    const std::thread::id main_thread_id;
 
     std::mutex mutex;
     std::list<Logger::Item> items;
