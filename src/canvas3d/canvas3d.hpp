@@ -9,6 +9,7 @@
 #include <gtkmm.h>
 #include <unordered_map>
 #include "canvas3d_base.hpp"
+#include "spacenav_prefs.hpp"
 #include <atomic>
 #include <thread>
 
@@ -26,6 +27,7 @@ public:
 
     bool smooth_zoom = false;
     bool touchpad_pan = false;
+    SpacenavPrefs spacenav_prefs;
 
     void request_push();
     void update(const class Board &brd);
@@ -68,6 +70,17 @@ public:
     type_signal_point_select signal_point_select()
     {
         return s_signal_point_select;
+    }
+
+    typedef sigc::signal<void, unsigned int> type_signal_spacenav_button_press;
+    type_signal_spacenav_button_press signal_spacenav_button_press()
+    {
+        return s_signal_spacenav_button_press;
+    }
+
+    bool get_spacenav_available() const
+    {
+        return have_spnav;
     }
 
     ~Canvas3D();
@@ -156,5 +169,11 @@ private:
     Glib::Dispatcher prepare_dispatcher;
     std::thread prepare_thread;
     void prepare_thread_worker();
+
+    bool have_spnav = false;
+    void handle_spnav();
+    sigc::connection spnav_connection;
+
+    type_signal_spacenav_button_press s_signal_spacenav_button_press;
 };
 } // namespace horizon

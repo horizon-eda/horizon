@@ -297,6 +297,12 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     });
 
     {
+        Gtk::Label *spacenav_label;
+        GET_WIDGET(spacenav_label);
+        spacenav_label->set_visible(canvas->get_spacenav_available());
+    }
+
+    {
         Gtk::Box *lollipop_box;
         GET_WIDGET(lollipop_box);
         auto axes_lollipop = Gtk::manage(new AxesLollipop());
@@ -318,6 +324,14 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
         }
         else {
             return handle_action_key(ev);
+        }
+    });
+
+    canvas->signal_spacenav_button_press().connect([this](unsigned int button) {
+        if (button < spnav_buttons.size()) {
+            auto act = spnav_buttons.at(button);
+            if (act != ActionID::NONE)
+                trigger_action(act);
         }
     });
 
@@ -575,6 +589,8 @@ void View3DWindow::apply_preferences(const Preferences &prefs)
     canvas->smooth_zoom = prefs.zoom.smooth_zoom_3d;
     canvas->touchpad_pan = prefs.zoom.touchpad_pan;
     canvas->set_appearance(prefs.canvas_layer.appearance);
+    canvas->spacenav_prefs = prefs.spacenav.prefs;
+    spnav_buttons = prefs.spacenav.buttons;
     const auto av = ActionCatalogItem::AVAILABLE_IN_3D;
     for (auto &it : action_connections) {
         const auto &act = action_catalog.at(it.first);

@@ -453,6 +453,35 @@ void AppearancePreferences::load_from_json(const json &j)
     dark_theme = j.value("dark_theme", false);
 }
 
+json SpacenavPreferences::serialize() const
+{
+    json j;
+    j["threshold"] = prefs.threshold;
+    j["pan_scale"] = prefs.pan_scale;
+    j["zoom_scale"] = prefs.zoom_scale;
+    j["rotation_scale"] = prefs.rotation_scale;
+    auto b = json::array();
+    for (const auto &it : buttons) {
+        b.push_back(action_lut.lookup_reverse(it));
+    }
+    j["buttons"] = b;
+    return j;
+}
+
+void SpacenavPreferences::load_from_json(const json &j)
+{
+    prefs.threshold = j.value("threshold", 10);
+    prefs.pan_scale = j.value("pan_scale", .05);
+    prefs.zoom_scale = j.value("zoom_scale", .001);
+    prefs.rotation_scale = j.value("rotation_scale", .01);
+    buttons.clear();
+    if (j.count("buttons")) {
+        for (const auto &v : j.at("buttons")) {
+            buttons.push_back(action_lut.lookup(v.get<std::string>()));
+        }
+    }
+}
+
 json Preferences::serialize() const
 {
     json j;
@@ -471,6 +500,7 @@ json Preferences::serialize() const
     j["mouse"] = mouse.serialize();
     j["undo_redo"] = undo_redo.serialize();
     j["appearance"] = appearance.serialize();
+    j["spacenav"] = spacenav.serialize();
     j["show_pull_request_tools"] = show_pull_request_tools;
     j["hud_debug"] = hud_debug;
     return j;
@@ -518,6 +548,8 @@ void Preferences::load_from_json(const json &j)
         undo_redo.load_from_json(j.at("undo_redo"));
     if (j.count("appearance"))
         appearance.load_from_json(j.at("appearance"));
+    if (j.count("spacenav"))
+        spacenav.load_from_json(j.at("spacenav"));
 }
 
 void Preferences::load()

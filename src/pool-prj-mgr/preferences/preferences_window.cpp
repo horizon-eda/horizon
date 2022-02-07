@@ -7,6 +7,7 @@
 #include "preferences_window_canvas.hpp"
 #include "preferences_window_stock_info.hpp"
 #include "preferences_window_misc.hpp"
+#include "preferences_window_spacenav.hpp"
 #include "canvas/color_palette.hpp"
 #include "board/board_layers.hpp"
 #include "pool/pool_manager.hpp"
@@ -68,6 +69,13 @@ PreferencesWindow::PreferencesWindow(Preferences &prefs) : Gtk::Window(), prefer
         ed->show();
         ed->unreference();
     }
+#ifdef HAVE_SPNAV
+    {
+        auto ed = Gtk::manage(new SpaceNavPreferencesEditor(preferences));
+        stack->add(*ed, "spacenav", "Spacenav");
+        ed->show();
+    }
+#endif
 
     box->show();
     add(*box);

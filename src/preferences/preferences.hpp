@@ -1,5 +1,6 @@
 #pragma once
 #include "canvas/appearance.hpp"
+#include "canvas3d/spacenav_prefs.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include <sigc++/sigc++.h>
 #include <string>
@@ -133,6 +134,16 @@ public:
     json serialize() const;
 };
 
+class SpacenavPreferences {
+public:
+    SpacenavPrefs prefs;
+
+    std::vector<ActionID> buttons;
+
+    void load_from_json(const json &j);
+    json serialize() const;
+};
+
 class Preferences {
 public:
     Preferences();
@@ -162,6 +173,7 @@ public:
     MousePreferences mouse;
     UndoRedoPreferences undo_redo;
     AppearancePreferences appearance;
+    SpacenavPreferences spacenav;
 
     bool show_pull_request_tools = false;
     bool hud_debug = false;

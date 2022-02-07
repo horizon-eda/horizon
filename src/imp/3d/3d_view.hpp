@@ -109,5 +109,7 @@ private:
     type_signal_request_update s_signal_present_imp;
 
     class MSDTuningWindow *msd_tuning_window = nullptr;
+
+    std::vector<ActionID> spnav_buttons;
 };
 } // namespace horizon

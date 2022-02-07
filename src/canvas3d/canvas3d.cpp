@@ -18,6 +18,10 @@
 #include <thread>
 #include "util/warp_cursor.hpp"
 
+#ifdef HAVE_SPNAV
+#include <spnav.h>
+#endif
+
 namespace horizon {
 
 static bool layer_counts(int layer)
@@ -87,6 +91,28 @@ Canvas3D::Canvas3D() : i_model_loading(0), stop_model_load_thread(false)
         }
     });
 
+#ifdef HAVE_SPNAV
+    if (spnav_open() != -1) {
+        have_spnav = true;
+        if (auto fd = spnav_fd(); fd != -1) {
+            auto chan = Glib::IOChannel::create_from_fd(fd);
+            spnav_connection = Glib::signal_io().connect(
+                    [this](Glib::IOCondition cond) {
+                        if (cond & Glib::IO_HUP) {
+                            Logger::log_warning("disconnected from spacenavd", Logger::Domain::CANVAS);
+                            return false;
+                        }
+                        handle_spnav();
+                        return true;
+                    },
+                    chan, Glib::IO_IN | Glib::IO_HUP);
+        }
+        else {
+            Logger::log_warning("couldn't get fd from spacenavd", Logger::Domain::CANVAS);
+        }
+    }
+#endif
+
     set_can_focus(true);
     animators.push_back(&azimuth_animator);
     animators.push_back(&elevation_animator);
@@ -94,6 +120,40 @@ Canvas3D::Canvas3D() : i_model_loading(0), stop_model_load_thread(false)
     animators.push_back(&cx_animator);
     animators.push_back(&cy_animator);
 }
+
+#ifdef HAVE_SPNAV
+void Canvas3D::handle_spnav()
+{
+    spnav_event e;
+    auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
+
+    while (spnav_poll_event(&e)) {
+        if (!top->is_active())
+            continue;
+        switch (e.type) {
+        case SPNAV_EVENT_MOTION: {
+            const auto thre = spacenav_prefs.threshold;
+            const auto values = {e.motion.x, e.motion.y, e.motion.z, e.motion.rx, e.motion.rz};
+            if (std::any_of(values.begin(), values.end(), [thre](auto x) { return std::abs(x) > thre; })) {
+                start_anim();
+                const auto center_shift =
+                        get_center_shift(glm::vec2(e.motion.x, e.motion.y) * spacenav_prefs.pan_scale);
+                cx_animator.target += center_shift.x;
+                cy_animator.target += center_shift.y;
+                zoom_animator.target += e.motion.z * spacenav_prefs.zoom_scale;
+                azimuth_animator.target += e.motion.rz * spacenav_prefs.rotation_scale;
+                elevation_animator.target += e.motion.rx * spacenav_prefs.rotation_scale;
+            }
+        } break;
+
+        case SPNAV_EVENT_BUTTON: {
+            if (e.button.press)
+                s_signal_spacenav_button_press.emit(e.button.bnum);
+        } break;
+        }
+    }
+}
+#endif
 
 void Canvas3D::set_msd_params(const MSD::Params &params)
 {
@@ -584,6 +644,13 @@ bool Canvas3D::on_render(const Glib::RefPtr<Gdk::GLContext> &context)
 
 Canvas3D::~Canvas3D()
 {
+#ifdef HAVE_SPNAV
+    if (have_spnav) {
+        spnav_connection.disconnect();
+        spnav_close();
+    }
+#endif
+
     stop_model_load_thread = true;
     if (model_load_thread.joinable()) {
         model_load_thread.join();

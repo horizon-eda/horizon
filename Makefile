@@ -714,6 +714,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/preferences/digikey_auth_window.cpp\
 	src/pool-prj-mgr/preferences/preferences_window_misc.cpp\
 	src/pool-prj-mgr/preferences/preferences_row.cpp\
+	src/pool-prj-mgr/preferences/preferences_window_spacenav.cpp\
 	src/pool-prj-mgr/preferences/action_editor.cpp\
 	src/imp/action.cpp\
 	src/imp/action_catalog.cpp\
@@ -853,6 +854,12 @@ GLIB_COMPILE_RESOURCES := $(shell $(PKG_CONFIG) --variable=glib_compile_resource
 
 ifeq ($(DEBUG),1)
 	CXXFLAGS += -DUUID_PTR_CHECK -DCONNECTION_CHECK
+endif
+
+EXTRA_LIBS =
+ifeq ($(WITH_SPNAV),1)
+	DEFINES += -DHAVE_SPNAV
+	EXTRA_LIBS += -lspnav
 endif
 
 
@@ -1017,7 +1024,7 @@ $(BUILDDIR)/gen/help_texts.hpp: scripts/make_help.py src/help_texts.txt
 
 $(BUILDDIR)/horizon-imp: $(OBJ_COMMON) $(OBJ_ROUTER) $(OBJ_OCE) $(OBJ_IMP)
 	$(ECHO) " $@"
-	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(LDFLAGS_OCE) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libcurl libpng) -lpodofo -lTKHLR -lTKGeomBase -o $@
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(LDFLAGS_OCE) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libcurl libpng) -lpodofo -lTKHLR -lTKGeomBase $(EXTRA_LIBS) -o $@
 
 $(BUILDDIR)/horizon-pool: $(OBJ_COMMON) $(OBJ_POOL_UTIL)
 	$(ECHO) " $@"
