@@ -1069,6 +1069,7 @@ const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
     }
 
 const LutEnumStr<ActionID> action_lut = {
+        ACTION_LUT_ITEM(NONE),
         ACTION_LUT_ITEM(TOOL),
         ACTION_LUT_ITEM(SELECTION_FILTER),
         ACTION_LUT_ITEM(DISTRACTION_FREE),
