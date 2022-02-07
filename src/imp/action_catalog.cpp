@@ -951,6 +951,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Orthographic projection", ActionGroup::VIEW_3D, ActionCatalogItem::AVAILABLE_IN_3D,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::VIEW_3D_TOGGLE_PERSP_ORTHO, ToolID::NONE},
+         {"Toggle projection", ActionGroup::VIEW_3D, ActionCatalogItem::AVAILABLE_IN_3D,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::VIEW_3D_TOP, ToolID::NONE},
          {"View top", ActionGroup::VIEW_3D, ActionCatalogItem::AVAILABLE_IN_3D, ActionCatalogItem::FLAGS_DEFAULT}},
 
@@ -1169,6 +1173,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(PREV_SHEET),
         ACTION_LUT_ITEM(VIEW_3D_PERSP),
         ACTION_LUT_ITEM(VIEW_3D_ORTHO),
+        ACTION_LUT_ITEM(VIEW_3D_TOGGLE_PERSP_ORTHO),
         ACTION_LUT_ITEM(VIEW_3D_FRONT),
         ACTION_LUT_ITEM(VIEW_3D_BACK),
         ACTION_LUT_ITEM(VIEW_3D_TOP),

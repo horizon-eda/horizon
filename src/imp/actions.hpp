@@ -103,6 +103,7 @@ enum class ActionID {
     PREV_SHEET,
     VIEW_3D_PERSP,
     VIEW_3D_ORTHO,
+    VIEW_3D_TOGGLE_PERSP_ORTHO,
     VIEW_3D_FRONT,
     VIEW_3D_BACK,
     VIEW_3D_TOP,

@@ -348,6 +348,7 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
 
     connect_action(ActionID::VIEW_3D_ORTHO, sigc::mem_fun(*this, &View3DWindow::handle_proj_action));
     connect_action(ActionID::VIEW_3D_PERSP, sigc::mem_fun(*this, &View3DWindow::handle_proj_action));
+    connect_action(ActionID::VIEW_3D_TOGGLE_PERSP_ORTHO, sigc::mem_fun(*this, &View3DWindow::handle_proj_action));
 
     connect_action(ActionID::MSD_TUNING_WINDOW, [this](const auto &conn) { msd_tuning_window->present(); });
 
@@ -653,10 +654,18 @@ void View3DWindow::handle_view_action(const ActionConnection &conn)
 
 void View3DWindow::handle_proj_action(const ActionConnection &conn)
 {
-    if (conn.id.action == ActionID::VIEW_3D_ORTHO)
+    if (conn.id.action == ActionID::VIEW_3D_ORTHO) {
         proj_ortho_rb->set_active(true);
-    else
+    }
+    else if (conn.id.action == ActionID::VIEW_3D_PERSP) {
         proj_persp_rb->set_active(true);
+    }
+    else {
+        if (proj_ortho_rb->get_active())
+            proj_persp_rb->set_active(true);
+        else
+            proj_ortho_rb->set_active(true);
+    }
 }
 
 
