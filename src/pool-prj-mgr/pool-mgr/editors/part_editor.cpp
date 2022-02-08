@@ -571,16 +571,16 @@ void PartEditor::update_orderable_MPNs_label()
 {
     std::string s;
     for (const auto &[uu, mpn] : part.orderable_MPNs) {
-        s += Glib::Markup::escape_text(mpn) + ", ";
+        s += mpn + ", ";
     }
     if (s.size()) {
         s.pop_back();
         s.pop_back();
     }
     else {
-        s = "<i>no orderable MPNs defined</i>";
+        s = "(None)";
     }
-    w_orderable_MPNs_label->set_markup(s);
+    w_orderable_MPNs_label->set_text(s);
 }
 
 void PartEditor::update_flags_label()
@@ -593,7 +593,7 @@ void PartEditor::update_flags_label()
     };
     for (const auto &[fl, name] : flag_names) {
         if (part.get_flag(fl)) {
-            s += Glib::Markup::escape_text(name);
+            s += name;
             s += ", ";
         }
     }
@@ -602,9 +602,9 @@ void PartEditor::update_flags_label()
         s.pop_back();
     }
     else {
-        s = "<i>none set</i>";
+        s = "(None)";
     }
-    w_flags_label->set_markup(s);
+    w_flags_label->set_text(s);
 }
 
 void PartEditor::update_prefix_entry()

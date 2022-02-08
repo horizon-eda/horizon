@@ -158,7 +158,7 @@ void PinNamesEditor::update_label()
         label->set_text(s);
     }
     else {
-        label->set_markup("<i>No alt. names set</i>");
+        label->set_text("(None)");
     }
 }
 
