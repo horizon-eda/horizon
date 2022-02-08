@@ -11,6 +11,13 @@ NetButton::NetButton(const Block &b) : Gtk::MenuButton(), block(b)
     ns->signal_activated().connect(sigc::mem_fun(*this, &NetButton::ns_activated));
     ns->show();
 
+    label = Gtk::manage(new Gtk::Label);
+    label->set_ellipsize(Pango::ELLIPSIZE_END);
+    label->show();
+    label->set_xalign(0);
+    label->set_max_width_chars(0);
+    add(*label);
+
     popover->add(*ns);
     set_popover(*popover);
     net_current = ns->get_selected_net();
@@ -51,10 +58,10 @@ UUID NetButton::get_net()
 void NetButton::update_label()
 {
     if (net_current) {
-        set_label(block.get_net_name(net_current));
+        label->set_text(block.get_net_name(net_current));
     }
     else {
-        set_label("<no net>");
+        label->set_text("(None)");
     }
 }
 

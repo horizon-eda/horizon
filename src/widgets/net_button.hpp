@@ -24,6 +24,7 @@ private:
     void ns_activated(const UUID &uu);
     UUID net_current;
     void on_toggled() override;
+    Gtk::Label *label = nullptr;
 
     type_signal_changed s_signal_changed;
 };
