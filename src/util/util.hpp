@@ -36,6 +36,18 @@ template <typename Map, typename F> static void map_erase_if(Map &m, F pred)
         ;
 }
 
+template <typename Set, typename F> static void set_erase_if(Set &m, F pred)
+{
+    for (auto it = m.begin(), last = m.end(); it != last;) {
+        if (pred(*it)) {
+            it = m.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+}
+
 bool endswith(const std::string &haystack, const std::string &needle);
 
 int strcmp_natural(const std::string &a, const std::string &b);

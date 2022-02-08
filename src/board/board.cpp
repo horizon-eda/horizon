@@ -33,7 +33,7 @@ BoardColors::BoardColors() : solder_mask({0, .5, 0}), silkscreen({1, 1, 1}), sub
 {
 }
 
-static const unsigned int app_version = 7;
+static const unsigned int app_version = 8;
 
 unsigned int Board::get_app_version()
 {

@@ -7,6 +7,7 @@ versions:
     5: add shorted pads rule
     6: add pads only flag to silkscreen exposed copper rule
     7: actually serialize from rules option for planes
+    8: add rule multi net matching
   schematic:
     1: add custom values on symbols
     2: add hierarchy

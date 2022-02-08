@@ -3,7 +3,9 @@
 #include "document/idocument.hpp"
 #include "rules/rule_match.hpp"
 #include "widgets/net_button.hpp"
+#include "widgets/multi_net_button.hpp"
 #include "widgets/net_class_button.hpp"
+
 
 namespace horizon {
 RuleMatchEditor::RuleMatchEditor(RuleMatch &ma, class IDocument &c)
@@ -11,7 +13,8 @@ RuleMatchEditor::RuleMatchEditor(RuleMatch &ma, class IDocument &c)
 {
     combo_mode = Gtk::manage(new Gtk::ComboBoxText());
     combo_mode->append(std::to_string(static_cast<int>(RuleMatch::Mode::ALL)), "All");
-    combo_mode->append(std::to_string(static_cast<int>(RuleMatch::Mode::NET)), "Net");
+    combo_mode->append(std::to_string(static_cast<int>(RuleMatch::Mode::NET)), "Single net");
+    combo_mode->append(std::to_string(static_cast<int>(RuleMatch::Mode::NETS)), "Multiple nets");
     combo_mode->append(std::to_string(static_cast<int>(RuleMatch::Mode::NET_CLASS)), "Net class");
     combo_mode->append(std::to_string(static_cast<int>(RuleMatch::Mode::NET_NAME_REGEX)), "Net name (regex)");
     combo_mode->append(std::to_string(static_cast<int>(RuleMatch::Mode::NET_CLASS_REGEX)), "Net class (regex)");
@@ -36,6 +39,14 @@ RuleMatchEditor::RuleMatchEditor(RuleMatch &ma, class IDocument &c)
         s_signal_updated.emit();
     });
     sel_stack->add(*net_button, std::to_string(static_cast<int>(RuleMatch::Mode::NET)));
+
+    multi_net_button = Gtk::manage(new MultiNetButton(block));
+    multi_net_button->set_nets(match.nets);
+    multi_net_button->signal_changed().connect([this] {
+        match.nets = multi_net_button->get_nets();
+        s_signal_updated.emit();
+    });
+    sel_stack->add(*multi_net_button, std::to_string(static_cast<int>(RuleMatch::Mode::NETS)));
 
     net_class_button = Gtk::manage(new NetClassButton(*core.get_top_block()));
     if (!match.net_class) {

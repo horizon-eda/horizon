@@ -15,6 +15,7 @@ private:
     Gtk::ComboBoxText *combo_mode = nullptr;
     Gtk::Stack *sel_stack = nullptr;
     class NetButton *net_button = nullptr;
+    class MultiNetButton *multi_net_button = nullptr;
     class NetClassButton *net_class_button = nullptr;
     Gtk::Entry *net_name_regex_entry = nullptr;
     Gtk::Entry *net_class_regex_entry = nullptr;

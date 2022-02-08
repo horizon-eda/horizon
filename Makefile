@@ -553,6 +553,8 @@ SRC_IMP = \
 	src/imp/grids_window.cpp\
 	src/util/action_label.cpp\
 	src/widgets/msd_tuning_window.cpp\
+	src/widgets/multi_net_button.cpp\
+	src/widgets/multi_net_selector.cpp\
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\
