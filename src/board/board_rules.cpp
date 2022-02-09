@@ -202,6 +202,7 @@ void BoardRules::cleanup(const Block *block)
         it.second.match.cleanup(block);
     }
     for (auto &it : rule_shorted_pads) {
+        it.second.match_component.cleanup(block);
         it.second.match.cleanup(block);
     }
     for (auto &it : rule_diffpair) {
