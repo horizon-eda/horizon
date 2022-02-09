@@ -1,6 +1,7 @@
 #pragma once
 #include "nlohmann/json_fwd.hpp"
 #include "util/uuid.hpp"
+#include <set>
 
 namespace horizon {
 using json = nlohmann::json;
@@ -16,10 +17,11 @@ public:
 
     bool matches(const class Component *component) const;
 
-    enum class Mode { COMPONENT, PART };
+    enum class Mode { COMPONENT, PART, COMPONENTS };
     Mode mode = Mode::COMPONENT;
 
     UUID component;
+    std::set<UUID> components;
     UUID part;
 
     bool match(const class Component *component) const;

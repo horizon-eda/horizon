@@ -3,6 +3,7 @@
 #include "document/idocument.hpp"
 #include "rules/rule_match_component.hpp"
 #include "widgets/component_button.hpp"
+#include "widgets/multi_component_button.hpp"
 #include "widgets/pool_browser_button.hpp"
 
 namespace horizon {
@@ -11,6 +12,7 @@ RuleMatchComponentEditor::RuleMatchComponentEditor(RuleMatchComponent &ma, class
 {
     combo_mode = Gtk::manage(new Gtk::ComboBoxText());
     combo_mode->append(std::to_string(static_cast<int>(RuleMatchComponent::Mode::COMPONENT)), "Component");
+    combo_mode->append(std::to_string(static_cast<int>(RuleMatchComponent::Mode::COMPONENTS)), "Components");
     combo_mode->append(std::to_string(static_cast<int>(RuleMatchComponent::Mode::PART)), "Part");
     combo_mode->set_active_id(std::to_string(static_cast<int>(match.mode)));
     combo_mode->signal_changed().connect([this] {
@@ -33,6 +35,14 @@ RuleMatchComponentEditor::RuleMatchComponentEditor(RuleMatchComponent &ma, class
         s_signal_updated.emit();
     });
     sel_stack->add(*component_button, std::to_string(static_cast<int>(RuleMatchComponent::Mode::COMPONENT)));
+
+    multi_component_button = Gtk::manage(new MultiComponentButton(*core.get_top_block()));
+    multi_component_button->set_items(match.components);
+    multi_component_button->signal_changed().connect([this] {
+        match.components = multi_component_button->get_items();
+        s_signal_updated.emit();
+    });
+    sel_stack->add(*multi_component_button, std::to_string(static_cast<int>(RuleMatchComponent::Mode::COMPONENTS)));
 
     part_button = Gtk::manage(new PoolBrowserButton(ObjectType::PART, core.get_pool()));
     part_button->property_selected_uuid().set_value(match.part);

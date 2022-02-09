@@ -15,6 +15,7 @@ private:
     Gtk::ComboBoxText *combo_mode = nullptr;
     Gtk::Stack *sel_stack = nullptr;
     class ComponentButton *component_button = nullptr;
+    class MultiComponentButton *multi_component_button = nullptr;
     class PoolBrowserButton *part_button = nullptr;
     RuleMatchComponent &match;
     class IDocument &core;
