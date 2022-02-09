@@ -19,7 +19,7 @@ RuleMatchComponentEditor::RuleMatchComponentEditor(RuleMatchComponent &ma, class
         s_signal_updated.emit();
     });
 
-    pack_start(*combo_mode, true, true, 0);
+    pack_start(*combo_mode, false, false, 0);
     combo_mode->show();
 
     sel_stack = Gtk::manage(new Gtk::Stack());
