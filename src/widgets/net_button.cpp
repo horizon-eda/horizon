@@ -15,13 +15,20 @@ NetButton::NetButton(const Block &b) : Gtk::MenuButton(), block(b)
     label->set_ellipsize(Pango::ELLIPSIZE_END);
     label->show();
     label->set_xalign(0);
-    label->set_max_width_chars(0);
     add(*label);
 
     popover->add(*ns);
     set_popover(*popover);
     net_current = ns->get_selected_net();
     update_label();
+}
+
+void NetButton::set_no_expand(bool e)
+{
+    if (e)
+        label->set_max_width_chars(0);
+    else
+        label->set_max_width_chars(-1);
 }
 
 void NetButton::on_toggled()

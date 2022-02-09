@@ -33,6 +33,7 @@ RuleMatchEditor::RuleMatchEditor(RuleMatch &ma, class IDocument &c)
     Block &block = *core.get_top_block();
 
     net_button = Gtk::manage(new NetButton(block));
+    net_button->set_no_expand(true);
     net_button->set_net(match.net);
     net_button->signal_changed().connect([this](const UUID &uu) {
         match.net = uu;

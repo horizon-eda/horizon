@@ -15,6 +15,7 @@ public:
         return s_signal_changed;
     }
     void update();
+    void set_no_expand(bool e);
 
 private:
     const Block &block;
