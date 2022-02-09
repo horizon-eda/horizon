@@ -47,7 +47,7 @@ json RuleMatch::serialize() const
     j["net_name_regex"] = net_name_regex;
     if (net_class_regex.size())
         j["net_class_regex"] = net_class_regex;
-    {
+    if (nets.size()) {
         auto o = json::array();
         for (const auto &it : nets) {
             o.push_back(static_cast<std::string>(it));
