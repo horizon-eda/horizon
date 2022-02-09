@@ -8,9 +8,15 @@
 
 namespace horizon {
 PoolBrowserButton::PoolBrowserButton(ObjectType ty, IPool &ipool)
-    : Glib::ObjectBase(typeid(PoolBrowserButton)), Gtk::Button("fixme"),
-      p_property_selected_uuid(*this, "selected-uuid"), pool(ipool), type(ty), dia(nullptr, type, pool)
+    : Glib::ObjectBase(typeid(PoolBrowserButton)), Gtk::Button(), p_property_selected_uuid(*this, "selected-uuid"),
+      pool(ipool), type(ty), dia(nullptr, type, pool)
 {
+    label = Gtk::manage(new Gtk::Label);
+    label->set_ellipsize(Pango::ELLIPSIZE_END);
+    label->show();
+    label->set_xalign(0);
+    add(*label);
+
     update_label();
     property_selected_uuid().signal_changed().connect([this] {
         selected_uuid = property_selected_uuid();
@@ -40,24 +46,24 @@ void PoolBrowserButton::on_clicked()
 void PoolBrowserButton::update_label()
 {
     if (!selected_uuid) {
-        set_label("none");
+        label->set_text("(None)");
         return;
     }
     switch (type) {
     case ObjectType::PADSTACK:
-        set_label(pool.get_padstack(selected_uuid)->name);
+        label->set_text(pool.get_padstack(selected_uuid)->name);
         break;
     case ObjectType::PACKAGE:
-        set_label(pool.get_package(selected_uuid)->name);
+        label->set_text(pool.get_package(selected_uuid)->name);
         break;
     case ObjectType::FRAME:
-        set_label(pool.get_frame(selected_uuid)->name);
+        label->set_text(pool.get_frame(selected_uuid)->name);
         break;
     case ObjectType::PART:
-        set_label(pool.get_part(selected_uuid)->get_MPN());
+        label->set_text(pool.get_part(selected_uuid)->get_MPN());
         break;
     default:
-        set_label("fixme");
+        label->set_text("fixme");
     }
 }
 } // namespace horizon

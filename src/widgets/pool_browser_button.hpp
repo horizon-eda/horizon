@@ -23,5 +23,7 @@ private:
     PoolBrowserDialog dia;
     void on_clicked() override;
     void update_label();
+
+    Gtk::Label *label = nullptr;
 };
 } // namespace horizon
