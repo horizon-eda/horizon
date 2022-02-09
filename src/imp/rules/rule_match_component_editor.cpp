@@ -26,6 +26,7 @@ RuleMatchComponentEditor::RuleMatchComponentEditor(RuleMatchComponent &ma, class
     sel_stack->set_homogeneous(true);
 
     component_button = Gtk::manage(new ComponentButton(core.get_top_block()));
+    component_button->set_no_expand(true);
     component_button->set_component(match.component);
     component_button->signal_changed().connect([this](const UUID &uu) {
         match.component = uu;

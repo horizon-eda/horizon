@@ -17,6 +17,8 @@ public:
     }
     void update();
 
+    void set_no_expand(bool e);
+
 private:
     Block *block;
     Gtk::Popover *popover;
@@ -25,6 +27,9 @@ private:
     void cs_activated(const UUID &uu);
     UUID component_current;
     void on_toggled() override;
+
+    Gtk::Label *label = nullptr;
+
 
     type_signal_changed s_signal_changed;
 };
