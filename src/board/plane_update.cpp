@@ -324,15 +324,16 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
             cl_plane.AddPaths(out, ClipperLib::ptSubject, true);
 
             // add thermal coutouts
-            for (const auto &patch : ca->get_patches()) {
-                if ((patch.first.layer == poly.layer && patch.first.net == plane->net->uuid
-                     && (patch.first.type == PatchType::PAD || patch.first.type == PatchType::PAD_TH))) {
+            for (const auto &[key, paths] : ca_pads->pads) {
+                const Net *pad_net = packages.at(key.package).package.pads.at(key.pad).net;
+                if (key.layer == poly.layer && (pad_net && (pad_net->uuid == plane->net->uuid))) {
                     if (cancel)
                         return;
+
                     ClipperLib::ClipperOffset ofs; // expand patch for cutout
                     ofs.ArcTolerance = 2e3;
                     ClipperLib::Paths pad;
-                    ClipperLib::SimplifyPolygons(patch.second, pad, ClipperLib::pftNonZero);
+                    ClipperLib::SimplifyPolygons(paths.second, pad, ClipperLib::pftNonZero);
 
                     ofs.AddPaths(pad, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
                     ClipperLib::Paths patch_exp;
