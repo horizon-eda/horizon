@@ -1,24 +1,19 @@
 #pragma once
-#include <gtkmm.h>
-#include "util/uuid.hpp"
-#include <set>
-#include "util/changeable.hpp"
+#include "multi_item_button.hpp"
 
 namespace horizon {
 
-class MultiNetButton : public Gtk::MenuButton, public Changeable {
+class MultiNetButton : public MultiItemButton {
 public:
     MultiNetButton(const class Block &b);
-    void set_nets(const std::set<UUID> &uus);
-    std::set<UUID> get_nets() const;
-    void update();
+
+protected:
+    virtual class MultiItemSelector &get_selector() override;
+    virtual const MultiItemSelector &get_selector() const override;
+    virtual std::string get_item_name(const UUID &uu) const override;
 
 private:
     const Block &block;
-    Gtk::Popover *popover;
     class MultiNetSelector *ns;
-    void update_label();
-    void on_toggled() override;
-    Gtk::Label *label = nullptr;
 };
 } // namespace horizon

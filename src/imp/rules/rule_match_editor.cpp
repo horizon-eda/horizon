@@ -42,9 +42,9 @@ RuleMatchEditor::RuleMatchEditor(RuleMatch &ma, class IDocument &c)
     sel_stack->add(*net_button, std::to_string(static_cast<int>(RuleMatch::Mode::NET)));
 
     multi_net_button = Gtk::manage(new MultiNetButton(block));
-    multi_net_button->set_nets(match.nets);
+    multi_net_button->set_items(match.nets);
     multi_net_button->signal_changed().connect([this] {
-        match.nets = multi_net_button->get_nets();
+        match.nets = multi_net_button->get_items();
         s_signal_updated.emit();
     });
     sel_stack->add(*multi_net_button, std::to_string(static_cast<int>(RuleMatch::Mode::NETS)));

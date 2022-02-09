@@ -555,6 +555,8 @@ SRC_IMP = \
 	src/widgets/msd_tuning_window.cpp\
 	src/widgets/multi_net_button.cpp\
 	src/widgets/multi_net_selector.cpp\
+	src/widgets/multi_item_selector.cpp\
+	src/widgets/multi_item_button.cpp\
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\
