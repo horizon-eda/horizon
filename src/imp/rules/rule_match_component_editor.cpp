@@ -11,8 +11,8 @@ RuleMatchComponentEditor::RuleMatchComponentEditor(RuleMatchComponent &ma, class
     : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 4), match(ma), core(c)
 {
     combo_mode = Gtk::manage(new Gtk::ComboBoxText());
-    combo_mode->append(std::to_string(static_cast<int>(RuleMatchComponent::Mode::COMPONENT)), "Component");
-    combo_mode->append(std::to_string(static_cast<int>(RuleMatchComponent::Mode::COMPONENTS)), "Components");
+    combo_mode->append(std::to_string(static_cast<int>(RuleMatchComponent::Mode::COMPONENT)), "Single component");
+    combo_mode->append(std::to_string(static_cast<int>(RuleMatchComponent::Mode::COMPONENTS)), "Multiple components");
     combo_mode->append(std::to_string(static_cast<int>(RuleMatchComponent::Mode::PART)), "Part");
     combo_mode->set_active_id(std::to_string(static_cast<int>(match.mode)));
     combo_mode->signal_changed().connect([this] {
