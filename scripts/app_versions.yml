@@ -10,6 +10,7 @@ versions:
     8: add rule multi net matching
     9: add rule multi component matching
     10: add thermal rules
+    11: add thermal spoke customisation
   schematic:
     1: add custom values on symbols
     2: add hierarchy

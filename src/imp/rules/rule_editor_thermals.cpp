@@ -12,6 +12,7 @@
 #include "pool/part.hpp"
 #include "pool/ipool.hpp"
 #include "widgets/layer_combo_box.hpp"
+#include "widgets/spin_button_angle.hpp"
 
 namespace horizon {
 
@@ -205,6 +206,31 @@ void RuleEditorThermals::populate()
             bind_widget(sp, rule2->thermal_settings.thermal_spoke_width);
             sp->signal_changed().connect([this] { s_signal_updated.emit(); });
             auto la = grid_attach_label_and_widget(grid, "Th. spoke width", sp, top);
+            widgets_thermal_only.insert(la);
+            widgets_thermal_only.insert(sp);
+        }
+        {
+            auto sp = Gtk::manage(new Gtk::SpinButton());
+            sp->set_increments(1, 1);
+            sp->set_range(1, 8);
+            sp->set_value(rule2->thermal_settings.n_spokes);
+            sp->signal_changed().connect([this, sp] {
+                rule2->thermal_settings.n_spokes = sp->get_value_as_int();
+                s_signal_updated.emit();
+            });
+            auto la = grid_attach_label_and_widget(grid, "Th. spokes", sp, top);
+            widgets_thermal_only.insert(la);
+            widgets_thermal_only.insert(sp);
+        }
+        {
+            auto sp = Gtk::manage(new SpinButtonAngle());
+            sp->set_increments(65536 / 8, 65536 / 8);
+            sp->set_value(rule2->thermal_settings.angle);
+            sp->signal_changed().connect([this, sp] {
+                rule2->thermal_settings.angle = sp->get_value_as_int();
+                s_signal_updated.emit();
+            });
+            auto la = grid_attach_label_and_widget(grid, "Th. spoke angle", sp, top);
             widgets_thermal_only.insert(la);
             widgets_thermal_only.insert(sp);
         }

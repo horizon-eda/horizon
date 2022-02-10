@@ -29,7 +29,8 @@ static const LutEnumStr<PlaneSettings::FillStyle> fill_style_lut = {
 
 ThermalSettings::ThermalSettings(const json &j)
     : thermal_gap_width(j.value("thermal_gap_width", 0.1_mm)),
-      thermal_spoke_width(j.value("thermal_spoke_width", 0.2_mm))
+      thermal_spoke_width(j.value("thermal_spoke_width", 0.2_mm)), n_spokes(j.value("n_spokes", 4)),
+      angle(j.value("angle", 0))
 {
     if (j.count("connect_style")) {
         connect_style = connect_style_lut.lookup(j.at("connect_style"));
@@ -41,6 +42,8 @@ void ThermalSettings::serialize(json &j) const
     j["connect_style"] = connect_style_lut.lookup_reverse(connect_style);
     j["thermal_gap_width"] = thermal_gap_width;
     j["thermal_spoke_width"] = thermal_spoke_width;
+    j["n_spokes"] = n_spokes;
+    j["angle"] = angle;
 }
 
 PlaneSettings::PlaneSettings(const json &j)

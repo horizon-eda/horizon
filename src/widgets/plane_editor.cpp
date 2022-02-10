@@ -3,6 +3,7 @@
 #include "util/gtk_util.hpp"
 #include "spin_button_dim.hpp"
 #include "widgets/help_button.hpp"
+#include "widgets/spin_button_angle.hpp"
 #include "help_texts.hpp"
 
 namespace horizon {
@@ -141,6 +142,34 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
         bind_widget(sp, settings->thermal_settings.thermal_spoke_width);
         sp->signal_changed().connect([this] { s_signal_changed.emit(); });
         auto la = grid_attach_label_and_widget(this, "Th. spoke width", sp, top);
+        widgets_from_rules_disable.insert(la);
+        widgets_from_rules_disable.insert(sp);
+        widgets_thermal_only.insert(la);
+        widgets_thermal_only.insert(sp);
+    }
+    {
+        auto sp = Gtk::manage(new Gtk::SpinButton());
+        sp->set_increments(1, 1);
+        sp->set_range(1, 8);
+        sp->set_value(settings->thermal_settings.n_spokes);
+        sp->signal_changed().connect([this, sp] {
+            settings->thermal_settings.n_spokes = sp->get_value_as_int();
+            s_signal_changed.emit();
+        });
+        auto la = grid_attach_label_and_widget(this, "Th. spokes", sp, top);
+        widgets_from_rules_disable.insert(la);
+        widgets_from_rules_disable.insert(sp);
+        widgets_thermal_only.insert(la);
+        widgets_thermal_only.insert(sp);
+    }
+    {
+        auto sp = Gtk::manage(new SpinButtonAngle());
+        sp->set_value(settings->thermal_settings.angle);
+        sp->signal_changed().connect([this, sp] {
+            settings->thermal_settings.angle = sp->get_value_as_int();
+            s_signal_changed.emit();
+        });
+        auto la = grid_attach_label_and_widget(this, "Th. spoke angle", sp, top);
         widgets_from_rules_disable.insert(la);
         widgets_from_rules_disable.insert(sp);
         widgets_thermal_only.insert(la);

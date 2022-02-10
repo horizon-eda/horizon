@@ -19,6 +19,8 @@ public:
 
     uint64_t thermal_gap_width = 0.2_mm;
     uint64_t thermal_spoke_width = 0.2_mm;
+    unsigned int n_spokes = 4;
+    int angle = 0;
 
     void serialize(json &j) const;
 };

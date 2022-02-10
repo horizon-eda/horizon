@@ -638,13 +638,13 @@ ClipperLib::Paths Board::get_thermals(Plane *plane, const CanvasPads *cp) const
         ClipperLib::Paths antipad;
         {
 
-            for (int angle = 0; angle < 360; angle += 90) {
+            for (unsigned int i = 0; i < th.n_spokes; i++) {
                 ClipperLib::Clipper cl;
                 cl.AddPaths(pad_exp, ClipperLib::ptSubject, true);
 
                 ClipperLib::Path r1 = spoke;
                 Placement tr;
-                tr.set_angle_deg(angle);
+                tr.set_angle((65536 * i) / th.n_spokes + th.angle);
                 transform_path(r1, tr);
                 transform_path(r1, it.second.first);
                 cl.AddPath(r1, ClipperLib::ptClip, true);
