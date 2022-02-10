@@ -135,6 +135,7 @@ SRC_COMMON = \
 	src/util/installation_uuid.cpp\
 	src/rules/rule_match_component.cpp\
 	src/board/rule_shorted_pads.cpp\
+	src/board/rule_thermals.cpp\
 	src/rules/rule_match_component.cpp\
 	src/common/pin_name_orientation.cpp\
 	src/util/pin_direction_accumulator.cpp\
@@ -467,6 +468,7 @@ SRC_IMP = \
 	src/imp/rules/rule_editor_layer_pair.cpp\
 	src/imp/rules/rule_editor_clearance_same_net.cpp\
 	src/imp/rules/rule_editor_shorted_pads.cpp\
+	src/imp/rules/rule_editor_thermals.cpp\
 	src/imp/rules/import.cpp\
 	src/imp/rules/export.cpp\
 	src/widgets/location_entry.cpp\
@@ -559,6 +561,8 @@ SRC_IMP = \
 	src/widgets/multi_item_button.cpp\
 	src/widgets/multi_component_button.cpp\
 	src/widgets/multi_component_selector.cpp\
+	src/widgets/multi_pad_button.cpp\
+	src/widgets/multi_pad_selector.cpp\
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\

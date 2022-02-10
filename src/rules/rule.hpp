@@ -27,6 +27,7 @@ enum class RuleID {
     CLEARANCE_SAME_NET,
     SYMBOL_CHECKS,
     CLEARANCE_PACKAGE,
+    THERMALS,
 };
 
 extern const LutEnumStr<RuleID> rule_id_lut;

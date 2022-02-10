@@ -14,6 +14,7 @@
 #include "rule_layer_pair.hpp"
 #include "rule_clearance_same_net.hpp"
 #include "rule_shorted_pads.hpp"
+#include "rule_thermals.hpp"
 #include "rules/rules.hpp"
 #include "util/uuid.hpp"
 #include <atomic>
@@ -55,6 +56,8 @@ public:
 
     const PlaneSettings &get_plane_settings(const class Net *net, int layer) const;
 
+    const ThermalSettings &get_thermal_settings(const Plane &plane, const BoardPackage &pkg, const Pad &pad) const;
+
     int get_layer_pair(const Net *net, int layer) const;
 
     json export_rules(const class RulesExportInfo &export_info, const Board &brd) const;
@@ -77,6 +80,7 @@ private:
     std::map<UUID, RuleLayerPair> rule_layer_pair;
     std::map<UUID, RuleClearanceSameNet> rule_clearance_same_net;
     std::map<UUID, RuleShortedPads> rule_shorted_pads;
+    std::map<UUID, RuleThermals> rule_thermals;
 
     std::vector<const RuleClearanceCopper *> rule_sorted_clearance_copper;
     void update_sorted();

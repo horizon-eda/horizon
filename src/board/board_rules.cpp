@@ -18,7 +18,7 @@ BoardRules::BoardRules(const BoardRules &other)
       rule_clearance_copper_other(other.rule_clearance_copper_other), rule_plane(other.rule_plane),
       rule_diffpair(other.rule_diffpair), rule_clearance_copper_keepout(other.rule_clearance_copper_keepout),
       rule_layer_pair(other.rule_layer_pair), rule_clearance_same_net(other.rule_clearance_same_net),
-      rule_shorted_pads(other.rule_shorted_pads),
+      rule_shorted_pads(other.rule_shorted_pads), rule_thermals(other.rule_thermals),
       rule_clearance_silkscreen_exposed_copper(other.rule_clearance_silkscreen_exposed_copper),
       rule_parameters(other.rule_parameters), rule_preflight_checks(other.rule_preflight_checks)
 {
@@ -38,6 +38,7 @@ void BoardRules::operator=(const BoardRules &other)
     rule_layer_pair = other.rule_layer_pair;
     rule_clearance_same_net = other.rule_clearance_same_net;
     rule_shorted_pads = other.rule_shorted_pads;
+    rule_thermals = other.rule_thermals;
     rule_clearance_silkscreen_exposed_copper = other.rule_clearance_silkscreen_exposed_copper;
     rule_parameters = other.rule_parameters;
     rule_preflight_checks = other.rule_preflight_checks;
@@ -160,6 +161,13 @@ void BoardRules::import_rules(const json &j, const RuleImportMap &import_map)
         }
         fix_order(RuleID::SHORTED_PADS);
     }
+    if (j.count("thermals")) {
+        for (const auto &[key, value] : j.at("thermals").items()) {
+            UUID u = key;
+            rule_thermals.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, value));
+        }
+        fix_order(RuleID::THERMALS);
+    }
     if (j.count("clearance_silkscreen_exposed_copper")) {
         const json &o = j["clearance_silkscreen_exposed_copper"];
         rule_clearance_silkscreen_exposed_copper = RuleClearanceSilkscreenExposedCopper(o, import_map);
@@ -204,6 +212,10 @@ void BoardRules::cleanup(const Block *block)
     for (auto &it : rule_shorted_pads) {
         it.second.match_component.cleanup(block);
         it.second.match.cleanup(block);
+    }
+    for (auto &it : rule_thermals) {
+        it.second.match.cleanup(block);
+        it.second.match_component.cleanup(block);
     }
     for (auto &it : rule_diffpair) {
         if (!block->net_classes.count(it.second.net_class))
@@ -275,6 +287,7 @@ json BoardRules::serialize_or_export(Rule::SerializeMode mode) const
     SERIALIZE(plane);
     SERIALIZE(diffpair);
     SERIALIZE(shorted_pads);
+    SERIALIZE(thermals);
     SERIALIZE(clearance_copper_other);
     SERIALIZE(clearance_copper_keepout);
     SERIALIZE(clearance_same_net);
@@ -306,6 +319,7 @@ std::vector<RuleID> BoardRules::get_rule_ids() const
 
             RuleID::VIA,
             RuleID::PLANE,
+            RuleID::THERMALS,
             RuleID::DIFFPAIR,
             RuleID::PARAMETERS,
 
@@ -354,6 +368,8 @@ const Rule &BoardRules::get_rule(RuleID id, const UUID &uu) const
         return rule_clearance_same_net.at(uu);
     case RuleID::SHORTED_PADS:
         return rule_shorted_pads.at(uu);
+    case RuleID::THERMALS:
+        return rule_thermals.at(uu);
     default:
         throw std::runtime_error("rule does not exist");
     }
@@ -427,6 +443,12 @@ std::map<UUID, const Rule *> BoardRules::get_rules(RuleID id) const
         }
         break;
 
+    case RuleID::THERMALS:
+        for (auto &it : rule_thermals) {
+            r.emplace(it.first, &it.second);
+        }
+        break;
+
     default:;
     }
     return r;
@@ -477,6 +499,10 @@ void BoardRules::remove_rule(RuleID id, const UUID &uu)
 
     case RuleID::SHORTED_PADS:
         rule_shorted_pads.erase(uu);
+        break;
+
+    case RuleID::THERMALS:
+        rule_thermals.erase(uu);
         break;
 
     default:;
@@ -532,6 +558,10 @@ Rule &BoardRules::add_rule(RuleID id)
 
     case RuleID::SHORTED_PADS:
         r = &rule_shorted_pads.emplace(uu, uu).first->second;
+        break;
+
+    case RuleID::THERMALS:
+        r = &rule_thermals.emplace(uu, uu).first->second;
         break;
 
     default:
@@ -698,6 +728,23 @@ const PlaneSettings &BoardRules::get_plane_settings(const Net *net, int layer) c
         }
     }
     return plane_settings_default;
+}
+
+const ThermalSettings &BoardRules::get_thermal_settings(const Plane &plane, const BoardPackage &pkg,
+                                                        const Pad &pad) const
+{
+    const RuleThermals *rule = nullptr;
+    for (const auto it : get_rules_sorted<RuleThermals>()) {
+        if (it->matches(pkg, pad, plane.polygon->layer)) {
+            rule = it;
+            break;
+        }
+    }
+
+    if (rule && rule->thermal_settings.connect_style != ThermalSettings::ConnectStyle::FROM_PLANE)
+        return rule->thermal_settings;
+    else
+        return plane.settings.thermal_settings;
 }
 
 int BoardRules::get_layer_pair(const Net *net, int layer) const

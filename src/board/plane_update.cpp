@@ -315,7 +315,7 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
     ClipperLib::PolyTree tree;
 
 
-    if (plane->settings.thermal_settings.connect_style == ThermalSettings::ConnectStyle::THERMAL) {
+    {
         ClipperLib::Paths plane_with_thermal_cutouts;
         {
             if (status_cb)
@@ -325,24 +325,29 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
 
             // add thermal coutouts
             for (const auto &[key, paths] : ca_pads->pads) {
-                const Net *pad_net = packages.at(key.package).package.pads.at(key.pad).net;
+                const auto &pkg = packages.at(key.package);
+                const auto &pkg_pad = pkg.package.pads.at(key.pad);
+                const Net *pad_net = pkg_pad.net;
                 if (key.layer == poly.layer && (pad_net && (pad_net->uuid == plane->net->uuid))) {
-                    if (cancel)
-                        return;
+                    if (const auto &th = rules.get_thermal_settings(*plane, pkg, pkg_pad);
+                        th.connect_style == ThermalSettings::ConnectStyle::THERMAL) {
+                        if (cancel)
+                            return;
 
-                    ClipperLib::ClipperOffset ofs; // expand patch for cutout
-                    ofs.ArcTolerance = 2e3;
-                    ClipperLib::Paths pad;
-                    ClipperLib::SimplifyPolygons(paths.second, pad, ClipperLib::pftNonZero);
+                        ClipperLib::ClipperOffset ofs; // expand patch for cutout
+                        ofs.ArcTolerance = 2e3;
+                        ClipperLib::Paths pad;
+                        ClipperLib::SimplifyPolygons(paths.second, pad, ClipperLib::pftNonZero);
 
-                    ofs.AddPaths(pad, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
-                    ClipperLib::Paths patch_exp;
+                        ofs.AddPaths(pad, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
+                        ClipperLib::Paths patch_exp;
 
-                    double expand = plane->settings.thermal_settings.thermal_gap_width + plane->settings.min_width / 2;
-                    ofs.Execute(patch_exp, expand);
+                        double expand = th.thermal_gap_width + plane->settings.min_width / 2;
+                        ofs.Execute(patch_exp, expand);
 
 
-                    cl_plane.AddPaths(patch_exp, ClipperLib::ptClip, true);
+                        cl_plane.AddPaths(patch_exp, ClipperLib::ptClip, true);
+                    }
                 }
             }
 
@@ -397,19 +402,7 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
             }
         }
     }
-    else {
-        if (status_cb)
-            status_cb(*plane, "Expanding for minimum width…");
-        ClipperLib::ClipperOffset ofs;
-        ofs.ArcTolerance = 2e3;
-        ofs.AddPaths(out, jt, ClipperLib::etClosedPolygon);
-        if (plane->settings.fill_style == PlaneSettings::FillStyle::SOLID) {
-            ofs.Execute(tree, plane->settings.min_width / 2);
-        }
-        else {
-            ofs.Execute(final, plane->settings.min_width / 2);
-        }
-    }
+
 
     if (plane->settings.fill_style == PlaneSettings::FillStyle::HATCH) {
         if (status_cb)
@@ -600,8 +593,14 @@ ClipperLib::Paths Board::get_thermals(Plane *plane, const CanvasPads *cp) const
         if (it.first.layer != plane->polygon->layer)
             continue;
 
-        auto net_from_pad = packages.at(it.first.package).package.pads.at(it.first.pad).net;
+        const auto &pkg = packages.at(it.first.package);
+        const auto &pad = pkg.package.pads.at(it.first.pad);
+        auto net_from_pad = pad.net;
         if (net_from_pad != plane->net)
+            continue;
+
+        const auto &th = rules.get_thermal_settings(*plane, pkg, pad);
+        if (th.connect_style == ThermalSettings::ConnectStyle::SOLID)
             continue;
 
         ClipperLib::Paths uni; // union of all off the pads polygons
@@ -612,7 +611,7 @@ ClipperLib::Paths Board::get_thermals(Plane *plane, const CanvasPads *cp) const
         ofs.AddPaths(uni, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
         ClipperLib::Paths pad_exp; // pad expanded by gap width
 
-        double expand = plane->settings.thermal_settings.thermal_gap_width + .01_mm + plane->settings.min_width / 2;
+        double expand = th.thermal_gap_width + .01_mm + plane->settings.min_width / 2;
         ofs.Execute(pad_exp, expand);
 
         auto p0 = pad_exp.front().front();
@@ -629,8 +628,7 @@ ClipperLib::Paths Board::get_thermals(Plane *plane, const CanvasPads *cp) const
         auto h = bb.second.y - bb.first.y;
         auto l = std::max(w, h);
 
-        int64_t spoke_width = std::max(.01_mm, (int64_t)plane->settings.thermal_settings.thermal_spoke_width
-                                                       - (int64_t)plane->settings.min_width);
+        int64_t spoke_width = std::max(.01_mm, (int64_t)th.thermal_spoke_width - (int64_t)plane->settings.min_width);
         ClipperLib::Path spoke;
         spoke.emplace_back(-spoke_width / 2, -spoke_width / 2);
         spoke.emplace_back(-spoke_width / 2, spoke_width / 2);

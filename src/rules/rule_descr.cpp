@@ -30,6 +30,8 @@ const std::map<RuleID, RD> rule_descriptions = {
 
         {RuleID::SHORTED_PADS, {"Shorted Pads", RD::IS_MULTI | RD::CAN_APPLY}},
 
+        {RuleID::THERMALS, {"Thermals", RD::IS_MULTI}},
+
         {RuleID::PREFLIGHT_CHECKS, {"Preflight checks", RD::CAN_CHECK}},
 
         {RuleID::CLEARANCE_COPPER_KEEPOUT,
