@@ -53,7 +53,7 @@ std::set<UUID> MultiItemButton::get_items() const
     return get_selector().get_selected_items();
 }
 
-void MultiItemButton::update_label()
+std::string MultiItemButton::get_label_text() const
 {
     if (get_items().size()) {
         std::string s;
@@ -62,10 +62,17 @@ void MultiItemButton::update_label()
                 s += ", ";
             s += get_item_name(uu);
         }
-        label->set_text(s);
+        return s;
     }
     else {
-        label->set_text("(None)");
+        return "(None)";
     }
+}
+
+void MultiItemButton::update_label()
+{
+    const auto l = get_label_text();
+    label->set_text(l);
+    set_tooltip_text(l);
 }
 } // namespace horizon

@@ -17,11 +17,13 @@ protected:
     virtual class MultiItemSelector &get_selector() = 0;
     virtual const MultiItemSelector &get_selector() const = 0;
     virtual std::string get_item_name(const UUID &uu) const = 0;
+    virtual std::string get_label_text() const;
+    void update_label();
+
     void construct();
 
 private:
     Gtk::Popover *popover;
-    void update_label();
     void on_toggled() override;
     Gtk::Label *label = nullptr;
 };
