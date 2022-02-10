@@ -315,7 +315,7 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
     ClipperLib::PolyTree tree;
 
 
-    if (plane->settings.connect_style == PlaneSettings::ConnectStyle::THERMAL) {
+    if (plane->settings.thermal_settings.connect_style == ThermalSettings::ConnectStyle::THERMAL) {
         ClipperLib::Paths plane_with_thermal_cutouts;
         {
             if (status_cb)
@@ -338,7 +338,7 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
                     ofs.AddPaths(pad, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
                     ClipperLib::Paths patch_exp;
 
-                    double expand = plane->settings.thermal_gap_width + plane->settings.min_width / 2;
+                    double expand = plane->settings.thermal_settings.thermal_gap_width + plane->settings.min_width / 2;
                     ofs.Execute(patch_exp, expand);
 
 
@@ -612,7 +612,7 @@ ClipperLib::Paths Board::get_thermals(Plane *plane, const CanvasPads *cp) const
         ofs.AddPaths(uni, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
         ClipperLib::Paths pad_exp; // pad expanded by gap width
 
-        double expand = plane->settings.thermal_gap_width + .01_mm + plane->settings.min_width / 2;
+        double expand = plane->settings.thermal_settings.thermal_gap_width + .01_mm + plane->settings.min_width / 2;
         ofs.Execute(pad_exp, expand);
 
         auto p0 = pad_exp.front().front();
@@ -629,8 +629,8 @@ ClipperLib::Paths Board::get_thermals(Plane *plane, const CanvasPads *cp) const
         auto h = bb.second.y - bb.first.y;
         auto l = std::max(w, h);
 
-        int64_t spoke_width =
-                std::max(.01_mm, (int64_t)plane->settings.thermal_spoke_width - (int64_t)plane->settings.min_width);
+        int64_t spoke_width = std::max(.01_mm, (int64_t)plane->settings.thermal_settings.thermal_spoke_width
+                                                       - (int64_t)plane->settings.min_width);
         ClipperLib::Path spoke;
         spoke.emplace_back(-spoke_width / 2, -spoke_width / 2);
         spoke.emplace_back(-spoke_width / 2, spoke_width / 2);

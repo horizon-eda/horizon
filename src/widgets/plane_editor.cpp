@@ -109,13 +109,13 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
         b2->join_group(*b1);
         box->pack_start(*b2, true, true, 0);
 
-        std::map<PlaneSettings::ConnectStyle, Gtk::RadioButton *> style_widgets = {
-                {PlaneSettings::ConnectStyle::SOLID, b1},
-                {PlaneSettings::ConnectStyle::THERMAL, b2},
+        std::map<ThermalSettings::ConnectStyle, Gtk::RadioButton *> style_widgets = {
+                {ThermalSettings::ConnectStyle::SOLID, b1},
+                {ThermalSettings::ConnectStyle::THERMAL, b2},
         };
 
-        bind_widget<PlaneSettings::ConnectStyle>(style_widgets, settings->connect_style,
-                                                 [this](auto v) { s_signal_changed.emit(); });
+        bind_widget<ThermalSettings::ConnectStyle>(style_widgets, settings->thermal_settings.connect_style,
+                                                   [this](auto v) { s_signal_changed.emit(); });
 
         b1->signal_toggled().connect(sigc::mem_fun(*this, &PlaneEditor::update_thermal));
         b2->signal_toggled().connect(sigc::mem_fun(*this, &PlaneEditor::update_thermal));
@@ -127,7 +127,7 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
     {
         auto sp = Gtk::manage(new SpinButtonDim());
         sp->set_range(0, 10_mm);
-        bind_widget(sp, settings->thermal_gap_width);
+        bind_widget(sp, settings->thermal_settings.thermal_gap_width);
         sp->signal_changed().connect([this] { s_signal_changed.emit(); });
         auto la = grid_attach_label_and_widget(this, "Th. gap", sp, top);
         widgets_from_rules_disable.insert(la);
@@ -138,7 +138,7 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
     {
         auto sp = Gtk::manage(new SpinButtonDim());
         sp->set_range(0, 10_mm);
-        bind_widget(sp, settings->thermal_spoke_width);
+        bind_widget(sp, settings->thermal_settings.thermal_spoke_width);
         sp->signal_changed().connect([this] { s_signal_changed.emit(); });
         auto la = grid_attach_label_and_widget(this, "Th. spoke width", sp, top);
         widgets_from_rules_disable.insert(la);
@@ -222,7 +222,7 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
 void PlaneEditor::update_thermal()
 {
     for (auto &it : widgets_thermal_only) {
-        it->set_visible(settings->connect_style == PlaneSettings::ConnectStyle::THERMAL);
+        it->set_visible(settings->thermal_settings.connect_style == ThermalSettings::ConnectStyle::THERMAL);
     }
 }
 

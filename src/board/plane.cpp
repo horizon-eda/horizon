@@ -11,9 +11,10 @@ static const LutEnumStr<PlaneSettings::Style> style_lut = {
         {"round", PlaneSettings::Style::ROUND},
 };
 
-static const LutEnumStr<PlaneSettings::ConnectStyle> connect_style_lut = {
-        {"solid", PlaneSettings::ConnectStyle::SOLID},
-        {"thermal", PlaneSettings::ConnectStyle::THERMAL},
+static const LutEnumStr<ThermalSettings::ConnectStyle> connect_style_lut = {
+        {"solid", ThermalSettings::ConnectStyle::SOLID},
+        {"thermal", ThermalSettings::ConnectStyle::THERMAL},
+        {"from_plane", ThermalSettings::ConnectStyle::FROM_PLANE},
 };
 
 static const LutEnumStr<PlaneSettings::TextStyle> text_style_lut = {
@@ -26,18 +27,29 @@ static const LutEnumStr<PlaneSettings::FillStyle> fill_style_lut = {
         {"hatch", PlaneSettings::FillStyle::HATCH},
 };
 
+ThermalSettings::ThermalSettings(const json &j)
+    : thermal_gap_width(j.value("thermal_gap_width", 0.1_mm)),
+      thermal_spoke_width(j.value("thermal_spoke_width", 0.2_mm))
+{
+    if (j.count("connect_style")) {
+        connect_style = connect_style_lut.lookup(j.at("connect_style"));
+    }
+}
+
+void ThermalSettings::serialize(json &j) const
+{
+    j["connect_style"] = connect_style_lut.lookup_reverse(connect_style);
+    j["thermal_gap_width"] = thermal_gap_width;
+    j["thermal_spoke_width"] = thermal_spoke_width;
+}
+
 PlaneSettings::PlaneSettings(const json &j)
-    : min_width(j.at("min_width")), keep_orphans(j.at("keep_orphans")),
-      thermal_gap_width(j.value("thermal_gap_width", 0.1_mm)),
-      thermal_spoke_width(j.value("thermal_spoke_width", 0.2_mm)),
+    : min_width(j.at("min_width")), keep_orphans(j.at("keep_orphans")), thermal_settings(j),
       hatch_border_width(j.value("hatch_border_width", 0.5_mm)), hatch_line_width(j.value("hatch_line_width", 0.2_mm)),
       hatch_line_spacing(j.value("hatch_line_spacing", 0.5_mm))
 {
     if (j.count("style")) {
         style = style_lut.lookup(j.at("style"));
-    }
-    if (j.count("connect_style")) {
-        connect_style = connect_style_lut.lookup(j.at("connect_style"));
     }
     if (j.count("text_style")) {
         text_style = text_style_lut.lookup(j.at("text_style"));
@@ -53,9 +65,7 @@ json PlaneSettings::serialize() const
     j["min_width"] = min_width;
     j["keep_orphans"] = keep_orphans;
     j["style"] = style_lut.lookup_reverse(style);
-    j["connect_style"] = connect_style_lut.lookup_reverse(connect_style);
-    j["thermal_gap_width"] = thermal_gap_width;
-    j["thermal_spoke_width"] = thermal_spoke_width;
+    thermal_settings.serialize(j);
     j["text_style"] = text_style_lut.lookup_reverse(text_style);
     j["fill_style"] = fill_style_lut.lookup_reverse(fill_style);
     j["hatch_border_width"] = hatch_border_width;
