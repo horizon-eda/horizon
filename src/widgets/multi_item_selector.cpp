@@ -119,6 +119,7 @@ void MultiItemSelector::select_items(const std::set<UUID> &nets)
     items_selected = nets;
     filter_available->refilter();
     filter_selected->refilter();
+    s_signal_changed.emit();
 }
 
 std::set<UUID> MultiItemSelector::get_selected_items() const
