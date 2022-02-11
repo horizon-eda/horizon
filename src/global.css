@@ -255,3 +255,8 @@ box.imp-instance-path-bar         > label {
 .tnum {
   font-feature-settings: "tnum 1";
 }
+
+.clearance-grid spinbutton > button {
+  padding-left: 3px;
+  padding-right: 3px;
+}

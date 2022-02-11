@@ -202,6 +202,9 @@
         <child>
           <placeholder/>
         </child>
+        <style>
+          <class name="clearance-grid"/>
+        </style>
       </object>
       <packing>
         <property name="expand">True</property>

@@ -76,6 +76,7 @@ void RuleEditorClearanceCopperOther::populate()
     auto clearance_grid = Gtk::manage(new Gtk::Grid);
     clearance_grid->set_row_spacing(10);
     clearance_grid->set_column_spacing(10);
+    clearance_grid->get_style_context()->add_class("clearance-grid");
 
     {
         int left = 1;
