@@ -48,9 +48,12 @@ public:
     void set_sheet_filter(const UUIDVec &uu);
 
 private:
-    std::array<std::deque<MarkerRef>, static_cast<int>(MarkerDomain::N_DOMAINS)> domains;
+    struct Domain {
+        std::deque<MarkerRef> markers;
+        bool visible = false;
+    };
+    std::array<Domain, static_cast<int>(MarkerDomain::N_DOMAINS)> domains;
     UUIDVec sheet_filter;
-    std::array<bool, static_cast<int>(MarkerDomain::N_DOMAINS)> domains_visible;
     CanvasGL &ca;
 };
 

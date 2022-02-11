@@ -54,18 +54,20 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out)
 
 Markers::Markers(CanvasGL &c) : ca(c)
 {
-    std::fill(domains_visible.begin(), domains_visible.end(), false);
+    for (auto &it : domains) {
+        it.visible = false;
+    }
 }
 
 void Markers::set_domain_visible(MarkerDomain dom, bool vis)
 {
-    domains_visible.at(static_cast<int>(dom)) = vis;
+    domains.at(static_cast<int>(dom)).visible = vis;
     ca.update_markers();
 }
 
 std::deque<MarkerRef> &Markers::get_domain(MarkerDomain dom)
 {
-    return domains.at(static_cast<int>(dom));
+    return domains.at(static_cast<int>(dom)).markers;
 }
 
 void Markers::update()
@@ -114,10 +116,9 @@ void MarkerRenderer::render()
 void MarkerRenderer::update()
 {
     markers.clear();
-    int i = 0;
     for (const auto &dom : markers_ref.domains) {
-        if (markers_ref.domains_visible.at(i)) {
-            for (const auto &mkr : dom) {
+        if (dom.visible) {
+            for (const auto &mkr : dom.markers) {
                 if (mkr.sheet == ca.markers.sheet_filter || mkr.sheet.size() == 0) {
                     uint8_t flags = 0;
                     if (mkr.size == MarkerRef::Size::SMALL)
@@ -126,8 +127,6 @@ void MarkerRenderer::update()
                 }
             }
         }
-
-        i++;
     }
 }
 
