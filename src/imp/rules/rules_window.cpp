@@ -95,8 +95,9 @@ private:
     Gtk::Image *img_imported = nullptr;
 };
 
-RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, CanvasGL &ca, class Core &c)
-    : Gtk::Window(cobject), canvas(ca), core(c), rules(*core.get_rules()),
+RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, CanvasGL &ca, class Core &c,
+                         bool ly)
+    : Gtk::Window(cobject), canvas(ca), core(c), rules(*core.get_rules()), layered(ly),
       state_store(this, "imp-rules-" + object_type_lut.lookup_reverse(core.get_object_type()))
 {
     GET_WIDGET(lb_rules);
@@ -108,6 +109,8 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     GET_WIDGET(button_rule_instance_move_down);
     GET_WIDGET(rule_editor_box);
     GET_WIDGET(check_result_treeview);
+    GET_WIDGET(work_layer_only_box);
+    GET_WIDGET(work_layer_only_checkbutton);
     GET_WIDGET(run_button);
     GET_WIDGET(apply_button);
     GET_WIDGET(stack);
@@ -197,7 +200,36 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     update_rule_labels();
 
     check_result_store = Gtk::TreeStore::create(tree_columns);
-    check_result_treeview->set_model(check_result_store);
+    if (layered) {
+        check_result_filter = Gtk::TreeModelFilter::create(check_result_store);
+        check_result_treeview->set_model(check_result_filter);
+        check_result_filter->set_visible_func([this](const Gtk::TreeModel::const_iterator &it) -> bool {
+            const Gtk::TreeModel::Row row = *it;
+            if (check_result_store->get_path(it).size() == 1)
+                return true;
+            if (work_layer_only_checkbutton->get_active()) {
+                return row.get_value(tree_columns.layers).count(canvas.property_work_layer().get_value());
+            }
+            else {
+                return true;
+            }
+        });
+        canvas.property_work_layer().signal_changed().connect([this] {
+            if (work_layer_only_checkbutton->get_active()) {
+                check_result_filter->refilter();
+                check_result_treeview->expand_all();
+                update_markers_and_error_polygons();
+            }
+        });
+        work_layer_only_checkbutton->signal_toggled().connect([this] {
+            check_result_filter->refilter();
+            update_markers_and_error_polygons();
+        });
+    }
+    else {
+        work_layer_only_box->set_visible(false);
+        check_result_treeview->set_model(check_result_store);
+    }
 
     check_result_treeview->append_column("Rule", tree_columns.name);
     {
@@ -277,7 +309,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
 
     check_result_treeview->signal_row_activated().connect(
             [this](const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *column) {
-                auto it = check_result_store->get_iter(path);
+                auto it = check_result_treeview->get_model()->get_iter(path);
                 if (it) {
                     Gtk::TreeModel::Row row = *it;
                     if (row[tree_columns.has_location]) {
@@ -387,6 +419,7 @@ bool RulesWindow::update_results()
                 row_err[tree_columns.instance_path] = it_err.instance_path;
                 row_err[tree_columns.state] = CheckState::NOT_RUNNING;
                 row_err[tree_columns.paths] = it_err.error_polygons;
+                row_err[tree_columns.layers] = it_err.layers;
 
                 if (it_err.has_location) {
                     UUIDVec sheet;
@@ -801,12 +834,12 @@ void RulesWindow::update_warning()
     }
 }
 
-RulesWindow *RulesWindow::create(Gtk::Window *p, CanvasGL &ca, Core &c)
+RulesWindow *RulesWindow::create(Gtk::Window *p, CanvasGL &ca, Core &c, bool ly)
 {
     RulesWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/org/horizon-eda/horizon/imp/rules/rules_window.ui");
-    x->get_widget_derived("window", w, ca, c);
+    x->get_widget_derived("window", w, ca, c, ly);
     w->set_transient_for(*p);
     return w;
 }

@@ -40,6 +40,7 @@ RulesCheckResult BoardRules::check_track_width(const Board &brd) const
                         r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
                         auto &e = r.errors.back();
                         e.has_location = true;
+                        e.layers.insert(layer);
                         e.location = (track.from.get_position() + track.to.get_position()) / 2;
                         e.comment = "Track width " + dim_to_string(width);
                         if (width < ws.min) {
@@ -330,6 +331,7 @@ clearance_cu_worker_intersect(const PatchesVector &patches, const PatchesExpande
                             + patch_type_names.at(key2.type) + get_net_name(net2) + " on layer "
                             + brd.get_layers().at(cu_layer).name;
                 e.error_polygons = {ite};
+                e.layers.insert(cu_layer);
             }
         }
     }
@@ -535,6 +537,7 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board &brd,
                         e.comment = patch_type_names.at(it.first.type) + "(" + (net ? net->name : "") + ") on layer"
                                     + brd.get_layers().at(it.first.layer).name + " near NPTH hole";
                         e.error_polygons = {ite};
+                        e.layers.insert(it.first.layer);
                     }
                 }
             }
@@ -617,6 +620,7 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board &brd,
                                 + patch_type_names.at(p_other.type) + " on layer"
                                 + brd.get_layers().at(p_non_other.layer).name;
                     e.error_polygons = {ite};
+                    e.layers.insert(p_non_other.layer);
                 }
             }
         }
@@ -679,6 +683,7 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board &brd,
                     e.comment = patch_type_names.at(it.first.type) + "(" + (net ? net->name : "") + ") on layer "
                                 + brd.get_layers().at(it.first.layer).name + " near Board edge";
                     e.error_polygons = {ite};
+                    e.layers.insert(it.first.layer);
                 }
             }
         }
@@ -780,6 +785,10 @@ RulesCheckResult BoardRules::check_clearance_silkscreen_exposed_copper(const Boa
                             e.comment = "Bottom side: Silkscreen near exposed copper";
                         }
                         e.error_polygons = {ite};
+                        if (side.top)
+                            e.layers.insert(BoardLayers::TOP_SILKSCREEN);
+                        else
+                            e.layers.insert(BoardLayers::BOTTOM_SILKSCREEN);
                     }
                 }
             }
@@ -979,7 +988,9 @@ RulesCheckResult BoardRules::check_clearance_copper_keepout(const Board &brd, Ru
                         }
                         e.location = acc.get();
                         e.comment = patch_type_names.at(it.first.type) + "(" + (net ? net->name : "") + ") on layer"
+                                    + brd.get_layers().at(it.first.layer).name + " near keepout";
                         e.error_polygons = {ite};
+                        e.layers.insert(it.first.layer);
                     }
                 }
             }
@@ -1066,6 +1077,7 @@ RulesCheckResult BoardRules::check_clearance_same_net(const Board &brd, RulesChe
                         e.comment = patch_type_names.at(p1.type) + " near " + patch_type_names.at(p2.type) + " "
                                     + get_net_name(net) + " on layer " + brd.get_layers().at(layer).name;
                         e.error_polygons = {ite};
+                        e.layers.insert(layer);
                     }
                 }
             }
@@ -1153,6 +1165,7 @@ RulesCheckResult BoardRules::check_plane_priorities(const Board &brd) const
                                             + " is identical to plane outline " + get_net_name(path_b.plane.net)
                                             + " on layer " + brd.get_layers().at(layer).name;
                                 e.error_polygons = {ite};
+                                e.layers.insert(layer);
                             }
                         }
                         else if (a_encloses_b || b_encloses_a) {
@@ -1175,6 +1188,7 @@ RulesCheckResult BoardRules::check_plane_priorities(const Board &brd) const
                                                 + brd.get_layers().at(layer).name
                                                 + " needs higher fill order than enclosed plane";
                                     e.error_polygons = {ite};
+                                    e.layers.insert(layer);
                                 }
                             }
                         }
@@ -1194,6 +1208,7 @@ RulesCheckResult BoardRules::check_plane_priorities(const Board &brd) const
                                                 + std::to_string(path_a.plane.priority) + " on layer "
                                                 + brd.get_layers().at(layer).name;
                                     e.error_polygons = {ite};
+                                    e.layers.insert(layer);
                                 }
                             }
                         }

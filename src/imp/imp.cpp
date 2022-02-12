@@ -717,7 +717,7 @@ void ImpBase::run(int argc, char *argv[])
             [this](ToolID id, json j) { save_json_to_file(get_tool_settings_filename(id), j); });
 
     if (core->get_rules()) {
-        rules_window = RulesWindow::create(main_window, *canvas, *core);
+        rules_window = RulesWindow::create(main_window, *canvas, *core, is_layered());
         rules_window->signal_canvas_update().connect(sigc::mem_fun(*this, &ImpBase::canvas_update_from_pp));
         rules_window->signal_changed().connect([this] { core->set_needs_save(); });
         core->signal_tool_changed().connect([this](ToolID id) { rules_window->set_enabled(id == ToolID::NONE); });

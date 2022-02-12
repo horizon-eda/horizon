@@ -29,6 +29,7 @@ public:
     std::string comment;
     bool has_location = false;
     ClipperLib::Paths error_polygons;
+    std::set<int> layers;
 
     json serialize() const;
 };

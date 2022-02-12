@@ -13,8 +13,9 @@ namespace horizon {
 
 class RulesWindow : public Gtk::Window, public Changeable {
 public:
-    RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class CanvasGL &ca, class Core &c);
-    static RulesWindow *create(Gtk::Window *p, class CanvasGL &ca, class Core &c);
+    RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class CanvasGL &ca, class Core &c,
+                bool layered);
+    static RulesWindow *create(Gtk::Window *p, class CanvasGL &ca, class Core &c, bool layered);
     typedef sigc::signal<void, Coordi, UUID, UUIDVec> type_signal_goto;
     type_signal_goto signal_goto()
     {
@@ -61,6 +62,7 @@ private:
     CanvasGL &canvas;
     Core &core;
     Rules &rules;
+    const bool layered;
     class CanvasAnnotation *annotation = nullptr;
 
     class Block *get_top_block();
@@ -86,6 +88,7 @@ private:
             Gtk::TreeModelColumnRecord::add(sheet);
             Gtk::TreeModelColumnRecord::add(instance_path);
             Gtk::TreeModelColumnRecord::add(paths);
+            Gtk::TreeModelColumnRecord::add(layers);
             Gtk::TreeModelColumnRecord::add(state);
             Gtk::TreeModelColumnRecord::add(status);
             Gtk::TreeModelColumnRecord::add(pulse);
@@ -100,12 +103,16 @@ private:
         Gtk::TreeModelColumn<UUIDVec> instance_path;
         Gtk::TreeModelColumn<CheckState> state;
         Gtk::TreeModelColumn<ClipperLib::Paths> paths;
+        Gtk::TreeModelColumn<std::set<int>> layers;
         Gtk::TreeModelColumn<std::string> status;
         Gtk::TreeModelColumn<int> pulse;
     };
     TreeColumns tree_columns;
 
     Glib::RefPtr<Gtk::TreeStore> check_result_store;
+    Glib::RefPtr<Gtk::TreeModelFilter> check_result_filter;
+    Gtk::CheckButton *work_layer_only_checkbutton = nullptr;
+    Gtk::Box *work_layer_only_box = nullptr;
     Gtk::TreeView *check_result_treeview = nullptr;
 
     class RuleRunInfo {
