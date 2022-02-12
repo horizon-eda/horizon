@@ -5,8 +5,6 @@
 #include "util/placement.hpp"
 #include "util/uuid.hpp"
 #include "util/uuid_ptr.hpp"
-#include <fstream>
-#include <map>
 #include <vector>
 
 namespace horizon {

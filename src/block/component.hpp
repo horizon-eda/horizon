@@ -6,9 +6,7 @@
 #include "util/uuid_path.hpp"
 #include "util/uuid_ptr.hpp"
 #include "util/uuid_vec.hpp"
-#include <fstream>
 #include <map>
-#include <vector>
 #include <set>
 
 namespace horizon {

@@ -7,7 +7,6 @@
 #include "util/uuid.hpp"
 #include "bom_export_settings.hpp"
 #include "block_instance.hpp"
-#include <fstream>
 #include <map>
 #include <set>
 #include <vector>

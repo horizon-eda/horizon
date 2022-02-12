@@ -54,7 +54,6 @@ void Image3DExporter::load_3d_models()
     clear_3d_models();
     auto model_filenames = get_model_filenames(pool);
     for (const auto &it : model_filenames) {
-        std::cout << "load " << it.first << std::endl;
         load_3d_model(it.first, it.second);
     }
     update_max_package_height();

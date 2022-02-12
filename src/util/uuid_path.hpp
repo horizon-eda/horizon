@@ -1,7 +1,6 @@
 #pragma once
 #include "uuid.hpp"
 #include <array>
-#include <iostream>
 
 namespace horizon {
 

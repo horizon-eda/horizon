@@ -18,6 +18,7 @@
 #include "core/tool_id.hpp"
 #include "actions.hpp"
 #include "widgets/action_button.hpp"
+#include <iostream>
 
 namespace horizon {
 ImpSchematic::ImpSchematic(const std::string &blocks_filename, const std::string &pictures_dir,

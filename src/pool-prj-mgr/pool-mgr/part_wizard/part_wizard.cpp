@@ -714,7 +714,6 @@ void PartWizard::prepare_edit()
                 delete ed;
             }
             else {
-                std::cout << "found gate " << (std::string)ed->gate->uuid << std::endl;
                 gates_avail.insert(ed->gate);
             }
         }
@@ -796,7 +795,6 @@ void PartWizard::update_pin_warnings()
 
 void PartWizard::update_part()
 {
-    std::cout << "upd part" << std::endl;
     std::set<UUID> pins_used;
     std::set<UUID> units_used;
     part.pad_map.clear();
@@ -856,8 +854,6 @@ void PartWizard::update_part()
     for (auto it = units.begin(); it != units.end();) {
         auto uu = it->second.uuid;
         if (units_used.count(uu) == 0) {
-            std::cout << "del sym" << std::endl;
-
             {
                 auto unit_filename = pool.get_tmp_filename(ObjectType::UNIT, uu);
                 auto fi = Gio::File::create_for_path(unit_filename);

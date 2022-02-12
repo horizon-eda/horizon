@@ -3,6 +3,7 @@
 #include "pool/entity.hpp"
 #include <set>
 #include <forward_list>
+#include <iostream>
 #include "nlohmann/json.hpp"
 #include "util/util.hpp"
 #include "logger/logger.hpp"

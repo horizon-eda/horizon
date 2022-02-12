@@ -78,7 +78,6 @@ int ToolHelperMerge::merge_nets(Net *net, Net *into)
     doc.c->get_current_schematic()->block->merge_nets(net, into); // net will be erased
     doc.c->get_current_schematic()->expand_connectivity(true);    // be careful
 
-    std::cout << "merging nets" << std::endl;
     return 0; // merged, 1: error
 }
 
@@ -140,7 +139,6 @@ void ToolHelperMerge::merge_and_connect(const std::set<UUID> &extra_junctions)
             auto ju_other = &it_other.second;
             if (!junctions.count(ju_other->uuid)) {       // not in selection
                 if (ju_other->position == ju->position) { // need to merge junctions
-                    std::cout << "maybe merge junction" << std::endl;
                     Net *net = ju->net;
                     Bus *bus = ju->bus;
                     Net *net_other = ju_other->net;

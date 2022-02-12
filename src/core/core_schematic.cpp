@@ -11,6 +11,7 @@
 #include "util/picture_load.hpp"
 #include "logger/logger.hpp"
 #include <filesystem>
+#include <iostream>
 
 namespace horizon {
 namespace fs = std::filesystem;

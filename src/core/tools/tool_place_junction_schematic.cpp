@@ -7,7 +7,6 @@ bool ToolPlaceJunctionSchematic::junction_placed()
 {
     for (auto &[uu, it] : doc.c->get_sheet()->net_lines) {
         if (it.coord_on_line(get_junction()->position)) {
-            std::cout << "on line" << std::endl;
             if (!check_line(&it))
                 return true;
 

@@ -1,9 +1,6 @@
 #pragma once
 #include "core.hpp"
 #include "pool/symbol.hpp"
-#include <deque>
-#include <iostream>
-#include <memory>
 #include "document/idocument_symbol.hpp"
 
 namespace horizon {

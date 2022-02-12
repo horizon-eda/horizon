@@ -5,10 +5,6 @@
 #include "pool/padstack.hpp"
 #include "util/uuid.hpp"
 #include "util/uuid_ptr.hpp"
-#include <fstream>
-#include <map>
-#include <set>
-#include <vector>
 
 namespace horizon {
 using json = nlohmann::json;

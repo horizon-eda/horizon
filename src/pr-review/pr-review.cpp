@@ -23,6 +23,7 @@
 #include "checks/check_unit.hpp"
 #include "checks/check_util.hpp"
 #include "checks/check_item.hpp"
+#include <iostream>
 
 using namespace horizon;
 

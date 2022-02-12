@@ -8,7 +8,6 @@ void SelectIncludedBoardDialog::ok_clicked()
     auto it = view->get_selection()->get_selected();
     if (it) {
         Gtk::TreeModel::Row row = *it;
-        std::cout << row[list_columns.name] << std::endl;
         valid = true;
         selected_uuid = row[list_columns.uuid];
     }
@@ -19,7 +18,6 @@ void SelectIncludedBoardDialog::row_activated(const Gtk::TreeModel::Path &path, 
     auto it = store->get_iter(path);
     if (it) {
         Gtk::TreeModel::Row row = *it;
-        std::cout << "act " << row[list_columns.name] << std::endl;
         valid = true;
         selected_uuid = row[list_columns.uuid];
         response(Gtk::ResponseType::RESPONSE_OK);

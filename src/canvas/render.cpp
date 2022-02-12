@@ -31,6 +31,7 @@
 #include "util/polygon_arc_removal_proxy.hpp"
 #include <algorithm>
 #include <ctime>
+#include <iostream>
 #include <sstream>
 
 namespace horizon {

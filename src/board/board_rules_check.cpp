@@ -11,6 +11,7 @@
 #include <sstream>
 #include "util/named_vector.hpp"
 #include "util/util.hpp"
+#include <iostream>
 
 namespace horizon {
 

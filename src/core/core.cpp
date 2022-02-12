@@ -10,6 +10,7 @@
 #include <glibmm/ustring.h>
 #include <glibmm/fileutils.h>
 #include "core/tool_id.hpp"
+#include <iostream>
 
 namespace horizon {
 

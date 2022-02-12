@@ -10,6 +10,7 @@
 #include "util/picture_load.hpp"
 #include "blocks/iblock_provider.hpp"
 #include "blocks/blocks.hpp"
+#include <iostream>
 
 namespace horizon {
 

@@ -20,8 +20,6 @@ void ToolDrawLine::apply_settings()
 
 ToolResponse ToolDrawLine::begin(const ToolArgs &args)
 {
-    std::cout << "tool draw line junction\n";
-
     temp_junc = doc.r->insert_junction(UUID::random());
     imp->set_snap_filter({{ObjectType::JUNCTION, temp_junc->uuid}});
     junctions_created.insert(temp_junc);

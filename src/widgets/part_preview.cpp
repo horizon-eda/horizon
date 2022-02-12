@@ -91,7 +91,6 @@ PartPreview::PartPreview(IPool &p, bool sgoto, const std::string &instance)
     label_entity->set_track_visited_links(false);
     label_entity->signal_activate_link().connect(
             [this](const std::string &url) {
-                std::cout << "link" << url << std::endl;
                 s_signal_goto.emit(ObjectType::ENTITY, UUID(url));
                 return true;
             },

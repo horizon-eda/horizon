@@ -4,9 +4,6 @@
 #include "common.hpp"
 #include "util/placement.hpp"
 #include "util/text_data.hpp"
-#include <vector>
-#include <map>
-#include <fstream>
 
 namespace horizon {
 using json = nlohmann::json;

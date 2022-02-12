@@ -6,6 +6,7 @@
 #include "gl_util.hpp"
 #include "util/util.hpp"
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
 
 namespace horizon {
 DragSelection::DragSelection(class CanvasGL &c) : ca(c), active(0), box(ca), line(ca)

@@ -8,7 +8,6 @@ void MapUUIDPathDialog::ok_clicked()
     auto it = view->get_selection()->get_selected();
     if (it) {
         Gtk::TreeModel::Row row = *it;
-        std::cout << row[list_columns.name] << std::endl;
         selection_valid = true;
         selected_uuid_path = row[list_columns.uuid_path];
     }

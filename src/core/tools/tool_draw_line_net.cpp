@@ -19,8 +19,6 @@ bool ToolDrawLineNet::can_begin()
 
 ToolResponse ToolDrawLineNet::begin(const ToolArgs &args)
 {
-    std::cout << "tool draw net line junction\n";
-
     const auto uu = UUID::random();
     temp_junc_head = &doc.c->get_sheet()->junctions.emplace(uu, uu).first->second;
     imp->set_snap_filter({{ObjectType::JUNCTION, temp_junc_head->uuid}});

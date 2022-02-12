@@ -8,10 +8,7 @@ namespace horizon {
 
 static GLuint create_vao(GLuint program, GLuint &vbo_out)
 {
-    auto err = glGetError();
-    if (err != GL_NO_ERROR) {
-        std::cout << "gl error a " << err << std::endl;
-    }
+    GL_CHECK_ERROR
     GLuint position_index = glGetAttribLocation(program, "position");
     GLuint color_index = glGetAttribLocation(program, "color");
     GLuint flags_index = glGetAttribLocation(program, "flags");

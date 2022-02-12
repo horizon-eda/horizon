@@ -33,8 +33,6 @@ ToolDragKeepSlope::TrackInfo::TrackInfo(Track &tr, const Track &track_from, cons
 
 ToolResponse ToolDragKeepSlope::begin(const ToolArgs &args)
 {
-    std::cout << "tool drag keep slope\n";
-
     selection.clear();
     for (const auto &it : args.selection) {
         if (it.type == ObjectType::TRACK) {
