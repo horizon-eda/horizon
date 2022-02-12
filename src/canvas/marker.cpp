@@ -85,7 +85,7 @@ void Markers::set_sheet_filter(const UUIDVec &uu)
 
 bool Markers::marker_is_visible(const MarkerRef &mkr) const
 {
-    return mkr.sheet == sheet_filter || mkr.sheet.size() == 0;
+    return mkr.visible && (mkr.sheet == sheet_filter || mkr.sheet.size() == 0);
 }
 
 bool Markers::hit_test_marker_ref(const MarkerRef &ref, const Coordf &p) const

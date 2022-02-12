@@ -85,17 +85,21 @@ private:
             Gtk::TreeModelColumnRecord::add(location);
             Gtk::TreeModelColumnRecord::add(sheet);
             Gtk::TreeModelColumnRecord::add(instance_path);
+            Gtk::TreeModelColumnRecord::add(paths);
             Gtk::TreeModelColumnRecord::add(state);
             Gtk::TreeModelColumnRecord::add(status);
             Gtk::TreeModelColumnRecord::add(pulse);
+            Gtk::TreeModelColumnRecord::add(marker_index);
         }
         Gtk::TreeModelColumn<Glib::ustring> name;
         Gtk::TreeModelColumn<RulesCheckErrorLevel> result;
         Gtk::TreeModelColumn<bool> has_location;
+        Gtk::TreeModelColumn<size_t> marker_index;
         Gtk::TreeModelColumn<Coordi> location;
         Gtk::TreeModelColumn<UUID> sheet;
         Gtk::TreeModelColumn<UUIDVec> instance_path;
         Gtk::TreeModelColumn<CheckState> state;
+        Gtk::TreeModelColumn<ClipperLib::Paths> paths;
         Gtk::TreeModelColumn<std::string> status;
         Gtk::TreeModelColumn<int> pulse;
     };
@@ -129,6 +133,7 @@ private:
     Glib::RefPtr<Gio::SimpleActionGroup> action_group;
 
     bool update_results();
+    void update_markers_and_error_polygons();
 
     std::atomic_bool cancel_flag;
     bool queue_close = false;

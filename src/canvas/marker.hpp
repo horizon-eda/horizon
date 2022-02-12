@@ -30,6 +30,7 @@ public:
     UUIDVec sheet;
     Color color;
     std::string label;
+    bool visible = true;
     enum class Size { DEFAULT, SMALL };
     Size size = Size::DEFAULT;
     MarkerRef(const Coordf &pos, const Color &co, const UUIDVec &s = {}, const std::string &la = "")

@@ -308,6 +308,17 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     cancel_button->set_visible(false);
     cancel_button->signal_clicked().connect(sigc::mem_fun(*this, &RulesWindow::cancel_checks));
 
+    check_result_treeview->signal_row_collapsed().connect(
+            [this](const Gtk::TreeModel::iterator &, const Gtk::TreeModel::Path &) {
+                update_markers_and_error_polygons();
+            });
+
+    check_result_treeview->signal_row_expanded().connect(
+            [this](const Gtk::TreeModel::iterator &, const Gtk::TreeModel::Path &) {
+                update_markers_and_error_polygons();
+            });
+
+
     signal_delete_event().connect([this](GdkEventAny *ev) {
         if (run_button->get_sensitive()) {
             return false;
@@ -318,6 +329,33 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
             return true;
         }
     });
+}
+
+void RulesWindow::update_markers_and_error_polygons()
+{
+    auto &dom = canvas.markers.get_domain(MarkerDomain::CHECK);
+    for (auto &mrk : dom) {
+        mrk.visible = false;
+    }
+    annotation->clear();
+
+    check_result_treeview->map_expanded_rows([this, &dom](Gtk::TreeView *, const Gtk::TreeModel::Path &treepath) {
+        for (auto it : check_result_treeview->get_model()->get_iter(treepath)->children()) {
+            Gtk::TreeModel::Row row = *it;
+            if (row.get_value(tree_columns.has_location)) {
+                dom.at(row.get_value(tree_columns.marker_index)).visible = true;
+            }
+            const auto &paths = row.get_value(tree_columns.paths);
+            for (const auto &path : paths) {
+                ClipperLib::IntPoint last = path.back();
+                for (const auto &pt : path) {
+                    annotation->draw_line(Coordf(last.X, last.Y), Coordf(pt.X, pt.Y), ColorP::FROM_LAYER, .01_mm);
+                    last = pt;
+                }
+            }
+        }
+    });
+    canvas.update_markers();
 }
 
 bool RulesWindow::update_results()
@@ -348,21 +386,15 @@ bool RulesWindow::update_results()
                 row_err[tree_columns.sheet] = it_err.sheet;
                 row_err[tree_columns.instance_path] = it_err.instance_path;
                 row_err[tree_columns.state] = CheckState::NOT_RUNNING;
+                row_err[tree_columns.paths] = it_err.error_polygons;
 
                 if (it_err.has_location) {
                     UUIDVec sheet;
                     if (it_err.sheet)
                         sheet = uuid_vec_append(it_err.instance_path, it_err.sheet);
+                    row_err[tree_columns.marker_index] = dom.size();
                     dom.emplace_back(it_err.location, rules_check_error_level_to_color(it_err.level), sheet,
                                      it_err.comment);
-                }
-
-                for (const auto &path : it_err.error_polygons) {
-                    ClipperLib::IntPoint last = path.back();
-                    for (const auto &pt : path) {
-                        annotation->draw_line(Coordf(last.X, last.Y), Coordf(pt.X, pt.Y), ColorP::FROM_LAYER, .01_mm);
-                        last = pt;
-                    }
                 }
             }
             {
@@ -374,7 +406,7 @@ bool RulesWindow::update_results()
             it.second.row[tree_columns.status] = it.second.status;
         }
     }
-    canvas.update_markers();
+    update_markers_and_error_polygons();
     if (my_run_store.size() == 0) {
         run_button->set_sensitive(true);
         apply_button->set_sensitive(true);
