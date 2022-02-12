@@ -325,9 +325,10 @@ clearance_cu_worker_intersect(const PatchesVector &patches, const PatchesExpande
                 const auto &key2 = patches.at(pair.second).key;
                 const Net *net1 = key1.net ? &brd.block->nets.at(key1.net) : nullptr;
                 const Net *net2 = key2.net ? &brd.block->nets.at(key2.net) : nullptr;
+                const auto cu_layer = BoardLayers::is_copper(key1.layer) ? key1.layer : key2.layer;
                 e.comment = patch_type_names.at(key1.type) + get_net_name(net1) + " near "
                             + patch_type_names.at(key2.type) + get_net_name(net2) + " on layer "
-                            + BoardLayers::get_layer_name(BoardLayers::is_copper(key1.layer) ? key1.layer : key2.layer);
+                            + brd.get_layers().at(cu_layer).name;
                 e.error_polygons = {ite};
             }
         }
@@ -531,8 +532,8 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board &brd,
                             acc.accumulate({ite2.X, ite2.Y});
                         }
                         e.location = acc.get();
-                        e.comment =
-                                patch_type_names.at(it.first.type) + "(" + (net ? net->name : "") + ") near NPTH hole";
+                        e.comment = patch_type_names.at(it.first.type) + "(" + (net ? net->name : "") + ") on layer"
+                                    + brd.get_layers().at(it.first.layer).name + " near NPTH hole";
                         e.error_polygons = {ite};
                     }
                 }
@@ -613,7 +614,8 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board &brd,
                     }
                     e.location = acc.get();
                     e.comment = patch_type_names.at(p_non_other.type) + "(" + (net ? net->name : "") + ") near "
-                                + patch_type_names.at(p_other.type);
+                                + patch_type_names.at(p_other.type) + " on layer"
+                                + brd.get_layers().at(p_non_other.layer).name;
                     e.error_polygons = {ite};
                 }
             }
@@ -674,7 +676,8 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board &brd,
                         acc.accumulate({ite2.X, ite2.Y});
                     }
                     e.location = acc.get();
-                    e.comment = patch_type_names.at(it.first.type) + "(" + (net ? net->name : "") + ") near Board edge";
+                    e.comment = patch_type_names.at(it.first.type) + "(" + (net ? net->name : "") + ") on layer "
+                                + brd.get_layers().at(it.first.layer).name + " near Board edge";
                     e.error_polygons = {ite};
                 }
             }
@@ -816,7 +819,8 @@ RulesCheckResult BoardRules::check_preflight(const Board &brd) const
             auto &e = r.errors.back();
             e.has_location = true;
             e.location = it.second.polygon->vertices.front().position;
-            e.comment = "Plane of net " + (it.second.net ? it.second.net->name : "No net") + " has no fragments";
+            e.comment = "Plane of net " + (it.second.net ? it.second.net->name : "No net") + " on layer "
+                        + brd.get_layers().at(it.second.polygon->layer).name + " has no fragments";
         }
     }
     for (const auto &it : brd.block->components) {
@@ -850,7 +854,7 @@ RulesCheckResult BoardRules::check_preflight(const Board &brd) const
             auto &e = r.errors.back();
             e.has_location = true;
             e.location = (track.from.get_position() + track.to.get_position()) / 2;
-            e.comment = "Track has no net";
+            e.comment = "Track on layer " + brd.get_layers().at(track.layer).name + " has no net";
         }
     }
 
@@ -974,8 +978,7 @@ RulesCheckResult BoardRules::check_clearance_copper_keepout(const Board &brd, Ru
                             acc.accumulate({ite2.X, ite2.Y});
                         }
                         e.location = acc.get();
-                        e.comment =
-                                patch_type_names.at(it.first.type) + "(" + (net ? net->name : "") + ") near keepout";
+                        e.comment = patch_type_names.at(it.first.type) + "(" + (net ? net->name : "") + ") on layer"
                         e.error_polygons = {ite};
                     }
                 }
