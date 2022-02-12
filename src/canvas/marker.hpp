@@ -48,6 +48,7 @@ public:
     void set_sheet_filter(const UUIDVec &uu);
 
 private:
+    bool marker_is_visible(const MarkerRef &mrk) const;
     struct Domain {
         std::deque<MarkerRef> markers;
         bool visible = false;

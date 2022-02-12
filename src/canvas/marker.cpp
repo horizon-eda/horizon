@@ -82,6 +82,11 @@ void Markers::set_sheet_filter(const UUIDVec &uu)
     update();
 }
 
+bool Markers::marker_is_visible(const MarkerRef &mkr) const
+{
+    return mkr.sheet == sheet_filter || mkr.sheet.size() == 0;
+}
+
 MarkerRenderer::MarkerRenderer(const CanvasGL &c, Markers &ma) : ca(c), markers_ref(ma)
 {
 }
@@ -119,7 +124,7 @@ void MarkerRenderer::update()
     for (const auto &dom : markers_ref.domains) {
         if (dom.visible) {
             for (const auto &mkr : dom.markers) {
-                if (mkr.sheet == ca.markers.sheet_filter || mkr.sheet.size() == 0) {
+                if (ca.markers.marker_is_visible(mkr)) {
                     uint8_t flags = 0;
                     if (mkr.size == MarkerRef::Size::SMALL)
                         flags = 1;
