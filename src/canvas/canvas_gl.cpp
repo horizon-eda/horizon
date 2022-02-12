@@ -64,6 +64,32 @@ CanvasGL::CanvasGL()
     gesture_drag->signal_update().connect(sigc::mem_fun(*this, &CanvasGL::drag_gesture_update_cb));
     gesture_drag->set_propagation_phase(Gtk::PHASE_BUBBLE);
     gesture_drag->set_touch_only(true);
+
+    signal_query_tooltip().connect(
+            [this](int x, int y, bool keyboard_tooltip, const Glib::RefPtr<Gtk::Tooltip> &tooltip) {
+                if (keyboard_tooltip)
+                    return false;
+                const auto mkrs = markers.get_markers_at_screen_pos(x, y);
+                const size_t max_lines = 5;
+                const size_t max_markers = (mkrs.size() > max_lines) ? max_lines - 1 : max_lines;
+                std::string l;
+                for (size_t i = 0; i < std::min(mkrs.size(), max_markers); i++) {
+                    const auto &m = *mkrs.at(i);
+                    if (m.label.size()) {
+                        if (l.size())
+                            l += "\n";
+                        l += m.label;
+                    }
+                }
+                if (mkrs.size() > max_lines) {
+                    l += "\n… " + std::to_string(mkrs.size() - max_markers) + " more";
+                }
+                if (l.size()) {
+                    tooltip->set_text(l);
+                    return true;
+                }
+                return false;
+            });
 }
 
 void CanvasGL::set_grid_spacing(uint64_t x, uint64_t y)

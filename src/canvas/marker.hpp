@@ -29,9 +29,11 @@ public:
     Coordf position;
     UUIDVec sheet;
     Color color;
+    std::string label;
     enum class Size { DEFAULT, SMALL };
     Size size = Size::DEFAULT;
-    MarkerRef(const Coordf &pos, const Color &co, const UUIDVec &s = {}) : position(pos), sheet(s), color(co)
+    MarkerRef(const Coordf &pos, const Color &co, const UUIDVec &s = {}, const std::string &la = "")
+        : position(pos), sheet(s), color(co), label(la)
     {
     }
 };
@@ -46,9 +48,12 @@ public:
     void set_domain_visible(MarkerDomain dom, bool vis);
     void update();
     void set_sheet_filter(const UUIDVec &uu);
+    std::vector<const MarkerRef *> get_markers_at_screen_pos(int x, int y) const;
 
 private:
     bool marker_is_visible(const MarkerRef &mrk) const;
+    bool hit_test_marker_ref(const MarkerRef &ref, const Coordf &p) const;
+
     struct Domain {
         std::deque<MarkerRef> markers;
         bool visible = false;

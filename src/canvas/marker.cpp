@@ -63,6 +63,7 @@ void Markers::set_domain_visible(MarkerDomain dom, bool vis)
 {
     domains.at(static_cast<int>(dom)).visible = vis;
     ca.update_markers();
+    ca.set_has_tooltip(std::any_of(domains.begin(), domains.end(), [](auto &x) { return x.visible; }));
 }
 
 std::deque<MarkerRef> &Markers::get_domain(MarkerDomain dom)
@@ -86,6 +87,32 @@ bool Markers::marker_is_visible(const MarkerRef &mkr) const
 {
     return mkr.sheet == sheet_filter || mkr.sheet.size() == 0;
 }
+
+bool Markers::hit_test_marker_ref(const MarkerRef &ref, const Coordf &p) const
+{
+    const auto size_px = ref.size == MarkerRef::Size::DEFAULT ? 40 : 20; // see geometry shader
+    const auto size_canvas = size_px / ca.scale;
+    const auto a = ref.position;
+    const auto b = ref.position + Coordf(size_canvas, -size_canvas);
+    return p.x >= a.x && p.x <= b.x && p.y >= b.y && p.y <= a.y;
+}
+
+std::vector<const MarkerRef *> Markers::get_markers_at_screen_pos(int x, int y) const
+{
+    const auto canvas_pos = ca.screen2canvas(Coordf(x, y));
+    std::vector<const MarkerRef *> r;
+    for (const auto &dom : domains) {
+        if (dom.visible) {
+            for (const auto &mrk : dom.markers) {
+                if (marker_is_visible(mrk) && hit_test_marker_ref(mrk, canvas_pos)) {
+                    r.push_back(&mrk);
+                }
+            }
+        }
+    }
+    return r;
+}
+
 
 MarkerRenderer::MarkerRenderer(const CanvasGL &c, Markers &ma) : ca(c), markers_ref(ma)
 {

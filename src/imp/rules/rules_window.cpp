@@ -353,7 +353,8 @@ bool RulesWindow::update_results()
                     UUIDVec sheet;
                     if (it_err.sheet)
                         sheet = uuid_vec_append(it_err.instance_path, it_err.sheet);
-                    dom.emplace_back(it_err.location, rules_check_error_level_to_color(it_err.level), sheet);
+                    dom.emplace_back(it_err.location, rules_check_error_level_to_color(it_err.level), sheet,
+                                     it_err.comment);
                 }
 
                 for (const auto &path : it_err.error_polygons) {
