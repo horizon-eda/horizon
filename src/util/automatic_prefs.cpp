@@ -12,7 +12,7 @@ AutomaticPreferences &AutomaticPreferences::get()
     return x;
 }
 
-static const int min_user_version = 2;
+static const int min_user_version = 3;
 
 AutomaticPreferences::AutomaticPreferences()
     : db_path(Glib::build_filename(get_config_dir(), "automatic_prefs.db")),

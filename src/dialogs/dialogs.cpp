@@ -45,6 +45,8 @@
 #include "align_and_distribute_window.hpp"
 #include "edit_text_window.hpp"
 #include "plane_update.hpp"
+#include "util/automatic_prefs.hpp"
+#include "board/board.hpp"
 
 namespace horizon {
 void Dialogs::set_parent(Gtk::Window *w)
@@ -489,12 +491,77 @@ bool Dialogs::manage_ports(Block &b)
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
+static void bind_board_and_plane(SQLite::Query &q, const Board &brd, const Plane *plane)
+{
+    q.bind(1, brd.uuid);
+    if (plane)
+        q.bind(2, plane->uuid);
+    else
+        q.bind(2, UUID());
+}
+
 bool Dialogs::update_plane(class Board &brd, class Plane *plane)
 {
-    PlaneUpdateDialog dia(*parent, brd, plane);
-    while (dia.run() != 1) {
+    Glib::Timer timer;
+    bool retval;
+    bool dialog_was_shown = false;
+    {
+        PlaneUpdateDialog dia(*parent, brd, plane);
+        bool immediately_show_dialog = false;
+        SQLite::Query q(AutomaticPreferences::get().db,
+                        "SELECT visible FROM plane_update_dialog_visibility WHERE board = ? AND plane = ?");
+        bind_board_and_plane(q, brd, plane);
+        if (q.step()) {
+            immediately_show_dialog = q.get<int>(0);
+        }
+
+        if (!immediately_show_dialog) {
+            auto invisible = gtk_invisible_new();
+            gtk_grab_add(invisible);
+            parent->get_window()->set_cursor(Gdk::Cursor::create(parent->get_display(), "wait"));
+            auto loop = Glib::MainLoop::create();
+            auto timeout = Glib::signal_timeout().connect(
+                    [&loop] {
+                        if (loop->is_running())
+                            loop->quit();
+                        return false;
+                    },
+                    2000);
+            auto done = dia.signal_done().connect([&loop] {
+                if (loop->is_running())
+                    loop->quit();
+            });
+            loop->run();
+            gtk_grab_remove(invisible);
+            gtk_widget_destroy(invisible);
+
+            parent->get_window()->set_cursor(Gdk::Cursor::create(parent->get_display(), ""));
+            done->disconnect();
+            timeout.disconnect();
+        }
+
+        if (!dia.is_done()) {
+            dialog_was_shown = true;
+            while (dia.run() != 1)
+                ;
+        }
+        retval = !dia.was_cancelled();
     }
-    return !dia.was_cancelled();
+    timer.stop();
+    bool show_dialog = dialog_was_shown;
+    if (timer.elapsed() < 2)
+        show_dialog = false;
+
+    if (retval) {
+        SQLite::Query q(
+                AutomaticPreferences::get().db,
+                "INSERT OR REPLACE INTO plane_update_dialog_visibility (board, plane, visible) VALUES (?, ?, ?)");
+        bind_board_and_plane(q, brd, plane);
+        q.bind(3, show_dialog);
+        q.step();
+    }
+
+    return retval;
 }
 
 

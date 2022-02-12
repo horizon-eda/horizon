@@ -89,6 +89,7 @@ PlaneUpdateDialog::PlaneUpdateDialog(Gtk::Window &parent, Board &brd, Plane *pla
     dispatcher.connect([this] {
         if (done) {
             spinner->stop();
+            s_signal_done.emit();
             // delay prevents deleted dispatcher warnings
             Glib::signal_timeout().connect_once(sigc::track_obj([this] { response(1); }, *this), 200);
         }

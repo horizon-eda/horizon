@@ -17,6 +17,16 @@ public:
     {
         return cancel;
     }
+    bool is_done() const
+    {
+        return done;
+    }
+
+    typedef sigc::signal<void> type_signal_done;
+    type_signal_done signal_done()
+    {
+        return s_signal_done;
+    }
 
 private:
     Gtk::Spinner *spinner = nullptr;
@@ -48,5 +58,7 @@ private:
 
     Gtk::TreeView *view;
     Glib::RefPtr<Gtk::ListStore> store;
+
+    type_signal_done s_signal_done;
 };
 } // namespace horizon
