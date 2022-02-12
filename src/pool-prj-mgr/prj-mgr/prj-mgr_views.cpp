@@ -205,6 +205,7 @@ void PoolProjectManagerViewProject::open_top_schematic()
     auto proc = win.spawn(PoolProjectManagerProcess::Type::IMP_SCHEMATIC, args);
     if (proc.spawned) {
         schematic_spinner->set_active(true);
+        proc.proc->signal_exited().connect([this](int, bool) { schematic_spinner->set_active(false); });
         proc.proc->signal_ready().connect([this] { schematic_spinner->set_active(false); });
     }
 }
@@ -216,6 +217,7 @@ void PoolProjectManagerViewProject::open_board()
     auto proc = win.spawn(PoolProjectManagerProcess::Type::IMP_BOARD, args);
     if (proc.spawned) {
         board_spinner->set_active(true);
+        proc.proc->signal_exited().connect([this](int, bool) { board_spinner->set_active(false); });
         proc.proc->signal_ready().connect([this] { board_spinner->set_active(false); });
     }
 }
