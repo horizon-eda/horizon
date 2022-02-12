@@ -9,10 +9,7 @@
 #include "common/text.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "util/uuid.hpp"
-#include <fstream>
 #include <map>
-#include <set>
-#include <vector>
 #include "util/file_version.hpp"
 
 namespace horizon {

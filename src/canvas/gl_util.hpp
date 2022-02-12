@@ -1,6 +1,5 @@
 #include "util/gl_inc.h"
 #include <string>
-#include <sstream>
 #include <array>
 #include <glm/fwd.hpp>
 

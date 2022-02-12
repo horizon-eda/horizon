@@ -4,8 +4,6 @@
 #include "pool/unit.hpp"
 #include "util/uuid.hpp"
 #include "util/uuid_ptr.hpp"
-#include <deque>
-#include <fstream>
 #include <map>
 
 namespace horizon {

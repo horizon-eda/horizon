@@ -17,7 +17,6 @@
 #include "util/warning.hpp"
 #include "parameter/program_polygon.hpp"
 #include "common/picture.hpp"
-#include <fstream>
 #include <map>
 #include <set>
 #include <vector>

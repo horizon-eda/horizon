@@ -9,7 +9,6 @@
 #include <glibmm/regex.h>
 #include <vector>
 #include <map>
-#include <fstream>
 #include "util/file_version.hpp"
 #include "util/template_util.hpp"
 

@@ -3,9 +3,6 @@
 #include "common.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "polygon.hpp"
-#include <vector>
-#include <map>
-#include <fstream>
 #include "util/placement.hpp"
 
 
