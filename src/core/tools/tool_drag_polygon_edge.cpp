@@ -74,8 +74,10 @@ ToolResponse ToolDragPolygonEdge::update(const ToolArgs &args)
             // fall through
 
         case InToolActionID::LMB:
-            plane_finish();
-            return ToolResponse::commit();
+            if (plane_finish())
+                return ToolResponse::commit();
+            else
+                return ToolResponse::revert();
 
         case InToolActionID::RMB:
         case InToolActionID::CANCEL:

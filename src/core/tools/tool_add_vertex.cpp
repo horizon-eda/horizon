@@ -96,8 +96,10 @@ ToolResponse ToolAddVertex::update(const ToolArgs &args)
             }
             else {
                 poly->vertices.erase(poly->vertices.begin() + vertex_index);
-                plane_finish();
-                return ToolResponse::commit();
+                if (plane_finish())
+                    return ToolResponse::commit();
+                else
+                    return ToolResponse::revert();
             }
 
         default:;

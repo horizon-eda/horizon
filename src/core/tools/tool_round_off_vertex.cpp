@@ -130,9 +130,10 @@ ToolResponse ToolRoundOffVertex::update(const ToolArgs &args)
     else if (args.type == ToolEventType::ACTION) {
         switch (args.action) {
         case InToolActionID::LMB:
-            plane_finish();
-            return ToolResponse::commit();
-
+            if (plane_finish())
+                return ToolResponse::commit();
+            else
+                return ToolResponse::revert();
         case InToolActionID::RMB:
         case InToolActionID::CANCEL:
             return ToolResponse::revert();
@@ -159,8 +160,11 @@ ToolResponse ToolRoundOffVertex::update(const ToolArgs &args)
                 }
             }
             else if (data->event == ToolDataWindow::Event::OK) {
-                plane_finish();
-                return ToolResponse::commit();
+                imp->dialogs.close_nonmodal();
+                if (plane_finish())
+                    return ToolResponse::commit();
+                else
+                    return ToolResponse::revert();
             }
         }
     }

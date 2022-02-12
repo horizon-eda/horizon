@@ -38,7 +38,6 @@ void ToolWindow::emit_event(ToolDataWindow::Event ev)
 {
     auto data = std::make_unique<ToolDataWindow>();
     data->event = ev;
-    handle_event(ev);
     interface->tool_update_data(std::move(data));
 }
 

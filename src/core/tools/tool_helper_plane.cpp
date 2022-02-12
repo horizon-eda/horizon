@@ -1,6 +1,7 @@
 #include "tool_helper_plane.hpp"
 #include "board/board.hpp"
 #include "document/idocument_board.hpp"
+#include "imp/imp_interface.hpp"
 
 namespace horizon {
 void ToolHelperPlane::plane_init(Polygon &poly)
@@ -16,13 +17,16 @@ void ToolHelperPlane::plane_init(Polygon &poly)
         plane->clear();
 }
 
-void ToolHelperPlane::plane_finish()
+bool ToolHelperPlane::plane_finish()
 {
     if (plane) {
         auto brd = doc.b->get_board();
-        brd->update_plane(plane);
+        imp->tool_bar_set_tip("updating plane…");
+        const auto ret = imp->dialogs.update_plane(*brd, plane);
         brd->update_airwires(false, {plane->net->uuid});
+        return ret;
     }
+    return true;
 }
 
 } // namespace horizon

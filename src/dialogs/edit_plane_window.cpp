@@ -84,20 +84,14 @@ EditPlaneWindow::EditPlaneWindow(Gtk::Window *parent, ImpInterface *intf, Plane 
     box->show_all();
 }
 
-void EditPlaneWindow::handle_event(ToolDataWindow::Event ev)
+class Plane *EditPlaneWindow::get_plane_and_reset_usage()
 {
-    if (ev == ToolDataWindow::Event::OK) {
-        if (brd.planes.count(plane_uuid)) { // may have been deleted
-            if (plane.from_rules) {
-                plane.settings = brd.rules.get_plane_settings(plane.net, poly.layer);
-            }
-            brd.update_plane(&plane);
-            brd.update_airwires(false, {plane.net->uuid});
-        }
-        else {
-            poly.usage = nullptr;
-            brd.update_planes();
-        }
+    if (brd.planes.count(plane_uuid)) {
+        return &plane;
+    }
+    else {
+        poly.usage = nullptr;
+        return nullptr;
     }
 }
 

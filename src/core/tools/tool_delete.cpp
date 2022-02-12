@@ -347,8 +347,11 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
         }
         else if (doc.b) {
             if (auto plane = dynamic_cast<Plane *>(it->usage.ptr)) {
-                if (plane->fragments.size())
-                    doc.b->get_board()->update_plane(plane);
+                if (plane->fragments.size()) {
+                    imp->tool_bar_set_tip("updating plane…");
+                    if (!imp->dialogs.update_plane(*doc.b->get_board(), plane))
+                        return ToolResponse::revert();
+                }
             }
         }
     }

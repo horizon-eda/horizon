@@ -310,14 +310,18 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
             move_mirror_or_rotate(selection_center, true);
             move_mirror_or_rotate(selection_center, true);
         }
-        finish();
-        return ToolResponse::commit();
+        if (finish())
+            return ToolResponse::commit();
+        else
+            return ToolResponse::revert();
     }
     if (tool_id == ToolID::MOVE_EXACTLY) {
         if (auto r = imp->dialogs.ask_datum_coord("Move exactly")) {
             move_do(*r);
-            finish();
-            return ToolResponse::commit();
+            if (finish())
+                return ToolResponse::commit();
+            else
+                return ToolResponse::revert();
         }
         else {
             return ToolResponse::end();
@@ -443,19 +447,22 @@ void ToolMove::do_move(const Coordi &d)
     update_tip();
 }
 
-void ToolMove::finish()
+bool ToolMove::finish()
 {
     std::set<UUID> junctions;
     for (const auto &[uu, ax] : extra_junctions)
         junctions.emplace(uu);
     merge_and_connect(junctions);
     if (doc.b) {
+        imp->tool_bar_set_tip("updating planes…");
         auto brd = doc.b->get_board();
         for (auto plane : planes) {
-            brd->update_plane(plane);
+            if (!imp->dialogs.update_plane(*brd, plane))
+                return false;
         }
         brd->update_airwires(false, nets);
     }
+    return true;
 }
 
 ToolResponse ToolMove::update(const ToolArgs &args)
@@ -468,8 +475,10 @@ ToolResponse ToolMove::update(const ToolArgs &args)
     else if (args.type == ToolEventType::ACTION) {
         if (any_of(args.action, {InToolActionID::LMB, InToolActionID::COMMIT})
             || (is_transient && args.action == InToolActionID::LMB_RELEASE)) {
-            finish();
-            return ToolResponse::commit();
+            if (finish())
+                return ToolResponse::commit();
+            else
+                return ToolResponse::revert();
         }
         else if (any_of(args.action, {InToolActionID::RMB, InToolActionID::CANCEL})) {
             return ToolResponse::revert();

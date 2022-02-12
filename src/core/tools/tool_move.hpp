@@ -50,7 +50,7 @@ private:
     std::set<UUID> nets;
 
     void update_airwires();
-    void finish();
+    [[nodiscard]] bool finish();
     bool is_key = false;
     Coordi key_delta;
 

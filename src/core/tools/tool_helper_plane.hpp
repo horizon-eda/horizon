@@ -5,7 +5,7 @@ namespace horizon {
 class ToolHelperPlane : public virtual ToolBase {
 protected:
     void plane_init(class Polygon &poly);
-    void plane_finish();
+    [[nodiscard]] bool plane_finish();
 
 private:
     class Plane *plane = nullptr;

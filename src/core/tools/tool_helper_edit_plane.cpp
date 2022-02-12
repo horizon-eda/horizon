@@ -24,10 +24,30 @@ ToolResponse ToolHelperEditPlane::update_for_plane(const ToolArgs &args)
                 imp->tool_bar_set_actions({});
         }
         else if (auto dataw = dynamic_cast<const ToolDataWindow *>(args.data.get())) {
-            if (dataw->event == ToolDataWindow::Event::CLOSE)
+            if (dataw->event == ToolDataWindow::Event::CLOSE) {
                 return ToolResponse::revert();
-            else if (dataw->event == ToolDataWindow::Event::OK)
-                return ToolResponse::commit();
+            }
+            else if (dataw->event == ToolDataWindow::Event::OK) {
+                imp->dialogs.close_nonmodal();
+                auto &brd = win->get_board();
+                if (auto plane = win->get_plane_and_reset_usage()) { // may have been deleted
+                    if (plane->from_rules) {
+                        plane->settings = brd.rules.get_plane_settings(plane->net, plane->polygon->layer);
+                    }
+                    imp->tool_bar_set_tip("upading plane…");
+                    if (!imp->dialogs.update_plane(brd, plane))
+                        return ToolResponse::revert();
+                    brd.update_airwires(false, {plane->net->uuid});
+                    return ToolResponse::commit();
+                }
+                else {
+                    imp->tool_bar_set_tip("upading planes…");
+                    if (imp->dialogs.update_plane(brd, nullptr))
+                        return ToolResponse::commit();
+                    else
+                        return ToolResponse::revert();
+                }
+            }
         }
     }
     else if (pick_net_mode && args.type == ToolEventType::ACTION) {
