@@ -15,6 +15,7 @@
 #include "rule_clearance_same_net.hpp"
 #include "rule_shorted_pads.hpp"
 #include "rule_thermals.hpp"
+#include "rule_net_ties.hpp"
 #include "rules/rules.hpp"
 #include "util/uuid.hpp"
 #include <atomic>
@@ -88,6 +89,7 @@ private:
     RuleClearanceSilkscreenExposedCopper rule_clearance_silkscreen_exposed_copper;
     RuleParameters rule_parameters;
     RulePreflightChecks rule_preflight_checks;
+    RuleNetTies rule_net_ties;
 
     RulesCheckResult check_track_width(const class Board &b) const;
     RulesCheckResult check_hole_size(const class Board &b) const;
@@ -105,6 +107,8 @@ private:
     RulesCheckResult check_clearance_same_net(const class Board &b, class RulesCheckCache &cache,
                                               check_status_cb_t status_cb, const std::atomic_bool &cancel) const;
     RulesCheckResult check_plane_priorities(const class Board &b) const;
+    RulesCheckResult check_net_ties(const class Board &b, RulesCheckCache &cache, check_status_cb_t status_cb,
+                                    const std::atomic_bool &cancel) const;
 
     json serialize_or_export(Rule::SerializeMode mode) const;
 };

@@ -7,6 +7,7 @@
 #include "util/uuid.hpp"
 #include "bom_export_settings.hpp"
 #include "block_instance.hpp"
+#include "net_tie.hpp"
 #include <map>
 #include <set>
 #include <vector>
@@ -36,6 +37,7 @@ public:
     UUID uuid;
     std::string name;
     std::map<UUID, Net> nets;
+    std::map<UUID, NetTie> net_ties;
     std::map<UUID, Bus> buses;
     std::map<UUID, Component> components;
     std::map<UUID, BlockInstance> block_instances;

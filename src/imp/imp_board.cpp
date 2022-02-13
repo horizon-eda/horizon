@@ -1256,6 +1256,7 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpBoard::get_selection_filte
     std::map<ObjectType, ImpBase::SelectionFilterInfo> r = {
             {ObjectType::BOARD_PACKAGE, {layers_package, Flag::DEFAULT}},
             {ObjectType::TRACK, {layers_track, Flag::DEFAULT}},
+            {ObjectType::BOARD_NET_TIE, {layers_track, Flag::DEFAULT}},
             {ObjectType::VIA, {{}, Flag::WORK_LAYER_ONLY_ENABLED}},
             {ObjectType::BOARD_DECAL, {}},
             {ObjectType::POLYGON, {layers_polygon, Flag::HAS_OTHERS}},

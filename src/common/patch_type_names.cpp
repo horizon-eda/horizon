@@ -12,5 +12,6 @@ std::map<PatchType, std::string> patch_type_names = {
         {PatchType::HOLE_NPTH, "NPTH hole"},
         {PatchType::BOARD_EDGE, "Board edge"},
         {PatchType::TEXT, "Text"},
+        {PatchType::NET_TIE, "Net tie"},
 };
 }

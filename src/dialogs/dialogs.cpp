@@ -37,6 +37,7 @@
 #include "enter_datum_scale_window.hpp"
 #include "router_settings_window.hpp"
 #include "edit_custom_value.hpp"
+#include "map_net_tie.hpp"
 #include <glibmm.h>
 #include "pool/ipool.hpp"
 #include "widgets/net_selector.hpp"
@@ -383,6 +384,18 @@ std::optional<UUID> Dialogs::select_part(IPool &pool, const UUID &entity_uuid, c
 std::optional<UUID> Dialogs::map_package(const std::vector<std::pair<Component *, bool>> &components)
 {
     MapPackageDialog dia(parent, components);
+    auto r = dia.run();
+    if (r == Gtk::RESPONSE_OK && dia.selection_valid) {
+        return dia.selected_uuid;
+    }
+    else {
+        return {};
+    }
+}
+
+std::optional<UUID> Dialogs::map_net_tie(const std::set<class NetTie *> &net_ties)
+{
+    MapNetTieDialog dia(parent, net_ties);
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK && dia.selection_valid) {
         return dia.selected_uuid;

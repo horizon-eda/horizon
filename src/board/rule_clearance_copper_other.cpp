@@ -26,6 +26,9 @@ uint64_t RuleClearanceCopperOther::get_clearance(PatchType pt_cu, PatchType pt_n
     if (pt_ncu == PatchType::TEXT) // text is same as other (lines, arcs, etc.)
         pt_ncu = PatchType::OTHER;
 
+    if (pt_cu == PatchType::NET_TIE)
+        pt_cu = PatchType::TRACK;
+
     std::pair<PatchType, PatchType> key(pt_cu, pt_ncu);
     if (clearances.count(key)) {
         return clearances.at(key);

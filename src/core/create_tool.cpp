@@ -95,6 +95,9 @@
 #include "tools/tool_merge_duplicate_junctions.hpp"
 #include "tools/tool_manage_power_nets.hpp"
 #include "tools/tool_edit_text.hpp"
+#include "tools/tool_tie_nets.hpp"
+#include "tools/tool_draw_net_tie.hpp"
+#include "tools/tool_flip_net_tie.hpp"
 
 namespace horizon {
 
@@ -444,6 +447,15 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::EDIT_TEXT:
         return std::make_unique<ToolEditText>(this, tool_id);
+
+    case ToolID::TIE_NETS:
+        return std::make_unique<ToolTieNets>(this, tool_id);
+
+    case ToolID::DRAW_NET_TIE:
+        return std::make_unique<ToolDrawNetTie>(this, tool_id);
+
+    case ToolID::FLIP_NET_TIE:
+        return std::make_unique<ToolFlipNetTie>(this, tool_id);
 
     default:
         return nullptr;

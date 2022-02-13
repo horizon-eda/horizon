@@ -959,6 +959,7 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpSchematic::get_selection_f
         case ObjectType::POWER_SYMBOL:
         case ObjectType::BLOCK_SYMBOL_PORT:
         case ObjectType::SCHEMATIC_BLOCK_SYMBOL:
+        case ObjectType::SCHEMATIC_NET_TIE:
             r[type];
             break;
         default:;
@@ -1238,6 +1239,11 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
                 auto &rip = core_schematic.get_sheet()->bus_rippers.at(it.uuid);
                 new_sel.emplace(rip.junction->uuid, ObjectType::JUNCTION);
             } break;
+            case ObjectType::SCHEMATIC_NET_TIE: {
+                auto &tie = core_schematic.get_sheet()->net_ties.at(it.uuid);
+                new_sel.emplace(tie.from->uuid, ObjectType::JUNCTION);
+                new_sel.emplace(tie.to->uuid, ObjectType::JUNCTION);
+            } break;
 
             case ObjectType::LINE_NET: {
                 auto line = &core_schematic.get_sheet()->net_lines.at(it.uuid);
@@ -1346,6 +1352,13 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
                 }
             }
         }
+        for (const auto &it : core_schematic.get_sheet()->net_ties) {
+            for (const auto &it_ft : {it.second.from, it.second.to}) {
+                if (selection.count(SelectableRef(it_ft->uuid, ObjectType::JUNCTION))) {
+                    new_sel.emplace(it.first, ObjectType::SCHEMATIC_NET_TIE);
+                }
+            }
+        }
 
         added = false;
         for (const auto &it : new_sel) {
@@ -1412,6 +1425,10 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
         case ObjectType::LINE: {
             new_sheet->lines.insert(std::make_pair(it.uuid, std::move(old_sheet->lines.at(it.uuid))));
             old_sheet->lines.erase(it.uuid);
+        } break;
+        case ObjectType::SCHEMATIC_NET_TIE: {
+            new_sheet->net_ties.insert(std::make_pair(it.uuid, std::move(old_sheet->net_ties.at(it.uuid))));
+            old_sheet->net_ties.erase(it.uuid);
         } break;
         case ObjectType::ARC: {
             new_sheet->arcs.insert(std::make_pair(it.uuid, std::move(old_sheet->arcs.at(it.uuid))));

@@ -67,6 +67,7 @@ bool DocumentBoard::has_object_type(ObjectType ty) const
     case ObjectType::KEEPOUT:
     case ObjectType::CONNECTION_LINE:
     case ObjectType::PICTURE:
+    case ObjectType::BOARD_NET_TIE:
         return true;
         break;
     default:;
@@ -84,6 +85,11 @@ std::string DocumentBoard::get_display_name(ObjectType type, const UUID &uu)
     case ObjectType::TRACK: {
         const auto &tr = get_board()->tracks.at(uu);
         return tr.net ? tr.net->name : "";
+    }
+
+    case ObjectType::BOARD_NET_TIE: {
+        const auto &tie = get_board()->net_ties.at(uu).net_tie;
+        return tie->net_primary->name + "<>" + tie->net_secondary->name;
     }
 
     case ObjectType::VIA: {

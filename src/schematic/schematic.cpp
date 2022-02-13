@@ -50,7 +50,7 @@ json Schematic::Annotation::serialize() const
     return j;
 }
 
-static const unsigned int app_version = 5;
+static const unsigned int app_version = 6;
 
 unsigned int Schematic::get_app_version()
 {
@@ -1348,6 +1348,10 @@ void Schematic::update_refs()
         }
         for (auto &it_sym : sheet.bus_rippers) {
             it_sym.second.update_refs(sheet, *block);
+        }
+        for (auto &[uu, tie] : sheet.net_ties) {
+            tie.net_tie.update(block->net_ties);
+            tie.update_refs(sheet);
         }
     }
 }

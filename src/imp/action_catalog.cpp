@@ -1041,6 +1041,16 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Tune MSD", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE_3D,
           ActionCatalogItem::FLAGS_NO_POPOVER}},
 
+        {{ActionID::TOOL, ToolID::TIE_NETS},
+         {"Tie nets", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::DRAW_NET_TIE},
+         {"Draw net tie", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::FLIP_NET_TIE},
+         {"Flip net tie", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1353,5 +1363,8 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(ALIGN_AND_DISTRIBUTE),
         TOOL_LUT_ITEM(MERGE_DUPLICATE_JUNCTIONS),
         TOOL_LUT_ITEM(EDIT_TEXT),
+        TOOL_LUT_ITEM(TIE_NETS),
+        TOOL_LUT_ITEM(DRAW_NET_TIE),
+        TOOL_LUT_ITEM(FLIP_NET_TIE),
 };
 } // namespace horizon

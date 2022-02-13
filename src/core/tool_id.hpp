@@ -163,5 +163,8 @@ enum class ToolID {
     ALIGN_AND_DISTRIBUTE,
     MERGE_DUPLICATE_JUNCTIONS,
     EDIT_TEXT,
+    FLIP_NET_TIE,
+    TIE_NETS,
+    DRAW_NET_TIE,
 };
 } // namespace horizon

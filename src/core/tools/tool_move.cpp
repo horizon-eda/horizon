@@ -93,6 +93,16 @@ void ToolMove::expand_selection()
                 }
             }
         } break;
+        case ObjectType::SCHEMATIC_NET_TIE: {
+            auto &tie = doc.c->get_sheet()->net_ties.at(it.uuid);
+            new_sel.emplace(tie.from->uuid, ObjectType::JUNCTION);
+            new_sel.emplace(tie.to->uuid, ObjectType::JUNCTION);
+        } break;
+        case ObjectType::BOARD_NET_TIE: {
+            auto &tie = doc.b->get_board()->net_ties.at(it.uuid);
+            new_sel.emplace(tie.from->uuid, ObjectType::JUNCTION);
+            new_sel.emplace(tie.to->uuid, ObjectType::JUNCTION);
+        } break;
         case ObjectType::TRACK: {
             auto track = &doc.b->get_board()->tracks.at(it.uuid);
             for (auto &it_ft : {track->from, track->to}) {

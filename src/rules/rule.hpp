@@ -28,6 +28,7 @@ enum class RuleID {
     SYMBOL_CHECKS,
     CLEARANCE_PACKAGE,
     THERMALS,
+    NET_TIES,
 };
 
 extern const LutEnumStr<RuleID> rule_id_lut;

@@ -83,6 +83,14 @@ Block::Block(const UUID &uu, const json &j, IPool &pool, class IBlockProvider &p
                                             std::forward_as_tuple(it.value()));
         }
     }
+    if (j.count("net_ties")) {
+        const json &o = j["net_ties"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            load_and_log(net_ties, ObjectType::NET_TIE, std::forward_as_tuple(u, it.value(), *this),
+                         Logger::Domain::BLOCK);
+        }
+    }
     if (j.count("group_names")) {
         for (const auto &[key, value] : j.at("group_names").items()) {
             group_names.emplace(key, value.get<std::string>());
@@ -201,6 +209,9 @@ void Block::update_refs()
         it_net.second.net_class.update(net_classes);
         it_net.second.diffpair.update(nets);
     }
+    for (auto &[uu, tie] : net_ties) {
+        tie.update_refs(*this);
+    }
 }
 
 void Block::vacuum_nets()
@@ -225,6 +236,10 @@ void Block::vacuum_nets()
         for (const auto &it_conn : it_inst.second.connections) {
             nets_erase.erase(it_conn.second.net.uuid);
         }
+    }
+    for (const auto &[uu, tie] : net_ties) {
+        nets_erase.erase(tie.net_primary->uuid);
+        nets_erase.erase(tie.net_secondary->uuid);
     }
     for (const auto &uu : nets_erase) {
         nets.erase(uu);
@@ -268,8 +283,8 @@ void Block::update_connection_count()
 }
 
 Block::Block(const Block &block)
-    : uuid(block.uuid), name(block.name), nets(block.nets), buses(block.buses), components(block.components),
-      block_instances(block.block_instances), net_classes(block.net_classes),
+    : uuid(block.uuid), name(block.name), nets(block.nets), net_ties(block.net_ties), buses(block.buses),
+      components(block.components), block_instances(block.block_instances), net_classes(block.net_classes),
       net_class_default(block.net_class_default), block_instance_mappings(block.block_instance_mappings),
       group_names(block.group_names), tag_names(block.tag_names), project_meta(block.project_meta),
       bom_export_settings(block.bom_export_settings)
@@ -282,6 +297,7 @@ void Block::operator=(const Block &block)
     uuid = block.uuid;
     name = block.name;
     nets = block.nets;
+    net_ties = block.net_ties;
     buses = block.buses;
     components = block.components;
     block_instances = block.block_instances;
@@ -324,6 +340,12 @@ json Block::serialize() const
     j["net_classes"] = json::object();
     for (const auto &it : net_classes) {
         j["net_classes"][(std::string)it.first] = it.second.serialize();
+    }
+    if (net_ties.size()) {
+        j["net_ties"] = json::object();
+        for (const auto &it : net_ties) {
+            j["net_ties"][(std::string)it.first] = it.second.serialize();
+        }
     }
     j["group_names"] = json::object();
     for (const auto &it : group_names) {
@@ -845,6 +867,14 @@ static void visit_block_for_flatten(const Block &block, const UUIDVec &instance_
                 net = &ctx.flat.nets.at(ctx.net_map.at(uuid_vec_append(instance_path, conn.net->uuid)));
             flat_comp.connections.emplace(k, net);
         }
+    }
+    for (const auto &[uu, tie] : block.net_ties) {
+        const auto href = uuid_vec_append(instance_path, uu);
+        const auto flat_uu = uuid_vec_flatten(href);
+        auto &flat_tie = ctx.flat.net_ties.emplace(flat_uu, flat_uu).first->second;
+        flat_tie.net_primary = &ctx.flat.nets.at(ctx.net_map.at(uuid_vec_append(instance_path, tie.net_primary->uuid)));
+        flat_tie.net_secondary =
+                &ctx.flat.nets.at(ctx.net_map.at(uuid_vec_append(instance_path, tie.net_secondary->uuid)));
     }
     for (const auto &[uu, name] : block.group_names) {
         ctx.flat.group_names.emplace(uuid_vec_flatten(uuid_vec_append(instance_path, uu)),

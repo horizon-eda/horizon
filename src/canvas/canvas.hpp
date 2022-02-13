@@ -145,6 +145,8 @@ protected:
     void render(const class BlockSymbol &sym, bool on_sheet = false);
     void render(const class BlockSymbolPort &port, bool interactive = true);
     void render(const class SchematicBlockSymbol &sym);
+    void render(const class SchematicNetTie &tie);
+    void render(const class BoardNetTie &tie, bool interactive = true);
 
     bool needs_push = true;
     virtual void request_push() = 0;

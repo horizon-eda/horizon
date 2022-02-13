@@ -189,6 +189,7 @@ bool CoreSchematic::has_object_type(ObjectType ty) const
         case ObjectType::LINE:
         case ObjectType::ARC:
         case ObjectType::PICTURE:
+        case ObjectType::SCHEMATIC_NET_TIE:
             return true;
             break;
         default:

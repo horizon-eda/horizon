@@ -16,6 +16,7 @@ public:
     std::vector<UUID> connected_bus_labels;
     std::vector<UUID> connected_bus_rippers;
     std::vector<UUID> connected_power_symbols;
+    std::vector<UUID> connected_net_ties;
     bool only_lines_arcs_connected() const override;
     bool only_net_lines_connected() const;
 };

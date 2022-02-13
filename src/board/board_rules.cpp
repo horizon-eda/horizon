@@ -20,7 +20,8 @@ BoardRules::BoardRules(const BoardRules &other)
       rule_layer_pair(other.rule_layer_pair), rule_clearance_same_net(other.rule_clearance_same_net),
       rule_shorted_pads(other.rule_shorted_pads), rule_thermals(other.rule_thermals),
       rule_clearance_silkscreen_exposed_copper(other.rule_clearance_silkscreen_exposed_copper),
-      rule_parameters(other.rule_parameters), rule_preflight_checks(other.rule_preflight_checks)
+      rule_parameters(other.rule_parameters), rule_preflight_checks(other.rule_preflight_checks),
+      rule_net_ties(other.rule_net_ties)
 {
     update_sorted();
 }
@@ -42,6 +43,7 @@ void BoardRules::operator=(const BoardRules &other)
     rule_clearance_silkscreen_exposed_copper = other.rule_clearance_silkscreen_exposed_copper;
     rule_parameters = other.rule_parameters;
     rule_preflight_checks = other.rule_preflight_checks;
+    rule_net_ties = other.rule_net_ties;
 
     update_sorted();
 }
@@ -233,6 +235,12 @@ void BoardRules::apply(RuleID id, Board &brd, IPool &pool) const
                 track.width = get_default_track_width(track.net, track.layer);
             }
         }
+        for (auto &it : brd.net_ties) {
+            auto &tie = it.second;
+            if (tie.width_from_rules) {
+                tie.width = get_default_track_width(tie.net_tie->net_primary, tie.layer);
+            }
+        }
     }
     else if (id == RuleID::PARAMETERS) {
         brd.rules.rule_parameters = rule_parameters;
@@ -324,6 +332,7 @@ std::vector<RuleID> BoardRules::get_rule_ids() const
             RuleID::PARAMETERS,
 
             RuleID::SHORTED_PADS,
+            RuleID::NET_TIES,
             RuleID::LAYER_PAIR,
             RuleID::PREFLIGHT_CHECKS,
     };
@@ -339,6 +348,9 @@ const Rule &BoardRules::get_rule(RuleID id) const
     }
     else if (id == RuleID::PREFLIGHT_CHECKS) {
         return rule_preflight_checks;
+    }
+    else if (id == RuleID::NET_TIES) {
+        return rule_net_ties;
     }
     throw std::runtime_error("rule does not exist");
 }

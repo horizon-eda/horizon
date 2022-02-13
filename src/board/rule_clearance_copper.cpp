@@ -70,6 +70,12 @@ json RuleClearanceCopper::serialize() const
 
 uint64_t RuleClearanceCopper::get_clearance(PatchType a, PatchType b) const
 {
+    if (a == PatchType::NET_TIE)
+        a = PatchType::TRACK;
+
+    if (b == PatchType::NET_TIE)
+        b = PatchType::TRACK;
+
     return clearances.at(get_index(a, b));
 }
 

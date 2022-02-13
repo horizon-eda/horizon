@@ -42,6 +42,11 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
                         delete_extra.emplace(line.uuid, ObjectType::LINE_NET);
                     }
                 }
+                for (const auto &[uu, tie] : doc.c->get_sheet()->net_ties) {
+                    if (tie.to.uuid == it.uuid || tie.from.uuid == it.uuid) {
+                        delete_extra.emplace(tie.uuid, ObjectType::SCHEMATIC_NET_TIE);
+                    }
+                }
                 for (const auto &[uu, label] : doc.c->get_sheet()->net_labels) {
                     if (label.junction.uuid == it.uuid) {
                         delete_extra.emplace(label.uuid, ObjectType::NET_LABEL);
@@ -57,6 +62,11 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
                 for (const auto &it_track : doc.b->get_board()->tracks) {
                     if (it_track.second.to.junc.uuid == it.uuid || it_track.second.from.junc.uuid == it.uuid) {
                         delete_extra.emplace(it_track.second.uuid, ObjectType::TRACK);
+                    }
+                }
+                for (const auto &it_tie : doc.b->get_board()->net_ties) {
+                    if (it_tie.second.to.uuid == it.uuid || it_tie.second.from.uuid == it.uuid) {
+                        delete_extra.emplace(it_tie.second.uuid, ObjectType::BOARD_NET_TIE);
                     }
                 }
             }
@@ -330,6 +340,15 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
         } break;
         case ObjectType::CONNECTION_LINE: {
             doc.b->get_board()->connection_lines.erase(it.uuid);
+        } break;
+        case ObjectType::SCHEMATIC_NET_TIE: {
+            auto &sheet = *doc.c->get_sheet();
+            auto &tie = sheet.net_ties.at(it.uuid);
+            doc.c->get_current_block()->net_ties.erase(tie.net_tie->uuid);
+            sheet.net_ties.erase(it.uuid);
+        } break;
+        case ObjectType::BOARD_NET_TIE: {
+            doc.b->get_board()->net_ties.erase(it.uuid);
         } break;
 
 

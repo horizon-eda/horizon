@@ -67,8 +67,11 @@ enum class ObjectType {
     BLOCK_SYMBOL_PORT,
     SCHEMATIC_BLOCK_SYMBOL,
     POOL,
+    NET_TIE,
+    SCHEMATIC_NET_TIE,
+    BOARD_NET_TIE,
 };
-enum class PatchType { OTHER, TRACK, PAD, PAD_TH, VIA, PLANE, HOLE_PTH, HOLE_NPTH, BOARD_EDGE, TEXT, N_TYPES };
+enum class PatchType { OTHER, TRACK, PAD, PAD_TH, VIA, PLANE, HOLE_PTH, HOLE_NPTH, BOARD_EDGE, TEXT, NET_TIE, N_TYPES };
 
 extern const LutEnumStr<PatchType> patch_type_lut;
 extern const LutEnumStr<ObjectType> object_type_lut;

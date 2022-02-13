@@ -362,6 +362,17 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                   {ObjectProperty::ID::REFDES, {ObjectProperty::Type::STRING, "Ref. desig.", 0}},
                   {ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Block", 1}},
           }}},
+        {ObjectType::NET_TIE, {"Net tie", "Net ties", {}}},
+        {ObjectType::SCHEMATIC_NET_TIE, {"Net tie", "Net ties", {}}},
+        {ObjectType::BOARD_NET_TIE,
+         {"Net tie",
+          "Net ties",
+          {
+                  {ObjectProperty::ID::WIDTH, {ObjectProperty::Type::LENGTH, "Width", 3}},
+                  {ObjectProperty::ID::LAYER, {ObjectProperty::Type::LAYER_COPPER, "Layer", 1}},
+                  {ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Nets", 0}},
+                  {ObjectProperty::ID::WIDTH_FROM_RULES, {ObjectProperty::Type::BOOL, "Width from rules", 2}},
 
+          }}},
 };
 } // namespace horizon

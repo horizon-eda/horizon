@@ -74,6 +74,15 @@ void CoreBoard::reload_netlist()
         }
     }
 
+    for (auto it = brd->net_ties.begin(); it != brd->net_ties.end();) {
+        if (it->second.net_tie == nullptr) {
+            brd->net_ties.erase(it++);
+        }
+        else {
+            it++;
+        }
+    }
+
     // delete planes with deleted nets
     for (auto it = brd->planes.begin(); it != brd->planes.end();) {
         const auto &plane = it->second;
@@ -221,6 +230,32 @@ bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID
         case ObjectProperty::ID::NET_CLASS:
             dynamic_cast<PropertyValueString &>(value).value = track->net ? (track->net->net_class->name) : "<no net>";
             return true;
+
+        default:
+            return false;
+        }
+    } break;
+
+    case ObjectType::BOARD_NET_TIE: {
+        const auto &tie = brd->net_ties.at(uu);
+        switch (property) {
+        case ObjectProperty::ID::WIDTH_FROM_RULES:
+            dynamic_cast<PropertyValueBool &>(value).value = tie.width_from_rules;
+            return true;
+
+        case ObjectProperty::ID::WIDTH:
+            dynamic_cast<PropertyValueInt &>(value).value = tie.width;
+            return true;
+
+        case ObjectProperty::ID::LAYER:
+            dynamic_cast<PropertyValueInt &>(value).value = tie.layer;
+            return true;
+
+        case ObjectProperty::ID::NAME:
+            dynamic_cast<PropertyValueString &>(value).value =
+                    tie.net_tie->net_primary->name + "\n" + tie.net_tie->net_secondary->name;
+            return true;
+
 
         default:
             return false;
@@ -481,6 +516,28 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
         }
     } break;
 
+    case ObjectType::BOARD_NET_TIE: {
+        auto &tie = brd->net_ties.at(uu);
+        switch (property) {
+        case ObjectProperty::ID::WIDTH_FROM_RULES:
+            tie.width_from_rules = dynamic_cast<const PropertyValueBool &>(value).value;
+            break;
+
+        case ObjectProperty::ID::WIDTH:
+            if (tie.width_from_rules)
+                return false;
+            tie.width = dynamic_cast<const PropertyValueInt &>(value).value;
+            break;
+
+        case ObjectProperty::ID::LAYER:
+            tie.layer = dynamic_cast<const PropertyValueInt &>(value).value;
+            break;
+
+        default:
+            return false;
+        }
+    } break;
+
     case ObjectType::VIA: {
         auto via = &brd->vias.at(uu);
         switch (property) {
@@ -618,6 +675,23 @@ bool CoreBoard::get_property_meta(ObjectType type, const UUID &uu, ObjectPropert
             return false;
         }
     } break;
+
+    case ObjectType::BOARD_NET_TIE: {
+        auto &tie = brd->net_ties.at(uu);
+        switch (property) {
+        case ObjectProperty::ID::WIDTH:
+            meta.is_settable = !tie.width_from_rules;
+            return true;
+
+        case ObjectProperty::ID::LAYER:
+            layers_to_meta(meta);
+            return true;
+
+        default:
+            return false;
+        }
+    } break;
+
 
     case ObjectType::PLANE: {
         auto plane = &brd->planes.at(uu);

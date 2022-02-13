@@ -22,6 +22,7 @@ enum class ColorP {
     CONNECTION_LINE,
     NOPOPULATE_X,
     PROJECTION,
+    NET_TIE,
     N_COLORS,
     // colors after N_COLORS aren't part of the UBO
     BACKGROUND,

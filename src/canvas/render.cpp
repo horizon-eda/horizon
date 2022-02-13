@@ -70,7 +70,8 @@ void Canvas::render(const SchematicJunction &junc)
     }
     object_ref_push(ObjectType::JUNCTION, junc.uuid);
 
-    auto connection_count = junc.connected_net_lines.size() + junc.connected_power_symbols.size();
+    auto connection_count =
+            junc.connected_net_lines.size() + junc.connected_power_symbols.size() + junc.connected_net_ties.size();
     if (connection_count == 2) {
         if (show_all_junctions_in_schematic)
             draw_plus(junc.position, 250000, c);
@@ -80,7 +81,7 @@ void Canvas::render(const SchematicJunction &junc)
         img_line(junc.position, junc.position + Coordi(0, 1000), 0.75_mm, 0, true);
     }
     else if (junc.connected_bus_labels.size() || junc.connected_bus_rippers.size() || junc.connected_net_labels.size()
-             || junc.connected_lines.size() || junc.connected_arcs.size()) {
+             || junc.connected_lines.size() || junc.connected_arcs.size() || junc.connected_net_ties.size()) {
         // nop
     }
     else {
@@ -254,6 +255,61 @@ void Canvas::render(const LineNet &line)
     selectables.append_line(line.uuid, ObjectType::LINE_NET, line.from.get_position(), line.to.get_position(), width);
 }
 
+static std::string get_name(const std::string &n)
+{
+    if (n.size())
+        return n;
+    else
+        return "unnamed net";
+}
+
+void Canvas::render(const SchematicNetTie &tie)
+{
+    const auto from = tie.from->position;
+    const auto to = tie.to->position;
+
+    object_ref_push(ObjectType::SCHEMATIC_NET_TIE, tie.uuid);
+    // draw_line(from, to, ColorP::NET_TIE, 0, true, width);
+    Coordf p0;
+    Coordf p1;
+    if (from < to) {
+        p0 = from;
+        p1 = to;
+    }
+    else {
+        p0 = to;
+        p1 = from;
+    }
+    const auto v = p1 - p0;
+    const auto vn = v.normalize();
+    const auto center = ((p0 + p1) / 2);
+    const auto perp_n = Coordf(v.y, -v.x).normalize();
+    const float h = .5_mm;
+    const auto s = v.mag();
+    const auto r = (4 * h * h + s * s) / (8 * h);
+    const auto d = r - h;
+    const auto arc_center = center + (perp_n * d);
+    const float a0 = c2pi(atan2f(p0.y - arc_center.y, p0.x - arc_center.x));
+    const float a1 = c2pi(atan2f(p1.y - arc_center.y, p1.x - arc_center.x));
+    // img_auto_line = img_mode;
+    draw_arc2(arc_center, r, a1, a0, ColorP::NET_TIE, 0, 0);
+    draw_arc2(center - (perp_n * d), r, a1 + M_PI, a0 + M_PI, ColorP::NET_TIE, 0, 0);
+
+
+    const auto text_pos = center + (perp_n * 1.5_mm);
+
+    TextRenderer::Options opts;
+    opts.center = true;
+    draw_text(text_pos, 1.5_mm,
+              get_name(tie.net_tie->net_primary->name) + "\n" + get_name(tie.net_tie->net_secondary->name),
+              angle_from_rad(atan2(v.y, v.x)), TextOrigin::CENTER, ColorP::NET_TIE, 0, opts);
+    // img_auto_line = false;
+    object_ref_pop();
+    if (img_mode)
+        return;
+    selectables.append_line(tie.uuid, ObjectType::SCHEMATIC_NET_TIE, p0 + (vn * h), p1 - (vn * h), h * 2);
+}
+
 void Canvas::render(const Track &track, bool interactive)
 {
     auto c = ColorP::FROM_LAYER;
@@ -302,6 +358,55 @@ void Canvas::render(const Track &track, bool interactive)
     if (interactive)
         selectables.append_line(track.uuid, ObjectType::TRACK, track.from.get_position(), track.to.get_position(),
                                 track.width, 0, track.layer);
+}
+
+void Canvas::render(const BoardNetTie &tie, bool interactive)
+{
+    auto c = ColorP::FROM_LAYER;
+    auto width = tie.width;
+
+
+    auto layer = tie.layer;
+
+    auto center = (tie.from->position + tie.to->position) / 2;
+    if (interactive)
+        object_ref_push(ObjectType::BOARD_NET_TIE, tie.uuid);
+
+    if (img_mode) {
+        img_net(tie.net_tie->net_primary);
+        img_patch_type(PatchType::NET_TIE);
+        img_line(tie.from->position, tie.to->position, width, tie.layer);
+        img_patch_type(PatchType::OTHER);
+        img_net(nullptr);
+    }
+
+    draw_line(tie.from->position, tie.to->position, c, layer, true, width);
+    if (interactive && show_text_in_tracks && width > 0) {
+        auto overlay_layer = get_overlay_layer(tie.layer, true);
+        set_lod_size(width);
+        const auto vec = (tie.from->position - tie.to->position);
+        const auto length = vec.magd();
+        Placement p;
+        p.set_angle_rad(get_view_angle());
+        if (get_flip_view())
+            p.invert_angle();
+        p.accumulate(Placement(center));
+        p.set_angle_rad(p.get_angle_rad() + atan2(vec.y, vec.x));
+        if (get_flip_view()) {
+            p.shift.x *= -1;
+            p.invert_angle();
+        }
+        draw_bitmap_text_box(p, length, width, tie.net_tie->net_primary->name + "<>" + tie.net_tie->net_secondary->name,
+                             ColorP::TEXT_OVERLAY, overlay_layer, TextBoxMode::FULL);
+        set_lod_size(-1);
+    }
+    if (interactive)
+        object_ref_pop();
+    if (img_mode)
+        return;
+    if (interactive)
+        selectables.append_line(tie.uuid, ObjectType::BOARD_NET_TIE, tie.from->position, tie.to->position, tie.width, 0,
+                                tie.layer);
 }
 
 void Canvas::render(const ConnectionLine &line)
@@ -1089,6 +1194,9 @@ void Canvas::render(const Sheet &sheet)
     for (const auto &it : sheet.block_symbols) {
         render(it.second);
     }
+    for (const auto &it : sheet.net_ties) {
+        render(it.second);
+    }
 }
 
 void Canvas::render(const Padstack &padstack, bool interactive)
@@ -1506,6 +1614,9 @@ void Canvas::render(const Board &brd, bool interactive, PanelMode mode, OutlineM
     }
     for (const auto &it : brd.decals) {
         render(it.second);
+    }
+    for (const auto &it : brd.net_ties) {
+        render(it.second, interactive);
     }
     if (mode == PanelMode::INCLUDE) {
         for (const auto &it : brd.board_panels) {

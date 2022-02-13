@@ -30,6 +30,10 @@ static const char *text_sym =
         "• No overlapping pins\n"
         "• Pin placement\n";
 
+static const char *text_net_ties =
+        "This rule checks if all net ties are correctly represented on the board:\n"
+        "• No missing net ties\n"
+        "• Net tie connects to its designated nets\n";
 
 void RuleEditorPackageChecks::populate()
 {
@@ -45,6 +49,10 @@ void RuleEditorPackageChecks::populate()
 
     case RuleID::SYMBOL_CHECKS:
         editor->set_text(text_sym);
+        break;
+
+    case RuleID::NET_TIES:
+        editor->set_text(text_net_ties);
         break;
 
     default:

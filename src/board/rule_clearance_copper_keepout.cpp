@@ -22,6 +22,9 @@ RuleClearanceCopperKeepout::RuleClearanceCopperKeepout(const UUID &uu, const jso
 
 uint64_t RuleClearanceCopperKeepout::get_clearance(PatchType pt) const
 {
+    if (pt == PatchType::NET_TIE)
+        pt = PatchType::TRACK;
+
     if (clearances.count(pt)) {
         return clearances.at(pt);
     }

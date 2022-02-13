@@ -1,6 +1,6 @@
 layout (std140) uniform layer_setup
 {
-	vec3 colors[20];
+	vec3 colors[21];
 	vec3 colors2[256];
 	mat3 screenmat;
 	mat3 viewmat;

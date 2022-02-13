@@ -114,6 +114,14 @@ Sheet::Sheet(const UUID &uu, const json &j, Block &block, IPool &pool, IBlockSym
                          Logger::Domain::SCHEMATIC);
         }
     }
+    if (j.count("net_ties")) {
+        const json &o = j["net_ties"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            load_and_log(net_ties, ObjectType::SCHEMATIC_NET_TIE, std::forward_as_tuple(u, it.value(), *this, block),
+                         Logger::Domain::SCHEMATIC);
+        }
+    }
 
     if (j.count("title_block_values")) {
         const json &o = j["title_block_values"];
@@ -284,6 +292,7 @@ void Sheet::update_junction_connections()
         it.connected_net_lines.clear();
         it.connected_power_symbols.clear();
         it.connected_net_labels.clear();
+        it.connected_net_ties.clear();
     }
     for (auto &[uu, it] : net_lines) {
         for (const auto &it_ft : {it.from, it.to}) {
@@ -308,6 +317,10 @@ void Sheet::update_junction_connections()
     }
     for (auto &[uu, it] : power_symbols) {
         it.junction->connected_power_symbols.push_back(uu);
+    }
+    for (auto &[uu, it] : net_ties) {
+        it.from->connected_net_ties.push_back(uu);
+        it.to->connected_net_ties.push_back(uu);
     }
 }
 
@@ -602,6 +615,23 @@ void Sheet::place_warnings(const std::map<UUID, NetSegmentInfo> &net_segments)
             warnings.emplace_back(it.second.from.get_position(), "Zero length line");
         }
     }
+    for (const auto &[uu, tie] : net_ties) {
+        const auto center = (tie.from->position + tie.to->position) / 2;
+        if (tie.from->position == tie.to->position)
+            warnings.emplace_back(center, "Zero length net tie");
+        if (tie.from->net == tie.net_tie->net_primary) {
+            // to must be secondary
+            if (tie.to->net != tie.net_tie->net_secondary)
+                warnings.emplace_back(center, "Net tie connected to incorrect net");
+        }
+        else if (tie.to->net == tie.net_tie->net_primary) {
+            if (tie.from->net != tie.net_tie->net_secondary)
+                warnings.emplace_back(center, "Net tie connected to incorrect net");
+        }
+        else {
+            warnings.emplace_back(center, "Net tie connected to incorrect net");
+        }
+    }
 }
 
 Block::NetPinsAndPorts Sheet::get_pins_connected_to_net_segment(const UUID &uu_segment)
@@ -831,6 +861,12 @@ json Sheet::serialize() const
     j["block_symbols"] = json::object();
     for (const auto &it : block_symbols) {
         j["block_symbols"][(std::string)it.first] = it.second.serialize();
+    }
+    if (net_ties.size()) {
+        j["net_ties"] = json::object();
+        for (const auto &it : net_ties) {
+            j["net_ties"][(std::string)it.first] = it.second.serialize();
+        }
     }
     return j;
 }

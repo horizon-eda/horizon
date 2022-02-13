@@ -33,7 +33,7 @@ BoardColors::BoardColors() : solder_mask({0, .5, 0}), silkscreen({1, 1, 1}), sub
 {
 }
 
-static const unsigned int app_version = 11;
+static const unsigned int app_version = 12;
 
 unsigned int Board::get_app_version()
 {
@@ -215,6 +215,20 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool)
                          Logger::Domain::BOARD);
         }
     }
+    if (j.count("net_ties")) {
+        const json &o = j["net_ties"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            UUID net_tie_uuid(it.value().at("net_tie").get<std::string>());
+            auto u = UUID(it.key());
+            if (block->net_ties.count(net_tie_uuid)) {
+                load_and_log(net_ties, ObjectType::BOARD_NET_TIE, std::forward_as_tuple(u, it.value(), this),
+                             Logger::Domain::BOARD);
+            }
+            else {
+                Logger::log_warning("not loading net tie " + (std::string)u + " since net tie in netlist is gone");
+            }
+        }
+    }
     if (j.count("rules")) {
         try {
             rules.load_from_json(j.at("rules"));
@@ -327,7 +341,7 @@ Board::Board(const Board &brd, CopyMode copy_mode)
       junctions(brd.junctions), tracks(brd.tracks), texts(brd.texts), lines(brd.lines), arcs(brd.arcs),
       planes(brd.planes), keepouts(brd.keepouts), dimensions(brd.dimensions), connection_lines(brd.connection_lines),
       included_boards(brd.included_boards), board_panels(brd.board_panels), pictures(brd.pictures), decals(brd.decals),
-      warnings(brd.warnings), rules(brd.rules), fab_output_settings(brd.fab_output_settings),
+      net_ties(brd.net_ties), warnings(brd.warnings), rules(brd.rules), fab_output_settings(brd.fab_output_settings),
       grid_settings(brd.grid_settings), airwires(brd.airwires), stackup(brd.stackup), colors(brd.colors),
       pdf_export_settings(brd.pdf_export_settings), step_export_settings(brd.step_export_settings),
       pnp_export_settings(brd.pnp_export_settings), version(brd.version), n_inner_layers(brd.n_inner_layers)
@@ -412,6 +426,10 @@ void Board::update_refs()
     for (auto &it : board_panels) {
         it.second.included_board.update(included_boards);
     }
+    for (auto &it : net_ties) {
+        it.second.net_tie.update(block->net_ties);
+        it.second.update_refs(*this);
+    }
 }
 
 void Board::update_junction_connections()
@@ -421,6 +439,7 @@ void Board::update_junction_connections()
         it.connected_connection_lines.clear();
         it.connected_tracks.clear();
         it.connected_vias.clear();
+        it.connected_net_ties.clear();
         it.has_via = false;
         it.needs_via = false;
     }
@@ -449,6 +468,12 @@ void Board::update_junction_connections()
         it.junction->has_via = true;
         it.junction->layer = LayerRange(BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER);
         it.junction->connected_vias.push_back(uu);
+    }
+    for (auto &[uu, it] : net_ties) {
+        for (auto &it_ft : {&it.from, &it.to}) {
+            (*it_ft)->connected_net_ties.push_back(uu);
+            (*it_ft)->layer.merge(it.layer);
+        }
     }
 }
 
@@ -631,7 +656,7 @@ void Board::vacuum_junctions()
     map_erase_if(junctions, [](auto &x) {
         const BoardJunction &ju = x.second;
         return (ju.connected_lines.size() == 0) && (ju.connected_arcs.size() == 0) && (ju.connected_tracks.size() == 0)
-               && (ju.connected_vias.size() == 0);
+               && (ju.connected_vias.size() == 0) && (ju.connected_net_ties.size() == 0);
     });
 }
 
@@ -1186,6 +1211,12 @@ json Board::serialize() const
         j["decals"] = json::object();
         for (const auto &it : decals) {
             j["decals"][(std::string)it.first] = it.second.serialize();
+        }
+    }
+    if (net_ties.size()) {
+        j["net_ties"] = json::object();
+        for (const auto &it : net_ties) {
+            j["net_ties"][(std::string)it.first] = it.second.serialize();
         }
     }
     return j;

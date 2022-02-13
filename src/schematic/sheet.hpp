@@ -18,6 +18,7 @@
 #include "common/picture.hpp"
 #include "schematic_junction.hpp"
 #include "schematic_block_symbol.hpp"
+#include "schematic_net_tie.hpp"
 #include <vector>
 #include <map>
 
@@ -58,6 +59,7 @@ public:
     std::map<UUID, Arc> arcs;
     std::map<UUID, Picture> pictures;
     std::map<UUID, SchematicBlockSymbol> block_symbols;
+    std::map<UUID, SchematicNetTie> net_ties;
     std::map<std::string, std::string> title_block_values;
     std::vector<Warning> warnings;
 

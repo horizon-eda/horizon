@@ -28,6 +28,7 @@
 #include "board_decal.hpp"
 #include "util/file_version.hpp"
 #include "common/grid_settings.hpp"
+#include "board_net_tie.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -112,6 +113,7 @@ public:
     std::map<UUID, BoardPanel> board_panels;
     std::map<UUID, Picture> pictures;
     std::map<UUID, BoardDecal> decals;
+    std::map<UUID, BoardNetTie> net_ties;
 
     std::vector<Warning> warnings;
 

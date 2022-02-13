@@ -139,6 +139,10 @@ SRC_COMMON = \
 	src/rules/rule_match_component.cpp\
 	src/common/pin_name_orientation.cpp\
 	src/util/pin_direction_accumulator.cpp\
+	src/block/net_tie.cpp\
+	src/schematic/schematic_net_tie.cpp\
+	src/board/board_net_tie.cpp\
+	src/board/rule_net_ties.cpp\
 
 
 ifeq ($(OS),Windows_NT)
@@ -339,6 +343,9 @@ SRC_IMP = \
 	src/core/tools/tool_helper_edit_plane.cpp\
 	src/core/tools/tool_manage_power_nets.cpp\
 	src/core/tools/tool_edit_text.cpp\
+	src/core/tools/tool_tie_nets.cpp\
+	src/core/tools/tool_draw_net_tie.cpp\
+	src/core/tools/tool_flip_net_tie.cpp\
 	src/document/documents.cpp\
 	src/core/clipboard/clipboard.cpp\
 	src/core/clipboard/clipboard_padstack.cpp\
@@ -385,6 +392,7 @@ SRC_IMP = \
 	src/dialogs/align_and_distribute_window.cpp\
 	src/dialogs/edit_text_window.cpp\
 	src/dialogs/plane_update.cpp\
+	src/dialogs/map_net_tie.cpp\
 	src/util/sort_controller.cpp\
 	src/core/core_symbol.cpp\
 	src/core/core_schematic.cpp\

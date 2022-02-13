@@ -36,6 +36,7 @@ public:
     std::optional<UUID> select_included_board(const class Board &brd);
     std::optional<UUID> select_decal(class IPool &pool);
     std::optional<UUID> select_block(const class BlocksSchematic &blocks);
+    std::optional<UUID> map_net_tie(const std::set<class NetTie *> &net_ties);
 
     unsigned int ask_net_merge(class Net &net, class Net &into);
     bool manage_buses(class Block &b);
