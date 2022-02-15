@@ -46,9 +46,9 @@ public:
     {
         return board;
     }
-    horizon::FabOutputSettings &get_fab_output_settings() override
+    horizon::GerberOutputSettings &get_gerber_output_settings() override
     {
-        return board.fab_output_settings;
+        return board.gerber_output_settings;
     }
     horizon::PDFExportSettings &get_pdf_export_settings() override
     {
@@ -118,7 +118,7 @@ static void PyBoard_dealloc(PyObject *pself)
 static PyObject *PyBoard_get_gerber_export_settings(PyObject *pself, PyObject *args)
 {
     auto self = reinterpret_cast<PyBoard *>(pself);
-    auto settings = self->board->board.fab_output_settings.serialize();
+    auto settings = self->board->board.gerber_output_settings.serialize();
     return py_from_json(settings);
 }
 
@@ -130,7 +130,7 @@ static PyObject *PyBoard_export_gerber(PyObject *pself, PyObject *args)
         return NULL;
     try {
         auto settings_json = json_from_py(py_export_settings);
-        horizon::FabOutputSettings settings(settings_json);
+        horizon::GerberOutputSettings settings(settings_json);
         horizon::GerberExporter ex(self->board->board, settings);
         ex.generate();
     }

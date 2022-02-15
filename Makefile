@@ -81,7 +81,7 @@ SRC_COMMON = \
 	src/board/rule_clearance_same_net.cpp\
 	3rd_party/delaunator/delaunator.cpp\
 	src/board/airwires.cpp\
-	src/board/fab_output_settings.cpp\
+	src/board/gerber_output_settings.cpp\
 	src/board/board_hole.cpp\
 	src/board/connection_line.cpp\
 	src/board/step_export_settings.cpp\

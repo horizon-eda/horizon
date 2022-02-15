@@ -152,7 +152,7 @@ std::string Project::create(const std::map<std::string, std::string> &meta, cons
         auto &rule_via = board.rules.add_rule_t<RuleVia>();
         rule_via.padstack = pool.default_via;
     }
-    board.fab_output_settings.prefix = name;
+    board.gerber_output_settings.prefix = name;
 
     board_filename = Glib::build_filename(base_path, "board.json");
     save_json_to_file(board_filename, board.serialize());

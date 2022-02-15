@@ -7,7 +7,7 @@
 namespace horizon {
 using json = nlohmann::json;
 
-class FabOutputSettings {
+class GerberOutputSettings {
 public:
     class GerberLayer {
     public:
@@ -20,8 +20,8 @@ public:
         bool enabled = true;
     };
 
-    FabOutputSettings(const json &);
-    FabOutputSettings()
+    GerberOutputSettings(const json &);
+    GerberOutputSettings()
     {
     }
     json serialize() const;

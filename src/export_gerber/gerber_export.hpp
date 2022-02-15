@@ -9,13 +9,13 @@ class GerberExporter {
     friend class CanvasGerber;
 
 public:
-    GerberExporter(const class Board &b, const class FabOutputSettings &s);
+    GerberExporter(const class Board &b, const class GerberOutputSettings &s);
     void generate();
     std::string get_log();
 
 private:
     const class Board &brd;
-    const class FabOutputSettings &settings;
+    const class GerberOutputSettings &settings;
     std::map<int, GerberWriter> writers;
     GerberWriter *get_writer_for_layer(int l);
     ExcellonWriter *get_drill_writer(bool pth);

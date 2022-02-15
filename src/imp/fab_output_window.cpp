@@ -12,19 +12,19 @@ namespace horizon {
 class GerberLayerEditor : public Gtk::Box, public Changeable {
 public:
     GerberLayerEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, FabOutputWindow &pa,
-                      FabOutputSettings::GerberLayer &la);
-    static GerberLayerEditor *create(FabOutputWindow &pa, FabOutputSettings::GerberLayer &la);
+                      GerberOutputSettings::GerberLayer &la);
+    static GerberLayerEditor *create(FabOutputWindow &pa, GerberOutputSettings::GerberLayer &la);
     FabOutputWindow &parent;
 
 private:
     Gtk::CheckButton *gerber_layer_checkbutton = nullptr;
     Gtk::Entry *gerber_layer_filename_entry = nullptr;
 
-    FabOutputSettings::GerberLayer &layer;
+    GerberOutputSettings::GerberLayer &layer;
 };
 
 GerberLayerEditor::GerberLayerEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, FabOutputWindow &pa,
-                                     FabOutputSettings::GerberLayer &la)
+                                     GerberOutputSettings::GerberLayer &la)
     : Gtk::Box(cobject), parent(pa), layer(la)
 {
     GET_WIDGET(gerber_layer_checkbutton);
@@ -38,7 +38,7 @@ GerberLayerEditor::GerberLayerEditor(BaseObjectType *cobject, const Glib::RefPtr
     gerber_layer_filename_entry->signal_changed().connect([this] { s_signal_changed.emit(); });
 }
 
-GerberLayerEditor *GerberLayerEditor::create(FabOutputWindow &pa, FabOutputSettings::GerberLayer &la)
+GerberLayerEditor *GerberLayerEditor::create(FabOutputWindow &pa, GerberOutputSettings::GerberLayer &la)
 {
     GerberLayerEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
@@ -50,7 +50,7 @@ GerberLayerEditor *GerberLayerEditor::create(FabOutputWindow &pa, FabOutputSetti
 
 FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IDocumentBoard &c,
                                  const std::string &project_dir)
-    : Gtk::Window(cobject), core(c), brd(*core.get_board()), settings(core.get_fab_output_settings()),
+    : Gtk::Window(cobject), core(c), brd(*core.get_board()), settings(core.get_gerber_output_settings()),
       state_store(this, "imp-fab-output")
 {
     GET_WIDGET(gerber_layers_box);
@@ -91,10 +91,10 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     bind_widget(zip_output_switch, settings.zip_output);
     zip_output_switch->property_active().signal_changed().connect([this] { s_signal_changed.emit(); });
 
-    drill_mode_combo->set_active_id(FabOutputSettings::mode_lut.lookup_reverse(settings.drill_mode));
+    drill_mode_combo->set_active_id(GerberOutputSettings::mode_lut.lookup_reverse(settings.drill_mode));
     drill_mode_combo->signal_changed().connect([this] {
         settings.drill_mode =
-                FabOutputSettings::mode_lut.lookup(static_cast<std::string>(drill_mode_combo->get_active_id()));
+                GerberOutputSettings::mode_lut.lookup(static_cast<std::string>(drill_mode_combo->get_active_id()));
         update_drill_visibility();
         s_signal_changed.emit();
         update_export_button();
@@ -132,7 +132,7 @@ void FabOutputWindow::reload_layers()
         for (auto ch : children)
             delete ch;
     }
-    std::vector<FabOutputSettings::GerberLayer *> layers_sorted;
+    std::vector<GerberOutputSettings::GerberLayer *> layers_sorted;
     layers_sorted.reserve(settings.layers.size());
     for (auto &la : settings.layers) {
         layers_sorted.push_back(&la.second);
@@ -154,7 +154,7 @@ void FabOutputWindow::reload_layers()
 
 void FabOutputWindow::update_drill_visibility()
 {
-    if (settings.drill_mode == FabOutputSettings::DrillMode::INDIVIDUAL) {
+    if (settings.drill_mode == GerberOutputSettings::DrillMode::INDIVIDUAL) {
         npth_filename_entry->set_visible(true);
         npth_filename_label->set_visible(true);
         pth_filename_label->set_text("PTH suffix");
@@ -191,7 +191,7 @@ void FabOutputWindow::generate()
     }
 
     try {
-        FabOutputSettings my_settings = settings;
+        GerberOutputSettings my_settings = settings;
         my_settings.output_directory = export_filechooser.get_filename_abs();
         my_settings.zip_output = zip_output_switch->get_active();
         GerberExporter ex(brd, my_settings);
@@ -221,7 +221,7 @@ void FabOutputWindow::update_export_button()
     if (can_export) {
         if (settings.output_directory.size()) {
             if (settings.prefix.size()) {
-                if (settings.drill_mode == FabOutputSettings::DrillMode::INDIVIDUAL) {
+                if (settings.drill_mode == GerberOutputSettings::DrillMode::INDIVIDUAL) {
                     if (settings.drill_pth_filename.size() == 0 || settings.drill_npth_filename.size() == 0) {
                         txt = "drill filenames not set";
                     }
