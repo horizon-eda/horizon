@@ -1,4 +1,4 @@
-#include "fab_output_settings.hpp"
+#include "gerber_output_settings.hpp"
 #include "board.hpp"
 #include "board_layers.hpp"
 #include "util/util.hpp"
@@ -6,12 +6,12 @@
 
 namespace horizon {
 
-const LutEnumStr<FabOutputSettings::DrillMode> FabOutputSettings::mode_lut = {
-        {"merged", FabOutputSettings::DrillMode::MERGED},
-        {"individual", FabOutputSettings::DrillMode::INDIVIDUAL},
+const LutEnumStr<GerberOutputSettings::DrillMode> GerberOutputSettings::mode_lut = {
+        {"merged", GerberOutputSettings::DrillMode::MERGED},
+        {"individual", GerberOutputSettings::DrillMode::INDIVIDUAL},
 };
 
-FabOutputSettings::GerberLayer::GerberLayer(int l) : layer(l)
+GerberOutputSettings::GerberLayer::GerberLayer(int l) : layer(l)
 {
     switch (layer) {
     case BoardLayers::L_OUTLINE:
@@ -44,12 +44,12 @@ FabOutputSettings::GerberLayer::GerberLayer(int l) : layer(l)
     }
 }
 
-FabOutputSettings::GerberLayer::GerberLayer(int l, const json &j)
+GerberOutputSettings::GerberLayer::GerberLayer(int l, const json &j)
     : layer(l), filename(j.at("filename").get<std::string>()), enabled(j.at("enabled"))
 {
 }
 
-json FabOutputSettings::GerberLayer::serialize() const
+json GerberOutputSettings::GerberLayer::serialize() const
 {
     json j;
     j["layer"] = layer;
@@ -58,7 +58,7 @@ json FabOutputSettings::GerberLayer::serialize() const
     return j;
 }
 
-FabOutputSettings::FabOutputSettings(const json &j)
+GerberOutputSettings::GerberOutputSettings(const json &j)
     : drill_pth_filename(j.at("drill_pth").get<std::string>()),
       drill_npth_filename(j.at("drill_npth").get<std::string>()), prefix(j.at("prefix").get<std::string>()),
       output_directory(j.at("output_directory").get<std::string>()), zip_output(j.value("zip_output", false))
@@ -75,7 +75,7 @@ FabOutputSettings::FabOutputSettings(const json &j)
     }
 }
 
-void FabOutputSettings::update_for_board(const Board &brd)
+void GerberOutputSettings::update_for_board(const Board &brd)
 {
     auto layers_from_board = brd.get_layers();
     // remove layers not on board
@@ -100,7 +100,7 @@ void FabOutputSettings::update_for_board(const Board &brd)
     add_layer(BoardLayers::BOTTOM_PASTE);
 }
 
-json FabOutputSettings::serialize() const
+json GerberOutputSettings::serialize() const
 {
     json j;
     j["drill_pth"] = drill_pth_filename;

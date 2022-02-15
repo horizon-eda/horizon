@@ -241,7 +241,7 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool)
     }
     if (j.count("fab_output_settings")) {
         try {
-            fab_output_settings = FabOutputSettings(j.at("fab_output_settings"));
+            gerber_output_settings = GerberOutputSettings(j.at("fab_output_settings"));
         }
         catch (const std::exception &e) {
             Logger::log_warning("couldn't load fab output settings", Logger::Domain::BOARD, e.what());
@@ -292,7 +292,7 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool)
             Logger::log_warning("couldn't load grid settings", Logger::Domain::BOARD, e.what());
         }
     }
-    fab_output_settings.update_for_board(*this);
+    gerber_output_settings.update_for_board(*this);
     update_pdf_export_settings(pdf_export_settings);
     update_refs(); // fill in smashed texts
 }
@@ -342,10 +342,11 @@ Board::Board(const Board &brd, CopyMode copy_mode)
       junctions(brd.junctions), tracks(brd.tracks), texts(brd.texts), lines(brd.lines), arcs(brd.arcs),
       planes(brd.planes), keepouts(brd.keepouts), dimensions(brd.dimensions), connection_lines(brd.connection_lines),
       included_boards(brd.included_boards), board_panels(brd.board_panels), pictures(brd.pictures), decals(brd.decals),
-      net_ties(brd.net_ties), warnings(brd.warnings), rules(brd.rules), fab_output_settings(brd.fab_output_settings),
-      grid_settings(brd.grid_settings), airwires(brd.airwires), stackup(brd.stackup), colors(brd.colors),
-      pdf_export_settings(brd.pdf_export_settings), step_export_settings(brd.step_export_settings),
-      pnp_export_settings(brd.pnp_export_settings), version(brd.version), n_inner_layers(brd.n_inner_layers)
+      net_ties(brd.net_ties), warnings(brd.warnings), rules(brd.rules),
+      gerber_output_settings(brd.gerber_output_settings), grid_settings(brd.grid_settings), airwires(brd.airwires),
+      stackup(brd.stackup), colors(brd.colors), pdf_export_settings(brd.pdf_export_settings),
+      step_export_settings(brd.step_export_settings), pnp_export_settings(brd.pnp_export_settings),
+      version(brd.version), n_inner_layers(brd.n_inner_layers)
 {
     if (copy_mode == CopyMode::DEEP) {
         packages = brd.packages;
@@ -516,7 +517,7 @@ void Board::set_n_inner_layers(unsigned int n)
         stackup.emplace(-j, -j);
     }
     map_erase_if(stackup, [this](const auto &x) { return layers.count(x.first) == 0; });
-    fab_output_settings.update_for_board(*this);
+    gerber_output_settings.update_for_board(*this);
     update_pdf_export_settings(pdf_export_settings);
 }
 
@@ -1122,7 +1123,7 @@ json Board::serialize() const
     j["name"] = name;
     j["n_inner_layers"] = n_inner_layers;
     j["rules"] = rules.serialize();
-    j["fab_output_settings"] = fab_output_settings.serialize();
+    j["fab_output_settings"] = gerber_output_settings.serialize();
     {
         json o;
         o["solder_mask"] = color_to_json(colors.solder_mask);

@@ -23,7 +23,7 @@ public:
 private:
     class IDocumentBoard &core;
     class Board &brd;
-    class FabOutputSettings &settings;
+    class GerberOutputSettings &settings;
     Gtk::ListBox *gerber_layers_box = nullptr;
     Gtk::Entry *npth_filename_entry = nullptr;
     Gtk::Entry *pth_filename_entry = nullptr;

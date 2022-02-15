@@ -29,9 +29,9 @@ public:
     const Board *get_board() const;
 
     class Rules *get_rules() override;
-    FabOutputSettings &get_fab_output_settings() override
+    GerberOutputSettings &get_gerber_output_settings() override
     {
-        return fab_output_settings;
+        return gerber_output_settings;
     }
     PDFExportSettings &get_pdf_export_settings() override
     {
@@ -79,7 +79,7 @@ private:
     std::optional<Board> brd;
 
     BoardRules rules;
-    FabOutputSettings fab_output_settings;
+    GerberOutputSettings gerber_output_settings;
     PDFExportSettings pdf_export_settings;
     STEPExportSettings step_export_settings;
     PnPExportSettings pnp_export_settings;

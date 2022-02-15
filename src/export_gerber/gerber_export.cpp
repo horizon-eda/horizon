@@ -1,13 +1,13 @@
 #include "gerber_export.hpp"
 #include "canvas_gerber.hpp"
 #include "board/board.hpp"
-#include "board/fab_output_settings.hpp"
+#include "board/gerber_output_settings.hpp"
 #include <glibmm/miscutils.h>
 #include "libzippp/zip.hpp"
 #include "board/board_layers.hpp"
 
 namespace horizon {
-GerberExporter::GerberExporter(const Board &b, const FabOutputSettings &s) : brd(b), settings(s)
+GerberExporter::GerberExporter(const Board &b, const GerberOutputSettings &s) : brd(b), settings(s)
 {
 
     for (const auto &it : settings.layers) {
@@ -18,7 +18,7 @@ GerberExporter::GerberExporter(const Board &b, const FabOutputSettings &s) : brd
 
     drill_writer_pth = std::make_unique<ExcellonWriter>(
             Glib::build_filename(settings.output_directory, settings.prefix + settings.drill_pth_filename));
-    if (settings.drill_mode == FabOutputSettings::DrillMode::INDIVIDUAL) {
+    if (settings.drill_mode == GerberOutputSettings::DrillMode::INDIVIDUAL) {
         drill_writer_npth = std::make_unique<ExcellonWriter>(
                 Glib::build_filename(settings.output_directory, settings.prefix + settings.drill_npth_filename));
     }
@@ -98,7 +98,7 @@ GerberWriter *GerberExporter::get_writer_for_layer(int l)
 
 ExcellonWriter *GerberExporter::get_drill_writer(bool pth)
 {
-    if (settings.drill_mode == FabOutputSettings::DrillMode::MERGED) {
+    if (settings.drill_mode == GerberOutputSettings::DrillMode::MERGED) {
         return drill_writer_pth.get();
     }
     else {
