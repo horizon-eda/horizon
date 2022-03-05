@@ -29,7 +29,7 @@ public:
     /**
      *  @return true if uuid is non-null, false otherwise
      */
-    operator bool() const;
+    explicit operator bool() const;
     const unsigned char *get_bytes() const
     {
         return uu;
