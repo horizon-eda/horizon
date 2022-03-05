@@ -531,15 +531,19 @@ void PartWizard::handle_import()
     GtkFileChooserNative *native =
             gtk_file_chooser_native_new("Open", gobj(), GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
     auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-    auto filter = Gtk::FileFilter::create();
-    filter->set_name("CSV documents");
-    filter->add_pattern("*.csv");
-    chooser->add_filter(filter);
-    filter = Gtk::FileFilter::create();
-    filter->set_name("json documents");
-    filter->add_pattern("*.json");
-    chooser->add_filter(filter);
-
+    {
+        auto filter = Gtk::FileFilter::create();
+        filter->set_name("Supported files (csv and json)");
+        filter->add_pattern("*.csv");
+        filter->add_pattern("*.json");
+        chooser->add_filter(filter);
+    }
+    {
+        auto filter = Gtk::FileFilter::create();
+        filter->set_name("All files");
+        filter->add_pattern("*");
+        chooser->add_filter(filter);
+    }
     if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         auto filename = chooser->get_filename();
         try {
