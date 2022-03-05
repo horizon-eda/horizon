@@ -97,7 +97,11 @@ private:
     public:
         std::string pin;
         std::string gate = "Main";
-        std::vector<std::string> alt;
+        struct AltName {
+            std::string name;
+            Pin::Direction direction = Pin::Direction::INPUT;
+        };
+        std::vector<AltName> alt;
         Pin::Direction direction = Pin::Direction::INPUT;
     };
     void import_pads(const json &j);

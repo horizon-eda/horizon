@@ -611,7 +611,7 @@ void PartWizard::import_pads(CSV::Csv &csv)
                 std::string alt = line[i];
                 trim(alt);
                 if (alt.size()) {
-                    item.alt.push_back(alt);
+                    item.alt.push_back({alt, item.direction});
                 }
             }
         }
@@ -631,7 +631,13 @@ void PartWizard::import_pads(const json &j)
         item.direction = Pin::direction_lut.lookup(v.value("direction", ""), Pin::Direction::INPUT);
         if (v.count("alt")) {
             for (const auto &a : v.at("alt")) {
-                item.alt.push_back(a.get<std::string>());
+                if (a.is_string()) {
+                    item.alt.push_back({a.get<std::string>(), item.direction});
+                }
+                else if (a.is_object()) {
+                    item.alt.push_back({a.at("name").get<std::string>(),
+                                        Pin::direction_lut.lookup(a.value("direction", ""), item.direction)});
+                }
             }
         }
     }
@@ -661,7 +667,7 @@ void PartWizard::import_pads(const std::map<std::string, PadImportItem> &items)
             ed->pin_names.clear();
             for (const auto &alt : it.alt) {
                 ed->pin_names.emplace(std::piecewise_construct, std::forward_as_tuple(UUID::random()),
-                                      std::forward_as_tuple(alt, Pin::Direction::BIDIRECTIONAL));
+                                      std::forward_as_tuple(alt.name, alt.direction));
             }
             ed->pin_names_editor->reload();
         }
