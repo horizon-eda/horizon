@@ -21,6 +21,7 @@ LIBS=(
 	libffi-7.dll\
 	libiconv-2.dll\
 	libpcre-1.dll\
+	libpcre2-8-0.dll\
 	libatkmm-1.6-1.dll\
 	libatk-1.0-0.dll\
 	libgtk-3-0.dll\
