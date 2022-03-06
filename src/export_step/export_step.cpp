@@ -61,15 +61,33 @@ namespace horizon {
 
 // adapted from https://github.com/KiCad/kicad-source-mirror/blob/master/utils/kicad2step/pcb/oce_utils.cpp
 
-static TopoDS_Shape face_from_countour(const ClipperLib::Path &contour)
+
+static TopoDS_Shape face_from_polyon(const Polygon &poly)
 {
     BRepBuilderAPI_MakeWire wire;
-    auto contour_sz = contour.size();
-    for (size_t i = 0; i < contour_sz; i++) {
-        auto pt1 = contour[i];
-        auto pt2 = contour[(i + 1) % contour_sz];
+    const auto sz = poly.vertices.size();
+    for (size_t i = 0; i < sz; i++) {
+        auto v1 = poly.vertices.at(i);
+        auto v2 = poly.vertices.at((i + 1) % sz);
         TopoDS_Edge edge;
-        edge = BRepBuilderAPI_MakeEdge(gp_Pnt(pt1.X / 1e6, pt1.Y / 1e6, 0.0), gp_Pnt(pt2.X / 1e6, pt2.Y / 1e6, 0.0));
+        const auto p1 = Coordd(v1.position) / 1e6;
+        const auto p2 = Coordd(v2.position) / 1e6;
+
+        if (v1.type == Polygon::Vertex::Type::LINE) {
+            edge = BRepBuilderAPI_MakeEdge(gp_Pnt(p1.x, p1.y, 0.0), gp_Pnt(p2.x, p2.y, 0.0));
+        }
+        else {
+            const auto c1 = Coordd(v1.arc_center) / 1e6;
+            const auto center = project_onto_perp_bisector(p1, p2, c1);
+            const auto radius = (center - p1).mag();
+
+            gp_Circ arc(gp_Ax2(gp_Pnt(center.x, center.y, 0.0), gp_Dir(0.0, 0.0, v1.arc_reverse ? -1.0 : 1.0)), radius);
+
+            gp_Pnt sa(p1.x, p1.y, 0.0);
+            gp_Pnt ea(p2.x, p2.y, 0.0);
+
+            edge = BRepBuilderAPI_MakeEdge(arc, sa, ea);
+        }
         wire.Add(edge);
     }
     return BRepBuilderAPI_MakeFace(wire);
@@ -388,29 +406,6 @@ void export_step(const std::string &filename, const Board &brd, class IPool &poo
         auto assy_label = assy->NewShape();
         TDataStd_Name::Set(assy_label, (prefix + "PCA").c_str());
 
-        progress_cb("Board outline…");
-        ClipperLib::Clipper cl;
-        {
-            CanvasPatch canvas;
-            canvas.update(brd);
-            for (const auto &it : canvas.get_patches()) {
-                if (it.first.layer == BoardLayers::L_OUTLINE) {
-                    cl.AddPaths(it.second, ClipperLib::ptSubject, true);
-                }
-            }
-        }
-        ClipperLib::PolyTree result;
-        cl.Execute(ClipperLib::ctUnion, result, ClipperLib::pftEvenOdd);
-
-        if (result.ChildCount() != 1) {
-            throw std::runtime_error("invalid board outline");
-        }
-
-        auto outline = result.Childs.front()->Contour;
-        if (outline.size() < 3) {
-            throw std::runtime_error("outline has less than 3 vertices");
-        }
-
         int64_t total_thickness = 0;
         for (const auto &it : brd.stackup) {
             if (it.second.layer != BoardLayers::BOTTOM_COPPER) {
@@ -418,64 +413,72 @@ void export_step(const std::string &filename, const Board &brd, class IPool &poo
             }
         }
 
-        progress_cb("Board cutouts…");
-        TopTools_ListOfShape cutouts;
-        for (const auto &hole_node : result.Childs.front()->Childs) {
-            auto hole_outline = hole_node->Contour;
-            cutouts.Append(face_from_countour(hole_outline));
+        progress_cb("Board outline…");
+
+        auto outline = brd.get_outline();
+        if (outline.outline.vertices.size()) { // board has valid outline
+            progress_cb("Board cutouts…");
+            TopTools_ListOfShape cutouts;
+
+            progress_cb("Holes…");
+            {
+                CanvasHole canvas_hole(cutouts);
+                canvas_hole.update(brd);
+            }
+            for (const auto &hole : outline.holes) {
+                cutouts.Append(face_from_polyon(hole));
+            }
+
+            progress_cb("Creating board…");
+            TopoDS_Shape board;
+            {
+
+                TopoDS_Shape board_face = face_from_polyon(outline.outline);
+                const auto v = gp_Vec(0, 0, total_thickness / 1e6);
+                if (!cutouts.IsEmpty()) {
+                    BRepAlgoAPI_Cut builder;
+
+                    TopTools_ListOfShape board_shapes;
+                    board_shapes.Append(board_face);
+
+                    builder.SetArguments(board_shapes);
+                    builder.SetTools(cutouts);
+                    builder.SetRunParallel(Standard_True);
+                    builder.Build();
+
+                    board = BRepPrimAPI_MakePrism(builder.Shape(), v);
+                }
+                else {
+                    board = BRepPrimAPI_MakePrism(board_face, v);
+                }
+            }
+
+            TDF_Label board_label = assy->AddShape(board, false);
+            assy->AddComponent(assy_label, board_label, board.Location());
+            TDataStd_Name::Set(board_label, (prefix + "PCB").c_str());
+
+            if (!board_label.IsNull()) {
+                Handle(XCAFDoc_ColorTool) color = XCAFDoc_DocumentTool::ColorTool(doc->Main());
+                Color c;
+                if (colors) {
+                    c = colors->solder_mask;
+                }
+                else {
+                    c = brd.colors.solder_mask;
+                }
+                Quantity_Color pcb_color(c.r, c.g, c.b, Quantity_TOC_RGB);
+                color->SetColor(board_label, pcb_color, XCAFDoc_ColorSurf);
+                TopExp_Explorer topex;
+                topex.Init(assy->GetShape(board_label), TopAbs_SOLID);
+
+                while (topex.More()) {
+                    color->SetColor(topex.Current(), pcb_color, XCAFDoc_ColorSurf);
+                    topex.Next();
+                }
+            }
         }
-
-        progress_cb("Holes…");
-        {
-            CanvasHole canvas_hole(cutouts);
-            canvas_hole.update(brd);
-        }
-
-        progress_cb("Creating board…");
-        TopoDS_Shape board;
-        {
-            TopoDS_Shape board_face = face_from_countour(outline);
-            const auto v = gp_Vec(0, 0, total_thickness / 1e6);
-            if (!cutouts.IsEmpty()) {
-                BRepAlgoAPI_Cut builder;
-
-                TopTools_ListOfShape board_shapes;
-                board_shapes.Append(board_face);
-
-                builder.SetArguments(board_shapes);
-                builder.SetTools(cutouts);
-                builder.SetRunParallel(Standard_True);
-                builder.Build();
-
-                board = BRepPrimAPI_MakePrism(builder.Shape(), v);
-            }
-            else {
-                board = BRepPrimAPI_MakePrism(board_face, v);
-            }
-        }
-
-        TDF_Label board_label = assy->AddShape(board, false);
-        assy->AddComponent(assy_label, board_label, board.Location());
-        TDataStd_Name::Set(board_label, (prefix + "PCB").c_str());
-
-        if (!board_label.IsNull()) {
-            Handle(XCAFDoc_ColorTool) color = XCAFDoc_DocumentTool::ColorTool(doc->Main());
-            Color c;
-            if (colors) {
-                c = colors->solder_mask;
-            }
-            else {
-                c = brd.colors.solder_mask;
-            }
-            Quantity_Color pcb_color(c.r, c.g, c.b, Quantity_TOC_RGB);
-            color->SetColor(board_label, pcb_color, XCAFDoc_ColorSurf);
-            TopExp_Explorer topex;
-            topex.Init(assy->GetShape(board_label), TopAbs_SOLID);
-
-            while (topex.More()) {
-                color->SetColor(topex.Current(), pcb_color, XCAFDoc_ColorSurf);
-                topex.Next();
-            }
+        else {
+            progress_cb("Invalid outline");
         }
 
         if (include_models) {
