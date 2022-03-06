@@ -10,6 +10,7 @@
 #include "pool/ipool.hpp"
 #include "common/junction_util.hpp"
 #include "util/bbox_accumulator.hpp"
+#include "util/polygon_arc_removal_proxy.hpp"
 
 namespace horizon {
 
@@ -1253,6 +1254,200 @@ ItemSet Board::get_pool_items_used() const
         items_needed.emplace(ObjectType::DECAL, it_decal.second.get_decal().uuid);
     }
     return items_needed;
+}
+
+static Polygon transform_polygon(const Polygon &poly, const Placement &tr)
+{
+    Polygon out{UUID()};
+
+    out.vertices.reserve(poly.vertices.size());
+    for (const auto &v : poly.vertices) {
+        out.vertices.emplace_back(tr.transform(v.position));
+        auto &vo = out.vertices.back();
+        if (v.type == Polygon::Vertex::Type::ARC) {
+            vo.type = v.type;
+            vo.arc_center = tr.transform(v.arc_center);
+            vo.arc_reverse = v.arc_reverse != tr.mirror;
+        }
+    }
+    return out;
+}
+
+static ClipperLib::Path polygon_to_path(const Polygon &ipoly)
+{
+    PolygonArcRemovalProxy prx(ipoly);
+    const auto &vs = prx.get().vertices;
+    ClipperLib::Path out;
+    out.reserve(vs.size());
+    for (const auto &v : vs) {
+        out.emplace_back(v.position.x, v.position.y);
+    }
+
+    return out;
+}
+
+struct PolyInfo {
+    PolyInfo(const Polygon &p) : polygon(p), path(polygon_to_path(polygon)){};
+    Polygon polygon;
+    const ClipperLib::Path path;
+    bool encloses_all_others = true;
+
+    bool encloses(const PolyInfo &other) const
+    {
+        ClipperLib::Clipper clipper;
+        clipper.AddPath(other.path, ClipperLib::ptSubject, true);
+        clipper.AddPath(path, ClipperLib::ptClip, true);
+
+        ClipperLib::Paths result;
+        clipper.Execute(ClipperLib::ctDifference, result, ClipperLib::pftNonZero);
+        return result.size() == 0;
+    }
+
+    ClipperLib::Paths intersects(const PolyInfo &other) const
+    {
+        ClipperLib::Clipper clipper;
+        clipper.AddPath(other.path, ClipperLib::ptSubject, true);
+        clipper.AddPath(path, ClipperLib::ptClip, true);
+
+        ClipperLib::Paths result;
+        clipper.Execute(ClipperLib::ctIntersection, result, ClipperLib::pftNonZero);
+        return result;
+    }
+};
+
+Board::Outline Board::get_outline(bool with_errors) const
+{
+    std::vector<PolyInfo> polys;
+    for (const auto &[uu, it] : polygons) {
+        if (it.layer == BoardLayers::L_OUTLINE)
+            polys.emplace_back(it);
+    }
+    for (const auto &[uu_pkg, pkg] : packages) {
+        if (!pkg.omit_outline) {
+            for (const auto &[uu, it] : pkg.package.polygons) {
+                if (it.layer == BoardLayers::L_OUTLINE) {
+                    Placement tr = pkg.placement;
+                    if (pkg.flip)
+                        tr.invert_angle();
+                    polys.emplace_back(transform_polygon(it, tr));
+                }
+            }
+        }
+    }
+
+    if (polys.size() == 0) {
+        Outline out{UUID()};
+        if (with_errors) {
+            out.errors.errors.emplace_back(RulesCheckErrorLevel::FAIL, "Found no outline polygons");
+            out.errors.update();
+        }
+        return out;
+    }
+
+
+    if (polys.size() == 1) {
+        const auto &outline_poly = polys.front();
+        Board::Outline outline{outline_poly.polygon, {}};
+        // On Y-axis positive upward displays, Orientation will return true if the polygon's orientation is
+        // counter-clockwise.
+
+        if (ClipperLib::Orientation(outline_poly.path))
+            outline.outline.reverse();
+
+        return outline;
+    }
+
+    // one of polys must be enclosing all others
+    for (size_t i = 0; i < polys.size(); i++) {
+        for (size_t j = 0; j < polys.size(); j++) {
+            if (i != j) {
+                if (!polys.at(i).encloses(polys.at(j))) {
+                    polys.at(i).encloses_all_others = false;
+                }
+            }
+        }
+    }
+
+    size_t outline_idx = SIZE_MAX;
+    for (size_t i = 0; i < polys.size(); i++) {
+        if (polys.at(i).encloses_all_others) {
+            if (outline_idx == SIZE_MAX) {
+                outline_idx = i;
+            }
+            else {
+                Outline out{UUID()};
+                if (with_errors) {
+                    out.errors.errors.emplace_back(RulesCheckErrorLevel::FAIL,
+                                                   "More than one outline polygon encloses all others");
+                    out.errors.update();
+                }
+                return out;
+            }
+        }
+    }
+
+    if (outline_idx == SIZE_MAX) {
+        Outline out{UUID()};
+        if (with_errors) {
+            out.errors.errors.emplace_back(RulesCheckErrorLevel::FAIL, "No outline polygon encloses all others");
+            out.errors.update();
+        }
+        return out;
+    }
+
+    const auto &outline_poly = polys.at(outline_idx);
+    Board::Outline outline{outline_poly.polygon, {}};
+    // On Y-axis positive upward displays, Orientation will return true if the polygon's orientation is
+    // counter-clockwise.
+
+    if (ClipperLib::Orientation(outline_poly.path))
+        outline.outline.reverse();
+
+    // make sure that holes don't intersect
+    for (size_t i = 0; i < polys.size(); i++) {
+        for (size_t j = i + 1; j < polys.size(); j++) {
+            if (i != outline_idx && j != outline_idx) {
+                if (auto isect = polys.at(i).intersects(polys.at(j)); isect.size()) {
+                    Outline out{UUID()};
+                    if (with_errors) {
+                        for (const auto &path : isect) {
+                            out.errors.errors.emplace_back(RulesCheckErrorLevel::FAIL, "Hole intersects other hole");
+                            auto &x = out.errors.errors.back();
+                            x.has_location = true;
+                            x.location.x = path.front().X;
+                            x.location.y = path.front().Y;
+                            x.error_polygons = {path};
+                        }
+                        out.errors.update();
+                    }
+                    return out;
+                }
+            }
+        }
+    }
+
+    outline.holes.reserve(polys.size() - 1);
+    for (size_t i = 0; i < polys.size(); i++) {
+        if (i != outline_idx) {
+            const auto &p = polys.at(i);
+            outline.holes.emplace_back(p.polygon);
+            if (!ClipperLib::Orientation(p.path))
+                outline.holes.back().reverse();
+        }
+    }
+
+    return outline;
+}
+
+Board::Outline Board::get_outline() const
+{
+    return get_outline(false);
+}
+
+
+Board::Outline Board::get_outline_and_errors() const
+{
+    return get_outline(true);
 }
 
 } // namespace horizon
