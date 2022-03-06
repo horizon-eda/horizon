@@ -175,4 +175,42 @@ json Polygon::serialize() const
 
     return j;
 }
+
+bool Polygon::is_cw() const
+{
+    return !is_ccw();
+}
+
+bool Polygon::is_ccw() const
+{
+    PolygonArcRemovalProxy prx(*this, 2);
+    const auto &vs = prx.get().vertices;
+    // adapted from ClipperLib::Area
+    int size = (int)vs.size();
+    if (size < 3)
+        return false;
+
+    double a = 0;
+    for (int i = 0, j = size - 1; i < size; ++i) {
+        a += ((double)vs.at(j).position.x + vs.at(i).position.x) * ((double)vs.at(j).position.y - vs.at(i).position.y);
+        j = i;
+    }
+    return a < 0;
+}
+
+void Polygon::reverse()
+{
+    std::reverse(vertices.begin(), vertices.end());
+
+    // roll arcs type by one
+    for (size_t i = 0; i < (vertices.size() - 1); i++) {
+        std::swap(vertices.at(i).type, vertices.at(i + 1).type);
+        std::swap(vertices.at(i).arc_center, vertices.at(i + 1).arc_center);
+        std::swap(vertices.at(i).arc_reverse, vertices.at(i + 1).arc_reverse);
+    }
+    for (auto &it : vertices) {
+        it.arc_reverse = !it.arc_reverse;
+    }
+}
+
 } // namespace horizon
