@@ -15,12 +15,19 @@ void ToolDrawPolygonCircle::update_polygon()
 {
     temp->vertices.clear();
     if (step == 1) {
-        temp->vertices.emplace_back(second_pos);
-        temp->vertices.emplace_back(second_pos);
-        auto &x = temp->vertices.back();
-        x.type = Polygon::Vertex::Type::ARC;
-        x.arc_center = first_pos;
-        x.arc_reverse = true;
+        const auto v = second_pos - first_pos;
+        temp->vertices.emplace_back(first_pos + v);
+        {
+            auto &x = temp->vertices.back();
+            x.type = Polygon::Vertex::Type::ARC;
+            x.arc_center = first_pos;
+        }
+        temp->vertices.emplace_back(first_pos - v);
+        {
+            auto &x = temp->vertices.back();
+            x.type = Polygon::Vertex::Type::ARC;
+            x.arc_center = first_pos;
+        }
     }
 }
 
