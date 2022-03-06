@@ -29,7 +29,6 @@ json RulesCheckResult::serialize() const
 {
     json j;
     j["level"] = level_names.at(level);
-    j["comment"] = comment;
     auto a = json::array();
     for (const auto &it : errors) {
         a.push_back(it.serialize());
