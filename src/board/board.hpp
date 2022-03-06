@@ -164,6 +164,16 @@ public:
     int get_package_layer(bool flip, int layer) const;
     ParameterSet get_parameters() const;
 
+    struct Outline {
+        Polygon outline;            // clockwise
+        std::vector<Polygon> holes; // counter-clockwise
+
+        RulesCheckResult errors;
+    };
+
+    Outline get_outline() const;
+    Outline get_outline_and_errors() const;
+
 private:
     unsigned int n_inner_layers = 0;
     ClipperLib::Paths get_thermals(class Plane *plane, const class CanvasPads *ca) const;
@@ -172,6 +182,7 @@ private:
 
     Board(const Board &brd, CopyMode copy_mode);
     void expand_packages();
+    Outline get_outline(bool with_errors) const;
 };
 
 inline Board::ExpandFlags operator|(Board::ExpandFlags a, Board::ExpandFlags b)

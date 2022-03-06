@@ -919,6 +919,13 @@ RulesCheckResult BoardRules::check_preflight(const Board &brd) const
         }
     }
 
+    {
+        auto outline_errors = brd.get_outline_and_errors();
+        for (const auto &e : outline_errors.errors.errors) {
+            r.errors.emplace_back(e);
+        }
+    }
+
     r.update();
     return r;
 }
