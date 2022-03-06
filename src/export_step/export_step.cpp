@@ -378,173 +378,180 @@ void export_step(const std::string &filename, const Board &brd, class IPool &poo
                  std::function<void(const std::string &)> progress_cb, const BoardColors *colors,
                  const std::string &prefix)
 {
-    auto app = XCAFApp_Application::GetApplication();
-    Handle(TDocStd_Document) doc;
-    app->NewDocument("MDTV-XCAF", doc);
-    XCAFDoc_ShapeTool::SetAutoNaming(false);
-    BRepBuilderAPI::Precision(1.0e-6);
-    auto assy = XCAFDoc_DocumentTool::ShapeTool(doc->Main());
-    auto assy_label = assy->NewShape();
-    TDataStd_Name::Set(assy_label, (prefix + "PCA").c_str());
+    try {
+        auto app = XCAFApp_Application::GetApplication();
+        Handle(TDocStd_Document) doc;
+        app->NewDocument("MDTV-XCAF", doc);
+        XCAFDoc_ShapeTool::SetAutoNaming(false);
+        BRepBuilderAPI::Precision(1.0e-6);
+        auto assy = XCAFDoc_DocumentTool::ShapeTool(doc->Main());
+        auto assy_label = assy->NewShape();
+        TDataStd_Name::Set(assy_label, (prefix + "PCA").c_str());
 
-    progress_cb("Board outline…");
-    ClipperLib::Clipper cl;
-    {
-        CanvasPatch canvas;
-        canvas.update(brd);
-        for (const auto &it : canvas.get_patches()) {
-            if (it.first.layer == BoardLayers::L_OUTLINE) {
-                cl.AddPaths(it.second, ClipperLib::ptSubject, true);
-            }
-        }
-    }
-    ClipperLib::PolyTree result;
-    cl.Execute(ClipperLib::ctUnion, result, ClipperLib::pftEvenOdd);
-
-    if (result.ChildCount() != 1) {
-        throw std::runtime_error("invalid board outline");
-    }
-
-    auto outline = result.Childs.front()->Contour;
-    if (outline.size() < 3) {
-        throw std::runtime_error("outline has less than 3 vertices");
-    }
-
-    int64_t total_thickness = 0;
-    for (const auto &it : brd.stackup) {
-        if (it.second.layer != BoardLayers::BOTTOM_COPPER) {
-            total_thickness += it.second.substrate_thickness;
-        }
-    }
-
-    progress_cb("Board cutouts…");
-    TopTools_ListOfShape cutouts;
-    for (const auto &hole_node : result.Childs.front()->Childs) {
-        auto hole_outline = hole_node->Contour;
-        cutouts.Append(face_from_countour(hole_outline));
-    }
-
-    progress_cb("Holes…");
-    {
-        CanvasHole canvas_hole(cutouts);
-        canvas_hole.update(brd);
-    }
-
-    progress_cb("Creating board…");
-    TopoDS_Shape board;
-    {
-        TopoDS_Shape board_face = face_from_countour(outline);
-        const auto v = gp_Vec(0, 0, total_thickness / 1e6);
-        if (!cutouts.IsEmpty()) {
-            BRepAlgoAPI_Cut builder;
-
-            TopTools_ListOfShape board_shapes;
-            board_shapes.Append(board_face);
-
-            builder.SetArguments(board_shapes);
-            builder.SetTools(cutouts);
-            builder.SetRunParallel(Standard_True);
-            builder.Build();
-
-            board = BRepPrimAPI_MakePrism(builder.Shape(), v);
-        }
-        else {
-            board = BRepPrimAPI_MakePrism(board_face, v);
-        }
-    }
-
-    TDF_Label board_label = assy->AddShape(board, false);
-    assy->AddComponent(assy_label, board_label, board.Location());
-    TDataStd_Name::Set(board_label, (prefix + "PCB").c_str());
-
-    if (!board_label.IsNull()) {
-        Handle(XCAFDoc_ColorTool) color = XCAFDoc_DocumentTool::ColorTool(doc->Main());
-        Color c;
-        if (colors) {
-            c = colors->solder_mask;
-        }
-        else {
-            c = brd.colors.solder_mask;
-        }
-        Quantity_Color pcb_color(c.r, c.g, c.b, Quantity_TOC_RGB);
-        color->SetColor(board_label, pcb_color, XCAFDoc_ColorSurf);
-        TopExp_Explorer topex;
-        topex.Init(assy->GetShape(board_label), TopAbs_SOLID);
-
-        while (topex.More()) {
-            color->SetColor(topex.Current(), pcb_color, XCAFDoc_ColorSurf);
-            topex.Next();
-        }
-    }
-
-    if (include_models) {
-        progress_cb("Packages…");
-        size_t i = 1;
-        std::vector<const BoardPackage *> pkgs;
-        pkgs.reserve(brd.packages.size());
-        for (const auto &[uuid, package] : brd.packages) {
-            if (package.component && package.component->nopopulate) {
-                continue;
-            }
-            pkgs.push_back(&package);
-        }
-        auto n_pkg = std::to_string(pkgs.size());
-        std::sort(pkgs.begin(), pkgs.end(),
-                  [](auto a, auto b) { return strcmp_natural(a->component->refdes, b->component->refdes) < 0; });
-
-        for (const auto it : pkgs) {
-            try {
-                auto model = it->package.get_model(it->model);
-                if (model) {
-                    progress_cb("Package " + it->component->refdes + " (" + std::to_string(i) + "/" + n_pkg + ")");
-                    TDF_Label lmodel;
-
-                    if (!getModelLabel(pool.get_model_filename(it->package.uuid, model->uuid), lmodel, app, doc,
-                                       prefix + it->component->refdes)) {
-                        throw std::runtime_error("get model label");
-                    }
-
-                    TopLoc_Location toploc;
-                    DOUBLET pos(it->placement.shift.x / 1e6, it->placement.shift.y / -1e6);
-                    double rot = angle_to_rad(it->placement.get_angle());
-                    TRIPLET offset(model->x / 1e6, model->y / 1e6, model->z / 1e6);
-                    TRIPLET orientation(angle_to_rad(model->roll), angle_to_rad(model->pitch),
-                                        angle_to_rad(model->yaw));
-                    getModelLocation(it->flip, pos, rot, offset, orientation, toploc, total_thickness / 1e6);
-
-                    assy->AddComponent(assy_label, lmodel, toploc);
-
-                    TCollection_ExtendedString refdes((prefix + it->component->refdes).c_str());
-                    TDataStd_Name::Set(lmodel, refdes);
+        progress_cb("Board outline…");
+        ClipperLib::Clipper cl;
+        {
+            CanvasPatch canvas;
+            canvas.update(brd);
+            for (const auto &it : canvas.get_patches()) {
+                if (it.first.layer == BoardLayers::L_OUTLINE) {
+                    cl.AddPaths(it.second, ClipperLib::ptSubject, true);
                 }
             }
-            catch (const std::exception &e) {
-                progress_cb("Error processing package " + it->component->refdes + ": " + e.what());
-            }
-            i++;
         }
-    }
-    progress_cb("Writing output file");
+        ClipperLib::PolyTree result;
+        cl.Execute(ClipperLib::ctUnion, result, ClipperLib::pftEvenOdd);
+
+        if (result.ChildCount() != 1) {
+            throw std::runtime_error("invalid board outline");
+        }
+
+        auto outline = result.Childs.front()->Contour;
+        if (outline.size() < 3) {
+            throw std::runtime_error("outline has less than 3 vertices");
+        }
+
+        int64_t total_thickness = 0;
+        for (const auto &it : brd.stackup) {
+            if (it.second.layer != BoardLayers::BOTTOM_COPPER) {
+                total_thickness += it.second.substrate_thickness;
+            }
+        }
+
+        progress_cb("Board cutouts…");
+        TopTools_ListOfShape cutouts;
+        for (const auto &hole_node : result.Childs.front()->Childs) {
+            auto hole_outline = hole_node->Contour;
+            cutouts.Append(face_from_countour(hole_outline));
+        }
+
+        progress_cb("Holes…");
+        {
+            CanvasHole canvas_hole(cutouts);
+            canvas_hole.update(brd);
+        }
+
+        progress_cb("Creating board…");
+        TopoDS_Shape board;
+        {
+            TopoDS_Shape board_face = face_from_countour(outline);
+            const auto v = gp_Vec(0, 0, total_thickness / 1e6);
+            if (!cutouts.IsEmpty()) {
+                BRepAlgoAPI_Cut builder;
+
+                TopTools_ListOfShape board_shapes;
+                board_shapes.Append(board_face);
+
+                builder.SetArguments(board_shapes);
+                builder.SetTools(cutouts);
+                builder.SetRunParallel(Standard_True);
+                builder.Build();
+
+                board = BRepPrimAPI_MakePrism(builder.Shape(), v);
+            }
+            else {
+                board = BRepPrimAPI_MakePrism(board_face, v);
+            }
+        }
+
+        TDF_Label board_label = assy->AddShape(board, false);
+        assy->AddComponent(assy_label, board_label, board.Location());
+        TDataStd_Name::Set(board_label, (prefix + "PCB").c_str());
+
+        if (!board_label.IsNull()) {
+            Handle(XCAFDoc_ColorTool) color = XCAFDoc_DocumentTool::ColorTool(doc->Main());
+            Color c;
+            if (colors) {
+                c = colors->solder_mask;
+            }
+            else {
+                c = brd.colors.solder_mask;
+            }
+            Quantity_Color pcb_color(c.r, c.g, c.b, Quantity_TOC_RGB);
+            color->SetColor(board_label, pcb_color, XCAFDoc_ColorSurf);
+            TopExp_Explorer topex;
+            topex.Init(assy->GetShape(board_label), TopAbs_SOLID);
+
+            while (topex.More()) {
+                color->SetColor(topex.Current(), pcb_color, XCAFDoc_ColorSurf);
+                topex.Next();
+            }
+        }
+
+        if (include_models) {
+            progress_cb("Packages…");
+            size_t i = 1;
+            std::vector<const BoardPackage *> pkgs;
+            pkgs.reserve(brd.packages.size());
+            for (const auto &[uuid, package] : brd.packages) {
+                if (package.component && package.component->nopopulate) {
+                    continue;
+                }
+                pkgs.push_back(&package);
+            }
+            auto n_pkg = std::to_string(pkgs.size());
+            std::sort(pkgs.begin(), pkgs.end(),
+                      [](auto a, auto b) { return strcmp_natural(a->component->refdes, b->component->refdes) < 0; });
+
+            for (const auto it : pkgs) {
+                try {
+                    auto model = it->package.get_model(it->model);
+                    if (model) {
+                        progress_cb("Package " + it->component->refdes + " (" + std::to_string(i) + "/" + n_pkg + ")");
+                        TDF_Label lmodel;
+
+                        if (!getModelLabel(pool.get_model_filename(it->package.uuid, model->uuid), lmodel, app, doc,
+                                           prefix + it->component->refdes)) {
+                            throw std::runtime_error("get model label");
+                        }
+
+                        TopLoc_Location toploc;
+                        DOUBLET pos(it->placement.shift.x / 1e6, it->placement.shift.y / -1e6);
+                        double rot = angle_to_rad(it->placement.get_angle());
+                        TRIPLET offset(model->x / 1e6, model->y / 1e6, model->z / 1e6);
+                        TRIPLET orientation(angle_to_rad(model->roll), angle_to_rad(model->pitch),
+                                            angle_to_rad(model->yaw));
+                        getModelLocation(it->flip, pos, rot, offset, orientation, toploc, total_thickness / 1e6);
+
+                        assy->AddComponent(assy_label, lmodel, toploc);
+
+                        TCollection_ExtendedString refdes((prefix + it->component->refdes).c_str());
+                        TDataStd_Name::Set(lmodel, refdes);
+                    }
+                }
+                catch (const std::exception &e) {
+                    progress_cb("Error processing package " + it->component->refdes + ": " + e.what());
+                }
+                i++;
+            }
+        }
+        progress_cb("Writing output file");
 #if OCC_VERSION_MAJOR >= 7 && OCC_VERSION_MINOR >= 2
-    assy->UpdateAssemblies();
+        assy->UpdateAssemblies();
 #endif
-    STEPCAFControl_Writer writer;
-    writer.SetColorMode(Standard_True);
-    writer.SetNameMode(Standard_True);
-    if (Standard_False == writer.Transfer(doc, STEPControl_AsIs)) {
-        throw std::runtime_error("transfer error");
+        STEPCAFControl_Writer writer;
+        writer.SetColorMode(Standard_True);
+        writer.SetNameMode(Standard_True);
+        if (Standard_False == writer.Transfer(doc, STEPControl_AsIs)) {
+            throw std::runtime_error("transfer error");
+        }
+
+        APIHeaderSection_MakeHeader hdr(writer.ChangeWriter().Model());
+        hdr.SetName(new TCollection_HAsciiString("Board"));
+        hdr.SetAuthorValue(1, new TCollection_HAsciiString("An Author"));
+        hdr.SetOrganizationValue(1, new TCollection_HAsciiString("A Company"));
+        hdr.SetOriginatingSystem(new TCollection_HAsciiString("horizon EDA"));
+        hdr.SetDescriptionValue(1, new TCollection_HAsciiString("Electronic assembly"));
+
+        if (Standard_False == writer.Write(filename.c_str()))
+            throw std::runtime_error("write error");
+
+        progress_cb("Done");
     }
-
-    APIHeaderSection_MakeHeader hdr(writer.ChangeWriter().Model());
-    hdr.SetName(new TCollection_HAsciiString("Board"));
-    hdr.SetAuthorValue(1, new TCollection_HAsciiString("An Author"));
-    hdr.SetOrganizationValue(1, new TCollection_HAsciiString("A Company"));
-    hdr.SetOriginatingSystem(new TCollection_HAsciiString("horizon EDA"));
-    hdr.SetDescriptionValue(1, new TCollection_HAsciiString("Electronic assembly"));
-
-    if (Standard_False == writer.Write(filename.c_str()))
-        throw std::runtime_error("write error");
-
-    progress_cb("Done");
+    catch (const Standard_Failure &e) {
+        std::ostringstream os;
+        e.Print(os);
+        throw std::runtime_error(os.str());
+    }
 }
 } // namespace horizon
