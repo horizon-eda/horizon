@@ -77,6 +77,21 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
         sel_erase_type(sel, ObjectType::POLYGON_VERTEX);
     }
 
+
+    if (auto it = sel_find_exactly_one(sel, ObjectType::POLYGON_ARC_CENTER)) {
+        s += "\n\n<b>" + object_descriptions.at(ObjectType::POLYGON_ARC_CENTER).name + "</b>\n";
+        const auto poly = core->get_polygon(it->uuid);
+        s += coord_to_string(poly->vertices.at(it->vertex).arc_center);
+        if (preferences.hud_debug) {
+            s += "\nVertex: " + std::to_string(it->vertex);
+            if (poly->vertices.at(it->vertex).arc_reverse)
+                s += "\nReversed (CW)";
+            else
+                s += "\nNot reversed (CCW)";
+        }
+        sel_erase_type(sel, ObjectType::POLYGON_ARC_CENTER);
+    }
+
     if (preferences.hud_debug) {
         if (auto it = sel_find_exactly_one(sel, ObjectType::TEXT)) {
             const auto txt = core->get_text(it->uuid);
