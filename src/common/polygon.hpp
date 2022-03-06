@@ -69,6 +69,11 @@ public:
     bool is_valid() const;
     std::pair<Coordi, Coordi> get_bbox() const;
 
+    bool is_cw() const;
+    bool is_ccw() const;
+
+    void reverse();
+
     UUID uuid;
     std::vector<Vertex> vertices;
     int layer = 0;
