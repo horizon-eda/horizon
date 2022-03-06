@@ -44,7 +44,6 @@ public:
 
 
     RulesCheckErrorLevel level = RulesCheckErrorLevel::NOT_RUN;
-    std::string comment;
 
     std::deque<RulesCheckError> errors;
 };
