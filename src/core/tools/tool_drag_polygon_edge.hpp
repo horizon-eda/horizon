@@ -33,6 +33,7 @@ private:
         Coordi arc_center_orig;
     };
     std::optional<PolyInfo> poly_info;
+    bool circle_mode = false;
 
     class Polygon *poly = nullptr;
     unsigned int edge = 0;
