@@ -103,33 +103,27 @@ void Canvas::draw_circle(const Coord<float> &center, float radius, ColorP color,
 }
 
 
-std::pair<Coordf, Coordf> Canvas::draw_arc2(const Coordf &center, float radius0, float a0, float a1, ColorP color,
-                                            int layer, uint64_t width)
+void Canvas::draw_arc2(const Coordf &center, float radius0, float a0, float a1, ColorP color, int layer, uint64_t width)
 {
-    unsigned int segments = 64;
-    a0 = c2pi(a0);
-    a1 = c2pi(a1);
+    if (img_mode) {
+        unsigned int segments = 64;
+        a0 = c2pi(a0);
+        a1 = c2pi(a1);
 
-    float dphi = c2pi(a1 - a0);
-    dphi /= segments;
-    std::pair<Coordf, Coordf> bb(center + Coordf::euler(radius0, a0), center + Coordf::euler(radius0, a0));
-    float a = a0;
-    while (segments--) {
-        Coordf p0 = center + Coordf::euler(radius0, a);
-        Coordf p1 = center + Coordf::euler(radius0, a + dphi);
-        bb.first = Coordf::min(bb.first, p0);
-        bb.first = Coordf::min(bb.first, p1);
-        bb.second = Coordf::max(bb.second, p0);
-        bb.second = Coordf::max(bb.second, p1);
-        if (img_mode)
+        float dphi = c2pi(a1 - a0);
+        dphi /= segments;
+        float a = a0;
+        while (segments--) {
+            Coordf p0 = center + Coordf::euler(radius0, a);
+            Coordf p1 = center + Coordf::euler(radius0, a + dphi);
             img_line(Coordi(p0.x, p0.y), Coordi(p1.x, p1.y), width, layer, true);
 
-        a += dphi;
+            a += dphi;
+        }
     }
-    if (!img_mode)
+    else {
         draw_arc0(center, radius0, a0, a1, color, layer, width);
-
-    return bb;
+    }
 }
 
 void Canvas::draw_arc0(const Coordf &center, float radius0, float a0, float a1, ColorP color, int layer, uint64_t width)
