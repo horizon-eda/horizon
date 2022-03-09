@@ -42,4 +42,8 @@ void Canvas::img_line(const Coordi &p0, const Coordi &p1, uint64_t width, int la
     img_polygon(polyr, tr);
 }
 
+void Canvas::img_arc(const Arc &arc)
+{
+}
+
 } // namespace horizon

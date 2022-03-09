@@ -214,6 +214,11 @@ protected:
     {
     }
     virtual void img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, int layer = 10000, bool tr = true);
+    virtual void img_arc(const Arc &arc);
+    virtual bool img_supports_arc() const
+    {
+        return false;
+    }
     virtual void img_hole(const Hole &hole)
     {
     }
