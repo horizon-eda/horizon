@@ -165,8 +165,8 @@ protected:
     void draw_arc(const Coord<float> &center, float radius, float a0, float a1, ColorP color = ColorP::FROM_LAYER,
                   int layer = 10000);
     void draw_circle(const Coord<float> &center, float radius, ColorP color = ColorP::FROM_LAYER, int layer = 10000);
-    std::pair<Coordf, Coordf> draw_arc2(const Coord<float> &center, float radius0, float a0, float a1, ColorP color,
-                                        int layer, uint64_t width);
+    void draw_arc2(const Coord<float> &center, float radius0, float a0, float a1, ColorP color, int layer,
+                   uint64_t width);
     void draw_arc0(const Coord<float> &center, float radius0, float a0, float a1, ColorP color, int layer,
                    uint64_t width);
 
