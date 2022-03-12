@@ -793,7 +793,9 @@ SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp
 
 SRC_GEN_PKG = \
-	src/gen-pkg/gen-pkg.cpp
+	src/gen-pkg/gen-pkg.cpp \
+	src/util/text_data.cpp \
+	src/canvas/hershey_fonts.cpp \
 
 SRC_PR_REVIEW = \
 	src/pr-review/pr-review.cpp\
