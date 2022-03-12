@@ -1205,9 +1205,6 @@ void Canvas::render(const Sheet &sheet)
 
 void Canvas::render(const Padstack &padstack, bool interactive)
 {
-    for (const auto &it : padstack.holes) {
-        render(it.second, interactive);
-    }
     img_padstack(padstack);
     img_set_padstack(true);
     for (const auto &it : padstack.polygons) {
@@ -1217,6 +1214,9 @@ void Canvas::render(const Padstack &padstack, bool interactive)
         render(it.second, interactive);
     }
     img_set_padstack(false);
+    for (const auto &it : padstack.holes) {
+        render(it.second, interactive);
+    }
 }
 
 void Canvas::render_pad_overlay(const Pad &pad, bool interactive)
