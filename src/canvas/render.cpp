@@ -317,11 +317,15 @@ void Canvas::render(const Track &track, bool interactive)
         c = ColorP::BUS;
     }
     auto width = track.width;
+    if (interactive)
+        object_ref_push(ObjectType::TRACK, track.uuid);
     img_net(track.net);
     img_patch_type(PatchType::TRACK);
     img_line(track.from.get_position(), track.to.get_position(), width, track.layer);
     img_patch_type(PatchType::OTHER);
     img_net(nullptr);
+    if (interactive)
+        object_ref_pop();
     if (img_mode)
         return;
     auto layer = track.layer;
