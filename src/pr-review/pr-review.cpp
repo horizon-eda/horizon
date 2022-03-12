@@ -23,6 +23,7 @@
 #include "checks/check_unit.hpp"
 #include "checks/check_util.hpp"
 #include "checks/check_item.hpp"
+#include "util/once.hpp"
 #include <iostream>
 
 using namespace horizon;
@@ -85,21 +86,6 @@ private:
 };
 
 static PinDirectionMap pin_direction_map;
-
-class Once {
-public:
-    bool operator()()
-    {
-        if (first) {
-            first = false;
-            return true;
-        }
-        return false;
-    }
-
-private:
-    bool first = true;
-};
 
 class Reviewer {
 public:
