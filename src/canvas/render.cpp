@@ -870,22 +870,6 @@ static const Coordf coordf_from_pt(const TPPLPoint &p)
     return Coordf(p.x, p.y);
 }
 
-static bool poly_is_rect(const Polygon &poly)
-{
-    if (poly.vertices.size() != 4)
-        return false;
-    for (size_t i = 0; i < 4; i++) {
-        const auto &p0 = poly.get_vertex(i).position;
-        const auto &p1 = poly.get_vertex(i + 1).position;
-        const auto &p2 = poly.get_vertex(i + 2).position;
-        const auto v0 = p1 - p0;
-        const auto v1 = p2 - p1;
-        if (v0.dot(v1) != 0)
-            return false;
-    }
-    return true;
-}
-
 void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
 {
     img_polygon(ipoly);
@@ -934,7 +918,7 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
     else { // normal polygon
         const bool is_keepout = dynamic_cast<Keepout *>(poly.usage.ptr);
         begin_group(poly.layer);
-        if (poly_is_rect(poly) && !is_keepout) {
+        if (poly.is_rect() && !is_keepout) {
             const Coordf p0 = (poly.get_vertex(0).position + poly.get_vertex(1).position) / 2;
             const Coordf p1 = (poly.get_vertex(2).position + poly.get_vertex(3).position) / 2;
             const float width = (poly.get_vertex(0).position - poly.get_vertex(1).position).magd();
