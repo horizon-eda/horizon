@@ -544,4 +544,28 @@ void Package::load_pictures(const std::string &dir)
     pictures_load({&pictures}, dir, "pkg");
 }
 
+std::vector<Pad *> Package::get_pads_sorted()
+{
+    std::vector<Pad *> pads_sorted;
+    pads_sorted.reserve(pads.size());
+    for (auto &[pad_uu, pad] : pads) {
+        pads_sorted.push_back(&pad);
+    }
+    std::sort(pads_sorted.begin(), pads_sorted.end(),
+              [](const auto a, const auto b) { return strcmp_natural(a->name, b->name) < 0; });
+    return pads_sorted;
+}
+
+std::vector<const Pad *> Package::get_pads_sorted() const
+{
+    std::vector<const Pad *> pads_sorted;
+    pads_sorted.reserve(pads.size());
+    for (const auto &[pad_uu, pad] : pads) {
+        pads_sorted.push_back(&pad);
+    }
+    std::sort(pads_sorted.begin(), pads_sorted.end(),
+              [](const auto a, const auto b) { return strcmp_natural(a->name, b->name) < 0; });
+    return pads_sorted;
+}
+
 } // namespace horizon

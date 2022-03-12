@@ -711,24 +711,18 @@ int Reviewer::main(int c_argc, char *c_argv[])
             if (!part.base) {
                 ofs << "| Pad | Gate | Pin |\n";
                 ofs << "| --- | --- | --- |\n";
-                std::vector<UUID> pads_sorted;
-                for (const auto &it : part.package->pads) {
-                    if (it.second.pool_padstack->type != Padstack::Type::MECHANICAL)
-                        pads_sorted.push_back(it.first);
-                }
-                std::sort(pads_sorted.begin(), pads_sorted.end(), [&part](const auto &a, const auto &b) {
-                    return strcmp_natural(part.package->pads.at(a).name, part.package->pads.at(b).name) < 0;
-                });
-
-                for (const auto &pad_uu : pads_sorted) {
-                    ofs << "| " << part.package->pads.at(pad_uu).name << " | ";
-                    if (part.pad_map.count(pad_uu)) {
-                        const auto &it = part.pad_map.at(pad_uu);
-                        ofs << it.gate->name << " | " << it.pin->primary_name << " |\n";
-                        all_pins.erase(std::make_pair(it.gate->uuid, it.pin->uuid));
-                    }
-                    else {
-                        ofs << " - | - |\n";
+                auto pads_sorted = part.package->get_pads_sorted();
+                for (const auto pad : pads_sorted) {
+                    if (pad->pool_padstack->type != Padstack::Type::MECHANICAL) {
+                        ofs << "| " << pad->name << " | ";
+                        if (part.pad_map.count(pad->uuid)) {
+                            const auto &it = part.pad_map.at(pad->uuid);
+                            ofs << it.gate->name << " | " << it.pin->primary_name << " |\n";
+                            all_pins.erase(std::make_pair(it.gate->uuid, it.pin->uuid));
+                        }
+                        else {
+                            ofs << " - | - |\n";
+                        }
                     }
                 }
                 ofs << "\n";
@@ -944,12 +938,7 @@ int Reviewer::main(int c_argc, char *c_argv[])
             ofs << "<details>\n<summary>Pads</summary>\n\n";
             {
                 std::set<ParameterID> params;
-                std::vector<const Pad *> pads_sorted;
-                for (const auto &[pad_uu, pad] : pkg.pads) {
-                    pads_sorted.push_back(&pad);
-                }
-                std::sort(pads_sorted.begin(), pads_sorted.end(),
-                          [](const auto a, const auto b) { return strcmp_natural(a->name, b->name) < 0; });
+                auto pads_sorted = pkg.get_pads_sorted();
                 for (auto pad : pads_sorted) {
                     for (const auto &[param, v] : pad->parameter_set) {
                         params.insert(param);
@@ -1092,13 +1081,13 @@ int Reviewer::main(int c_argc, char *c_argv[])
 
             if (pkg.pads.size() > 1) {
                 ofs << "<details>\n<summary>Pitch analysis</summary>\n\n";
+                auto all_pads_sorted = pkg.get_pads_sorted();
                 std::vector<const Pad *> pads_sorted;
-                for (const auto &[pad_uu, pad] : pkg.pads) {
-                    if (pad.pool_padstack->type != Padstack::Type::MECHANICAL)
-                        pads_sorted.push_back(&pad);
+                pads_sorted.reserve(all_pads_sorted.size());
+                for (auto it : all_pads_sorted) {
+                    if (it->pool_padstack->type != Padstack::Type::MECHANICAL)
+                        pads_sorted.push_back(it);
                 }
-                std::sort(pads_sorted.begin(), pads_sorted.end(),
-                          [](const auto a, const auto b) { return strcmp_natural(a->name, b->name) < 0; });
                 std::map<Coordi, unsigned int> pitches;
                 for (size_t i = 0; i < pads_sorted.size(); i++) {
                     const auto i_next = (i + 1) % pads_sorted.size();
