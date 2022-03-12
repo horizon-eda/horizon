@@ -384,9 +384,9 @@ int main(int c_argc, char *c_argv[])
     // 1x 2.54mm
     for (int i = 1; i <= 40; i++) {
         std::string pkg_filename, part_filename;
-        std::tie(pkg_filename, part_filename) = get_pkg_part_filename(
-                pool->get_base_path(), Glib::build_filename("connectors", "header", "pin", "2.54"),
-                "1x" + std::to_string(i) + "-vertical");
+        std::tie(pkg_filename, part_filename) =
+                get_pkg_part_filename(pool->get_base_path(), Glib::build_filename("connector", "header", "pin", "2.54"),
+                                      "1x" + std::to_string(i) + "-vertical");
 
         auto pkg = make_package_pinhd_1x(i);
         save_json_to_file(pkg_filename, pkg.serialize());
@@ -400,9 +400,9 @@ int main(int c_argc, char *c_argv[])
     // 2x 2.54mm
     for (int i = 1; i <= 40; i++) {
         std::string pkg_filename, part_filename;
-        std::tie(pkg_filename, part_filename) = get_pkg_part_filename(
-                pool->get_base_path(), Glib::build_filename("connectors", "header", "pin", "2.54"),
-                "2x" + std::to_string(i) + "-vertical");
+        std::tie(pkg_filename, part_filename) =
+                get_pkg_part_filename(pool->get_base_path(), Glib::build_filename("connector", "header", "pin", "2.54"),
+                                      "2x" + std::to_string(i) + "-vertical");
 
         auto pkg = make_package_pinhd_2x(i);
         save_json_to_file(pkg_filename, pkg.serialize());
@@ -420,7 +420,7 @@ int main(int c_argc, char *c_argv[])
         for (int i : pin_counts) {
             std::string pkg_filename, part_filename;
             std::tie(pkg_filename, part_filename) = get_pkg_part_filename(
-                    pool->get_base_path(), Glib::build_filename("connectors", "header", "idc", "2.54"),
+                    pool->get_base_path(), Glib::build_filename("connector", "header", "idc", "2.54"),
                     "2x" + std::to_string(i) + "-vertical");
 
             auto pkg = make_package_idc_254_vertical(i);
