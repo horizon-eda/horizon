@@ -730,7 +730,9 @@ void Canvas::render(const Text &text, bool interactive, ColorP co)
     const bool rev = layer_provider->get_layers().at(text.layer).reverse;
     img_patch_type(PatchType::TEXT);
     triangle_type_current = TriangleInfo::Type::TEXT;
+    img_text(&text);
     const auto extents = text_renderer.render(text, co, transform, rev);
+    img_text(nullptr);
     triangle_type_current = TriangleInfo::Type::NONE;
     img_patch_type(PatchType::OTHER);
 

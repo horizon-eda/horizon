@@ -222,6 +222,9 @@ protected:
     virtual void img_hole(const Hole &hole)
     {
     }
+    virtual void img_text(const Text *text)
+    {
+    }
     virtual void img_patch_type(PatchType type)
     {
     }
