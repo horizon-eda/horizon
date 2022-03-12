@@ -123,6 +123,9 @@ public:
     void save_pictures(const std::string &dir) const;
     void load_pictures(const std::string &dir);
 
+    std::vector<Pad *> get_pads_sorted();
+    std::vector<const Pad *> get_pads_sorted() const;
+
 private:
     void update_refs();
 };
