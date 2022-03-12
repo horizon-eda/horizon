@@ -74,6 +74,8 @@ public:
 
     void reverse();
 
+    bool is_rect() const;
+
     UUID uuid;
     std::vector<Vertex> vertices;
     int layer = 0;

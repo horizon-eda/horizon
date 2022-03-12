@@ -213,4 +213,22 @@ void Polygon::reverse()
     }
 }
 
+bool Polygon::is_rect() const
+{
+    if (vertices.size() != 4)
+        return false;
+    if (has_arcs())
+        return false;
+    for (size_t i = 0; i < 4; i++) {
+        const auto &p0 = get_vertex(i).position;
+        const auto &p1 = get_vertex(i + 1).position;
+        const auto &p2 = get_vertex(i + 2).position;
+        const auto v0 = p1 - p0;
+        const auto v1 = p2 - p1;
+        if (v0.dot(v1) != 0)
+            return false;
+    }
+    return true;
+}
+
 } // namespace horizon
