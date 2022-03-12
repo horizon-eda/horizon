@@ -321,6 +321,14 @@ std::optional<std::string> Padstack::apply_parameter_set(const ParameterSet &ps)
     return parameter_program.run(ps_this);
 }
 
+static UUID get_layer_uuid(const UUID &ns, const UUID &uu, uint32_t index)
+{
+    std::array<unsigned char, UUID::size + sizeof(index)> buf;
+    memcpy(buf.data(), uu.get_bytes(), UUID::size);
+    memcpy(buf.data() + UUID::size, &index, sizeof(index));
+    return UUID::UUID5(ns, buf.data(), buf.size());
+}
+
 void Padstack::expand_inner(unsigned int n_inner)
 {
     if (n_inner == 0) {
@@ -344,8 +352,8 @@ void Padstack::expand_inner(unsigned int n_inner)
     std::map<UUID, Polygon> new_polygons;
     for (const auto &it : polygons) {
         if (it.second.layer == -1) {
-            for (unsigned int i = 0; i < (n_inner - 1); i++) {
-                auto uu = UUID::random();
+            for (uint32_t i = 0; i < (n_inner - 1); i++) {
+                const auto uu = get_layer_uuid(UUID{"7ba04a7a-7644-4bdf-ba8d-6bc006fb6ae6"}, it.first, i);
                 auto &np = new_polygons.emplace(uu, it.second).first->second;
                 np.uuid = uu;
                 np.layer = -2 - i;
@@ -357,8 +365,8 @@ void Padstack::expand_inner(unsigned int n_inner)
     std::map<UUID, Shape> new_shapes;
     for (const auto &it : shapes) {
         if (it.second.layer == -1) {
-            for (unsigned int i = 0; i < (n_inner - 1); i++) {
-                auto uu = UUID::random();
+            for (uint32_t i = 0; i < (n_inner - 1); i++) {
+                const auto uu = get_layer_uuid(UUID{"81dca5e4-5215-4072-892e-9883265e90b2"}, it.first, i);
                 auto &np = new_shapes.emplace(uu, it.second).first->second;
                 np.uuid = uu;
                 np.layer = -2 - i;
