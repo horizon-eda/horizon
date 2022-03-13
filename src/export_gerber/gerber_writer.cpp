@@ -1,5 +1,5 @@
 #include "gerber_writer.hpp"
-#include "hash.hpp"
+#include "export_util/padstack_hash.hpp"
 #include <iomanip>
 #include "util/util.hpp"
 
@@ -257,7 +257,7 @@ void GerberWriter::draw_region(const ClipperLib::Path &path, bool dark, int prio
 
 void GerberWriter::draw_padstack(const Padstack &ps, int layer, const Placement &transform)
 {
-    auto hash = GerberHash::hash(ps);
+    auto hash = PadstackHash::hash(ps);
     // the hash thing is needed since we have parameters and the same uuid
     // doens't imply the same padstack anymore
     auto key = std::make_tuple(ps.uuid, hash, transform.get_angle(), transform.mirror);

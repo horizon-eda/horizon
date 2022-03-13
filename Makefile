@@ -193,7 +193,7 @@ SRC_EXPORT = \
 	src/export_gerber/excellon_writer.cpp\
 	src/export_gerber/gerber_export.cpp\
 	src/export_gerber/canvas_gerber.cpp\
-	src/export_gerber/hash.cpp\
+	src/export_util/padstack_hash.cpp\
 	src/export_pdf/canvas_pdf.cpp\
 	src/export_pdf/export_pdf.cpp\
 	src/export_pdf/export_pdf_board.cpp\
