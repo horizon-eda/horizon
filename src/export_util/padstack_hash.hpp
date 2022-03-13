@@ -3,12 +3,12 @@
 #include "common/common.hpp"
 
 namespace horizon {
-class GerberHash {
+class PadstackHash {
 public:
     static std::string hash(const class Padstack &padstack);
 
 private:
-    GerberHash();
+    PadstackHash();
     void update(const class Padstack &padstack);
     std::string get_digest();
 

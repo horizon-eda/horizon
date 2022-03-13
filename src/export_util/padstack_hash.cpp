@@ -1,11 +1,11 @@
-#include "hash.hpp"
+#include "padstack_hash.hpp"
 #include "pool/padstack.hpp"
 
 namespace horizon {
-GerberHash::GerberHash() : checksum(Glib::Checksum::CHECKSUM_SHA256)
+PadstackHash::PadstackHash() : checksum(Glib::Checksum::CHECKSUM_SHA256)
 {
 }
-void GerberHash::update(const Padstack &ps)
+void PadstackHash::update(const Padstack &ps)
 {
     for (const auto &it : ps.holes) {
         update(it.second);
@@ -18,19 +18,19 @@ void GerberHash::update(const Padstack &ps)
     }
 }
 
-std::string GerberHash::get_digest()
+std::string PadstackHash::get_digest()
 {
     return checksum.get_string();
 }
 
-std::string GerberHash::hash(const Padstack &ps)
+std::string PadstackHash::hash(const Padstack &ps)
 {
-    GerberHash h;
+    PadstackHash h;
     h.update(ps);
     return h.get_digest();
 }
 
-void GerberHash::update(const Hole &h)
+void PadstackHash::update(const Hole &h)
 {
     update(h.diameter);
     update(static_cast<int>(h.shape));
@@ -41,7 +41,7 @@ void GerberHash::update(const Hole &h)
     update(h.placement);
 }
 
-void GerberHash::update(const Shape &s)
+void PadstackHash::update(const Shape &s)
 {
     update(static_cast<int>(s.form));
     update(s.placement);
@@ -51,7 +51,7 @@ void GerberHash::update(const Shape &s)
     }
 }
 
-void GerberHash::update(const Polygon &p)
+void PadstackHash::update(const Polygon &p)
 {
     update(p.layer);
     for (const auto &it : p.vertices) {
@@ -62,18 +62,18 @@ void GerberHash::update(const Polygon &p)
     }
 }
 
-void GerberHash::update(int64_t i)
+void PadstackHash::update(int64_t i)
 {
     checksum.update(reinterpret_cast<const guchar *>(&i), sizeof(i));
 }
 
-void GerberHash::update(const Coordi &c)
+void PadstackHash::update(const Coordi &c)
 {
     update(c.x);
     update(c.y);
 }
 
-void GerberHash::update(const Placement &p)
+void PadstackHash::update(const Placement &p)
 {
     update(p.shift);
     update(p.get_angle());
