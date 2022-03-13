@@ -194,6 +194,9 @@ SRC_EXPORT = \
 	src/export_gerber/gerber_export.cpp\
 	src/export_gerber/canvas_gerber.cpp\
 	src/export_util/padstack_hash.cpp\
+	src/export_util/tree_writer.cpp\
+	src/export_util/tree_writer_fs.cpp\
+	src/export_util/tree_writer_archive.cpp\
 	src/export_pdf/canvas_pdf.cpp\
 	src/export_pdf/export_pdf.cpp\
 	src/export_pdf/export_pdf_board.cpp\
@@ -845,11 +848,11 @@ INC = -Isrc -isystem 3rd_party -I$(BUILDDIR)/gen
 
 DEFINES = -D_USE_MATH_DEFINES -DGLM_ENABLE_EXPERIMENTAL -DJSON_USE_IMPLICIT_CONVERSIONS=0
 
-LIBS_COMMON = sqlite3 libzip
+LIBS_COMMON = sqlite3
 ifneq ($(OS),Windows_NT)
 	LIBS_COMMON += uuid
 endif
-LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libgit2 libcurl glm libpng
+LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libgit2 libcurl glm libpng libarchive
 
 OPTIMIZE = -fdata-sections -ffunction-sections -O3
 DEBUGFLAGS = -g3
@@ -1004,7 +1007,7 @@ $(BUILDDIR)/gen/help_texts.hpp: scripts/make_help.py src/help_texts.txt
 
 $(BUILDDIR)/horizon-imp: $(OBJ_COMMON) $(OBJ_ROUTER) $(OBJ_OCE) $(OBJ_IMP)
 	$(ECHO) " $@"
-	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(LDFLAGS_OCE) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libcurl libpng) -lpodofo -lTKHLR -lTKGeomBase $(EXTRA_LIBS) -o $@
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(LDFLAGS_OCE) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libcurl libpng libarchive) -lpodofo -lTKHLR -lTKGeomBase $(EXTRA_LIBS) -o $@
 
 $(BUILDDIR)/horizon-pool: $(OBJ_COMMON) $(OBJ_POOL_UTIL)
 	$(ECHO) " $@"
@@ -1032,7 +1035,7 @@ $(BUILDDIR)/horizon-pr-review: $(OBJ_COMMON) $(OBJ_PR_REVIEW) $(OBJ_SHARED_3D)
 
 $(BUILDDIR)/horizon.so: $(OBJ_PYTHON) $(OBJ_SHARED) $(OBJ_SHARED_OCE)
 	$(ECHO) " $@"
-	$(QUIET)$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) python3 glibmm-2.4 giomm-2.4 cairomm-1.0 py3cairo libpng) -lpodofo  $(OCE_LIBDIRS) -lTKXDESTEP -lOSMesa -shared -o $@
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) python3 glibmm-2.4 giomm-2.4 cairomm-1.0 py3cairo libpng libarchive) -lpodofo  $(OCE_LIBDIRS) -lTKXDESTEP -lOSMesa -shared -o $@
 
 $(OBJDIR)/%.o: %.c
 	$(QUIET)$(MKDIR) $(dir $@)

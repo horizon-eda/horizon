@@ -93,8 +93,10 @@ LIBS=(
 	libcrypto-1_1-x64.dll\
 	libpodofo.dll\
 	libidn-12.dll\
-	libzip.dll\
+	libarchive-13.dll\
 	libzstd.dll\
+	liblz4.dll\
+	libb2-1.dll\
 	libssp-0.dll\
 	libdeflate.dll\
 	libwebp-7.dll\
