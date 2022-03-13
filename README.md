@@ -45,7 +45,6 @@ Debian packages are hosted by [packagecloud](https://packagecloud.io/).
 | alphanum                 | The Alphanum Algorithm    | 1.3                                      | http://www.davekoelle.com/alphanum.html                                 | MIT          |
 | delaunator               | Delaunator C++            | 6f2879967bc96a9bcdbacf418e560e9f2e170ace | https://github.com/abellgithub/delaunator-cpp                           | MIT          |
 | footag                   | footag                    | 99116328abe8f53e71831b446d35e93ee7128ef3 | https://github.com/endofexclusive/footag                                | GPLv3        |
-| libzippp                 | libzip++                  | ba9aec43f7760c3384bbe36f9a5454912f61307a | https://github.com/leezu/libzippp                                       | ISC          |
 | router                   | KiCad router              | 5.1.6                                    | https://gitlab.com/kicad/code/kicad/-/tree/5.1.6/pcbnew/router          | GPLv3        |
 | sexpr                    | KiCad s-expression parser | 5.1.6                                    | https://gitlab.com/kicad/code/kicad/-/tree/5.1.6/utils/kicad2step/sexpr | GPLv3        |
 

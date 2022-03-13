@@ -3,8 +3,9 @@
 #include "board/board.hpp"
 #include "board/gerber_output_settings.hpp"
 #include <glibmm/miscutils.h>
-#include "libzippp/zip.hpp"
+#include "export_util/tree_writer_archive.hpp"
 #include "board/board_layers.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 GerberExporter::GerberExporter(const Board &b, const GerberOutputSettings &s) : brd(b), settings(s)
@@ -59,22 +60,26 @@ void GerberExporter::generate()
     }
 }
 
+static void add_file(TreeWriter &writer, const std::string &filename)
+{
+    auto basename = Glib::path_get_basename(filename);
+    auto file = writer.create_file(fs::u8path(basename));
+    auto ifs = make_ifstream(filename, std::ios_base::in | std::ios_base::binary);
+    file.stream << ifs.rdbuf();
+}
+
 void GerberExporter::generate_zip()
 {
-    std::string zip_file = Glib::build_filename(settings.output_directory, settings.prefix + ".zip");
-    libzip::archive zip(zip_file, ZIP_CREATE);
-
-    for (int64_t i = 0; i < zip.num_entries(); i++) {
-        zip.remove(i);
-    }
+    const std::string zip_file = Glib::build_filename(settings.output_directory, settings.prefix + ".zip");
+    TreeWriterArchive tree_writer(zip_file, "", TreeWriterArchive::Type::ZIP);
 
     for (auto &it : writers) {
-        zip.add(libzip::source_file(it.second.get_filename()), Glib::path_get_basename(it.second.get_filename()));
+        add_file(tree_writer, it.second.get_filename());
     }
 
     for (auto it : {drill_writer_npth.get(), drill_writer_pth.get()}) {
         if (it) {
-            zip.add(libzip::source_file(it->get_filename()), Glib::path_get_basename(it->get_filename()));
+            add_file(tree_writer, it->get_filename());
         }
     }
     log << "Added files to " << zip_file << std::endl;

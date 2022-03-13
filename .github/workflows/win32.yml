@@ -33,7 +33,7 @@ jobs:
           mingw-w64-x86_64-libgit2-winhttp
           mingw-w64-x86_64-oce
           mingw-w64-x86_64-podofo
-          mingw-w64-x86_64-libzip
+          mingw-w64-x86_64-libarchive
           mingw-w64-x86_64-curl-winssl
           mingw-w64-x86_64-jq
           zip
