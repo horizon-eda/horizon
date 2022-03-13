@@ -115,8 +115,10 @@ jobs:
     - name: Install python dependencies
       if: ${{ matrix.target == 'build/horizon.so' }}
       run: pacman -S --needed --noconfirm mesa python-cairo python-yaml strace
-    - name: Build
-      run: strace -f make build/gen/resources.cpp
+    - name: Build LD_PRELOAD kludge
+      run: gcc -shared -fPIC -o close_range.so scripts/close_range.c
+    - name: Test
+      run: LD_PRELOAD=close_range.so make build/gen/resources.cpp
     - name: Build
       run: make -j2 ${{ matrix.target }} WITH_SPNAV=1
     - name: Check version
