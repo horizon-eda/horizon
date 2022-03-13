@@ -169,40 +169,56 @@ SRC_POOL_UPDATE = \
 
 SRC_CANVAS = \
 	src/canvas/canvas.cpp \
-	src/canvas/canvas_gl.cpp \
-	src/canvas/grid.cpp \
-	src/canvas/gl_util.cpp \
-	src/canvas/pan.cpp \
+	src/canvas/appearance.cpp \
 	src/canvas/render.cpp \
 	src/canvas/draw.cpp \
 	src/canvas/text.cpp \
 	src/canvas/hershey_fonts.cpp \
-	src/canvas/drag_selection.cpp \
-	src/canvas/selectables.cpp \
-	src/canvas/selectables_renderer.cpp \
-	src/canvas/hover_prelight.cpp\
-	src/canvas/triangle_renderer.cpp\
 	src/canvas/image.cpp\
-	src/canvas/selection_filter.cpp\
-	3rd_party/polypartition/polypartition.cpp\
-	src/canvas/marker.cpp\
-	src/canvas/annotation.cpp \
-	src/canvas/fragment_cache.cpp \
+	src/canvas/selectables.cpp\
+	src/canvas/fragment_cache.cpp\
 	src/util/text_data.cpp \
 	src/util/text_renderer.cpp \
 	src/canvas/text_renderer.cpp\
+	3rd_party/polypartition/polypartition.cpp\
 	3rd_party/poly2tri/common/shapes.cpp\
 	3rd_party/poly2tri/sweep/cdt.cpp\
 	3rd_party/poly2tri/sweep/sweep.cpp\
 	3rd_party/poly2tri/sweep/sweep_context.cpp\
 	3rd_party/poly2tri/sweep/advancing_front.cpp\
+	src/canvas/layer_display.cpp\
+
+SRC_EXPORT = \
+	src/export_gerber/gerber_writer.cpp\
+	src/export_gerber/excellon_writer.cpp\
+	src/export_gerber/gerber_export.cpp\
+	src/export_gerber/canvas_gerber.cpp\
+	src/export_gerber/hash.cpp\
+	src/export_pdf/canvas_pdf.cpp\
+	src/export_pdf/export_pdf.cpp\
+	src/export_pdf/export_pdf_board.cpp\
+	src/export_pdf/export_pdf_util.cpp\
+	src/export_pnp/export_pnp.cpp \
+	src/export_bom/export_bom.cpp\
+
+SRC_CANVAS_GL = \
+	$(SRC_CANVAS) \
+	src/canvas/canvas_gl.cpp \
+	src/canvas/grid.cpp \
+	src/canvas/gl_util.cpp \
+	src/canvas/pan.cpp \
+	src/canvas/drag_selection.cpp \
+	src/canvas/selectables_renderer.cpp \
+	src/canvas/hover_prelight.cpp\
+	src/canvas/triangle_renderer.cpp\
+	src/canvas/selection_filter.cpp\
+	src/canvas/marker.cpp\
+	src/canvas/annotation.cpp \
 	src/util/msd.cpp\
 	src/util/msd_animator.cpp\
-	src/canvas/appearance.cpp\
 	src/canvas/bitmap_font_util.cpp\
 	src/canvas/picture_renderer.cpp\
 	src/util/warp_cursor.cpp\
-	src/canvas/layer_display.cpp\
 
 SRC_IMP = \
 	src/imp/imp_main.cpp \
@@ -229,7 +245,7 @@ SRC_IMP = \
 	src/imp/action_catalog.cpp\
 	src/imp/in_tool_action_catalog.cpp\
 	src/imp/clipboard_handler.cpp\
-	$(SRC_CANVAS) \
+	$(SRC_CANVAS_GL) \
 	src/document/document.cpp \
 	src/document/document_board.cpp \
 	src/core/core.cpp \
@@ -420,17 +436,9 @@ SRC_IMP = \
 	src/widgets/preview_canvas.cpp\
 	src/widgets/about_dialog.cpp\
 	src/widgets/project_meta_editor.cpp\
-	src/export_pdf/canvas_pdf.cpp\
-	src/export_pdf/export_pdf.cpp\
-	src/export_pdf/export_pdf_board.cpp\
-	src/export_pdf/export_pdf_util.cpp\
 	src/imp/keyseq_dialog.cpp\
 	src/canvas/canvas_patch.cpp\
-	src/export_gerber/gerber_writer.cpp\
-	src/export_gerber/excellon_writer.cpp\
-	src/export_gerber/gerber_export.cpp\
-	src/export_gerber/canvas_gerber.cpp\
-	src/export_gerber/hash.cpp\
+	$(SRC_EXPORT) \
 	src/imp/footprint_generator/footprint_generator_window.cpp\
 	src/imp/footprint_generator/footprint_generator_base.cpp\
 	src/imp/footprint_generator/footprint_generator_dual.cpp\
@@ -517,7 +525,6 @@ SRC_IMP = \
 	src/logger/log_dispatcher.cpp\
 	src/util/selection_util.cpp\
 	src/util/pool_completion.cpp\
-	src/export_bom/export_bom.cpp\
 	src/widgets/unplaced_box.cpp\
 	src/widgets/tag_entry.cpp\
 	src/widgets/layer_help_box.cpp\
@@ -539,7 +546,6 @@ SRC_IMP = \
 	src/widgets/column_chooser.cpp\
 	src/util/csv_util.cpp\
 	src/imp/pnp_export_window.cpp\
-	src/export_pnp/export_pnp.cpp\
 	src/imp/airwire_filter_window.cpp\
 	src/imp/search/searcher.cpp\
 	src/imp/search/searcher_symbol.cpp\
@@ -699,7 +705,7 @@ SRC_POOL_PRJ_MGR = \
 	src/util/sort_controller.cpp\
 	src/util/editor_process.cpp\
 	src/widgets/pin_names_editor.cpp\
-	$(SRC_CANVAS)\
+	$(SRC_CANVAS_GL)\
 	$(SRC_POOL_UPDATE)\
 	src/util/gtk_util.cpp\
 	src/util/window_state_store.cpp\
@@ -801,23 +807,8 @@ SRC_PR_REVIEW = \
 	src/pr-review/pr-review.cpp\
 	src/pr-review/canvas_cairo2.cpp\
 	$(SRC_POOL_UPDATE)\
-	src/canvas/canvas.cpp \
-	src/canvas/appearance.cpp \
-	src/canvas/render.cpp \
-	src/canvas/draw.cpp \
-	src/canvas/text.cpp \
-	src/canvas/hershey_fonts.cpp \
-	src/canvas/image.cpp\
-	src/canvas/selectables.cpp\
-	src/canvas/fragment_cache.cpp\
-	src/canvas/canvas_patch.cpp\
-	src/util/text_data.cpp \
-	3rd_party/polypartition/polypartition.cpp\
-	3rd_party/poly2tri/common/shapes.cpp\
-	3rd_party/poly2tri/sweep/cdt.cpp\
-	3rd_party/poly2tri/sweep/sweep.cpp\
-	3rd_party/poly2tri/sweep/sweep_context.cpp\
-	3rd_party/poly2tri/sweep/advancing_front.cpp\
+	$(SRC_CANVAS) \
+	src/canvas/canvas_patch.cpp \
 	src/package/package_rules_check.cpp\
 	src/symbol/symbol_rules_check.cpp\
 	src/import_step/step_importer.cpp\
@@ -827,9 +818,6 @@ SRC_PR_REVIEW = \
 	src/checks/check_unit.cpp\
 	src/checks/check_part.cpp\
 	src/checks/check_item.cpp\
-	src/canvas/layer_display.cpp\
-	src/util/text_renderer.cpp \
-	src/canvas/text_renderer.cpp\
 
 SRC_OCE = \
 	src/import_step/step_importer.cpp\
@@ -915,33 +903,8 @@ SRC_SHARED_3D = \
 	src/canvas/gl_util.cpp\
 
 SRC_SHARED = $(SRC_COMMON) \
-	src/export_pdf/canvas_pdf.cpp \
-	src/export_pdf/export_pdf.cpp \
-	src/export_pdf/export_pdf_board.cpp \
-	src/export_pdf/export_pdf_util.cpp\
-	src/export_pnp/export_pnp.cpp \
-	src/canvas/canvas.cpp \
-	src/canvas/appearance.cpp \
-	src/canvas/render.cpp \
-	src/canvas/draw.cpp \
-	src/canvas/text.cpp \
-	src/canvas/hershey_fonts.cpp \
-	src/canvas/image.cpp\
-	src/canvas/selectables.cpp\
-	src/canvas/fragment_cache.cpp\
-	src/util/text_data.cpp \
-	3rd_party/polypartition/polypartition.cpp\
-	3rd_party/poly2tri/common/shapes.cpp\
-	3rd_party/poly2tri/sweep/cdt.cpp\
-	3rd_party/poly2tri/sweep/sweep.cpp\
-	3rd_party/poly2tri/sweep/sweep_context.cpp\
-	3rd_party/poly2tri/sweep/advancing_front.cpp\
-	src/export_bom/export_bom.cpp\
-	src/export_gerber/gerber_writer.cpp\
-	src/export_gerber/excellon_writer.cpp\
-	src/export_gerber/gerber_export.cpp\
-	src/export_gerber/canvas_gerber.cpp\
-	src/export_gerber/hash.cpp\
+	$(SRC_EXPORT) \
+	$(SRC_CANVAS) \
 	src/board/plane_update.cpp\
 	src/canvas/canvas_pads.cpp\
 	src/canvas/canvas_patch.cpp\
@@ -951,9 +914,6 @@ SRC_SHARED = $(SRC_COMMON) \
 	src/document/document_board.cpp \
 	src/rules/cache.cpp \
 	src/board/board_rules_check.cpp \
-	src/canvas/layer_display.cpp\
-	src/util/text_renderer.cpp \
-	src/canvas/text_renderer.cpp\
 	$(SRC_POOL_UPDATE)\
 	$(SRC_SHARED_3D)
 
