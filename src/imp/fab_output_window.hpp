@@ -5,6 +5,7 @@
 #include "util/window_state_store.hpp"
 #include "util/export_file_chooser.hpp"
 #include "util/changeable.hpp"
+#include "util/done_revealer_controller.hpp"
 
 namespace horizon {
 
@@ -41,6 +42,11 @@ private:
     void update_export_button();
 
     ExportFileChooser export_filechooser;
+
+    Gtk::Revealer *done_revealer = nullptr;
+    Gtk::Label *done_label = nullptr;
+    Gtk::Button *done_close_button = nullptr;
+    DoneRevealerController done_revealer_controller;
 
     Glib::RefPtr<Gtk::SizeGroup> sg_layer_name;
 

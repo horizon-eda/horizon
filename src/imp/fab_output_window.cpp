@@ -65,6 +65,11 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     GET_WIDGET(drill_mode_combo);
     GET_WIDGET(log_textview);
     GET_WIDGET(zip_output_switch);
+    GET_WIDGET(done_label);
+    GET_WIDGET(done_revealer);
+    GET_WIDGET(done_close_button);
+
+    done_revealer_controller.attach(done_revealer, done_label, done_close_button);
 
     export_filechooser.attach(directory_entry, directory_button, this);
     export_filechooser.set_project_dir(project_dir);
@@ -190,6 +195,7 @@ void FabOutputWindow::generate()
         }
     }
 
+    std::string error_str;
     try {
         GerberOutputSettings my_settings = settings;
         my_settings.output_directory = export_filechooser.get_filename_abs();
@@ -197,15 +203,20 @@ void FabOutputWindow::generate()
         GerberExporter ex(brd, my_settings);
         ex.generate();
         log_textview->get_buffer()->set_text(ex.get_log());
+        done_revealer_controller.show_success("Gerber output done");
     }
     catch (const std::exception &e) {
-        log_textview->get_buffer()->set_text(std::string("Error: ") + e.what());
+        error_str = std::string("Error: ") + e.what();
     }
     catch (const Gio::Error &e) {
-        log_textview->get_buffer()->set_text(std::string("Error: ") + e.what());
+        error_str = std::string("Error: ") + e.what();
     }
     catch (...) {
-        log_textview->get_buffer()->set_text("Other error");
+        error_str = "Other error";
+    }
+    if (error_str.size()) {
+        log_textview->get_buffer()->set_text(error_str);
+        done_revealer_controller.show_error(error_str);
     }
 }
 
