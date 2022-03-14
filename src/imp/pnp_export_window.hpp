@@ -7,6 +7,7 @@
 #include "util/export_file_chooser.hpp"
 #include "board/pnp.hpp"
 #include "widgets/column_chooser.hpp"
+#include "util/done_revealer_controller.hpp"
 
 namespace horizon {
 
@@ -32,6 +33,7 @@ private:
     Gtk::Button *export_button = nullptr;
     Gtk::Label *done_label = nullptr;
     Gtk::Revealer *done_revealer = nullptr;
+    Gtk::Button *done_close_button = nullptr;
     Gtk::Entry *directory_entry = nullptr;
     Gtk::Button *directory_button = nullptr;
 
@@ -68,8 +70,7 @@ private:
 
     MyAdapter adapter;
 
-    void flash(const std::string &s);
-    sigc::connection flash_connection;
+    DoneRevealerController done_revealer_controller;
 
     class ListColumnsPreview : public Gtk::TreeModelColumnRecord {
     public:

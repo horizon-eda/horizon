@@ -9,6 +9,7 @@
 #include "pool/pool_parametric.hpp"
 #include "widgets/column_chooser.hpp"
 #include "util/uuid.hpp"
+#include "util/done_revealer_controller.hpp"
 
 namespace horizon {
 
@@ -48,6 +49,7 @@ private:
     Gtk::ComboBoxText *sort_order_combo = nullptr;
     Gtk::Revealer *done_revealer = nullptr;
     Gtk::Label *done_label = nullptr;
+    Gtk::Button *done_close_button = nullptr;
     Gtk::Entry *filename_entry = nullptr;
     Gtk::Button *filename_button = nullptr;
     Gtk::ListBox *orderable_MPNs_listbox = nullptr;
@@ -114,8 +116,7 @@ private:
 
     MyAdapter adapter;
 
-    void flash(const std::string &s);
-    sigc::connection flash_connection;
+    DoneRevealerController done_revealer_controller;
 
     class ListColumnsPreview : public Gtk::TreeModelColumnRecord {
     public:

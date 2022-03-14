@@ -32,6 +32,7 @@ PnPExportWindow::PnPExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     GET_WIDGET(directory_entry);
     GET_WIDGET(done_label);
     GET_WIDGET(done_revealer);
+    GET_WIDGET(done_close_button);
     GET_WIDGET(mode_combo);
     GET_WIDGET(nopopulate_check);
     GET_WIDGET(filename_merged_entry);
@@ -44,6 +45,8 @@ PnPExportWindow::PnPExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     GET_WIDGET(customize_revealer);
     GET_WIDGET(customize_check);
     GET_WIDGET(customize_grid);
+
+    done_revealer_controller.attach(done_revealer, done_label, done_close_button);
 
     export_filechooser.attach(directory_entry, directory_button, this);
     export_filechooser.set_project_dir(project_dir);
@@ -179,32 +182,19 @@ void PnPExportWindow::update_filename_visibility()
     filename_merged_label->set_visible(!is_individual);
 }
 
-void PnPExportWindow::flash(const std::string &s)
-{
-    done_label->set_text(s);
-    done_revealer->set_reveal_child(true);
-    flash_connection.disconnect();
-    flash_connection = Glib::signal_timeout().connect(
-            [this] {
-                done_revealer->set_reveal_child(false);
-                return false;
-            },
-            2000);
-}
-
 void PnPExportWindow::generate()
 {
     try {
         PnPExportSettings my_settings = settings;
         my_settings.output_directory = export_filechooser.get_filename_abs();
         export_PnP(board, my_settings);
-        flash("Pick & place export done");
+        done_revealer_controller.show_success("Pick & place export done");
     }
     catch (const std::exception &e) {
-        flash("Error: " + std::string(e.what()));
+        done_revealer_controller.show_error("Error: " + std::string(e.what()));
     }
     catch (...) {
-        flash("unknown error");
+        done_revealer_controller.show_error("unknown error");
     }
 }
 

@@ -58,6 +58,7 @@ BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     GET_WIDGET(sort_order_combo);
     GET_WIDGET(done_label);
     GET_WIDGET(done_revealer);
+    GET_WIDGET(done_close_button);
     GET_WIDGET(preview_tv);
     GET_WIDGET(orderable_MPNs_listbox);
     GET_OBJECT(sg_manufacturer);
@@ -70,6 +71,8 @@ BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     GET_WIDGET(rb_tol_1);
     GET_WIDGET(button_clear_similar);
     GET_WIDGET(button_set_similar);
+
+    done_revealer_controller.attach(done_revealer, done_label, done_close_button);
 
     export_filechooser.attach(filename_entry, filename_button, this);
     export_filechooser.set_project_dir(project_dir);
@@ -182,30 +185,17 @@ void BOMExportWindow::handle_set_similar()
     update_orderable_MPNs();
 }
 
-void BOMExportWindow::flash(const std::string &s)
-{
-    done_label->set_text(s);
-    done_revealer->set_reveal_child(true);
-    flash_connection.disconnect();
-    flash_connection = Glib::signal_timeout().connect(
-            [this] {
-                done_revealer->set_reveal_child(false);
-                return false;
-            },
-            2000);
-}
-
 void BOMExportWindow::generate()
 {
     try {
         export_BOM(export_filechooser.get_filename_abs(), *doc.get_top_block(), settings);
-        flash("BOM written to " + settings.output_filename);
+        done_revealer_controller.show_success("BOM written to " + settings.output_filename);
     }
     catch (const std::exception &e) {
-        flash("Error: " + std::string(e.what()));
+        done_revealer_controller.show_error("Error: " + std::string(e.what()));
     }
     catch (...) {
-        flash("unknown error");
+        done_revealer_controller.show_error("unknown error");
     }
     update_preview();
 }
