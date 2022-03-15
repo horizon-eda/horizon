@@ -447,7 +447,11 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::EDIT_SCHEMATIC_PROPERTIES},
-         {"Edit schematic properties", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+         {"Manage sheets and blocks", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::EDIT_PROJECT_PROPERTIES},
+         {"Edit project properties", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::SET_DIFFPAIR},
@@ -1208,6 +1212,7 @@ const LutEnumStr<ActionID> action_lut = {
 
 const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(EDIT_SCHEMATIC_PROPERTIES),
+        TOOL_LUT_ITEM(EDIT_PROJECT_PROPERTIES),
         TOOL_LUT_ITEM(NONE),
         TOOL_LUT_ITEM(MOVE),
         TOOL_LUT_ITEM(PLACE_JUNCTION),

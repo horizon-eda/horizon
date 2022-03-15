@@ -429,7 +429,7 @@ bool ImpSchematic::handle_broadcast(const json &j)
         else if (op == "edit-meta") {
             main_window->present(timestamp);
             if (force_end_tool())
-                tool_begin(ToolID::EDIT_SCHEMATIC_PROPERTIES);
+                tool_begin(ToolID::EDIT_PROJECT_PROPERTIES);
         }
     }
     return true;
@@ -557,8 +557,11 @@ void ImpSchematic::construct()
     hamburger_menu->append("Power Nets", "win.manage_pn");
     add_tool_action(ToolID::MANAGE_POWER_NETS, "manage_pn");
 
-    hamburger_menu->append("Schematic properties", "win.sch_properties");
+    hamburger_menu->append("Sheets and blocks", "win.sch_properties");
     add_tool_action(ToolID::EDIT_SCHEMATIC_PROPERTIES, "sch_properties");
+
+    hamburger_menu->append("Project properties", "win.prj_properties");
+    add_tool_action(ToolID::EDIT_PROJECT_PROPERTIES, "prj_properties");
 
     hamburger_menu->append("Export BOM…", "win.bom_export");
     main_window->add_action("bom_export", [this] { trigger_action(ActionID::BOM_EXPORT_WINDOW); });

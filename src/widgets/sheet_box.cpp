@@ -30,7 +30,8 @@ private:
 SheetBox::SheetBox(CoreSchematic &c) : Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 0), core(c)
 {
     auto *la = Gtk::manage(new Gtk::Label());
-    la->set_markup("<b>Sheets</b>");
+    la->set_markup("<b>Sheets and blocks</b>");
+    la->set_margin_bottom(2);
     la->show();
     pack_start(*la, false, false, 0);
 
@@ -229,7 +230,7 @@ SheetBox::SheetBox(CoreSchematic &c) : Gtk::Box(Gtk::Orientation::ORIENTATION_VE
             auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0));
             tb->pack_end(*box, false, false, 0);
             auto tbo = Gtk::manage(new Gtk::Button());
-            tbo->set_tooltip_text("Schematic properties");
+            tbo->set_tooltip_text("Change frames and manage hierarchical blocks");
             tbo->set_image_from_icon_name("view-more-symbolic");
             tbo->signal_clicked().connect([this] { s_signal_edit_more.emit(); });
             box->pack_start(*tbo, false, false, 0);

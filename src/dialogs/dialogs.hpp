@@ -49,6 +49,7 @@ public:
     bool edit_keepout(class Keepout &keepout, class IDocument &c, bool add_mode);
     bool edit_stackup(class IDocumentBoard &brd);
     bool edit_schematic_properties(class IDocumentSchematicBlockSymbol &s);
+    bool edit_project_properties(class Block &b);
     bool edit_frame_properties(class Frame &fr);
     std::optional<int64_t> ask_datum(const std::string &label, int64_t def = 0);
     std::optional<Coordi> ask_datum_coord(const std::string &label, Coordi def = Coordi());

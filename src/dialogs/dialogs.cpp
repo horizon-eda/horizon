@@ -19,6 +19,7 @@
 #include "edit_shape.hpp"
 #include "pad_parameter_set_window.hpp"
 #include "schematic_properties.hpp"
+#include "project_properties.hpp"
 #include "edit_via.hpp"
 #include "edit_plane_window.hpp"
 #include "edit_stackup.hpp"
@@ -279,6 +280,12 @@ bool Dialogs::edit_board_hole(std::set<class BoardHole *> &holes, IPool &pool, I
 bool Dialogs::edit_schematic_properties(class IDocumentSchematicBlockSymbol &doc)
 {
     SchematicPropertiesDialog dia(parent, doc);
+    return dia.run() == Gtk::RESPONSE_OK;
+}
+
+bool Dialogs::edit_project_properties(class Block &block)
+{
+    ProjectPropertiesDialog dia(parent, block);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 

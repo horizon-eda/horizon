@@ -132,7 +132,7 @@ UUID BlockEditor::get_block() const
 }
 
 SchematicPropertiesDialog::SchematicPropertiesDialog(Gtk::Window *parent, IDocumentSchematicBlockSymbol &adoc)
-    : Gtk::Dialog("Schematic properties", *parent,
+    : Gtk::Dialog("Sheets and blocks", *parent,
                   Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
       doc(adoc)
 {
@@ -223,13 +223,6 @@ void SchematicPropertiesDialog::update_view()
 {
     updating = true;
     store->clear();
-    {
-        Gtk::TreeModel::Row row = *store->append();
-        row[tree_columns.name] = "Global";
-        row[tree_columns.block] = UUID();
-        row[tree_columns.sheet] = UUID();
-        view->get_selection()->select(row);
-    }
 
     auto &blocks = doc.get_blocks();
     {
@@ -277,12 +270,7 @@ void SchematicPropertiesDialog::selection_changed()
         Gtk::TreeModel::Row row = *it;
         const auto sheet = row.get_value(tree_columns.sheet);
         const auto block = row.get_value(tree_columns.block);
-        if (!sheet && !block) {
-            current = Gtk::manage(new ProjectMetaEditor(doc.get_blocks().get_top_block_item().block.project_meta));
-            current->property_margin() = 20;
-            remove_button->set_sensitive(false);
-        }
-        else if (sheet && block) {
+        if (sheet && block) {
             auto &b = doc.get_blocks().blocks.at(block);
             auto &sh = b.schematic.sheets.at(sheet);
             auto w = Gtk::manage(new SheetEditor(sh, b.block, doc.get_pool(), doc.get_pool_caching()));

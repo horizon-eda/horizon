@@ -182,6 +182,7 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     case ToolID::EDIT_STACKUP:
     case ToolID::ANNOTATE:
     case ToolID::EDIT_SCHEMATIC_PROPERTIES:
+    case ToolID::EDIT_PROJECT_PROPERTIES:
     case ToolID::EDIT_FRAME_PROPERTIES:
     case ToolID::TOGGLE_GROUP_TAG_VISIBLE:
     case ToolID::MANAGE_INCLUDED_BOARDS:

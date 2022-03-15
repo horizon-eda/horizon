@@ -24,6 +24,9 @@ bool ToolManageBuses::can_begin()
     case ToolID::EDIT_SCHEMATIC_PROPERTIES:
         return doc.co;
 
+    case ToolID::EDIT_PROJECT_PROPERTIES:
+        return doc.co;
+
     case ToolID::MANAGE_PORTS:
         return doc.o || (doc.c && !doc.c->current_block_is_top());
 
@@ -56,6 +59,9 @@ ToolResponse ToolManageBuses::begin(const ToolArgs &args)
     }
     else if (tool_id == ToolID::EDIT_SCHEMATIC_PROPERTIES) {
         r = imp->dialogs.edit_schematic_properties(*doc.co);
+    }
+    else if (tool_id == ToolID::EDIT_PROJECT_PROPERTIES) {
+        r = imp->dialogs.edit_project_properties(*doc.co->get_top_block());
     }
     else if (tool_id == ToolID::EDIT_STACKUP) {
         r = imp->dialogs.edit_stackup(*doc.b);
