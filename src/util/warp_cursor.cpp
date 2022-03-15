@@ -1,5 +1,9 @@
 #include "warp_cursor.hpp"
 
+#ifdef GDK_WINDOWING_WAYLAND
+#include <gdk/gdkwayland.h>
+#endif
+
 namespace horizon {
 Coordi warp_cursor(GdkEvent *motion_event, const Gtk::Widget &widget)
 {
@@ -12,6 +16,13 @@ Coordi warp_cursor(GdkEvent *motion_event, const Gtk::Widget &widget)
     if (src == GDK_SOURCE_PEN)
         return {};
     auto scr = gdk_event_get_screen(motion_event);
+    auto dpy = gdk_screen_get_display(scr);
+
+#ifdef GDK_WINDOWING_WAYLAND
+    if (GDK_IS_WAYLAND_DISPLAY(dpy))
+        return {};
+#endif
+
     const auto w = widget.get_allocated_width();
     const auto h = widget.get_allocated_height();
     const int offset = 1;
