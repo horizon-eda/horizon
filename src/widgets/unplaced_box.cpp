@@ -8,6 +8,7 @@ UnplacedBox::UnplacedBox(const std::string &title) : Gtk::Box(Gtk::Orientation::
 {
     auto *la = Gtk::manage(new Gtk::Label());
     la->set_markup("<b>Unplaced</b>");
+    la->set_margin_bottom(2);
     la->show();
     pack_start(*la, false, false, 0);
 
