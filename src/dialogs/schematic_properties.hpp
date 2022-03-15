@@ -9,7 +9,7 @@ namespace horizon {
 class SchematicPropertiesDialog : public Gtk::Dialog {
 public:
     SchematicPropertiesDialog(Gtk::Window *parent, class IDocumentSchematicBlockSymbol &c);
-
+    void select_sheet(const UUID &block, const UUID &sheet);
 
 private:
     IDocumentSchematicBlockSymbol &doc;

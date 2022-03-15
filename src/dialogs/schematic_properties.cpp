@@ -311,6 +311,19 @@ void SchematicPropertiesDialog::selection_changed()
     }
 }
 
+void SchematicPropertiesDialog::select_sheet(const UUID &block, const UUID &sheet)
+{
+    store->foreach_iter([this, &sheet, &block](const Gtk::TreeIter &it) {
+        Gtk::TreeModel::Row row = *it;
+        if (row[tree_columns.sheet] == sheet && row[tree_columns.block] == block) {
+            view->get_selection()->select(it);
+            return true;
+        }
+        return false;
+    });
+}
+
+
 void SchematicPropertiesDialog::update_for_sheet()
 {
     const auto x = sheet_editor->get_sheet_and_block();

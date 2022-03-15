@@ -277,9 +277,10 @@ bool Dialogs::edit_board_hole(std::set<class BoardHole *> &holes, IPool &pool, I
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::edit_schematic_properties(class IDocumentSchematicBlockSymbol &doc)
+bool Dialogs::edit_schematic_properties(class IDocumentSchematicBlockSymbol &doc, const UUID &block, const UUID &sheet)
 {
     SchematicPropertiesDialog dia(parent, doc);
+    dia.select_sheet(block, sheet);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 

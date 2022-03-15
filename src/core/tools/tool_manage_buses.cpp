@@ -58,7 +58,8 @@ ToolResponse ToolManageBuses::begin(const ToolArgs &args)
         r = imp->dialogs.manage_net_classes(doc.c->get_blocks());
     }
     else if (tool_id == ToolID::EDIT_SCHEMATIC_PROPERTIES) {
-        r = imp->dialogs.edit_schematic_properties(*doc.co);
+        r = imp->dialogs.edit_schematic_properties(*doc.co, doc.co->get_current_block()->uuid,
+                                                   doc.c ? doc.c->get_sheet()->uuid : UUID());
     }
     else if (tool_id == ToolID::EDIT_PROJECT_PROPERTIES) {
         r = imp->dialogs.edit_project_properties(*doc.co->get_top_block());
