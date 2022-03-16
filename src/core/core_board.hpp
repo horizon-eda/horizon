@@ -33,6 +33,10 @@ public:
     {
         return gerber_output_settings;
     }
+    ODBOutputSettings &get_odb_output_settings() override
+    {
+        return odb_output_settings;
+    }
     PDFExportSettings &get_pdf_export_settings() override
     {
         return pdf_export_settings;
@@ -80,6 +84,7 @@ private:
 
     BoardRules rules;
     GerberOutputSettings gerber_output_settings;
+    ODBOutputSettings odb_output_settings;
     PDFExportSettings pdf_export_settings;
     STEPExportSettings step_export_settings;
     PnPExportSettings pnp_export_settings;

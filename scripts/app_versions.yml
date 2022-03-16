@@ -12,6 +12,7 @@ versions:
     10: add thermal rules
     11: add thermal spoke customisation
     12: add net ties
+    13: add ODB++ export
   schematic:
     1: add custom values on symbols
     2: add hierarchy

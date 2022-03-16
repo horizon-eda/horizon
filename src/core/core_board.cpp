@@ -48,10 +48,10 @@ CoreBoard::CoreBoard(const std::string &board_filename, const std::string &block
                      const std::string &pictures_dir, IPool &pool, IPool &pool_caching)
     : Core(pool, &pool_caching), block(get_flattend_block(blocks_filename, pool_caching)),
       brd(Board::new_from_file(board_filename, *block, pool_caching)), rules(brd->rules),
-      gerber_output_settings(brd->gerber_output_settings), pdf_export_settings(brd->pdf_export_settings),
-      step_export_settings(brd->step_export_settings), pnp_export_settings(brd->pnp_export_settings),
-      grid_settings(brd->grid_settings), colors(brd->colors), m_board_filename(board_filename),
-      m_blocks_filename(blocks_filename), m_pictures_dir(pictures_dir)
+      gerber_output_settings(brd->gerber_output_settings), odb_output_settings(brd->odb_output_settings),
+      pdf_export_settings(brd->pdf_export_settings), step_export_settings(brd->step_export_settings),
+      pnp_export_settings(brd->pnp_export_settings), grid_settings(brd->grid_settings), colors(brd->colors),
+      m_board_filename(board_filename), m_blocks_filename(blocks_filename), m_pictures_dir(pictures_dir)
 {
     brd->load_pictures(pictures_dir);
     rebuild("init");
@@ -811,6 +811,7 @@ void CoreBoard::save(const std::string &suffix)
 {
     brd->rules = rules;
     brd->gerber_output_settings = gerber_output_settings;
+    brd->odb_output_settings = odb_output_settings;
     brd->pdf_export_settings = pdf_export_settings;
     brd->step_export_settings = step_export_settings;
     brd->pnp_export_settings = pnp_export_settings;

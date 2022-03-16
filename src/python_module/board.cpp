@@ -2,6 +2,7 @@
 #include "nlohmann/json.hpp"
 #include "util.hpp"
 #include "export_gerber/gerber_export.hpp"
+#include "export_odb/odb_export.hpp"
 #include "export_pdf/export_pdf_board.hpp"
 #include "export_pnp/export_pnp.hpp"
 #include "export_step/export_step.hpp"
@@ -49,6 +50,10 @@ public:
     horizon::GerberOutputSettings &get_gerber_output_settings() override
     {
         return board.gerber_output_settings;
+    }
+    horizon::ODBOutputSettings &get_odb_output_settings() override
+    {
+        return board.odb_output_settings;
     }
     horizon::PDFExportSettings &get_pdf_export_settings() override
     {
@@ -122,6 +127,13 @@ static PyObject *PyBoard_get_gerber_export_settings(PyObject *pself, PyObject *a
     return py_from_json(settings);
 }
 
+static PyObject *PyBoard_get_odb_export_settings(PyObject *pself, PyObject *args)
+{
+    auto self = reinterpret_cast<PyBoard *>(pself);
+    auto settings = self->board->board.odb_output_settings.serialize();
+    return py_from_json(settings);
+}
+
 static PyObject *PyBoard_export_gerber(PyObject *pself, PyObject *args)
 {
     auto self = reinterpret_cast<PyBoard *>(pself);
@@ -133,6 +145,28 @@ static PyObject *PyBoard_export_gerber(PyObject *pself, PyObject *args)
         horizon::GerberOutputSettings settings(settings_json);
         horizon::GerberExporter ex(self->board->board, settings);
         ex.generate();
+    }
+    catch (const std::exception &e) {
+        PyErr_SetString(PyExc_IOError, e.what());
+        return NULL;
+    }
+    catch (...) {
+        PyErr_SetString(PyExc_IOError, "unknown exception");
+        return NULL;
+    }
+    Py_RETURN_NONE;
+}
+
+static PyObject *PyBoard_export_odb(PyObject *pself, PyObject *args)
+{
+    auto self = reinterpret_cast<PyBoard *>(pself);
+    PyObject *py_export_settings = nullptr;
+    if (!PyArg_ParseTuple(args, "O!", &PyDict_Type, &py_export_settings))
+        return NULL;
+    try {
+        auto settings_json = json_from_py(py_export_settings);
+        horizon::ODBOutputSettings settings(settings_json);
+        horizon::export_odb(self->board->board, settings);
     }
     catch (const std::exception &e) {
         PyErr_SetString(PyExc_IOError, e.what());
@@ -384,7 +418,9 @@ static PyObject *PyBoard_export_3d(PyObject *pself, PyObject *args)
 static PyMethodDef PyBoard_methods[] = {
         {"get_gerber_export_settings", PyBoard_get_gerber_export_settings, METH_NOARGS,
          "Return gerber export settings"},
+        {"get_odb_export_settings", PyBoard_get_odb_export_settings, METH_NOARGS, "Return ODB++ export settings"},
         {"export_gerber", PyBoard_export_gerber, METH_VARARGS, "Export gerber"},
+        {"export_odb", PyBoard_export_odb, METH_VARARGS, "Export ODB++"},
         {"get_pdf_export_settings", PyBoard_get_pdf_export_settings, METH_NOARGS, "Return PDF export settings"},
         {"get_pnp_export_settings", PyBoard_get_pnp_export_settings, METH_NOARGS, "Return PnP export settings"},
         {"get_step_export_settings", PyBoard_get_step_export_settings, METH_NOARGS, "Return STEP export settings"},
