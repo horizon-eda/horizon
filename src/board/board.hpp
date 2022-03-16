@@ -12,6 +12,7 @@
 #include "common/keepout.hpp"
 #include "common/pdf_export_settings.hpp"
 #include "gerber_output_settings.hpp"
+#include "odb_output_settings.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "plane.hpp"
 #include "track.hpp"
@@ -117,8 +118,13 @@ public:
 
     std::vector<Warning> warnings;
 
+    enum class OutputFormat { GERBER, ODB };
+    OutputFormat output_format = OutputFormat::GERBER;
+    static const LutEnumStr<OutputFormat> output_format_lut;
+
     BoardRules rules;
     GerberOutputSettings gerber_output_settings;
+    ODBOutputSettings odb_output_settings;
     GridSettings grid_settings;
 
     std::map<UUID, std::list<Airwire>> airwires;

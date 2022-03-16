@@ -1,11 +1,13 @@
 #include "fab_output_window.hpp"
 #include "board/board.hpp"
 #include "export_gerber/gerber_export.hpp"
+#include "export_odb/odb_export.hpp"
 #include "util/gtk_util.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "document/idocument_board.hpp"
 #include "rules/rules_with_core.hpp"
 #include "rules/cache.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 
@@ -48,9 +50,44 @@ GerberLayerEditor *GerberLayerEditor::create(FabOutputWindow &pa, GerberOutputSe
     return w;
 }
 
+FabOutputWindow::ODBExportFileChooserFilename::ODBExportFileChooserFilename(const ODBOutputSettings &set)
+    : settings(set)
+{
+}
+
+
+void FabOutputWindow::ODBExportFileChooserFilename::prepare_chooser(Glib::RefPtr<Gtk::FileChooser> chooser)
+{
+    auto filter = Gtk::FileFilter::create();
+    if (settings.format == ODBOutputSettings::Format::TGZ) {
+        filter->set_name("Tarballs");
+        filter->add_pattern("*.tgz");
+    }
+    else if (settings.format == ODBOutputSettings::Format::ZIP) {
+        filter->set_name("ZIP archives");
+        filter->add_pattern("*.zip");
+    }
+    chooser->add_filter(filter);
+}
+
+void FabOutputWindow::ODBExportFileChooserFilename::prepare_filename(std::string &filename)
+{
+    if (settings.format == ODBOutputSettings::Format::TGZ) {
+        if (!endswith(filename, ".tgz")) {
+            filename += ".tgz";
+        }
+    }
+    else if (settings.format == ODBOutputSettings::Format::ZIP) {
+        if (!endswith(filename, ".zip")) {
+            filename += ".zip";
+        }
+    }
+}
+
 FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IDocumentBoard &c,
                                  const std::string &project_dir)
     : Gtk::Window(cobject), core(c), brd(*core.get_board()), settings(core.get_gerber_output_settings()),
+      odb_settings(core.get_odb_output_settings()), odb_export_filechooser_filename(odb_settings),
       state_store(this, "imp-fab-output")
 {
     GET_WIDGET(gerber_layers_box);
@@ -68,8 +105,25 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     GET_WIDGET(done_label);
     GET_WIDGET(done_revealer);
     GET_WIDGET(done_close_button);
+    GET_WIDGET(stack);
+    GET_WIDGET(odb_filename_entry);
+    GET_WIDGET(odb_filename_button);
+    GET_WIDGET(odb_filename_box);
+    GET_WIDGET(odb_filename_label);
+    GET_WIDGET(odb_directory_entry);
+    GET_WIDGET(odb_directory_button);
+    GET_WIDGET(odb_directory_box);
+    GET_WIDGET(odb_directory_label);
+    GET_WIDGET(odb_format_tgz_rb);
+    GET_WIDGET(odb_format_directory_rb);
+    GET_WIDGET(odb_format_zip_rb);
+    GET_WIDGET(odb_job_name_entry);
+    GET_WIDGET(odb_done_label);
+    GET_WIDGET(odb_done_revealer);
+    GET_WIDGET(odb_done_close_button);
 
     done_revealer_controller.attach(done_revealer, done_label, done_close_button);
+    odb_done_revealer_controller.attach(odb_done_revealer, odb_done_label, odb_done_close_button);
 
     export_filechooser.attach(directory_entry, directory_button, this);
     export_filechooser.set_project_dir(project_dir);
@@ -121,6 +175,47 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 
     sg_layer_name = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
 
+    odb_export_filechooser_filename.attach(odb_filename_entry, odb_filename_button, this);
+    odb_export_filechooser_filename.set_project_dir(project_dir);
+    odb_export_filechooser_filename.bind_filename(odb_settings.output_filename);
+    odb_export_filechooser_filename.signal_changed().connect([this] {
+        s_signal_changed.emit();
+        update_export_button();
+    });
+    odb_export_filechooser_filename.set_action(GTK_FILE_CHOOSER_ACTION_SAVE);
+
+    odb_export_filechooser_directory.attach(odb_directory_entry, odb_directory_button, this);
+    odb_export_filechooser_directory.set_project_dir(project_dir);
+    odb_export_filechooser_directory.bind_filename(odb_settings.output_directory);
+    odb_export_filechooser_directory.signal_changed().connect([this] {
+        s_signal_changed.emit();
+        update_export_button();
+    });
+    odb_export_filechooser_directory.set_action(GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
+
+    stack->set_visible_child(Board::output_format_lut.lookup_reverse(brd.output_format));
+    stack->property_visible_child_name().signal_changed().connect([this] {
+        brd.output_format = Board::output_format_lut.lookup(stack->get_visible_child_name());
+        s_signal_changed.emit();
+        update_export_button();
+    });
+
+    {
+        std::map<ODBOutputSettings::Format, Gtk::RadioButton *> format_map = {
+                {ODBOutputSettings::Format::DIRECTORY, odb_format_directory_rb},
+                {ODBOutputSettings::Format::TGZ, odb_format_tgz_rb},
+                {ODBOutputSettings::Format::ZIP, odb_format_zip_rb},
+        };
+        bind_widget<ODBOutputSettings::Format>(format_map, odb_settings.format, [this](auto v) {
+            s_signal_changed.emit();
+            update_odb_visibility();
+            update_export_button();
+        });
+    }
+    update_odb_visibility();
+
+    bind_widget(odb_job_name_entry, odb_settings.job_name, [this](std::string &) { s_signal_changed.emit(); });
+
     reload_layers();
     update_export_button();
 }
@@ -171,6 +266,15 @@ void FabOutputWindow::update_drill_visibility()
     }
 }
 
+void FabOutputWindow::update_odb_visibility()
+{
+    const bool is_dir = odb_settings.format == ODBOutputSettings::Format::DIRECTORY;
+    odb_directory_box->set_visible(is_dir);
+    odb_directory_label->set_visible(is_dir);
+    odb_filename_box->set_visible(!is_dir);
+    odb_filename_label->set_visible(!is_dir);
+}
+
 static void cb_nop(const std::string &)
 {
 }
@@ -195,28 +299,45 @@ void FabOutputWindow::generate()
         }
     }
 
-    std::string error_str;
-    try {
-        GerberOutputSettings my_settings = settings;
-        my_settings.output_directory = export_filechooser.get_filename_abs();
-        my_settings.zip_output = zip_output_switch->get_active();
-        GerberExporter ex(brd, my_settings);
-        ex.generate();
-        log_textview->get_buffer()->set_text(ex.get_log());
-        done_revealer_controller.show_success("Gerber output done");
+    if (brd.output_format == Board::OutputFormat::GERBER) {
+        std::string error_str;
+        try {
+            GerberOutputSettings my_settings = settings;
+            my_settings.output_directory = export_filechooser.get_filename_abs();
+            my_settings.zip_output = zip_output_switch->get_active();
+            GerberExporter ex(brd, my_settings);
+            ex.generate();
+            log_textview->get_buffer()->set_text(ex.get_log());
+            done_revealer_controller.show_success("Gerber output done");
+        }
+        catch (const std::exception &e) {
+            error_str = std::string("Error: ") + e.what();
+        }
+        catch (const Gio::Error &e) {
+            error_str = std::string("Error: ") + e.what();
+        }
+        catch (...) {
+            error_str = "Other error";
+        }
+        if (error_str.size()) {
+            log_textview->get_buffer()->set_text(error_str);
+            done_revealer_controller.show_error(error_str);
+        }
     }
-    catch (const std::exception &e) {
-        error_str = std::string("Error: ") + e.what();
-    }
-    catch (const Gio::Error &e) {
-        error_str = std::string("Error: ") + e.what();
-    }
-    catch (...) {
-        error_str = "Other error";
-    }
-    if (error_str.size()) {
-        log_textview->get_buffer()->set_text(error_str);
-        done_revealer_controller.show_error(error_str);
+    else {
+        try {
+            ODBOutputSettings my_settings = odb_settings;
+            my_settings.output_filename = odb_export_filechooser_filename.get_filename_abs();
+            my_settings.output_directory = odb_export_filechooser_directory.get_filename_abs();
+            export_odb(brd, my_settings);
+            odb_done_revealer_controller.show_success("ODB++ output done");
+        }
+        catch (const std::exception &e) {
+            odb_done_revealer_controller.show_error("Error: " + std::string(e.what()));
+        }
+        catch (...) {
+            odb_done_revealer_controller.show_error("unknown error");
+        }
     }
 }
 
@@ -230,33 +351,51 @@ void FabOutputWindow::update_export_button()
 {
     std::string txt;
     if (can_export) {
-        if (settings.output_directory.size()) {
-            if (settings.prefix.size()) {
-                if (settings.drill_mode == GerberOutputSettings::DrillMode::INDIVIDUAL) {
-                    if (settings.drill_pth_filename.size() == 0 || settings.drill_npth_filename.size() == 0) {
-                        txt = "drill filenames not set";
+        if (brd.output_format == Board::OutputFormat::GERBER) {
+            if (settings.output_directory.size()) {
+                if (settings.prefix.size()) {
+                    if (settings.drill_mode == GerberOutputSettings::DrillMode::INDIVIDUAL) {
+                        if (settings.drill_pth_filename.size() == 0 || settings.drill_npth_filename.size() == 0) {
+                            txt = "drill filenames not set";
+                        }
                     }
-                }
-                else {
-                    if (settings.drill_pth_filename.size() == 0) {
-                        txt = "drill filename not set";
+                    else {
+                        if (settings.drill_pth_filename.size() == 0) {
+                            txt = "drill filename not set";
+                        }
                     }
-                }
-                if (txt.size() == 0) { // still okay
-                    for (const auto &it : settings.layers) {
-                        if (it.second.enabled && it.second.filename.size() == 0) {
-                            txt = brd.get_layers().at(it.first).name + " filename not set";
-                            break;
+                    if (txt.size() == 0) { // still okay
+                        for (const auto &it : settings.layers) {
+                            if (it.second.enabled && it.second.filename.size() == 0) {
+                                txt = brd.get_layers().at(it.first).name + " filename not set";
+                                break;
+                            }
                         }
                     }
                 }
+                else {
+                    txt = "prefix not set";
+                }
             }
             else {
-                txt = "prefix not set";
+                txt = "output directory not set";
             }
         }
         else {
-            txt = "output directory not set";
+            switch (odb_settings.format) {
+            case ODBOutputSettings::Format::DIRECTORY:
+                if (odb_settings.output_directory.size() == 0) {
+                    txt = "ODB++ directory not set";
+                }
+                break;
+
+            case ODBOutputSettings::Format::ZIP:
+            case ODBOutputSettings::Format::TGZ:
+                if (odb_settings.output_filename.size() == 0) {
+                    txt = "ODB++ filename not set";
+                }
+                break;
+            }
         }
     }
     else {

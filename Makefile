@@ -82,6 +82,7 @@ SRC_COMMON = \
 	3rd_party/delaunator/delaunator.cpp\
 	src/board/airwires.cpp\
 	src/board/gerber_output_settings.cpp\
+	src/board/odb_output_settings.cpp\
 	src/board/board_hole.cpp\
 	src/board/connection_line.cpp\
 	src/board/step_export_settings.cpp\
@@ -203,6 +204,18 @@ SRC_EXPORT = \
 	src/export_pdf/export_pdf_util.cpp\
 	src/export_pnp/export_pnp.cpp \
 	src/export_bom/export_bom.cpp\
+	src/export_odb/odb_export.cpp\
+	src/export_odb/canvas_odb.cpp\
+	src/export_odb/db.cpp\
+	src/export_odb/eda_data.cpp\
+	src/export_odb/attribute_util.cpp\
+	src/export_odb/surface_data.cpp\
+	src/export_odb/features.cpp\
+	src/export_odb/components.cpp\
+	src/export_odb/symbol.cpp\
+	src/export_odb/odb_util.cpp\
+	src/export_odb/track_graph.cpp\
+	src/export_odb/structured_text_writer.cpp\
 
 SRC_CANVAS_GL = \
 	$(SRC_CANVAS) \
