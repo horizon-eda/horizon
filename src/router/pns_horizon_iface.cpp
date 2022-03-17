@@ -702,12 +702,12 @@ std::unique_ptr<PNS::SOLID> PNS_HORIZON_IFACE::syncPadstack(const horizon::Padst
         }
     }
 
-    ClipperLib::Paths poly_union;
-    clipper.Execute(ClipperLib::ctUnion, poly_union, ClipperLib::pftNonZero);
-    if (poly_union.size() == 0) // nothing we care about
+    ClipperLib::PolyTree poly_tree;
+    clipper.Execute(ClipperLib::ctUnion, poly_tree, ClipperLib::pftNonZero);
+    if (poly_tree.ChildCount() == 0) // nothing we care about
         return nullptr;
-    if (poly_union.size() != 1) {
-        throw std::runtime_error("invalid pad polygons: " + std::to_string(poly_union.size()));
+    if (poly_tree.ChildCount() != 1) {
+        throw std::runtime_error("invalid pad polygons: " + std::to_string(poly_tree.ChildCount()));
     }
 
     std::unique_ptr<PNS::SOLID> solid(new PNS::SOLID);
@@ -719,7 +719,7 @@ std::unique_ptr<PNS::SOLID> PNS_HORIZON_IFACE::syncPadstack(const horizon::Padst
 
     SHAPE_SIMPLE *shape = new SHAPE_SIMPLE();
 
-    for (auto &pt : poly_union.front()) {
+    for (auto &pt : poly_tree.Childs.front()->Contour) {
         shape->Append(pt.X, pt.Y);
     }
     solid->SetShape(shape);
