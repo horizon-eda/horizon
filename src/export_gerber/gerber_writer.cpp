@@ -2,6 +2,7 @@
 #include "export_util/padstack_hash.hpp"
 #include <iomanip>
 #include "util/util.hpp"
+#include "util/polygon_arc_removal_proxy.hpp"
 
 namespace horizon {
 
@@ -325,7 +326,8 @@ void GerberWriter::draw_padstack(const Padstack &ps, int layer, const Placement 
                 if (it.second.vertices.size()) {
                     am->primitives.push_back(std::make_unique<ApertureMacro::PrimitiveOutline>());
                     auto prim = dynamic_cast<ApertureMacro::PrimitiveOutline *>(am->primitives.back().get());
-                    for (const auto &itv : it.second.vertices) {
+                    PolygonArcRemovalProxy prx(it.second, 16);
+                    for (const auto &itv : prx.get().vertices) {
                         prim->vertices.push_back(tr.transform(itv.position));
                     }
                 }
