@@ -87,8 +87,7 @@ void GerberWriter::write_prim(const ApertureMacro::PrimitiveOutline *prim)
         write_vertex(v);
     }
     write_vertex(prim->vertices.front());
-    ofs << "0"
-        << "\r\n";
+    ofs << "0";
 }
 
 void GerberWriter::write_prim(const ApertureMacro::PrimitiveCenterLine *prim)
