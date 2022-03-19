@@ -857,6 +857,12 @@ void ImpBoard::construct()
     set_view_angle(0);
 }
 
+void ImpBoard::set_window_title(const std::string &s)
+{
+    view_3d_window->set_3d_title(s);
+    ImpBase::set_window_title(s);
+}
+
 UUID ImpBoard::net_from_selectable(const SelectableRef &sr)
 {
     const auto &board = *core_board.get_board();

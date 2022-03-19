@@ -22,6 +22,7 @@ protected:
     void update_action_sensitivity() override;
     void apply_preferences() override;
     void update_highlights() override;
+    void set_window_title(const std::string &s) override;
 
     ActionCatalogItem::Availability get_editor_type_for_action() const override
     {

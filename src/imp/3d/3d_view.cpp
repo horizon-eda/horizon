@@ -369,6 +369,14 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     GET_WIDGET(main_box);
 }
 
+void View3DWindow::set_3d_title(const std::string &s)
+{
+    if (s.size())
+        set_title(s + " – 3D Preview");
+    else
+        set_title("3D Preview");
+}
+
 void View3DWindow::update_loading()
 {
     const bool model_loading = model_loading_i < model_loading_n;

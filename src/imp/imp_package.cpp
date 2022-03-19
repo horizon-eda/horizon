@@ -419,6 +419,7 @@ void ImpPackage::update_header()
     header_button->set_label(name);
     set_window_title(name);
     parameter_window->set_subtitle(name);
+    view_3d_window->set_3d_title(name);
 }
 
 std::vector<std::string> ImpPackage::get_view_hints()

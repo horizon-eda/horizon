@@ -48,6 +48,8 @@ public:
     typedef sigc::signal<void, UUID> type_signal_package_select;
     type_signal_package_select signal_package_select();
 
+    void set_3d_title(const std::string &s);
+
 private:
     class Canvas3D *canvas = nullptr;
     const class Board &board;
