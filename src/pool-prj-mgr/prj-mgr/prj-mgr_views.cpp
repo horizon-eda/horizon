@@ -243,7 +243,7 @@ bool PoolProjectManagerViewProject::update_meta()
     if (meta.count("author"))
         author = meta.at("author");
     if (title.size())
-        win.set_title(title + " - Horizon EDA");
+        win.set_title(title + " – Horizon EDA");
     else
         win.set_title("Project Manager");
     label_project_title->set_text(title);

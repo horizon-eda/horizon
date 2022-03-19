@@ -1694,7 +1694,7 @@ void ImpBase::load_meta()
 void ImpBase::set_window_title(const std::string &s)
 {
     if (s.size()) {
-        main_window->set_title(s + " - " + object_descriptions.at(get_editor_type()).name);
+        main_window->set_title(s + " – " + object_descriptions.at(get_editor_type()).name);
     }
     else {
         main_window->set_title("Untitled " + object_descriptions.at(get_editor_type()).name);

@@ -1196,7 +1196,7 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
                         if (w->get_view_mode() == PoolProjectManagerAppWindow::ViewMode::PROJECT) {
                             const auto win_path = Glib::path_get_dirname(w->get_filename());
                             if (win_path == project_path) {
-                                set_title(w->get_project_title() + " - Pool");
+                                set_title(w->get_project_title() + " – Pool");
                                 break;
                             }
                         }
