@@ -149,7 +149,10 @@ void ImpPackage::construct_3d()
         box->pack_start(*la, false, false, 0);
 
         auto button_reload = Gtk::manage(new Gtk::Button("Reload models"));
-        button_reload->signal_clicked().connect([this] { view_3d_window->update(true); });
+        button_reload->signal_clicked().connect([this] {
+            view_3d_window->set_needs_update();
+            view_3d_window->update(true);
+        });
         box->pack_end(*button_reload, false, false, 0);
 
         auto button_add = Gtk::manage(new Gtk::Button("Add model"));
@@ -163,10 +166,14 @@ void ImpPackage::construct_3d()
                 core_package.models.emplace(std::piecewise_construct, std::forward_as_tuple(uu),
                                             std::forward_as_tuple(uu, mfn));
                 auto ed = Gtk::manage(new ModelEditor(*this, uu));
-                ed->signal_changed().connect([this] { core_package.set_needs_save(); });
+                ed->signal_changed().connect([this] {
+                    view_3d_window->set_needs_update();
+                    core_package.set_needs_save();
+                });
                 models_listbox->append(*ed);
                 ed->show();
                 current_model = uu;
+                view_3d_window->set_needs_update();
                 view_3d_window->update();
                 update_model_editors();
                 core_package.set_needs_save();
@@ -197,7 +204,10 @@ void ImpPackage::construct_3d()
         current_model = core_package.default_model;
         for (auto &it : core_package.models) {
             auto ed = Gtk::manage(new ModelEditor(*this, it.first));
-            ed->signal_changed().connect([this] { core_package.set_needs_save(); });
+            ed->signal_changed().connect([this] {
+                view_3d_window->set_needs_update();
+                core_package.set_needs_save();
+            });
             models_listbox->append(*ed);
             ed->show();
         }

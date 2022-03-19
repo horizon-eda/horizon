@@ -34,6 +34,7 @@ void ModelEditor::make_current()
 {
     if (imp.current_model != uu) {
         imp.current_model = uu;
+        imp.view_3d_window->set_needs_update();
         imp.view_3d_window->update();
     }
     imp.update_model_editors();
@@ -49,6 +50,7 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu)
     entry->set_width_chars(45);
     entry->signal_focus_in_event().connect([this](GdkEventFocus *ev) {
         imp.current_model = uu;
+        imp.view_3d_window->set_needs_update();
         imp.view_3d_window->update();
         imp.update_model_editors();
         return false;
@@ -72,6 +74,7 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu)
                 }
             }
             s_signal_changed.emit();
+            imp.view_3d_window->set_needs_update();
             imp.view_3d_window->update();
             imp.update_model_editors();
             delete this->get_parent();
@@ -87,6 +90,7 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu)
             auto mfn = imp.ask_3d_model_filename(model2 ? model2->filename : "");
             if (mfn.size()) {
                 entry->set_text(mfn);
+                imp.view_3d_window->set_needs_update();
                 imp.view_3d_window->update(true);
             }
         });
