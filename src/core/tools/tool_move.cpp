@@ -79,6 +79,25 @@ void ToolMove::expand_selection()
         case ObjectType::POWER_SYMBOL: {
             auto &ps = doc.c->get_sheet()->power_symbols.at(it.uuid);
             new_sel.emplace(ps.junction->uuid, ObjectType::JUNCTION);
+            for (const auto &uu_line : ps.junction->connected_net_lines) {
+                const auto &line = doc.c->get_sheet()->net_lines.at(uu_line);
+                for (const auto &it_ft : {line.from, line.to}) {
+                    if (it_ft.is_junc()) {
+                        const auto &ju = *it_ft.junc;
+                        const auto pin_pos = ps.junction->position;
+                        Axis ax = Axis::NONE;
+                        if (pin_pos.x == ju.position.x)
+                            ax = Axis::X;
+                        else if (pin_pos.y == ju.position.y)
+                            ax = Axis::Y;
+
+                        if (ju.connected_net_lines.size() == 1) { // dangling end
+                            ax = Axis::X | Axis::Y;
+                        }
+                        add_extra_junction(ju.uuid, ax);
+                    }
+                }
+            }
         } break;
         case ObjectType::BUS_RIPPER: {
             auto &rip = doc.c->get_sheet()->bus_rippers.at(it.uuid);
