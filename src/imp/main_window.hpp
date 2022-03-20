@@ -96,7 +96,7 @@ private:
     Gtk::Label *tool_bar_flash_label = nullptr;
     Gtk::Stack *tool_bar_stack = nullptr;
     Gtk::Label *tool_bar_action_tip_label = nullptr;
-    Gtk::Box *tool_bar_actions_box = nullptr;
+    class ReflowBox *tool_bar_actions_reflow_box = nullptr;
     sigc::connection tip_timeout_connection;
     bool tool_bar_queue_close = false;
 

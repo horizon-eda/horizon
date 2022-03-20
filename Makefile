@@ -595,6 +595,7 @@ SRC_IMP = \
 	src/widgets/multi_pad_button.cpp\
 	src/widgets/multi_pad_selector.cpp\
 	src/util/done_revealer_controller.cpp\
+	src/widgets/reflow_box.cpp\
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\

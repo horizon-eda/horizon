@@ -1,6 +1,7 @@
 #include "main_window.hpp"
 #include "canvas/canvas_gl.hpp"
 #include "util/gtk_util.hpp"
+#include "widgets/reflow_box.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -56,8 +57,15 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     GET_WIDGET(grid_window_button);
     GET_WIDGET(grid_reset_origin_button);
     GET_WIDGET(tool_bar_action_tip_label);
-    GET_WIDGET(tool_bar_actions_box);
-
+    {
+        Gtk::Box *tool_bar_actions_box = nullptr;
+        GET_WIDGET(tool_bar_actions_box);
+        tool_bar_actions_reflow_box = Gtk::manage(new ReflowBox());
+        tool_bar_actions_reflow_box->property_spacing() = 10;
+        tool_bar_actions_reflow_box->property_row_spacing() = 10;
+        tool_bar_actions_box->pack_start(*tool_bar_actions_reflow_box, true, true, 0);
+        tool_bar_actions_reflow_box->show();
+    }
     GET_WIDGET(version_info_bar);
     GET_WIDGET(version_label);
 
@@ -262,14 +270,14 @@ void MainWindow::tool_bar_set_use_actions(bool use_actions)
 
 void MainWindow::tool_bar_clear_actions()
 {
-    for (auto ch : tool_bar_actions_box->get_children())
+    for (auto ch : tool_bar_actions_reflow_box->get_children())
         delete ch;
 }
 
 void MainWindow::tool_bar_append_action(Gtk::Widget &w)
 {
     w.show();
-    tool_bar_actions_box->pack_start(w, false, false, 0);
+    tool_bar_actions_reflow_box->append(w);
 }
 
 void MainWindow::set_version_info(const std::string &s)
