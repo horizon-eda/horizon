@@ -27,6 +27,13 @@ public:
             Coordi to;
         };
         std::list<SRect> rects;
+
+        class SPolyline {
+        public:
+            std::vector<Coordi> pts;
+        };
+        std::list<SPolyline> polylines;
+
         class SPoly {
         public:
             std::vector<Coordi> vertices;

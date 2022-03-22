@@ -34,7 +34,17 @@ void PoolNotebook::handle_kicad_symbol_import_wizard()
         auto filter = Gtk::FileFilter::create();
         filter->set_name("KiCad library");
         filter->add_pattern("*.lib");
+        filter->add_pattern("*.kicad_sym");
         chooser->add_filter(filter);
+        {
+            static const std::vector<std::string> default_paths = {"/usr/share/kicad/symbols/"};
+            for (const auto &path : default_paths) {
+                if (Glib::file_test(path, Glib::FILE_TEST_IS_DIR)) {
+                    chooser->add_shortcut_folder(path);
+                    chooser->set_current_folder(path);
+                }
+            }
+        }
 
         if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
             kicad_symbol_import_wizard =

@@ -7,6 +7,8 @@
 #include "pool/symbol.hpp"
 #include "pool/entity.hpp"
 #include "util/str_util.hpp"
+#include "sexpr/sexpr.h"
+#include "sexpr/sexpr_parser.h"
 #include <glibmm/fileutils.h>
 #include <numeric>
 
@@ -82,7 +84,7 @@ std::map<std::string, DCMInfo> parse_dcm(const std::string &filename)
     return r;
 }
 
-std::list<KiCadSymbol> parse_kicad_library(const std::string &filename)
+static std::list<KiCadSymbol> parse_kicad_library_old(const std::string &filename)
 {
     std::map<std::string, DCMInfo> dcm_info;
     if (endswith(filename, ".lib")) {
@@ -207,6 +209,214 @@ std::list<KiCadSymbol> parse_kicad_library(const std::string &filename)
 
     return symbols;
 }
+
+static std::string slurp_from_file(const std::string &filename)
+{
+    auto ifs = make_ifstream(filename);
+    if (!ifs.is_open()) {
+        throw std::runtime_error("not opened");
+    }
+    std::stringstream text;
+    text << ifs.rdbuf();
+    return text.str();
+}
+
+static const double scale_factor = 100. / 2.54;
+
+static Coordi get_size(const SEXPR::SEXPR *data, size_t offset = 1)
+{
+    auto x = data->GetChild(offset)->GetDouble();
+    auto y = data->GetChild(offset + 1)->GetDouble();
+    return Coordi(x * scale_factor, y * scale_factor);
+}
+
+static Coordi get_coord(const SEXPR::SEXPR *data, size_t offset = 1)
+{
+    auto c = get_size(data, offset);
+    return Coordi(c.x, c.y);
+}
+
+
+static void parse_pin(KiCadSymbol::SPart::SPin &pin, const SEXPR::SEXPR *kpin)
+{
+    {
+        const auto dir = kpin->GetChild(1)->GetSymbol();
+        static const std::map<std::string, Pin::Direction> dmap = {
+                {"input", Pin::Direction::INPUT},
+                {"output", Pin::Direction::OUTPUT},
+                {"bidirectional", Pin::Direction::BIDIRECTIONAL},
+                {"tri_state", Pin::Direction::BIDIRECTIONAL},
+                {"passive", Pin::Direction::PASSIVE},
+                {"free", Pin::Direction::NOT_CONNECTED},
+                {"unspecified", Pin::Direction::BIDIRECTIONAL},
+                {"power_in", Pin::Direction::POWER_INPUT},
+                {"power_out", Pin::Direction::POWER_OUTPUT},
+                {"open_collector", Pin::Direction::OPEN_COLLECTOR},
+                {"open_emitter", Pin::Direction::OUTPUT},
+                {"no_connect", Pin::Direction::NOT_CONNECTED},
+        };
+        pin.direction = dmap.at(dir);
+    }
+    for (const auto &child : *kpin->GetChildren()) {
+        if (child->IsList() && child->GetChild(0)->IsSymbol()) {
+            if (child->GetChild(0)->GetSymbol() == "name") {
+                const auto n = child->GetChild(1)->GetString();
+                pin.name.reserve(n.size());
+                for (const auto c : n) {
+                    if (c != '{' && c != '}')
+                        pin.name.append(1, c);
+                }
+            }
+            else if (child->GetChild(0)->GetSymbol() == "number") {
+                pin.pad = child->GetChild(1)->GetString();
+            }
+            else if (child->GetChild(0)->GetSymbol() == "at") {
+                pin.pos = get_coord(child);
+                auto angle = child->GetChild(3)->GetInteger();
+                static const std::map<int, Orientation> omap = {
+                        {0, Orientation::RIGHT},
+                        {90, Orientation::UP},
+                        {180, Orientation::LEFT},
+                        {270, Orientation::DOWN},
+                };
+                pin.orientation = omap.at(angle);
+            }
+            else if (child->GetChild(0)->GetSymbol() == "length") {
+                pin.length = child->GetChild(1)->GetDouble() * scale_factor;
+            }
+        }
+    }
+}
+
+static void parse_rect(KiCadSymbol::SPart::SRect &rect, const SEXPR::SEXPR *kpin)
+{
+    for (const auto &child : *kpin->GetChildren()) {
+        if (child->IsList() && child->GetChild(0)->IsSymbol()) {
+            if (child->GetChild(0)->GetSymbol() == "start") {
+                rect.from = get_coord(child);
+            }
+            else if (child->GetChild(0)->GetSymbol() == "end") {
+                rect.to = get_coord(child);
+            }
+        }
+    }
+}
+
+static void parse_polyline(KiCadSymbol::SPart::SPolyline &polyline, const SEXPR::SEXPR *kpolyline)
+{
+    auto pts_list = kpolyline->GetChild(1);
+    polyline.pts.reserve(pts_list->GetNumberOfChildren() - 1);
+    for (size_t i = 1; i < pts_list->GetNumberOfChildren(); i++) {
+        polyline.pts.push_back(get_coord(pts_list->GetChild(i)));
+    }
+}
+
+static void parse_part(KiCadSymbol::SPart &part, const SEXPR::SEXPR *kpart)
+{
+    for (const auto &child : *kpart->GetChildren()) {
+        if (child->IsList() && child->GetChild(0)->IsSymbol() && child->GetChild(0)->GetSymbol() == "pin") {
+            bool hide = false;
+            for (const auto ch : *child->GetChildren()) {
+                if (ch->IsSymbol() && ch->GetSymbol() == "hide") {
+                    hide = true;
+                    break;
+                }
+            }
+            if (!hide) {
+                part.pins.emplace_back();
+                parse_pin(part.pins.back(), child);
+            }
+        }
+        else if (child->IsList() && child->GetChild(0)->IsSymbol() && child->GetChild(0)->GetSymbol() == "rectangle") {
+            part.rects.emplace_back();
+            parse_rect(part.rects.back(), child);
+        }
+        else if (child->IsList() && child->GetChild(0)->IsSymbol() && child->GetChild(0)->GetSymbol() == "polyline") {
+            part.polylines.emplace_back();
+            parse_polyline(part.polylines.back(), child);
+        }
+    }
+}
+
+static void parse_symbol(KiCadSymbol &sym, const SEXPR::SEXPR *ksym)
+{
+    sym.name = ksym->GetChild(1)->GetString();
+    KiCadSymbol::SPart global_part;
+    for (const auto &child : *ksym->GetChildren()) {
+        if (child->IsList() && child->GetChild(0)->IsSymbol() && child->GetChild(0)->GetSymbol() == "symbol") {
+            const auto subsym_name = child->GetChild(1)->GetString();
+            const auto subsym_info = subsym_name.substr(sym.name.size() + 1);
+            const auto underscore_pos = subsym_info.find('_');
+            const unsigned int unit = std::stoi(subsym_info.substr(0, underscore_pos));
+            if (sym.parts.size() <= unit)
+                sym.parts.resize(unit);
+            const auto style = std::stoi(subsym_info.substr(underscore_pos + 1));
+            // we only care about style 1 and 0 (global to all styles)
+            if (style <= 1) {
+                if (unit == 0) {
+                    parse_part(global_part, child);
+                }
+                else {
+                    parse_part(sym.parts.at(unit - 1), child);
+                }
+            }
+        }
+        if (child->IsList() && child->GetChild(0)->IsSymbol() && child->GetChild(0)->GetSymbol() == "property") {
+            const auto key = child->GetChild(1)->GetString();
+            const auto value = child->GetChild(2)->GetString();
+            if (key == "Footprint")
+                sym.footprint = value;
+            else if (key == "Datasheet")
+                sym.datasheet = value;
+            else if (key == "ki_description")
+                sym.description = value;
+            else if (key == "Reference")
+                sym.prefix = value;
+        }
+    }
+    for (auto &part : sym.parts) {
+        for (const auto &pin : global_part.pins) {
+            part.pins.push_back(pin);
+        }
+        for (const auto &rect : global_part.rects) {
+            part.rects.push_back(rect);
+        }
+        for (const auto &poly : global_part.polys) {
+            part.polys.push_back(poly);
+        }
+        for (const auto &poly : global_part.polylines) {
+            part.polylines.push_back(poly);
+        }
+    }
+}
+
+static std::list<KiCadSymbol> parse_kicad_library_new(const std::string &filename)
+{
+    SEXPR::PARSER parser;
+    std::list<KiCadSymbol> symbols;
+
+    std::unique_ptr<SEXPR::SEXPR> sexpr_data(parser.Parse(slurp_from_file(filename)));
+    for (const auto &child : *sexpr_data->GetChildren()) {
+        if (child->IsList() && child->GetChild(0)->IsSymbol() && child->GetChild(0)->GetSymbol() == "symbol") {
+            if (child->GetChild(2)->IsList() && child->GetChild(2)->GetChild(0)->GetSymbol() == "extends")
+                continue;
+            symbols.emplace_back();
+            parse_symbol(symbols.back(), child);
+        }
+    }
+    return symbols;
+}
+
+std::list<KiCadSymbol> parse_kicad_library(const std::string &filename)
+{
+    if (endswith(filename, ".lib"))
+        return parse_kicad_library_old(filename);
+    else if (endswith(filename, ".kicad_sym"))
+        return parse_kicad_library_new(filename);
+    else
+        return {};
+}
+
 
 KiCadSymbol::SPartIterProxy KiCadSymbol::get_parts(int idx)
 {
@@ -360,6 +570,22 @@ KiCadSymbolImporter::KiCadSymbolImporter(const KiCadSymbol &ksym, const class Pa
                 auto &line = sym.lines.emplace(uu, uu).first->second;
                 line.from = last;
                 line.to = first;
+            }
+        }
+        for (const auto &it_poly : it.polylines) {
+            Junction *last = nullptr;
+            for (const auto &pt : it_poly.pts) {
+                auto j_uu = UUID::random();
+                auto ju = &sym.junctions.emplace(j_uu, j_uu).first->second;
+                ju->position = conv(pt);
+                if (last) {
+                    auto uu = UUID::random();
+                    auto &line = sym.lines.emplace(uu, uu).first->second;
+                    line.from = last;
+                    line.to = ju;
+                }
+
+                last = ju;
             }
         }
     }
