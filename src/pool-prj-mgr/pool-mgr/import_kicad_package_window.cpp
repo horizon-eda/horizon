@@ -32,7 +32,7 @@ ImportKiCadPackageWindow::ImportKiCadPackageWindow(BaseObjectType *cobject, cons
     GET_WIDGET(import_error_box);
     GET_WIDGET(import_button);
 
-    static const std::vector<std::string> default_paths = {"/usr/share/kicad/modules/"};
+    static const std::vector<std::string> default_paths = {"/usr/share/kicad/modules/", "/usr/share/kicad/footprints"};
     for (const auto &path : default_paths) {
         if (Glib::file_test(path, Glib::FILE_TEST_IS_DIR)) {
             chooser_widget->add_shortcut_folder(path);

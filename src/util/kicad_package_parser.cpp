@@ -85,6 +85,14 @@ int KiCadModuleParser::get_layer(const std::string &l)
     }
 }
 
+static auto get_string_or_symbol(const SEXPR::SEXPR *d)
+{
+    if (d->IsString())
+        return d->GetString();
+    else
+        return d->GetSymbol();
+}
+
 Line *KiCadModuleParser::parse_line(const SEXPR::SEXPR *data)
 {
     auto nc = data->GetNumberOfChildren();
@@ -104,7 +112,7 @@ Line *KiCadModuleParser::parse_line(const SEXPR::SEXPR *data)
                 end = get_coord(ch);
             }
             else if (tag == "layer") {
-                auto l = ch->GetChild(1)->GetSymbol();
+                const auto l = get_string_or_symbol(ch->GetChild(1));
                 try {
                     layer = get_layer(l);
                 }
@@ -135,6 +143,9 @@ void KiCadPackageParser::parse_pad(const SEXPR::SEXPR *data)
         auto ch = data->GetChild(1);
         if (ch->IsSymbol()) {
             name = ch->GetSymbol();
+        }
+        else if (ch->IsString()) {
+            name = ch->GetString();
         }
         else if (ch->IsInteger()) {
             name = std::to_string(ch->GetInteger());
@@ -167,7 +178,7 @@ void KiCadPackageParser::parse_pad(const SEXPR::SEXPR *data)
             else if (tag == "layers") {
                 auto n = ch->GetNumberOfChildren();
                 for (size_t i_layer = 1; i_layer < n; i_layer++) {
-                    layers.insert(get_layer(ch->GetChild(i_layer)->GetSymbol()));
+                    layers.insert(get_layer(get_string_or_symbol(ch->GetChild(i_layer))));
                 }
             }
             else if (tag == "drill") {
@@ -326,14 +337,6 @@ void KiCadModuleParser::parse_poly(const SEXPR::SEXPR *data)
     }
 }
 
-static auto get_string_or_symbol(const SEXPR::SEXPR *d)
-{
-    if (d->IsString())
-        return d->GetString();
-    else
-        return d->GetSymbol();
-}
-
 KiCadPackageParser::Meta KiCadPackageParser::parse(const SEXPR::SEXPR *data)
 {
     KiCadPackageParser::Meta ret;
@@ -341,8 +344,8 @@ KiCadPackageParser::Meta KiCadPackageParser::parse(const SEXPR::SEXPR *data)
         throw std::runtime_error("data must be list");
     {
         auto ch = data->GetChild(0);
-        if (ch->GetSymbol() != "module") {
-            throw std::runtime_error("not a module");
+        if (ch->GetSymbol() != "module" && ch->GetSymbol() != "footprint") {
+            throw std::runtime_error("not a module or footprint");
         }
     }
     ret.name = get_string_or_symbol(data->GetChild(1));
