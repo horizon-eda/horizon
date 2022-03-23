@@ -49,35 +49,15 @@ ToolResponse ToolDrawConnectionLine::update(const ToolArgs &args)
         switch (args.action) {
         case InToolActionID::LMB:
             if (target_type == ObjectType::PAD || target_type == ObjectType::BOARD_PACKAGE) {
-                auto pkg = &brd->packages.at(args.target.path.at(0));
 
-                Pad *pad = nullptr;
-                bool multiple_pads = false;
-                if (target_type == ObjectType::BOARD_PACKAGE) {
-                    // If the selected package has a pin on the origin, it's possible for us to
-                    // select the package instead of the pad.
-                    for (auto &[pad_uuid, pkg_pad] : pkg->package.pads) {
-                        if (pkg_pad.placement.shift.x == 0 && pkg_pad.placement.shift.y == 0) {
-                            if (pad) {
-                                multiple_pads = true;
-                                break;
-                            }
-                            pad = &pkg_pad;
-                        }
-                    }
-                }
-                else {
-                    pad = &pkg->package.pads.at(args.target.path.at(1));
-                }
+                auto pkgpad = pad_from_target(args.target);
 
-                if (multiple_pads) {
-                    imp->tool_bar_flash("multiple pads on package origin");
-                    break;
-                }
-                else if (!pad) {
+                if (!pkgpad) {
                     imp->tool_bar_flash("only connects to pads or junctions");
                     break;
                 }
+                auto pkg = &pkgpad->pkg;
+                auto pad = &pkgpad->pad;
 
                 if (temp_line) {
                     if (temp_net == nullptr || pad->net == nullptr) {

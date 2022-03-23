@@ -1,9 +1,10 @@
 #pragma once
 #include "core/tool.hpp"
+#include "tool_helper_pick_pad.hpp"
 
 namespace horizon {
 
-class ToolDrawConnectionLine : public ToolBase {
+class ToolDrawConnectionLine : public virtual ToolBase, public ToolHelperPickPad {
 public:
     using ToolBase::ToolBase;
     ToolResponse begin(const ToolArgs &args) override;
