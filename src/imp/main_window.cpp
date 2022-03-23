@@ -170,7 +170,13 @@ void MainWindow::tool_bar_set_tool_tip(const std::string &s)
 
 void MainWindow::tool_bar_flash(const std::string &s)
 {
-    tool_bar_flash_label->set_markup(s);
+    if (flash_text.size())
+        flash_text += "; " + s;
+    else
+        flash_text = s;
+
+    tool_bar_flash_label->set_markup(flash_text);
+
     tool_bar_stack->set_visible_child("flash");
     tip_timeout_connection.disconnect();
     tip_timeout_connection = Glib::signal_timeout().connect(
@@ -180,6 +186,7 @@ void MainWindow::tool_bar_flash(const std::string &s)
 
                 else
                     tool_bar_stack->set_visible_child("tip");
+                flash_text.clear();
                 if (tool_bar_queue_close)
                     tool_bar->set_reveal_child(false);
                 tool_bar_queue_close = false;
