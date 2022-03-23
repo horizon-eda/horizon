@@ -25,6 +25,8 @@ Track::Connection::Connection(const json &j, Board *brd)
             package.uuid = pad_path.at(0);
             pad.uuid = pad_path.at(1);
         }
+        if (j.count("offset"))
+            offset = j.at("offset").get<std::vector<int64_t>>();
     }
     else {
         assert(false);
@@ -74,6 +76,7 @@ void Track::Connection::connect(BoardJunction *j)
     junc = j;
     package = nullptr;
     pad = nullptr;
+    offset = Coordi();
 }
 
 void Track::Connection::connect(BoardPackage *pkg, Pad *pa)
@@ -81,6 +84,7 @@ void Track::Connection::connect(BoardPackage *pkg, Pad *pa)
     junc = nullptr;
     package = pkg;
     pad = pa;
+    offset = Coordi();
 }
 
 void Track::Connection::update_refs(Board &brd)
@@ -100,7 +104,7 @@ Coordi Track::Connection::get_position() const
         auto tr = package->placement;
         if (package->flip)
             tr.invert_angle();
-        return tr.transform(pad->placement.shift);
+        return tr.transform(pad->placement.shift + offset);
     }
     else {
         assert(false);
@@ -137,6 +141,8 @@ json Track::Connection::serialize() const
     }
     else if (is_pad()) {
         j["pad"] = (std::string)get_pad_path();
+        if (offset.x || offset.y)
+            j["offset"] = offset.as_array();
     }
     else {
         assert(false);

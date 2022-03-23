@@ -39,6 +39,7 @@ public:
         uuid_ptr<BoardJunction> junc = nullptr;
         uuid_ptr<BoardPackage> package = nullptr;
         uuid_ptr<Pad> pad = nullptr;
+        Coordi offset;
         bool operator<(const Track::Connection &other) const;
         bool operator==(const Track::Connection &other) const;
 

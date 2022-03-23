@@ -13,6 +13,7 @@ versions:
     11: add thermal spoke customisation
     12: add net ties
     13: add ODB++ export
+    14: add track connection offset
   schematic:
     1: add custom values on symbols
     2: add hierarchy

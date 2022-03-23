@@ -1055,6 +1055,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::TOOL, ToolID::FLIP_NET_TIE},
          {"Flip net tie", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::MOVE_TRACK_CONNECTION},
+         {"Move track connection", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1371,5 +1375,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(TIE_NETS),
         TOOL_LUT_ITEM(DRAW_NET_TIE),
         TOOL_LUT_ITEM(FLIP_NET_TIE),
+        TOOL_LUT_ITEM(MOVE_TRACK_CONNECTION),
 };
 } // namespace horizon

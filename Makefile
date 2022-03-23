@@ -378,6 +378,7 @@ SRC_IMP = \
 	src/core/tools/tool_tie_nets.cpp\
 	src/core/tools/tool_draw_net_tie.cpp\
 	src/core/tools/tool_flip_net_tie.cpp\
+	src/core/tools/tool_move_track_connection.cpp\
 	src/core/tools/tool_helper_pick_pad.cpp\
 	src/document/documents.cpp\
 	src/core/clipboard/clipboard.cpp\
