@@ -13,7 +13,7 @@ RulesCheckResult SchematicRules::check_connectivity(const BlocksSchematic &block
         return r;
     r.level = RulesCheckErrorLevel::PASS;
     auto &rule = rule_connectivity;
-    auto &c = dynamic_cast<RulesCheckCacheNetPins &>(cache.get_cache(RulesCheckCacheID::NET_PINS));
+    auto &c = cache.get_cache<RulesCheckCacheNetPins>();
     const auto &top = blocks.get_top_block_item().block;
 
     for (const auto &[net_uu, it] : c.get_net_pins()) {

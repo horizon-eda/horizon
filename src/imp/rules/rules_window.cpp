@@ -27,6 +27,7 @@
 #include "nlohmann/json.hpp"
 #include "import.hpp"
 #include "export.hpp"
+#include "rules/cache.hpp"
 
 #include <thread>
 
@@ -844,4 +845,7 @@ RulesWindow *RulesWindow::create(Gtk::Window *p, CanvasGL &ca, Core &c, bool ly)
     w->set_transient_for(*p);
     return w;
 }
+
+RulesWindow::~RulesWindow() = default;
+
 } // namespace horizon

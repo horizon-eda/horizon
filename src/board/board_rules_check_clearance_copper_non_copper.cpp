@@ -14,7 +14,7 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board &brd,
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
-    auto &c = dynamic_cast<RulesCheckCacheBoardImage &>(cache.get_cache(RulesCheckCacheID::BOARD_IMAGE));
+    auto &c = cache.get_cache<RulesCheckCacheBoardImage>();
     const auto &patches = c.get_canvas().get_patches();
     CanvasPatch::PatchKey npth_key;
     npth_key.layer = 10000;

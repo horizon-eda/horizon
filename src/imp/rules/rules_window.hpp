@@ -1,7 +1,6 @@
 #pragma once
 #include "common/common.hpp"
 #include "rules/rules.hpp"
-#include "rules/cache.hpp"
 #include "util/uuid.hpp"
 #include "util/changeable.hpp"
 #include "util/window_state_store.hpp"
@@ -32,6 +31,8 @@ public:
     void apply_rules();
 
     void set_enabled(bool enable);
+
+    ~RulesWindow();
 
 private:
     Gtk::ListBox *lb_rules = nullptr;
@@ -128,7 +129,7 @@ private:
     std::map<RuleID, RuleRunInfo> run_store;
     std::mutex run_store_mutex;
 
-    std::unique_ptr<RulesCheckCache> cache;
+    std::unique_ptr<class RulesCheckCache> cache;
 
     void check_thread(RuleID id);
 

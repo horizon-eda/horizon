@@ -68,7 +68,7 @@ const RulesCheckCacheNetPins::NetPins &RulesCheckCacheNetPins::get_net_pins() co
     return net_pins;
 }
 
-RulesCheckCacheBase &RulesCheckCache::get_cache(RulesCheckCacheID id)
+const RulesCheckCacheBase &RulesCheckCache::get_cache(RulesCheckCacheID id)
 {
     std::lock_guard<std::mutex> guard(mutex);
     if (!cache.count(id)) {

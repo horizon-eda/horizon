@@ -138,7 +138,7 @@ RulesCheckResult BoardRules::check_clearance_silkscreen_exposed_copper(const Boa
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
-    auto &c = dynamic_cast<RulesCheckCacheBoardImage &>(cache.get_cache(RulesCheckCacheID::BOARD_IMAGE));
+    auto &c = cache.get_cache<RulesCheckCacheBoardImage>();
     const auto &patches = c.get_canvas().get_patches();
 
     const auto &rule = rule_clearance_silkscreen_exposed_copper;
@@ -362,7 +362,7 @@ RulesCheckResult BoardRules::check_clearance_copper_keepout(const Board &brd, Ru
     r.level = RulesCheckErrorLevel::PASS;
     status_cb("Getting patches");
     auto rules = get_rules_sorted<RuleClearanceCopperKeepout>();
-    auto &c = dynamic_cast<RulesCheckCacheBoardImage &>(cache.get_cache(RulesCheckCacheID::BOARD_IMAGE));
+    auto &c = cache.get_cache<RulesCheckCacheBoardImage>();
     std::set<int> layers;
     const auto &patches = c.get_canvas().get_patches();
     for (const auto &it : patches) { // collect copper layers
@@ -453,7 +453,7 @@ RulesCheckResult BoardRules::check_clearance_same_net(const Board &brd, RulesChe
     r.level = RulesCheckErrorLevel::PASS;
     status_cb("Getting patches");
     auto rules = get_rules_sorted<RuleClearanceSameNet>();
-    auto &c = dynamic_cast<RulesCheckCacheBoardImage &>(cache.get_cache(RulesCheckCacheID::BOARD_IMAGE));
+    auto &c = cache.get_cache<RulesCheckCacheBoardImage>();
     std::set<int> layers;
     const auto &patches = c.get_canvas().get_patches();
     for (const auto &it : patches) { // collect copper layers

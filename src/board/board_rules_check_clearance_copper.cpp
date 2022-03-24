@@ -216,7 +216,7 @@ RulesCheckResult BoardRules::check_clearance_copper(const Board &brd, RulesCheck
 
     PatchesVector patches;
     {
-        auto &c = dynamic_cast<RulesCheckCacheBoardImage &>(cache.get_cache(RulesCheckCacheID::BOARD_IMAGE));
+        auto &c = cache.get_cache<RulesCheckCacheBoardImage>();
         const auto &patches_from_canvas = c.get_canvas().get_patches();
         patches.reserve(patches_from_canvas.size());
 

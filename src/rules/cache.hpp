@@ -21,6 +21,7 @@ public:
 
 class RulesCheckCacheBoardImage : public RulesCheckCacheBase {
 public:
+    static const RulesCheckCacheID id = RulesCheckCacheID::BOARD_IMAGE;
     RulesCheckCacheBoardImage(class IDocument &c);
     const CanvasPatch &get_canvas() const;
 
@@ -30,6 +31,8 @@ private:
 
 class RulesCheckCacheNetPins : public RulesCheckCacheBase {
 public:
+    static const RulesCheckCacheID id = RulesCheckCacheID::NET_PINS;
+
     RulesCheckCacheNetPins(class IDocument &c);
     struct NetPin {
         UUID comp;
@@ -54,10 +57,14 @@ private:
 class RulesCheckCache {
 public:
     RulesCheckCache(class IDocument &c);
-    RulesCheckCacheBase &get_cache(RulesCheckCacheID id);
     void clear();
+    template <typename T> const T &get_cache()
+    {
+        return dynamic_cast<const T &>(get_cache(T::id));
+    }
 
 private:
+    const RulesCheckCacheBase &get_cache(RulesCheckCacheID id);
     std::map<RulesCheckCacheID, std::unique_ptr<RulesCheckCacheBase>> cache;
     class IDocument &core;
     std::mutex mutex;

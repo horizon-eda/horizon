@@ -64,7 +64,7 @@ RulesCheckResult BoardRules::check_net_ties(const Board &brd, RulesCheckCache &c
     r.level = RulesCheckErrorLevel::PASS;
     status_cb("Getting patches");
     auto rules = get_rules_sorted<RuleClearanceSameNet>();
-    auto &c = dynamic_cast<RulesCheckCacheBoardImage &>(cache.get_cache(RulesCheckCacheID::BOARD_IMAGE));
+    auto &c = cache.get_cache<RulesCheckCacheBoardImage>();
     if (r.check_cancelled(cancel))
         return r;
 
