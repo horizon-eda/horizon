@@ -211,6 +211,11 @@ void ToolHelperMerge::merge_and_connect(const std::set<UUID> &extra_junctions)
             auto &sym = doc.c->get_sheet()->block_symbols.at(it.uuid);
             doc.c->get_current_schematic()->autoconnect_block_symbol(doc.c->get_sheet(), &sym);
         }
+        /* else if (it.type == ObjectType::BUS_RIPPER) {
+             auto &rip = doc.c->get_sheet()->bus_rippers.at(it.uuid);
+             if (rip.connections.size() == 0) {
+             }
+         }*/
     }
 }
 } // namespace horizon

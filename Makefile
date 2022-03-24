@@ -236,6 +236,15 @@ SRC_CANVAS_GL = \
 	src/canvas/picture_renderer.cpp\
 	src/util/warp_cursor.cpp\
 
+SRC_BOARD_RULES_CHECK = \
+	src/rules/cache.cpp \
+	src/board/board_rules_check.cpp\
+	src/board/board_rules_check_clearance_copper.cpp\
+	src/board/board_rules_check_clearance_copper_non_copper.cpp\
+	src/board/board_rules_check_net_ties.cpp\
+	src/board/board_rules_check_plane_priorities.cpp\
+	src/board/board_rules_check_util.cpp\
+
 SRC_IMP = \
 	src/imp/imp_main.cpp \
 	src/imp/main_window.cpp \
@@ -508,8 +517,7 @@ SRC_IMP = \
 	src/imp/rules/export.cpp\
 	src/widgets/location_entry.cpp\
 	src/rules/rules_with_core.cpp\
-	src/rules/cache.cpp\
-	src/board/board_rules_check.cpp\
+	$(SRC_BOARD_RULES_CHECK) \
 	src/board/board_rules_import.cpp\
 	src/schematic/schematic_rules_check.cpp\
 	src/package/package_rules_check.cpp\
@@ -933,8 +941,7 @@ SRC_SHARED = $(SRC_COMMON) \
 	src/util/clipper_util.cpp\
 	src/document/document.cpp \
 	src/document/document_board.cpp \
-	src/rules/cache.cpp \
-	src/board/board_rules_check.cpp \
+	$(SRC_BOARD_RULES_CHECK)\
 	$(SRC_POOL_UPDATE)\
 	$(SRC_SHARED_3D)
 
