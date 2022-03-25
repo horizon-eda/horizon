@@ -711,6 +711,7 @@ RuleEditor *RulesWindow::create_editor(Rule &r)
     case RuleID::PREFLIGHT_CHECKS:
     case RuleID::SYMBOL_CHECKS:
     case RuleID::NET_TIES:
+    case RuleID::BOARD_CONNECTIVITY:
         e = new RuleEditorPackageChecks(r, core);
         break;
 

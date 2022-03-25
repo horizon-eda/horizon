@@ -29,6 +29,7 @@ enum class RuleID {
     CLEARANCE_PACKAGE,
     THERMALS,
     NET_TIES,
+    BOARD_CONNECTIVITY,
 };
 
 extern const LutEnumStr<RuleID> rule_id_lut;

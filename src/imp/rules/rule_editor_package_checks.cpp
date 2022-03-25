@@ -35,6 +35,11 @@ static const char *text_net_ties =
         "• No missing net ties\n"
         "• Net tie connects to its designated nets\n";
 
+static const char *text_board_connectivity =
+        "This rule checks if all copper features of each net are connected to one another:\n"
+        "• Connected by PTH holes such as vias or through-hole pins\n"
+        "• Connected by shorted pads as specfied in the the shorted pads rule\n";
+
 void RuleEditorPackageChecks::populate()
 {
     Gtk::Label *editor = Gtk::manage(new Gtk::Label);
@@ -53,6 +58,10 @@ void RuleEditorPackageChecks::populate()
 
     case RuleID::NET_TIES:
         editor->set_text(text_net_ties);
+        break;
+
+    case RuleID::BOARD_CONNECTIVITY:
+        editor->set_text(text_board_connectivity);
         break;
 
     default:

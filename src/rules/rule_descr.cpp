@@ -46,5 +46,8 @@ const std::map<RuleID, RD> rule_descriptions = {
         {RuleID::CLEARANCE_PACKAGE, {"Package clearance", RD::CAN_CHECK}},
 
         {RuleID::NET_TIES, {"Net ties", RD::CAN_CHECK}},
+
+        {RuleID::BOARD_CONNECTIVITY, {"Connectivity", RD::CAN_CHECK}},
+
 };
 } // namespace horizon

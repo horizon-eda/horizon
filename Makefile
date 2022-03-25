@@ -79,6 +79,7 @@ SRC_COMMON = \
 	src/board/rule_clearance_copper_keepout.cpp\
 	src/board/rule_layer_pair.cpp\
 	src/board/rule_clearance_same_net.cpp\
+	src/board/rule_board_connectivity.cpp\
 	3rd_party/delaunator/delaunator.cpp\
 	src/board/airwires.cpp\
 	src/board/gerber_output_settings.cpp\
@@ -243,6 +244,7 @@ SRC_BOARD_RULES_CHECK = \
 	src/board/board_rules_check_clearance_copper_non_copper.cpp\
 	src/board/board_rules_check_net_ties.cpp\
 	src/board/board_rules_check_plane_priorities.cpp\
+	src/board/board_rules_check_board_connectivity.cpp\
 	src/board/board_rules_check_util.cpp\
 
 SRC_IMP = \

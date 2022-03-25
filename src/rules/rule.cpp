@@ -56,6 +56,7 @@ const LutEnumStr<RuleID> rule_id_lut = {
         {"package_checks", RuleID::PACKAGE_CHECKS},
         {"preflight_checks", RuleID::PREFLIGHT_CHECKS},
         {"clearance_copper_keepout", RuleID::CLEARANCE_COPPER_KEEPOUT},
+        {"board_connectivity", RuleID::BOARD_CONNECTIVITY},
 };
 
 std::string Rule::layer_to_string(int layer)

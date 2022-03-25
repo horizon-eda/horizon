@@ -569,6 +569,9 @@ RulesCheckResult BoardRules::check(RuleID id, const Board &brd, RulesCheckCache 
     case RuleID::NET_TIES:
         return BoardRules::check_net_ties(brd, cache, status_cb, cancel);
 
+    case RuleID::BOARD_CONNECTIVITY:
+        return BoardRules::check_board_connectivity(brd, cache, status_cb, cancel);
+
     default:
         return RulesCheckResult();
     }

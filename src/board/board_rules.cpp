@@ -21,7 +21,7 @@ BoardRules::BoardRules(const BoardRules &other)
       rule_shorted_pads(other.rule_shorted_pads), rule_thermals(other.rule_thermals),
       rule_clearance_silkscreen_exposed_copper(other.rule_clearance_silkscreen_exposed_copper),
       rule_parameters(other.rule_parameters), rule_preflight_checks(other.rule_preflight_checks),
-      rule_net_ties(other.rule_net_ties)
+      rule_net_ties(other.rule_net_ties), rule_board_connectivity(other.rule_board_connectivity)
 {
     update_sorted();
 }
@@ -44,6 +44,7 @@ void BoardRules::operator=(const BoardRules &other)
     rule_parameters = other.rule_parameters;
     rule_preflight_checks = other.rule_preflight_checks;
     rule_net_ties = other.rule_net_ties;
+    rule_board_connectivity = other.rule_board_connectivity;
 
     update_sorted();
 }
@@ -335,6 +336,7 @@ std::vector<RuleID> BoardRules::get_rule_ids() const
             RuleID::NET_TIES,
             RuleID::LAYER_PAIR,
             RuleID::PREFLIGHT_CHECKS,
+            RuleID::BOARD_CONNECTIVITY,
     };
 }
 
@@ -351,6 +353,9 @@ const Rule &BoardRules::get_rule(RuleID id) const
     }
     else if (id == RuleID::NET_TIES) {
         return rule_net_ties;
+    }
+    else if (id == RuleID::BOARD_CONNECTIVITY) {
+        return rule_board_connectivity;
     }
     throw std::runtime_error("rule does not exist");
 }
