@@ -77,15 +77,6 @@ static void clearance_cu_worker_bounding_boxes(PatchesVector &patch_infos, std::
     }
 }
 
-static void format_progress(std::ostringstream &oss, size_t i, size_t n)
-{
-    const unsigned int percentage = (i * 100) / n;
-    oss << format_m_of_n(i, n) << "  ";
-    if (percentage < 10)
-        oss << " ";
-    oss << percentage << "%";
-}
-
 static void clearance_cu_worker_expand(const PatchesVector &patches, PatchesExpandedVector &patches_expanded,
                                        std::atomic_size_t &patch_counter, const std::atomic_bool &cancel,
                                        check_status_cb_t status_cb)

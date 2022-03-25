@@ -1,5 +1,7 @@
 #include "board_rules_check_util.hpp"
 #include "block/net.hpp"
+#include "util/util.hpp"
+#include <sstream>
 
 namespace horizon {
 std::string get_net_name(const Net *net)
@@ -32,6 +34,15 @@ bool bbox_test_overlap(const ClipperLib::IntRect &bb1, const ClipperLib::IntRect
     const int64_t offset = clearance + 10; // just to be safe
     return (((bb1.right + offset) >= bb2.left && bb2.right >= (bb1.left - offset))
             && ((bb1.top + offset) >= bb2.bottom && bb2.top >= (bb1.bottom - offset)));
+}
+
+void format_progress(std::ostringstream &oss, size_t i, size_t n)
+{
+    const unsigned int percentage = (i * 100) / n;
+    oss << format_m_of_n(i, n) << "  ";
+    if (percentage < 10)
+        oss << " ";
+    oss << percentage << "%";
 }
 
 } // namespace horizon
