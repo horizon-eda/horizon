@@ -93,12 +93,10 @@ private:
             Gtk::TreeModelColumnRecord::add(state);
             Gtk::TreeModelColumnRecord::add(status);
             Gtk::TreeModelColumnRecord::add(pulse);
-            Gtk::TreeModelColumnRecord::add(marker_index);
         }
         Gtk::TreeModelColumn<Glib::ustring> name;
         Gtk::TreeModelColumn<RulesCheckErrorLevel> result;
         Gtk::TreeModelColumn<bool> has_location;
-        Gtk::TreeModelColumn<size_t> marker_index;
         Gtk::TreeModelColumn<Coordi> location;
         Gtk::TreeModelColumn<UUID> sheet;
         Gtk::TreeModelColumn<UUIDVec> instance_path;

@@ -367,16 +367,20 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
 void RulesWindow::update_markers_and_error_polygons()
 {
     auto &dom = canvas.markers.get_domain(MarkerDomain::CHECK);
-    for (auto &mrk : dom) {
-        mrk.visible = false;
-    }
+    dom.clear();
     annotation->clear();
 
     check_result_treeview->map_expanded_rows([this, &dom](Gtk::TreeView *, const Gtk::TreeModel::Path &treepath) {
         for (auto it : check_result_treeview->get_model()->get_iter(treepath)->children()) {
             Gtk::TreeModel::Row row = *it;
             if (row.get_value(tree_columns.has_location)) {
-                dom.at(row.get_value(tree_columns.marker_index)).visible = true;
+                UUIDVec sheet;
+                if (row.get_value(tree_columns.sheet))
+                    sheet = uuid_vec_append(row.get_value(tree_columns.instance_path),
+                                            row.get_value(tree_columns.sheet));
+                dom.emplace_back(row.get_value(tree_columns.location),
+                                 rules_check_error_level_to_color(row.get_value(tree_columns.result)), sheet,
+                                 row.get_value(tree_columns.name));
             }
             const auto &paths = row.get_value(tree_columns.paths);
             for (const auto &path : paths) {
@@ -404,7 +408,6 @@ bool RulesWindow::update_results()
         map_erase_if(run_store, [](auto &a) { return a.second.result.level != RulesCheckErrorLevel::NOT_RUN; });
     }
 
-    auto &dom = canvas.markers.get_domain(MarkerDomain::CHECK);
     for (const auto &it : my_run_store) {
         if (it.second.result.level != RulesCheckErrorLevel::NOT_RUN) { // has completed
             it.second.row[tree_columns.result] = it.second.result.level;
@@ -421,15 +424,6 @@ bool RulesWindow::update_results()
                 row_err[tree_columns.state] = CheckState::NOT_RUNNING;
                 row_err[tree_columns.paths] = it_err.error_polygons;
                 row_err[tree_columns.layers] = it_err.layers;
-
-                if (it_err.has_location) {
-                    UUIDVec sheet;
-                    if (it_err.sheet)
-                        sheet = uuid_vec_append(it_err.instance_path, it_err.sheet);
-                    row_err[tree_columns.marker_index] = dom.size();
-                    dom.emplace_back(it_err.location, rules_check_error_level_to_color(it_err.level), sheet,
-                                     it_err.comment);
-                }
             }
             {
                 auto path = check_result_store->get_path(it.second.row);
