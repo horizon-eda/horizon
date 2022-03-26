@@ -10,6 +10,7 @@
 #include "widgets/help_button.hpp"
 #include "help_texts.hpp"
 #include "actions.hpp"
+#include "rules/rules_window.hpp"
 
 namespace horizon {
 ImpSymbol::ImpSymbol(const std::string &symbol_filename, const std::string &pool_path)
@@ -226,6 +227,9 @@ void ImpSymbol::construct()
             trigger_action(ActionID::TOGGLE_JUNCTIONS_AND_HIDDEN_NAMES);
         }
     });
+
+    rules_window->signal_goto().connect(
+            [this](Coordi location, UUID sheet, UUIDVec instance_path) { canvas->center_and_zoom(location); });
 
 
     update_header();
