@@ -112,11 +112,12 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     GET_WIDGET(check_result_treeview);
     GET_WIDGET(work_layer_only_box);
     GET_WIDGET(work_layer_only_checkbutton);
-    GET_WIDGET(run_button);
+    GET_WIDGET(run_box);
     GET_WIDGET(apply_button);
     GET_WIDGET(stack);
     GET_WIDGET(stack_switcher);
     GET_WIDGET(rev_warn);
+    GET_WIDGET(check_selected_rule_item);
     sg_order = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
 
     lb_rules->signal_row_selected().connect(
@@ -196,9 +197,27 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
             s_signal_changed.emit();
         }
     });
-    run_button->signal_clicked().connect(sigc::mem_fun(*this, &RulesWindow::run_checks));
+    {
+        Gtk::Button *run_button = nullptr;
+        GET_WIDGET(run_button);
+        run_button->signal_clicked().connect(sigc::mem_fun(*this, &RulesWindow::run_checks));
+    }
     apply_button->signal_clicked().connect(sigc::mem_fun(*this, &RulesWindow::apply_rules));
     update_rule_labels();
+
+    check_selected_rule_item->signal_activate().connect([this] {
+        if (stack->get_visible_child_name() == "checks") {
+            auto sel = check_result_treeview->get_selection()->get_selected();
+            if (sel) {
+                if (sel->parent())
+                    sel = sel->parent();
+                run_check(sel->get_value(tree_columns.rule));
+            }
+        }
+        else {
+            run_check(rule_id_current);
+        }
+    });
 
     check_result_store = Gtk::TreeStore::create(tree_columns);
     if (layered) {
@@ -254,7 +273,8 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
                 mcr->property_text() = "Running";
                 break;
             case CheckState::NOT_RUNNING:
-                mcr->property_text() = rules_check_error_level_to_string(row[tree_columns.result]);
+                mcr->property_text() = rules_check_error_level_to_string(row[tree_columns.result])
+                                       + (row.get_value(tree_columns.outdated) ? " (Outdated)" : "");
                 break;
             case CheckState::CANCELLING:
                 mcr->property_text() = "Cancelling";
@@ -351,9 +371,14 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
                 update_markers_and_error_polygons();
             });
 
+    stack->property_visible_child_name().signal_changed().connect(
+            sigc::mem_fun(*this, &RulesWindow::update_can_check_selected));
+
+    check_result_treeview->get_selection()->signal_changed().connect(
+            sigc::mem_fun(*this, &RulesWindow::update_can_check_selected));
 
     signal_delete_event().connect([this](GdkEventAny *ev) {
-        if (run_button->get_sensitive()) {
+        if (run_box->get_sensitive()) {
             return false;
         }
         else {
@@ -436,7 +461,7 @@ bool RulesWindow::update_results()
     }
     update_markers_and_error_polygons();
     if (my_run_store.size() == 0) {
-        run_button->set_sensitive(true);
+        run_box->set_sensitive(true);
         apply_button->set_sensitive(true);
         set_modal(false);
         stack_switcher->set_sensitive(true);
@@ -568,9 +593,28 @@ void RulesWindow::check_thread(RuleID id)
     }
 }
 
-void RulesWindow::run_checks()
+void RulesWindow::run_check(RuleID rule)
 {
-    check_result_store->clear();
+    Gtk::TreeModel::iterator rule_it;
+    if (rule == RuleID::NONE) {
+        check_result_store->clear();
+    }
+    else {
+        for (auto it : check_result_store->children()) {
+            Gtk::TreeModel::Row row = *it;
+            if (row.get_value(tree_columns.rule) == rule) {
+                rule_it = it;
+
+                auto ch = it->children();
+                for (auto itc = ch.begin(); itc != ch.end();) {
+                    check_result_store->erase(itc++);
+                }
+            }
+            else {
+                row[tree_columns.outdated] = true;
+            }
+        }
+    }
     auto &dom = canvas.markers.get_domain(MarkerDomain::CHECK);
     dom.clear();
     cache.reset(new RulesCheckCache(core));
@@ -579,26 +623,45 @@ void RulesWindow::run_checks()
     cancel_flag = false;
     queue_close = false;
     Glib::signal_timeout().connect(sigc::mem_fun(*this, &RulesWindow::update_results), 750 / 12);
-    for (auto rule_id : rules.get_rule_ids()) {
+    std::vector<RuleID> rule_ids;
+    if (rule == RuleID::NONE)
+        rule_ids = rules.get_rule_ids();
+    else
+        rule_ids = {rule};
+
+    for (auto rule_id : rule_ids) {
         if (rule_descriptions.at(rule_id).can_check) {
-            Gtk::TreeModel::iterator iter = check_result_store->append();
+            Gtk::TreeModel::iterator iter;
+            if (rule_it)
+                iter = rule_it;
+            else
+                iter = check_result_store->append();
+
             Gtk::TreeModel::Row row = *iter;
+            row[tree_columns.rule] = rule_id;
+            row[tree_columns.result] = RulesCheckErrorLevel::NOT_RUN;
             row[tree_columns.name] = rule_descriptions.at(rule_id).name;
             row[tree_columns.state] = CheckState::RUNNING;
             row[tree_columns.has_location] = false;
+            row[tree_columns.outdated] = false;
             run_store.emplace(rule_id, row);
 
             std::thread thr(&RulesWindow::check_thread, this, rule_id);
             thr.detach();
         }
     }
-    run_button->set_sensitive(false);
+    run_box->set_sensitive(false);
     apply_button->set_sensitive(false);
     set_modal(true);
     stack->set_visible_child("checks");
     stack_switcher->set_sensitive(false);
     hamburger_menu_button->set_sensitive(false);
     cancel_button->set_visible(true);
+}
+
+void RulesWindow::run_checks()
+{
+    run_check(RuleID::NONE);
 }
 
 void RulesWindow::cancel_checks()
@@ -611,11 +674,23 @@ void RulesWindow::cancel_checks()
     }
 }
 
+void RulesWindow::update_can_check_selected()
+{
+    if (stack->get_visible_child_name() == "checks") {
+        auto sel = check_result_treeview->get_selection()->get_selected();
+        check_selected_rule_item->set_sensitive(sel);
+    }
+    else if (rule_id_current != RuleID::NONE) {
+        check_selected_rule_item->set_sensitive(rule_descriptions.at(rule_id_current).can_check);
+    }
+}
+
 void RulesWindow::rule_selected(RuleID id)
 {
     auto multi = rule_descriptions.at(id).multi;
     rev_multi->set_reveal_child(multi);
     rule_id_current = id;
+    update_can_check_selected();
     if (multi) {
         show_editor(nullptr);
         update_rule_instances(id);
@@ -804,7 +879,7 @@ void RulesWindow::update_rule_labels()
 void RulesWindow::set_enabled(bool enable)
 {
     apply_button->set_sensitive(enable);
-    run_button->set_sensitive(enable);
+    run_box->set_sensitive(enable);
     if (editor)
         editor->set_sensitive(enable);
     button_rule_instance_add->set_sensitive(enable);

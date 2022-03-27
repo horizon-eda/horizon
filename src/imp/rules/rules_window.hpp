@@ -43,13 +43,14 @@ private:
     Gtk::Button *button_rule_instance_move_up = nullptr;
     Gtk::Button *button_rule_instance_move_down = nullptr;
     Gtk::Box *rule_editor_box = nullptr;
-    Gtk::Button *run_button = nullptr;
+    Gtk::Box *run_box = nullptr;
     Gtk::Button *apply_button = nullptr;
     Gtk::Button *cancel_button = nullptr;
     Gtk::Stack *stack = nullptr;
     Gtk::StackSwitcher *stack_switcher = nullptr;
     Gtk::Revealer *rev_warn = nullptr;
     Glib::RefPtr<Gtk::SizeGroup> sg_order;
+    Gtk::MenuItem *check_selected_rule_item = nullptr;
 
     void rule_selected(RuleID id);
     void rule_instance_selected(RuleID id, const UUID &uu);
@@ -58,7 +59,9 @@ private:
     void update_rule_labels();
     void update_warning();
     void cancel_checks();
+    void update_can_check_selected();
 
+    void run_check(RuleID rule);
 
     CanvasGL &canvas;
     Core &core;
@@ -82,6 +85,7 @@ private:
     public:
         TreeColumns()
         {
+            Gtk::TreeModelColumnRecord::add(rule);
             Gtk::TreeModelColumnRecord::add(name);
             Gtk::TreeModelColumnRecord::add(result);
             Gtk::TreeModelColumnRecord::add(has_location);
@@ -93,7 +97,9 @@ private:
             Gtk::TreeModelColumnRecord::add(state);
             Gtk::TreeModelColumnRecord::add(status);
             Gtk::TreeModelColumnRecord::add(pulse);
+            Gtk::TreeModelColumnRecord::add(outdated);
         }
+        Gtk::TreeModelColumn<RuleID> rule;
         Gtk::TreeModelColumn<Glib::ustring> name;
         Gtk::TreeModelColumn<RulesCheckErrorLevel> result;
         Gtk::TreeModelColumn<bool> has_location;
@@ -105,6 +111,7 @@ private:
         Gtk::TreeModelColumn<std::set<int>> layers;
         Gtk::TreeModelColumn<std::string> status;
         Gtk::TreeModelColumn<int> pulse;
+        Gtk::TreeModelColumn<bool> outdated;
     };
     TreeColumns tree_columns;
 

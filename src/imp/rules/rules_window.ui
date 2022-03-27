@@ -22,6 +22,18 @@
     <property name="can-focus">False</property>
     <property name="icon-name">go-down-symbolic</property>
   </object>
+  <object class="GtkMenu" id="menu1">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <child>
+      <object class="GtkMenuItem" id="check_selected_rule_item">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="label" translatable="yes">Check selected rule</property>
+        <property name="use-underline">True</property>
+      </object>
+    </child>
+  </object>
   <object class="GtkWindow" id="window">
     <property name="can-focus">False</property>
     <property name="default-width">800</property>
@@ -335,7 +347,7 @@
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkCheckButton" id="work_layer_only_checkbutton">
-                    <property name="label" translatable="yes">Work layer only</property>
+                    <property name="label" translatable="yes">Show only results on work layer</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">False</property>
@@ -378,6 +390,9 @@
                   <object class="GtkTreeView" id="check_result_treeview">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection"/>
+                    </child>
                   </object>
                 </child>
               </object>
@@ -409,13 +424,48 @@
           </object>
         </child>
         <child>
-          <object class="GtkButton" id="run_button">
-            <property name="label" translatable="yes">Run checks</property>
+          <object class="GtkBox" id="run_box">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkButton" id="run_button">
+                <property name="label" translatable="yes">Run checks</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkMenuButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="focus-on-click">False</property>
+                <property name="receives-default">True</property>
+                <property name="popup">menu1</property>
+                <property name="use-popover">False</property>
+                <child>
+                  <placeholder/>
+                </child>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
             <style>
-              <class name="suggested-action"/>
+              <class name="linked"/>
             </style>
           </object>
         </child>
