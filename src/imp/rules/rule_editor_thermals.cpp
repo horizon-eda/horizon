@@ -286,7 +286,8 @@ void RuleEditorThermals::update_pads()
     } break;
 
     case RuleMatchComponent::Mode::PART: {
-        pkg = core.get_pool().get_part(rule2->match_component.part)->package;
+        if (rule2->match_component.part)
+            pkg = core.get_pool().get_part(rule2->match_component.part)->package;
     } break;
     }
 
