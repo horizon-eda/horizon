@@ -521,6 +521,20 @@ void ImpSchematic::handle_show_in_pool_manager(const ActionConnection &conn)
     }
 }
 
+static void block_to_board(json &j, const Block &block, UUIDVec instance_path)
+{
+    if (Block::instance_path_too_long(instance_path, __FUNCTION__))
+        return;
+    for (const auto &[uu, comp] : block.components) {
+        json k;
+        k["type"] = static_cast<int>(ObjectType::COMPONENT);
+        k["uuid"] = (std::string)uuid_vec_flatten(uuid_vec_append(instance_path, uu));
+        j.push_back(k);
+    }
+    for (const auto &[uu, inst] : block.block_instances) {
+        block_to_board(j, *inst.block, uuid_vec_append(instance_path, uu));
+    }
+}
 
 void ImpSchematic::construct()
 {
@@ -616,6 +630,11 @@ void ImpSchematic::construct()
                     k["uuid"] = (std::string)uuid_vec_flatten(
                             uuid_vec_append(core_schematic.get_instance_path(), sym.component->uuid));
                     j["selection"].push_back(k);
+                }
+                else if (it.type == ObjectType::SCHEMATIC_BLOCK_SYMBOL) {
+                    const auto &sym = sheet->block_symbols.at(it.uuid);
+                    block_to_board(j["selection"], *sym.block_instance->block,
+                                   uuid_vec_append(core_schematic.get_instance_path(), sym.block_instance->uuid));
                 }
             }
             canvas->set_selection({});
@@ -874,6 +893,7 @@ ActionButton &ImpSchematic::add_action_button_schematic(ActionToolID id)
 void ImpSchematic::update_action_sensitivity()
 {
     auto sel = canvas->get_selection();
+    const auto n_block_sym = sel_count_type(sel, ObjectType::SCHEMATIC_BLOCK_SYMBOL);
     if (sockets_connected) {
         json req;
         req["op"] = "has-board";
@@ -888,7 +908,7 @@ void ImpSchematic::update_action_sensitivity()
             set_action_sensitive(ActionID::TO_BOARD, false);
         }
         else {
-            set_action_sensitive(ActionID::TO_BOARD, n_sym && core_schematic.in_hierarchy());
+            set_action_sensitive(ActionID::TO_BOARD, (n_sym || n_block_sym) && core_schematic.in_hierarchy());
         }
     }
     else {
@@ -931,7 +951,8 @@ void ImpSchematic::update_action_sensitivity()
 
     set_action_sensitive(ActionID::HIGHLIGHT_GROUP, can_higlight_group);
     set_action_sensitive(ActionID::HIGHLIGHT_TAG, can_higlight_tag);
-    bool have_block_sym = sel_count_type(sel, ObjectType::SCHEMATIC_BLOCK_SYMBOL) == 1;
+
+    const auto have_block_sym = n_block_sym == 1;
     set_action_sensitive(ActionID::PUSH_INTO_BLOCK, have_block_sym && core_schematic.in_hierarchy());
     set_action_sensitive(ActionID::EDIT_BLOCK_SYMBOL, have_block_sym);
     set_action_sensitive(ActionID::POP_OUT_OF_BLOCK, core_schematic.get_instance_path().size());
