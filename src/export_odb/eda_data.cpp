@@ -232,7 +232,8 @@ EDAData::Package &EDAData::add_package(const horizon::Package &pkg)
 
     std::set<const Polygon *> outline_polys;
     for (const auto &[uu, poly] : pkg.polygons) {
-        if (poly.layer == BoardLayers::TOP_PACKAGE) {
+        // check both layers since we might be looking at a flipped package
+        if ((poly.layer == BoardLayers::TOP_PACKAGE) || (poly.layer == BoardLayers::BOTTOM_PACKAGE)) {
             outline_polys.insert(&poly);
         }
     }
