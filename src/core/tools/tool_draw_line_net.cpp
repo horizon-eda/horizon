@@ -159,6 +159,20 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                     ju = &doc.c->get_sheet()->junctions.at(args.target.path.at(0));
                     net = ju->net;
                     bus = ju->bus;
+                    if (ju->connected_power_symbols.size() == 1) {
+                        const auto &pwrsym = doc.c->get_sheet()->power_symbols.at(ju->connected_power_symbols.front());
+                        switch (pwrsym.orientation) {
+                        case Orientation::UP:
+                        case Orientation::DOWN:
+                            bend_mode = BendMode::YX;
+                            break;
+
+                        case Orientation::LEFT:
+                        case Orientation::RIGHT:
+                            bend_mode = BendMode::XY;
+                            break;
+                        }
+                    }
                 }
                 else if (args.target.type == ObjectType::SYMBOL_PIN) {
                     sym = &doc.c->get_sheet()->symbols.at(args.target.path.at(0));
