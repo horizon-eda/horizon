@@ -157,6 +157,7 @@ json ImpBase::send_json(const json &j)
         return nullptr;
 
     std::string s = j.dump();
+    const std::string op = j.value("op", "unknown");
     zmq::message_t msg(UUID::size + s.size() + 1);
     auto m = (char *)msg.data();
     memcpy(m, ipc_cookie.get_bytes(), UUID::size);
@@ -166,14 +167,14 @@ json ImpBase::send_json(const json &j)
         if (zmq_helper::send(sock_project, msg) == false) {
             sockets_broken = true;
             sockets_connected = false;
-            show_sockets_broken_dialog("send timeout");
+            show_sockets_broken_dialog("send timeout, op=" + op);
             return nullptr;
         }
     }
     catch (zmq::error_t &e) {
         sockets_broken = true;
         sockets_connected = false;
-        show_sockets_broken_dialog(e.what());
+        show_sockets_broken_dialog(e.what() + std::string(", op=") + op);
         return nullptr;
     }
 
@@ -182,14 +183,14 @@ json ImpBase::send_json(const json &j)
         if (zmq_helper::recv(sock_project, rx) == false) {
             sockets_broken = true;
             sockets_connected = false;
-            show_sockets_broken_dialog("receive timeout");
+            show_sockets_broken_dialog("receive timeout, op=" + op);
             return nullptr;
         }
     }
     catch (zmq::error_t &e) {
         sockets_broken = true;
         sockets_connected = false;
-        show_sockets_broken_dialog(e.what());
+        show_sockets_broken_dialog(e.what() + std::string(", op=") + op);
         return nullptr;
     }
     char *rxdata = ((char *)rx.data());
