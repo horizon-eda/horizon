@@ -7,6 +7,8 @@ bool SelectionFilter::can_select(const SelectableRef &sel) const
 {
     if (!ca.layer_is_visible(sel.layer) && sel.layer.start() != 10000 && sel.type != ObjectType::BOARD_PACKAGE)
         return false;
+    if (sel.type == ObjectType::PICTURE && !ca.show_pictures)
+        return false;
     ObjectType type = sel.type;
     if (type == ObjectType::POLYGON_ARC_CENTER || sel.type == ObjectType::POLYGON_EDGE
         || sel.type == ObjectType::POLYGON_VERTEX)

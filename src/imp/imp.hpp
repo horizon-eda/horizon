@@ -319,6 +319,7 @@ private:
 
     Glib::RefPtr<Gio::SimpleAction> bottom_view_action;
     Glib::RefPtr<Gio::SimpleAction> distraction_free_action;
+    Glib::RefPtr<Gio::SimpleAction> show_pictures_action;
 
     int left_panel_width = 0;
 

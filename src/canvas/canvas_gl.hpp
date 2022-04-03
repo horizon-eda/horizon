@@ -194,6 +194,8 @@ public:
 
     void set_msd_params(const MSD::Params &params);
 
+    bool show_pictures = true;
+
 protected:
     void push() override;
     void request_push() override;

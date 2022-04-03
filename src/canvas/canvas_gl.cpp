@@ -258,13 +258,15 @@ bool CanvasGL::on_render(const Glib::RefPtr<Gdk::GLContext> &context)
     GL_CHECK_ERROR
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    picture_renderer.render(false);
+    if (show_pictures)
+        picture_renderer.render(false);
     GL_CHECK_ERROR
     grid.render();
     GL_CHECK_ERROR
     triangle_renderer.render();
     GL_CHECK_ERROR
-    picture_renderer.render(true);
+    if (show_pictures)
+        picture_renderer.render(true);
     GL_CHECK_ERROR
     selectables_renderer.render();
     GL_CHECK_ERROR

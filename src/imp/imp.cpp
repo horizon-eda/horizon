@@ -507,6 +507,23 @@ void ImpBase::run(int argc, char *argv[])
         main_window->property_scrolled_window->set_visible(show_properties && !distraction_free);
         this->update_view_hints();
     });
+
+    if (core->has_object_type(ObjectType::PICTURE)) {
+        show_pictures_action = main_window->add_action_bool("show_pictures", canvas->show_pictures);
+        show_pictures_action->signal_change_state().connect([this](const Glib::VariantBase &v) {
+            auto b = Glib::VariantBase::cast_dynamic<Glib::Variant<bool>>(v).get();
+            if (b != canvas->show_pictures) {
+                trigger_action(ActionID::TOGGLE_PICTURES);
+            }
+        });
+        connect_action(ActionID::TOGGLE_PICTURES, [this](const auto &a) {
+            canvas->show_pictures = !canvas->show_pictures;
+            canvas->queue_draw();
+            g_simple_action_set_state(show_pictures_action->gobj(), g_variant_new_boolean(canvas->show_pictures));
+            update_view_hints();
+        });
+    }
+
     connect_action(ActionID::SELECTION_FILTER, [this](const auto &a) { selection_filter_dialog->present(); });
     connect_action(ActionID::SAVE, [this](const auto &a) {
         if (!read_only) {
@@ -793,6 +810,8 @@ void ImpBase::run(int argc, char *argv[])
     view_options_menu_append_action("Distraction free mode", "win.distraction_free");
     add_tool_action(ActionID::SELECTION_FILTER, "selection_filter");
     view_options_menu_append_action("Selection filter", "win.selection_filter");
+    if (core->has_object_type(ObjectType::PICTURE))
+        view_options_menu_append_action("Pictures", "win.show_pictures");
 
     imp_interface = std::make_unique<ImpInterface>(this);
 
@@ -1720,6 +1739,9 @@ std::vector<std::string> ImpBase::get_view_hints()
 
     if (selection_filter_dialog->get_filtered())
         r.emplace_back("selection filtered");
+
+    if (!canvas->show_pictures)
+        r.emplace_back("no pictures");
     return r;
 }
 

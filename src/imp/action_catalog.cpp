@@ -1059,6 +1059,11 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::TOOL, ToolID::MOVE_TRACK_CONNECTION},
          {"Move track connection", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOGGLE_PICTURES, ToolID::NONE},
+         {"Toggle pictures", ActionGroup::VIEW,
+          ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD | ActionCatalogItem::AVAILABLE_IN_PACKAGE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1207,6 +1212,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(GO_TO_PROJECT_MANAGER),
         ACTION_LUT_ITEM(TOGGLE_JUNCTIONS_AND_HIDDEN_NAMES),
         ACTION_LUT_ITEM(MSD_TUNING_WINDOW),
+        ACTION_LUT_ITEM(TOGGLE_PICTURES),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \
