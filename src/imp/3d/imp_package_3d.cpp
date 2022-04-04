@@ -85,6 +85,9 @@ std::string ImpPackage::ask_3d_model_filename(const std::string &current_filenam
 void ImpPackage::update_fake_board()
 {
     fake_board.polygons.clear();
+    fake_board.set_n_inner_layers(1);
+    fake_board.stackup.at(BoardLayers::TOP_COPPER).substrate_thickness = .8_mm;
+    fake_board.stackup.at(BoardLayers::IN1_COPPER).substrate_thickness = .8_mm;
     {
         auto uu = UUID::random();
         auto &poly = fake_board.polygons.emplace(uu, uu).first->second;
