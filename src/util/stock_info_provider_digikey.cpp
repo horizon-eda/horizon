@@ -733,7 +733,8 @@ void StockInfoProviderDigiKey::construct_popover(const StockInfoRecordDigiKey &r
             la->set_markup(make_link_markup(it_part.j.at("PrimaryDatasheet").get<std::string>(), descr) + "\n"
                            + make_link_markup(it_part.j.at("ProductUrl").get<std::string>(),
                                               it_part.j.at("DigiKeyPartNumber").get<std::string>())
-                           + "\n" + it_part.j.at("Packaging").at("Value").get<std::string>());
+                           + "\n"
+                           + Glib::Markup::escape_text(it_part.j.at("Packaging").at("Value").get<std::string>()));
             box->pack_start(*la, false, false, 0);
         }
 
