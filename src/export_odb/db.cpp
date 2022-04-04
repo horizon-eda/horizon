@@ -91,10 +91,13 @@ void Step::write(TreeWriter &writer) const
     {
         auto file = writer.create_file("stephdr");
         StructuredTextWriter txt_writer(file.stream);
+        txt_writer.write_line("UNITS", "MM");
         txt_writer.write_line("X_DATUM", 0);
         txt_writer.write_line("Y_DATUM", 0);
         txt_writer.write_line("X_ORIGIN", 0);
         txt_writer.write_line("Y_ORIGIN", 0);
+        txt_writer.write_line("AFFECTING_BOM", "0");
+        txt_writer.write_line("AFFECTING_BOM_CHANGED", "0");
     }
     for (const auto &[layer_name, feats] : layer_features) {
         auto file = writer.create_file(fs::path("layers") / layer_name / "features");
