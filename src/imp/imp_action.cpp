@@ -21,6 +21,18 @@ void ImpBase::init_action()
 
     connect_action(ActionID::ZOOM_IN, sigc::mem_fun(*this, &ImpBase::handle_zoom_action));
     connect_action(ActionID::ZOOM_OUT, sigc::mem_fun(*this, &ImpBase::handle_zoom_action));
+
+    connect_action(ActionID::VIEW_ACTUAL_SIZE, [this](const auto &conn) {
+        auto win = canvas->get_window();
+        auto dpy = win->get_display();
+        auto mon = dpy->get_monitor_at_window(win);
+        const double mon_width_nm = mon->get_width_mm() * 1_mm;
+        Gdk::Rectangle geom;
+        mon->get_geometry(geom);
+        const auto c = canvas->screen2canvas(Coordf(canvas->get_width(), canvas->get_height()) / 2);
+        const auto scale = geom.get_width() / mon_width_nm;
+        canvas->center_and_zoom(c, scale);
+    });
 }
 
 ActionButton &ImpBase::add_action_button(ActionToolID action)
