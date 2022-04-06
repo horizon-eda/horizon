@@ -444,8 +444,10 @@ void CanvasGL::request_push(PushFilter filter)
 void CanvasGL::center_and_zoom(const Coordf &center, float sc)
 {
     // we want center to be at width, height/2
-    if (sc > 0)
+    if (sc > 0) {
         scale = sc;
+        update_viewmat();
+    }
     const Coordf m(m_width / 2, m_height / 2);
     const auto c = canvas2screen(center);
     offset -= (c - m);
