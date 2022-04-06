@@ -19,5 +19,15 @@ private:
     bool draw(const Cairo::RefPtr<Cairo::Context> &ctx);
     void apply_style();
     Gdk::RGBA fg_color;
+
+    class SubInfo {
+    public:
+        double x;
+        double y;
+        double width;
+        double height;
+    };
+
+    std::map<std::string, SubInfo> subs;
 };
 } // namespace horizon

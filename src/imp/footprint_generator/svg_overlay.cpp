@@ -1,5 +1,6 @@
 #include "svg_overlay.hpp"
 #include "util/util.hpp"
+#include "nlohmann/json.hpp"
 
 #if LIBRSVG_CHECK_VERSION(2, 48, 0)
 #define HAVE_SET_STYLESHEET
@@ -14,9 +15,24 @@ SVGOverlay::SVGOverlay(const guint8 *data, gsize data_len)
 
 SVGOverlay::SVGOverlay(const char *resource)
 {
-    auto bytes = Gio::Resource::lookup_data_global(resource);
-    gsize size{bytes->get_size()};
-    init((const guint8 *)bytes->get_data(size), size);
+    {
+        auto bytes = Gio::Resource::lookup_data_global(resource);
+        gsize size{bytes->get_size()};
+        init((const guint8 *)bytes->get_data(size), size);
+    }
+    {
+        auto bytes = Gio::Resource::lookup_data_global(std::string(resource) + ".subs");
+        gsize size{bytes->get_size()};
+        const auto j = json::parse(std::string_view((const char *)bytes->get_data(size), size));
+        for (const auto &[sub, o] : j.items()) {
+            SubInfo i;
+            i.x = o.at("x").get<double>();
+            i.y = o.at("y").get<double>();
+            i.width = o.at("width").get<double>();
+            i.height = o.at("height").get<double>();
+            subs.emplace(sub, i);
+        }
+    }
 }
 
 bool SVGOverlay::draw(const Cairo::RefPtr<Cairo::Context> &cr)
@@ -37,17 +53,13 @@ bool SVGOverlay::draw(const Cairo::RefPtr<Cairo::Context> &cr)
     layout->set_font_description(font);
     layout->set_alignment(Pango::ALIGN_LEFT);
 
-    RsvgPositionData pos;
-    RsvgDimensionData dim;
-
     for (const auto &it : sub_texts) {
-        rsvg_handle_get_position_sub(handle, &pos, it.first.c_str());
-        rsvg_handle_get_dimensions_sub(handle, &dim, it.first.c_str());
+        const auto &subinfo = subs.at(it.first);
         layout->set_text(it.second);
         Pango::Rectangle ink, logic;
         layout->get_extents(ink, logic);
         Gdk::Cairo::set_source_rgba(cr, fg_color);
-        cr->move_to(pos.x, pos.y + (dim.height - logic.get_height() / PANGO_SCALE) / 2);
+        cr->move_to(subinfo.x, subinfo.y + (subinfo.height - logic.get_height() / PANGO_SCALE) / 2);
         layout->show_in_cairo_context(cr);
     }
     return false;
@@ -55,19 +67,16 @@ bool SVGOverlay::draw(const Cairo::RefPtr<Cairo::Context> &cr)
 
 void SVGOverlay::add_at_sub(Gtk::Widget &widget, const char *sub)
 {
-    RsvgPositionData pos;
-    RsvgDimensionData dim;
-    rsvg_handle_get_position_sub(handle, &pos, sub);
-    rsvg_handle_get_dimensions_sub(handle, &dim, sub);
+    const auto &subinfo = subs.at(sub);
     auto box = Gtk::manage(new Gtk::Box());
     add_overlay(*box);
     box->show();
     box->pack_start(widget, true, true, 0);
     box->set_halign(Gtk::ALIGN_START);
     box->set_valign(Gtk::ALIGN_START);
-    box->set_margin_top(pos.y);
-    box->set_margin_start(pos.x);
-    box->set_size_request(dim.width, dim.height);
+    box->set_margin_top(subinfo.y);
+    box->set_margin_start(subinfo.x);
+    box->set_size_request(subinfo.width, subinfo.height);
 }
 
 void SVGOverlay::init(const guint8 *data, gsize data_len)
