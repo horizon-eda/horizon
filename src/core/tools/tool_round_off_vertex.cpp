@@ -58,15 +58,7 @@ ToolResponse ToolRoundOffVertex::begin(const ToolArgs &args)
     }
     r_max = tan(alpha) * delta_max;
 
-    bool rev = false;
-    {
-        ClipperLib::Path path;
-        path.reserve(poly->vertices.size());
-        std::transform(poly->vertices.begin(), poly->vertices.end(), std::back_inserter(path),
-                       [](const Polygon::Vertex &v) { return ClipperLib::IntPoint(v.position.x, v.position.y); });
-        rev = (!ClipperLib::Orientation(path));
-    }
-
+    const bool rev = vn.cross(vp) < 0;
 
     if (v_next == 0) {
         poly->vertices.emplace_back(Coordi());
