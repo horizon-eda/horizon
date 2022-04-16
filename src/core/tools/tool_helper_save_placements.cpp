@@ -129,7 +129,7 @@ void ToolHelperSavePlacements::apply_placements(Callback fn)
 
 void ToolHelperSavePlacements::reset_placements()
 {
-    apply_placements([this](const SelectableRef &sel, const PlacementInfo &it) { return it.placement; });
+    apply_placements([](const SelectableRef &sel, const PlacementInfo &it) { return it.placement; });
 }
 
 void ToolHelperSavePlacements::update_indices(IndexCallback fn)

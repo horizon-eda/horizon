@@ -104,7 +104,7 @@ void ToolAlignAndDistribute::align(Coordi::type Coordi::*cp, const int64_t Place
         acc.accumulate(it.placement.shift.*cp + pp_sign * (pp ? it.*pp : 0));
     }
     const auto target = pp_sign > 0 ? acc.get_max() : acc.get_min();
-    apply_placements([this, target, cp, pp, pp_sign](const SelectableRef &sel, const PlacementInfo &it) {
+    apply_placements([target, cp, pp, pp_sign](const SelectableRef &sel, const PlacementInfo &it) {
         Placement pl = it.placement;
         pl.shift.*cp = target - pp_sign * (pp ? it.*pp : 0);
         return pl;
@@ -121,7 +121,7 @@ void ToolAlignAndDistribute::distribute(Coordi::type Coordi::*cp)
     const auto left = acc.get_min();
     const auto span = acc.get_max() - left;
     const auto step = span / static_cast<double>(placements.size() - 1);
-    apply_placements([this, step, left, cp](const SelectableRef &sel, const PlacementInfo &it) {
+    apply_placements([step, left, cp](const SelectableRef &sel, const PlacementInfo &it) {
         Placement pl = it.placement;
         pl.shift.*cp = left + it.index * step;
         return pl;
@@ -131,7 +131,7 @@ void ToolAlignAndDistribute::distribute(Coordi::type Coordi::*cp)
 void ToolAlignAndDistribute::distribute_equi(Coordi::type Coordi::*cp, const int64_t PlacementInfo::*pp1,
                                              const int64_t PlacementInfo::*pp2)
 {
-    update_indices([this, cp](const SelectableRef &sel, const PlacementInfo &it) { return it.placement.shift.*cp; });
+    update_indices([cp](const SelectableRef &sel, const PlacementInfo &it) { return it.placement.shift.*cp; });
     MinMaxAccumulator<int64_t> acc;
     for (const auto &[sel, it] : placements) {
         acc.accumulate(it.placement.shift.*cp);
@@ -154,7 +154,7 @@ void ToolAlignAndDistribute::distribute_equi(Coordi::type Coordi::*cp, const int
         auto &prev = items.at(i - 1).second;
         it.placement.shift.*cp = prev.placement.shift.*cp + prev.*pp2 + spacing + it.*pp1;
     }
-    apply_placements([this, &items](const SelectableRef &sel, const PlacementInfo &it) {
+    apply_placements([&items](const SelectableRef &sel, const PlacementInfo &it) {
         assert(*items.at(it.index).first == sel);
         return items.at(it.index).second.placement;
     });

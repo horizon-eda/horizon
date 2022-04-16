@@ -53,7 +53,7 @@ MSDTuningWindow::MSDTuningWindow() : Gtk::Window()
         });
         auto sp = it.sp;
         auto unit = it.unit;
-        it.sp->signal_output().connect([this, sp, unit] {
+        it.sp->signal_output().connect([sp, unit] {
             auto value = sp->get_adjustment()->get_value();
 
             std::ostringstream stream;

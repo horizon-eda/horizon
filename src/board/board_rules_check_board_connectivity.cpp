@@ -31,7 +31,7 @@ struct HoleInfo {
     }
     const ClipperLib::Path path;
     const ClipperLib::IntRect bbox;
-    std::vector<class Fragment *> connected_fragments;
+    std::vector<struct Fragment *> connected_fragments;
 };
 
 struct Fragment {
@@ -42,7 +42,7 @@ struct Fragment {
         bbox = get_path_bb(paths.front());
     }
     int layer = 10000;
-    std::vector<class HoleInfo *> connected_holes;
+    std::vector<struct HoleInfo *> connected_holes;
     std::set<Fragment *> connected_fragments; // directly connected by shorted pads
     size_t cluster = 0;
     bool contains(const Coordi &c) const
