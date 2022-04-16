@@ -47,6 +47,9 @@ public:
     void bind(const char *name, ObjectType type);
     void reset();
 
+    int get_column_count();
+    std::string get_column_name(int col);
+
 private:
     class Database &db;
     sqlite3_stmt *stmt;

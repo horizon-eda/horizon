@@ -31,6 +31,7 @@
 #include "blocks/blocks_schematic.hpp"
 #include "project/project.hpp"
 #include <filesystem>
+#include "widgets/sqlite_shell.hpp"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>
@@ -212,6 +213,19 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
         if (ev->keyval == GDK_KEY_O && (ev->state & GDK_CONTROL_MASK)) {
             output_window->present();
             return true;
+        }
+        return false;
+    });
+
+    signal_key_press_event().connect([this](const GdkEventKey *ev) {
+        if (ev->keyval == GDK_KEY_S && (ev->state & GDK_CONTROL_MASK)) {
+            if (pool || project) {
+                auto w = new SQLiteShellWindow(get_pool_base_path() + "/pool.db");
+                w->set_transient_for(*this);
+                w->signal_hide().connect([w] { delete w; });
+                w->present();
+                return true;
+            }
         }
         return false;
     });

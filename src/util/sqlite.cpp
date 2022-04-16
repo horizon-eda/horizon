@@ -181,6 +181,16 @@ void Query::reset()
     }
 }
 
+int Query::get_column_count()
+{
+    return sqlite3_column_count(stmt);
+}
+
+std::string Query::get_column_name(int col)
+{
+    return sqlite3_column_name(stmt, col);
+}
+
 Database::~Database()
 {
     if (sqlite3_close_v2(db) != SQLITE_OK) {
