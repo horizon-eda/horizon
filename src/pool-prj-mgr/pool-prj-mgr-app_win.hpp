@@ -189,7 +189,8 @@ private:
     std::string sock_mgr_ep;
 
     bool check_pools();
-    void check_schema_update(const std::string &base_path);
+    bool check_schema_update(const std::string &base_path);
+
     void check_pool_update(const std::string &base_path);
 
     bool check_autosave(PoolProjectManagerProcess::Type type, const std::vector<std::string> &filenames);

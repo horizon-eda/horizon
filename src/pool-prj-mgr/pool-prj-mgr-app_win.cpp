@@ -1034,17 +1034,21 @@ PoolProjectManagerAppWindow *PoolProjectManagerAppWindow::create(PoolProjectMana
     return window;
 }
 
-void PoolProjectManagerAppWindow::check_schema_update(const std::string &base_path)
+bool PoolProjectManagerAppWindow::check_schema_update(const std::string &base_path)
 {
     const auto r = pool_check_schema_update(base_path, *this);
     if (r == CheckSchemaUpdateResult::INSTALLATION_UUID_MISMATCH)
         info_bar_show(info_bar_installation_uuid_mismatch);
-    if (r != CheckSchemaUpdateResult::NO_UPDATE)
+
+    if (r != CheckSchemaUpdateResult::NO_UPDATE) {
         app.signal_pool_updated().emit(base_path);
+        return true;
+    }
+    return false;
 }
 
 
-void PoolProjectManagerAppWindow::check_pool_update(const std::string &base_path)
+static bool check_pool_update_inc(const std::string &base_path)
 {
     Pool my_pool(base_path);
     for (auto &[bp, uu] : my_pool.get_actually_included_pools(false)) {
@@ -1060,8 +1064,9 @@ void PoolProjectManagerAppWindow::check_pool_update(const std::string &base_path
                                 "SELECT a.time > b.time FROM inc.last_updated AS a LEFT JOIN last_updated AS b");
                 if (q.step()) {
                     if (q.get<int>(0)) {
-                        pool_update();
-                        return;
+                        Logger::log_info("pool " + base_path + " got updated", Logger::Domain::POOL_UPDATE,
+                                         "beacause included pool " + bp + " has been updated");
+                        return true;
                     }
                 }
             }
@@ -1069,6 +1074,7 @@ void PoolProjectManagerAppWindow::check_pool_update(const std::string &base_path
             my_pool.db.execute("DETACH inc");
         }
     }
+    return false;
 }
 
 
@@ -1168,6 +1174,17 @@ gboolean PoolProjectManagerAppWindow::part_browser_key_pressed(GtkEventControlle
 }
 #endif
 
+
+void PoolProjectManagerAppWindow::check_pool_update(const std::string &base_path)
+{
+    if (check_schema_update(base_path)) {
+        // it's okay, pool got updated
+    }
+    else if (check_pool_update_inc(base_path)) {
+        pool_update();
+    }
+}
+
 void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &file)
 {
     auto path = file->get_path();
@@ -1185,7 +1202,7 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
                 throw std::runtime_error("pool.json not found");
             }
             auto pool_base_path = file->get_parent()->get_path();
-            check_schema_update(pool_base_path);
+            check_pool_update(pool_base_path);
             set_view_mode(ViewMode::POOL);
             pool_notebook = new PoolNotebook(pool_base_path, *this);
             if (!PoolManager::get().get_pools().count(pool_base_path) && !pool->get_pool_info().is_project_pool()) {
@@ -1233,8 +1250,6 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
         project = std::make_unique<Project>(Project::new_from_file(path));
         project_filename = path;
         project_needs_save = false;
-
-        check_schema_update(project->pool_directory);
 
         check_pool_update(project->pool_directory);
 
