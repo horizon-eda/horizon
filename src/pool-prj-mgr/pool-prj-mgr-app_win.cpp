@@ -31,6 +31,7 @@
 #include "blocks/blocks_schematic.hpp"
 #include "project/project.hpp"
 #include <filesystem>
+#include "util/fs_util.hpp"
 #include "widgets/sqlite_shell.hpp"
 
 #ifdef G_OS_WIN32
@@ -239,6 +240,8 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
                     part_browser_window->pool_updated(path);
             },
             *this));
+
+    check_mtimes_dispatcher.connect([this] { pool_update(); });
 }
 
 
@@ -931,6 +934,8 @@ bool PoolProjectManagerAppWindow::really_close_pool_or_project()
         set_view_mode(ViewMode::OPEN);
     }
     output_window->clear_all();
+    if (check_mtimes_thread.joinable())
+        check_mtimes_thread.join();
     return true;
 }
 
@@ -1174,6 +1179,49 @@ gboolean PoolProjectManagerAppWindow::part_browser_key_pressed(GtkEventControlle
 }
 #endif
 
+void PoolProjectManagerAppWindow::check_mtimes(const std::string &path)
+{
+    try {
+        Pool my_pool(path);
+        int64_t last_update_time = 0;
+        {
+            SQLite::Query q(my_pool.db, "SELECT time FROM last_updated");
+            if (q.step())
+                last_update_time = q.get<sqlite3_int64>(0);
+            else
+                return;
+        }
+
+        for (auto &[bp, uu] : my_pool.get_actually_included_pools(true)) {
+            PoolInfo pool_info(bp);
+            for (const auto &[type, name] : IPool::type_names) {
+                const auto p = fs::u8path(bp) / name;
+                if (!fs::is_directory(p))
+                    continue;
+                for (const auto &ent : fs::recursive_directory_iterator(p)) {
+                    if (!ent.is_regular_file())
+                        continue;
+                    if (endswith(ent.path().filename().u8string(), ".json")) {
+                        const auto mtime = ent.last_write_time().time_since_epoch().count();
+                        if (mtime > last_update_time) {
+                            Logger::log_info("pool " + path + " got updated", Logger::Domain::POOL_UPDATE,
+                                             "beacause " + ent.path().u8string() + " has been modified");
+                            check_mtimes_dispatcher.emit();
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    catch (const std::exception &e) {
+        Logger::log_critical("exception thrown in check_mtimes", Logger::Domain::POOL_UPDATE, e.what());
+    }
+    catch (...) {
+        Logger::log_critical("unknown exception thrown in check_mtimes", Logger::Domain::POOL_UPDATE);
+    }
+}
+
 
 void PoolProjectManagerAppWindow::check_pool_update(const std::string &base_path)
 {
@@ -1182,6 +1230,9 @@ void PoolProjectManagerAppWindow::check_pool_update(const std::string &base_path
     }
     else if (check_pool_update_inc(base_path)) {
         pool_update();
+    }
+    else {
+        check_mtimes_thread = std::thread(&PoolProjectManagerAppWindow::check_mtimes, this, base_path);
     }
 }
 

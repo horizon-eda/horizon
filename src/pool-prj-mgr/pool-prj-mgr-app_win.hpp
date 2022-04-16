@@ -11,6 +11,7 @@
 #include "prj-mgr/prj-mgr_views.hpp"
 #include "pool-mgr/view_create_pool.hpp"
 #include "common/common.hpp"
+#include <thread>
 
 namespace horizon {
 using json = nlohmann::json;
@@ -192,6 +193,9 @@ private:
     bool check_schema_update(const std::string &base_path);
 
     void check_pool_update(const std::string &base_path);
+    void check_mtimes(const std::string &base_path);
+    std::thread check_mtimes_thread;
+    Glib::Dispatcher check_mtimes_dispatcher;
 
     bool check_autosave(PoolProjectManagerProcess::Type type, const std::vector<std::string> &filenames);
 
