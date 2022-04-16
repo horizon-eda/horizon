@@ -5,6 +5,7 @@
 #include "pool/pool_info.hpp"
 #include "logger/logger.hpp"
 #include "util/util.hpp"
+#include <filesystem>
 
 namespace horizon {
 
@@ -43,7 +44,8 @@ void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb, 
     }
 
     {
-        SQLite::Query q(updater.get_pool().get_db(), "UPDATE last_updated SET time = datetime()");
+        SQLite::Query q(updater.get_pool().get_db(), "UPDATE last_updated SET time = ?");
+        q.bind_int64(1, std::filesystem::file_time_type::clock::now().time_since_epoch().count());
         q.step();
     }
 

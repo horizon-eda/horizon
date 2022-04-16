@@ -1,4 +1,4 @@
-PRAGMA user_version=24; --keep in sync with pool.cpp
+PRAGMA user_version=25; --keep in sync with pool.cpp
 
 DROP TABLE IF EXISTS "units";
 CREATE TABLE "units" (
@@ -186,9 +186,9 @@ CREATE VIEW "tags_view" AS
 
 DROP TABLE IF EXISTS "last_updated";
 CREATE TABLE "last_updated" (
-	'time'	DATETIME NOT NULL UNIQUE
+	'time'	INTEGER NOT NULL UNIQUE
 );
-INSERT INTO last_updated VALUES ('2000-01-01');
+INSERT INTO last_updated VALUES (0);
 
 DROP TABLE IF EXISTS "installation_uuid";
 CREATE TABLE "installation_uuid" (
