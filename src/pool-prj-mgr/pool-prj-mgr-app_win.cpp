@@ -340,6 +340,14 @@ void PoolProjectManagerAppWindow::pool_update(const std::vector<std::string> &fi
 
     set_pool_updating(true, true);
     pool_update_n_files = 0;
+    if (pool_update_n_files_last == 0) { // use estimate
+        Pool my_pool(get_pool_base_path());
+        SQLite::Query q(my_pool.db,
+                        "SELECT SUM(x) FROM (SELECT COUNT(*) AS x FROM parts WHERE parametric_table != '' "
+                        "UNION ALL SELECT COUNT(*) AS x FROM all_items_view)");
+        if (q.step())
+            pool_update_n_files_last = q.get<int>(0);
+    }
     pool_updating = true;
     pool_update_filenames = filenames;
     pool_update_status_queue.clear();
