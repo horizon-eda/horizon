@@ -2093,12 +2093,13 @@ In case of modifying an existing part, provide rationale for the modification.</
                     <property name="orientation">vertical</property>
                     <property name="spacing">20</property>
                     <child>
-                      <!-- n-columns=2 n-rows=3 -->
+                      <!-- n-columns=3 n-rows=4 -->
                       <object class="GtkGrid" id="grid1">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="row-spacing">10</property>
                         <property name="column-spacing">10</property>
+                        <property name="row-homogeneous">True</property>
                         <child>
                           <object class="GtkLabel" id="label6">
                             <property name="visible">True</property>
@@ -2130,46 +2131,6 @@ In case of modifying an existing part, provide rationale for the modification.</
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkBox">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="hexpand">True</property>
-                            <property name="spacing">10</property>
-                            <child>
-                              <object class="GtkLabel" id="label_project_directory">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="halign">start</property>
-                                <property name="label" translatable="yes">fixme</property>
-                                <property name="selectable">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkButton" id="prj_open_dir_button">
-                                <property name="label" translatable="yes">Open</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="pack-type">end</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="left-attach">1</property>
-                            <property name="top-attach">2</property>
-                          </packing>
-                        </child>
-                        <child>
                           <object class="GtkLabel" id="label2">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
@@ -2197,41 +2158,98 @@ In case of modifying an existing part, provide rationale for the modification.</
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkBox">
+                          <object class="GtkButton" id="prj_edit_meta_button">
+                            <property name="label" translatable="yes">Edit</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">2</property>
+                            <property name="top-attach">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="prj_open_dir_button">
+                            <property name="label" translatable="yes">Open</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">2</property>
+                            <property name="top-attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label_project_title">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <child>
-                              <object class="GtkLabel" id="label_project_title">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="halign">start</property>
-                                <property name="label" translatable="yes">fixme</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkButton" id="prj_edit_meta_button">
-                                <property name="label" translatable="yes">Edit</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="pack-type">end</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
+                            <property name="halign">start</property>
+                            <property name="hexpand">True</property>
+                            <property name="label" translatable="yes">fixme</property>
                           </object>
                           <packing>
                             <property name="left-attach">1</property>
                             <property name="top-attach">0</property>
                           </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label_project_directory">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">fixme</property>
+                            <property name="selectable">True</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">1</property>
+                            <property name="top-attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label1">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">end</property>
+                            <property name="label" translatable="yes">Pools</property>
+                            <style>
+                              <class name="dim-label"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label_project_pools">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="label" translatable="yes">fixme</property>
+                            <property name="ellipsize">end</property>
+                            <property name="max-width-chars">0</property>
+                            <property name="xalign">0</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">1</property>
+                            <property name="top-attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="prj_change_pools_button">
+                            <property name="label" translatable="yes">Change</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">2</property>
+                            <property name="top-attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <placeholder/>
                         </child>
                       </object>
                       <packing>
@@ -3080,12 +3098,6 @@ In case of modifying an existing part, provide rationale for the modification.</
       <widget name="create_pool_name_entry"/>
     </widgets>
   </object>
-  <object class="GtkSizeGroup" id="sg_prj_open_change">
-    <widgets>
-      <widget name="prj_open_dir_button"/>
-      <widget name="prj_edit_meta_button"/>
-    </widgets>
-  </object>
   <object class="GtkBox" id="pull_request_item">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
@@ -3198,8 +3210,5 @@ In case of modifying an existing part, provide rationale for the modification.</
         <property name="position">1</property>
       </packing>
     </child>
-  </object>
-  <object class="GtkSizeGroup" id="sg_prj_pool">
-    <property name="mode">vertical</property>
   </object>
 </interface>

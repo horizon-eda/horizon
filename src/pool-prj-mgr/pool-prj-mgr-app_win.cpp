@@ -238,6 +238,8 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
             [this](const auto &path) {
                 if (part_browser_window)
                     part_browser_window->pool_updated(path);
+                if (project && project->pool_directory == path)
+                    view_project.update_pools_label();
             },
             *this));
 
@@ -1032,6 +1034,12 @@ void PoolProjectManagerAppWindow::pool_notebook_go_to(ObjectType type, const UUI
         pool_notebook->go_to(type, uu);
 }
 
+void PoolProjectManagerAppWindow::pool_notebook_show_settings_tab()
+{
+    if (pool_notebook)
+        pool_notebook->show_settings_tab();
+}
+
 PoolProjectManagerAppWindow *PoolProjectManagerAppWindow::create(PoolProjectManagerApplication &app)
 {
     // Load the Builder file and instantiate its widgets.
@@ -1361,6 +1369,7 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
         set_view_mode(ViewMode::PROJECT);
 
         view_project.update_meta();
+        view_project.update_pools_label();
     }
 }
 

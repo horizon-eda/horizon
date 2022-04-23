@@ -83,6 +83,7 @@ public:
 
     UUID get_pool_uuid() const;
     void pool_notebook_go_to(ObjectType type, const UUID &uu);
+    void pool_notebook_show_settings_tab();
     void open_pool(const std::string &pool_json);
     void update_pool_cache_status_now();
     const std::string &get_project_title() const;

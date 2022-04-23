@@ -9,6 +9,7 @@
 #include "blocks/blocks.hpp"
 #include "pool/pool_cache_status.hpp"
 #include "util/gtk_util.hpp"
+#include "pool/pool.hpp"
 
 namespace horizon {
 
@@ -152,6 +153,7 @@ PoolProjectManagerViewProject::PoolProjectManagerViewProject(const Glib::RefPtr<
     builder->get_widget("label_project_title", label_project_title);
     builder->get_widget("label_project_author", label_project_author);
     builder->get_widget("label_project_directory", label_project_directory);
+    builder->get_widget("label_project_pools", label_project_pools);
     builder->get_widget("pool_cache_status_label", pool_cache_status_label);
 
     {
@@ -187,6 +189,14 @@ PoolProjectManagerViewProject::PoolProjectManagerViewProject(const Glib::RefPtr<
                 });
             }
         }
+    });
+
+    Gtk::Button *change_button;
+    builder->get_widget("prj_change_pools_button", change_button);
+    change_button->signal_clicked().connect([this] {
+        auto path = Glib::build_filename(win.project->pool_directory, "pool.json");
+        auto &win2 = win.app.open_pool(path);
+        win2.pool_notebook_show_settings_tab();
     });
 
     button_top_schematic->signal_clicked().connect(
@@ -250,6 +260,26 @@ bool PoolProjectManagerViewProject::update_meta()
     label_project_author->set_text(author);
     win.project_title = title;
     return meta.size();
+}
+
+void PoolProjectManagerViewProject::update_pools_label()
+{
+    Pool my_pool(win.project->pool_directory);
+    std::string pools_label;
+    std::string pools_tooltip;
+    for (const auto &[bp, uu] : my_pool.get_actually_included_pools(false)) {
+        const auto inc_pool = PoolManager::get().get_by_uuid(uu);
+        if (inc_pool) {
+            if (pools_label.size()) {
+                pools_label += ", ";
+                pools_tooltip += "\n";
+            }
+            pools_label += inc_pool->name;
+            pools_tooltip += inc_pool->name;
+        }
+    }
+    label_project_pools->set_text(pools_label);
+    label_project_pools->set_tooltip_text(pools_tooltip);
 }
 
 void PoolProjectManagerViewProject::update_pool_cache_status(const PoolCacheStatus &status)

@@ -41,6 +41,8 @@ public:
         return s_signal_saved;
     }
 
+    void show_settings_tab();
+
 private:
     const std::string base_path;
     Pool pool;

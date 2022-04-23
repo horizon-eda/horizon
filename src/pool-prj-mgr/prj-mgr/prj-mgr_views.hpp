@@ -38,12 +38,14 @@ public:
     Gtk::Label *label_project_title = nullptr;
     Gtk::Label *label_project_author = nullptr;
     Gtk::Label *label_project_directory = nullptr;
+    Gtk::Label *label_project_pools = nullptr;
 
     void open_top_schematic();
     void open_board();
     bool update_meta();
     void update_pool_cache_status(const class PoolCacheStatus &status);
     void reset_pool_cache_status();
+    void update_pools_label();
 
 private:
     PoolProjectManagerAppWindow &win;

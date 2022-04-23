@@ -525,6 +525,13 @@ void PoolNotebook::go_to(ObjectType type, const UUID &uu)
     set_current_page(page);
 }
 
+void PoolNotebook::show_settings_tab()
+{
+    auto page = page_num(*settings_box);
+    if (page != -1)
+        set_current_page(page);
+}
+
 const UUID &PoolNotebook::get_pool_uuid() const
 {
     return pool_uuid;
