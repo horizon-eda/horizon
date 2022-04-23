@@ -625,7 +625,8 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             pool_path = pool2->base_path;
         }
         if (pool_path.size()) {
-            app.open_pool(Glib::build_filename(pool_path, "pool.json"), type, uu, timestamp);
+            auto &win = app.open_pool(Glib::build_filename(pool_path, "pool.json"), timestamp);
+            win.pool_notebook_go_to(type, uu);
         }
     }
     else if (op == "backannotate") {
@@ -1370,13 +1371,10 @@ const std::string &PoolProjectManagerAppWindow::get_project_title() const
     return project_title;
 }
 
-void PoolProjectManagerAppWindow::open_pool(const std::string &pool_json, ObjectType type, const UUID &uu)
+void PoolProjectManagerAppWindow::open_pool(const std::string &pool_json)
 {
     open_file_view(Gio::File::create_for_path(pool_json));
-    if (type != ObjectType::INVALID)
-        pool_notebook_go_to(type, uu);
 }
-
 
 void PoolProjectManagerAppWindow::handle_place_part(const UUID &uu)
 {

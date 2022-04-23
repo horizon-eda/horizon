@@ -260,8 +260,7 @@ bool PoolProjectManagerApplication::present_existing_window(const std::string &p
     return false;
 }
 
-void PoolProjectManagerApplication::open_pool(const std::string &pool_json, ObjectType type, const UUID &uu,
-                                              guint32 timestamp)
+PoolProjectManagerAppWindow &PoolProjectManagerApplication::open_pool(const std::string &pool_json, guint32 timestamp)
 {
     PoolProjectManagerAppWindow *appwindow = nullptr;
     for (auto ws : get_windows()) {
@@ -273,8 +272,9 @@ void PoolProjectManagerApplication::open_pool(const std::string &pool_json, Obje
     }
     if (!appwindow)
         appwindow = create_appwindow();
-    appwindow->open_pool(pool_json, type, uu);
+    appwindow->open_pool(pool_json);
     appwindow->present(timestamp);
+    return *appwindow;
 }
 
 void PoolProjectManagerApplication::on_hide_window(Gtk::Window *window)

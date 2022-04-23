@@ -366,7 +366,8 @@ void PoolNotebook::add_context_menu(PoolBrowser *br)
             [this, ty](const UUID &uu) {
                 auto x = get_pool_uuids(ty, uu);
                 if (auto pool2 = PoolManager::get().get_by_uuid(x.last ? x.last : x.pool)) {
-                    appwin.app.open_pool(Glib::build_filename(pool2->base_path, "pool.json"), ty, uu);
+                    auto &win = appwin.app.open_pool(Glib::build_filename(pool2->base_path, "pool.json"));
+                    win.pool_notebook_go_to(ty, uu);
                 }
             },
             [this, ty](const UUID &uu) -> bool {
