@@ -246,6 +246,24 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         remote_repo = "";
     }
 
+    if (pool.get_pool_info().is_project_pool()) {
+        cache_box = PoolCacheBox::create(&appwin.app, this, pool);
+        cache_box->signal_goto().connect(sigc::mem_fun(*this, &PoolNotebook::go_to));
+        cache_box->show();
+        append_page(*cache_box, "Cache");
+        cache_box->unreference();
+        cache_box->refresh_status();
+
+        signal_switch_page().connect([this](Gtk::Widget *page, int page_num) {
+            if (in_destruction())
+                return;
+            if (page == cache_box && !cache_box->refreshed_once) {
+                cache_box->refresh_status();
+                cache_box->refreshed_once = true;
+            }
+        });
+    }
+
     construct_units();
     construct_symbols();
     construct_entities();
@@ -265,24 +283,6 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         settings_box->show();
         append_page(*settings_box, "Settings");
         settings_box->unreference();
-    }
-
-
-    if (pool.get_pool_info().is_project_pool()) {
-        cache_box = PoolCacheBox::create(&appwin.app, this, pool);
-        cache_box->signal_goto().connect(sigc::mem_fun(*this, &PoolNotebook::go_to));
-        cache_box->show();
-        append_page(*cache_box, "Cache");
-        cache_box->unreference();
-
-        signal_switch_page().connect([this](Gtk::Widget *page, int page_num) {
-            if (in_destruction())
-                return;
-            if (page == cache_box && !cache_box->refreshed_once) {
-                cache_box->refresh_status();
-                cache_box->refreshed_once = true;
-            }
-        });
     }
 
     if (remote_repo.size()) {
