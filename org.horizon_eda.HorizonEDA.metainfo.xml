@@ -39,6 +39,17 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+    <release version="2.2.90" date="2022-04-24">
+      <url>https://github.com/horizon-eda/horizon/releases/tag/v2.2.90</url>
+      <description>
+        <p>What's new</p>
+        <ul>
+          <li>Faster clearance checks</li>
+          <li>ODB++ output</li>
+          <li>Various check enhacements</li>
+        </ul>
+      </description>
+    </release>
     <release version="2.2.0" date="2022-01-09">
       <url>https://github.com/horizon-eda/horizon/releases/tag/v2.2.0</url>
       <description>
