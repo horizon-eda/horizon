@@ -377,13 +377,14 @@ void spinbutton_connect_activate(Gtk::SpinButton *sp, std::function<void()> cb)
 
 void open_directory(Gtk::Window &win, const std::string &filename)
 {
+    const auto dir_name = Glib::path_get_dirname(filename);
 #ifdef G_OS_WIN32
     auto wnd = reinterpret_cast<HWND>(GDK_WINDOW_HWND(win.get_window()->gobj()));
-    auto wfilename = reinterpret_cast<wchar_t *>(g_utf8_to_utf16(filename.c_str(), -1, NULL, NULL, NULL));
+    auto wfilename = reinterpret_cast<wchar_t *>(g_utf8_to_utf16(dir_name.c_str(), -1, NULL, NULL, NULL));
     ShellExecuteW(wnd, NULL, wfilename, NULL, NULL, SW_SHOWNORMAL);
     g_free(wfilename);
 #else
-    auto uri = Gio::File::create_for_path(Glib::path_get_dirname(filename))->get_uri();
+    auto uri = Gio::File::create_for_path(dir_name)->get_uri();
     Gio::AppInfo::launch_default_for_uri(uri);
 #endif
 }

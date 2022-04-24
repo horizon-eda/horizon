@@ -40,7 +40,7 @@ RecentItemBox::RecentItemBox(const std::string &name, const std::string &pa, con
         auto item = Gtk::manage(new Gtk::MenuItem("Open in file browser"));
         item->signal_activate().connect([this] {
             auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
-            open_directory(*top, Glib::path_get_dirname(path));
+            open_directory(*top, path);
         });
         item->show();
         menu.append(*item);
