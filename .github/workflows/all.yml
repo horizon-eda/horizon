@@ -89,7 +89,7 @@ jobs:
       if: ${{ matrix.target == 'build/horizon.so' }}
       run: apt-get install python3-cairo-dev libosmesa6-dev python3-yaml -y
     - name: Build
-      run: make -j2 CXX=${{ matrix.os.cxx }} CC=${{ matrix.os.cc }} WARNFLAGS="-Wall -Wshadow -Wno-parentheses"  WITH_SPNAV=1 ${{ matrix.target }}
+      run: make -j2 CXX=${{ matrix.os.cxx }} CC=${{ matrix.os.cc }} WARNFLAGS="-Wall -Wshadow -Wno-parentheses" ${{ matrix.target }}
     - name: Check version
       run: python3 check_version.py
     - name: Test python module
@@ -119,7 +119,7 @@ jobs:
     - name: Build LD_PRELOAD kludge
       run: gcc -shared -fPIC -o close_range.so scripts/close_range.c
     - name: Build
-      run: LD_PRELOAD=$PWD/close_range.so make -j2 ${{ matrix.target }} WITH_SPNAV=1
+      run: LD_PRELOAD=$PWD/close_range.so make -j2 ${{ matrix.target }}
     - name: Check version
       run: python3 check_version.py
     - name: Test python module
@@ -138,4 +138,4 @@ jobs:
     - name: Install dependencies
       run: apt-get update -y && apt-get install git build-essential libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libarchive-dev git -y
     - name: Build
-      run: make DEBUG=1 LDFLAGS="-lstdc++fs -lpthread" -j2
+      run: make DEBUG=1 LDFLAGS="-lstdc++fs -lpthread" WITH_SPNAV=0 -j2

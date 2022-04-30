@@ -896,6 +896,16 @@ ifeq ($(DEBUG),1)
 	CXXFLAGS += -DUUID_PTR_CHECK -DCONNECTION_CHECK
 endif
 
+ifeq ($(OS),Windows_NT)
+	WITH_SPNAV ?= 0
+else
+	ifeq ($(UNAME), Linux)
+		WITH_SPNAV ?= 1
+	else
+		WITH_SPNAV ?= 0
+	endif
+endif
+
 EXTRA_LIBS =
 ifeq ($(WITH_SPNAV),1)
 	DEFINES += -DHAVE_SPNAV
