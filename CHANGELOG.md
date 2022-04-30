@@ -10,9 +10,9 @@
 
  - Support connecting tracks to pads with offset ([21840a7](https://github.com/horizon-eda/horizon/commit/21840a725e6010098f8c3d6b17ad8dfe5c78a70b))
  - ODB++ output ([d84af5e](https://github.com/horizon-eda/horizon/commit/d84af5ed4dd0b25dcf2dd889365cf3e00c21dc5d))
- - Board connectivity check to check that all copper features of a net are connected ([42eba6a](https://github.com/horizon-eda/horizon/commit/42eba6acd31ec3322314633f98d974f7811b288c))
  - Thermal relief spoke customisation ([c1a568f](https://github.com/horizon-eda/horizon/commit/c1a568fc514d58d7688eede7723a8634e5986ab2))
  - Thermal relief rules for overriding thermal style ([7e880dc](https://github.com/horizon-eda/horizon/commit/7e880dc091a5f429ec219b29c94f6a7b5d9bd24e))
+ - Board connectivity check to check that all copper features of a net are connected ([42eba6a](https://github.com/horizon-eda/horizon/commit/42eba6acd31ec3322314633f98d974f7811b288c))
 
 ### Editors
 
@@ -41,15 +41,13 @@
  - Edit plane: support picking net ([bac09fd](https://github.com/horizon-eda/horizon/commit/bac09fde8c033371fa5bc952964358314a1fc466))
  - Update planes without blocking the UI and show progress ([421e610](https://github.com/horizon-eda/horizon/commit/421e6103195dc1fc62fb1e933559cadf3f3f13a9), [5b490df](https://github.com/horizon-eda/horizon/commit/5b490dfe49fa3f8841018ea3d6979c1391ae997f), [deab5f2](https://github.com/horizon-eda/horizon/commit/deab5f22f5a93642350b856a36e2c3942159c901))
 
-
 ### Editors
-
  
  - Rules: support cancelling checks ([9d96698](https://github.com/horizon-eda/horizon/commit/9d966988298868f25c61f9a3f2446974b3a72438), [8338a74](https://github.com/horizon-eda/horizon/commit/8338a746255f585e16a446168c9203304ae22217), [e22f1af](https://github.com/horizon-eda/horizon/commit/e22f1af537b0e5c3c0f4764c8518142203ffb58f))
  - Rules: support checking just a single rule ([90b24ac](https://github.com/horizon-eda/horizon/commit/90b24ace6635622adac144420850538cb543ceeb))
  - Rules: add option for only showing errors on work layer ([c5259b3](https://github.com/horizon-eda/horizon/commit/c5259b3c9dc173ba936de47163c7c3e2dd9acf07))
  - Rules: only show markers and error polygons for visible rows ([25e6838](https://github.com/horizon-eda/horizon/commit/25e6838be6c719178fc5b7a8af8d7a4f262e6c5d))
- - Reflow actions in tool bar ([b08b6fc](https://github.com/horizon-eda/horizon/commit/b08b6fcc4bfa0ee49377347de9412d4041a6b5a3))
+ - Reflow actions in tool bar if ther are too many ([b08b6fc](https://github.com/horizon-eda/horizon/commit/b08b6fcc4bfa0ee49377347de9412d4041a6b5a3))
  - Show tooltips on markers ([e3d999a](https://github.com/horizon-eda/horizon/commit/e3d999a1b0617a112fb93d8d65127dae3b400031))
  - Non-modal text editing ([2d0ac2f](https://github.com/horizon-eda/horizon/commit/2d0ac2fdd3efcf346cfd20124af0f16ccd2f34bc))
  - Support German umlauts in texts ([969d8d5](https://github.com/horizon-eda/horizon/commit/969d8d574cb2272b0de5154b3e24fe0348424155))
@@ -150,6 +148,7 @@
 ### Pool/project manager
 
  - Correctly handle opening files form argv ([56b3f08](https://github.com/horizon-eda/horizon/commit/56b3f086c7799bbf0bb042e5bb9bc50004b7c5ee))
+ - Correctly open directories in external file browser ([972cf17](https://github.com/horizon-eda/horizon/commit/972cf174bc03a59de127b1add98cc3be99169b7e))
 
 ### Project manager
 
@@ -158,7 +157,8 @@
 
 ## For packagers
 
- - replace libzip with libarchive ([06b7a64](https://github.com/horizon-eda/horizon/commit/06b7a64f8daed65a33a09478a37c4bb4f1170463))
+ - Replace libzip dependency with libarchive ([06b7a64](https://github.com/horizon-eda/horizon/commit/06b7a64f8daed65a33a09478a37c4bb4f1170463))
+ - New dependency libspnav, if your distribution doesn't include it, you can disable spacenav support by passing `WITH_SPNAV=0` to make
 
 # Version 2.2.0
 
