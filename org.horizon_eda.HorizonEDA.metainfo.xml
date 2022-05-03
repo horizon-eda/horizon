@@ -39,8 +39,8 @@
   <content_rating type="oars-1.0" />
 
   <releases>
-    <release version="2.2.91" date="2022-05-03">
-      <url>https://github.com/horizon-eda/horizon/releases/tag/v2.2.90</url>
+    <release version="2.2.92" date="2022-05-03">
+      <url>https://github.com/horizon-eda/horizon/releases/tag/v2.2.92</url>
       <description>
         <p>What's new</p>
         <ul>
