@@ -1,4 +1,4 @@
-# Version 2.2.90 (will become 2.3.0)
+# Version 2.3.0
 
 ## New features
 
@@ -32,14 +32,14 @@
 ### Board Editor
 
  - Faster copper clearance checks (2718b88614eb1106e8acf2314ebcad2633508848)
- - Fab output window: show message when export is done (1ace3c5f461617e10d9c7f96f217be74131898c1)
+ - Update planes without blocking the UI and show progress (421e6103195dc1fc62fb1e933559cadf3f3f13a9, 5b490dfe49fa3f8841018ea3d6979c1391ae997f, deab5f22f5a93642350b856a36e2c3942159c901)
  - STEP export: export arcs in board outline as such (9c3c740e5eff82cdd703b88bb3b3944b2556894c)
- - STEP export: improved error reporting (545ca3e5b05aa625b9426484135732f465b063f6)
  - Rules: support matching multiple nets (d2da4b6d4e62c4c6c93a2507f1a42e4e272656f5)
  - Rules: support matching multiple components (50ecfa87fba67e810668aa54b5fce945ad69dac8)
  - Show layer in check results (ac470c95daba4616917ce124b15ca979f761a810)
  - Edit plane: support picking net (bac09fde8c033371fa5bc952964358314a1fc466)
- - Update planes without blocking the UI and show progress (421e6103195dc1fc62fb1e933559cadf3f3f13a9, 5b490dfe49fa3f8841018ea3d6979c1391ae997f, deab5f22f5a93642350b856a36e2c3942159c901)
+ - Fab output window: show message when export is done (1ace3c5f461617e10d9c7f96f217be74131898c1)
+ - STEP export: improved error reporting (545ca3e5b05aa625b9426484135732f465b063f6)
 
 ### Editors
  
