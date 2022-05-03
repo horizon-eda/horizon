@@ -899,7 +899,7 @@ endif
 ifeq ($(OS),Windows_NT)
 	WITH_SPNAV ?= 0
 else
-	ifeq ($(UNAME), Linux)
+	ifeq ($(shell uname), Linux)
 		WITH_SPNAV ?= 1
 	else
 		WITH_SPNAV ?= 0
