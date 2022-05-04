@@ -12,6 +12,8 @@ NetLabel::NetLabel(const UUID &uu, const json &j, Sheet *sheet)
         junction = &sheet->junctions.at(j.at("junction").get<std::string>());
     else
         junction.uuid = j.at("junction").get<std::string>();
+    if (j.count("last_net"))
+        last_net = j.at("last_net").get<std::string>();
 }
 
 NetLabel::NetLabel(const UUID &uu) : uuid(uu)
@@ -26,6 +28,8 @@ json NetLabel::serialize() const
     j["size"] = size;
     j["offsheet_refs"] = offsheet_refs;
     j["show_port"] = show_port;
+    if (last_net)
+        j["last_net"] = (std::string)last_net;
     return j;
 }
 } // namespace horizon

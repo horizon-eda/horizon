@@ -33,6 +33,7 @@ public:
     // not saved
     bool is_power_forced = false;
     bool is_bussed = false;
+    bool keep = false;
     unsigned int n_pins_connected = 0;
     bool has_bus_rippers = false;
     std::vector<UUIDVec> hrefs;

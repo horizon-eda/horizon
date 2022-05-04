@@ -50,7 +50,7 @@ json Schematic::Annotation::serialize() const
     return j;
 }
 
-static const unsigned int app_version = 6;
+static const unsigned int app_version = 7;
 
 unsigned int Schematic::get_app_version()
 {
@@ -535,6 +535,7 @@ void Schematic::expand_connectivity(bool careful)
     for (auto &it_net : block->nets) {
         it_net.second.is_power_forced = false;
         it_net.second.is_bussed = false;
+        it_net.second.keep = false;
     }
     for (auto &it_bus : block->buses) {
         for (auto &it_mem : it_bus.second.members) {
@@ -547,6 +548,10 @@ void Schematic::expand_connectivity(bool careful)
         for (auto &it_sym : sheet.power_symbols) {
             it_sym.second.net->is_power = true;
             it_sym.second.net->is_power_forced = true;
+        }
+        for (auto &[uu, label] : sheet.net_labels) {
+            if (block->nets.count(label.last_net))
+                block->nets.at(label.last_net).keep = true;
         }
     }
 
@@ -720,6 +725,13 @@ void Schematic::expand_connectivity(bool careful)
                 }
             }
         }
+        for (auto &[uu_label, label] : sheet.net_labels) {
+            if (block->nets.count(label.last_net) && net_segments.count(label.junction->net_segment)) {
+                auto &ns = net_segments.at(label.junction->net_segment);
+                if (ns.net == nullptr)
+                    ns.net = &block->nets.at(label.last_net);
+            }
+        }
         for (auto &it_line : sheet.net_lines) {
             it_line.second.net = net_segments.at(it_line.second.net_segment).net;
             it_line.second.bus = net_segments.at(it_line.second.net_segment).bus;
@@ -729,6 +741,12 @@ void Schematic::expand_connectivity(bool careful)
                 it_junc.second.net = net_segments.at(it_junc.second.net_segment).net;
                 it_junc.second.bus = net_segments.at(it_junc.second.net_segment).bus;
             }
+        }
+        for (auto &[uu_label, label] : sheet.net_labels) {
+            if (label.junction->net)
+                label.last_net = label.junction->net->uuid;
+            else
+                label.last_net = UUID();
         }
         sheet.update_junction_connections();
     }

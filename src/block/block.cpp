@@ -218,7 +218,7 @@ void Block::vacuum_nets()
 {
     std::set<UUID> nets_erase;
     for (const auto &it : nets) {
-        if (!it.second.is_power && !it.second.is_port) { // don't vacuum power nets and ports
+        if (!it.second.is_power && !it.second.is_port && !it.second.keep) { // don't vacuum power nets and ports
             nets_erase.emplace(it.first);
         }
     }

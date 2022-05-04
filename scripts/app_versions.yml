@@ -21,6 +21,7 @@ versions:
     4: add connectivity checks
     5: add support for UUID-based alternate pin names
     6: add net ties
+    7: keep nets on unconnected labels
   project:
     1: replace pool cache with project pool
     2: add hierarchy

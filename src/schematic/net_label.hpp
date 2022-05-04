@@ -29,6 +29,7 @@ public:
     std::set<unsigned int> on_sheets;
     bool offsheet_refs = true;
     bool show_port = false;
+    UUID last_net;
 
     json serialize() const;
 };
