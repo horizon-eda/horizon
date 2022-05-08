@@ -212,7 +212,7 @@ RulesCheckResult BoardRules::check_clearance_copper(const Board &brd, RulesCheck
         patches.reserve(patches_from_canvas.size());
 
         for (const auto &[key, patch] : patches_from_canvas) {
-            if (check_clearance_copper_filter_patches(key))
+            if (check_clearance_copper_filter_patches(key) && patch.size())
                 patches.push_back({key, patch});
         }
     }
