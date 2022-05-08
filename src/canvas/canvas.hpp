@@ -162,8 +162,6 @@ protected:
                    bool tr = true, uint64_t width = 0);
     void draw_box(const Coord<float> &o, float size, ColorP color = ColorP::FROM_LAYER, int layer = 10000,
                   bool tr = true, uint64_t width = 0);
-    void draw_arc(const Coord<float> &center, float radius, float a0, float a1, ColorP color = ColorP::FROM_LAYER,
-                  int layer = 10000);
     void draw_circle(const Coord<float> &center, float radius, ColorP color = ColorP::FROM_LAYER, int layer = 10000);
     void draw_arc2(const Coord<float> &center, float radius0, float a0, float a1, ColorP color, int layer,
                    uint64_t width);
