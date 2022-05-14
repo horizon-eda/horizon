@@ -209,20 +209,6 @@ json Track::serialize() const
     return j;
 }
 
-bool Track::coord_on_line(const Coordi &p) const
-{
-    Coordi a = Coordi::min(from.get_position(), to.get_position());
-    Coordi b = Coordi::max(from.get_position(), to.get_position());
-    if (p.x >= a.x && p.x <= b.x && p.y >= a.y && p.y <= b.y) { // inside bbox
-        auto c = to.get_position() - from.get_position();
-        auto d = p - from.get_position();
-        if ((c.dot(d)) * (c.dot(d)) == c.mag_sq() * d.mag_sq()) {
-            return true;
-        }
-    }
-    return false;
-}
-
 bool Track::is_parallel_to(const Track &other) const
 {
     const auto zero = Coordi();
@@ -231,6 +217,11 @@ bool Track::is_parallel_to(const Track &other) const
     if (v1 == zero || v2 == zero)
         return false; // Direction undefined
     return v1.cross(v2) == 0;
+}
+
+double Track::get_length() const
+{
+    return (from.get_position() - to.get_position()).magd();
 }
 
 } // namespace horizon

@@ -206,11 +206,6 @@ void TuningWindow::add_tracks(const std::set<UUID> &tracks_uuid, bool all)
     update();
 }
 
-static int64_t get_track_length(const Track &track)
-{
-    return (track.from.get_position() - track.to.get_position()).magd();
-}
-
 void TuningWindow::update()
 {
     auto children = store->children();
@@ -225,14 +220,14 @@ void TuningWindow::update()
         if (row[list_columns.all_tracks]) {
             for (auto &it_track : board.tracks) {
                 if (it_track.second.net && it_track.second.net->uuid == row[list_columns.net])
-                    length += get_track_length(it_track.second);
+                    length += it_track.second.get_length();
             }
         }
         else {
             for (const auto &track_uuid : row.get_value(list_columns.tracks)) {
                 if (board.tracks.count(track_uuid)) {
                     auto &track = board.tracks.at(track_uuid);
-                    length += get_track_length(track);
+                    length += track.get_length();
                 }
             }
         }

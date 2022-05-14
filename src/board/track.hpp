@@ -17,8 +17,8 @@ public:
 
     void update_refs(class Board &brd);
     UUID get_uuid() const;
-    bool coord_on_line(const Coordi &coord) const;
     bool is_parallel_to(const Track &other) const;
+    double get_length() const;
 
     UUID uuid;
     uuid_ptr<Net> net = nullptr;

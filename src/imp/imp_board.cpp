@@ -952,7 +952,7 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
                 the_track = &tr;
                 tracks.emplace_back(the_track);
                 layers.insert(tr.layer);
-                length += (tr.from.get_position() - tr.to.get_position()).magd();
+                length += tr.get_length();
                 if (tr.net)
                     nets.insert(tr.net);
             }
