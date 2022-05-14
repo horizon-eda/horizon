@@ -49,21 +49,23 @@ void main() {
   if(my_a0 > a1) { //outside of arc
     vec2 p0 = p2r(a0, 1-line_width/2) - round_pos_to_fragment;
     vec2 p1 = p2r(a0+a1, 1-line_width/2) - round_pos_to_fragment;
-    if(length(p0) < line_width/2) {
+    bool e0 = length(p0) < line_width/2;
+    bool e1 = length(p1) < line_width/2;
+    if(e0 && !e1) {
       if(length(p0) > line_width/2-border_width) {
         if(layer_mode != LAYER_MODE_FILL_ONLY)
           my_alpha = 1;
         disc = false;
       }
     }
-    else if(length(p1) < line_width/2) {
+    else if(e1 && !e0) {
       if(length(p1) > line_width/2-border_width) {
         if(layer_mode != LAYER_MODE_FILL_ONLY)
           my_alpha = 1;
         disc = false;
       }
     }
-    else {
+    else if (!e0 && !e1){
       discard;
     }
   }

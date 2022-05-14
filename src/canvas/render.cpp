@@ -683,11 +683,16 @@ void Canvas::render(const Arc &arc, bool interactive, ColorP co)
         const float a0 = c2pi((a - c).angle());
         const float a1 = c2pi((b - c).angle());
         const float dphi = c2pi(a1 - a0);
+        const auto ri = radius0 - arc.width / 2;
 
-        Coordf t(radius0, radius0);
-        const float ax = std::min(asin(arc.width / 2 / radius0), static_cast<float>((2 * M_PI - dphi) / 2 - .1e-4));
-        selectables.append_arc(arc.uuid, ObjectType::ARC, c, radius0 - arc.width / 2, radius0 + arc.width / 2, a0 - ax,
-                               a1 + ax, 0, arc.layer);
+        if (ri > 0) {
+            const float ax = std::min(asin(arc.width / 2 / radius0), static_cast<float>((2 * M_PI - dphi) / 2 - .1e-4));
+            selectables.append_arc(arc.uuid, ObjectType::ARC, c, ri, radius0 + arc.width / 2, a0 - ax, a1 + ax, 0,
+                                   arc.layer);
+        }
+        else {
+            selectables.append_line(arc.uuid, ObjectType::ARC, a, b, arc.width, 0, arc.layer);
+        }
     }
 }
 
