@@ -34,11 +34,12 @@ Features::Line &Features::draw_line(const Coordi &from, const Coordi &to, uint64
     return add_feature<Line>(from, to, sym);
 }
 
-Features::Arc &Features::draw_arc(const Coordi &from, const Coordi &to, const Coordi &center, uint64_t width)
+Features::Arc &Features::draw_arc(const Coordi &from, const Coordi &to, const Coordi &center, uint64_t width,
+                                  Arc::Direction direction)
 {
     const auto sym = get_or_create_symbol_circle(width);
     const auto real_center = project_onto_perp_bisector(from, to, center).to_coordi();
-    return add_feature<Arc>(from, to, real_center, sym, Arc::Direction::CCW);
+    return add_feature<Arc>(from, to, real_center, sym, direction);
 }
 
 std::vector<Features::Feature *> Features::draw_polygon_outline(const Polygon &ipoly, const Placement &transform)
@@ -52,12 +53,9 @@ std::vector<Features::Feature *> Features::draw_polygon_outline(const Polygon &i
             r.push_back(&draw_line(transform.transform(v_last.position), transform.transform(v.position), 0));
         }
         else if (v_last.type == Polygon::Vertex::Type::ARC) {
-            if (!v_last.arc_reverse != transform.mirror)
-                r.push_back(&draw_arc(transform.transform(v_last.position), transform.transform(v.position),
-                                      transform.transform(v_last.arc_center), 0));
-            else
-                r.push_back(&draw_arc(transform.transform(v.position), transform.transform(v_last.position),
-                                      transform.transform(v_last.arc_center), 0));
+            r.push_back(&draw_arc(transform.transform(v_last.position), transform.transform(v.position),
+                                  transform.transform(v_last.arc_center), 0,
+                                  v_last.arc_reverse != transform.mirror ? Arc::Direction::CW : Arc::Direction::CCW));
         }
     }
     return r;

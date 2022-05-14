@@ -28,7 +28,9 @@ void CanvasODB::img_net(const Net *n)
 void CanvasODB::img_arc(const Coordi &from, const Coordi &to, const Coordi &center, const uint64_t width, int layer)
 {
     if (auto feats = get_layer_features(layer)) {
-        feats->draw_arc(from, to, center, width);
+        using Dir = ODB::Features::Arc::Direction;
+        feats->draw_arc(transform.transform(from), transform.transform(to), transform.transform(center), width,
+                        transform.mirror ? Dir::CW : Dir::CCW);
     }
 }
 

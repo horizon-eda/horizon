@@ -115,7 +115,7 @@ public:
     };
 
     Line &draw_line(const Coordi &from, const Coordi &to, uint64_t width);
-    Arc &draw_arc(const Coordi &from, const Coordi &to, const Coordi &center, uint64_t width);
+    Arc &draw_arc(const Coordi &from, const Coordi &to, const Coordi &center, uint64_t width, Arc::Direction direction);
 
     std::vector<Feature *> draw_polygon_outline(const Polygon &poly, const Placement &transform);
 
