@@ -3,6 +3,7 @@
 #include <iomanip>
 #include "util/util.hpp"
 #include "util/polygon_arc_removal_proxy.hpp"
+#include "util/geom_util.hpp"
 
 namespace horizon {
 
@@ -247,7 +248,7 @@ void GerberWriter::draw_line(const Coordi &from, const Coordi &to, uint64_t widt
 void GerberWriter::draw_arc(const Coordi &from, const Coordi &to, const Coordi &center, bool flip, uint64_t width)
 {
     auto ap = get_or_create_aperture_circle(width);
-    arcs.emplace_back(from, to, center, flip, ap);
+    arcs.emplace_back(from, to, project_onto_perp_bisector(from, to, center).to_coordi(), flip, ap);
 }
 
 void GerberWriter::draw_region(const ClipperLib::Path &path, bool dark, int prio)

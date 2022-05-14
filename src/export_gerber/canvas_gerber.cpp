@@ -39,14 +39,13 @@ void CanvasGerber::img_polygon(const Polygon &ipoly, bool tr)
                 if (GerberWriter *wr = exporter.get_writer_for_layer(ipoly.layer)) {
                     Coordi from = it->position;
                     Coordi to = it_next->position;
-                    Coordd centerd = project_onto_perp_bisector(from, to, it->arc_center);
-                    Coordi center(centerd.x, centerd.y);
+                    Coordi center = it->arc_center;
                     if (tr) {
                         from = transform.transform(from);
                         to = transform.transform(to);
                         center = transform.transform(center);
                     }
-                    wr->draw_arc(from, to, center, it->arc_reverse, outline_width);
+                    wr->draw_arc(from, to, center, it->arc_reverse != transform.mirror, outline_width);
                 }
             }
         }
@@ -91,6 +90,14 @@ void CanvasGerber::img_line(const Coordi &p0, const Coordi &p1, const uint64_t w
             wr->draw_line(transform.transform(p0), transform.transform(p1), width);
         else
             wr->draw_line(p0, p1, width);
+    }
+}
+
+void CanvasGerber::img_arc(const Coordi &from, const Coordi &to, const Coordi &center, const uint64_t width, int layer)
+{
+    if (GerberWriter *wr = exporter.get_writer_for_layer(layer)) {
+        wr->draw_arc(transform.transform(from), transform.transform(to), transform.transform(center), transform.mirror,
+                     width);
     }
 }
 
