@@ -126,6 +126,14 @@ public:
     json serialize() const;
 };
 
+class ToolBarPreferences {
+public:
+    bool vertical_layout = false;
+
+    void load_from_json(const json &j);
+    json serialize() const;
+};
+
 class AppearancePreferences {
 public:
     bool dark_theme = false;
@@ -173,6 +181,7 @@ public:
     MousePreferences mouse;
     UndoRedoPreferences undo_redo;
     AppearancePreferences appearance;
+    ToolBarPreferences tool_bar;
     SpacenavPreferences spacenav;
 
     bool show_pull_request_tools = false;

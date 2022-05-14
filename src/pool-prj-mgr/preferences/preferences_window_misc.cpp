@@ -195,6 +195,17 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
         }
     }
     {
+        auto gr = Gtk::manage(new PreferencesGroup("Tool Bar"));
+        box->pack_start(*gr, false, false, 0);
+        gr->show();
+        {
+            auto r = Gtk::manage(new PreferencesRowBool(
+                    "Vertical layout", "Show tool tip in a separate row rather than right to the action keys",
+                    preferences, preferences.tool_bar.vertical_layout));
+            gr->add_row(*r);
+        }
+    }
+    {
         auto gr = Gtk::manage(new PreferencesGroup("Appearance (also applies to Pool/Project Manager)"));
         box->pack_start(*gr, false, false, 0);
         gr->show();

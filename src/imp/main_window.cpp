@@ -23,6 +23,7 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     GET_WIDGET(tool_bar_stack);
     GET_WIDGET(tool_bar_tip_label);
     GET_WIDGET(tool_bar_flash_label);
+    GET_WIDGET(tool_bar_box);
     GET_WIDGET(selection_label);
     GET_WIDGET(header);
     GET_WIDGET(property_scrolled_window);
@@ -162,7 +163,13 @@ void MainWindow::tool_bar_set_tool_name(const std::string &s)
 void MainWindow::tool_bar_set_tool_tip(const std::string &s)
 {
     if (tool_bar_use_actions) {
-        tool_bar_action_tip_label->set_markup(s);
+        if (s.size()) {
+            tool_bar_action_tip_label->set_markup(s);
+            tool_bar_action_tip_label->show();
+        }
+        else {
+            tool_bar_action_tip_label->hide();
+        }
     }
     else {
         tool_bar_tip_label->set_markup(s);
@@ -204,6 +211,11 @@ void MainWindow::tool_bar_flash(const std::string &s, bool replace)
                 return false;
             },
             2000);
+}
+
+void MainWindow::tool_bar_set_vertical(bool v)
+{
+    tool_bar_box->set_orientation(v ? Gtk::ORIENTATION_VERTICAL : Gtk::ORIENTATION_HORIZONTAL);
 }
 
 void MainWindow::hud_update(const std::string &s)

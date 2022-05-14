@@ -454,6 +454,18 @@ void AppearancePreferences::load_from_json(const json &j)
     dark_theme = j.value("dark_theme", false);
 }
 
+json ToolBarPreferences::serialize() const
+{
+    json j;
+    j["vertical_layout"] = vertical_layout;
+    return j;
+}
+
+void ToolBarPreferences::load_from_json(const json &j)
+{
+    vertical_layout = j.value("vertical_layout", false);
+}
+
 json SpacenavPreferences::serialize() const
 {
     json j;
@@ -501,6 +513,7 @@ json Preferences::serialize() const
     j["mouse"] = mouse.serialize();
     j["undo_redo"] = undo_redo.serialize();
     j["appearance"] = appearance.serialize();
+    j["tool_bar"] = tool_bar.serialize();
     j["spacenav"] = spacenav.serialize();
     j["show_pull_request_tools"] = show_pull_request_tools;
     j["hud_debug"] = hud_debug;
@@ -549,6 +562,8 @@ void Preferences::load_from_json(const json &j)
         undo_redo.load_from_json(j.at("undo_redo"));
     if (j.count("appearance"))
         appearance.load_from_json(j.at("appearance"));
+    if (j.count("tool_bar"))
+        tool_bar.load_from_json(j.at("tool_bar"));
     if (j.count("spacenav"))
         spacenav.load_from_json(j.at("spacenav"));
 }

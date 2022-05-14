@@ -853,7 +853,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkBox">
+                                      <object class="GtkBox" id="tool_bar_box">
                                         <property name="visible">True</property>
                                         <property name="can-focus">False</property>
                                         <property name="valign">baseline</property>
@@ -886,6 +886,7 @@
                                             <property name="valign">baseline</property>
                                             <property name="label" translatable="yes">label</property>
                                             <property name="single-line-mode">True</property>
+                                            <property name="xalign">0</property>
                                           </object>
                                           <packing>
                                             <property name="expand">False</property>
