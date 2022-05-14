@@ -289,12 +289,9 @@ void Canvas::render(const SchematicNetTie &tie)
     const auto r = (4 * h * h + s * s) / (8 * h);
     const auto d = r - h;
     const auto arc_center = center + (perp_n * d);
-    const float a0 = c2pi((p0 - arc_center).angle());
-    const float a1 = c2pi((p1 - arc_center).angle());
-    // img_auto_line = img_mode;
-    draw_arc2(arc_center, r, a1, a0, ColorP::NET_TIE, 0, 0);
-    draw_arc2(center - (perp_n * d), r, a1 + M_PI, a0 + M_PI, ColorP::NET_TIE, 0, 0);
-
+    img_auto_line = img_mode;
+    draw_arc(p1, p0, arc_center, ColorP::NET_TIE, 0, 0);
+    draw_arc(p0, p1, center - (perp_n * d), ColorP::NET_TIE, 0, 0);
 
     const auto text_pos = center + (perp_n * 1.5_mm);
 
@@ -303,7 +300,7 @@ void Canvas::render(const SchematicNetTie &tie)
     draw_text(text_pos, 1.5_mm,
               get_name(tie.net_tie->net_primary->name) + "\n" + get_name(tie.net_tie->net_secondary->name),
               angle_from_rad(v.angle()), TextOrigin::CENTER, ColorP::NET_TIE, 0, opts);
-    // img_auto_line = false;
+    img_auto_line = false;
     object_ref_pop();
     if (img_mode)
         return;
@@ -673,24 +670,24 @@ void Canvas::render(const SymbolPin &pin, SymbolMode mode, ColorP co)
 
 void Canvas::render(const Arc &arc, bool interactive, ColorP co)
 {
-    Coordf a(arc.from->position); // ,b,c;
-    Coordf b(arc.to->position);   // ,b,c;
-    Coordf c = project_onto_perp_bisector(a, b, arc.center->position);
-    const float radius0 = (c - a).mag();
-    const float a0 = c2pi((a - c).angle());
-    const float a1 = c2pi((b - c).angle());
-    const float dphi = c2pi(a1 - a0);
-    if (img_mode && img_supports_arc()) {
-        img_arc(arc);
+    if (img_mode) {
+        img_arc(arc.from->position, arc.to->position, arc.center->position, arc.width, arc.layer);
+        return;
     }
-    else {
-        draw_arc2(c, radius0, a0, a1, co, arc.layer, arc.width);
+    draw_arc(arc.from->position, arc.to->position, arc.center->position, co, arc.layer, arc.width);
+    if (interactive) {
+        Coordf a(arc.from->position); // ,b,c;
+        Coordf b(arc.to->position);   // ,b,c;
+        Coordf c = project_onto_perp_bisector(a, b, arc.center->position);
+        const float radius0 = (c - a).mag();
+        const float a0 = c2pi((a - c).angle());
+        const float a1 = c2pi((b - c).angle());
+        const float dphi = c2pi(a1 - a0);
+
         Coordf t(radius0, radius0);
-        if (interactive) {
-            const float ax = std::min(asin(arc.width / 2 / radius0), static_cast<float>((2 * M_PI - dphi) / 2 - .1e-4));
-            selectables.append_arc(arc.uuid, ObjectType::ARC, c, radius0 - arc.width / 2, radius0 + arc.width / 2,
-                                   a0 - ax, a1 + ax, 0, arc.layer);
-        }
+        const float ax = std::min(asin(arc.width / 2 / radius0), static_cast<float>((2 * M_PI - dphi) / 2 - .1e-4));
+        selectables.append_arc(arc.uuid, ObjectType::ARC, c, radius0 - arc.width / 2, radius0 + arc.width / 2, a0 - ax,
+                               a1 + ax, 0, arc.layer);
     }
 }
 

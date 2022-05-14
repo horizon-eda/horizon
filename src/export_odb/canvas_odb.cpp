@@ -25,10 +25,10 @@ void CanvasODB::img_net(const Net *n)
 {
 }
 
-void CanvasODB::img_arc(const Arc &arc)
+void CanvasODB::img_arc(const Coordi &from, const Coordi &to, const Coordi &center, const uint64_t width, int layer)
 {
-    if (auto feats = get_layer_features(arc.layer)) {
-        feats->draw_arc(arc.from->position, arc.to->position, arc.center->position, arc.width);
+    if (auto feats = get_layer_features(layer)) {
+        feats->draw_arc(from, to, center, width);
     }
 }
 

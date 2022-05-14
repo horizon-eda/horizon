@@ -64,31 +64,24 @@ void Canvas::draw_box(const Coordf &p, float size, ColorP color, int layer, bool
 
 void Canvas::draw_circle(const Coord<float> &center, float radius, ColorP color, int layer)
 {
-    draw_arc2(center, radius, 0, M_PI, color, layer, 0);
-    draw_arc2(center, radius, M_PI, 2 * M_PI, color, layer, 0);
+    const auto p0 = center - Coordf(radius, 0);
+    const auto p1 = center + Coordf(radius, 0);
+    draw_arc(p0, p1, center, color, layer, 0);
+    draw_arc(p1, p0, center, color, layer, 0);
 }
 
-void Canvas::draw_arc2(const Coordf &center, float radius0, float a0, float a1, ColorP color, int layer, uint64_t width)
+void Canvas::draw_arc(const Coordf &from, const Coordf &to, const Coordf &center, ColorP color, int layer,
+                      uint64_t width)
 {
-    if (img_mode) {
-        unsigned int segments = 64;
-        a0 = c2pi(a0);
-        a1 = c2pi(a1);
-
-        float dphi = c2pi(a1 - a0);
-        dphi /= segments;
-        float a = a0;
-        while (segments--) {
-            Coordf p0 = center + Coordf::euler(radius0, a);
-            Coordf p1 = center + Coordf::euler(radius0, a + dphi);
-            img_line(Coordi(p0.x, p0.y), Coordi(p1.x, p1.y), width, layer, true);
-
-            a += dphi;
-        }
+    if (img_auto_line) {
+        img_arc(from.to_coordi(), to.to_coordi(), center.to_coordi(), width, layer);
+        return;
     }
-    else {
-        draw_arc0(center, radius0, a0, a1, color, layer, width);
-    }
+    Coordf c = project_onto_perp_bisector(from, to, center);
+    const float radius0 = (c - from).mag();
+    const float a0 = c2pi((from - c).angle());
+    const float a1 = c2pi((to - c).angle());
+    draw_arc0(c, radius0, a0, a1, color, layer, width);
 }
 
 void Canvas::draw_arc0(const Coordf &center, float radius0, float a0, float a1, ColorP color, int layer, uint64_t width)

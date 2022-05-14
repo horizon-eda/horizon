@@ -22,11 +22,7 @@ public:
 private:
     void img_net(const Net *net) override;
     void img_polygon(const Polygon &poly, bool tr) override;
-    void img_arc(const Arc &arc) override;
-    bool img_supports_arc() const override
-    {
-        return true;
-    }
+    void img_arc(const Coordi &from, const Coordi &to, const Coordi &center, const uint64_t width, int layer) override;
     void img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, int layer, bool tr = true) override;
     void img_padstack(const Padstack &ps) override;
     void img_hole(const Hole &hole) override;

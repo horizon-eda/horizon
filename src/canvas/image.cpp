@@ -1,7 +1,7 @@
 #include "canvas.hpp"
 #include "common/polygon.hpp"
 #include <algorithm>
-#include <iostream>
+#include "util/geom_util.hpp"
 
 namespace horizon {
 void Canvas::img_line(const Coordi &p0, const Coordi &p1, uint64_t width, int layer, bool tr)
@@ -42,8 +42,23 @@ void Canvas::img_line(const Coordi &p0, const Coordi &p1, uint64_t width, int la
     img_polygon(polyr, tr);
 }
 
-void Canvas::img_arc(const Arc &arc)
+void Canvas::img_arc(const Coordi &from, const Coordi &to, const Coordi &center, const uint64_t width, int layer)
 {
+    Coordi c = project_onto_perp_bisector(from, to, center).to_coordi();
+    const auto radius0 = (c - from).magd();
+    const auto a0 = c2pi((from - c).angle());
+    const auto a1 = c2pi((to - c).angle());
+    unsigned int segments = 64;
+
+    float dphi = c2pi(a1 - a0);
+    dphi /= segments;
+    float a = a0;
+    while (segments--) {
+        const auto p0 = c + Coordd::euler(radius0, a).to_coordi();
+        const auto p1 = c + Coordd::euler(radius0, a + dphi).to_coordi();
+        img_line(p0, p1, width, layer, true);
+        a += dphi;
+    }
 }
 
 } // namespace horizon

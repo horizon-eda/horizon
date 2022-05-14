@@ -163,10 +163,9 @@ protected:
     void draw_box(const Coord<float> &o, float size, ColorP color = ColorP::FROM_LAYER, int layer = 10000,
                   bool tr = true, uint64_t width = 0);
     void draw_circle(const Coord<float> &center, float radius, ColorP color = ColorP::FROM_LAYER, int layer = 10000);
-    void draw_arc2(const Coord<float> &center, float radius0, float a0, float a1, ColorP color, int layer,
-                   uint64_t width);
     void draw_arc0(const Coord<float> &center, float radius0, float a0, float a1, ColorP color, int layer,
                    uint64_t width);
+    void draw_arc(const Coordf &from, const Coordf &to, const Coordf &center, ColorP color, int layer, uint64_t width);
 
 
     std::pair<Coordf, Coordf> draw_text(const Coordf &p, float size, const std::string &rtext, int angle,
@@ -212,11 +211,7 @@ protected:
     {
     }
     virtual void img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, int layer = 10000, bool tr = true);
-    virtual void img_arc(const Arc &arc);
-    virtual bool img_supports_arc() const
-    {
-        return false;
-    }
+    virtual void img_arc(const Coordi &from, const Coordi &to, const Coordi &center, const uint64_t width, int layer);
     virtual void img_hole(const Hole &hole)
     {
     }
