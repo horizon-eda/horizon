@@ -68,6 +68,7 @@ public:
     void tool_bar_set_tool_name(const std::string &s);
     void tool_bar_set_tool_tip(const std::string &s);
     void tool_bar_flash(const std::string &s);
+    void tool_bar_flash_replace(const std::string &s);
     void tool_bar_set_use_actions(bool use_actions);
     void tool_bar_clear_actions();
     void tool_bar_append_action(Gtk::Widget &w);
@@ -100,6 +101,7 @@ private:
     sigc::connection tip_timeout_connection;
     std::string flash_text;
     bool tool_bar_queue_close = false;
+    void tool_bar_flash(const std::string &s, bool replace);
 
     Gtk::Revealer *hud = nullptr;
     Gtk::Label *hud_label = nullptr;

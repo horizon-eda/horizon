@@ -29,6 +29,11 @@ void ImpInterface::tool_bar_flash(const std::string &s)
     imp->main_window->tool_bar_flash(s);
 }
 
+void ImpInterface::tool_bar_flash_replace(const std::string &s)
+{
+    imp->main_window->tool_bar_flash_replace(s);
+}
+
 void ImpInterface::part_placed(const UUID &uu)
 {
     imp->send_json({{"op", "part-placed"}, {"part", (std::string)uu}});

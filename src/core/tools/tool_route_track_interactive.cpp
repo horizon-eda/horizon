@@ -719,8 +719,9 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     dir = 1;
                 }
                 meander_placer->SpacingStep(dir);
-                imp->tool_bar_flash("Meander spacing: " + dim_to_string(meander_placer->MeanderSettings().m_spacing)
-                                    + " <i>" + meander_placer->TuningInfo() + "</i>");
+                imp->tool_bar_flash_replace("Meander spacing: "
+                                            + dim_to_string(meander_placer->MeanderSettings().m_spacing) + " <i>"
+                                            + meander_placer->TuningInfo() + "</i>");
                 router->Move(VECTOR2I(args.coords.x, args.coords.y), NULL);
             } break;
 
@@ -734,9 +735,9 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     dir = 1;
                 }
                 meander_placer->AmplitudeStep(dir);
-                imp->tool_bar_flash("Meander amplitude: "
-                                    + dim_to_string(meander_placer->MeanderSettings().m_maxAmplitude) + " <i>"
-                                    + meander_placer->TuningInfo() + "</i>");
+                imp->tool_bar_flash_replace("Meander amplitude: "
+                                            + dim_to_string(meander_placer->MeanderSettings().m_maxAmplitude) + " <i>"
+                                            + meander_placer->TuningInfo() + "</i>");
                 router->Move(VECTOR2I(args.coords.x, args.coords.y), NULL);
             } break;
 
