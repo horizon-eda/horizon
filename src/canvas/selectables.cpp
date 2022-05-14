@@ -25,7 +25,7 @@ bool Selectable::inside(const Coordf &c, float expand) const
     }
     else {
         Coordf d = c - Coordf(x, y);
-        auto phi = c2pi(atan2f(d.y, d.x));
+        auto phi = c2pi(d.angle());
         const auto l = d.mag();
         const float r0 = c_x;
         const float r1 = c_y;
@@ -154,7 +154,7 @@ void Selectables::append_line(const UUID &uu, ObjectType ot, const Coordf &p0, c
     float box_height = width;
     Coordf delta = p1 - p0;
     float box_width = width + delta.mag();
-    float angle = atan2(delta.y, delta.x);
+    float angle = delta.angle();
     auto center = (p0 + p1) / 2;
     append_angled(uu, ot, center, center, Coordf(box_width, box_height), angle, vertex, layer, always);
 }

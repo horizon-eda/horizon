@@ -45,7 +45,7 @@ void ToolMeasure::update_tip()
         }
         else {
             ss << coord_to_string(delta, true) << " D:" << dim_to_string(delta.mag(), false);
-            ss << " α:" << angle_to_string(angle_from_rad(atan2(delta.y, delta.x)), false);
+            ss << " α:" << angle_to_string(angle_from_rad(delta.angle()), false);
         }
     }
 

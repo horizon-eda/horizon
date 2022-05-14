@@ -103,7 +103,7 @@ void ToolDrawArc::set_radius_angle(double r, double a, double b)
 void ToolDrawArc::update_end_angle(const Coordi &c)
 {
     const auto d = c - temp_arc->center->position;
-    const auto end_angle = atan2(d.y, d.x);
+    const auto end_angle = d.angle();
     if (flipped)
         set_radius_angle(radius, end_angle, start_angle);
     else
@@ -123,7 +123,7 @@ ToolResponse ToolDrawArc::update(const ToolArgs &args)
             annotation->clear();
             const Coordf c = temp_arc->center->position;
             const auto d = Coordf(args.coords) - c;
-            const auto a = atan2(d.y, d.x);
+            const auto a = d.angle();
             annotation->draw_line(c, c + Coordf::euler(radius, a), ColorP::FROM_LAYER, 0);
         }
         else if (state == State::END_ANGLE) {
@@ -198,7 +198,7 @@ ToolResponse ToolDrawArc::update(const ToolArgs &args)
 
             case State::START_ANGLE: {
                 const auto d = args.coords - temp_arc->center->position;
-                start_angle = atan2(d.y, d.x);
+                start_angle = d.angle();
                 state = State::END_ANGLE;
             } break;
 

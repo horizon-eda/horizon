@@ -289,8 +289,8 @@ void Canvas::render(const SchematicNetTie &tie)
     const auto r = (4 * h * h + s * s) / (8 * h);
     const auto d = r - h;
     const auto arc_center = center + (perp_n * d);
-    const float a0 = c2pi(atan2f(p0.y - arc_center.y, p0.x - arc_center.x));
-    const float a1 = c2pi(atan2f(p1.y - arc_center.y, p1.x - arc_center.x));
+    const float a0 = c2pi((p0 - arc_center).angle());
+    const float a1 = c2pi((p1 - arc_center).angle());
     // img_auto_line = img_mode;
     draw_arc2(arc_center, r, a1, a0, ColorP::NET_TIE, 0, 0);
     draw_arc2(center - (perp_n * d), r, a1 + M_PI, a0 + M_PI, ColorP::NET_TIE, 0, 0);
@@ -302,7 +302,7 @@ void Canvas::render(const SchematicNetTie &tie)
     opts.center = true;
     draw_text(text_pos, 1.5_mm,
               get_name(tie.net_tie->net_primary->name) + "\n" + get_name(tie.net_tie->net_secondary->name),
-              angle_from_rad(atan2(v.y, v.x)), TextOrigin::CENTER, ColorP::NET_TIE, 0, opts);
+              angle_from_rad(v.angle()), TextOrigin::CENTER, ColorP::NET_TIE, 0, opts);
     // img_auto_line = false;
     object_ref_pop();
     if (img_mode)
@@ -349,7 +349,7 @@ void Canvas::render(const Track &track, bool interactive)
         if (get_flip_view())
             p.invert_angle();
         p.accumulate(Placement(center));
-        p.set_angle_rad(p.get_angle_rad() + atan2(vec.y, vec.x));
+        p.set_angle_rad(p.get_angle_rad() + vec.angle());
         if (get_flip_view()) {
             p.shift.x *= -1;
             p.invert_angle();
@@ -395,7 +395,7 @@ void Canvas::render(const BoardNetTie &tie, bool interactive)
         if (get_flip_view())
             p.invert_angle();
         p.accumulate(Placement(center));
-        p.set_angle_rad(p.get_angle_rad() + atan2(vec.y, vec.x));
+        p.set_angle_rad(p.get_angle_rad() + vec.angle());
         if (get_flip_view()) {
             p.shift.x *= -1;
             p.invert_angle();
@@ -677,8 +677,8 @@ void Canvas::render(const Arc &arc, bool interactive, ColorP co)
     Coordf b(arc.to->position);   // ,b,c;
     Coordf c = project_onto_perp_bisector(a, b, arc.center->position);
     const float radius0 = (c - a).mag();
-    const float a0 = c2pi(atan2f(a.y - c.y, a.x - c.x));
-    const float a1 = c2pi(atan2f(b.y - c.y, b.x - c.x));
+    const float a0 = c2pi((a - c).angle());
+    const float a1 = c2pi((b - c).angle());
     const float dphi = c2pi(a1 - a0);
     if (img_mode && img_supports_arc()) {
         img_arc(arc);
@@ -988,8 +988,8 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
                 const Coordf a = v_last.position;
                 const Coordf c = project_onto_perp_bisector(a, b, v_last.arc_center);
                 const auto r = (a - c).mag();
-                float a0 = atan2f(a.y - c.y, a.x - c.x);
-                float a1 = atan2f(b.y - c.y, b.x - c.x);
+                float a0 = (a - c).angle();
+                float a1 = (b - c).angle();
                 if (v_last.arc_reverse)
                     std::swap(a0, a1);
                 selectables.append_arc(ipoly.uuid, ObjectType::POLYGON_EDGE, c, r, r, a0, a1, i_last, ipoly.layer);
@@ -1521,7 +1521,7 @@ void Canvas::render(const class Dimension &dim)
         auto text_width = std::abs(text_bb.second.x - text_bb.first.x);
 
         Coordf text_pos = (q0 + v / 2) - (vn * text_width / 2);
-        auto angle = atan2(v.y, v.x);
+        auto angle = v.angle();
 
         if ((text_width + 2 * dim.label_size) > length) {
             text_pos = q1;

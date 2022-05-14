@@ -233,6 +233,14 @@ public:
         return sqrt(mag_sq());
     }
 
+    std::conditional_t<std::is_same_v<T, float>, float, double> angle() const
+    {
+        if constexpr (std::is_same_v<T, float>)
+            return atan2f(y, x);
+        else
+            return atan2(y, x);
+    }
+
     bool in_range(const Coord<T> &a, const Coord<T> &b) const
     {
         return x > a.x && y > a.y && x < b.x && y < b.y;

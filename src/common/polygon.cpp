@@ -76,8 +76,8 @@ Polygon Polygon::remove_arcs(unsigned int precision) const
             double radius0 = (a - c).mag();
             double radius1 = (b - c).mag();
             Color co(1, 1, 0);
-            double a0 = atan2(a.y - c.y, a.x - c.x);
-            double a1 = atan2(b.y - c.y, b.x - c.x);
+            double a0 = (a - c).angle();
+            double a1 = (b - c).angle();
 
             unsigned int segments = precision;
             if (a0 < 0) {

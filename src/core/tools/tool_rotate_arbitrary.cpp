@@ -234,12 +234,12 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
             const auto v0 = ref - origin;
             annotation->clear();
             annotation->draw_line(origin, ref, ColorP::FROM_LAYER, 2);
-            annotation->draw_arc(origin, v0.magd() / 3, atan2(v0.y, v0.x), atan2(v.y, v.x), ColorP::FROM_LAYER, 2);
+            annotation->draw_arc(origin, v0.magd() / 3, v0.angle(), v.angle(), ColorP::FROM_LAYER, 2);
             annotation->draw_line(origin, rref, ColorP::FROM_LAYER, 2);
 
 
-            const double angle0 = atan2(v0.y, v0.x);
-            const double angle = atan2(v.y, v.x) - angle0;
+            const double angle0 = v0.angle();
+            const double angle = v.angle() - angle0;
             iangle = wrap_angle(angle_from_rad(angle));
             if (snap)
                 iangle = round_multiple(iangle, 8192);

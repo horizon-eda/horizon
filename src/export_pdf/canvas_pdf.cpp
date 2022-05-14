@@ -233,8 +233,8 @@ static void pdf_arc(PoDoFo::PdfPainter &painter, const Coordd start, const Coord
     const auto ctr = Coordd(to_pt(c.x), to_pt(c.y));
 
     // Get angles relative to the x axis
-    double a0 = atan2(start.y - c.y, start.x - c.x);
-    double a1 = atan2(end.y - c.y, end.x - c.x);
+    double a0 = (start - c).angle();
+    double a1 = (end - c).angle();
 
     // Circle or large arc
     if (cw && a0 <= a1) {

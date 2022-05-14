@@ -124,7 +124,7 @@ static void sort_pads(std::vector<Pad *> &pads, bool x, bool asc)
 
 static double get_angle(const Coordi &c)
 {
-    auto a = atan2(c.y, c.x);
+    auto a = c.angle();
     if (a < 0)
         return a + 2 * M_PI;
     else
