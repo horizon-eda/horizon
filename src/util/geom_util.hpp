@@ -29,5 +29,5 @@ template <typename T> int sgn(T val)
 double angle_to_rad(int angle);
 int angle_from_rad(double rad);
 int wrap_angle(int angle);
-float c2pi(float x);
+template <typename T> T c2pi(T x);
 } // namespace horizon

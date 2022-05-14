@@ -126,7 +126,7 @@ int wrap_angle(int angle)
     return angle;
 }
 
-float c2pi(float x)
+template <typename T> T c2pi(T x)
 {
     while (x < 0)
         x += 2 * M_PI;
@@ -135,5 +135,8 @@ float c2pi(float x)
         x -= 2 * M_PI;
     return x;
 }
+
+template float c2pi<float>(float);
+template double c2pi<double>(double);
 
 } // namespace horizon
