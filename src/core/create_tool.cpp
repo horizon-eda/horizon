@@ -99,6 +99,7 @@
 #include "tools/tool_draw_net_tie.hpp"
 #include "tools/tool_flip_net_tie.hpp"
 #include "tools/tool_move_track_connection.hpp"
+#include "tools/tool_move_track_center.hpp"
 
 namespace horizon {
 
@@ -461,6 +462,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::MOVE_TRACK_CONNECTION:
         return std::make_unique<ToolMoveTrackConnection>(this, tool_id);
+
+    case ToolID::MOVE_TRACK_CENTER:
+        return std::make_unique<ToolMoveTrackCenter>(this, tool_id);
 
     default:
         return nullptr;

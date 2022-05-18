@@ -1072,6 +1072,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::OPEN_DATASHEET, ToolID::NONE},
          {"Open datasheet", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
           ActionCatalogItem::FLAGS_SPECIFIC}},
+
+        {{ActionID::TOOL, ToolID::MOVE_TRACK_CENTER},
+         {"Move track arc center", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1392,5 +1396,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(DRAW_NET_TIE),
         TOOL_LUT_ITEM(FLIP_NET_TIE),
         TOOL_LUT_ITEM(MOVE_TRACK_CONNECTION),
+        TOOL_LUT_ITEM(MOVE_TRACK_CENTER),
 };
 } // namespace horizon

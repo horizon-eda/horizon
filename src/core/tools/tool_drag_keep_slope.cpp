@@ -29,6 +29,8 @@ ToolDragKeepSlope::TrackInfo::TrackInfo(Track &tr, const Track &track_from, cons
     }
     pos_from_orig = tr.from.get_position();
     pos_to_orig = tr.to.get_position();
+    if (tr.is_arc())
+        center_orig = tr.center.value();
 }
 
 ToolResponse ToolDragKeepSlope::begin(const ToolArgs &args)
@@ -93,6 +95,9 @@ ToolResponse ToolDragKeepSlope::update(const ToolArgs &args)
             const auto pos = it.get_pos(args.coords - pos_orig);
             it.track.from.junc->position = pos.from;
             it.track.to.junc->position = pos.to;
+            if (it.track.is_arc()) {
+                it.track.center = it.center_orig + pos.arc_center;
+            }
         }
         doc.b->get_board()->update_airwires(true, nets);
     }

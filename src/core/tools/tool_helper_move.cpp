@@ -100,6 +100,11 @@ void ToolHelperMove::move_do(const Coordi &delta)
                 dim->label_distance += dim->project(delta);
             }
         } break;
+        case ObjectType::TRACK: {
+            auto &tr = doc.b->get_board()->tracks.at(it.uuid);
+            if (tr.is_arc())
+                tr.center.value() += delta;
+        } break;
         default:;
         }
     }
@@ -306,9 +311,13 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
         } break;
 
         case ObjectType::TRACK: {
+            auto &track = doc.b->get_board()->tracks.at(it.uuid);
+            if (track.is_arc()) {
+                transform(track.center.value(), center, rotate);
+                if (!rotate)
+                    std::swap(track.from, track.to);
+            }
             if (!rotate) {
-                auto &track = doc.b->get_board()->tracks.at(it.uuid);
-
                 if (track.layer == BoardLayers::TOP_COPPER)
                     track.layer = BoardLayers::BOTTOM_COPPER;
                 else if (track.layer == BoardLayers::BOTTOM_COPPER)

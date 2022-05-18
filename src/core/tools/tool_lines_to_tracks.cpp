@@ -13,7 +13,7 @@ bool ToolLinesToTracks::can_begin()
 {
     if (!doc.b)
         return false;
-    return sel_has_type(selection, ObjectType::LINE);
+    return sel_has_type(selection, ObjectType::LINE) || sel_has_type(selection, ObjectType::ARC);
 }
 
 ToolResponse ToolLinesToTracks::begin(const ToolArgs &args)
@@ -21,31 +21,55 @@ ToolResponse ToolLinesToTracks::begin(const ToolArgs &args)
     auto &brd = *doc.b->get_board();
 
     for (const auto &it : selection) {
-        if (it.type != ObjectType::LINE)
-            continue;
+        if (it.type == ObjectType::LINE) {
+            auto *ln = doc.r->get_line(it.uuid);
+            if (!BoardLayers::is_copper(ln->layer)) {
+                imp->tool_bar_flash("cannot convert lines on non-copper layers to tracks");
+                return ToolResponse::revert();
+            }
 
-        auto *ln = doc.r->get_line(it.uuid);
-        if (!BoardLayers::is_copper(ln->layer)) {
-            imp->tool_bar_flash("cannot convert lines on non-copper layers to tracks");
-            return ToolResponse::revert();
+            auto uu = UUID::random();
+            auto *track = &brd.tracks.emplace(uu, uu).first->second;
+            auto *from_junc = &brd.junctions.at(ln->from.uuid);
+            auto *to_junc = &brd.junctions.at(ln->to.uuid);
+            if (!from_junc->only_lines_arcs_connected() || !to_junc->only_lines_arcs_connected()) {
+                // lots of potential to e.g. create tracks between different nets
+                imp->tool_bar_flash(
+                        "cannot convert a line that is already connected to board elements (not just lines/arcs)");
+                return ToolResponse::revert();
+            }
+            track->to.connect(to_junc);
+            track->from.connect(from_junc);
+            track->width_from_rules = false;
+            track->width = ln->width;
+            track->layer = ln->layer;
+            doc.r->delete_line(ln->uuid);
         }
+        else if (it.type == ObjectType::ARC) {
+            auto *arc = doc.r->get_arc(it.uuid);
+            if (!BoardLayers::is_copper(arc->layer)) {
+                imp->tool_bar_flash("cannot convert arcs on non-copper layers to tracks");
+                return ToolResponse::revert();
+            }
 
-        auto uu = UUID::random();
-        auto *track = &brd.tracks.emplace(uu, uu).first->second;
-        auto *from_junc = &brd.junctions.at(ln->from.uuid);
-        auto *to_junc = &brd.junctions.at(ln->to.uuid);
-        if (!from_junc->only_lines_arcs_connected() || !to_junc->only_lines_arcs_connected()) {
-            // lots of potential to e.g. create tracks between different nets
-            imp->tool_bar_flash(
-                    "cannot convert a line that is already connected to board elements (not just lines/arcs)");
-            return ToolResponse::revert();
+            auto uu = UUID::random();
+            auto *track = &brd.tracks.emplace(uu, uu).first->second;
+            auto *from_junc = &brd.junctions.at(arc->from.uuid);
+            auto *to_junc = &brd.junctions.at(arc->to.uuid);
+            if (!from_junc->only_lines_arcs_connected() || !to_junc->only_lines_arcs_connected()) {
+                // lots of potential to e.g. create tracks between different nets
+                imp->tool_bar_flash(
+                        "cannot convert an arc that is already connected to board elements (not just lines/arcs)");
+                return ToolResponse::revert();
+            }
+            track->to.connect(to_junc);
+            track->from.connect(from_junc);
+            track->width_from_rules = false;
+            track->width = arc->width;
+            track->layer = arc->layer;
+            track->center = arc->center->position;
+            doc.r->delete_arc(arc->uuid);
         }
-        track->to.connect(to_junc);
-        track->from.connect(from_junc);
-        track->width_from_rules = false;
-        track->width = ln->width;
-        track->layer = ln->layer;
-        doc.r->delete_line(ln->uuid);
     }
 
     return ToolResponse::commit();

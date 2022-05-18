@@ -23,11 +23,7 @@ ToolResponse ToolDrawTrack::begin(const ToolArgs &args)
     temp_track = nullptr;*/
     selection.clear();
 
-    imp->tool_bar_set_actions({
-            {InToolActionID::LMB},
-            {InToolActionID::RMB, "finish"},
-    });
-
+    update_tip();
     rules = dynamic_cast<BoardRules *>(doc.r->get_rules());
     return ToolResponse();
 }
@@ -45,7 +41,10 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
 {
     auto &brd = *doc.b->get_board();
     if (args.type == ToolEventType::MOVE) {
-        if (temp_junc) {
+        if (arc_mode == ArcMode::CURRENT) {
+            temp_track->center = args.coords;
+        }
+        else if (temp_junc) {
             temp_junc->position = args.coords;
             if (temp_junc->net) {
                 std::set<UUID> nets;
@@ -58,6 +57,10 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
     else if (args.type == ToolEventType::ACTION) {
         switch (args.action) {
         case InToolActionID::LMB:
+            if (arc_mode == ArcMode::CURRENT) {
+                return ToolResponse::commit();
+            }
+
             if (temp_junc) {
                 if (args.target.type == ObjectType::JUNCTION) {
                     auto &ju = brd.junctions.at(args.target.path.at(0));
@@ -73,8 +76,7 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
                             brd.airwires_expand = {temp_junc->net->uuid};
                         brd.junctions.erase(temp_junc->uuid);
                         temp_junc = nullptr;
-                        brd.expand_flags = Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES;
-                        return ToolResponse::commit();
+                        return finish();
                     }
                     else if (ju.net != temp_junc->net) {
                         imp->tool_bar_flash("can't connect different nets");
@@ -90,8 +92,7 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
                             brd.junctions.erase(temp_junc->uuid);
                             temp_junc = nullptr;
                             brd.airwires_expand = {pad.net->uuid};
-                            brd.expand_flags = Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES;
-                            return ToolResponse::commit();
+                            return finish();
                         }
                         else {
                             imp->tool_bar_flash("can't connect different nets");
@@ -104,8 +105,7 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
                 else if (args.target.type == ObjectType::INVALID) {
                     if (temp_junc->net) {
                         brd.airwires_expand = {temp_junc->net->uuid};
-                        brd.expand_flags = Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES;
-                        return ToolResponse::commit();
+                        return finish();
                     }
                     else {
                         imp->tool_bar_flash("can't connect no-net track to nowhere");
@@ -157,9 +157,63 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
         case InToolActionID::CANCEL:
             return ToolResponse::revert();
 
+        case InToolActionID::TOGGLE_ARC: {
+            if (temp_junc) {
+                if (arc_mode == ArcMode::OFF) {
+                    arc_mode = ArcMode::NEXT;
+                }
+                else {
+                    arc_mode = ArcMode::OFF;
+                }
+                update_tip();
+            }
+        } break;
+
+        case InToolActionID::FLIP_ARC: {
+            if (temp_track && arc_mode == ArcMode::CURRENT) {
+                std::swap(temp_track->to, temp_track->from);
+            }
+        } break;
+
         default:;
         }
     }
     return ToolResponse();
 }
+
+void ToolDrawTrack::update_tip()
+{
+    std::vector<ActionLabelInfo> actions;
+    actions.reserve(9);
+    if (arc_mode == ArcMode::CURRENT) {
+        actions.emplace_back(InToolActionID::LMB, "place arc enter");
+    }
+    else if (arc_mode == ArcMode::NEXT) {
+        actions.emplace_back(InToolActionID::LMB, "place end, then arc enter");
+    }
+    else {
+        actions.emplace_back(InToolActionID::LMB, "place");
+    }
+    actions.emplace_back(InToolActionID::RMB, "delete last vertex and finish");
+    actions.emplace_back(InToolActionID::TOGGLE_ARC);
+    if (arc_mode == ArcMode::CURRENT) {
+        actions.emplace_back(InToolActionID::FLIP_ARC);
+    }
+    imp->tool_bar_set_actions(actions);
+}
+
+ToolResponse ToolDrawTrack::finish()
+{
+    auto &brd = *doc.b->get_board();
+    brd.expand_flags = Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES;
+    if (arc_mode == ArcMode::OFF) {
+        return ToolResponse::commit();
+    }
+    else {
+        arc_mode = ArcMode::CURRENT;
+        update_tip();
+        return ToolResponse();
+    }
+}
+
 } // namespace horizon

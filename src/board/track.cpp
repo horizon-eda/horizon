@@ -4,6 +4,7 @@
 #include "board_package.hpp"
 #include "common/lut.hpp"
 #include "nlohmann/json.hpp"
+#include "util/geom_util.hpp"
 
 namespace horizon {
 
@@ -178,6 +179,8 @@ Track::Track(const UUID &uu, const json &j, Board *brd)
       width_from_rules(j.value("width_from_net_class", true)), locked(j.value("locked", false)),
       from(j.at("from"), brd), to(j.at("to"), brd)
 {
+    if (j.count("center"))
+        center = j.at("center").get<std::vector<int64_t>>();
 }
 
 void Track::update_refs(Board &brd)
@@ -205,12 +208,16 @@ json Track::serialize() const
     j["width"] = width;
     j["width_from_net_class"] = width_from_rules;
     j["locked"] = locked;
+    if (center.has_value())
+        j["center"] = center->as_array();
 
     return j;
 }
 
 bool Track::is_parallel_to(const Track &other) const
 {
+    if (is_arc() || other.is_arc())
+        return false;
     const auto zero = Coordi();
     const auto v1 = to.get_position() - from.get_position();
     const auto v2 = other.to.get_position() - other.from.get_position();
@@ -219,9 +226,26 @@ bool Track::is_parallel_to(const Track &other) const
     return v1.cross(v2) == 0;
 }
 
+bool Track::is_arc() const
+{
+    return center.has_value();
+}
+
 double Track::get_length() const
 {
-    return (from.get_position() - to.get_position()).magd();
+    if (is_arc()) {
+        Coordf a(from.get_position()); // ,b,c;
+        Coordf b(to.get_position());   // ,b,c;
+        const auto real_center = project_onto_perp_bisector(a, b, center.value());
+        const auto radius = (real_center - a).mag();
+        const auto arc_a0 = c2pi(atan2f(a.y - real_center.y, a.x - real_center.x));
+        const auto arc_a1 = c2pi(atan2f(b.y - real_center.y, b.x - real_center.x));
+        const auto dphi = c2pi(arc_a1 - arc_a0);
+        return radius * dphi;
+    }
+    else {
+        return (from.get_position() - to.get_position()).magd();
+    }
 }
 
 } // namespace horizon

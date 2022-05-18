@@ -9,11 +9,12 @@ in float r1_to_fragment;
 in float a0_to_fragment;
 in float dphi_to_fragment;
 in float origin_size_to_fragment;
+flat in uint flags_to_fragment;
 ##selectable-ubo
 
-bool diamond()
+bool diamond(vec2 shift)
 {
-    float lc = abs(pos_to_fragment.x)+abs(pos_to_fragment.y);
+    float lc = abs(pos_to_fragment.x-shift.x)+abs(pos_to_fragment.y-shift.y);
     if(lc < origin_size_to_fragment/2) {
         outputColor = color_inner;
         return true;
@@ -25,10 +26,15 @@ bool diamond()
     return false;
 }
 
+vec2 p2r(float phi, float l) {
+	return vec2(cos(phi), sin(phi))*l;
+}
+
 void main() {
   outputColor = vec4(color_to_fragment, 1);
   float l = length(pos_to_fragment);
   float phi = atan(pos_to_fragment.y, pos_to_fragment.x);
+  bool diamond_at_midpoint = (flags_to_fragment & uint(16))!=uint(0);
   if(phi < 0)
     phi += 2*PI;
   float rs;
@@ -54,10 +60,15 @@ void main() {
   if(r0_to_fragment == r1_to_fragment)
     sp = 1;
 
+  if(diamond_at_midpoint) {
+    if(diamond(p2r(a0_to_fragment+dphi_to_fragment/2, (r0_to_fragment+r1_to_fragment)/2)))
+      return;
+  }
+
   if(l > (r1_to_fragment+sp))
     discard;
   if(l < (r0_to_fragment-sp)) {
-    if(diamond())
+    if(!diamond_at_midpoint && diamond(vec2(0,0)))
       return;
     else
       discard;

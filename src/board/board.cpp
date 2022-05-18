@@ -39,7 +39,7 @@ const LutEnumStr<Board::OutputFormat> Board::output_format_lut = {
         {"odb", Board::OutputFormat::ODB},
 };
 
-static const unsigned int app_version = 14;
+static const unsigned int app_version = 15;
 
 unsigned int Board::get_app_version()
 {

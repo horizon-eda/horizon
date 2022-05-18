@@ -309,16 +309,21 @@ void Canvas::render(const SchematicNetTie &tie)
 
 void Canvas::render(const Track &track, bool interactive)
 {
-    auto c = ColorP::FROM_LAYER;
+    auto color = ColorP::FROM_LAYER;
     if (track.net == nullptr) {
-        c = ColorP::BUS;
+        color = ColorP::BUS;
     }
     auto width = track.width;
     if (interactive)
         object_ref_push(ObjectType::TRACK, track.uuid);
     img_net(track.net);
     img_patch_type(PatchType::TRACK);
-    img_line(track.from.get_position(), track.to.get_position(), width, track.layer);
+    if (track.is_arc()) {
+        img_arc(track.from.get_position(), track.to.get_position(), track.center.value(), track.width, track.layer);
+    }
+    else {
+        img_line(track.from.get_position(), track.to.get_position(), width, track.layer);
+    }
     img_patch_type(PatchType::OTHER);
     img_net(nullptr);
     if (interactive)
@@ -330,13 +335,20 @@ void Canvas::render(const Track &track, bool interactive)
     auto center = (track.from.get_position() + track.to.get_position()) / 2;
     if (interactive)
         object_ref_push(ObjectType::TRACK, track.uuid);
-    draw_line(track.from.get_position(), track.to.get_position(), c, layer, true, width);
+
+    if (track.is_arc()) {
+        draw_arc(track.from.get_position(), track.to.get_position(), track.center.value(), color, layer, width);
+    }
+    else {
+        draw_line(track.from.get_position(), track.to.get_position(), color, layer, true, width);
+    }
     if (track.locked) {
         auto ol = get_overlay_layer(layer);
         draw_lock(center, 0.7 * track.width, ColorP::TEXT_OVERLAY, ol, true);
     }
     if (interactive && show_text_in_tracks && width > 0 && track.net && track.net->name.size() && track.from.is_junc()
-        && track.to.is_junc() && (!show_text_in_vias || (!track.from.junc->has_via && !track.to.junc->has_via))) {
+        && track.to.is_junc() && (!show_text_in_vias || (!track.from.junc->has_via && !track.to.junc->has_via))
+        && !track.center) {
         auto overlay_layer = get_overlay_layer(track.layer, true);
         set_lod_size(width);
         const auto vec = (track.from.get_position() - track.to.get_position());
@@ -356,9 +368,32 @@ void Canvas::render(const Track &track, bool interactive)
     }
     if (interactive)
         object_ref_pop();
-    if (interactive)
-        selectables.append_line(track.uuid, ObjectType::TRACK, track.from.get_position(), track.to.get_position(),
-                                track.width, 0, track.layer);
+    if (interactive) {
+        bool force_line = false;
+        if (track.is_arc()) {
+            Coordf a(track.from.get_position()); // ,b,c;
+            Coordf b(track.to.get_position());   // ,b,c;
+            const auto arc_center = project_onto_perp_bisector(a, b, track.center.value());
+            const float arc_radius = (arc_center - a).mag();
+            const auto arc_a0 = c2pi(atan2f(a.y - arc_center.y, a.x - arc_center.x));
+            const auto arc_a1 = c2pi(atan2f(b.y - arc_center.y, b.x - arc_center.x));
+            const float ax = std::min(asin(track.width / 2 / arc_radius),
+                                      static_cast<float>((2 * M_PI - c2pi(arc_a1 - arc_a0)) / 2 - .1e-4));
+            const float dphi = c2pi(arc_a1 - arc_a0);
+            auto mid = arc_center + Coordf::euler(arc_radius, arc_a0 + dphi / 2);
+            const auto ri = arc_radius - track.width / 2;
+            if (ri > 0)
+                selectables.append_arc_midpoint(track.uuid, ObjectType::TRACK, mid, ri, arc_radius + track.width / 2,
+                                                arc_a0 - ax, arc_a1 + ax, 0, track.layer);
+            else
+                force_line = true;
+        }
+
+        if (!track.is_arc() || force_line) {
+            selectables.append_line(track.uuid, ObjectType::TRACK, track.from.get_position(), track.to.get_position(),
+                                    track.width, 0, track.layer);
+        }
+    }
 }
 
 void Canvas::render(const BoardNetTie &tie, bool interactive)
