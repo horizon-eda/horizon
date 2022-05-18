@@ -168,5 +168,6 @@ enum class ToolID {
     TIE_NETS,
     DRAW_NET_TIE,
     MOVE_TRACK_CONNECTION,
+    MOVE_TRACK_CENTER,
 };
 } // namespace horizon

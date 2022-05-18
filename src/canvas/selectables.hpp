@@ -16,7 +16,7 @@ public:
     float height;
     float angle;
     uint8_t flags;
-    enum class Flag { SELECTED = 1, PRELIGHT = 2, ALWAYS = 4, PREVIEW = 8 };
+    enum class Flag { SELECTED = 1, PRELIGHT = 2, ALWAYS = 4, PREVIEW = 8, ARC_CENTER_IS_MIDPOINT = 16 };
     bool get_flag(Flag f) const;
     void set_flag(Flag f, bool v);
 
@@ -28,6 +28,7 @@ public:
     bool is_point() const;
     bool is_box() const;
     bool is_arc() const;
+    Coordf get_arc_center() const;
     std::array<Coordf, 4> get_corners() const;
 } __attribute__((packed));
 
@@ -83,6 +84,8 @@ public:
                      unsigned int vertex = 0, LayerRange layer = 10000, bool always = false);
     void append_arc(const UUID &uu, ObjectType ot, const Coordf &center, float r0, float r1, float a0, float a1,
                     unsigned int vertex = 0, LayerRange layer = 10000, bool always = false);
+    void append_arc_midpoint(const UUID &uu, ObjectType ot, const Coordf &midpoint, float r0, float r1, float a0,
+                             float a1, unsigned int vertex = 0, LayerRange layer = 10000, bool always = false);
     void update_preview(const std::set<SelectableRef> &sel);
 
     void group_begin();

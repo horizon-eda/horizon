@@ -24,9 +24,6 @@ bool Selectable::inside(const Coordf &c, float expand) const
         return (dx >= -w) && (dx <= w) && (dy >= -h) && (dy <= h);
     }
     else {
-        Coordf d = c - Coordf(x, y);
-        auto phi = c2pi(d.angle());
-        const auto l = d.mag();
         const float r0 = c_x;
         const float r1 = c_y;
         const float rm = (r0 + r1) / 2;
@@ -36,7 +33,13 @@ bool Selectable::inside(const Coordf &c, float expand) const
 
         const float a0 = width;
         const float dphi = height;
+
+
+        Coordf d = c - get_arc_center();
+        auto phi = c2pi(d.angle());
         const float phi0 = c2pi(phi - a0);
+        const auto l = d.mag();
+
         return l > r0_ex && l < r1_ex && phi0 < dphi;
     }
 }
@@ -82,6 +85,24 @@ bool Selectable::is_arc() const
 {
     return isnan(angle);
 }
+
+Coordf Selectable::get_arc_center() const
+{
+    assert(is_arc());
+    if (flags & static_cast<int>(Flag::ARC_CENTER_IS_MIDPOINT)) {
+        auto center = Coordf(x, y);
+        const float r0 = c_x;
+        const float r1 = c_y;
+        const float rm = (r0 + r1) / 2;
+        const float a0 = width;
+        const float dphi = height;
+        return center - Coordf::euler(rm, a0 + dphi / 2);
+    }
+    else {
+        return Coordf(x, y);
+    }
+}
+
 
 std::array<Coordf, 4> Selectable::get_corners() const
 {
@@ -168,6 +189,19 @@ void Selectables::append_arc(const UUID &uu, ObjectType ot, const Coordf &center
     items_map.emplace(std::piecewise_construct, std::forward_as_tuple(uu, ot, vertex, layer),
                       std::forward_as_tuple(items.size()));
     items.emplace_back(center, Coordf(r0, r1), Coordf(a0, dphi), NAN, always);
+    items_ref.emplace_back(uu, ot, vertex, layer);
+    items_group.push_back(group_current);
+}
+void Selectables::append_arc_midpoint(const UUID &uu, ObjectType ot, const Coordf &mid, float r0, float r1, float a0,
+                                      float a1, unsigned int vertex, LayerRange layer, bool always)
+{
+    a0 = c2pi(a0);
+    a1 = c2pi(a1);
+    const float dphi = c2pi(a1 - a0);
+    items_map.emplace(std::piecewise_construct, std::forward_as_tuple(uu, ot, vertex, layer),
+                      std::forward_as_tuple(items.size()));
+    items.emplace_back(mid, Coordf(r0, r1), Coordf(a0, dphi), NAN, always);
+    items.back().set_flag(Selectable::Flag::ARC_CENTER_IS_MIDPOINT, true);
     items_ref.emplace_back(uu, ot, vertex, layer);
     items_group.push_back(group_current);
 }

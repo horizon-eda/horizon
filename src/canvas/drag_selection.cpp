@@ -415,7 +415,7 @@ static ClipperLib::Path path_from_sel(const Selectable &sel)
         const float dphi = sel.height;
         const float r0 = sel.c_x - 100;
         const float r1 = sel.c_y + 100;
-        const auto c = Coordf(sel.x, sel.y);
+        const auto c = sel.get_arc_center();
 
         path.reserve((steps + 1) * 2);
         for (unsigned int i = 0; i <= steps; i++) {

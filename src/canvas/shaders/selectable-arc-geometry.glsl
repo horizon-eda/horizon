@@ -15,6 +15,8 @@ out float r1_to_fragment;
 out float a0_to_fragment;
 out float dphi_to_fragment;
 out float origin_size_to_fragment;
+flat out uint flags_to_fragment;
+
 
 ##selectable-ubo
 
@@ -51,6 +53,9 @@ void main() {
 	if((flags & uint(2))!=uint(0)) { //prelight
 		color_to_fragment = color_prelight.rgb;
 	}
+	if((flags & uint(16))!=uint(0)) { //arc midpoint
+		center -= p2r(a0+dphi/2, (r0+r1)/2);
+	}
 
     float r = r1+(4/scale);
 	float h = r*2;
@@ -60,6 +65,7 @@ void main() {
     r1_to_fragment = r1*scale;
     a0_to_fragment = a0;
     dphi_to_fragment = dphi;
+	flags_to_fragment = flags;
 	
 	for(int i = 0; i<3; i++) {
 		float phi = PI*(2./3)*i;

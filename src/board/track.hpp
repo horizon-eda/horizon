@@ -6,6 +6,7 @@
 #include "nlohmann/json_fwd.hpp"
 #include "util/uuid.hpp"
 #include "util/uuid_ptr.hpp"
+#include <optional>
 
 namespace horizon {
 using json = nlohmann::json;
@@ -58,6 +59,8 @@ public:
 
     Connection from;
     Connection to;
+    std::optional<Coordi> center;
+    bool is_arc() const;
 
     json serialize() const;
 };

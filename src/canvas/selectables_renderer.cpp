@@ -154,7 +154,8 @@ void SelectablesRenderer::push()
     std::vector<unsigned int> elements;
     elements.reserve(sel.items.size());
     for (unsigned int i = 0; i < sel.items.size(); i++) {
-        if (sel.items.at(i).is_arc() && sel.items.at(i).flags != 0) {
+        if (sel.items.at(i).is_arc()
+            && (sel.items.at(i).flags & (~static_cast<int>(Selectable::Flag::ARC_CENTER_IS_MIDPOINT))) != 0) {
             elements.push_back(i);
         }
     }

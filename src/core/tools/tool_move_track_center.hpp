@@ -1,11 +1,9 @@
 #pragma once
 #include "core/tool.hpp"
-#include "util/keep_slope_util.hpp"
-#include <deque>
 
 namespace horizon {
 
-class ToolDragKeepSlope : public ToolBase {
+class ToolMoveTrackCenter : public ToolBase {
 public:
     using ToolBase::ToolBase;
     ToolResponse begin(const ToolArgs &args) override;
@@ -26,19 +24,9 @@ public:
     }
 
 private:
-    class TrackInfo : public KeepSlopeInfo {
-    public:
-        class Track &track; // the track itself
+    std::set<class Track *> tracks;
 
-        TrackInfo(Track &tr, const Track &fr, const Track &to);
-
-        Coordi center_orig;
-        // TrackInfo(Track *a, Track *b, Track *c): track(a), track_from(b),
-        // track_to(c) {}
-    };
-    std::set<UUID> nets;
-
-    std::deque<TrackInfo> track_info;
-    Coordi pos_orig;
+    std::set<class Track *> get_tracks();
+    Coordi last;
 };
 } // namespace horizon
