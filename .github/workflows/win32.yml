@@ -11,6 +11,9 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  RSYNC_PASSWORD: {{ secrets.RSYNC_PASSWORD }}
+
 jobs:
   build-win32:
     runs-on: windows-latest
@@ -41,9 +44,16 @@ jobs:
           make
           git
           dos2unix
+          rsync
     - name: Downgrade librsvg
       shell: msys2 {0}
       run: pacman -U https://mirror.selfnet.de/msys2/mingw/mingw64/mingw-w64-x86_64-librsvg-2.50.3-3-any.pkg.tar.zst --noconfirm
+    - name: test
+      shell: msys2 {0}
+      run: date > foo.dat
+    - name: upload zip to selfnet mirror
+      shell: msys2 {0}
+      run: rsync -avz --stats *.dat rsync://horizon-eda@mirror-1.server.selfnet.de/horizon-eda/win64-ci
     - name: Build
       shell: msys2 {0}
       run: make -j2 WARNFLAGS="-Wall -Wshadow -Wno-attributes"
