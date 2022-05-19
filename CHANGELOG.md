@@ -1,3 +1,20 @@
+# Version 2.3.1
+
+## Bugfixes
+
+### Board Editor
+
+ - Clearance checks: don't crash on unfilled planes ([418f15d](https://github.com/horizon-eda/horizon/commit/418f15d550621f098f1304e62013da5ace59debd))
+ - prevent cursor from disappearing after updating planes ([5f43810](https://github.com/horizon-eda/horizon/commit/5f43810cb1fc46c258d2f7f66fab75750f664c4b))
+
+### Schematic Editor
+
+ - Connectivity checks: don't crash if unplaced pin is not connected ([1cf64d0](https://github.com/horizon-eda/horizon/commit/1cf64d051e756c387f2bf657d923e1443699594f))
+
+### Pool and proejct manager
+
+ - don't crash when closing windows that don't have an open pool/project ([268b2f5](https://github.com/horizon-eda/horizon/commit/268b2f5df253f3d93cb57abdde834ad841ca8223))
+
 # Version 2.3.0
 
 ## New features
