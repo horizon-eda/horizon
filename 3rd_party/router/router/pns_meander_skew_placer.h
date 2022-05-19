@@ -32,7 +32,7 @@ class SHOVE;
 class OPTIMIZER;
 
 /**
- * Class MEANDER_SKEW_PLACER
+ * MEANDER_SKEW_PLACER
  *
  * Differential pair skew adjustment algorithm.
  */
@@ -49,19 +49,19 @@ public:
     bool Move( const VECTOR2I& aP, ITEM* aEndItem ) override;
 
     /// @copydoc MEANDER_PLACER_BASE::TuningInfo()
-    const std::string TuningInfo() const override;
+    const wxString TuningInfo( EDA_UNITS aUnits ) const override;
 
 private:
+    long long int currentSkew() const;
 
-    int currentSkew( ) const;
-    int itemsetLength( const ITEM_SET& aSet ) const;
-
-    int origPathLength () const override;
+    long long int origPathLength() const override;
 
     DIFF_PAIR m_originPair;
     ITEM_SET  m_tunedPath, m_tunedPathP, m_tunedPathN;
 
-    int m_coupledLength;
+    long long int m_coupledLength;
+    int           m_padToDieP;
+    int           m_padToDieN;
 };
 
 }

@@ -69,6 +69,8 @@ enum class InToolActionID {
     CLEARANCE_OFFSET,
     CLEARANCE_OFFSET_DEFAULT,
     ROUTER_MODE,
+    DELETE_LAST_SEGMENT,
+    TOGGLE_CORNER_STYLE,
 
     // set NC
     NC_MODE,

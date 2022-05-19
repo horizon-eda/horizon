@@ -7,6 +7,7 @@
 #include "imp/imp_interface.hpp"
 #include "router/pns_horizon_iface.hpp"
 #include "router/pns_solid.h"
+#include "router/pns_arc.h"
 #include "router/router/pns_router.h"
 #include "router/router/pns_meander_placer_base.h"
 #include "util/util.hpp"
@@ -17,6 +18,7 @@
 #include <iostream>
 #include <iomanip>
 #include "nlohmann/json.hpp"
+#include "router/layer_ids.h"
 
 namespace horizon {
 
@@ -37,12 +39,13 @@ public:
     VECTOR2I m_startSnapPoint;
     VECTOR2I m_endSnapPoint;
     int work_layer = 0;
+    PNS::ROUTING_SETTINGS settings;
 
     ToolRouteTrackInteractive *tool = nullptr;
 };
 
 const std::map<ToolRouteTrackInteractive::Settings::Mode, std::string> ToolRouteTrackInteractive::Settings::mode_names =
-        {{ToolRouteTrackInteractive::Settings::Mode::BEND, "45 degree"},
+        {{ToolRouteTrackInteractive::Settings::Mode::BEND, "Bent"},
          {ToolRouteTrackInteractive::Settings::Mode::STRAIGHT, "Straight"},
          {ToolRouteTrackInteractive::Settings::Mode::PUSH, "Push & shove"},
          {ToolRouteTrackInteractive::Settings::Mode::WALKAROUND, "Walkaround"}};
@@ -54,13 +57,32 @@ static const LutEnumStr<ToolRouteTrackInteractive::Settings::Mode> mode_lut = {
         {"walkaround", ToolRouteTrackInteractive::Settings::Mode::WALKAROUND},
 };
 
+
+const std::map<ToolRouteTrackInteractive::Settings::CornerMode, std::string>
+        ToolRouteTrackInteractive::Settings::corner_mode_names = {
+                {ToolRouteTrackInteractive::Settings::CornerMode::MITERED_45, "45°"},
+                {ToolRouteTrackInteractive::Settings::CornerMode::ROUNDED_45, "45° rounded"},
+                {ToolRouteTrackInteractive::Settings::CornerMode::MITERED_90, "90°"},
+                {ToolRouteTrackInteractive::Settings::CornerMode::ROUNDED_90, "90° rounded"},
+};
+
+static const LutEnumStr<ToolRouteTrackInteractive::Settings::CornerMode> corner_mode_lut = {
+        {"mitered_45", ToolRouteTrackInteractive::Settings::CornerMode::MITERED_45},
+        {"mitered_90", ToolRouteTrackInteractive::Settings::CornerMode::MITERED_90},
+        {"rounded_45", ToolRouteTrackInteractive::Settings::CornerMode::ROUNDED_45},
+        {"rounded_90", ToolRouteTrackInteractive::Settings::CornerMode::ROUNDED_90},
+};
+
+
 json ToolRouteTrackInteractive::Settings::serialize() const
 {
     json j;
     j["effort"] = effort;
     j["remove_loops"] = remove_loops;
+    j["fix_all_segments"] = fix_all_segments;
     j["drc"] = drc;
     j["mode"] = mode_lut.lookup_reverse(mode);
+    j["corner_mode"] = corner_mode_lut.lookup_reverse(corner_mode);
     return j;
 }
 
@@ -68,19 +90,33 @@ void ToolRouteTrackInteractive::Settings::load_from_json(const json &j)
 {
     effort = j.value("effort", 1);
     remove_loops = j.value("remove_loops", true);
+    fix_all_segments = j.value("fix_all_segments", false);
     drc = j.value("drc", true);
     mode = mode_lut.lookup(j.value("mode", ""), Settings::Mode::WALKAROUND);
+    corner_mode = corner_mode_lut.lookup(j.value("corner_mode", ""), CornerMode::MITERED_45);
 }
 
 void ToolRouteTrackInteractive::apply_settings()
 {
     if (!router)
         return;
-    PNS::ROUTING_SETTINGS routing_settings(router->Settings());
-    routing_settings.SetRemoveLoops(settings.remove_loops);
-    routing_settings.SetOptimizerEffort(static_cast<PNS::PNS_OPTIMIZATION_EFFORT>(settings.effort));
-    routing_settings.SetCanViolateDRC(!settings.drc);
-    router->LoadSettings(routing_settings);
+    wrapper->settings.SetRemoveLoops(settings.remove_loops);
+    wrapper->settings.SetOptimizerEffort(static_cast<PNS::PNS_OPTIMIZATION_EFFORT>(settings.effort));
+    wrapper->settings.SetAllowDRCViolations(!settings.drc);
+    wrapper->settings.SetFixAllSegments(settings.fix_all_segments);
+    DIRECTION_45::CORNER_MODE corner_mode = DIRECTION_45::CORNER_MODE::MITERED_45;
+#define X_MODE(m_)                                                                                                     \
+    case Settings::CornerMode::m_:                                                                                     \
+        corner_mode = DIRECTION_45::CORNER_MODE::m_;                                                                   \
+        break;
+    switch (settings.corner_mode) {
+        X_MODE(MITERED_45)
+        X_MODE(MITERED_90)
+        X_MODE(ROUNDED_45)
+        X_MODE(ROUNDED_90)
+    }
+#undef X_MODE
+    wrapper->settings.SetCornerMode(corner_mode);
 }
 
 bool ToolRouteTrackInteractive::is_tune() const
@@ -108,12 +144,12 @@ bool ToolRouteTrackInteractive::can_begin()
         else if (via)
             return via->junction->net;
         else if (track)
-            return track->net;
+            return !track->is_arc() && track->net;
         else
             return false;
 
     case ToolID::TUNE_TRACK:
-        return track && track->net;
+        return track && track->net && !track->is_arc();
 
     case ToolID::TUNE_DIFFPAIR:
     case ToolID::TUNE_DIFFPAIR_SKEW:
@@ -167,7 +203,6 @@ ToolResponse ToolRouteTrackInteractive::begin(const ToolArgs &args)
 
     iface = new PNS::PNS_HORIZON_IFACE;
     iface->SetBoard(board);
-    iface->create_debug_decorator(imp->get_canvas());
     iface->SetCanvas(imp->get_canvas());
     iface->SetRules(rules);
     iface->SetPool(&doc.b->get_pool_caching());
@@ -175,6 +210,7 @@ ToolResponse ToolRouteTrackInteractive::begin(const ToolArgs &args)
 
     router = new PNS::ROUTER;
     router->SetInterface(iface);
+    iface->SetRouter(router);
     switch (tool_id) {
     case ToolID::ROUTE_DIFFPAIR_INTERACTIVE:
         router->SetMode(PNS::ROUTER_MODE::PNS_MODE_ROUTE_DIFF_PAIR);
@@ -199,12 +235,11 @@ ToolResponse ToolRouteTrackInteractive::begin(const ToolArgs &args)
     router->ClearWorld();
     router->SyncWorld();
 
-    PNS::ROUTING_SETTINGS routing_settings;
-    routing_settings.SetShoveVias(false);
+    wrapper->settings.SetShoveVias(false);
 
     PNS::SIZES_SETTINGS sizes_settings;
 
-    router->LoadSettings(routing_settings);
+    router->LoadSettings(&wrapper->settings);
     router->UpdateSizes(sizes_settings);
     apply_settings();
 
@@ -227,7 +262,16 @@ ToolResponse ToolRouteTrackInteractive::begin(const ToolArgs &args)
         else
             return ToolResponse::end();
 
+        auto &highlights = imp->get_highlights();
+        highlights.clear();
+        highlights.emplace(ObjectType::NET, net->uuid);
+        imp->update_highlights();
+
         wrapper->m_startItem = router->GetWorld()->FindItemByParent(parent, iface->get_net_code(net->uuid));
+
+        wrapper->settings.SetMode(PNS::RM_Shove);
+        router->LoadSettings(&wrapper->settings);
+
 
         VECTOR2I p0(args.coords.x, args.coords.y);
         if (!router->StartDragging(p0, wrapper->m_startItem, PNS::DM_ANY))
@@ -261,10 +305,20 @@ PNS::ITEM *ToolWrapper::pickSingleItem(const VECTOR2I &aWhere, int aNet, int aLa
 
     if (aLayer > 0)
         tl = aLayer;
+    static const int candidateCount = 5;
+    PNS::ITEM *prioritized[candidateCount];
+    SEG::ecoord dist[candidateCount];
 
-    PNS::ITEM *prioritized[4] = {0};
+    for (int i = 0; i < candidateCount; i++) {
+        prioritized[i] = nullptr;
+        dist[i] = VECTOR2I::ECOORD_MAX;
+    }
+
 
     PNS::ITEM_SET candidates = tool->router->QueryHoverItems(aWhere);
+    if (candidates.Empty())
+        candidates = tool->router->QueryHoverItems(aWhere, true);
+
 
     for (PNS::ITEM *item : candidates.Items()) {
         // if( !IsCopperLayer( item->Layers().Start() ) )
@@ -279,18 +333,38 @@ PNS::ITEM *ToolWrapper::pickSingleItem(const VECTOR2I &aWhere, int aNet, int aLa
                 continue;
         }
 
-        if (aNet < 0 || item->Net() == aNet) {
+        if (aNet <= 0 || item->Net() == aNet) {
             if (item->OfKind(PNS::ITEM::VIA_T | PNS::ITEM::SOLID_T)) {
-                if (!prioritized[2])
+                // if (item->OfKind(PNS::ITEM::SOLID_T) && aIgnorePads)
+                //     continue;
+
+                SEG::ecoord d = (item->Shape()->Centre() - aWhere).SquaredEuclideanNorm();
+
+                if (d < dist[2]) {
                     prioritized[2] = item;
-                if (item->Layers().Overlaps(tl))
+                    dist[2] = d;
+                }
+
+                if (item->Layers().Overlaps(tl) && d < dist[0]) {
                     prioritized[0] = item;
+                    dist[0] = d;
+                }
             }
-            else {
-                if (!prioritized[3])
+            else // ITEM::SEGMENT_T | ITEM::ARC_T
+            {
+                PNS::LINKED_ITEM *li = static_cast<PNS::LINKED_ITEM *>(item);
+                SEG::ecoord d = std::min((li->Anchor(0) - aWhere).SquaredEuclideanNorm(),
+                                         (li->Anchor(1) - aWhere).SquaredEuclideanNorm());
+
+                if (d < dist[3]) {
                     prioritized[3] = item;
-                if (item->Layers().Overlaps(tl))
+                    dist[3] = d;
+                }
+
+                if (item->Layers().Overlaps(tl) && d < dist[1]) {
                     prioritized[1] = item;
+                    dist[1] = d;
+                }
             }
         }
     }
@@ -318,21 +392,33 @@ PNS::ITEM *ToolWrapper::pickSingleItem(const VECTOR2I &aWhere, int aNet, int aLa
     return rv;
 }
 
-static VECTOR2I AlignToSegment(const VECTOR2I &aPoint, const VECTOR2I &snapped, const SEG &aSeg)
+
+static VECTOR2I AlignToSegment(const VECTOR2I &aPoint, const SEG &aSeg)
 {
     OPT_VECTOR2I pts[6];
 
-    VECTOR2I nearest = snapped;
+    const int c_gridSnapEpsilon = 2;
+
+
+    VECTOR2I nearest = aPoint;
+
+    SEG pos_slope(nearest + VECTOR2I(-1, 1), nearest + VECTOR2I(1, -1));
+    SEG neg_slope(nearest + VECTOR2I(-1, -1), nearest + VECTOR2I(1, 1));
+    int max_i = 2;
 
     pts[0] = aSeg.A;
     pts[1] = aSeg.B;
-    pts[2] = aSeg.IntersectLines(SEG(nearest, nearest + VECTOR2I(1, 0)));
-    pts[3] = aSeg.IntersectLines(SEG(nearest, nearest + VECTOR2I(0, 1)));
+
+    if (!aSeg.ApproxParallel(pos_slope))
+        pts[max_i++] = aSeg.IntersectLines(pos_slope);
+
+    if (!aSeg.ApproxParallel(neg_slope))
+        pts[max_i++] = aSeg.IntersectLines(neg_slope);
 
     int min_d = std::numeric_limits<int>::max();
 
-    for (int i = 0; i < 4; i++) {
-        if (pts[i] && aSeg.Contains(*pts[i])) {
+    for (int i = 0; i < max_i; i++) {
+        if (pts[i] && aSeg.Distance(*pts[i]) <= c_gridSnapEpsilon) {
             int d = (*pts[i] - aPoint).EuclideanNorm();
 
             if (d < min_d) {
@@ -345,13 +431,35 @@ static VECTOR2I AlignToSegment(const VECTOR2I &aPoint, const VECTOR2I &snapped, 
     return nearest;
 }
 
+
+static VECTOR2I AlignToArc(const VECTOR2I &aPoint, const SHAPE_ARC &aArc)
+{
+    VECTOR2I nearest = aPoint;
+
+    int min_d = std::numeric_limits<int>::max();
+
+    for (auto pt : {aArc.GetP0(), aArc.GetP1()}) {
+        int d = (pt - aPoint).EuclideanNorm();
+
+        if (d < min_d) {
+            min_d = d;
+            nearest = pt;
+        }
+        else
+            break;
+    }
+
+    return nearest;
+}
+
 const VECTOR2I ToolWrapper::snapToItem(bool aEnabled, PNS::ITEM *aItem, VECTOR2I aP)
 {
     VECTOR2I anchor;
+    auto snapped = tool->canvas->snap_to_grid(Coordi(aP.x, aP.y), tool->canvas->get_last_grid_div());
+    auto snapped_v = VECTOR2I(snapped.x, snapped.y);
 
     if (!aItem || !aEnabled) {
-        auto snapped = tool->canvas->snap_to_grid(Coordi(aP.x, aP.y), tool->canvas->get_last_grid_div());
-        return VECTOR2I(snapped.x, snapped.y);
+        return snapped_v;
     }
 
     switch (aItem->Kind()) {
@@ -363,19 +471,28 @@ const VECTOR2I ToolWrapper::snapToItem(bool aEnabled, PNS::ITEM *aItem, VECTOR2I
         anchor = static_cast<PNS::VIA *>(aItem)->Pos();
         break;
 
-    case PNS::ITEM::SEGMENT_T: {
-        PNS::SEGMENT *seg = static_cast<PNS::SEGMENT *>(aItem);
-        const SEG &s = seg->Seg();
-        int w = seg->Width();
+    case PNS::ITEM::SEGMENT_T:
+    case PNS::ITEM::ARC_T: {
+        PNS::LINKED_ITEM *li = static_cast<PNS::LINKED_ITEM *>(aItem);
+        VECTOR2I A = li->Anchor(0);
+        VECTOR2I B = li->Anchor(1);
+        SEG::ecoord w_sq = SEG::Square(li->Width() / 2);
+        SEG::ecoord distA_sq = (aP - A).SquaredEuclideanNorm();
+        SEG::ecoord distB_sq = (aP - B).SquaredEuclideanNorm();
 
-        if ((aP - s.A).EuclideanNorm() < w / 2)
-            anchor = s.A;
-        else if ((aP - s.B).EuclideanNorm() < w / 2)
-            anchor = s.B;
-        else {
-            auto snapped = tool->canvas->snap_to_grid(Coordi(aP.x, aP.y), tool->canvas->get_last_grid_div());
-            anchor = AlignToSegment(aP, VECTOR2I(snapped.x, snapped.y), s);
+        if (distA_sq < w_sq || distB_sq < w_sq) {
+            return (distA_sq < distB_sq) ? A : B;
         }
+        else if (aItem->Kind() == PNS::ITEM::SEGMENT_T) {
+            // TODO(snh): Clean this up
+            PNS::SEGMENT *seg = static_cast<PNS::SEGMENT *>(li);
+            return AlignToSegment(snapped_v, seg->Seg());
+        }
+        else if (aItem->Kind() == PNS::ITEM::ARC_T) {
+            PNS::ARC *arc = static_cast<PNS::ARC *>(li);
+            return AlignToArc(snapped_v, *static_cast<const SHAPE_ARC *>(arc->Shape()));
+        }
+
         break;
     }
 
@@ -451,6 +568,9 @@ const PNS::PNS_HORIZON_PARENT_ITEM *inheritTrackWidth(PNS::ITEM *aItem)
     case ITEM::SEGMENT_T:
         return static_cast<SEGMENT *>(aItem)->Parent();
 
+    case ITEM::ARC_T:
+        return static_cast<ARC *>(aItem)->Parent();
+
     default:
         return 0;
     }
@@ -497,7 +617,7 @@ bool ToolWrapper::prepareInteractive()
         auto parent = inheritTrackWidth(m_startItem);
         if (parent && parent->track) {
             auto track = parent->track;
-            sizes.SetWidthFromRules(track->width_from_rules);
+            sizes.SetTrackWidthIsExplicit(!track->width_from_rules);
             track_width = track->width;
         }
     }
@@ -508,7 +628,7 @@ bool ToolWrapper::prepareInteractive()
             auto net = tool->iface->get_net_for_code(netcode);
             track_width =
                     tool->rules->get_default_track_width(net, PNS::PNS_HORIZON_IFACE::layer_from_router(routingLayer));
-            sizes.SetWidthFromRules(true);
+            sizes.SetTrackWidthIsExplicit(false);
         }
     }
 
@@ -528,7 +648,7 @@ bool ToolWrapper::prepareInteractive()
         sizes.SetDiffPairWidth(rules_dp->track_width);
         sizes.SetDiffPairViaGap(rules_dp->via_gap);
         sizes.SetDiffPairViaGapSameAsTraceGap(false);
-        sizes.SetWidthFromRules(false);
+        sizes.SetTrackWidthIsExplicit(true);
     }
 
     if (m_startItem) {
@@ -559,34 +679,32 @@ bool ToolWrapper::prepareInteractive()
     );
     */
     tool->router->UpdateSizes(sizes);
-    PNS::ROUTING_SETTINGS settings(tool->router->Settings());
     using Mode = ToolRouteTrackInteractive::Settings::Mode;
     switch (tool->settings.mode) {
     case Mode::WALKAROUND:
         settings.SetMode(PNS::RM_Walkaround);
         settings.SetFreeAngleMode(false);
-        settings.SetCanViolateDRC(false);
+        settings.SetAllowDRCViolations(false);
         break;
 
     case Mode::PUSH:
         settings.SetMode(PNS::RM_Shove);
         settings.SetFreeAngleMode(false);
-        settings.SetCanViolateDRC(false);
+        settings.SetAllowDRCViolations(false);
         break;
 
     case Mode::BEND:
         settings.SetMode(PNS::RM_MarkObstacles);
         settings.SetFreeAngleMode(false);
-        settings.SetCanViolateDRC(!tool->settings.drc);
+        settings.SetAllowDRCViolations(!tool->settings.drc);
         break;
 
     case Mode::STRAIGHT:
         settings.SetMode(PNS::RM_MarkObstacles);
         settings.SetFreeAngleMode(true);
-        settings.SetCanViolateDRC(!tool->settings.drc);
+        settings.SetAllowDRCViolations(!tool->settings.drc);
         break;
     }
-    tool->router->LoadSettings(settings);
 
     if (!tool->router->StartRouting(m_startSnapPoint, m_startItem, routingLayer)) {
         std::cout << "error " << tool->router->FailureReason() << std::endl;
@@ -721,7 +839,7 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                 meander_placer->SpacingStep(dir);
                 imp->tool_bar_flash_replace("Meander spacing: "
                                             + dim_to_string(meander_placer->MeanderSettings().m_spacing) + " <i>"
-                                            + meander_placer->TuningInfo() + "</i>");
+                                            + meander_placer->TuningInfo(EDA_UNITS::MILLIMETRES) + "</i>");
                 router->Move(VECTOR2I(args.coords.x, args.coords.y), NULL);
             } break;
 
@@ -737,7 +855,7 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                 meander_placer->AmplitudeStep(dir);
                 imp->tool_bar_flash_replace("Meander amplitude: "
                                             + dim_to_string(meander_placer->MeanderSettings().m_maxAmplitude) + " <i>"
-                                            + meander_placer->TuningInfo() + "</i>");
+                                            + meander_placer->TuningInfo(EDA_UNITS::MILLIMETRES) + "</i>");
                 router->Move(VECTOR2I(args.coords.x, args.coords.y), NULL);
             } break;
 
@@ -811,6 +929,7 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     const bool was_placing_via = router->IsPlacingVia();
 
                     if (router->FixRoute(wrapper->m_endSnapPoint, wrapper->m_endItem)) {
+                        router->CommitRouting();
                         router->StopRouting();
                         imp->canvas_update();
                         state = State::START;
@@ -842,6 +961,7 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                 } break;
 
                 case InToolActionID::RMB:
+                    router->CommitRouting();
                     router->StopRouting();
                     imp->canvas_update();
                     state = State::START;
@@ -867,6 +987,12 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
                     break;
 
+                case InToolActionID::DELETE_LAST_SEGMENT:
+                    router->UndoLastSegment();
+                    wrapper->updateEndItem(args);
+                    router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
+                    break;
+
                 default:;
                 }
             }
@@ -884,7 +1010,7 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                 PNS::SIZES_SETTINGS sz(router->Sizes());
                 if (auto r = imp->dialogs.ask_datum("Track width", sz.TrackWidth())) {
                     sz.SetTrackWidth(*r);
-                    sz.SetWidthFromRules(false);
+                    sz.SetTrackWidthIsExplicit(true);
                     router->UpdateSizes(sz);
                     router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
                 }
@@ -900,7 +1026,9 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     PNS::SIZES_SETTINGS sz(router->Sizes());
                     sz.SetTrackWidth(rules->get_default_track_width(
                             net, PNS::PNS_HORIZON_IFACE::layer_from_router(router->GetCurrentLayer())));
-                    sz.SetWidthFromRules(true);
+                    sz.SetTrackWidthIsExplicit(true); // workaround to get updated track width
+                    router->UpdateSizes(sz);
+                    sz.SetTrackWidthIsExplicit(false);
                     router->UpdateSizes(sz);
                     router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
                 }
@@ -922,6 +1050,30 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                 imp->dialogs.show_router_settings_window(settings);
                 settings_window_visible = true;
                 update_settings_window();
+                break;
+
+            case InToolActionID::TOGGLE_CORNER_STYLE:
+                if (!imp->dialogs.get_nonmodal()) {
+                    switch (settings.corner_mode) {
+                    case Settings::CornerMode::MITERED_45:
+                        settings.corner_mode = Settings::CornerMode::ROUNDED_45;
+                        break;
+
+                    case Settings::CornerMode::ROUNDED_45:
+                        settings.corner_mode = Settings::CornerMode::MITERED_90;
+                        break;
+
+                    case Settings::CornerMode::MITERED_90:
+                        settings.corner_mode = Settings::CornerMode::ROUNDED_90;
+                        break;
+
+                    case Settings::CornerMode::ROUNDED_90:
+                        settings.corner_mode = Settings::CornerMode::MITERED_45;
+                        break;
+                    }
+                    apply_settings();
+                    router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
+                }
                 break;
 
             default:;
@@ -957,7 +1109,7 @@ void ToolRouteTrackInteractive::update_tip()
 {
     std::stringstream ss;
     std::vector<ActionLabelInfo> actions;
-    actions.reserve(12);
+    actions.reserve(13);
     if (tool_id == ToolID::DRAG_TRACK_INTERACTIVE) {
         imp->tool_bar_set_actions({
                 {InToolActionID::LMB},
@@ -975,7 +1127,7 @@ void ToolRouteTrackInteractive::update_tip()
                      "amplitude"},
                     {InToolActionID::LENGTH_TUNING_SPACING_DEC, InToolActionID::LENGTH_TUNING_SPACING_INC, "spacing"},
             });
-            imp->tool_bar_set_tip(meander_placer->TuningInfo());
+            imp->tool_bar_set_tip(meander_placer->TuningInfo(EDA_UNITS::MILLIMETRES));
         }
         return;
     }
@@ -983,10 +1135,14 @@ void ToolRouteTrackInteractive::update_tip()
         actions.emplace_back(InToolActionID::LMB, "connect");
         actions.emplace_back(InToolActionID::RMB, "finish");
         actions.emplace_back(InToolActionID::POSTURE);
+        if (tool_id != ToolID::ROUTE_DIFFPAIR_INTERACTIVE)
+            actions.emplace_back(InToolActionID::DELETE_LAST_SEGMENT);
         actions.emplace_back(InToolActionID::TOGGLE_VIA);
         actions.emplace_back(InToolActionID::ROUTER_SETTINGS);
+        if (!settings_window_visible && tool_id != ToolID::ROUTE_DIFFPAIR_INTERACTIVE)
+            actions.emplace_back(InToolActionID::TOGGLE_CORNER_STYLE);
         const auto &sz = router->Sizes();
-        if (sz.WidthFromRules()) {
+        if (!sz.TrackWidthIsExplicit()) {
             actions.emplace_back(InToolActionID::ENTER_WIDTH, "track width");
         }
         else {
@@ -1000,7 +1156,8 @@ void ToolRouteTrackInteractive::update_tip()
             actions.emplace_back(InToolActionID::CLEARANCE_OFFSET, InToolActionID::CLEARANCE_OFFSET_DEFAULT,
                                  "set / reset clearance offset");
         }
-
+        if (tool_id != ToolID::ROUTE_DIFFPAIR_INTERACTIVE)
+            ss << Settings::corner_mode_names.at(settings.corner_mode) << " ";
         auto nets = router->GetCurrentNets();
         Net *net = nullptr;
         for (auto x : nets) {
@@ -1019,7 +1176,7 @@ void ToolRouteTrackInteractive::update_tip()
         }
 
         ss << "  width " << format_length(sz.TrackWidth());
-        if (sz.WidthFromRules()) {
+        if (!sz.TrackWidthIsExplicit()) {
             ss << " (default)";
         }
     }
@@ -1029,7 +1186,11 @@ void ToolRouteTrackInteractive::update_tip()
         if (!settings_window_visible)
             actions.emplace_back(InToolActionID::ROUTER_MODE);
         actions.emplace_back(InToolActionID::ROUTER_SETTINGS);
+        if (!settings_window_visible && tool_id != ToolID::ROUTE_DIFFPAIR_INTERACTIVE)
+            actions.emplace_back(InToolActionID::TOGGLE_CORNER_STYLE);
         ss << "Mode: " << Glib::Markup::escape_text(Settings::mode_names.at(settings.mode));
+        ss << " Corners: " << Settings::corner_mode_names.at(settings.corner_mode);
+
         if (wrapper->m_startItem) {
             auto nc = wrapper->m_startItem->Net();
             auto net = iface->get_net_for_code(nc);

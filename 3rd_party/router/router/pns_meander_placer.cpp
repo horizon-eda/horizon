@@ -2,7 +2,7 @@
  * KiRouter - a push-and-(sometimes-)shove PCB router
  *
  * Copyright (C) 2013-2015 CERN
- * Copyright (C) 2016 KiCad Developers, see AUTHORS.txt for contributors.
+ * Copyright (C) 2016-2021 KiCad Developers, see AUTHORS.txt for contributors.
  * Author: Tomasz Wlostowski <tomasz.wlostowski@cern.ch>
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -19,26 +19,25 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-//#include <base_units.h> // God forgive me doing this...
+#include "base_units.h" // God forgive me doing this...
 
-#include "pns_node.h"
-#include "pns_itemset.h"
-#include "pns_topology.h"
-#include "pns_meander_placer.h"
-#include "pns_router.h"
 #include "pns_debug_decorator.h"
-#include "util/geom_util.hpp"
+#include "pns_itemset.h"
+#include "pns_meander_placer.h"
+#include "pns_node.h"
+#include "pns_router.h"
+#include "pns_solid.h"
+#include "pns_topology.h"
 
 namespace PNS {
 
 MEANDER_PLACER::MEANDER_PLACER( ROUTER* aRouter ) :
     MEANDER_PLACER_BASE( aRouter )
 {
-    m_world = NULL;
-    m_currentNode = NULL;
+    m_currentNode = nullptr;
 
     // Init temporary variables (do not leave uninitialized members)
-    m_initialSegment = NULL;
+    m_initialSegment = nullptr;
     m_lastLength = 0;
     m_lastStatus = TOO_SHORT;
 }
@@ -60,26 +59,32 @@ NODE* MEANDER_PLACER::CurrentNode( bool aLoopsRemoved ) const
 
 bool MEANDER_PLACER::Start( const VECTOR2I& aP, ITEM* aStartItem )
 {
-    VECTOR2I p;
-
-    if( !aStartItem || !aStartItem->OfKind( ITEM::SEGMENT_T ) )
+    if( !aStartItem || !aStartItem->OfKind( ITEM::SEGMENT_T | ITEM::ARC_T ) )
     {
-        Router()->SetFailureReason( ( "Please select a track whose length you want to tune." ) );
+        Router()->SetFailureReason( _( "Please select a track whose length you want to tune." ) );
         return false;
     }
 
-    m_initialSegment = static_cast<SEGMENT*>( aStartItem );
-
-    p = m_initialSegment->Seg().NearestPoint( aP );
-
-    m_currentNode = NULL;
-    m_currentStart = p;
+    m_initialSegment = static_cast<LINKED_ITEM*>( aStartItem );
+    m_currentNode    = nullptr;
+    m_currentStart   = getSnappedStartPoint( m_initialSegment, aP );
 
     m_world = Router()->GetWorld()->Branch();
     m_originLine = m_world->AssembleLine( m_initialSegment );
 
+    SOLID* padA = nullptr;
+    SOLID* padB = nullptr;
+
     TOPOLOGY topo( m_world );
-    m_tunedPath = topo.AssembleTrivialPath( m_initialSegment );
+    m_tunedPath = topo.AssembleTuningPath( m_initialSegment, &padA, &padB );
+
+    m_padToDieLength = 0;
+
+    if( padA )
+        m_padToDieLength += padA->GetPadToDie();
+
+    if( padB )
+        m_padToDieLength += padB->GetPadToDie();
 
     m_world->Remove( m_originLine );
 
@@ -90,18 +95,9 @@ bool MEANDER_PLACER::Start( const VECTOR2I& aP, ITEM* aStartItem )
 }
 
 
-int MEANDER_PLACER::origPathLength() const
+long long int MEANDER_PLACER::origPathLength() const
 {
-    int total = 0;
-    for( const ITEM* item : m_tunedPath.CItems() )
-    {
-        if( const LINE* l = dynamic_cast<const LINE*>( item ) )
-        {
-            total += l->CLine().Length();
-        }
-    }
-
-    return total;
+    return m_padToDieLength + lineLength( m_tunedPath );
 }
 
 
@@ -111,7 +107,7 @@ bool MEANDER_PLACER::Move( const VECTOR2I& aP, ITEM* aEndItem )
 }
 
 
-bool MEANDER_PLACER::doMove( const VECTOR2I& aP, ITEM* aEndItem, int aTargetLength )
+bool MEANDER_PLACER::doMove( const VECTOR2I& aP, ITEM* aEndItem, long long int aTargetLength )
 {
     SHAPE_LINE_CHAIN pre, tuned, post;
 
@@ -128,13 +124,26 @@ bool MEANDER_PLACER::doMove( const VECTOR2I& aP, ITEM* aEndItem, int aTargetLeng
 
     for( int i = 0; i < tuned.SegmentCount(); i++ )
     {
+        if( tuned.IsArcSegment( i ) )
+        {
+            ssize_t arcIndex = tuned.ArcIndex( i );
+            m_result.AddArc( tuned.Arc( arcIndex ) );
+            i = tuned.NextShape( i );
+
+            // NextShape will return -1 if last shape
+            if( i < 0 )
+                i = tuned.SegmentCount();
+
+            continue;
+        }
+
         const SEG s = tuned.CSegment( i );
         m_result.AddCorner( s.A );
-        m_result.MeanderSegment( s );
+        m_result.MeanderSegment( s, s.Side( aP ) < 0 );
         m_result.AddCorner( s.B );
     }
 
-    int lineLen = origPathLength();
+    long long int lineLen = origPathLength();
 
     m_lastLength = lineLen;
     m_lastStatus = TUNED;
@@ -149,9 +158,9 @@ bool MEANDER_PLACER::doMove( const VECTOR2I& aP, ITEM* aEndItem, int aTargetLeng
 
     for( const ITEM* item : m_tunedPath.CItems() )
     {
-        if( const LINE* l = dynamic_cast<const LINE*>( item ) )
+        if( const LINE* l = dyn_cast<const LINE*>( item ) )
         {
-            Dbg()->AddLine( l->CLine(), 5, 30000 );
+            PNS_DBG( Dbg(), AddLine, l->CLine(), BLUE, 30000, "tuned-line" );
         }
     }
 
@@ -169,7 +178,8 @@ bool MEANDER_PLACER::doMove( const VECTOR2I& aP, ITEM* aEndItem, int aTargetLeng
 
         m_lastLength += tuned.Length();
 
-        int comp = compareWithTolerance( m_lastLength - aTargetLength, 0, m_settings.m_lengthTolerance );
+        int comp = compareWithTolerance( m_lastLength - aTargetLength, 0,
+                                         m_settings.m_lengthTolerance );
 
         if( comp > 0 )
             m_lastStatus = TOO_LONG;
@@ -196,8 +206,31 @@ bool MEANDER_PLACER::FixRoute( const VECTOR2I& aP, ITEM* aEndItem, bool aForceFi
 
     m_currentTrace = LINE( m_originLine, m_finalShape );
     m_currentNode->Add( m_currentTrace );
+    CommitPlacement();
 
-    Router()->CommitRouting( m_currentNode );
+    return true;
+}
+
+
+bool MEANDER_PLACER::AbortPlacement()
+{
+    m_world->KillChildren();
+    return true;
+}
+
+
+bool MEANDER_PLACER::HasPlacedAnything() const
+{
+     return m_currentTrace.SegmentCount() > 0;
+}
+
+
+bool MEANDER_PLACER::CommitPlacement()
+{
+    if( m_currentNode )
+        Router()->CommitRouting( m_currentNode );
+
+    m_currentNode = nullptr;
     return true;
 }
 
@@ -234,28 +267,28 @@ int MEANDER_PLACER::CurrentLayer() const
 }
 
 
-const std::string MEANDER_PLACER::TuningInfo() const
+const wxString MEANDER_PLACER::TuningInfo( EDA_UNITS aUnits ) const
 {
-    std::string status;
+    wxString status;
 
     switch ( m_lastStatus )
     {
     case TOO_LONG:
-        status = ( "Too long: " );
+        status = _( "Too long: " );
         break;
     case TOO_SHORT:
-        status = ( "Too short: " );
+        status = _( "Too short: " );
         break;
     case TUNED:
-        status = ( "Tuned: " );
+        status = _( "Tuned: " );
         break;
     default:
-        return ( "?" );
+        return _( "?" );
     }
 
-    status += horizon::dim_to_string(m_lastLength, false);
+    status += ::MessageTextFromValue( aUnits, m_lastLength );
     status += "/";
-    status += horizon::dim_to_string(m_settings.m_targetLength, false);
+    status += ::MessageTextFromValue( aUnits, m_settings.m_targetLength );
 
     return status;
 }

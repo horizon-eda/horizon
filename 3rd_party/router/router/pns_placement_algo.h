@@ -35,7 +35,7 @@ class ITEM;
 class NODE;
 
 /**
- * Class PLACEMENT_ALGO
+ * PLACEMENT_ALGO
  *
  * Abstract class for a P&S placement/dragging algorithm.
  * All subtools (drag, single/diff pair routing and meandering)
@@ -72,11 +72,19 @@ public:
      *
      * Commits the currently routed items to the parent node, taking
      * aP as the final end point and aEndItem as the final anchor (if provided).
-     * @return true, if route has been commited. May return false if the routing
+     * @return true, if route has been committed. May return false if the routing
      * result is violating design rules - in such case, the track is only committed
      * if Settings.CanViolateDRC() is on.
      */
     virtual bool FixRoute( const VECTOR2I& aP, ITEM* aEndItem, bool aForceFinish = false ) = 0;
+
+    virtual bool UnfixRoute() { return false; };
+
+    virtual bool CommitPlacement() { return false; };
+
+    virtual bool AbortPlacement() { return false; };
+
+    virtual bool HasPlacedAnything() const { return false; }
 
     /**
      * Function ToggleVia()
@@ -183,6 +191,8 @@ public:
     virtual void GetModifiedNets( std::vector<int> &aNets ) const
     {
     }
+
+    
 };
 
 }

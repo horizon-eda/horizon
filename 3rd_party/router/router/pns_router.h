@@ -23,20 +23,13 @@
 #define __PNS_ROUTER_H
 
 #include <list>
-
 #include <memory>
 #include <core/optional.h>
-#include <boost/unordered_set.hpp>
-
-#include <layers_id_colors_and_visibility.h>
-#include <geometry/shape_line_chain.h>
+#include <math/box2.h>
 
 #include "pns_routing_settings.h"
 #include "pns_sizes_settings.h"
-#include "pns_item.h"
-#include "pns_itemset.h"
 #include "pns_node.h"
-#include "../wx_compat.h"
 
 namespace KIGFX
 {
@@ -54,6 +47,7 @@ class DIFF_PAIR_PLACER;
 class PLACEMENT_ALGO;
 class LINE_PLACER;
 class ITEM;
+class ARC;
 class LINE;
 class SOLID;
 class SEGMENT;
@@ -62,6 +56,8 @@ class VIA;
 class RULE_RESOLVER;
 class SHOVE;
 class DRAGGER;
+class DRAG_ALGO;
+class LOGGER;
 
 enum ROUTER_MODE {
     PNS_MODE_ROUTE_SINGLE = 1,
@@ -77,10 +73,12 @@ enum DRAG_MODE
     DM_SEGMENT = 0x2,
     DM_VIA = 0x4,
     DM_FREE_ANGLE = 0x8,
-    DM_ANY = 0x7
+    DM_ARC = 0x10,
+    DM_ANY = 0x17,
+    DM_COMPONENT = 0x20
 };
 /**
- * Class ROUTER
+ * ROUTER
  *
  * Main router class.
  */
@@ -88,34 +86,40 @@ enum DRAG_MODE
  class ROUTER_IFACE
  {
  public:
-        ROUTER_IFACE() {};
-        virtual ~ROUTER_IFACE() {};
+    ROUTER_IFACE() {};
+    virtual ~ROUTER_IFACE() {};
 
-        virtual void SetRouter( ROUTER* aRouter ) = 0;
-        virtual void SyncWorld( NODE* aNode ) = 0;
-        virtual void AddItem( ITEM* aItem ) = 0;
-        virtual void RemoveItem( ITEM* aItem ) = 0;
-        virtual bool IsAnyLayerVisible( const LAYER_RANGE& aLayer ) = 0;
-        virtual bool IsItemVisible( const PNS::ITEM* aItem ) = 0;
-        virtual void DisplayItem( const ITEM* aItem, int aColor = -1, int aClearance = -1, bool aEdit = false ) = 0;
-        virtual void HideItem( ITEM* aItem ) = 0;
-        virtual void Commit() = 0;
-//        virtual void Abort () = 0;
+    virtual void SyncWorld( NODE* aNode ) = 0;
+    virtual void AddItem( ITEM* aItem ) = 0;
+    virtual void UpdateItem( ITEM* aItem ) = 0;
+    virtual void RemoveItem( ITEM* aItem ) = 0;
+    virtual bool IsAnyLayerVisible( const LAYER_RANGE& aLayer ) const = 0;
+    virtual bool IsItemVisible( const PNS::ITEM* aItem ) const = 0;
+    virtual bool IsFlashedOnLayer( const PNS::ITEM* aItem, int aLayer ) const = 0;
+    virtual void DisplayItem( const ITEM* aItem, int aClearance, bool aEdit = false ) = 0;
+    virtual void DisplayRatline( const SHAPE_LINE_CHAIN& aRatline, int aColor = -1 ) = 0;
+    virtual void HideItem( ITEM* aItem ) = 0;
+    virtual void Commit() = 0;
+    virtual bool ImportSizes( SIZES_SETTINGS& aSizes, ITEM* aStartItem, int aNet ) = 0;
+    virtual int  StackupHeight( int aFirstLayer, int aSecondLayer ) const = 0;
 
-        virtual void EraseView() = 0;
-        virtual void UpdateNet( int aNetCode ) = 0;
+    virtual void EraseView() = 0;
+    virtual void UpdateNet( int aNetCode ) = 0;
 
-        virtual RULE_RESOLVER* GetRuleResolver() = 0;
-        virtual DEBUG_DECORATOR* GetDebugDecorator() = 0;
+    virtual PNS::NODE* GetWorld() const = 0;
+
+    virtual RULE_RESOLVER* GetRuleResolver() = 0;
+    virtual DEBUG_DECORATOR* GetDebugDecorator() = 0;
 };
 
 class ROUTER
 {
-private:
+public:
     enum RouterState
     {
         IDLE,
         DRAG_SEGMENT,
+        DRAG_COMPONENT,
         ROUTE_TRACK
     };
 
@@ -127,12 +131,14 @@ public:
     void SetMode ( ROUTER_MODE aMode );
     ROUTER_MODE Mode() const { return m_mode; }
 
+    RouterState GetState() const { return m_state; }
+
+    DRAG_ALGO* GetDragger() { return m_dragger.get(); }
+
     static ROUTER* GetInstance();
 
     void ClearWorld();
     void SyncWorld();
-
-    void SetView( KIGFX::VIEW* aView );
 
     bool RoutingInProgress() const;
     bool StartRouting( const VECTOR2I& aP, ITEM* aItem, int aLayer );
@@ -140,55 +146,40 @@ public:
     bool FixRoute( const VECTOR2I& aP, ITEM* aItem, bool aForceFinish = false );
     void BreakSegment( ITEM *aItem, const VECTOR2I& aP );
 
+    void UndoLastSegment();
+    void CommitRouting();
     void StopRouting();
+    void ClearViewDecorations();
 
-    int GetClearance( const ITEM* aA, const ITEM* aB ) const;
-
-    NODE* GetWorld() const
-    {
-        return m_world.get();
-    }
+    NODE* GetWorld() const { return m_world.get(); }
 
     void FlipPosture();
 
-    void DisplayItem( const ITEM* aItem, int aColor = -1, int aClearance = -1, bool aEdit = false );
-    void DisplayItems( const ITEM_SET& aItems );
-    void DeleteTraces( ITEM* aStartItem, bool aWholeTrack );
-    void SwitchLayer( int layer );
+    bool SwitchLayer( int layer );
 
     void ToggleViaPlacement();
     void SetOrthoMode( bool aEnable );
 
+    void ToggleCornerMode();
+
     int GetCurrentLayer() const;
     const std::vector<int> GetCurrentNets() const;
 
-    void DumpLog();
+    LOGGER* Logger();
 
-    RULE_RESOLVER* GetRuleResolver() const
-    {
-        return m_iface->GetRuleResolver();
-    }
+    RULE_RESOLVER* GetRuleResolver() const { return m_iface->GetRuleResolver(); }
 
     bool IsPlacingVia() const;
 
-    const ITEM_SET   QueryHoverItems( const VECTOR2I& aP );
-    const VECTOR2I      SnapToItem( ITEM* aItem, VECTOR2I aP, bool& aSplitsSegment );
+    const ITEM_SET QueryHoverItems( const VECTOR2I& aP, bool aUseClearance = false );
 
     bool StartDragging( const VECTOR2I& aP, ITEM* aItem, int aDragMode = DM_ANY );
+    bool StartDragging( const VECTOR2I& aP, ITEM_SET aItems, int aDragMode = DM_COMPONENT );
 
     void SetIterLimit( int aX ) { m_iterLimit = aX; }
     int GetIterLimit() const { return m_iterLimit; };
 
-    void SetShowIntermediateSteps( bool aX, int aSnapshotIter = -1 )
-    {
-        m_showInterSteps = aX;
-        m_snapshotIter = aSnapshotIter;
-    }
-
-    bool GetShowIntermediateSteps() const { return m_showInterSteps; }
-    int GetShapshotIter() const { return m_snapshotIter; }
-
-    ROUTING_SETTINGS& Settings() { return m_settings; }
+    ROUTING_SETTINGS& Settings() { return *m_settings; }
 
     void CommitRouting( NODE* aNode );
 
@@ -202,77 +193,57 @@ public:
      * Changes routing settings to ones passed in the parameter.
      * @param aSettings are the new settings.
      */
-    void LoadSettings( const ROUTING_SETTINGS& aSettings )
+    void LoadSettings( ROUTING_SETTINGS* aSettings )
     {
         m_settings = aSettings;
     }
 
-    SIZES_SETTINGS& Sizes()
-    {
-        return m_sizes;
-    }
+    SIZES_SETTINGS& Sizes() { return m_sizes; }
 
-    void SetFailureReason( const std::string& aReason ) { m_failureReason = aReason; }
-    const std::string& FailureReason() const { return m_failureReason; }
+    void SetFailureReason( const wxString& aReason ) { m_failureReason = aReason; }
+    const wxString& FailureReason() const { return m_failureReason; }
 
     PLACEMENT_ALGO* Placer() { return m_placer.get(); }
 
-    ROUTER_IFACE* GetInterface() const
-    {
-        return m_iface;
-    }
+    ROUTER_IFACE* GetInterface() const { return m_iface; }
+
+    void SetVisibleViewArea( const BOX2I& aExtents ) { m_visibleViewArea = aExtents; }
+    const BOX2I& VisibleViewArea() const { return m_visibleViewArea; }
 
 private:
     void movePlacing( const VECTOR2I& aP, ITEM* aItem );
     void moveDragging( const VECTOR2I& aP, ITEM* aItem );
 
-    void eraseView();
     void updateView( NODE* aNode, ITEM_SET& aCurrent, bool aDragging = false );
-
-    void clearViewFlags();
 
     // optHoverItem queryHoverItemEx(const VECTOR2I& aP);
 
-    ITEM* pickSingleItem( ITEM_SET& aItems ) const;
-    void splitAdjacentSegments( NODE* aNode, ITEM* aSeg, const VECTOR2I& aP );
-
-    ITEM* syncPad( D_PAD* aPad );
-    ITEM* syncTrack( TRACK* aTrack );
-    ITEM* syncVia( VIA* aVia );
-
-    void commitPad( SOLID* aPad );
-    void commitSegment( SEGMENT* aTrack );
-    void commitVia( VIA* aVia );
-
-    void highlightCurrent( bool enabled );
-
     void markViolations( NODE* aNode, ITEM_SET& aCurrent, NODE::ITEM_VECTOR& aRemoved );
-    bool isStartingPointRoutable( const VECTOR2I& aWhere, int aLayer );
+    bool isStartingPointRoutable( const VECTOR2I& aWhere, ITEM* aItem, int aLayer );
 
-    VECTOR2I m_currentEnd;
-    RouterState m_state;
+private:
+    BOX2I                           m_visibleViewArea;
+    RouterState                     m_state;
 
-    std::unique_ptr< NODE > m_world;
-    NODE*                   m_lastNode;
+    std::unique_ptr<NODE>           m_world;
+    NODE*                           m_lastNode;
 
-    std::unique_ptr< PLACEMENT_ALGO > m_placer;
-    std::unique_ptr< DRAGGER >        m_dragger;
-    std::unique_ptr< SHOVE >          m_shove;
+    std::unique_ptr<PLACEMENT_ALGO> m_placer;
+    std::unique_ptr<DRAG_ALGO>      m_dragger;
+    std::unique_ptr<SHOVE>          m_shove;
 
-    ROUTER_IFACE* m_iface;
+    ROUTER_IFACE*     m_iface;
 
-    int m_iterLimit;
-    bool m_showInterSteps;
-    int m_snapshotIter;
-    bool m_violation;
-    bool m_forceMarkObstaclesMode = false;
+    int               m_iterLimit;
+    bool              m_forceMarkObstaclesMode = false;
 
-    ROUTING_SETTINGS m_settings;
-    SIZES_SETTINGS m_sizes;
-    ROUTER_MODE m_mode;
+    ROUTING_SETTINGS* m_settings;
+    SIZES_SETTINGS    m_sizes;
+    ROUTER_MODE       m_mode;
+    LOGGER*           m_logger;
 
-    std::string m_toolStatusbarName;
-    std::string m_failureReason;
+    wxString          m_toolStatusbarName;
+    wxString          m_failureReason;
 };
 
 }

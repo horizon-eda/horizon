@@ -9,9 +9,11 @@
 #include "router/pns_solid.h"
 #include "router/pns_topology.h"
 #include "router/pns_via.h"
+#include "router/pns_arc.h"
 #include "util/geom_util.hpp"
 #include "logger/logger.hpp"
 #include "pool/ipool.hpp"
+#include "router/layer_ids.h"
 
 namespace PNS {
 
@@ -71,32 +73,37 @@ int PNS_HORIZON_IFACE::layer_from_router(int l)
 
 class PNS_HORIZON_RULE_RESOLVER : public PNS::RULE_RESOLVER {
 public:
-    PNS_HORIZON_RULE_RESOLVER(const horizon::Board *aBoard, const horizon::BoardRules *aRules, PNS::ROUTER *aRouter);
+    PNS_HORIZON_RULE_RESOLVER(const horizon::Board *aBoard, const horizon::BoardRules *aRules,
+                              PNS_HORIZON_IFACE *aIface);
     virtual ~PNS_HORIZON_RULE_RESOLVER();
 
-    int Clearance(const PNS::ITEM *aA, const PNS::ITEM *aB) const override;
-    int Clearance(int aNetCode) const override;
+    int Clearance(const PNS::ITEM *aA, const PNS::ITEM *aB) override;
+    int HoleClearance(const PNS::ITEM *aA, const PNS::ITEM *aB) override;
+    int HoleToHoleClearance(const PNS::ITEM *aA, const PNS::ITEM *aB) override;
     int DpCoupledNet(int aNet) override;
     int DpNetPolarity(int aNet) override;
-    bool DpNetPair(PNS::ITEM *aItem, int &aNetP, int &aNetN) override;
-    std::string NetName(int aNet) override;
+    bool DpNetPair(const PNS::ITEM *aItem, int &aNetP, int &aNetN) override;
+    wxString NetName(int aNet) override;
+
+    bool IsDiffPair(const PNS::ITEM *aA, const PNS::ITEM *aB) override;
+
+    bool QueryConstraint(CONSTRAINT_TYPE aType, const PNS::ITEM *aItemA, const PNS::ITEM *aItemB, int aLayer,
+                         PNS::CONSTRAINT *aConstraint) override;
 
 private:
-    PNS::ROUTER *m_router;
     const horizon::BoardRules *m_rules;
     PNS_HORIZON_IFACE *m_iface = nullptr;
     std::vector<const horizon::RuleClearanceCopperKeepout *> m_rules_keepout;
 };
 
 PNS_HORIZON_RULE_RESOLVER::PNS_HORIZON_RULE_RESOLVER(const horizon::Board *aBoard, const horizon::BoardRules *rules,
-                                                     PNS::ROUTER *aRouter)
-    : m_router(aRouter), m_rules(rules)
+                                                     PNS_HORIZON_IFACE *aIface)
+    : m_rules(rules), m_iface(aIface)
 {
-    PNS::NODE *world = m_router->GetWorld();
+    PNS::NODE *world = m_iface->GetWorld();
 
     PNS::TOPOLOGY topo(world);
 
-    m_iface = static_cast<PNS_HORIZON_IFACE *>(m_router->GetInterface());
     m_rules_keepout = m_rules->get_rules_sorted<horizon::RuleClearanceCopperKeepout>();
 }
 
@@ -112,8 +119,8 @@ static horizon::PatchType patch_type_from_kind(PNS::ITEM::PnsKind kind)
     case PNS::ITEM::SOLID_T:
         return horizon::PatchType::PAD;
     case PNS::ITEM::LINE_T:
-        return horizon::PatchType::TRACK;
     case PNS::ITEM::SEGMENT_T:
+    case PNS::ITEM::ARC_T:
         return horizon::PatchType::TRACK;
     default:;
     }
@@ -123,8 +130,11 @@ static horizon::PatchType patch_type_from_kind(PNS::ITEM::PnsKind kind)
 
 static const PNS_HORIZON_PARENT_ITEM parent_dummy_outline;
 
-int PNS_HORIZON_RULE_RESOLVER::Clearance(const PNS::ITEM *aA, const PNS::ITEM *aB) const
+int PNS_HORIZON_RULE_RESOLVER::Clearance(const PNS::ITEM *aA, const PNS::ITEM *aB)
 {
+    if (aB == nullptr)
+        return 1e6;
+
     auto net_a = m_iface->get_net_for_code(aA->Net());
     auto net_b = m_iface->get_net_for_code(aB->Net());
 
@@ -235,10 +245,40 @@ int PNS_HORIZON_RULE_RESOLVER::Clearance(const PNS::ITEM *aA, const PNS::ITEM *a
     return clearance->get_clearance(pt_a, pt_b) + routing_offset;
 }
 
-int PNS_HORIZON_RULE_RESOLVER::Clearance(int aNetCode) const
+int PNS_HORIZON_RULE_RESOLVER::HoleClearance(const PNS::ITEM *aA, const PNS::ITEM *aB)
 {
-    // only used for display purposes, can return dummy value
-    return .1e6;
+    return 0;
+    if (!(aA && aB))
+        return 0;
+    // std::cout << "HoleClearance " << aA->KindStr() << " " << aB->KindStr() << std::endl;
+    // throw std::runtime_error("HoleClearance not implemented");
+    return 0;
+}
+
+int PNS_HORIZON_RULE_RESOLVER::HoleToHoleClearance(const PNS::ITEM *aA, const PNS::ITEM *aB)
+{
+    // throw std::runtime_error("HoleToHoleClearance not implemented");
+    // good enough for now
+    return 0;
+}
+
+bool PNS_HORIZON_RULE_RESOLVER::IsDiffPair(const PNS::ITEM *aA, const PNS::ITEM *aB)
+{
+    // not used anywhere
+    throw std::runtime_error("IsDiffPair not implemented");
+    return false;
+}
+
+bool PNS_HORIZON_RULE_RESOLVER::QueryConstraint(CONSTRAINT_TYPE aType, const PNS::ITEM *aItemA, const PNS::ITEM *aItemB,
+                                                int aLayer, PNS::CONSTRAINT *aConstraint)
+{
+    if (aType == CONSTRAINT_TYPE::CT_CLEARANCE) {
+        // only used in  MEANDER_PLACER_BASE::Clearance
+        aConstraint->m_Value.SetMin(0);
+        return true;
+    }
+    throw std::runtime_error("QueryConstraint not implemented");
+    return false;
 }
 
 int PNS_HORIZON_RULE_RESOLVER::DpCoupledNet(int aNet)
@@ -258,7 +298,7 @@ int PNS_HORIZON_RULE_RESOLVER::DpNetPolarity(int aNet)
         return -1;
 }
 
-bool PNS_HORIZON_RULE_RESOLVER::DpNetPair(PNS::ITEM *aItem, int &aNetP, int &aNetN)
+bool PNS_HORIZON_RULE_RESOLVER::DpNetPair(const PNS::ITEM *aItem, int &aNetP, int &aNetN)
 {
     if (!aItem)
         return false;
@@ -277,7 +317,7 @@ bool PNS_HORIZON_RULE_RESOLVER::DpNetPair(PNS::ITEM *aItem, int &aNetP, int &aNe
     return false;
 }
 
-std::string PNS_HORIZON_RULE_RESOLVER::NetName(int aNet)
+wxString PNS_HORIZON_RULE_RESOLVER::NetName(int aNet)
 {
     auto net = m_iface->get_net_for_code(aNet);
     if (net)
@@ -285,107 +325,6 @@ std::string PNS_HORIZON_RULE_RESOLVER::NetName(int aNet)
     else
         return "";
 }
-
-class PNS_HORIZON_DEBUG_DECORATOR : public PNS::DEBUG_DECORATOR {
-public:
-    PNS_HORIZON_DEBUG_DECORATOR(horizon::CanvasGL *canvas) : PNS::DEBUG_DECORATOR(), m_canvas(canvas)
-    {
-    }
-
-    ~PNS_HORIZON_DEBUG_DECORATOR()
-    {
-        try {
-            Clear();
-        }
-        catch (const std::exception &e) {
-            horizon::Logger::log_critical("exception thrown in ~PNS_HORIZON_DEBUG_DECORATOR",
-                                          horizon::Logger::Domain::TOOL, e.what());
-        }
-    }
-
-    void AddPoint(VECTOR2I aP, int aColor) override
-    {
-        SHAPE_LINE_CHAIN l;
-
-        l.Append(aP - VECTOR2I(-50000, -50000));
-        l.Append(aP + VECTOR2I(-50000, -50000));
-
-        AddLine(l, aColor, 10000);
-
-        l.Clear();
-        l.Append(aP - VECTOR2I(50000, -50000));
-        l.Append(aP + VECTOR2I(50000, -50000));
-
-        AddLine(l, aColor, 10000);
-    }
-
-    void AddBox(BOX2I aB, int aColor) override
-    {
-        SHAPE_LINE_CHAIN l;
-
-        VECTOR2I o = aB.GetOrigin();
-        VECTOR2I s = aB.GetSize();
-
-        l.Append(o);
-        l.Append(o.x + s.x, o.y);
-        l.Append(o.x + s.x, o.y + s.y);
-        l.Append(o.x, o.y + s.y);
-        l.Append(o);
-
-        AddLine(l, aColor, 10000);
-    }
-
-    void AddSegment(SEG aS, int aColor) override
-    {
-        SHAPE_LINE_CHAIN l;
-
-        l.Append(aS.A);
-        l.Append(aS.B);
-
-        AddLine(l, aColor, 10000);
-    }
-
-    void AddDirections(VECTOR2D aP, int aMask, int aColor) override
-    {
-        BOX2I b(aP - VECTOR2I(10000, 10000), VECTOR2I(20000, 20000));
-
-        AddBox(b, aColor);
-        for (int i = 0; i < 8; i++) {
-            if ((1 << i) & aMask) {
-                VECTOR2I v = DIRECTION_45((DIRECTION_45::Directions)i).ToVector() * 100000;
-                AddSegment(SEG(aP, aP + v), aColor);
-            }
-        }
-    }
-
-    void AddLine(const SHAPE_LINE_CHAIN &aLine, int aType, int aWidth) override
-    {
-        auto npts = aLine.PointCount();
-        std::deque<horizon::Coordi> pts;
-        for (int i = 0; i < npts; i++) {
-            auto pt = aLine.CPoint(i);
-            pts.emplace_back(pt.x, pt.y);
-        }
-        if (aLine.IsClosed()) {
-            auto pt = aLine.CPoint(0);
-            pts.emplace_back(pt.x, pt.y);
-        }
-        lines.insert(m_canvas->add_line(pts, aWidth, horizon::ColorP::AIRWIRE_ROUTER, 10000));
-    }
-
-    void Clear() override
-    {
-        // std::cout << "debug clear" << std::endl;
-        for (auto &li : lines) {
-            m_canvas->remove_obj(li);
-        }
-        lines.clear();
-    }
-
-private:
-    horizon::CanvasGL *m_canvas;
-    std::set<horizon::ObjectRef> lines;
-};
 
 PNS_HORIZON_IFACE::PNS_HORIZON_IFACE()
 {
@@ -488,6 +427,28 @@ std::unique_ptr<PNS::SEGMENT> PNS_HORIZON_IFACE::syncTrack(const horizon::Track 
         segment->Mark(PNS::MK_LOCKED);
 
     return segment;
+}
+
+std::unique_ptr<PNS::ARC> PNS_HORIZON_IFACE::syncTrackArc(const horizon::Track *track)
+{
+    auto from = track->from.get_position();
+    auto to = track->to.get_position();
+    int net = PNS::ITEM::UnusedNet;
+    if (track->net)
+        net = get_net_code(track->net->uuid);
+    SHAPE_ARC sarc;
+    sarc.ConstructFromStartEndCenter(VECTOR2I(from.x, from.y), VECTOR2I(to.x, to.y),
+                                     VECTOR2I(track->center->x, track->center->y), false, track->width);
+    std::unique_ptr<PNS::ARC> arc(new PNS::ARC(sarc, net));
+    arc->SetWidth(track->width);
+
+    arc->SetLayer(layer_to_router(track->layer));
+    arc->SetParent(get_parent(track));
+
+    if (track->locked)
+        arc->Mark(PNS::MK_LOCKED);
+
+    return arc;
 }
 
 void PNS_HORIZON_IFACE::syncOutline(const horizon::Polygon *ipoly, PNS::NODE *aWorld)
@@ -738,7 +699,7 @@ std::unique_ptr<PNS::VIA> PNS_HORIZON_IFACE::syncVia(const horizon::Via *via)
                                                             layer_to_router(horizon::BoardLayers::BOTTOM_COPPER)),
                                                 via->parameter_set.at(horizon::ParameterID::VIA_DIAMETER),
                                                 via->parameter_set.at(horizon::ParameterID::HOLE_DIAMETER), net,
-                                                VIA_THROUGH));
+                                                VIATYPE::THROUGH));
 
     // via->SetParent( aVia );
     pvia->SetParent(get_parent(via));
@@ -752,6 +713,7 @@ std::unique_ptr<PNS::VIA> PNS_HORIZON_IFACE::syncVia(const horizon::Via *via)
 void PNS_HORIZON_IFACE::SyncWorld(PNS::NODE *aWorld)
 {
     // std::cout << "!!!sync world" << std::endl;
+    m_world = aWorld;
     if (!board) {
         wxLogTrace("PNS", "No board attached, aborting sync.");
         return;
@@ -760,9 +722,17 @@ void PNS_HORIZON_IFACE::SyncWorld(PNS::NODE *aWorld)
     junctions_maybe_erased.clear();
 
     for (const auto &it : board->tracks) {
-        auto segment = syncTrack(&it.second);
-        if (segment) {
-            aWorld->Add(std::move(segment));
+        if (it.second.is_arc()) {
+            auto arc = syncTrackArc(&it.second);
+            if (arc) {
+                aWorld->Add(std::move(arc));
+            }
+        }
+        else {
+            auto segment = syncTrack(&it.second);
+            if (segment) {
+                aWorld->Add(std::move(segment));
+            }
         }
     }
 
@@ -803,7 +773,7 @@ void PNS_HORIZON_IFACE::SyncWorld(PNS::NODE *aWorld)
     int worstClearance = rules->get_max_clearance();
 
     delete m_ruleResolver;
-    m_ruleResolver = new PNS_HORIZON_RULE_RESOLVER(board, rules, m_router);
+    m_ruleResolver = new PNS_HORIZON_RULE_RESOLVER(board, rules, this);
 
     aWorld->SetRuleResolver(m_ruleResolver);
     aWorld->SetMaxClearance(4 * worstClearance);
@@ -819,12 +789,12 @@ void PNS_HORIZON_IFACE::EraseView()
         canvas->remove_obj(it);
     }
     m_preview_items.clear();
-    if (m_debugDecorator)
-        m_debugDecorator->Clear();
 }
 
-void PNS_HORIZON_IFACE::DisplayItem(const PNS::ITEM *aItem, int aColor, int aClearance, bool aEdit)
+void PNS_HORIZON_IFACE::DisplayItem(const PNS::ITEM *aItem, int aClearance, bool aEdit)
 {
+    if (aItem->IsVirtual())
+        return;
     wxLogTrace("PNS", "DisplayItem %p %s", aItem, aItem->KindStr().c_str());
     if (aItem->Kind() == PNS::ITEM::LINE_T) {
         auto line_item = dynamic_cast<const PNS::LINE *>(aItem);
@@ -835,8 +805,8 @@ void PNS_HORIZON_IFACE::DisplayItem(const PNS::ITEM *aItem, int aColor, int aCle
             pts.emplace_back(pt.x, pt.y);
         }
         int la = line_item->Layer();
-        m_preview_items.insert(
-                canvas->add_line(pts, line_item->Width(), horizon::ColorP::LAYER_HIGHLIGHT, layer_from_router(la)));
+        m_preview_items.insert(canvas->add_line(pts, line_item->Width(), horizon::ColorP::LAYER_HIGHLIGHT_LIGHTEN,
+                                                layer_from_router(la)));
     }
     else if (aItem->Kind() == PNS::ITEM::SEGMENT_T) {
         auto seg_item = dynamic_cast<const PNS::SEGMENT *>(aItem);
@@ -861,6 +831,22 @@ void PNS_HORIZON_IFACE::DisplayItem(const PNS::ITEM *aItem, int aColor, int aCle
         la = via_item->Layers().End();
         m_preview_items.insert(
                 canvas->add_line(pts, via_item->Diameter(), horizon::ColorP::LAYER_HIGHLIGHT, layer_from_router(la)));
+    }
+    else if (aItem->Kind() == PNS::ITEM::ARC_T) {
+        auto arc_item = static_cast<const PNS::ARC *>(aItem);
+        const auto &arc = arc_item->CArc();
+        const auto p0 = arc.GetP0();
+        const auto p1 = arc.GetP1();
+        const auto c = arc.GetCenter();
+        const auto center = horizon::Coordi(c.x, c.y);
+        auto from = horizon::Coordi(p0.x, p0.y);
+        auto to = horizon::Coordi(p1.x, p1.y);
+        if (arc.IsClockwise())
+            std::swap(from, to);
+
+        int la = arc_item->Layer();
+        m_preview_items.insert(canvas->add_arc(from, to, center, arc_item->Width(), horizon::ColorP::LAYER_HIGHLIGHT,
+                                               layer_from_router(la)));
     }
     else if (aItem->Kind() == PNS::ITEM::SOLID_T) {
         // it's okay
@@ -941,17 +927,38 @@ void PNS_HORIZON_IFACE::AddItem(PNS::ITEM *aItem)
 {
     // std::cout << "!!!iface add item" << std::endl;
     switch (aItem->Kind()) {
-    case PNS::ITEM::SEGMENT_T: {
-        PNS::SEGMENT *seg = static_cast<PNS::SEGMENT *>(aItem);
-        const SEG &s = seg->Seg();
+    case PNS::ITEM::SEGMENT_T:
+    case PNS::ITEM::ARC_T: {
         auto uu = horizon::UUID::random();
         auto track = &board->tracks.emplace(uu, uu).first->second;
-        horizon::Coordi from(s.A.x, s.A.y);
-        horizon::Coordi to(s.B.x, s.B.y);
-        track->width = seg->Width();
-        track->net = get_net_for_code(seg->Net());
+        horizon::Coordi from;
+        horizon::Coordi to;
+        int layer;
+        if (aItem->Kind() == PNS::ITEM::SEGMENT_T) {
+            PNS::SEGMENT *seg = static_cast<PNS::SEGMENT *>(aItem);
+            const SEG &s = seg->Seg();
+            from = horizon::Coordi(s.A.x, s.A.y);
+            to = horizon::Coordi(s.B.x, s.B.y);
+            track->width = seg->Width();
+            track->net = get_net_for_code(seg->Net());
+            layer = layer_from_router(seg->Layer());
+        }
+        else {
+            auto arc_item = static_cast<const PNS::ARC *>(aItem);
+            const auto &arc = arc_item->CArc();
+            const auto p0 = arc.GetP0();
+            const auto p1 = arc.GetP1();
+            const auto c = arc.GetCenter();
+            from = horizon::Coordi(p0.x, p0.y);
+            to = horizon::Coordi(p1.x, p1.y);
+            if (arc.IsClockwise())
+                std::swap(from, to);
+            track->center = horizon::Coordi(c.x, c.y);
+            track->width = arc.GetWidth();
+            track->net = get_net_for_code(arc_item->Net());
+            layer = layer_from_router(arc_item->Layer());
+        }
 
-        auto layer = layer_from_router(seg->Layer());
         track->layer = layer;
 
         auto connect = [this, &layer, track](horizon::Track::Connection &conn, const horizon::Coordi &c) {
@@ -976,7 +983,7 @@ void PNS_HORIZON_IFACE::AddItem(PNS::ITEM *aItem)
         };
         connect(track->from, from);
         connect(track->to, to);
-        track->width_from_rules = m_router->Sizes().WidthFromRules();
+        track->width_from_rules = !m_router->Sizes().TrackWidthIsExplicit();
         aItem->SetParent(get_parent(track));
 
     } break;
@@ -1048,22 +1055,14 @@ PNS::RULE_RESOLVER *PNS_HORIZON_IFACE::GetRuleResolver()
     return m_ruleResolver;
 }
 
-void PNS_HORIZON_IFACE::create_debug_decorator(horizon::CanvasGL *ca)
-{
-    if (!m_debugDecorator) {
-        m_debugDecorator = new PNS_HORIZON_DEBUG_DECORATOR(ca);
-    }
-}
-
 PNS::DEBUG_DECORATOR *PNS_HORIZON_IFACE::GetDebugDecorator()
 {
-    return m_debugDecorator;
+    return nullptr;
 }
 
 PNS_HORIZON_IFACE::~PNS_HORIZON_IFACE()
 {
     delete m_ruleResolver;
-    delete m_debugDecorator;
 }
 
 void PNS_HORIZON_IFACE::SetRouter(PNS::ROUTER *aRouter)
@@ -1071,17 +1070,48 @@ void PNS_HORIZON_IFACE::SetRouter(PNS::ROUTER *aRouter)
     m_router = aRouter;
 }
 
-bool PNS_HORIZON_IFACE::IsAnyLayerVisible(const LAYER_RANGE &aLayer)
+bool PNS_HORIZON_IFACE::IsAnyLayerVisible(const LAYER_RANGE &aLayer) const
 {
     throw std::runtime_error("IsAnyLayerVisible not implemented");
     return true;
 }
 
-bool PNS_HORIZON_IFACE::IsItemVisible(const PNS::ITEM *aItem)
+bool PNS_HORIZON_IFACE::IsItemVisible(const PNS::ITEM *aItem) const
 {
     throw std::runtime_error("IsItemVisible not implemented");
     return true;
 }
 
+
+void PNS_HORIZON_IFACE::UpdateItem(ITEM *aItem)
+{
+    throw std::runtime_error("UpdateItem not implemented");
+}
+
+bool PNS_HORIZON_IFACE::IsFlashedOnLayer(const PNS::ITEM *aItem, int aLayer) const
+{
+    return true;
+}
+
+bool PNS_HORIZON_IFACE::ImportSizes(SIZES_SETTINGS &aSizes, ITEM *aStartItem, int aNet)
+{
+    return true;
+}
+
+int PNS_HORIZON_IFACE::StackupHeight(int aFirstLayer, int aSecondLayer) const
+{
+    return 0;
+}
+
+void PNS_HORIZON_IFACE::DisplayRatline(const SHAPE_LINE_CHAIN &aRatline, int aColor)
+{
+    auto npts = aRatline.PointCount();
+    std::deque<horizon::Coordi> pts;
+    for (int i = 0; i < npts; i++) {
+        auto pt = aRatline.CPoint(i);
+        pts.emplace_back(pt.x, pt.y);
+    }
+    m_preview_items.insert(canvas->add_line(pts, 0, horizon::ColorP::AIRWIRE_ROUTER, 10000));
+}
 
 } // namespace PNS

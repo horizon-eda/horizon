@@ -81,6 +81,8 @@ static std::string keyval_to_string(unsigned int kv)
         return "<";
     case GDK_KEY_greater:
         return ">";
+    case GDK_KEY_BackSpace:
+        return "⌫";
     default:
         return gdk_keyval_name(kv);
     }

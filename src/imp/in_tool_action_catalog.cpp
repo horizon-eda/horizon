@@ -75,6 +75,10 @@ const std::map<InToolActionID, InToolActionCatalogItem> in_tool_action_catalog =
          {"default clearance offset", ToolID::ROUTE_TRACK_INTERACTIVE, InToolActionCatalogItem::FLAGS_DEFAULT}},
         {InToolActionID::ROUTER_MODE,
          {"shove/walkaround", ToolID::ROUTE_TRACK_INTERACTIVE, InToolActionCatalogItem::FLAGS_DEFAULT}},
+        {InToolActionID::DELETE_LAST_SEGMENT,
+         {"delete last segment", ToolID::ROUTE_TRACK_INTERACTIVE, InToolActionCatalogItem::FLAGS_DEFAULT}},
+        {InToolActionID::TOGGLE_CORNER_STYLE,
+         {"corner style", ToolID::ROUTE_TRACK_INTERACTIVE, InToolActionCatalogItem::FLAGS_DEFAULT}},
 
         {InToolActionID::NC_MODE, {"NC mode", ToolID::SET_NC, InToolActionCatalogItem::FLAGS_DEFAULT}},
 
@@ -143,10 +147,12 @@ const LutEnumStr<InToolActionID> in_tool_action_lut = {
         LUT_ITEM(CLEARANCE_OFFSET),
         LUT_ITEM(CLEARANCE_OFFSET_DEFAULT),
         LUT_ITEM(ROUTER_MODE),
+        LUT_ITEM(DELETE_LAST_SEGMENT),
         LUT_ITEM(NC_MODE),
         LUT_ITEM(FLIP_DIRECTION),
         LUT_ITEM(ARC_MODE),
         LUT_ITEM(TOGGLE_DEG45_RESTRICT),
+        LUT_ITEM(TOGGLE_CORNER_STYLE),
 };
 
 

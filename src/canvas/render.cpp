@@ -215,6 +215,18 @@ ObjectRef Canvas::add_line(const std::deque<Coordi> &pts, int64_t width, ColorP 
     return sr;
 }
 
+ObjectRef Canvas::add_arc(const Coordi &from, const Coordi &to, const Coordi &center, int64_t width, ColorP color,
+                          int layer)
+{
+    auto uu = UUID::random();
+    ObjectRef sr(ObjectType::ARC, uu);
+    object_ref_push(sr);
+    draw_arc(from, to, center, color, layer, width);
+    object_ref_pop();
+    request_push();
+    return sr;
+}
+
 void Canvas::render(const Line &line, bool interactive, ColorP co)
 {
     img_line(line.from->position, line.to->position, line.width, line.layer);

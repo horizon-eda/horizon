@@ -27,7 +27,7 @@
 #include <geometry/shape_line_chain.h>
 #include <geometry/shape_segment.h>
 #include <geometry/shape_rect.h>
-#include "include/geometry/shape_simple.h"
+#include <geometry/shape_simple.h>
 
 namespace PNS {
 
@@ -37,6 +37,8 @@ class ITEM;
 class LINE;
 
 /** Various utility functions */
+
+const SHAPE_LINE_CHAIN ArcHull( const SHAPE_ARC& aSeg, int aClearance, int aWalkaroundThickness );
 
 const SHAPE_LINE_CHAIN OctagonalHull( const VECTOR2I& aP0, const VECTOR2I& aSize,
                                       int aClearance, int aChamfer );
@@ -59,12 +61,9 @@ SHAPE_RECT ApproximateSegmentAsRect( const SHAPE_SEGMENT& aSeg );
 OPT_BOX2I ChangedArea( const ITEM* aItemA, const ITEM* aItemB );
 OPT_BOX2I ChangedArea( const LINE& aLineA, const LINE& aLineB );
 
-#if 0
-void DrawDebugPoint( VECTOR2I aP, int aColor );
-void DrawDebugBox( BOX2I aB, int aColor );
-void DrawDebugSeg( SEG aS, int aColor );
-void DrawDebugDirs( VECTOR2D aP, int aMask, int aColor );
-#endif
+void HullIntersection( const SHAPE_LINE_CHAIN& hull, const SHAPE_LINE_CHAIN& line,
+                       SHAPE_LINE_CHAIN::INTERSECTIONS& ips );
+
 
 }
 

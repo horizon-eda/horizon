@@ -41,6 +41,25 @@ RouterSettingsWindow::RouterSettingsWindow(Gtk::Window *parent, ImpInterface *in
         grid_attach_label_and_widget(grid, "Mode", mode_combo, top);
     }
     {
+        corner_mode_combo = Gtk::manage(new Gtk::ComboBoxText);
+        corner_mode_combo->set_halign(Gtk::ALIGN_START);
+        auto add_mode = [this](auto mode) {
+            corner_mode_combo->append(std::to_string(static_cast<int>(mode)),
+                                      ToolRouteTrackInteractive::Settings::corner_mode_names.at(mode));
+        };
+        add_mode(CornerMode::MITERED_45);
+        add_mode(CornerMode::ROUNDED_45);
+        add_mode(CornerMode::MITERED_90);
+        add_mode(CornerMode::ROUNDED_90);
+        corner_mode_combo->set_active_id(std::to_string(static_cast<int>(settings.corner_mode)));
+        corner_mode_combo->signal_changed().connect([this] {
+            auto mode = static_cast<CornerMode>(std::stoi(corner_mode_combo->get_active_id()));
+            settings.corner_mode = mode;
+            emit_event(ToolDataWindow::Event::UPDATE);
+        });
+        grid_attach_label_and_widget(grid, "Corner style", corner_mode_combo, top);
+    }
+    {
         drc_switch = Gtk::manage(new Gtk::Switch);
         drc_switch->set_halign(Gtk::ALIGN_START);
         update_drc();
@@ -59,6 +78,13 @@ RouterSettingsWindow::RouterSettingsWindow(Gtk::Window *parent, ImpInterface *in
         bind_widget(sw, settings.remove_loops);
         sw->property_active().signal_changed().connect([this] { emit_event(ToolDataWindow::Event::UPDATE); });
         grid_attach_label_and_widget(grid, "Remove loops", sw, top);
+    }
+    {
+        auto sw = Gtk::manage(new Gtk::Switch);
+        sw->set_halign(Gtk::ALIGN_START);
+        bind_widget(sw, settings.fix_all_segments);
+        sw->property_active().signal_changed().connect([this] { emit_event(ToolDataWindow::Event::UPDATE); });
+        grid_attach_label_and_widget(grid, "Fix all segments", sw, top);
     }
 
     {

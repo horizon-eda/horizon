@@ -45,6 +45,8 @@ public:
     void update(const class BlockSymbol &sym, bool edit = true);
 
     ObjectRef add_line(const std::deque<Coordi> &pts, int64_t width, ColorP color, int layer);
+    ObjectRef add_arc(const Coordi &from, const Coordi &to, const Coordi &center, int64_t width, ColorP color,
+                      int layer);
     void remove_obj(const ObjectRef &r);
     void hide_obj(const ObjectRef &r);
     void show_obj(const ObjectRef &r);

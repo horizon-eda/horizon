@@ -19,16 +19,16 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-//#include <base_units.h> // God forgive me doing this...
+#include "base_units.h" // God forgive me doing this...
 
 #include "pns_node.h"
 #include "pns_itemset.h"
 #include "pns_topology.h"
 #include "pns_meander_skew_placer.h"
+#include "pns_solid.h"
 
 #include "pns_router.h"
 #include "pns_debug_decorator.h"
-#include "util/geom_util.hpp"
 
 namespace PNS {
 
@@ -37,6 +37,8 @@ MEANDER_SKEW_PLACER::MEANDER_SKEW_PLACER ( ROUTER* aRouter ) :
 {
     // Init temporary variables (do not leave uninitialized members)
     m_coupledLength = 0;
+    m_padToDieN = 0;
+    m_padToDieP = 0;
 }
 
 
@@ -47,20 +49,15 @@ MEANDER_SKEW_PLACER::~MEANDER_SKEW_PLACER( )
 
 bool MEANDER_SKEW_PLACER::Start( const VECTOR2I& aP, ITEM* aStartItem )
 {
-    VECTOR2I p;
-
-    if( !aStartItem || !aStartItem->OfKind( ITEM::SEGMENT_T ) )
+    if( !aStartItem || !aStartItem->OfKind( ITEM::SEGMENT_T | ITEM::ARC_T) )
     {
-        Router()->SetFailureReason( ( "Please select a differential pair trace you want to tune." ) );
+        Router()->SetFailureReason( _( "Please select a differential pair trace you want to tune." ) );
         return false;
     }
 
-    m_initialSegment = static_cast<SEGMENT*>( aStartItem );
-
-    p = m_initialSegment->Seg().NearestPoint( aP );
-
-    m_currentNode = NULL;
-    m_currentStart = p;
+    m_initialSegment = static_cast<LINKED_ITEM*>( aStartItem );
+    m_currentNode    = nullptr;
+    m_currentStart   = getSnappedStartPoint( m_initialSegment, aP );
 
     m_world = Router()->GetWorld( )->Branch();
     m_originLine = m_world->AssembleLine( m_initialSegment );
@@ -70,7 +67,7 @@ bool MEANDER_SKEW_PLACER::Start( const VECTOR2I& aP, ITEM* aStartItem )
 
     if( !topo.AssembleDiffPair ( m_initialSegment, m_originPair ) )
     {
-        Router()->SetFailureReason( ( "Unable to find complementary differential pair "
+        Router()->SetFailureReason( _( "Unable to find complementary differential pair "
                                        "net for skew tuning. Make sure the names of the nets belonging "
                                        "to a differential pair end with either _N/_P or +/-." ) );
         return false;
@@ -83,8 +80,28 @@ bool MEANDER_SKEW_PLACER::Start( const VECTOR2I& aP, ITEM* aStartItem )
         !m_originPair.NLine().SegmentCount() )
         return false;
 
-    m_tunedPathP = topo.AssembleTrivialPath( m_originPair.PLine().GetLink( 0 ) );
-    m_tunedPathN = topo.AssembleTrivialPath( m_originPair.NLine().GetLink( 0 ) );
+    SOLID* padA = nullptr;
+    SOLID* padB = nullptr;
+
+    m_tunedPathP = topo.AssembleTuningPath( m_originPair.PLine().GetLink( 0 ), &padA, &padB );
+
+    m_padToDieP = 0;
+
+    if( padA )
+        m_padToDieP += padA->GetPadToDie();
+
+    if( padB )
+        m_padToDieP += padB->GetPadToDie();
+
+    m_tunedPathN = topo.AssembleTuningPath( m_originPair.NLine().GetLink( 0 ), &padA, &padB );
+
+    m_padToDieN = 0;
+
+    if( padA )
+        m_padToDieN += padA->GetPadToDie();
+
+    if( padB )
+        m_padToDieN += padB->GetPadToDie();
 
     m_world->Remove( m_originLine );
 
@@ -92,36 +109,29 @@ bool MEANDER_SKEW_PLACER::Start( const VECTOR2I& aP, ITEM* aStartItem )
     m_currentEnd = VECTOR2I( 0, 0 );
 
     if ( m_originPair.PLine().Net() == m_originLine.Net() )
-        m_coupledLength = itemsetLength( m_tunedPathN );
+    {
+        m_padToDieLength = m_padToDieN;
+        m_coupledLength = lineLength( m_tunedPathN );
+        m_tunedPath = m_tunedPathP;
+    }
     else
-        m_coupledLength = itemsetLength( m_tunedPathP );
+    {
+        m_padToDieLength = m_padToDieP;
+        m_coupledLength = lineLength( m_tunedPathP );
+        m_tunedPath = m_tunedPathN;
+    }
 
     return true;
 }
 
 
-int MEANDER_SKEW_PLACER::origPathLength( ) const
+long long int MEANDER_SKEW_PLACER::origPathLength() const
 {
-    return itemsetLength ( m_tunedPath );
+    return m_padToDieLength + lineLength( m_tunedPath );
 }
 
 
-int MEANDER_SKEW_PLACER::itemsetLength( const ITEM_SET& aSet ) const
-{
-    int total = 0;
-    for( const ITEM* item : aSet.CItems() )
-    {
-        if( const LINE* l = dynamic_cast<const LINE*>( item ) )
-        {
-            total += l->CLine().Length();
-        }
-    }
-
-    return total;
-}
-
-
-int MEANDER_SKEW_PLACER::currentSkew() const
+long long int MEANDER_SKEW_PLACER::currentSkew() const
 {
     return m_lastLength - m_coupledLength;
 }
@@ -131,42 +141,42 @@ bool MEANDER_SKEW_PLACER::Move( const VECTOR2I& aP, ITEM* aEndItem )
 {
     for( const ITEM* item : m_tunedPathP.CItems() )
     {
-        if( const LINE* l = dynamic_cast<const LINE*>( item ) )
-            Dbg()->AddLine( l->CLine(), 5, 10000 );
+        if( const LINE* l = dyn_cast<const LINE*>( item ) )
+            PNS_DBG( Dbg(), AddLine, l->CLine(), BLUE, 10000, "tuned-path-skew-p" );
     }
 
     for( const ITEM* item : m_tunedPathN.CItems() )
     {
-        if( const LINE* l = dynamic_cast<const LINE*>( item ) )
-            Dbg()->AddLine( l->CLine(), 4, 10000 );
+        if( const LINE* l = dyn_cast<const LINE*>( item ) )
+            PNS_DBG( Dbg(), AddLine, l->CLine(), YELLOW, 10000, "tuned-path-skew-n" );
     }
 
     return doMove( aP, aEndItem, m_coupledLength + m_settings.m_targetSkew );
 }
 
 
-const std::string MEANDER_SKEW_PLACER::TuningInfo() const
+const wxString MEANDER_SKEW_PLACER::TuningInfo( EDA_UNITS aUnits ) const
 {
-    std::string status;
+    wxString status;
 
     switch( m_lastStatus )
     {
     case TOO_LONG:
-        status = ( "Too long: skew " );
+        status = _( "Too long: skew " );
         break;
     case TOO_SHORT:
-        status = ( "Too short: skew " );
+        status = _( "Too short: skew " );
         break;
     case TUNED:
-        status = ( "Tuned: skew " );
+        status = _( "Tuned: skew " );
         break;
     default:
-        return ( "?" );
+        return _( "?" );
     }
 
-    status += horizon::dim_to_string(m_lastLength - m_coupledLength, false);
-    status += "/";
-    status += horizon::dim_to_string(m_settings.m_targetSkew, false);
+    status += ::MessageTextFromValue( aUnits, m_lastLength - m_coupledLength );
+    status += wxT( "/" );
+    status += ::MessageTextFromValue( aUnits, m_settings.m_targetSkew );
 
     return status;
 }

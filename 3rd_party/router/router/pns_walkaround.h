@@ -53,6 +53,7 @@ public:
         m_recursiveCollision[0] = m_recursiveCollision[1] = false;
         m_iteration = 0;
         m_forceCw = false;
+        m_forceUniqueWindingDirection = false;
     }
 
     ~WALKAROUND() {};
@@ -60,8 +61,23 @@ public:
     enum WALKAROUND_STATUS
     {
         IN_PROGRESS = 0,
+        ALMOST_DONE,
         DONE,
         STUCK
+    };
+
+    struct RESULT
+    {
+        RESULT( WALKAROUND_STATUS aStatusCw = STUCK, WALKAROUND_STATUS aStatusCcw = STUCK, const LINE& aLineCw = LINE(), const LINE& aLineCcw = LINE() )
+        {
+            statusCw = aStatusCw;
+            statusCcw = aStatusCcw;
+            lineCw = aLineCw;
+            lineCcw = aLineCcw;
+        }
+
+        WALKAROUND_STATUS statusCw, statusCcw;
+        LINE lineCw, lineCcw;
     };
 
     void SetWorld( NODE* aNode )
@@ -121,10 +137,7 @@ public:
     WALKAROUND_STATUS Route( const LINE& aInitialPath, LINE& aWalkPath,
             bool aOptimize = true );
 
-    virtual LOGGER* Logger() override
-    {
-        return &m_logger;
-    }
+    const RESULT Route( const LINE& aInitialPath );
 
 private:
     void start( const LINE& aInitialPath );
@@ -142,10 +155,10 @@ private:
     bool m_cursorApproachMode;
     bool m_forceWinding;
     bool m_forceCw;
+    bool m_forceUniqueWindingDirection;
     VECTOR2I m_cursorPos;
     NODE::OPT_OBSTACLE m_currentObstacle[2];
     bool m_recursiveCollision[2];
-    LOGGER m_logger;
     std::set<ITEM*> m_restrictedSet;
 };
 

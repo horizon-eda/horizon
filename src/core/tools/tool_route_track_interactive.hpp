@@ -31,9 +31,14 @@ public:
         void load_from_json(const json &j) override;
         int effort = 1;
         bool remove_loops = true;
+        bool fix_all_segments = false;
         enum class Mode { WALKAROUND, PUSH, BEND, STRAIGHT };
         Mode mode = Mode::WALKAROUND;
         static const std::map<Mode, std::string> mode_names;
+
+        enum class CornerMode { MITERED_45, ROUNDED_45, MITERED_90, ROUNDED_90 };
+        CornerMode corner_mode = CornerMode::MITERED_45;
+        static const std::map<CornerMode, std::string> corner_mode_names;
 
         bool drc = true;
     };
@@ -65,6 +70,8 @@ public:
                 I::TRACK_WIDTH_DEFAULT,
                 I::CLEARANCE_OFFSET,
                 I::CLEARANCE_OFFSET_DEFAULT,
+                I::DELETE_LAST_SEGMENT,
+                I::TOGGLE_CORNER_STYLE,
         };
     }
 

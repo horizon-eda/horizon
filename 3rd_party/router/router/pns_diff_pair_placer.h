@@ -2,8 +2,9 @@
  * KiRouter - a push-and-(sometimes-)shove PCB router
  *
  * Copyright (C) 2013-2014 CERN
- * Copyright (C) 2016 KiCad Developers, see AUTHORS.txt for contributors.
- * Author: Tomasz Wlostowski <tomasz.wlostowski@cern.ch>
+ * Copyright (C) 2016-2021 KiCad Developers, see AUTHORS.txt for contributors.
+ *
+ * @author Tomasz Wlostowski <tomasz.wlostowski@cern.ch>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,9 +25,6 @@
 
 #include <math/vector2d.h>
 
-#include <geometry/shape.h>
-#include <geometry/shape_line_chain.h>
-
 #include "pns_sizes_settings.h"
 #include "pns_node.h"
 #include "pns_via.h"
@@ -46,10 +44,9 @@ class SIZES_SETTINGS;
 
 
 /**
- * Class LINE_PLACER
+ * Single track placement algorithm.
  *
- * Single track placement algorithm. Interactively routes a track.
- * Applies shove and walkaround algorithms when needed.
+ * Interactively routes a track and applies shove and walk around algorithms when needed.
  */
 
 class DIFF_PAIR_PLACER : public PLACEMENT_ALGO
@@ -58,60 +55,57 @@ public:
     DIFF_PAIR_PLACER( ROUTER* aRouter );
     ~DIFF_PAIR_PLACER();
 
+    static bool FindDpPrimitivePair( NODE* aWorld, const VECTOR2I& aP, ITEM* aItem,
+                                     DP_PRIMITIVE_PAIR& aPair, wxString* aErrorMsg = nullptr );
+
     /**
-     * Function Start()
-     *
-     * Starts routing a single track at point aP, taking item aStartItem as anchor
-     * (unless NULL).
+     * Start routing a single track at point aP, taking item aStartItem as anchor (unless NULL).
      */
     bool Start( const VECTOR2I& aP, ITEM* aStartItem ) override;
 
     /**
-     * Function Move()
-     *
-     * Moves the end of the currently routed trace to the point aP, taking
-     * aEndItem as anchor (if not NULL).
-     * (unless NULL).
+     * Move the end of the currently routed trace to the point \a aP, taking \a aEndItem as
+     * anchor (if not NULL).
      */
     bool Move( const VECTOR2I& aP, ITEM* aEndItem ) override;
 
     /**
-     * Function FixRoute()
+     * Commit the currently routed track to the parent node, taking \a aP as the final end
+     * point and \a aEndItem as the final anchor (if provided).
      *
-     * Commits the currently routed track to the parent node, taking
-     * aP as the final end point and aEndItem as the final anchor (if provided).
-     * @return true, if route has been commited. May return false if the routing
-     * result is violating design rules - in such case, the track is only committed
-     * if Settings.CanViolateDRC() is on.
+     * @return true if route has been committed. May return false if the routing result is
+     *         violating design rules.  In such cases, the track is only committed if
+     *         #Settings.CanViolateDRC() is on.
      */
     bool FixRoute( const VECTOR2I& aP, ITEM* aEndItem, bool aForceFinish ) override;
 
+    /// @copydoc PLACEMENT_ALGO::CommitPlacement()
+    bool CommitPlacement() override;
+
+    /// @copydoc PLACEMENT_ALGO::AbortPlacement()
+    bool AbortPlacement() override;
+
+    /// @copydoc PLACEMENT_ALGO::HasPlacedAnything()
+    bool HasPlacedAnything() const override;
+
     /**
-     * Function ToggleVia()
-     *
-     * Enables/disables a via at the end of currently routed trace.
+     * Enable/disable a via at the end of currently routed trace.
      */
     bool ToggleVia( bool aEnabled ) override;
 
     /**
-     * Function SetLayer()
-     *
-     * Sets the current routing layer.
+     * Set the current routing layer.
      */
     bool SetLayer( int aLayer ) override;
 
     /**
-     * Function Traces()
-     *
-     * Returns the complete routed line, as a single-member ITEM_SET.
+     * Return the complete routed line, as a single-member ITEM_SET.
      */
     const ITEM_SET Traces() override;
 
     /**
-     * Function CurrentEnd()
-     *
-     * Returns the current end of the line being placed. It may not be equal
-     * to the cursor position due to collisions.
+     * Return the current end of the line being placed. It may not be equal to the cursor
+     * position due to collisions.
      */
     const VECTOR2I& CurrentEnd() const override
     {
@@ -119,16 +113,12 @@ public:
     }
 
     /**
-     * Function CurrentNets()
-     *
-     * Returns the net code of currently routed track.
+     * Return the net code of currently routed track.
      */
     const std::vector<int> CurrentNets() const override;
 
     /**
-     * Function CurrentLayer()
-     *
-     * Returns the layer of currently routed track.
+     * Return the layer of currently routed track.
      */
     int CurrentLayer() const override
     {
@@ -136,25 +126,19 @@ public:
     }
 
     /**
-     * Function CurrentNode()
-     *
-     * Returns the most recent world state.
+     * Return the most recent world state.
      */
     NODE* CurrentNode( bool aLoopsRemoved = false ) const override;
 
     /**
-     * Function FlipPosture()
-     *
-     * Toggles the current posture (straight/diagonal) of the trace head.
+     * Toggle the current posture (straight/diagonal) of the trace head.
      */
     void FlipPosture() override;
 
     /**
-     * Function UpdateSizes()
+     * Perform on-the-fly update of the width, via diameter & drill size from a settings class.
      *
-     * Performs on-the-fly update of the width, via diameter & drill size from
-     * a settings class. Used to dynamically change these parameters as
-     * the track is routed.
+     * Used to dynamically change these parameters as the track is routed.
      */
     void UpdateSizes( const SIZES_SETTINGS& aSizes ) override;
 
@@ -169,44 +153,36 @@ private:
     int gap() const;
 
     /**
-     * Function route()
+     * Re-route the current track to point \a aP.
      *
-     * Re-routes the current track to point aP. Returns true, when routing has
-     * completed successfully (i.e. the trace end has reached point aP), and false
-     * if the trace was stuck somewhere on the way. May call routeStep()
+     * Returns true, when routing has completed successfully (i.e. the trace end has reached
+     * point aP), and false if the trace was stuck somewhere on the way.  May call routeStep()
      * repetitively due to mouse smoothing.
-     * @param aP ending point of current route.
-     * @return true, if the routing is complete.
+     *
+     * @param aP is the ending point of current route.
+     * @return true if the routing is complete.
      */
     bool route( const VECTOR2I& aP );
 
     /**
-     * Function updateLeadingRatLine()
-     *
-     * Draws the "leading" ratsnest line, which connects the end of currently
-     * routed track and the nearest yet unrouted item. If the routing for
-     * current net is complete, draws nothing.
+     * Draw the "leading" ratsnest line, which connects the end of currently routed track and
+     * the nearest yet unrouted item. If the routing for current net is complete, draws nothing.
      */
     void updateLeadingRatLine();
 
     /**
-     * Function setWorld()
-     *
-     * Sets the board to route.
+     * Set the board to route.
      */
     void setWorld( NODE* aWorld );
 
     /**
-     * Function startPlacement()
-     *
-     * Initializes placement of a new line with given parameters.
+     * Initialize placement of a new line with given parameters.
      */
     void initPlacement( );
 
     /**
-     * Function setInitialDirection()
+     * Set preferred direction of the very first track segment to be laid.
      *
-     * Sets preferred direction of the very first track segment to be laid.
      * Used by posture switching mechanism.
      */
     void setInitialDirection( const DIRECTION_45& aDirection );
@@ -215,20 +191,19 @@ private:
     bool routeHead( const VECTOR2I& aP );
     bool tryWalkDp( NODE* aNode, DIFF_PAIR& aPair, bool aSolidsOnly );
 
-    ///> route step, walkaround mode
+    ///< route step, walk around mode
     bool rhWalkOnly( const VECTOR2I& aP );
 
-    ///> route step, shove mode
+    ///< route step, shove mode
     bool rhShoveOnly ( const VECTOR2I& aP );
 
-    ///> route step, mark obstacles mode
+    ///< route step, mark obstacles mode
     bool rhMarkObstacles( const VECTOR2I& aP );
 
     const VIA makeVia ( const VECTOR2I& aP, int aNet );
 
-    bool findDpPrimitivePair( const VECTOR2I& aP, ITEM* aItem, DP_PRIMITIVE_PAIR& aPair, std::string* aErrorMsg = nullptr );
-    OPT_VECTOR2I getDanglingAnchor( NODE* aNode, ITEM* aItem );
-    bool attemptWalk( NODE* aNode, DIFF_PAIR* aCurrent, DIFF_PAIR& aWalk, bool aPFirst, bool aWindCw, bool aSolidsOnly );
+    bool attemptWalk( NODE* aNode, DIFF_PAIR* aCurrent, DIFF_PAIR& aWalk, bool aPFirst,
+                      bool aWindCw, bool aSolidsOnly );
     bool propagateDpHeadForces ( const VECTOR2I& aP, VECTOR2I& aNewP );
 
     enum State {
@@ -249,36 +224,36 @@ private:
     DP_PRIMITIVE_PAIR m_start;
     OPT<DP_PRIMITIVE_PAIR> m_prevPair;
 
-    ///> current algorithm iteration
+    ///< current algorithm iteration
     int m_iteration;
 
-    ///> pointer to world to search colliding items
+    ///< pointer to world to search colliding items
     NODE* m_world;
 
-    ///> current routing start point (end of tail, beginning of head)
+    ///< current routing start point (end of tail, beginning of head)
     VECTOR2I m_p_start;
 
-    ///> The shove engine
-    SHOVE* m_shove;
+    ///< The shove engine
+    std::unique_ptr<SHOVE> m_shove;
 
-    ///> Current world state
+    ///< Current world state
     NODE* m_currentNode;
 
-    ///> Postprocessed world state (including marked collisions & removed loops)
+    ///< Postprocessed world state (including marked collisions & removed loops)
     NODE* m_lastNode;
 
     SIZES_SETTINGS m_sizes;
 
-    ///> Are we placing a via?
+    ///< Are we placing a via?
     bool m_placingVia;
 
-    ///> current via diameter
+    ///< current via diameter
     int m_viaDiameter;
 
-    ///> current via drill
+    ///< current via drill
     int m_viaDrill;
 
-    ///> current track width
+    ///< current track width
     int m_currentWidth;
 
     int m_currentNet;
@@ -290,9 +265,9 @@ private:
 
     VECTOR2I m_currentEnd, m_currentStart;
     DIFF_PAIR m_currentTrace;
+    bool m_currentTraceOk;
 
     ITEM* m_currentEndItem;
-    PNS_MODE m_currentMode;
 
     bool m_idle;
 };

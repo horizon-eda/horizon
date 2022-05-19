@@ -68,7 +68,7 @@ public:
     PNS_HORIZON_IFACE();
     ~PNS_HORIZON_IFACE();
 
-    void SetRouter(PNS::ROUTER *aRouter) override;
+    void SetRouter(PNS::ROUTER *aRouter);
     void SetBoard(horizon::Board *brd);
     void SetCanvas(class horizon::CanvasGL *ca);
     void SetRules(const horizon::BoardRules *rules);
@@ -77,20 +77,29 @@ public:
     void SyncWorld(PNS::NODE *aWorld) override;
     void EraseView() override;
     void HideItem(PNS::ITEM *aItem) override;
-    void DisplayItem(const PNS::ITEM *aItem, int aColor = 0, int aClearance = 0, bool aEdit = false) override;
+    void DisplayItem(const PNS::ITEM *aItem, int aClearance = 0, bool aEdit = false) override;
     void AddItem(PNS::ITEM *aItem) override;
     void RemoveItem(PNS::ITEM *aItem) override;
     void Commit() override;
 
-    bool IsAnyLayerVisible(const LAYER_RANGE &aLayer) override;
-    bool IsItemVisible(const PNS::ITEM *aItem) override;
+    void UpdateItem(ITEM *aItem) override;
+    bool IsFlashedOnLayer(const PNS::ITEM *aItem, int aLayer) const override;
+    bool ImportSizes(SIZES_SETTINGS &aSizes, ITEM *aStartItem, int aNet) override;
+    int StackupHeight(int aFirstLayer, int aSecondLayer) const override;
+    void DisplayRatline(const SHAPE_LINE_CHAIN &aRatline, int aColor = -1) override;
+
+    PNS::NODE *GetWorld() const override
+    {
+        return m_world;
+    }
+
+    bool IsAnyLayerVisible(const LAYER_RANGE &aLayer) const override;
+    bool IsItemVisible(const PNS::ITEM *aItem) const override;
 
     void UpdateNet(int aNetCode) override;
 
     PNS::RULE_RESOLVER *GetRuleResolver() override;
     PNS::DEBUG_DECORATOR *GetDebugDecorator() override;
-
-    void create_debug_decorator(horizon::CanvasGL *ca);
 
     static int layer_to_router(int l);
     static int layer_from_router(int l);
@@ -118,19 +127,20 @@ private:
     const PNS_HORIZON_PARENT_ITEM *get_or_create_parent(const PNS_HORIZON_PARENT_ITEM &it);
 
     class PNS_HORIZON_RULE_RESOLVER *m_ruleResolver = nullptr;
-    class PNS_HORIZON_DEBUG_DECORATOR *m_debugDecorator = nullptr;
     std::set<horizon::ObjectRef> m_preview_items;
 
     horizon::Board *board = nullptr;
     class horizon::CanvasGL *canvas = nullptr;
     const class horizon::BoardRules *rules = nullptr;
     class horizon::IPool *pool = nullptr;
-    PNS::ROUTER *m_router;
+    PNS::NODE *m_world = nullptr;
+    PNS::ROUTER *m_router = nullptr;
 
     std::unique_ptr<PNS::SOLID> syncPad(const horizon::BoardPackage *pkg, const horizon::Pad *pad);
     std::unique_ptr<PNS::SOLID> syncPadstack(const horizon::Padstack *padstack, const horizon::Placement &tr);
     std::unique_ptr<PNS::SOLID> syncHole(const horizon::BoardHole *hole);
     std::unique_ptr<PNS::SEGMENT> syncTrack(const horizon::Track *track);
+    std::unique_ptr<PNS::ARC> syncTrackArc(const horizon::Track *track);
     std::unique_ptr<PNS::VIA> syncVia(const horizon::Via *via);
     void syncOutline(const horizon::Polygon *poly, PNS::NODE *aWorld);
     void syncKeepout(const horizon::KeepoutContour *keepout_contour, PNS::NODE *aWorld);

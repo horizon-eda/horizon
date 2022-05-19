@@ -19,56 +19,13 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+//#include <board.h>
 
 #include "pns_item.h"
-#include "pns_via.h"
-#include "pns_solid.h"
-#include "pns_node.h"
 #include "pns_sizes_settings.h"
+#include "layer_ids.h"
 
 namespace PNS {
-
-int SIZES_SETTINGS::inheritTrackWidth( ITEM* aItem )
-{
-    VECTOR2I p;
-
-    assert( aItem->Owner() != NULL );
-
-    switch( aItem->Kind() )
-    {
-    case ITEM::VIA_T:
-        p = static_cast<VIA*>( aItem )->Pos();
-        break;
-
-    case ITEM::SOLID_T:
-        p = static_cast<SOLID*>( aItem )->Pos();
-        break;
-
-    case ITEM::SEGMENT_T:
-        return static_cast<SEGMENT*>( aItem )->Width();
-
-    default:
-        return 0;
-    }
-
-    JOINT* jt = static_cast<NODE*>( aItem->Owner() )->FindJoint( p, aItem );
-
-    assert( jt != NULL );
-
-    int mval = INT_MAX;
-
-
-    ITEM_SET linkedSegs = jt->Links();
-    linkedSegs.ExcludeItem( aItem ).FilterKinds( ITEM::SEGMENT_T );
-
-    for( ITEM* item : linkedSegs.Items() )
-    {
-        int w = static_cast<SEGMENT*>( item )->Width();
-        mval = std::min( w, mval );
-    }
-
-    return ( mval == INT_MAX ? 0 : mval );
-}
 
 
 void SIZES_SETTINGS::ClearLayerPairs()

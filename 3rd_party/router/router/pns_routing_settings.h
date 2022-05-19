@@ -2,8 +2,9 @@
  * KiRouter - a push-and-(sometimes-)shove PCB router
  *
  * Copyright (C) 2013-2014 CERN
- * Copyright (C) 2016 KiCad Developers, see AUTHORS.txt for contributors.
- * Author: Tomasz Wlostowski <tomasz.wlostowski@cern.ch>
+ * Copyright (C) 2016-2021 KiCad Developers, see AUTHORS.txt for contributors.
+ *
+ * @author Tomasz Wlostowski <tomasz.wlostowski@cern.ch>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,6 +25,8 @@
 
 #include <cstdio>
 
+#include <geometry/direction45.h>
+
 #include "time_limit.h"
 
 class DIRECTION_45;
@@ -31,16 +34,15 @@ class TOOL_SETTINGS;
 
 namespace PNS {
 
-///> Routing modes
+///< Routing modes
 enum PNS_MODE
 {
-    RM_MarkObstacles = 0,   ///> Ignore collisions, mark obstacles
-    RM_Shove,               ///> Only shove
-    RM_Walkaround,          ///> Only walkaround
-    RM_Smart                ///> Guess what's better, try to make least mess on the PCB
+    RM_MarkObstacles = 0,   ///< Ignore collisions, mark obstacles
+    RM_Shove,               ///< Only shove
+    RM_Walkaround,          ///< Only walk around
 };
 
-///> Optimization effort
+///< Optimization effort.
 enum PNS_OPTIMIZATION_EFFORT
 {
     OE_LOW = 0,
@@ -49,77 +51,75 @@ enum PNS_OPTIMIZATION_EFFORT
 };
 
 /**
- * Class ROUTING_SETTINGS
- *
- * Contains all persistent settings of the router, such as the mode, optimization effort, etc.
+ * Contain all persistent settings of the router, such as the mode, optimization effort, etc.
  */
 
-class ROUTING_SETTINGS
+class ROUTING_SETTINGS //: public NESTED_SETTINGS
 {
 public:
     ROUTING_SETTINGS();
 
-    //void Load( const TOOL_SETTINGS& where );
-    //void Save( TOOL_SETTINGS& where ) const;
-
-    ///> Returns the routing mode.
+    ///< Return the routing mode.
     PNS_MODE Mode() const { return m_routingMode; }
 
-    ///> Sets the routing mode.
+    ///< Set the routing mode.
     void SetMode( PNS_MODE aMode ) { m_routingMode = aMode; }
 
-    ///> Returns the optimizer effort. Bigger means cleaner traces, but slower routing.
+    ///< Return the optimizer effort. Bigger means cleaner traces, but slower routing.
     PNS_OPTIMIZATION_EFFORT OptimizerEffort() const { return m_optimizerEffort; }
 
-    ///> Sets the optimizer effort. Bigger means cleaner traces, but slower routing.
+    ///< Set the optimizer effort. Bigger means cleaner traces, but slower routing.
     void SetOptimizerEffort( PNS_OPTIMIZATION_EFFORT aEffort ) { m_optimizerEffort = aEffort; }
 
-    ///> Returns true if shoving vias is enbled.
+    ///< Return true if shoving vias is enabled.
     bool ShoveVias() const { return m_shoveVias; }
 
-    ///> Enables/disables shoving vias.
+    ///< Enable/disable shoving vias.
     void SetShoveVias( bool aShoveVias ) { m_shoveVias = aShoveVias; }
 
-    ///> Returns true if loop (redundant track) removal is on.
+    ///< Return true if loop (redundant track) removal is on.
     bool RemoveLoops() const { return m_removeLoops; }
 
-    ///> Enables/disables loop (redundant track) removal.
+    ///< Enable/disable loop (redundant track) removal.
     void SetRemoveLoops( bool aRemoveLoops ) { m_removeLoops = aRemoveLoops; }
 
-    ///> Returns true if suggesting the finish of currently placed track is on.
+    ///< Return true if suggesting the finish of currently placed track is on.
     bool SuggestFinish() { return m_suggestFinish; }
 
-    ///> Enables displaying suggestions for finishing the currently placed track.
+    ///< Enable displaying suggestions for finishing the currently placed track.
     void SetSuggestFinish( bool aSuggestFinish ) { m_suggestFinish = aSuggestFinish; }
 
-    ///> Returns true if Smart Pads (optimized connections) is enabled.
+    ///< Return true if Smart Pads (optimized connections) is enabled.
     bool SmartPads() const { return m_smartPads; }
 
-    ///> Enables/disables Smart Pads (optimized connections).
+    ///< Enable/disable Smart Pads (optimized connections).
     void SetSmartPads( bool aSmartPads ) { m_smartPads = aSmartPads; }
 
-    ///> Returns true if follow mouse mode is active (permanently on for the moment).
+    ///< Return true if follow mouse mode is active (permanently on for the moment).
     bool FollowMouse() const
     {
         return m_followMouse && !( Mode() == RM_MarkObstacles );
     }
 
-    ///> Returns true if smoothing segments durign dragging is enabled.
+    ///< Return true if smoothing segments during dragging is enabled.
     bool SmoothDraggedSegments() const { return m_smoothDraggedSegments; }
 
-    ///> Enables/disabled smoothing segments during dragging.
+    ///< Enable/disable smoothing segments during dragging.
     void SetSmoothDraggedSegments( bool aSmooth ) { m_smoothDraggedSegments = aSmooth; }
 
-    ///> Returns true if jumping over unmovable obstacles is on.
+    ///< Return true if jumping over unmovable obstacles is on.
     bool JumpOverObstacles() const { return m_jumpOverObstacles; }
-
-    ///> Enables/disables jumping over unmovable obstacles.
-    void SetJumpOverObstacles( bool aJumpOverObstacles ) { m_jumpOverObstacles = aJumpOverObstacles; }
+    void SetJumpOverObstacles( bool aJump ) { m_jumpOverObstacles = aJump; }
 
     void SetStartDiagonal( bool aStartDiagonal ) { m_startDiagonal = aStartDiagonal; }
 
-    bool CanViolateDRC() const { return m_canViolateDRC; }
-    void SetCanViolateDRC( bool aViolate ) { m_canViolateDRC = aViolate; }
+    bool AllowDRCViolations() const
+    {
+        return m_routingMode == PNS_MODE::RM_MarkObstacles && m_allowDRCViolations;
+    }
+
+    bool GetAllowDRCViolationsSetting() const { return m_allowDRCViolations; }
+    void SetAllowDRCViolations( bool aViolate ) { m_allowDRCViolations = aViolate; }
 
     bool GetFreeAngleMode() const { return m_freeAngleMode; }
 
@@ -133,14 +133,25 @@ public:
     int WalkaroundIterationLimit() const { return m_walkaroundIterationLimit; };
     TIME_LIMIT WalkaroundTimeLimit() const;
 
-    void SetInlineDragEnabled ( bool aEnable ) { m_inlineDragEnabled = aEnable; }
-    bool InlineDragEnabled() const { return m_inlineDragEnabled; }
-
     void SetSnapToTracks( bool aSnap ) { m_snapToTracks = aSnap; }
     void SetSnapToPads( bool aSnap ) { m_snapToPads = aSnap; }
 
     bool GetSnapToTracks() const { return m_snapToTracks; }
     bool GetSnapToPads() const { return m_snapToPads; }
+
+    DIRECTION_45::CORNER_MODE GetCornerMode() const { return m_cornerMode; }
+    void SetCornerMode( DIRECTION_45::CORNER_MODE aMode ) { m_cornerMode = aMode; }
+
+    bool GetOptimizeEntireDraggedTrack() const { return m_optimizeEntireDraggedTrack; }
+    void SetOptimizeEntireDraggedTrack( bool aEnable ) { m_optimizeEntireDraggedTrack = aEnable; }
+
+    bool GetAutoPosture() const { return m_autoPosture; }
+    void SetAutoPosture( bool aEnable ) { m_autoPosture = aEnable; }
+
+    bool GetFixAllSegments() const { return m_fixAllSegments; }
+    void SetFixAllSegments( bool aEnable ) { m_fixAllSegments = aEnable; }
+
+    double WalkaroundHugLengthThreshold() const { return m_walkaroundHugLengthThreshold; }
 
 private:
     bool m_shoveVias;
@@ -151,17 +162,23 @@ private:
     bool m_followMouse;
     bool m_jumpOverObstacles;
     bool m_smoothDraggedSegments;
-    bool m_canViolateDRC;
+    bool m_allowDRCViolations;
     bool m_freeAngleMode;
-    bool m_inlineDragEnabled;
     bool m_snapToTracks;
     bool m_snapToPads;
+    bool m_optimizeEntireDraggedTrack;
+    bool m_autoPosture;
+    bool m_fixAllSegments;
+
+    DIRECTION_45::CORNER_MODE m_cornerMode;
 
     PNS_MODE m_routingMode;
     PNS_OPTIMIZATION_EFFORT m_optimizerEffort;
 
     int m_walkaroundIterationLimit;
     int m_shoveIterationLimit;
+    double m_walkaroundHugLengthThreshold;
+
     TIME_LIMIT m_shoveTimeLimit;
     TIME_LIMIT m_walkaroundTimeLimit;
 };

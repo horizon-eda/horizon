@@ -15,10 +15,12 @@ public:
 
 private:
     using Mode = ToolRouteTrackInteractive::Settings::Mode;
+    using CornerMode = ToolRouteTrackInteractive::Settings::CornerMode;
 
     ToolRouteTrackInteractive::Settings &settings;
     Gtk::Switch *drc_switch = nullptr;
     Gtk::ComboBoxText *mode_combo = nullptr;
+    Gtk::ComboBoxText *corner_mode_combo = nullptr;
     void update_drc();
 };
 } // namespace horizon

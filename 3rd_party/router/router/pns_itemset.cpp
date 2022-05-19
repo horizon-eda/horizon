@@ -32,14 +32,14 @@ ITEM_SET::~ITEM_SET()
 void ITEM_SET::Add( const LINE& aLine )
 {
     LINE* copy = aLine.Clone();
-    m_items.push_back( ENTRY( copy, true ) );
+    m_items.emplace_back( ENTRY( copy, true ) );
 }
 
 
 void ITEM_SET::Prepend( const LINE& aLine )
 {
     LINE* copy = aLine.Clone();
-    m_items.insert( m_items.begin(), ENTRY( copy, true ) );
+    m_items.emplace( m_items.begin(), ENTRY( copy, true ) );
 }
 
 
@@ -56,9 +56,7 @@ ITEM_SET& ITEM_SET::FilterLayers( int aStart, int aEnd, bool aInvert )
     for( const ENTRY& ent : m_items )
     {
         if( ent.item->Layers().Overlaps( l ) ^ aInvert )
-        {
             newItems.push_back( ent );
-        }
     }
 
     m_items = newItems;
@@ -74,9 +72,7 @@ ITEM_SET& ITEM_SET::FilterKinds( int aKindMask, bool aInvert )
     for( const ENTRY& ent : m_items )
     {
         if( ent.item->OfKind( aKindMask ) ^ aInvert )
-        {
             newItems.push_back( ent );
-        }
     }
 
     m_items = newItems;
@@ -92,9 +88,7 @@ ITEM_SET& ITEM_SET::FilterMarker( int aMarker, bool aInvert )
     for( const ENTRY& ent : m_items )
     {
         if( ent.item->Marker() & aMarker )
-        {
             newItems.push_back( ent );
-        }
     }
 
     m_items = newItems;
@@ -110,9 +104,7 @@ ITEM_SET& ITEM_SET::FilterNet( int aNet, bool aInvert )
     for( const ENTRY& ent : m_items )
     {
         if( ( ent.item->Net() == aNet ) ^ aInvert )
-        {
             newItems.push_back( ent );
-        }
     }
 
     m_items = newItems;
@@ -128,8 +120,7 @@ ITEM_SET& ITEM_SET::ExcludeItem( const ITEM* aItem )
     for( const ENTRY& ent : m_items )
     {
         if( ent.item != aItem )
-
-        newItems.push_back( ent );
+            newItems.push_back( ent );
     }
 
     m_items = newItems;

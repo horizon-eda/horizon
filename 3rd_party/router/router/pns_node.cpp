@@ -1,9 +1,10 @@
 /*
  * KiRouter - a push-and-(sometimes-)shove PCB router
  *
- * Copyright (C) 2013-2014 CERN
- * Copyright (C) 2016 KiCad Developers, see AUTHORS.txt for contributors.
- * Author: Tomasz Wlostowski <tomasz.wlostowski@cern.ch>
+ * Copyright (C) 2013-2019 CERN
+ * Copyright (C) 2016-2021 KiCad Developers, see AUTHORS.txt for contributors.
+ *
+ * @author Tomasz Wlostowski <tomasz.wlostowski@cern.ch>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -21,22 +22,27 @@
 
 #include <vector>
 #include <cassert>
+#include <utility>
 
 #include <math/vector2d.h>
 
 #include <geometry/seg.h>
-#include <geometry/shape.h>
 #include <geometry/shape_line_chain.h>
-#include <geometry/shape_index.h>
 
+#include "wx_compat.h"
+
+#include "pns_arc.h"
 #include "pns_item.h"
+#include "pns_itemset.h"
 #include "pns_line.h"
 #include "pns_node.h"
 #include "pns_via.h"
 #include "pns_solid.h"
 #include "pns_joint.h"
 #include "pns_index.h"
+#include "pns_debug_decorator.h"
 #include "pns_router.h"
+#include "pns_utils.h"
 
 
 namespace PNS {
@@ -47,12 +53,11 @@ static std::unordered_set<NODE*> allocNodes;
 
 NODE::NODE()
 {
-    wxLogTrace( "PNS", "NODE::create %p", this );
     m_depth = 0;
     m_root = this;
-    m_parent = NULL;
+    m_parent = nullptr;
     m_maxClearance = 800000;    // fixme: depends on how thick traces are.
-    m_ruleResolver = NULL;
+    m_ruleResolver = nullptr;
     m_index = new INDEX;
 
 #ifdef DEBUG
@@ -63,18 +68,16 @@ NODE::NODE()
 
 NODE::~NODE()
 {
-    wxLogTrace( "PNS", "NODE::delete %p", this );
-
     if( !m_children.empty() )
     {
-        wxLogTrace( "PNS", "attempting to free a node that has kids." );
+        wxLogTrace( wxT( "PNS" ), wxT( "attempting to free a node that has kids." ) );
         assert( false );
     }
 
 #ifdef DEBUG
     if( allocNodes.find( this ) == allocNodes.end() )
     {
-        wxLogTrace( "PNS", "attempting to free an already-free'd node." );
+        wxLogTrace( wxT( "PNS" ), wxT( "attempting to free an already-free'd node." ) );
         assert( false );
     }
 
@@ -83,10 +86,10 @@ NODE::~NODE()
 
     m_joints.clear();
 
-    for( INDEX::ITEM_SET::iterator i = m_index->begin(); i != m_index->end(); ++i )
+    for( ITEM* item : *m_index )
     {
-        if( (*i)->BelongsTo( this ) )
-            delete *i;
+        if( item->BelongsTo( this ) )
+            delete item;
     }
 
     releaseGarbage();
@@ -95,20 +98,46 @@ NODE::~NODE()
     delete m_index;
 }
 
+
 int NODE::GetClearance( const ITEM* aA, const ITEM* aB ) const
 {
    if( !m_ruleResolver )
         return 100000;
 
+   if( aA->IsVirtual() || aB->IsVirtual() )
+       return 0;
+
    return m_ruleResolver->Clearance( aA, aB );
+}
+
+
+int NODE::GetHoleClearance( const ITEM* aA, const ITEM* aB ) const
+{
+    if( !m_ruleResolver )
+        return 0;
+
+    if( aA->IsVirtual() || aB->IsVirtual() )
+        return 0;
+
+    return m_ruleResolver->HoleClearance( aA, aB );
+}
+
+
+int NODE::GetHoleToHoleClearance( const ITEM* aA, const ITEM* aB ) const
+{
+   if( !m_ruleResolver )
+        return 0;
+
+   if( aA->IsVirtual() || aB->IsVirtual() )
+       return 0;
+
+   return m_ruleResolver->HoleToHoleClearance( aA, aB );
 }
 
 
 NODE* NODE::Branch()
 {
     NODE* child = new NODE;
-
-    wxLogTrace( "PNS", "NODE::branch %p (parent %p)", child, this );
 
     m_children.insert( child );
 
@@ -118,22 +147,25 @@ NODE* NODE::Branch()
     child->m_root = isRoot() ? this : m_root;
     child->m_maxClearance = m_maxClearance;
 
-    // immmediate offspring of the root branch needs not copy anything.
-    // For the rest, deep-copy joints, overridden item map and pointers
-    // to stored items.
+    // Immediate offspring of the root branch needs not copy anything. For the rest, deep-copy
+    // joints, overridden item maps and pointers to stored items.
     if( !isRoot() )
     {
         JOINT_MAP::iterator j;
 
-        for( INDEX::ITEM_SET::iterator i = m_index->begin(); i != m_index->end(); ++i )
-            child->m_index->Add( *i );
+        for( ITEM* item : *m_index )
+            child->m_index->Add( item );
 
         child->m_joints = m_joints;
         child->m_override = m_override;
     }
 
-    wxLogTrace( "PNS", "%d items, %d joints, %d overrides",
-            child->m_index->Size(), (int) child->m_joints.size(), (int) child->m_override.size() );
+#if 0
+    wxLogTrace( wxT( "PNS" ), wxT( "%d items, %d joints, %d overrides" ),
+                child->m_index->Size(),
+                (int) child->m_joints.size(),
+                (int) child->m_override.size() );
+#endif
 
     return child;
 }
@@ -150,11 +182,9 @@ void NODE::unlinkParent()
 
 OBSTACLE_VISITOR::OBSTACLE_VISITOR( const ITEM* aItem ) :
     m_item( aItem ),
-    m_node( NULL ),
-    m_override( NULL ),
-    m_extraClearance( 0 )
+    m_node( nullptr ),
+    m_override( nullptr )
 {
-
 }
 
 
@@ -167,8 +197,8 @@ void OBSTACLE_VISITOR::SetWorld( const NODE* aNode, const NODE* aOverride )
 
 bool OBSTACLE_VISITOR::visit( ITEM* aCandidate )
 {
-    // check if there is a more recent branch with a newer
-    // (possibily modified) version of this item.
+    // check if there is a more recent branch with a newer (possibly modified) version of this
+    // item.
     if( m_override && m_override->Overrides( aCandidate ) )
         return true;
 
@@ -176,43 +206,29 @@ bool OBSTACLE_VISITOR::visit( ITEM* aCandidate )
 }
 
 
-// function object that visits potential obstacles and performs
-// the actual collision refining
+// function object that visits potential obstacles and performs the actual collision refining
 struct NODE::DEFAULT_OBSTACLE_VISITOR : public OBSTACLE_VISITOR
 {
-    ///> list of encountered obstacles
     OBSTACLES& m_tab;
 
-    ///> acccepted kinds of colliding items (solids, vias, segments, etc...)
-    int m_kindMask;
+    int        m_kindMask;          ///<  (solids, vias, segments, etc...)
+    int        m_limitCount;
+    int        m_matchCount;
+    bool       m_differentNetsOnly;
 
-    ///> max number of hits
-    int m_limitCount;
-
-    ///> number of items found so far
-    int m_matchCount;
-
-    ///> additional clearance
-    int m_extraClearance;
-
-    bool m_differentNetsOnly;
-
-    int m_forceClearance;
-
-    DEFAULT_OBSTACLE_VISITOR( NODE::OBSTACLES& aTab, const ITEM* aItem, int aKindMask, bool aDifferentNetsOnly ) :
+    DEFAULT_OBSTACLE_VISITOR( NODE::OBSTACLES& aTab, const ITEM* aItem, int aKindMask,
+                              bool aDifferentNetsOnly ) :
         OBSTACLE_VISITOR( aItem ),
         m_tab( aTab ),
         m_kindMask( aKindMask ),
         m_limitCount( -1 ),
         m_matchCount( 0 ),
-        m_extraClearance( 0 ),
-        m_differentNetsOnly( aDifferentNetsOnly ),
-        m_forceClearance( -1 )
+        m_differentNetsOnly( aDifferentNetsOnly )
     {
-        if( aItem && aItem->Kind() == ITEM::LINE_T )
-        {
-             m_extraClearance += static_cast<const LINE*>( aItem )->Width() / 2;
-        }
+    }
+
+    virtual ~DEFAULT_OBSTACLE_VISITOR()
+    {
     }
 
     void SetCountLimit( int aLimit )
@@ -228,24 +244,14 @@ struct NODE::DEFAULT_OBSTACLE_VISITOR : public OBSTACLE_VISITOR
         if( visit( aCandidate ) )
             return true;
 
-        int clearance = m_extraClearance + m_node->GetClearance( aCandidate, m_item );
-
-        if( aCandidate->Kind() == ITEM::LINE_T ) // this should never happen.
-        {
-            assert( false );
-            clearance += static_cast<LINE*>( aCandidate )->Width() / 2;
-        }
-
-        if( m_forceClearance >= 0 )
-            clearance = m_forceClearance;
-
-        if( !aCandidate->Collide( m_item, clearance, m_differentNetsOnly ) )
+        if( !aCandidate->Collide( m_item, m_node, m_differentNetsOnly ) )
             return true;
 
         OBSTACLE obs;
 
         obs.m_item = aCandidate;
         obs.m_head = m_item;
+        obs.m_distFirst = INT_MAX;
         m_tab.push_back( obs );
 
         m_matchCount++;
@@ -258,25 +264,13 @@ struct NODE::DEFAULT_OBSTACLE_VISITOR : public OBSTACLE_VISITOR
 };
 
 
-int NODE::QueryColliding( const ITEM* aItem, OBSTACLE_VISITOR& aVisitor )
+int NODE::QueryColliding( const ITEM* aItem, NODE::OBSTACLES& aObstacles, int aKindMask,
+                          int aLimitCount, bool aDifferentNetsOnly )
 {
-    aVisitor.SetWorld( this, NULL );
-    m_index->Query( aItem, m_maxClearance, aVisitor );
+    /// By default, virtual items cannot collide
+    if( aItem->IsVirtual() )
+        return 0;
 
-    // if we haven't found enough items, look in the root branch as well.
-    if( !isRoot() )
-    {
-        aVisitor.SetWorld( m_root, this );
-        m_root->m_index->Query( aItem, m_maxClearance, aVisitor );
-    }
-
-    return 0;
-}
-
-
-int NODE::QueryColliding( const ITEM* aItem,
-        NODE::OBSTACLES& aObstacles, int aKindMask, int aLimitCount, bool aDifferentNetsOnly, int aForceClearance )
-{
     DEFAULT_OBSTACLE_VISITOR visitor( aObstacles, aItem, aKindMask, aDifferentNetsOnly );
 
 #ifdef DEBUG
@@ -284,8 +278,8 @@ int NODE::QueryColliding( const ITEM* aItem,
 #endif
 
     visitor.SetCountLimit( aLimitCount );
-    visitor.SetWorld( this, NULL );
-    visitor.m_forceClearance = aForceClearance;
+    visitor.SetWorld( this, nullptr );
+
     // first, look for colliding items in the local index
     m_index->Query( aItem, m_maxClearance, visitor );
 
@@ -300,110 +294,141 @@ int NODE::QueryColliding( const ITEM* aItem,
 }
 
 
-NODE::OPT_OBSTACLE NODE::NearestObstacle( const LINE* aItem, int aKindMask,
-                                                  const std::set<ITEM*>* aRestrictedSet )
+NODE::OPT_OBSTACLE NODE::NearestObstacle( const LINE* aLine, int aKindMask,
+                                          const std::set<ITEM*>* aRestrictedSet )
 {
-    OBSTACLES obs_list;
-    bool found_isects = false;
+    OBSTACLES obstacleList;
+    obstacleList.reserve( 100 );
 
-    const SHAPE_LINE_CHAIN& line = aItem->CLine();
-
-    obs_list.reserve( 100 );
-
-    int n = 0;
-
-    for( int i = 0; i < line.SegmentCount(); i++ )
+    for( int i = 0; i < aLine->CLine().SegmentCount(); i++ )
     {
-        const SEGMENT s( *aItem, line.CSegment( i ) );
-        n += QueryColliding( &s, obs_list, aKindMask );
+        const SEGMENT s( *aLine, aLine->CLine().CSegment( i ) );
+        QueryColliding( &s, obstacleList, aKindMask );
     }
 
-    if( aItem->EndsWithVia() )
-        n += QueryColliding( &aItem->Via(), obs_list, aKindMask );
+    if( aLine->EndsWithVia() )
+        QueryColliding( &aLine->Via(), obstacleList, aKindMask );
 
-    if( !n )
+    if( obstacleList.empty() )
         return OPT_OBSTACLE();
 
-    LINE& aLine = (LINE&) *aItem;
-
     OBSTACLE nearest;
-    nearest.m_item = NULL;
+    nearest.m_item = nullptr;
     nearest.m_distFirst = INT_MAX;
 
-    for( OBSTACLE obs : obs_list )
-    {
-        VECTOR2I ip_first, ip_last;
-        int dist_max = INT_MIN;
-
-        if( aRestrictedSet && aRestrictedSet->find( obs.m_item ) == aRestrictedSet->end() )
-            continue;
-
-        std::vector<SHAPE_LINE_CHAIN::INTERSECTION> isect_list;
-
-        int clearance = GetClearance( obs.m_item, &aLine );
-
-        SHAPE_LINE_CHAIN hull = obs.m_item->Hull( clearance, aItem->Width() );
-
-        if( aLine.EndsWithVia() )
-        {
-            clearance = GetClearance( obs.m_item, &aLine.Via() );
-
-            SHAPE_LINE_CHAIN viaHull = aLine.Via().Hull( clearance, aItem->Width() );
-
-            viaHull.Intersect( hull, isect_list );
-
-            for( SHAPE_LINE_CHAIN::INTERSECTION isect : isect_list )
+    auto updateNearest =
+            [&]( const SHAPE_LINE_CHAIN::INTERSECTION& pt, ITEM* obstacle,
+                 const SHAPE_LINE_CHAIN& hull, bool isHole )
             {
-                int dist = aLine.CLine().Length() +
-                           ( isect.p - aLine.Via().Pos() ).EuclideanNorm();
+                int dist = aLine->CLine().PathLength( pt.p, pt.index_their );
 
                 if( dist < nearest.m_distFirst )
                 {
-                    found_isects = true;
                     nearest.m_distFirst = dist;
-                    nearest.m_ipFirst = isect.p;
-                    nearest.m_item = obs.m_item;
+                    nearest.m_ipFirst = pt.p;
+                    nearest.m_item = obstacle;
                     nearest.m_hull = hull;
+
+                    obstacle->Mark( isHole ? obstacle->Marker() | MK_HOLE
+                                           : obstacle->Marker() & ~MK_HOLE );
                 }
+            };
 
-                if( dist > dist_max )
-                {
-                    dist_max = dist;
-                    ip_last = isect.p;
-                }
-            }
-        }
+    SHAPE_LINE_CHAIN obstacleHull;
+    DEBUG_DECORATOR* debugDecorator = ROUTER::GetInstance()->GetInterface()->GetDebugDecorator();
+    std::vector<SHAPE_LINE_CHAIN::INTERSECTION> intersectingPts;
+    int layer = aLine->Layer();
 
-        isect_list.clear();
 
-        hull.Intersect( aLine.CLine(), isect_list );
+    for( const OBSTACLE& obstacle : obstacleList )
+    {
+        if( aRestrictedSet && aRestrictedSet->find( obstacle.m_item ) == aRestrictedSet->end() )
+            continue;
 
-        for( SHAPE_LINE_CHAIN::INTERSECTION isect : isect_list )
+        int clearance = GetClearance( obstacle.m_item, aLine ) + aLine->Width() / 2;
+        obstacleHull = obstacle.m_item->Hull( clearance + PNS_HULL_MARGIN, 0, layer );
+        //debugDecorator->AddLine( obstacleHull, 2, 40000, "obstacle-hull-test" );
+        //debugDecorator->AddLine( aLine->CLine(), 5, 40000, "obstacle-test-line" );
+
+        intersectingPts.clear();
+        HullIntersection( obstacleHull, aLine->CLine(), intersectingPts );
+
+        for( const auto& ip : intersectingPts )
         {
-            int dist = aLine.CLine().PathLength( isect.p );
-
-            if( dist < nearest.m_distFirst )
-            {
-                found_isects = true;
-                nearest.m_distFirst = dist;
-                nearest.m_ipFirst = isect.p;
-                nearest.m_item = obs.m_item;
-                nearest.m_hull = hull;
-            }
-
-            if( dist > dist_max )
-            {
-                dist_max = dist;
-                ip_last = isect.p;
-            }
+            //debugDecorator->AddPoint( ip.p, ip.valid?3:6, 100000, (const char *) wxString::Format("obstacle-isect-point-%d" ).c_str() );
+            if(ip.valid)
+                updateNearest( ip, obstacle.m_item, obstacleHull, false );
         }
 
-        nearest.m_ipLast = ip_last;
-        nearest.m_distLast = dist_max;
+        if( aLine->EndsWithVia() )
+        {
+            const VIA& via = aLine->Via();
+            // Don't use via.Drill(); it doesn't include the plating thickness
+
+            int viaHoleRadius = static_cast<const SHAPE_CIRCLE*>( via.Hole() )->GetRadius();
+
+            int viaClearance = GetClearance( obstacle.m_item, &via ) + via.Diameter() / 2;
+            int holeClearance = GetHoleClearance( obstacle.m_item, &via ) + viaHoleRadius;
+
+            if( holeClearance > viaClearance )
+                viaClearance = holeClearance;
+
+            obstacleHull = obstacle.m_item->Hull( viaClearance + PNS_HULL_MARGIN, 0, layer );
+            //debugDecorator->AddLine( obstacleHull, 3 );
+
+            intersectingPts.clear();
+            HullIntersection( obstacleHull, aLine->CLine(), intersectingPts );
+
+            // obstacleHull.Intersect( aLine->CLine(), intersectingPts, true );
+
+            for( const SHAPE_LINE_CHAIN::INTERSECTION& ip : intersectingPts )
+                updateNearest( ip, obstacle.m_item, obstacleHull, false );
+        }
+
+        if( obstacle.m_item->Hole() )
+        {
+            clearance = GetHoleClearance( obstacle.m_item, aLine ) + aLine->Width() / 2;
+            obstacleHull = obstacle.m_item->HoleHull( clearance + PNS_HULL_MARGIN, 0, layer );
+            //debugDecorator->AddLine( obstacleHull, 4 );
+
+            intersectingPts.clear();
+            HullIntersection( obstacleHull, aLine->CLine(), intersectingPts );
+
+            for( const SHAPE_LINE_CHAIN::INTERSECTION& ip : intersectingPts )
+                updateNearest( ip, obstacle.m_item, obstacleHull, true );
+
+            if( aLine->EndsWithVia() )
+            {
+                const VIA& via = aLine->Via();
+                // Don't use via.Drill(); it doesn't include the plating thickness
+                int viaHoleRadius = static_cast<const SHAPE_CIRCLE*>( via.Hole() )->GetRadius();
+
+                int viaClearance = GetClearance( obstacle.m_item, &via ) + via.Diameter() / 2;
+                int holeClearance = GetHoleClearance( obstacle.m_item, &via ) + viaHoleRadius;
+                int holeToHole = GetHoleToHoleClearance( obstacle.m_item, &via ) + viaHoleRadius;
+
+                if( holeClearance > viaClearance )
+                    viaClearance = holeClearance;
+
+                if( holeToHole > viaClearance )
+                    viaClearance = holeToHole;
+
+                obstacleHull = obstacle.m_item->Hull( viaClearance + PNS_HULL_MARGIN, 0, layer );
+                //debugDecorator->AddLine( obstacleHull, 5 );
+
+                intersectingPts.clear();
+                HullIntersection( obstacleHull, aLine->CLine(), intersectingPts );
+
+                for( const SHAPE_LINE_CHAIN::INTERSECTION& ip : intersectingPts )
+                    updateNearest( ip, obstacle.m_item, obstacleHull, true );
+            }
+        }
     }
 
-    if( !found_isects )
-        nearest.m_item = obs_list[0].m_item;
+    if( nearest.m_distFirst == INT_MAX )
+        nearest.m_item = obstacleList[0].m_item;
+
+    // debugDecorator->AddLine( nearest.m_hull, YELLOW, 60000, "obstacle-nearest-hull" );
 
     return nearest;
 }
@@ -453,28 +478,11 @@ NODE::OPT_OBSTACLE NODE::CheckColliding( const ITEM* aItemA, int aKindMask )
         }
     }
     else if( QueryColliding( aItemA, obs, aKindMask, 1 ) > 0 )
+    {
         return OPT_OBSTACLE( obs[0] );
+    }
 
     return OPT_OBSTACLE();
-}
-
-
-bool NODE::CheckColliding( const ITEM* aItemA, const ITEM* aItemB, int aKindMask, int aForceClearance )
-{
-    assert( aItemB );
-    int clearance;
-    if( aForceClearance >= 0 )
-        clearance = aForceClearance;
-    else
-        clearance = GetClearance( aItemA, aItemB );
-
-    // fixme: refactor
-    if( aItemA->Kind() == ITEM::LINE_T )
-        clearance += static_cast<const LINE*>( aItemA )->Width() / 2;
-    if( aItemB->Kind() == ITEM::LINE_T )
-        clearance += static_cast<const LINE*>( aItemB )->Width() / 2;
-
-    return aItemA->Collide( aItemB, clearance );
 }
 
 
@@ -484,9 +492,14 @@ struct HIT_VISITOR : public OBSTACLE_VISITOR
     const VECTOR2I& m_point;
 
     HIT_VISITOR( ITEM_SET& aTab, const VECTOR2I& aPoint ) :
-        OBSTACLE_VISITOR( NULL ),
-        m_items( aTab ), m_point( aPoint )
+        OBSTACLE_VISITOR( nullptr ),
+        m_items( aTab ),
+        m_point( aPoint )
     {}
+
+    virtual ~HIT_VISITOR()
+    {
+    }
 
     bool operator()( ITEM* aItem ) override
     {
@@ -509,14 +522,14 @@ const ITEM_SET NODE::HitTest( const VECTOR2I& aPoint ) const
     // fixme: we treat a point as an infinitely small circle - this is inefficient.
     SHAPE_CIRCLE s( aPoint, 0 );
     HIT_VISITOR visitor( items, aPoint );
-    visitor.SetWorld( this, NULL );
+    visitor.SetWorld( this, nullptr );
 
     m_index->Query( &s, m_maxClearance, visitor );
 
     if( !isRoot() )    // fixme: could be made cleaner
     {
         ITEM_SET items_root;
-        visitor.SetWorld( m_root, NULL );
+        visitor.SetWorld( m_root, nullptr );
         HIT_VISITOR  visitor_root( items_root, aPoint );
         m_root->m_index->Query( &s, m_maxClearance, visitor_root );
 
@@ -539,17 +552,21 @@ void NODE::addSolid( SOLID* aSolid )
     m_index->Add( aSolid );
 }
 
+
 void NODE::Add( std::unique_ptr< SOLID > aSolid )
 {
     aSolid->SetOwner( this );
     addSolid( aSolid.release() );
 }
 
+
 void NODE::addVia( VIA* aVia )
 {
     linkJoint( aVia->Pos(), aVia->Layers(), aVia->Net(), aVia );
+
     m_index->Add( aVia );
 }
+
 
 void NODE::Add( std::unique_ptr< VIA > aVia )
 {
@@ -557,34 +574,58 @@ void NODE::Add( std::unique_ptr< VIA > aVia )
     addVia( aVia.release() );
 }
 
+
 void NODE::Add( LINE& aLine, bool aAllowRedundant )
 {
     assert( !aLine.IsLinked() );
 
     SHAPE_LINE_CHAIN& l = aLine.Line();
 
+    for( size_t i = 0; i < l.ArcCount(); i++ )
+    {
+        auto s = l.Arc( i );
+        ARC* rarc;
+
+        if( !aAllowRedundant && ( rarc = findRedundantArc( s.GetP0(), s.GetP1(), aLine.Layers(),
+                                                           aLine.Net() ) ) )
+        {
+            aLine.Link( rarc );
+        }
+        else
+        {
+            auto newarc = std::make_unique< ARC >( aLine, s );
+            aLine.Link( newarc.get() );
+            Add( std::move( newarc ), true );
+        }
+    }
+
     for( int i = 0; i < l.SegmentCount(); i++ )
     {
+        if( l.IsArcSegment( i ) )
+            continue;
+
         SEG s = l.CSegment( i );
 
         if( s.A != s.B )
         {
             SEGMENT* rseg;
-            if( !aAllowRedundant &&
-                (rseg = findRedundantSegment( s.A, s.B, aLine.Layers(), aLine.Net() )) )
+
+            if( !aAllowRedundant && ( rseg = findRedundantSegment( s.A, s.B, aLine.Layers(),
+                                                                   aLine.Net() ) ) )
             {
                 // another line could be referencing this segment too :(
-                aLine.LinkSegment( rseg );
+                aLine.Link( rseg );
             }
             else
             {
-                std::unique_ptr< SEGMENT > newseg( new SEGMENT( aLine, s ) );
-                aLine.LinkSegment( newseg.get() );
+                std::unique_ptr<SEGMENT> newseg = std::make_unique<SEGMENT>( aLine, s );
+                aLine.Link( newseg.get() );
                 Add( std::move( newseg ), true );
             }
         }
     }
 }
+
 
 void NODE::addSegment( SEGMENT* aSeg )
 {
@@ -594,11 +635,13 @@ void NODE::addSegment( SEGMENT* aSeg )
     m_index->Add( aSeg );
 }
 
+
 bool NODE::Add( std::unique_ptr< SEGMENT > aSegment, bool aAllowRedundant )
 {
     if( aSegment->Seg().A == aSegment->Seg().B )
     {
-        wxLogTrace( "PNS", "attempting to add a segment with same end coordinates, ignoring." );
+        wxLogTrace( wxT( "PNS" ),
+                    wxT( "attempting to add a segment with same end coordinates, ignoring." ) );
         return false;
     }
 
@@ -611,26 +654,46 @@ bool NODE::Add( std::unique_ptr< SEGMENT > aSegment, bool aAllowRedundant )
     return true;
 }
 
+
+void NODE::addArc( ARC* aArc )
+{
+    linkJoint( aArc->Anchor( 0 ), aArc->Layers(), aArc->Net(), aArc );
+    linkJoint( aArc->Anchor( 1 ), aArc->Layers(), aArc->Net(), aArc );
+
+    m_index->Add( aArc );
+}
+
+
+bool NODE::Add( std::unique_ptr< ARC > aArc, bool aAllowRedundant )
+{
+    const SHAPE_ARC& arc = aArc->CArc();
+
+    if( !aAllowRedundant && findRedundantArc( arc.GetP0(), arc.GetP1(), aArc->Layers(),
+                                              aArc->Net() ) )
+    {
+        return false;
+    }
+
+    aArc->SetOwner( this );
+    addArc( aArc.release() );
+    return true;
+}
+
+
 void NODE::Add( std::unique_ptr< ITEM > aItem, bool aAllowRedundant )
 {
     switch( aItem->Kind() )
     {
-    case ITEM::SOLID_T:
-        Add( ItemCast<SOLID>( std::move( aItem ) ) );
-        break;
+    case ITEM::SOLID_T:   Add( ItemCast<SOLID>( std::move( aItem ) ) );                    break;
+    case ITEM::SEGMENT_T: Add( ItemCast<SEGMENT>( std::move( aItem ) ), aAllowRedundant ); break;
+    case ITEM::VIA_T:     Add( ItemCast<VIA>( std::move( aItem ) ) );                      break;
 
-    case ITEM::SEGMENT_T:
-        Add( ItemCast<SEGMENT>( std::move( aItem ) ), aAllowRedundant );
+    case ITEM::ARC_T:
+        //todo(snh): Add redundant search
+        Add( ItemCast<ARC>( std::move( aItem ) ) );
         break;
 
     case ITEM::LINE_T:
-        assert( false );
-        break;
-
-    case ITEM::VIA_T:
-        Add( ItemCast<VIA>( std::move( aItem ) ) );
-        break;
-
     default:
         assert( false );
     }
@@ -652,7 +715,7 @@ void NODE::doRemove( ITEM* aItem )
     // the item belongs to this particular branch: un-reference it
     if( aItem->BelongsTo( this ) )
     {
-        aItem->SetOwner( NULL );
+        aItem->SetOwner( nullptr );
         m_root->m_garbageItems.insert( aItem );
     }
 }
@@ -664,37 +727,42 @@ void NODE::removeSegmentIndex( SEGMENT* aSeg )
     unlinkJoint( aSeg->Seg().B, aSeg->Layers(), aSeg->Net(), aSeg );
 }
 
-void NODE::removeViaIndex( VIA* aVia )
+
+void NODE::removeArcIndex( ARC* aArc )
 {
-    // We have to split a single joint (associated with a via, binding together multiple layers)
-    // into multiple independent joints. As I'm a lazy bastard, I simply delete the via and all its links and re-insert them.
+    unlinkJoint( aArc->Anchor( 0 ), aArc->Layers(), aArc->Net(), aArc );
+    unlinkJoint( aArc->Anchor( 1 ), aArc->Layers(), aArc->Net(), aArc );
+}
 
+
+void NODE::rebuildJoint( JOINT* aJoint, ITEM* aItem )
+{
+    // We have to split a single joint (associated with a via or a pad, binding together multiple
+    // layers) into multiple independent joints. As I'm a lazy bastard, I simply delete the
+    // via/solid and all its links and re-insert them.
+
+    JOINT::LINKED_ITEMS links( aJoint->LinkList() );
     JOINT::HASH_TAG tag;
-
-    VECTOR2I p( aVia->Pos() );
-    LAYER_RANGE vLayers( aVia->Layers() );
-    int net = aVia->Net();
-
-    JOINT* jt = FindJoint( p, vLayers.Start(), net );
-    JOINT::LINKED_ITEMS links( jt->LinkList() );
+    int net = aItem->Net();
 
     tag.net = net;
-    tag.pos = p;
+    tag.pos = aJoint->Pos();
 
     bool split;
+
     do
     {
         split = false;
-        std::pair<JOINT_MAP::iterator, JOINT_MAP::iterator> range = m_joints.equal_range( tag );
+        auto range = m_joints.equal_range( tag );
 
         if( range.first == m_joints.end() )
             break;
 
         // find and remove all joints containing the via to be removed
 
-        for( JOINT_MAP::iterator f = range.first; f != range.second; ++f )
+        for( auto f = range.first; f != range.second; ++f )
         {
-            if( aVia->LayersOverlap( &f->second ) )
+            if( aItem->LayersOverlap( &f->second ) )
             {
                 m_joints.erase( f );
                 split = true;
@@ -704,16 +772,31 @@ void NODE::removeViaIndex( VIA* aVia )
     } while( split );
 
     // and re-link them, using the former via's link list
-    for(ITEM* item : links)
+    for( ITEM* link : links )
     {
-        if( item != aVia )
-            linkJoint( p, item->Layers(), net, item );
+        if( link != aItem )
+            linkJoint( tag.pos, link->Layers(), net, link );
     }
 }
 
+
+void NODE::removeViaIndex( VIA* aVia )
+{
+    JOINT* jt = FindJoint( aVia->Pos(), aVia->Layers().Start(), aVia->Net() );
+    assert( jt );
+    rebuildJoint( jt, aVia );
+}
+
+
 void NODE::removeSolidIndex( SOLID* aSolid )
 {
-    // fixme: this fucks up the joints, but it's only used for marking colliding obstacles for the moment, so we don't care.
+    if( !aSolid->IsRoutable() )
+        return;
+
+    // fixme: redundant code
+    JOINT* jt = FindJoint( aSolid->Pos(), aSolid->Layers().Start(), aSolid->Net() );
+    assert( jt );
+    rebuildJoint( jt, aSolid );
 }
 
 
@@ -723,11 +806,13 @@ void NODE::Replace( ITEM* aOldItem, std::unique_ptr< ITEM > aNewItem )
     Add( std::move( aNewItem ) );
 }
 
+
 void NODE::Replace( LINE& aOldLine, LINE& aNewLine )
 {
     Remove( aOldLine );
     Add( aNewLine );
 }
+
 
 void NODE::Remove( SOLID* aSolid )
 {
@@ -735,11 +820,13 @@ void NODE::Remove( SOLID* aSolid )
     doRemove( aSolid );
 }
 
+
 void NODE::Remove( VIA* aVia )
 {
     removeViaIndex( aVia );
     doRemove( aVia );
 }
+
 
 void NODE::Remove( SEGMENT* aSegment )
 {
@@ -747,10 +834,22 @@ void NODE::Remove( SEGMENT* aSegment )
     doRemove( aSegment );
 }
 
+
+void NODE::Remove( ARC* aArc )
+{
+    removeArcIndex( aArc );
+    doRemove( aArc );
+}
+
+
 void NODE::Remove( ITEM* aItem )
 {
     switch( aItem->Kind() )
     {
+    case ITEM::ARC_T:
+        Remove( static_cast<ARC*>( aItem ) );
+        break;
+
     case ITEM::SOLID_T:
         Remove( static_cast<SOLID*>( aItem ) );
         break;
@@ -761,9 +860,9 @@ void NODE::Remove( ITEM* aItem )
 
     case ITEM::LINE_T:
     {
-        auto l = static_cast<LINE *> ( aItem );
+        LINE* l = static_cast<LINE*>( aItem );
 
-        for ( auto s : l->LinkedSegments() )
+        for ( LINKED_ITEM* s : l->Links() )
             Remove( s );
 
         break;
@@ -781,107 +880,146 @@ void NODE::Remove( ITEM* aItem )
 
 void NODE::Remove( LINE& aLine )
 {
-    // LINE does not have a seperate remover, as LINEs are never truly a member of the tree
-    std::vector<SEGMENT*>& segRefs = aLine.LinkedSegments();
+    // LINE does not have a separate remover, as LINEs are never truly a member of the tree
+    std::vector<LINKED_ITEM*>& segRefs = aLine.Links();
 
-    for( SEGMENT* seg : segRefs )
+    for( LINKED_ITEM* li : segRefs )
     {
-        Remove( seg );
+        if( li->OfKind( ITEM::SEGMENT_T ) )
+            Remove( static_cast<SEGMENT*>( li ) );
+        else if( li->OfKind( ITEM::ARC_T ) )
+            Remove( static_cast<ARC*>( li ) );
     }
 
     aLine.SetOwner( nullptr );
-    aLine.ClearSegmentLinks();
+    aLine.ClearLinks();
 }
 
 
-void NODE::followLine( SEGMENT* aCurrent, bool aScanDirection, int& aPos,
-        int aLimit, VECTOR2I* aCorners, SEGMENT** aSegments, bool& aGuardHit,
-        bool aStopAtLockedJoints )
+void NODE::followLine( LINKED_ITEM* aCurrent, bool aScanDirection, int& aPos, int aLimit,
+                       VECTOR2I* aCorners, LINKED_ITEM** aSegments, bool* aArcReversed,
+                       bool& aGuardHit, bool aStopAtLockedJoints, bool aFollowLockedSegments )
 {
     bool prevReversed = false;
 
-    const VECTOR2I guard = aScanDirection ? aCurrent->Seg().B : aCurrent->Seg().A;
+    const VECTOR2I guard = aCurrent->Anchor( aScanDirection );
 
     for( int count = 0 ; ; ++count )
     {
-        const VECTOR2I p =
-            ( aScanDirection ^ prevReversed ) ? aCurrent->Seg().B : aCurrent->Seg().A;
-        const JOINT* jt = FindJoint( p, aCurrent );
+        const VECTOR2I p  = aCurrent->Anchor( aScanDirection ^ prevReversed );
+        const JOINT*   jt = FindJoint( p, aCurrent );
 
         assert( jt );
 
-        aCorners[aPos] = jt->Pos();
-        aSegments[aPos] = aCurrent;
+        aCorners[aPos]     = jt->Pos();
+        aSegments[aPos]    = aCurrent;
+        aArcReversed[aPos] = false;
+
+        if( aCurrent->Kind() == ITEM::ARC_T )
+        {
+            if( ( aScanDirection && jt->Pos() == aCurrent->Anchor( 0 ) )
+                    || ( !aScanDirection && jt->Pos() == aCurrent->Anchor( 1 ) ) )
+                aArcReversed[aPos] = true;
+        }
+
         aPos += ( aScanDirection ? 1 : -1 );
 
-        if( count && guard == p)
+        if( count && guard == p )
         {
-            aSegments[aPos] = NULL;
+            if( aPos >= 0 && aPos < aLimit )
+                aSegments[aPos] = nullptr;
+
             aGuardHit = true;
             break;
         }
 
         bool locked = aStopAtLockedJoints ? jt->IsLocked() : false;
 
-        if( locked || !jt->IsLineCorner() || aPos < 0 || aPos == aLimit )
+        if( locked || !jt->IsLineCorner( aFollowLockedSegments ) || aPos < 0 || aPos == aLimit )
             break;
 
-        aCurrent = jt->NextSegment( aCurrent );
+        aCurrent = jt->NextSegment( aCurrent, aFollowLockedSegments );
 
-        prevReversed =
-            ( jt->Pos() == ( aScanDirection ? aCurrent->Seg().B : aCurrent->Seg().A ) );
+        prevReversed = ( aCurrent && jt->Pos() == aCurrent->Anchor( aScanDirection ) );
     }
 }
 
 
-const LINE NODE::AssembleLine( SEGMENT* aSeg, int* aOriginSegmentIndex, bool aStopAtLockedJoints )
+const LINE NODE::AssembleLine( LINKED_ITEM* aSeg, int* aOriginSegmentIndex,
+                               bool aStopAtLockedJoints, bool aFollowLockedSegments )
 {
     const int MaxVerts = 1024 * 16;
 
-    VECTOR2I corners[MaxVerts + 1];
-    SEGMENT* segs[MaxVerts + 1];
+    std::array<VECTOR2I, MaxVerts + 1> corners;
+    std::array<LINKED_ITEM*, MaxVerts + 1> segs;
+    std::array<bool, MaxVerts + 1> arcReversed;
 
     LINE pl;
     bool guardHit = false;
 
-    int i_start = MaxVerts / 2, i_end = i_start + 1;
+    int i_start = MaxVerts / 2;
+    int i_end   = i_start + 1;
 
     pl.SetWidth( aSeg->Width() );
     pl.SetLayers( aSeg->Layers() );
     pl.SetNet( aSeg->Net() );
     pl.SetOwner( this );
 
-    followLine( aSeg, false, i_start, MaxVerts, corners, segs, guardHit, aStopAtLockedJoints );
+    followLine( aSeg, false, i_start, MaxVerts, corners.data(), segs.data(), arcReversed.data(),
+                guardHit, aStopAtLockedJoints, aFollowLockedSegments );
 
     if( !guardHit )
-        followLine( aSeg, true, i_end, MaxVerts, corners, segs, guardHit, aStopAtLockedJoints );
+    {
+        followLine( aSeg, true, i_end, MaxVerts, corners.data(), segs.data(), arcReversed.data(),
+                    guardHit, aStopAtLockedJoints, aFollowLockedSegments );
+    }
 
     int n = 0;
 
-    SEGMENT* prev_seg = NULL;
+    LINKED_ITEM* prev_seg = nullptr;
     bool originSet = false;
+
+    SHAPE_LINE_CHAIN& line = pl.Line();
 
     for( int i = i_start + 1; i < i_end; i++ )
     {
-        const VECTOR2I& p = corners[i];
+        const VECTOR2I& p  = corners[i];
+        LINKED_ITEM*    li = segs[i];
 
-        pl.Line().Append( p );
+        if( !li || li->Kind() != ITEM::ARC_T )
+            line.Append( p );
 
-        if( segs[i] && prev_seg != segs[i] )
+        if( li && prev_seg != li )
         {
-            pl.LinkSegment( segs[i] );
+            if( li->Kind() == ITEM::ARC_T )
+            {
+                const ARC*       arc = static_cast<const ARC*>( li );
+                const SHAPE_ARC* sa  = static_cast<const SHAPE_ARC*>( arc->Shape() );
+
+                int      nSegs     = line.PointCount();
+                VECTOR2I last      = nSegs ? line.CPoint( -1 ) : VECTOR2I();
+                ssize_t lastShape = nSegs ? line.ArcIndex( static_cast<ssize_t>( nSegs ) - 1 ) : -1;
+
+                line.Append( arcReversed[i] ? sa->Reversed() : *sa );
+            }
+
+            pl.Link( li );
 
             // latter condition to avoid loops
-            if( segs[i] == aSeg && aOriginSegmentIndex && !originSet )
+            if( li == aSeg && aOriginSegmentIndex && !originSet )
             {
-                *aOriginSegmentIndex = n;
+                wxASSERT( n < line.SegmentCount() ||
+                          ( n == line.SegmentCount() && li->Kind() == ITEM::SEGMENT_T ) );
+                *aOriginSegmentIndex = line.PointCount() - 1;
                 originSet = true;
             }
-            n++;
         }
 
-        prev_seg = segs[i];
+        prev_seg = li;
     }
+
+    // Remove duplicate verts, but do NOT remove colinear segments here!
+    pl.Line().Simplify( false );
 
     assert( pl.SegmentCount() != 0 );
 
@@ -896,52 +1034,14 @@ void NODE::FindLineEnds( const LINE& aLine, JOINT& aA, JOINT& aB )
 }
 
 
-#if 0
-void NODE::MapConnectivity( JOINT* aStart, std::vector<JOINT*>& aFoundJoints )
-{
-    std::deque<JOINT*> searchQueue;
-    std::set<JOINT*> processed;
-
-    searchQueue.push_back( aStart );
-    processed.insert( aStart );
-
-    while( !searchQueue.empty() )
-    {
-        JOINT* current = searchQueue.front();
-        searchQueue.pop_front();
-
-        for( ITEM* item : current->LinkList() )
-        {
-            if( item->OfKind( ITEM::SEGMENT_T ) )
-            {
-                SEGMENT* seg = static_cast<SEGMENT *>( item );
-                JOINT* a = FindJoint( seg->Seg().A, seg );
-                JOINT* b = FindJoint( seg->Seg().B, seg );
-                JOINT* next = ( *a == *current ) ? b : a;
-
-                if( processed.find( next ) == processed.end() )
-                {
-                    processed.insert( next );
-                    searchQueue.push_back( next );
-                }
-            }
-        }
-    }
-
-    for(JOINT* jt : processed)
-        aFoundJoints.push_back( jt );
-}
-#endif
-
-
-int NODE::FindLinesBetweenJoints( JOINT& aA, JOINT& aB, std::vector<LINE>& aLines )
+int NODE::FindLinesBetweenJoints( const JOINT& aA, const JOINT& aB, std::vector<LINE>& aLines )
 {
     for( ITEM* item : aA.LinkList() )
     {
-        if( item->Kind() == ITEM::SEGMENT_T )
+        if( item->Kind() == ITEM::SEGMENT_T || item->Kind() == ITEM::ARC_T )
         {
-            SEGMENT* seg = static_cast<SEGMENT*>( item );
-            LINE line = AssembleLine( seg );
+            LINKED_ITEM* li = static_cast<LINKED_ITEM*>( item );
+            LINE line = AssembleLine( li );
 
             if( !line.Layers().Overlaps( aB.Layers() ) )
                 continue;
@@ -968,6 +1068,77 @@ int NODE::FindLinesBetweenJoints( JOINT& aA, JOINT& aB, std::vector<LINE>& aLine
 }
 
 
+void NODE::FixupVirtualVias()
+{
+    SEGMENT* locked_seg = nullptr;
+    std::vector<VVIA*> vvias;
+
+    for( auto& jointPair : m_joints )
+    {
+        JOINT joint = jointPair.second;
+
+        if( joint.Layers().IsMultilayer() )
+            continue;
+
+        int  n_seg = 0, n_solid = 0, n_vias = 0;
+        int  prev_w          = -1;
+        int  max_w           = -1;
+        bool is_width_change = false;
+        bool is_locked       = false;
+
+        for( const auto& lnk : joint.LinkList() )
+        {
+            if( lnk.item->OfKind( ITEM::VIA_T ) )
+            {
+                n_vias++;
+            }
+            else if( lnk.item->OfKind( ITEM::SOLID_T ) )
+            {
+                n_solid++;
+            }
+            else if( const auto t = dyn_cast<PNS::SEGMENT*>( lnk.item ) )
+            {
+                int w = t->Width();
+
+                if( prev_w >= 0 && w != prev_w )
+                {
+                    is_width_change = true;
+                }
+
+                max_w = std::max( w, max_w );
+                prev_w = w;
+
+                is_locked  = t->IsLocked();
+                locked_seg = t;
+            }
+        }
+
+        if( ( is_width_change || n_seg >= 3 || is_locked ) && n_solid == 0 && n_vias == 0 )
+        {
+            // fixme: the hull margin here is an ugly temporary workaround. The real fix
+            // is to use octagons for via force propagation.
+            vvias.push_back( new VVIA( joint.Pos(), joint.Layers().Start(),
+                                       max_w + 2 * PNS_HULL_MARGIN, joint.Net() ) );
+        }
+
+        if( is_locked )
+        {
+            const VECTOR2I& secondPos = ( locked_seg->Seg().A == joint.Pos() ) ?
+                                        locked_seg->Seg().B :
+                                        locked_seg->Seg().A;
+
+            vvias.push_back( new VVIA( secondPos, joint.Layers().Start(),
+                                       max_w + 2 * PNS_HULL_MARGIN, joint.Net() ) );
+        }
+    }
+
+    for( auto vvia : vvias )
+    {
+        Add( ItemCast<VIA>( std::move( std::unique_ptr<VVIA>( vvia ) ) ) );
+    }
+}
+
+
 JOINT* NODE::FindJoint( const VECTOR2I& aPos, int aLayer, int aNet )
 {
     JOINT::HASH_TAG tag;
@@ -984,7 +1155,7 @@ JOINT* NODE::FindJoint( const VECTOR2I& aPos, int aLayer, int aNet )
     }
 
     if( f == end )
-        return NULL;
+        return nullptr;
 
     while( f != end )
     {
@@ -994,7 +1165,7 @@ JOINT* NODE::FindJoint( const VECTOR2I& aPos, int aLayer, int aNet )
         ++f;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 
@@ -1058,13 +1229,16 @@ JOINT& NODE::touchJoint( const VECTOR2I& aPos, const LAYER_RANGE& aLayers, int a
 
 void JOINT::Dump() const
 {
-    wxLogTrace( "PNS", "joint layers %d-%d, net %d, pos %s, links: %d", m_layers.Start(),
-            m_layers.End(), m_tag.net, m_tag.pos.Format().c_str(), LinkCount() );
+    wxLogTrace( wxT( "PNS" ), wxT( "joint layers %d-%d, net %d, pos %s, links: %d" ),
+                m_layers.Start(),
+                m_layers.End(),
+                m_tag.net,
+                m_tag.pos.Format().c_str(),
+                LinkCount() );
 }
 
 
-void NODE::linkJoint( const VECTOR2I& aPos, const LAYER_RANGE& aLayers,
-                          int aNet, ITEM* aWhere )
+void NODE::linkJoint( const VECTOR2I& aPos, const LAYER_RANGE& aLayers, int aNet, ITEM* aWhere )
 {
     JOINT& jt = touchJoint( aPos, aLayers, aNet );
 
@@ -1072,8 +1246,7 @@ void NODE::linkJoint( const VECTOR2I& aPos, const LAYER_RANGE& aLayers,
 }
 
 
-void NODE::unlinkJoint( const VECTOR2I& aPos, const LAYER_RANGE& aLayers,
-                            int aNet, ITEM* aWhere )
+void NODE::unlinkJoint( const VECTOR2I& aPos, const LAYER_RANGE& aLayers, int aNet, ITEM* aWhere )
 {
     // fixme: remove dangling joints
     JOINT& jt = touchJoint( aPos, aLayers, aNet );
@@ -1106,10 +1279,11 @@ void NODE::Dump( bool aLong )
     JOINT_MAP::iterator j;
 
     if( aLong )
+    {
         for( j = m_joints.begin(); j != m_joints.end(); ++j )
         {
-            wxLogTrace( "PNS", "joint : %s, links : %d\n",
-                    j->second.GetPos().Format().c_str(), j->second.LinkCount() );
+            wxLogTrace( wxT( "PNS" ), wxT( "joint : %s, links : %d\n" ),
+                        j->second.GetPos().Format().c_str(), j->second.LinkCount() );
             JOINT::LINKED_ITEMS::const_iterator k;
 
             for( k = j->second.GetLinkList().begin(); k != j->second.GetLinkList().end(); ++k )
@@ -1121,8 +1295,9 @@ void NODE::Dump( bool aLong )
                 case ITEM::SEGMENT_T:
                     {
                         const SEGMENT* seg = static_cast<const SEGMENT*>( m_item );
-                        wxLogTrace( "PNS", " -> seg %s %s\n", seg->GetSeg().A.Format().c_str(),
-                                seg->GetSeg().B.Format().c_str() );
+                        wxLogTrace( wxT( "PNS" ), wxT( " -> seg %s %s\n" ),
+                                    seg->GetSeg().A.Format().c_str(),
+                                    seg->GetSeg().B.Format().c_str() );
                         break;
                     }
 
@@ -1131,7 +1306,7 @@ void NODE::Dump( bool aLong )
                 }
             }
         }
-
+    }
 
     int lines_count = 0;
 
@@ -1143,14 +1318,17 @@ void NODE::Dump( bool aLong )
         LINE::LinkedSegments* seg_refs = l->GetLinkedSegments();
 
         if( aLong )
-            wxLogTrace( "PNS", "Line: %s, net %d ", l->GetLine().Format().c_str(), l->GetNet() );
+        {
+            wxLogTrace( wxT( "PNS" ), wxT( "Line: %s, net %d " ),
+                        l->GetLine().Format().c_str(), l->GetNet() );
+        }
 
         for( std::vector<SEGMENT*>::iterator j = seg_refs->begin(); j != seg_refs->end(); ++j )
         {
-            wxLogTrace( "PNS", "%s ", (*j)->GetSeg().A.Format().c_str() );
+            wxLogTrace( wxT( "PNS" ), wxT( "%s " ), (*j)->GetSeg().A.Format().c_str() );
 
             if( j + 1 == seg_refs->end() )
-                wxLogTrace( "PNS", "%s\n", (*j)->GetSeg().B.Format().c_str() );
+                wxLogTrace( wxT( "PNS" ), wxT( "%s\n" ), (*j)->GetSeg().B.Format().c_str() );
 
             all_segs.erase( *j );
         }
@@ -1158,18 +1336,22 @@ void NODE::Dump( bool aLong )
         lines_count++;
     }
 
-    wxLogTrace( "PNS", "Local joints: %d, lines : %d \n", m_joints.size(), lines_count );
+    wxLogTrace( wxT( "PNS" ), wxT( "Local joints: %d, lines : %d \n" ),
+                m_joints.size(), lines_count );
 #endif
 }
 
 
 void NODE::GetUpdatedItems( ITEM_VECTOR& aRemoved, ITEM_VECTOR& aAdded )
 {
-    aRemoved.reserve( m_override.size() );
-    aAdded.reserve( m_index->Size() );
-
     if( isRoot() )
         return;
+
+    if( m_override.size() )
+        aRemoved.reserve( m_override.size() );
+
+    if( m_index->Size() )
+        aAdded.reserve( m_index->Size() );
 
     for( ITEM* item : m_override )
         aRemoved.push_back( item );
@@ -1177,6 +1359,7 @@ void NODE::GetUpdatedItems( ITEM_VECTOR& aRemoved, ITEM_VECTOR& aAdded )
     for( INDEX::ITEM_SET::iterator i = m_index->begin(); i != m_index->end(); ++i )
         aAdded.push_back( *i );
 }
+
 
 void NODE::releaseChildren()
 {
@@ -1207,40 +1390,42 @@ void NODE::releaseGarbage()
 
 
 void NODE::Commit( NODE* aNode )
+{
+    if( aNode->isRoot() )
+        return;
+
+    for( ITEM* item : aNode->m_override )
+        Remove( item );
+
+    for( ITEM* item : *aNode->m_index )
     {
-        if( aNode->isRoot() )
-            return;
-
-        for( ITEM* item : aNode->m_override )
-            Remove( item );
-
-        for( auto i : *aNode->m_index )
-        {
-            i->SetRank( -1 );
-            i->Unmark();
-            Add( std::unique_ptr<ITEM>( i ) );
-        }
-
-        releaseChildren();
-        releaseGarbage();
+        item->SetRank( -1 );
+        item->Unmark();
+        Add( std::unique_ptr<ITEM>( item ) );
     }
+
+    releaseChildren();
+    releaseGarbage();
+}
 
 
 void NODE::KillChildren()
 {
-    assert( isRoot() );
     releaseChildren();
 }
 
 
-void NODE::AllItemsInNet( int aNet, std::set<ITEM*>& aItems )
+void NODE::AllItemsInNet( int aNet, std::set<ITEM*>& aItems, int aKindMask )
 {
     INDEX::NET_ITEMS_LIST* l_cur = m_index->GetItemsForNet( aNet );
 
     if( l_cur )
     {
-        for( ITEM*item : *l_cur )
-            aItems.insert( item );
+        for( ITEM* item : *l_cur )
+        {
+            if( item->OfKind( aKindMask ) && item->IsRoutable() )
+                aItems.insert( item );
+        }
     }
 
     if( !isRoot() )
@@ -1248,54 +1433,41 @@ void NODE::AllItemsInNet( int aNet, std::set<ITEM*>& aItems )
         INDEX::NET_ITEMS_LIST* l_root = m_root->m_index->GetItemsForNet( aNet );
 
         if( l_root )
-            for( INDEX::NET_ITEMS_LIST::iterator i = l_root->begin(); i!= l_root->end(); ++i )
-                if( !Overrides( *i ) )
-                    aItems.insert( *i );
+        {
+            for( ITEM* item : *l_root )
+            {
+                if( !Overrides( item ) && item->OfKind( aKindMask ) && item->IsRoutable() )
+                    aItems.insert( item );
+            }
+        }
     }
 }
 
 
 void NODE::ClearRanks( int aMarkerMask )
 {
-    for( INDEX::ITEM_SET::iterator i = m_index->begin(); i != m_index->end(); ++i )
+    for( ITEM* item : *m_index )
     {
-        (*i)->SetRank( -1 );
-        (*i)->Mark( (*i)->Marker() & (~aMarkerMask) );
+        item->SetRank( -1 );
+        item->Mark( item->Marker() & ~aMarkerMask );
     }
 }
 
 
-int NODE::FindByMarker( int aMarker, ITEM_SET& aItems )
+void NODE::RemoveByMarker( int aMarker )
 {
-    for( INDEX::ITEM_SET::iterator i = m_index->begin(); i != m_index->end(); ++i )
+    std::vector<ITEM*> garbage;
+
+    for( ITEM* item : *m_index )
     {
-        if( (*i)->Marker() & aMarker )
-            aItems.Add( *i );
+        if( item->Marker() & aMarker )
+            garbage.emplace_back( item );
     }
 
-    return 0;
+    for( ITEM* item : garbage )
+        Remove( item );
 }
 
-
-int NODE::RemoveByMarker( int aMarker )
-{
-    std::list<ITEM*> garbage;
-
-    for( INDEX::ITEM_SET::iterator i = m_index->begin(); i != m_index->end(); ++i )
-    {
-        if( (*i)->Marker() & aMarker )
-        {
-            garbage.push_back( *i );
-        }
-    }
-
-    for( std::list<ITEM*>::const_iterator i = garbage.begin(), end = garbage.end(); i != end; ++i )
-    {
-        Remove( *i );
-    }
-
-    return 0;
-}
 
 SEGMENT* NODE::findRedundantSegment( const VECTOR2I& A, const VECTOR2I& B, const LAYER_RANGE& lr,
                                      int aNet )
@@ -1314,18 +1486,94 @@ SEGMENT* NODE::findRedundantSegment( const VECTOR2I& A, const VECTOR2I& B, const
             const VECTOR2I a2( seg2->Seg().A );
             const VECTOR2I b2( seg2->Seg().B );
 
-            if( seg2->Layers().Start() == lr.Start() &&
-                ((A == a2 && B == b2) || (A == b2 && B == a2)) )
+            if( seg2->Layers().Start() == lr.Start()
+                    && ( ( A == a2 && B == b2 ) || ( A == b2 && B == a2 ) ) )
+            {
                 return seg2;
+            }
         }
     }
 
     return nullptr;
 }
 
+
 SEGMENT* NODE::findRedundantSegment( SEGMENT* aSeg )
 {
     return findRedundantSegment( aSeg->Seg().A, aSeg->Seg().B, aSeg->Layers(), aSeg->Net() );
+}
+
+
+ARC* NODE::findRedundantArc( const VECTOR2I& A, const VECTOR2I& B, const LAYER_RANGE& lr,
+                             int aNet )
+{
+    JOINT* jtStart = FindJoint( A, lr.Start(), aNet );
+
+    if( !jtStart )
+        return nullptr;
+
+    for( ITEM* item : jtStart->LinkList() )
+    {
+        if( item->OfKind( ITEM::ARC_T ) )
+        {
+            ARC* seg2 = static_cast<ARC*>( item );
+
+            const VECTOR2I a2( seg2->Anchor( 0 ) );
+            const VECTOR2I b2( seg2->Anchor( 1 ) );
+
+            if( seg2->Layers().Start() == lr.Start()
+                    && ( ( A == a2 && B == b2 ) || ( A == b2 && B == a2 ) ) )
+            {
+                return seg2;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+
+ARC* NODE::findRedundantArc( ARC* aArc )
+{
+    return findRedundantArc( aArc->Anchor( 0 ), aArc->Anchor( 1 ), aArc->Layers(), aArc->Net() );
+}
+
+
+int NODE::QueryJoints( const BOX2I& aBox, std::vector<JOINT*>& aJoints, LAYER_RANGE aLayerMask,
+                       int aKindMask )
+{
+    int n = 0;
+
+    aJoints.clear();
+
+    for( JOINT_MAP::value_type& j : m_joints )
+    {
+        if( !j.second.Layers().Overlaps( aLayerMask ) )
+            continue;
+
+        if( aBox.Contains( j.second.Pos() ) && j.second.LinkCount( aKindMask ) )
+        {
+            aJoints.push_back( &j.second );
+            n++;
+        }
+    }
+
+    if( isRoot() )
+        return n;
+
+    for( JOINT_MAP::value_type& j : m_root->m_joints )
+    {
+        if( !Overrides( &j.second ) && j.second.Layers().Overlaps( aLayerMask ) )
+        {
+            if( aBox.Contains( j.second.Pos() ) && j.second.LinkCount( aKindMask ) )
+            {
+                aJoints.push_back( &j.second );
+                n++;
+            }
+        }
+    }
+
+    return n;
 }
 
 

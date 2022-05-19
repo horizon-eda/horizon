@@ -22,13 +22,16 @@
 #ifndef __PNS_DRAGGER_H
 #define __PNS_DRAGGER_H
 
+#include <memory>
 #include <math/vector2d.h>
 
 #include "pns_node.h"
 #include "pns_via.h"
 #include "pns_line.h"
-#include "pns_algo_base.h"
+#include "pns_drag_algo.h"
 #include "pns_itemset.h"
+#include "pns_layerset.h"
+#include "pns_mouse_trail_tracer.h"
 
 namespace PNS {
 
@@ -37,22 +40,15 @@ class SHOVE;
 class OPTIMIZER;
 
 /**
- * Class DRAGGER
+ * DRAGGER
  *
  * Via, segment and corner dragging algorithm.
  */
-class DRAGGER : public ALGO_BASE
+class DRAGGER : public DRAG_ALGO
 {
 public:
      DRAGGER( ROUTER* aRouter );
     ~DRAGGER();
-
-    /**
-     * Function SetWorld()
-     *
-     * Sets the board to work on.
-     */
-    void SetWorld( NODE* aWorld );
 
     /**
      * Function Start()
@@ -60,7 +56,7 @@ public:
      * Starts routing a single track at point aP, taking item aStartItem as anchor
      * (unless NULL). Returns true if a dragging operation has started.
      */
-    bool Start( const VECTOR2I& aP, ITEM* aStartItem );
+    virtual bool Start( const VECTOR2I& aP, ITEM_SET& aPrimitives ) override;
 
     /**
      * Function Drag()
@@ -68,7 +64,7 @@ public:
      * Drags the current segment/corner/via to the point aP.
      * @return true, if dragging finished with success.
      */
-    bool Drag( const VECTOR2I& aP );
+    bool Drag( const VECTOR2I& aP ) override;
 
     /**
      * Function FixRoute()
@@ -77,7 +73,7 @@ public:
      * and eventually commits it to the world.
      * @return true, if dragging finished with success.
      */
-    bool FixRoute();
+    bool FixRoute() override;
 
     /**
      * Function CurrentNode()
@@ -85,43 +81,74 @@ public:
      * Returns the most recent world state, including all
      * items changed due to dragging operation.
      */
-    NODE* CurrentNode() const;
+    NODE* CurrentNode() const override;
+
+    /**
+     * Function CurrentNets()
+     *
+     * Returns the net code(s) of currently routed track(s).
+     */
+    const std::vector<int> CurrentNets() const override
+    {
+        return std::vector<int>( 1, m_draggedLine.Net() );
+    }
+
+    /**
+     * Function CurrentLayer()
+     *
+     * Returns the layer of currently routed track.
+     */
+    int CurrentLayer() const override
+    {
+        return m_draggedLine.Layer();
+    }
 
     /**
      * Function Traces()
      *
      * Returns the set of dragged items.
      */
-    const ITEM_SET Traces();
+    const ITEM_SET Traces() override;
 
-    /// @copydoc ALGO_BASE::Logger()
-    virtual LOGGER* Logger() override;
-
-    void SetMode( int aDragMode );
+    void SetMode( int aDragMode ) override;
 
 private:
-
+    const ITEM_SET findViaFanoutByHandle ( NODE *aNode, const VIA_HANDLE& handle );
 
     bool dragMarkObstacles( const VECTOR2I& aP );
     bool dragShove(const VECTOR2I& aP );
+    bool dragWalkaround(const VECTOR2I& aP );
     bool startDragSegment( const VECTOR2D& aP, SEGMENT* aSeg );
-    bool startDragVia( const VECTOR2D& aP, VIA* aVia );
-    void dumbDragVia( VIA* aVia, NODE* aNode, const VECTOR2I& aP );
+    bool startDragArc( const VECTOR2D& aP, ARC* aArc );
+    bool startDragVia( VIA* aVia );
+    bool dragViaMarkObstacles( const VIA_HANDLE& aHandle, NODE* aNode, const VECTOR2I& aP );
+    bool dragViaWalkaround( const VIA_HANDLE& aHandle, NODE* aNode, const VECTOR2I& aP );
+    void optimizeAndUpdateDraggedLine( LINE& aDragged, const LINE& aOrig, const VECTOR2I& aP );
+    bool propagateViaForces( NODE* node, std::set<VIA*>& vias );
+    bool tryWalkaround( NODE* aNode, LINE& aOrig, LINE& aWalk );
+    VVIA* checkVirtualVia( const VECTOR2D& aP, SEGMENT* aSeg );
 
-    NODE*    m_world;
-    NODE*    m_lastNode;
-    int      m_mode;
-    LINE     m_draggedLine;
-    VIA*     m_draggedVia;
-    LINE     m_lastValidDraggedLine;
-    SHOVE*   m_shove;
-    int      m_draggedSegmentIndex;
-    bool     m_dragStatus;
-    PNS_MODE m_currentMode;
-    ITEM_SET m_origViaConnections;
-    VIA*     m_initialVia;
-    ITEM_SET m_draggedItems;
-    bool     m_freeAngleMode;
+
+    VIA_HANDLE             m_initialVia;
+    VIA_HANDLE             m_draggedVia;
+
+    NODE*                  m_lastNode;
+    int                    m_mode;
+    LINE                   m_draggedLine;
+    LINE                   m_lastDragSolution;
+    std::unique_ptr<SHOVE> m_shove;
+    int                    m_draggedSegmentIndex;
+    bool                   m_dragStatus;
+    PNS_MODE               m_currentMode;
+    ITEM_SET               m_origViaConnections;
+    VECTOR2D               m_lastValidPoint;
+
+    ///< Contains the list of items that are currently modified by the dragger
+    ITEM_SET               m_draggedItems;
+
+    ///< If true, moves the connection lines without maintaining 45 degrees corners
+    bool                   m_freeAngleMode;
+    MOUSE_TRAIL_TRACER     m_mouseTrailTracer;
 };
 
 }

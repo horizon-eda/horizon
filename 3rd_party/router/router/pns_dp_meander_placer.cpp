@@ -2,7 +2,7 @@
  * KiRouter - a push-and-(sometimes-)shove PCB router
  *
  * Copyright (C) 2013-2014 CERN
- * Copyright (C) 2016 KiCad Developers, see AUTHORS.txt for contributors.
+ * Copyright (C) 2016-2021 KiCad Developers, see AUTHORS.txt for contributors.
  * Author: Tomasz Wlostowski <tomasz.wlostowski@cern.ch>
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -21,7 +21,7 @@
 
 #include <core/optional.h>
 
-//#include <base_units.h> // God forgive me doing this...
+#include "base_units.h" // God forgive me doing this...
 
 #include "pns_node.h"
 #include "pns_itemset.h"
@@ -29,21 +29,23 @@
 #include "pns_dp_meander_placer.h"
 #include "pns_diff_pair.h"
 #include "pns_router.h"
-#include "pns_utils.h"
-#include "util/geom_util.hpp"
+#include "pns_solid.h"
 
 namespace PNS {
 
 DP_MEANDER_PLACER::DP_MEANDER_PLACER( ROUTER* aRouter ) :
     MEANDER_PLACER_BASE( aRouter )
 {
-    m_world = NULL;
-    m_currentNode = NULL;
+    m_world       = nullptr;
+    m_currentNode = nullptr;
+
+    m_padToDieP = 0;
+    m_padToDieN = 0;
 
     // Init temporary variables (do not leave uninitialized members)
-    m_initialSegment = NULL;
-    m_lastLength = 0;
-    m_lastStatus = TOO_SHORT;
+    m_initialSegment = nullptr;
+    m_lastLength     = 0;
+    m_lastStatus     = TOO_SHORT;
 }
 
 
@@ -69,20 +71,15 @@ NODE* DP_MEANDER_PLACER::CurrentNode( bool aLoopsRemoved ) const
 
 bool DP_MEANDER_PLACER::Start( const VECTOR2I& aP, ITEM* aStartItem )
 {
-    VECTOR2I p;
-
-    if( !aStartItem || !aStartItem->OfKind( ITEM::SEGMENT_T ) )
+    if( !aStartItem || !aStartItem->OfKind( ITEM::SEGMENT_T | ITEM::ARC_T ) )
     {
-        Router()->SetFailureReason( ( "Please select a track whose length you want to tune." ) );
+        Router()->SetFailureReason( _( "Please select a track whose length you want to tune." ) );
         return false;
     }
 
-    m_initialSegment = static_cast<SEGMENT*>( aStartItem );
-
-    p = m_initialSegment->Seg().NearestPoint( aP );
-
-    m_currentNode=NULL;
-    m_currentStart = p;
+    m_initialSegment = static_cast<LINKED_ITEM*>( aStartItem );
+    m_currentNode    = nullptr;
+    m_currentStart   = getSnappedStartPoint( m_initialSegment, aP );
 
     m_world = Router()->GetWorld()->Branch();
 
@@ -90,21 +87,43 @@ bool DP_MEANDER_PLACER::Start( const VECTOR2I& aP, ITEM* aStartItem )
 
     if( !topo.AssembleDiffPair( m_initialSegment, m_originPair ) )
     {
-        Router()->SetFailureReason( ( "Unable to find complementary differential pair "
-                                       "net for length tuning. Make sure the names of the nets belonging "
-                                       "to a differential pair end with either _N/_P or +/-." ) );
+        Router()->SetFailureReason( _( "Unable to find complementary differential pair "
+                                       "net for length tuning. Make sure the names of the nets "
+                                       "belonging to a differential pair end with either _N/_P "
+                                       "or +/-." ) );
         return false;
     }
 
     if( m_originPair.Gap() < 0 )
         m_originPair.SetGap( Router()->Sizes().DiffPairGap() );
 
-    if( !m_originPair.PLine().SegmentCount() ||
-        !m_originPair.NLine().SegmentCount() )
+    if( !m_originPair.PLine().SegmentCount() || !m_originPair.NLine().SegmentCount() )
         return false;
 
-    m_tunedPathP = topo.AssembleTrivialPath( m_originPair.PLine().GetLink( 0 ) );
-    m_tunedPathN = topo.AssembleTrivialPath( m_originPair.NLine().GetLink( 0 ) );
+    SOLID* padA = nullptr;
+    SOLID* padB = nullptr;
+
+    m_tunedPathP = topo.AssembleTuningPath( m_originPair.PLine().GetLink( 0 ), &padA, &padB );
+
+    m_padToDieP = 0;
+
+    if( padA )
+        m_padToDieP += padA->GetPadToDie();
+
+    if( padB )
+        m_padToDieP += padB->GetPadToDie();
+
+    m_tunedPathN = topo.AssembleTuningPath( m_originPair.NLine().GetLink( 0 ), &padA, &padB );
+
+    m_padToDieN = 0;
+
+    if( padA )
+        m_padToDieN += padA->GetPadToDie();
+
+    if( padB )
+        m_padToDieN += padB->GetPadToDie();
+
+    m_padToDieLength = std::max( m_padToDieP, m_padToDieN );
 
     m_world->Remove( m_originPair.PLine() );
     m_world->Remove( m_originPair.NLine() );
@@ -120,24 +139,10 @@ void DP_MEANDER_PLACER::release()
 }
 
 
-int DP_MEANDER_PLACER::origPathLength() const
+long long int DP_MEANDER_PLACER::origPathLength() const
 {
-    int totalP = 0;
-    int totalN = 0;
-
-    for( const ITEM* item : m_tunedPathP.CItems() )
-    {
-        if( const LINE* l = dynamic_cast<const LINE*>( item ) )
-            totalP += l->CLine().Length();
-
-    }
-
-    for( const ITEM* item : m_tunedPathN.CItems() )
-    {
-        if( const LINE* l = dynamic_cast<const LINE*>( item ) )
-            totalN += l->CLine().Length();
-    }
-
+    long long int totalP = m_padToDieLength + lineLength( m_tunedPathP );
+    long long int totalN = m_padToDieLength + lineLength( m_tunedPathN );
     return std::max( totalP, totalN );
 }
 
@@ -187,12 +192,6 @@ bool DP_MEANDER_PLACER::Move( const VECTOR2I& aP, ITEM* aEndItem )
     if( coupledSegments.size() == 0 )
         return false;
 
-    //Router()->DisplayDebugLine( tuned.CP(), 5, 20000 );
-    //Router()->DisplayDebugLine( tuned.CN(), 4, 20000 );
-
-    //Router()->DisplayDebugLine( m_originPair.CP(), 5, 20000 );
-    //Router()->DisplayDebugLine( m_originPair.CN(), 4, 20000 );
-
     m_result = MEANDERED_LINE( this, true );
     m_result.SetWidth( tuned.Width() );
 
@@ -205,14 +204,14 @@ bool DP_MEANDER_PLACER::Move( const VECTOR2I& aP, ITEM* aEndItem )
 
     for( const ITEM* item : m_tunedPathP.CItems() )
     {
-        if( const LINE* l = dynamic_cast<const LINE*>( item ) )
-            Dbg()->AddLine( l->CLine(), 5, 10000 );
+        if( const LINE* l = dyn_cast<const LINE*>( item ) )
+            PNS_DBG( Dbg(), AddLine, l->CLine(), YELLOW, 10000, "tuned-path-p" );
     }
 
     for( const ITEM* item : m_tunedPathN.CItems() )
     {
-        if( const LINE* l = dynamic_cast<const LINE*>( item ) )
-            Dbg()->AddLine( l->CLine(), 5, 10000 );
+        if( const LINE* l = dyn_cast<const LINE*>( item ) )
+            PNS_DBG( Dbg(), AddLine, l->CLine(), YELLOW, 10000, "tuned-path-n" );
     }
 
     int curIndexP = 0, curIndexN = 0;
@@ -221,30 +220,76 @@ bool DP_MEANDER_PLACER::Move( const VECTOR2I& aP, ITEM* aEndItem )
     {
         SEG base = baselineSegment( sp );
 
-        Dbg()->AddSegment( base, 3 );
+        PNS_DBG( Dbg(), AddSegment, base, GREEN, "dp-baseline" );
 
-        while( sp.indexP >= curIndexP )
+        while( sp.indexP >= curIndexP && curIndexP != -1 )
         {
-            m_result.AddCorner( tunedP.CPoint( curIndexP ), tunedN.CPoint( curIndexN ) );
-            curIndexP++;
+            if( tunedP.IsArcSegment( curIndexP ) )
+            {
+                ssize_t arcIndex = tunedP.ArcIndex( curIndexP );
+
+                m_result.AddArcAndPt( tunedP.Arc( arcIndex ), tunedN.CPoint( curIndexN ) );
+            }
+            else
+            {
+                m_result.AddCorner( tunedP.CPoint( curIndexP ), tunedN.CPoint( curIndexN ) );
+            }
+
+            curIndexP = tunedP.NextShape( curIndexP );
         }
 
-        while( sp.indexN >= curIndexN )
+        while( sp.indexN >= curIndexN && curIndexN != -1 )
         {
-            m_result.AddCorner( tunedP.CPoint( sp.indexP ), tunedN.CPoint( curIndexN ) );
-            curIndexN++;
+            if( tunedN.IsArcSegment( curIndexN ) )
+            {
+                ssize_t arcIndex = tunedN.ArcIndex( curIndexN );
+
+                m_result.AddPtAndArc( tunedP.CPoint( sp.indexP ), tunedN.Arc( arcIndex ) );
+            }
+            else
+            {
+                m_result.AddCorner( tunedP.CPoint( sp.indexP ), tunedN.CPoint( curIndexN ) );
+            }
+
+            curIndexN = tunedN.NextShape( curIndexN );
         }
 
-        m_result.MeanderSegment( base );
+        m_result.MeanderSegment( base, base.Side( aP ) < 0 );
     }
 
-    while( curIndexP < tunedP.PointCount() )
-        m_result.AddCorner( tunedP.CPoint( curIndexP++ ), tunedN.CPoint( curIndexN ) );
+    while( curIndexP < tunedP.PointCount() && curIndexP != -1 )
+    {
+        if( tunedP.IsArcSegment( curIndexP ) )
+        {
+            ssize_t arcIndex = tunedP.ArcIndex( curIndexP );
 
-    while( curIndexN < tunedN.PointCount() )
-        m_result.AddCorner( tunedP.CPoint( -1 ), tunedN.CPoint( curIndexN++ ) );
+            m_result.AddArcAndPt( tunedP.Arc( arcIndex ), tunedN.CPoint( curIndexN ) );
+        }
+        else
+        {
+            m_result.AddCorner( tunedP.CPoint( curIndexP ), tunedN.CPoint( curIndexN ) );
+        }
 
-    int dpLen = origPathLength();
+        curIndexP = tunedP.NextShape( curIndexP );
+    }
+
+    while( curIndexN < tunedN.PointCount() && curIndexN != -1 )
+    {
+        if( tunedN.IsArcSegment( curIndexN ) )
+        {
+            ssize_t arcIndex = tunedN.ArcIndex( curIndexN );
+
+            m_result.AddPtAndArc( tunedP.CPoint( -1 ), tunedN.Arc( arcIndex ) );
+        }
+        else
+        {
+            m_result.AddCorner( tunedP.CPoint( -1 ), tunedN.CPoint( curIndexN ) );
+        }
+
+        curIndexN = tunedN.NextShape( curIndexN );
+    }
+
+    long long int dpLen = origPathLength();
 
     m_lastStatus = TUNED;
 
@@ -275,7 +320,8 @@ bool DP_MEANDER_PLACER::Move( const VECTOR2I& aP, ITEM* aEndItem )
 
         m_lastLength += std::max( tunedP.Length(), tunedN.Length() );
 
-        int comp = compareWithTolerance( m_lastLength - m_settings.m_targetLength, 0, m_settings.m_lengthTolerance );
+        int comp = compareWithTolerance( m_lastLength - m_settings.m_targetLength, 0,
+                                         m_settings.m_lengthTolerance );
 
         if( comp > 0 )
             m_lastStatus = TOO_LONG;
@@ -309,8 +355,31 @@ bool DP_MEANDER_PLACER::FixRoute( const VECTOR2I& aP, ITEM* aEndItem, bool aForc
     m_currentNode->Add( lP );
     m_currentNode->Add( lN );
 
-    Router()->CommitRouting( m_currentNode );
+    CommitPlacement();
 
+    return true;
+}
+
+
+bool DP_MEANDER_PLACER::AbortPlacement()
+{
+    m_world->KillChildren();
+    return true;
+}
+
+
+bool DP_MEANDER_PLACER::HasPlacedAnything() const
+{
+     return m_originPair.CP().SegmentCount() > 0 || m_originPair.CN().SegmentCount() > 0;
+}
+
+
+bool DP_MEANDER_PLACER::CommitPlacement()
+{
+    if( m_currentNode )
+        Router()->CommitRouting( m_currentNode );
+
+    m_currentNode = nullptr;
     return true;
 }
 
@@ -359,31 +428,31 @@ int DP_MEANDER_PLACER::CurrentLayer() const
 }
 
 
-const std::string DP_MEANDER_PLACER::TuningInfo() const
+const wxString DP_MEANDER_PLACER::TuningInfo( EDA_UNITS aUnits ) const
 {
-    std::string status;
+    wxString status;
 
     switch( m_lastStatus )
     {
     case TOO_LONG:
-        status = ( "Too long: " );
+        status = _( "Too long: " );
         break;
     case TOO_SHORT:
-        status = ("Too short: " );
+        status = _("Too short: " );
         break;
     case TUNED:
-        status = ( "Tuned: " );
+        status = _( "Tuned: " );
         break;
     default:
-        return ( "?" );
+        return _( "?" );
     }
 
-    status += horizon::dim_to_string(m_lastLength, false);
-    status += "/";
-    status += horizon::dim_to_string(m_settings.m_targetLength, false);
-    status += " (gap: ";
-    status += horizon::dim_to_string(m_originPair.Gap(), false);
-    status += ")";
+    status += ::MessageTextFromValue( aUnits, m_lastLength );
+    status += wxT( "/" );
+    status += ::MessageTextFromValue( aUnits, m_settings.m_targetLength );
+    status += wxT( " (gap: " );
+    status += ::MessageTextFromValue( aUnits, m_originPair.Gap() );
+    status += wxT( ")" );
 
     return status;
 }

@@ -108,6 +108,13 @@ ToolResponse ToolDragKeepSlope::update(const ToolArgs &args)
             return ToolResponse::commit();
         }
 
+        case InToolActionID::LMB_RELEASE:
+            if (is_transient) {
+                doc.b->get_board()->update_airwires(false, nets);
+                return ToolResponse::commit();
+            }
+            break;
+
         case InToolActionID::RMB:
         case InToolActionID::CANCEL:
             return ToolResponse::revert();

@@ -28,28 +28,29 @@
 #include <geometry/shape_segment.h>
 #include <geometry/shape_line_chain.h>
 
-#include "pns_item.h"
 #include "pns_line.h"
+#include "pns_linked_item.h"
 
 namespace PNS {
 
 class NODE;
 
-class SEGMENT : public ITEM
+class SEGMENT : public LINKED_ITEM
 {
 public:
     SEGMENT() :
-        ITEM( SEGMENT_T )
+        LINKED_ITEM( SEGMENT_T )
     {}
 
     SEGMENT( const SEG& aSeg, int aNet ) :
-        ITEM( SEGMENT_T ), m_seg( aSeg, 0 )
+        LINKED_ITEM( SEGMENT_T ),
+        m_seg( aSeg, 0 )
     {
         m_net = aNet;
     }
 
     SEGMENT( const LINE& aParentLine, const SEG& aSeg ) :
-        ITEM( SEGMENT_T ),
+        LINKED_ITEM( SEGMENT_T ),
         m_seg( aSeg, aParentLine.Width() )
     {
         m_net = aParentLine.Net();
@@ -70,22 +71,12 @@ public:
         return static_cast<const SHAPE*>( &m_seg );
     }
 
-    void SetLayer( int aLayer )
-    {
-        SetLayers( LAYER_RANGE( aLayer ) );
-    }
-
-    int Layer() const override
-    {
-        return Layers().Start();
-    }
-
-    void SetWidth( int aWidth )
+    void SetWidth( int aWidth ) override
     {
         m_seg.SetWidth(aWidth);
     }
 
-    int Width() const
+    int Width() const override
     {
         return m_seg.GetWidth();
     }
@@ -97,7 +88,7 @@ public:
 
     const SHAPE_LINE_CHAIN CLine() const
     {
-        return SHAPE_LINE_CHAIN( m_seg.GetSeg().A, m_seg.GetSeg().B );
+        return SHAPE_LINE_CHAIN( { m_seg.GetSeg().A, m_seg.GetSeg().B } );
     }
 
     void SetEnds( const VECTOR2I& a, const VECTOR2I& b )
@@ -111,7 +102,7 @@ public:
         m_seg.SetSeg( SEG (tmp.B , tmp.A ) );
     }
 
-    const SHAPE_LINE_CHAIN Hull( int aClearance, int aWalkaroundThickness ) const override;
+    const SHAPE_LINE_CHAIN Hull( int aClearance, int aWalkaroundThickness, int aLayer = -1 ) const override;
 
     virtual VECTOR2I Anchor( int n ) const override
     {

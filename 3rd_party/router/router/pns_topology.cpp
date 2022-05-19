@@ -2,7 +2,7 @@
  * KiRouter - a push-and-(sometimes-)shove PCB router
  *
  * Copyright (C) 2013-2015 CERN
- * Copyright (C) 2016 KiCad Developers, see AUTHORS.txt for contributors.
+ * Copyright (C) 2016-2021 KiCad Developers, see AUTHORS.txt for contributors.
  * Author: Tomasz Wlostowski <tomasz.wlostowski@cern.ch>
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -30,7 +30,8 @@
 #include "pns_diff_pair.h"
 #include "pns_topology.h"
 
-//#include <class_board.h>
+//#include <board.h>
+//#include <pad.h>
 
 namespace PNS {
 
@@ -39,7 +40,7 @@ bool TOPOLOGY::SimplifyLine( LINE* aLine )
     if( !aLine->IsLinked() || !aLine->SegmentCount() )
         return false;
 
-    SEGMENT* root = aLine->GetLink(0);
+    LINKED_ITEM* root = aLine->GetLink( 0 );
     LINE l = m_world->AssembleLine( root );
     SHAPE_LINE_CHAIN simplified( l.CLine() );
 
@@ -106,10 +107,11 @@ bool TOPOLOGY::LeadingRatLine( const LINE* aTrack, SHAPE_LINE_CHAIN& aRatLine )
 
     JOINT* jt = tmpNode->FindJoint( track.CPoint( -1 ), &track );
 
-    if( !jt )
+    if( !jt || jt->Net() <= 0 )
        return false;
 
-    if( ( !track.EndsWithVia() && jt->LinkCount() >= 2 ) || ( track.EndsWithVia() && jt->LinkCount() >= 3 ) ) // we got something connected
+    if( ( !track.EndsWithVia() && jt->LinkCount() >= 2 )
+            || ( track.EndsWithVia() && jt->LinkCount() >= 3 ) ) // we got something connected
     {
         end = jt->Pos();
     }
@@ -149,7 +151,7 @@ ITEM* TOPOLOGY::NearestUnconnectedItem( JOINT* aStart, int* aAnchor, int aKindMa
     }
 
     int best_dist = INT_MAX;
-    ITEM* best = NULL;
+    ITEM* best = nullptr;
 
     for( ITEM* item : disconnected )
     {
@@ -176,22 +178,23 @@ ITEM* TOPOLOGY::NearestUnconnectedItem( JOINT* aStart, int* aAnchor, int aKindMa
 }
 
 
-bool TOPOLOGY::followTrivialPath( LINE* aLine, bool aLeft, ITEM_SET& aSet, std::set<ITEM*>& aVisited )
+bool TOPOLOGY::followTrivialPath( LINE* aLine, bool aLeft, ITEM_SET& aSet,
+                                  std::set<ITEM*>& aVisited, JOINT** aTerminalJoint )
 {
     assert( aLine->IsLinked() );
 
-    VECTOR2I anchor = aLeft ? aLine->CPoint( 0 )              : aLine->CPoint( -1 );
-    SEGMENT* last   = aLeft ? aLine->LinkedSegments().front() : aLine->LinkedSegments().back();
-    JOINT* jt = m_world->FindJoint( anchor, aLine );
+    VECTOR2I     anchor = aLeft ? aLine->CPoint( 0 ) : aLine->CPoint( -1 );
+    LINKED_ITEM* last   = aLeft ? aLine->Links().front() : aLine->Links().back();
+    JOINT*       jt     = m_world->FindJoint( anchor, aLine );
 
-    assert( jt != NULL );
+    assert( jt != nullptr );
 
     aVisited.insert( last );
 
     if( jt->IsNonFanoutVia() || jt->IsTraceWidthChange() )
     {
-        ITEM* via = NULL;
-        SEGMENT* next_seg = NULL;
+        ITEM* via = nullptr;
+        SEGMENT* next_seg = nullptr;
 
         for( ITEM* link : jt->Links().Items() )
         {
@@ -202,7 +205,12 @@ bool TOPOLOGY::followTrivialPath( LINE* aLine, bool aLeft, ITEM_SET& aSet, std::
         }
 
         if( !next_seg )
+        {
+            if( aTerminalJoint )
+                *aTerminalJoint = jt;
+
             return false;
+        }
 
         LINE l = m_world->AssembleLine( next_seg );
 
@@ -228,45 +236,196 @@ bool TOPOLOGY::followTrivialPath( LINE* aLine, bool aLeft, ITEM_SET& aSet, std::
             aSet.Add( l );
         }
 
-        return followTrivialPath( &l, aLeft, aSet, aVisited );
+        return followTrivialPath( &l, aLeft, aSet, aVisited, aTerminalJoint );
     }
+
+    if( aTerminalJoint )
+        *aTerminalJoint = jt;
 
     return false;
 }
 
 
-const ITEM_SET TOPOLOGY::AssembleTrivialPath( ITEM* aStart )
+const ITEM_SET TOPOLOGY::AssembleTrivialPath( ITEM* aStart,
+                                              std::pair<JOINT*, JOINT*>* aTerminalJoints,
+                                              bool aFollowLockedSegments )
 {
-    ITEM_SET path;
+    ITEM_SET        path;
     std::set<ITEM*> visited;
-    SEGMENT* seg;
-    VIA* via;
+    LINKED_ITEM*    seg = nullptr;
 
-    seg = dynamic_cast<SEGMENT*> (aStart);
-
-    if(!seg && (via = dynamic_cast<VIA*>( aStart ) ) )
+    if( aStart->Kind() == ITEM::VIA_T )
     {
-        JOINT *jt = m_world->FindJoint( via->Pos(), via );
+        VIA*   via = static_cast<VIA*>( aStart );
+        JOINT* jt  = m_world->FindJoint( via->Pos(), via );
 
         if( !jt->IsNonFanoutVia() )
             return ITEM_SET();
 
-        for( auto entry : jt->Links().Items() )
-            if( ( seg = dynamic_cast<SEGMENT*>( entry.item ) ) )
+        for( const ITEM_SET::ENTRY& entry : jt->Links().Items() )
+        {
+            if( entry.item->OfKind( ITEM::SEGMENT_T | ITEM::ARC_T ) )
+            {
+                seg = static_cast<LINKED_ITEM*>( entry.item );
                 break;
+            }
+        }
+    }
+    else if( aStart->OfKind( ITEM::SEGMENT_T | ITEM::ARC_T ) )
+    {
+        seg = static_cast<LINKED_ITEM*>( aStart );
     }
 
     if( !seg )
         return ITEM_SET();
 
-    LINE l = m_world->AssembleLine( seg );
+    // Assemble a line following through locked segments
+    // TODO: consider if we want to allow tuning lines with different widths in the future
+    LINE l = m_world->AssembleLine( seg, nullptr, false, true );
 
     path.Add( l );
 
-    followTrivialPath( &l, false, path, visited );
-    followTrivialPath( &l, true, path, visited );
+    JOINT* jointA = nullptr;
+    JOINT* jointB = nullptr;
+
+    followTrivialPath( &l, false, path, visited, &jointA );
+    followTrivialPath( &l, true, path, visited, &jointB );
+
+    if( aTerminalJoints )
+    {
+        wxASSERT( jointA && jointB );
+        *aTerminalJoints = std::make_pair( jointA, jointB );
+    }
 
     return path;
+}
+
+
+const ITEM_SET TOPOLOGY::AssembleTuningPath( ITEM* aStart, SOLID** aStartPad, SOLID** aEndPad )
+{
+    std::pair<JOINT*, JOINT*> joints;
+    ITEM_SET initialPath = AssembleTrivialPath( aStart, &joints, true );
+
+    return initialPath;
+/*
+    PAD* padA = nullptr;
+    PAD* padB = nullptr;
+
+    auto getPadFromJoint =
+            []( JOINT* aJoint, PAD** aTargetPad, SOLID** aTargetSolid )
+            {
+                for( ITEM* item : aJoint->LinkList() )
+                {
+                    if( item->OfKind( ITEM::SOLID_T ) )
+                    {
+                        BOARD_ITEM* bi = static_cast<SOLID*>( item )->Parent();
+
+                        if( bi->Type() == PCB_PAD_T )
+                        {
+                            *aTargetPad = static_cast<PAD*>( bi );
+
+                            if( aTargetSolid )
+                                *aTargetSolid = static_cast<SOLID*>( item );
+                        }
+
+                        break;
+                    }
+                }
+            };
+
+    if( joints.first )
+        getPadFromJoint( joints.first, &padA, aStartPad );
+
+    if( joints.second )
+        getPadFromJoint( joints.second, &padB, aEndPad );
+
+    if( !padA && !padB )
+        return initialPath;
+
+    auto clipLineToPad =
+            []( SHAPE_LINE_CHAIN& aLine, PAD* aPad, bool aForward = true )
+            {
+                const std::shared_ptr<SHAPE_POLY_SET>& shape = aPad->GetEffectivePolygon();
+
+                int start = aForward ? 0 : aLine.PointCount() - 1;
+                int delta = aForward ? 1 : -1;
+
+                // Skip the "first" (or last) vertex, we already know it's contained in the pad
+                int clip = start;
+
+                for( int vertex = start + delta;
+                     aForward ? vertex < aLine.PointCount() : vertex >= 0;
+                     vertex += delta )
+                {
+                    SEG seg( aLine.GetPoint( vertex ), aLine.GetPoint( vertex - delta ) );
+
+                    bool containsA = shape->Contains( seg.A );
+                    bool containsB = shape->Contains( seg.B );
+
+                    if( containsA && containsB )
+                    {
+                        // Whole segment is inside: clip out this segment
+                        clip = vertex;
+                    }
+                    else if( containsB &&
+                             ( aForward ? vertex < aLine.PointCount() - 1 : vertex > 0 ) )
+                    {
+                        // Only one point inside: Find the intersection
+                        VECTOR2I loc;
+
+                        if( shape->Collide( seg, 0, nullptr, &loc ) )
+                        {
+                            aLine.Replace( vertex - delta, vertex - delta, loc );
+                        }
+                    }
+                }
+
+                if( !aForward && clip < start )
+                    aLine.Remove( clip + 1, start );
+                else if( clip > start )
+                    aLine.Remove( start, clip - 1 );
+
+                // Now connect the dots
+                aLine.Insert( aForward ? 0 : aLine.PointCount(), aPad->GetPosition() );
+            };
+
+    auto processPad =
+            [&]( JOINT* aJoint, PAD* aPad )
+            {
+                const std::shared_ptr<SHAPE_POLY_SET>& shape = aPad->GetEffectivePolygon();
+
+                for( int idx = 0; idx < initialPath.Size(); idx++ )
+                {
+                    if( initialPath[idx]->Kind() != ITEM::LINE_T )
+                        continue;
+
+                    LINE* line = static_cast<LINE*>( initialPath[idx] );
+
+                    if( !aPad->FlashLayer( line->Layer() ) )
+                        continue;
+
+                    const std::vector<VECTOR2I>& points = line->CLine().CPoints();
+
+                    if( points.front() != aJoint->Pos() && points.back() != aJoint->Pos() )
+                        continue;
+
+                    SHAPE_LINE_CHAIN& slc = line->Line();
+
+                    if( shape->Contains( slc.CPoint( 0 ) ) )
+                        clipLineToPad( slc, aPad, true );
+                    else if( shape->Contains( slc.CPoint( -1 ) ) )
+                        clipLineToPad( slc, aPad, false );
+                }
+            };
+
+    if( padA )
+        processPad( joints.first, padA );
+
+    if( padB )
+        processPad( joints.second, padB );
+
+    return initialPath;
+    */
 }
 
 
@@ -297,22 +456,24 @@ bool TOPOLOGY::AssembleDiffPair( ITEM* aStart, DIFF_PAIR& aPair )
 
     m_world->AllItemsInNet( coupledNet, coupledItems );
 
-    SEGMENT* coupledSeg = NULL, *refSeg;
+    SEGMENT* coupledSeg = nullptr, *refSeg;
     int minDist = std::numeric_limits<int>::max();
 
-    if( ( refSeg = dynamic_cast<SEGMENT*>( aStart ) ) != NULL )
+    if( ( refSeg = dyn_cast<SEGMENT*>( aStart ) ) != nullptr )
     {
         for( ITEM* item : coupledItems )
         {
-            if( SEGMENT* s = dynamic_cast<SEGMENT*>( item ) )
+            if( SEGMENT* s = dyn_cast<SEGMENT*>( item ) )
             {
-                if( s->Layers().Start() == refSeg->Layers().Start() && s->Width() == refSeg->Width() )
+                if( s->Layers().Start() == refSeg->Layers().Start() &&
+                    s->Width() == refSeg->Width() )
                 {
                     int dist = s->Seg().Distance( refSeg->Seg() );
-                    bool isParallel = refSeg->Seg().ApproxParallel( s->Seg() );
+                    bool isParallel = refSeg->Seg().ApproxParallel( s->Seg(), DP_PARALLELITY_THRESHOLD );
                     SEG p_clip, n_clip;
 
-                    bool isCoupled = commonParallelProjection( refSeg->Seg(), s->Seg(), p_clip, n_clip );
+                    bool isCoupled = commonParallelProjection( refSeg->Seg(), s->Seg(), p_clip,
+                                                               n_clip );
 
                     if( isParallel && isCoupled && dist < minDist )
                     {
@@ -341,7 +502,7 @@ bool TOPOLOGY::AssembleDiffPair( ITEM* aStart, DIFF_PAIR& aPair )
 
     int gap = -1;
 
-    if( refSeg->Seg().ApproxParallel( coupledSeg->Seg() ) )
+    if( refSeg->Seg().ApproxParallel( coupledSeg->Seg(), DP_PARALLELITY_THRESHOLD ) )
     {
         // Segments are parallel -> compute pair gap
         const VECTOR2I refDir       = refSeg->Anchor( 1 ) - refSeg->Anchor( 0 );
@@ -377,7 +538,8 @@ const std::set<ITEM*> TOPOLOGY::AssembleCluster( ITEM* aStart, int aLayer )
 
         for( OBSTACLE& obs : obstacles )
         {
-            if( visited.find( obs.m_item ) == visited.end() && obs.m_item->Layers().Overlaps( aLayer ) && !( obs.m_item->Marker() & MK_HEAD ) )
+            if( visited.find( obs.m_item ) == visited.end() &&
+                obs.m_item->Layers().Overlaps( aLayer ) && !( obs.m_item->Marker() & MK_HEAD ) )
             {
                 visited.insert( obs.m_item );
                 pending.push_back( obs.m_item );

@@ -1106,10 +1106,16 @@ void ImpBoard::handle_measure_tracks(const ActionConnection &a)
 
 ToolID ImpBoard::get_tool_for_drag_move(bool ctrl, const std::set<SelectableRef> &sel) const
 {
-    if (preferences.board.move_using_router && sel.size() == 1 && sel_count_type(sel, ObjectType::TRACK) == 1)
-        return ToolID::DRAG_TRACK_INTERACTIVE;
-    else
+    if (preferences.board.move_using_router && sel.size() == 1 && sel_count_type(sel, ObjectType::TRACK) == 1) {
+        auto &track = core_board.get_board()->tracks.at(sel_find_one(sel, ObjectType::TRACK).uuid);
+        if (track.is_arc())
+            return ToolID::DRAG_KEEP_SLOPE;
+        else
+            return ToolID::DRAG_TRACK_INTERACTIVE;
+    }
+    else {
         return ImpBase::get_tool_for_drag_move(ctrl, sel);
+    }
 }
 
 void ImpBoard::handle_maybe_drag(bool ctrl)

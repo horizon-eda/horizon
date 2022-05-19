@@ -2,7 +2,7 @@
  * KiRouter - a push-and-(sometimes-)shove PCB router
  *
  * Copyright (C) 2013  CERN
- * Copyright (C) 2016 KiCad Developers, see AUTHORS.txt for contributors.
+ * Copyright (C) 2016-2021 KiCad Developers, see AUTHORS.txt for contributors.
  * Author: Tomasz Wlostowski <tomasz.wlostowski@cern.ch>
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -35,21 +35,38 @@ namespace PNS {
 class SOLID : public ITEM
 {
 public:
-    SOLID() : ITEM( SOLID_T ), m_shape( NULL )
+    SOLID() :
+        ITEM( SOLID_T ),
+        m_shape( nullptr ),
+        m_hole( nullptr )
     {
         m_movable = false;
+        m_padToDie = 0;
+        m_orientation = 0;
     }
 
     ~SOLID()
     {
         delete m_shape;
+        delete m_hole;
     }
 
     SOLID( const SOLID& aSolid ) :
         ITEM( aSolid )
     {
-        m_shape = aSolid.m_shape->Clone();
+        if( aSolid.m_shape )
+            m_shape = aSolid.m_shape->Clone();
+        else
+            m_shape = nullptr;
+
+        if( aSolid.m_hole )
+            m_hole = aSolid.m_hole->Clone();
+        else
+            m_hole = nullptr;
+
         m_pos = aSolid.m_pos;
+        m_padToDie = aSolid.m_padToDie;
+        m_orientation = aSolid.m_orientation;
     }
 
     static inline bool ClassOf( const ITEM* aItem )
@@ -61,25 +78,31 @@ public:
 
     const SHAPE* Shape() const override { return m_shape; }
 
-    const SHAPE_LINE_CHAIN Hull( int aClearance = 0, int aWalkaroundThickness = 0 ) const override;
+    const SHAPE* Hole() const override { return m_hole; }
+
+    const SHAPE_LINE_CHAIN Hull( int aClearance = 0, int aWalkaroundThickness = 0,
+                                 int aLayer = -1 ) const override;
+
+    const SHAPE_LINE_CHAIN HoleHull( int aClearance, int aWalkaroundThickness,
+                                     int aLayer ) const override;
 
     void SetShape( SHAPE* shape )
     {
-        if( m_shape )
-            delete m_shape;
-
+        delete m_shape;
         m_shape = shape;
     }
 
-    const VECTOR2I& Pos() const
+    void SetHole( SHAPE* shape )
     {
-        return m_pos;
+        delete m_hole;
+        m_hole = shape;
     }
 
-    void SetPos( const VECTOR2I& aCenter )
-    {
-        m_pos = aCenter;
-    }
+    const VECTOR2I& Pos() const { return m_pos; }
+    void SetPos( const VECTOR2I& aCenter );
+
+    int GetPadToDie() const { return m_padToDie; }
+    void SetPadToDie( int aLen ) { m_padToDie = aLen; }
 
     virtual VECTOR2I Anchor( int aN ) const override
     {
@@ -91,20 +114,19 @@ public:
         return 1;
     }
 
-    VECTOR2I Offset() const
-    {
-        return m_offset;
-    }
+    VECTOR2I Offset() const { return m_offset; }
+    void SetOffset( const VECTOR2I& aOffset ) { m_offset = aOffset; }
 
-    void SetOffset( const VECTOR2I& aOffset )
-    {
-        m_offset = aOffset;
-    }
+    double GetOrientation() const { return m_orientation; }
+    void SetOrientation( double aOrientation ) { m_orientation = aOrientation; }
 
 private:
     VECTOR2I    m_pos;
     SHAPE*      m_shape;
+    SHAPE*      m_hole;
     VECTOR2I    m_offset;
+    int         m_padToDie;
+    double      m_orientation;  // in 1/10 degrees, matching PAD
 };
 
 }

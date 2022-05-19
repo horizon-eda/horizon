@@ -19,12 +19,13 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include <geometry/direction45.h>
 
 #include "pns_routing_settings.h"
 
 namespace PNS {
+
+const int pnsSchemaVersion = 0;
 
 ROUTING_SETTINGS::ROUTING_SETTINGS()
 {
@@ -41,11 +42,16 @@ ROUTING_SETTINGS::ROUTING_SETTINGS()
     m_walkaroundIterationLimit = 40;
     m_jumpOverObstacles = false;
     m_smoothDraggedSegments = true;
-    m_canViolateDRC = false;
+    m_allowDRCViolations = false;
     m_freeAngleMode = false;
-    m_inlineDragEnabled = false;
     m_snapToTracks = false;
     m_snapToPads = false;
+    m_optimizeEntireDraggedTrack = false;
+    m_cornerMode = DIRECTION_45::CORNER_MODE::MITERED_45;
+    m_walkaroundHugLengthThreshold = 1.5;
+    m_autoPosture = true;
+    m_fixAllSegments = true;
+
 }
 
 

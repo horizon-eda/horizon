@@ -2,7 +2,7 @@
  * KiRouter - a push-and-(sometimes-)shove PCB router
  *
  * Copyright (C) 2013-2014 CERN
- * Copyright (C) 2016 KiCad Developers, see AUTHORS.txt for contributors.
+ * Copyright (C) 2016-2021 KiCad Developers, see AUTHORS.txt for contributors.
  * Author: Tomasz Wlostowski <tomasz.wlostowski@cern.ch>
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -27,6 +27,8 @@
 #include <string>
 #include <sstream>
 
+#include "wx_compat.h"
+
 #include <math/vector2d.h>
 
 class SHAPE_LINE_CHAIN;
@@ -39,25 +41,35 @@ class ITEM;
 class LOGGER
 {
 public:
+
+    enum EVENT_TYPE {
+        EVT_START_ROUTE = 0,
+        EVT_START_DRAG,
+        EVT_FIX,
+        EVT_MOVE,
+        EVT_ABORT
+    };
+
+    struct EVENT_ENTRY {
+        VECTOR2I p;
+        EVENT_TYPE type;
+        wxString uuid;
+    };
+
     LOGGER();
     ~LOGGER();
 
     void Save( const std::string& aFilename );
     void Clear();
+    void Log( EVENT_TYPE evt, const VECTOR2I& pos, const ITEM* item = nullptr );
 
-    void NewGroup( const std::string& aName, int aIter = 0 );
-    void EndGroup();
-
-    void Log( const ITEM* aItem, int aKind = 0, const std::string& aName = std::string() );
-    void Log( const SHAPE_LINE_CHAIN *aL, int aKind = 0, const std::string& aName = std::string() );
-    void Log( const VECTOR2I& aStart, const VECTOR2I& aEnd, int aKind = 0,
-              const std::string& aName = std::string() );
+    const std::vector<EVENT_ENTRY>& GetEvents()
+    {
+        return m_events;
+    }
 
 private:
-    void dumpShape( const SHAPE* aSh );
-
-    bool m_groupOpened;
-    std::stringstream m_theLog;
+    std::vector<EVENT_ENTRY> m_events;
 };
 
 }

@@ -332,5 +332,21 @@
                 "mod": 0
             }
         ]
+    ],
+    "DELETE_LAST_SEGMENT": [
+        [
+            {
+                "key": "BackSpace",
+                "mod": 0
+            }
+        ]
+    ],
+    "TOGGLE_CORNER_STYLE": [
+        [
+            {
+                "key": "c",
+                "mod": 0
+            }
+        ]
     ]
 }

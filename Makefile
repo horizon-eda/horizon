@@ -664,17 +664,32 @@ SRC_ROUTER = \
 	3rd_party/router/router/time_limit.cpp \
 	3rd_party/router/router/pns_routing_settings.cpp \
 	3rd_party/router/router/pns_sizes_settings.cpp \
-	3rd_party/router/common/geometry/shape_line_chain.cpp\
-	3rd_party/router/common/geometry/shape_arc.cpp\
-	3rd_party/router/common/geometry/shape.cpp \
-	3rd_party/router/common/geometry/shape_collisions.cpp\
-	3rd_party/router/common/geometry/seg.cpp\
-	3rd_party/router/common/geometry/geometry_utils.cpp\
-	3rd_party/router/common/math/math_util.cpp\
+	3rd_party/router/router/pns_arc.cpp \
+	3rd_party/router/router/pns_component_dragger.cpp \
+	3rd_party/router/router/pns_mouse_trail_tracer.cpp \
 	3rd_party/router/wx_compat.cpp\
 	src/router/pns_horizon_iface.cpp\
 	src/core/tools/tool_route_track_interactive.cpp\
-
+	3rd_party/router/kimath/src/geometry/circle.cpp\
+	3rd_party/router/kimath/src/geometry/direction_45.cpp\
+	3rd_party/router/kimath/src/geometry/geometry_utils.cpp\
+	3rd_party/router/kimath/src/geometry/seg.cpp\
+	3rd_party/router/kimath/src/geometry/shape_arc.cpp\
+	3rd_party/router/kimath/src/geometry/shape_collisions.cpp\
+	3rd_party/router/kimath/src/geometry/shape_compound.cpp\
+	3rd_party/router/kimath/src/geometry/shape.cpp\
+	3rd_party/router/kimath/src/geometry/shape_file_io.cpp\
+	3rd_party/router/kimath/src/geometry/shape_line_chain.cpp\
+	3rd_party/router/kimath/src/geometry/shape_poly_set.cpp\
+	3rd_party/router/kimath/src/geometry/shape_rect.cpp\
+	3rd_party/router/kimath/src/geometry/shape_segment.cpp\
+	3rd_party/router/kimath/src/math/util.cpp\
+	3rd_party/router/kimath/src/md5_hash.cpp\
+	3rd_party/router/color4d.cpp\
+	3rd_party/router/kimath/src/trigo.cpp\
+	3rd_party/router/base_units.cpp\
+	3rd_party/router/clipper_kicad/clipper.cpp\
+	3rd_party/router/kimath/src/math/vector2.cpp\
 
 SRC_POOL_UTIL = \
 	src/pool-util/util_main.cpp\
@@ -994,7 +1009,7 @@ OBJ_PR_REVIEW    = $(addprefix $(OBJDIR)/,$(SRC_PR_REVIEW:.cpp=.o))
 
 
 
-INC_ROUTER = -I3rd_party/router/include/ -I3rd_party/router -isystem 3rd_party
+INC_ROUTER = -I3rd_party/router/include/ -I3rd_party/router/kimath/include -I3rd_party/router -I3rd_party/clipper -isystem 3rd_party -isystem 3rd_party/rtree
 INC_OCE ?= -isystem /opt/opencascade/inc/ -isystem /mingw64/include/oce/ -isystem /usr/include/oce -isystem /usr/include/opencascade -isystem ${CASROOT}/include/opencascade -isystem ${CASROOT}/include/oce -isystem /usr/local/include/OpenCASCADE
 INC_PYTHON = $(shell $(PKG_CONFIG) --cflags python3 py3cairo)
 OCE_LIBDIRS = -L/opt/opencascade/lib/ -L${CASROOT}/lib

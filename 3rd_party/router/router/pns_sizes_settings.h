@@ -25,7 +25,11 @@
 #include <map>
 #include <core/optional.h>
 
-#include "../class_track.h" // for VIATYPE_T
+//#include "pcb_track.h" // for VIATYPE_T
+#include "viatype.h"
+
+#include "wx_compat.h"
+
 
 class BOARD;
 class BOARD_DESIGN_SETTINGS;
@@ -34,19 +38,22 @@ namespace PNS {
 
 class ITEM;
 
-class SIZES_SETTINGS {
-
+class SIZES_SETTINGS
+{
 public:
     SIZES_SETTINGS() :
-        m_trackWidth( 155000 ),
-        m_diffPairWidth( 125000 ),
-        m_diffPairGap( 180000 ),
-        m_diffPairViaGap( 180000 ),
-        m_viaDiameter( 600000 ),
-        m_viaDrill( 250000 ),
-        m_diffPairViaGapSameAsTraceGap( true ),
-        m_widthFromRules( false),
-        m_viaType( VIA_THROUGH )
+            m_minClearance( 0 ),
+            m_trackWidth( 155000 ),
+            m_trackWidthIsExplicit( true ),
+            m_viaType( VIATYPE::THROUGH ),
+            m_viaDiameter( 600000 ),
+            m_viaDrill( 250000 ),
+            m_diffPairWidth( 125000 ),
+            m_diffPairGap( 180000 ),
+            m_diffPairViaGap( 180000 ),
+            m_diffPairViaGapSameAsTraceGap( true ),
+            m_holeToHole( 0 ),
+            m_widthSource()
     {};
 
     ~SIZES_SETTINGS() {};
@@ -54,28 +61,29 @@ public:
     void ClearLayerPairs();
     void AddLayerPair( int aL1, int aL2 );
 
+    int MinClearance() const { return m_minClearance; }
+    void SetMinClearance( int aClearance ) { m_minClearance = aClearance; }
+
     int TrackWidth() const { return m_trackWidth; }
     void SetTrackWidth( int aWidth ) { m_trackWidth = aWidth; }
+
+    bool TrackWidthIsExplicit() const { return m_trackWidthIsExplicit; }
+    void SetTrackWidthIsExplicit( bool aIsExplicit ) { m_trackWidthIsExplicit = aIsExplicit; }
 
     int DiffPairWidth() const { return m_diffPairWidth; }
     int DiffPairGap() const { return m_diffPairGap; }
 
-    int DiffPairViaGap() const {
-        if( m_diffPairViaGapSameAsTraceGap )
-            return m_diffPairGap;
-        else
-            return m_diffPairViaGap;
+    int DiffPairViaGap() const
+    {
+        return m_diffPairViaGapSameAsTraceGap ? m_diffPairGap : m_diffPairViaGap;
     }
 
     bool DiffPairViaGapSameAsTraceGap() const { return m_diffPairViaGapSameAsTraceGap; }
-    bool WidthFromRules() const { return m_widthFromRules; }
 
     void SetDiffPairWidth( int aWidth ) { m_diffPairWidth = aWidth; }
     void SetDiffPairGap( int aGap ) { m_diffPairGap = aGap; }
     void SetDiffPairViaGapSameAsTraceGap ( bool aEnable ) { m_diffPairViaGapSameAsTraceGap = aEnable; }
     void SetDiffPairViaGap( int aGap ) { m_diffPairViaGap = aGap; }
-
-    void SetWidthFromRules( int aEnable ) { m_widthFromRules = aEnable; }
 
     int ViaDiameter() const { return m_viaDiameter; }
     void SetViaDiameter( int aDiameter ) { m_viaDiameter = aDiameter; }
@@ -94,26 +102,34 @@ public:
     int GetLayerTop() const;
     int GetLayerBottom() const;
 
-    void SetViaType( VIATYPE_T aViaType ) { m_viaType = aViaType; }
-    VIATYPE_T ViaType() const { return m_viaType; }
+    void SetHoleToHole( int aHoleToHole ) { m_holeToHole = aHoleToHole; }
+    int GetHoleToHole() const { return m_holeToHole; }
+
+    void SetViaType( VIATYPE aViaType ) { m_viaType = aViaType; }
+    VIATYPE ViaType() const { return m_viaType; }
+
+    wxString GetWidthSource() const { return m_widthSource; }
+    void SetWidthSource( const wxString& aSource ) { m_widthSource = aSource; }
 
 private:
+    int     m_minClearance;
+    int     m_trackWidth;
+    bool    m_trackWidthIsExplicit;
 
-    int inheritTrackWidth( ITEM* aItem );
+    VIATYPE m_viaType;
+    int     m_viaDiameter;
+    int     m_viaDrill;
 
-    int m_trackWidth;
-    int m_diffPairWidth;
-    int m_diffPairGap;
-    int m_diffPairViaGap;
-    int m_viaDiameter;
-    int m_viaDrill;
+    int     m_diffPairWidth;
+    int     m_diffPairGap;
+    int     m_diffPairViaGap;
+    bool    m_diffPairViaGapSameAsTraceGap;
 
-    bool m_diffPairViaGapSameAsTraceGap;
-    bool m_widthFromRules;
-
-    VIATYPE_T m_viaType;
+    int     m_holeToHole;
 
     std::map<int, int> m_layerPairs;
+
+    wxString m_widthSource;
 };
 
 }

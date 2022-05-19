@@ -143,7 +143,7 @@ void TriangleRenderer::realize()
 
 class UBOBuffer {
 public:
-    static constexpr size_t ubo_size = 21; //  keep in sync with ubo.glsl
+    static constexpr size_t ubo_size = 22; //  keep in sync with ubo.glsl
     static_assert(static_cast<int>(ColorP::N_COLORS) == ubo_size, "ubo size mismatch");
     std::array<std::array<float, 4>, ubo_size> colors;
     std::array<std::array<float, 4>, 256> colors2; // keep in sync with shader
@@ -295,7 +295,8 @@ void TriangleRenderer::render_layer_batch(int layer, HighlightMode highlight_mod
             buf.colors[static_cast<int>(ColorP::AIRWIRE_ROUTER)] =
                     gl_array_from_color(ca.appearance.colors.at(ColorP::AIRWIRE_ROUTER));
             buf.colors[static_cast<int>(ColorP::FROM_LAYER)] = apply_highlight(lc, highlight_mode, layer);
-            buf.colors[static_cast<int>(ColorP::LAYER_HIGHLIGHT)] =
+            buf.colors[static_cast<int>(ColorP::LAYER_HIGHLIGHT)] = apply_highlight(lc, highlight_mode, layer);
+            buf.colors[static_cast<int>(ColorP::LAYER_HIGHLIGHT_LIGHTEN)] =
                     gl_array_from_color(lc) + ca.appearance.highlight_lighten;
             for (size_t i = 0; i < std::min(buf.colors2.size(), ca.colors2.size()); i++) {
                 buf.colors2[i] = apply_highlight(ca.colors2[i].to_color(), highlight_mode, layer);
@@ -489,7 +490,8 @@ void TriangleRenderer::push()
                     throw std::runtime_error("unknown triangle type");
                 }
                 const bool highlight = (tri_info.flags & TriangleInfo::FLAG_HIGHLIGHT)
-                                       || (tri.color == static_cast<int>(ColorP::LAYER_HIGHLIGHT));
+                                       || (tri.color == static_cast<int>(ColorP::LAYER_HIGHLIGHT))
+                                       || (tri.color == static_cast<int>(ColorP::LAYER_HIGHLIGHT_LIGHTEN));
                 const bool do_stencil = tri_info.type == TriangleInfo::Type::PAD;
                 const BatchKey key{ty, highlight, do_stencil};
                 type_indices[key].push_back(i + ofs);

@@ -2,7 +2,7 @@
  * KiRouter - a push-and-(sometimes-)shove PCB router
  *
  * Copyright (C) 2013-2014 CERN
- * Copyright (C) 2016 KiCad Developers, see AUTHORS.txt for contributors.
+ * Copyright (C) 2016-2021 KiCad Developers, see AUTHORS.txt for contributors.
  * Author: Tomasz Wlostowski <tomasz.wlostowski@cern.ch>
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -23,24 +23,21 @@
 #define __PNS_ITEMSET_H
 
 #include <vector>
-
+#include <core/kicad_algo.h>
 #include "pns_item.h"
 
 namespace PNS {
 
 /**
- * Class ITEM_SET
- *
- * Holds a list of board items, that can be filtered against net, kinds,
- * layers, etc.
- **/
+ * Hold a list of board items, that can be filtered against net, kinds, layers, etc.
+ */
 class LINE;
 
 class ITEM_SET
 {
 public:
-    struct ENTRY {
-
+    struct ENTRY
+    {
         ENTRY( ITEM* aItem, bool aOwned = false ) :
             item( aItem ),
             owned( aOwned )
@@ -62,17 +59,17 @@ public:
                 delete item;
         }
 
-        bool operator== ( const ENTRY& b ) const
+        bool operator==( const ENTRY& b ) const
         {
             return item == b.item;
         }
 
-        bool operator< ( const ENTRY& b ) const
+        bool operator<( const ENTRY& b ) const
         {
             return item < b.item;
         }
 
-        ENTRY& operator= ( const ENTRY& aOther )
+        ENTRY& operator=( const ENTRY& aOther )
         {
             owned = aOther.owned;
 
@@ -95,12 +92,10 @@ public:
 
     typedef std::vector<ENTRY> ENTRIES;
 
-    ITEM_SET( ITEM* aInitialItem = NULL, bool aBecomeOwner = false )
+    ITEM_SET( ITEM* aInitialItem = nullptr, bool aBecomeOwner = false )
     {
         if( aInitialItem )
-        {
-            m_items.push_back( ENTRY( aInitialItem, aBecomeOwner ) );
-        }
+            m_items.emplace_back( ENTRY( aInitialItem, aBecomeOwner ) );
     }
 
     ITEM_SET( const ITEM_SET& aOther )
@@ -121,7 +116,7 @@ public:
         int n = 0;
 
         if( aKindMask == -1 || aKindMask == ITEM::ANY_T )
-            return m_items.size();
+            return static_cast<int>( m_items.size() );
 
         for( ITEM* item : m_items )
         {
@@ -164,25 +159,30 @@ public:
 
     int Size() const
     {
-        return m_items.size();
+        return static_cast<int>( m_items.size() );
     }
 
     void Add( const LINE& aLine );
     void Prepend( const LINE& aLine );
 
-    ITEM* operator[] ( int index ) const
+    ITEM* operator[]( size_t aIndex ) const
     {
-        return m_items[index].item;
+        return m_items[aIndex].item;
     }
+
+    ENTRIES::iterator begin() { return m_items.begin(); }
+    ENTRIES::iterator end() { return m_items.end(); }
+    ENTRIES::const_iterator cbegin() const { return m_items.cbegin(); }
+    ENTRIES::const_iterator cend() const { return m_items.cend(); }
 
     void Add( ITEM* aItem, bool aBecomeOwner = false )
     {
-        m_items.push_back( ENTRY( aItem, aBecomeOwner ) );
+        m_items.emplace_back( ENTRY( aItem, aBecomeOwner ) );
     }
 
     void Prepend( ITEM* aItem, bool aBecomeOwner = false )
     {
-         m_items.insert( m_items.begin(), ENTRY( aItem, aBecomeOwner ) );
+         m_items.emplace( m_items.begin(), ENTRY( aItem, aBecomeOwner ) );
     }
 
     void Clear()
@@ -193,7 +193,7 @@ public:
     bool Contains( ITEM* aItem ) const
     {
         const ENTRY ent( aItem );
-        return std::find( m_items.begin(), m_items.end(), ent ) != m_items.end();
+        return alg::contains( m_items, ent );
     }
 
     void Erase( ITEM* aItem )
@@ -221,11 +221,10 @@ public:
             }
         }
 
-        return NULL;
+        return nullptr;
     }
 
 private:
-
     ENTRIES m_items;
 };
 

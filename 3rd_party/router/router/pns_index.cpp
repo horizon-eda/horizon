@@ -2,7 +2,7 @@
  * KiRouter - a push-and-(sometimes-)shove PCB router
  *
  * Copyright (C) 2013-2014 CERN
- * Copyright (C) 2016 KiCad Developers, see AUTHORS.txt for contributors.
+ * Copyright (C) 2016-2021 KiCad Developers, see AUTHORS.txt for contributors.
  * Author: Tomasz Wlostowski <tomasz.wlostowski@cern.ch>
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -20,99 +20,46 @@
  */
 
 #include "pns_index.h"
+#include "pns_router.h"
 
 namespace PNS {
 
-INDEX::INDEX()
-{
-    memset( m_subIndices, 0, sizeof( m_subIndices ) );
-}
-
-
-INDEX::~INDEX()
-{
-    Clear();
-}
-
-
-INDEX::ITEM_SHAPE_INDEX* INDEX::getSubindex( const ITEM* aItem )
-{
-    int idx_n = -1;
-
-    const LAYER_RANGE l = aItem->Layers();
-
-    switch( aItem->Kind() )
-    {
-    case ITEM::VIA_T:
-        idx_n = SI_Multilayer;
-        break;
-
-    case ITEM::SOLID_T:
-        {
-            if( l.IsMultilayer() )
-                idx_n = SI_Multilayer;
-            else if( l.Start() == B_Cu ) // fixme: use kicad layer codes
-                idx_n = SI_PadsTop;
-            else if( l.Start() == F_Cu )
-                idx_n = SI_PadsBottom;
-            else
-                idx_n = SI_Traces + 2 * l.Start() + SI_SegStraight;
-        }
-        break;
-
-    case ITEM::SEGMENT_T:
-    case ITEM::LINE_T:
-        idx_n = SI_Traces + 2 * l.Start() + SI_SegStraight;
-        break;
-
-    default:
-        break;
-    }
-
-    if( idx_n < 0 || idx_n >= MaxSubIndices )
-    {
-        assert( idx_n >= 0 );
-        assert( idx_n < MaxSubIndices );
-        return nullptr;
-    }
-
-    if( !m_subIndices[idx_n] )
-        m_subIndices[idx_n] = new ITEM_SHAPE_INDEX;
-
-    return m_subIndices[idx_n];
-}
 
 void INDEX::Add( ITEM* aItem )
 {
-    ITEM_SHAPE_INDEX* idx = getSubindex( aItem );
+    const LAYER_RANGE& range = aItem->Layers();
 
-    if( !idx )
-        return;
+    if( m_subIndices.size() <= static_cast<size_t>( range.End() ) )
+        m_subIndices.resize( 2 * range.End() + 1 ); // +1 handles the 0 case
 
-    idx->Add( aItem );
+    for( int i = range.Start(); i <= range.End(); ++i )
+        m_subIndices[i].Add( aItem );
+
     m_allItems.insert( aItem );
     int net = aItem->Net();
 
     if( net >= 0 )
-    {
         m_netMap[net].push_back( aItem );
-    }
 }
+
 
 void INDEX::Remove( ITEM* aItem )
 {
-    ITEM_SHAPE_INDEX* idx = getSubindex( aItem );
+    const LAYER_RANGE& range = aItem->Layers();
 
-    if( !idx )
+    if( m_subIndices.size() <= static_cast<size_t>( range.End() ) )
         return;
 
-    idx->Remove( aItem );
+    for( int i = range.Start(); i <= range.End(); ++i )
+        m_subIndices[i].Remove( aItem );
+
     m_allItems.erase( aItem );
     int net = aItem->Net();
 
     if( net >= 0 && m_netMap.find( net ) != m_netMap.end() )
         m_netMap[net].remove( aItem );
 }
+
 
 void INDEX::Replace( ITEM* aOldItem, ITEM* aNewItem )
 {
@@ -121,24 +68,10 @@ void INDEX::Replace( ITEM* aOldItem, ITEM* aNewItem )
 }
 
 
-void INDEX::Clear()
-{
-    for( int i = 0; i < MaxSubIndices; ++i )
-    {
-        ITEM_SHAPE_INDEX* idx = m_subIndices[i];
-
-        if( idx )
-            delete idx;
-
-        m_subIndices[i] = NULL;
-    }
-}
-
-
 INDEX::NET_ITEMS_LIST* INDEX::GetItemsForNet( int aNet )
 {
     if( m_netMap.find( aNet ) == m_netMap.end() )
-        return NULL;
+        return nullptr;
 
     return &m_netMap[aNet];
 }

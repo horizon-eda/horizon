@@ -2,7 +2,7 @@
  * KiRouter - a push-and-(sometimes-)shove PCB router
  *
  * Copyright (C) 2013-2014 CERN
- * Copyright (C) 2016 KiCad Developers, see AUTHORS.txt for contributors.
+ * Copyright (C) 2016-2020 KiCad Developers, see AUTHORS.txt for contributors.
  * Author: Tomasz Wlostowski <tomasz.wlostowski@cern.ch>
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -25,6 +25,7 @@
 #include "pns_router.h"
 
 #include <geometry/shape_rect.h>
+#include <math/box2.h>
 
 namespace PNS {
 
@@ -33,12 +34,12 @@ bool VIA::PushoutForce( NODE* aNode, const VECTOR2I& aDirection, VECTOR2I& aForc
 {
     int iter = 0;
     VIA mv( *this );
-    VECTOR2I force, totalForce, force2;
+    VECTOR2I force, totalForce;
 
     while( iter < aMaxIterations )
     {
-        NODE::OPT_OBSTACLE obs = aNode->CheckColliding( &mv,
-                aSolidsOnly ? ITEM::SOLID_T : ITEM::ANY_T );
+        NODE::OPT_OBSTACLE obs = aNode->CheckColliding( &mv, aSolidsOnly ? ITEM::SOLID_T
+                                                                         : ITEM::ANY_T );
 
         if( !obs )
             break;
@@ -52,11 +53,10 @@ bool VIA::PushoutForce( NODE* aNode, const VECTOR2I& aDirection, VECTOR2I& aForc
             mv.SetPos( mv.Pos() + l );
         }
 
-        bool col = CollideShapes( obs->m_item->Shape(), mv.Shape(), clearance, true, force2 );
-
-        if( col ) {
-            totalForce += force2;
-            mv.SetPos( mv.Pos() + force2 );
+        if( obs->m_item->Shape()->Collide( mv.Shape(), clearance, &force ) )
+        {
+            totalForce += force;
+            mv.SetPos( mv.Pos() + force );
         }
 
         iter++;
@@ -71,13 +71,18 @@ bool VIA::PushoutForce( NODE* aNode, const VECTOR2I& aDirection, VECTOR2I& aForc
 }
 
 
-const SHAPE_LINE_CHAIN VIA::Hull( int aClearance, int aWalkaroundThickness ) const
+const SHAPE_LINE_CHAIN VIA::Hull( int aClearance, int aWalkaroundThickness, int aLayer ) const
 {
     int cl = ( aClearance + aWalkaroundThickness / 2 );
+    int width = m_diameter;
 
-    return OctagonalHull( m_pos -
-            VECTOR2I( m_diameter / 2, m_diameter / 2 ), VECTOR2I( m_diameter, m_diameter ),
-            cl + 1, ( 2 * cl + m_diameter ) * 0.26 );
+    if( !ROUTER::GetInstance()->GetInterface()->IsFlashedOnLayer( this, aLayer ) )
+        width = m_drill;
+
+    // Chamfer = width * ( 1 - sqrt(2)/2 ) for equilateral octagon
+    return OctagonalHull( m_pos - VECTOR2I( width / 2, width / 2 ),
+                         VECTOR2I( width, width ),
+                         cl + 1, ( 2 * cl + width ) * ( 1.0 - M_SQRT1_2 ) );
 }
 
 
@@ -91,9 +96,13 @@ VIA* VIA::Clone() const
     v->m_diameter = m_diameter;
     v->m_drill = m_drill;
     v->m_shape = SHAPE_CIRCLE( m_pos, m_diameter / 2 );
+    v->m_hole = SHAPE_CIRCLE( m_pos, m_drill / 2 );
     v->m_rank = m_rank;
     v->m_marker = m_marker;
     v->m_viaType = m_viaType;
+    v->m_parent = m_parent;
+    v->m_isFree = m_isFree;
+    v->m_isVirtual = m_isVirtual;
 
     return v;
 }
@@ -109,6 +118,16 @@ OPT_BOX2I VIA::ChangedArea( const VIA* aOther ) const
     }
 
     return OPT_BOX2I();
+}
+
+const VIA_HANDLE VIA::MakeHandle() const
+{
+    VIA_HANDLE h;
+    h.pos = Pos();
+    h.layers = Layers();
+    h.net = Net();
+    h.valid = true;
+    return h;
 }
 
 }
