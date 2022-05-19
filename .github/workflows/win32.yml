@@ -12,7 +12,7 @@ on:
     branches: [ master ]
 
 env:
-  RSYNC_PASSWORD: {{ secrets.RSYNC_PASSWORD }}
+  RSYNC_PASSWORD: foo
 
 jobs:
   build-win32:
