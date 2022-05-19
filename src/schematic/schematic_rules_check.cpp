@@ -117,18 +117,25 @@ RulesCheckResult SchematicRules::check_connectivity(const BlocksSchematic &block
                 for (const auto &it : all_sheets) {
                     for (const auto &[uu_sym, sym] : it.sheet.symbols) {
                         if (sym.component->uuid == uu_comp && sym.gate->uuid == pin_path.at(0)) {
+                            const auto pin_uuid = pin_path.at(1);
                             x.comment = "Pin "
                                         + blocks.get_top_block_item()
                                                   .block.get_component_info(comp, it.instance_path)
                                                   .refdes
-                                        + sym.gate->suffix + "." + sym.gate->unit->pins.at(pin_path.at(1)).primary_name
+                                        + sym.gate->suffix + "." + sym.gate->unit->pins.at(pin_uuid).primary_name
                                         + " is not connected";
-                            x.has_location = true;
                             if (it.instance_path.size())
                                 x.comment += " (Only shown in first instance)";
                             x.instance_path = it.instance_path;
                             x.sheet = it.sheet.uuid;
-                            x.location = sym.placement.transform(sym.symbol.pins.at(pin_path.at(1)).position);
+                            x.has_location = true;
+                            if (sym.symbol.pins.count(pin_uuid)) {
+                                x.location = sym.placement.transform(sym.symbol.pins.at(pin_uuid).position);
+                            }
+                            else {
+                                x.location = sym.placement.shift;
+                                x.comment += " (Pin not placed in symbol)";
+                            }
                             found = true;
                             break;
                         }
