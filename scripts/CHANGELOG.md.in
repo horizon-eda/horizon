@@ -1,3 +1,15 @@
+# Version 2.3.1
+
+## Bugfixes
+
+### Board Editor
+
+ - Clearance checks: don't crash on unfilled planes (418f15d550621f098f1304e62013da5ace59debd)
+
+### Schematic Editor
+
+ - Connectivity checks: don't crash if unplaced pin is not connected (1cf64d051e756c387f2bf657d923e1443699594f)
+
 # Version 2.3.0
 
 ## New features
