@@ -45,12 +45,6 @@ jobs:
     - name: Downgrade librsvg
       shell: msys2 {0}
       run: pacman -U https://mirror.selfnet.de/msys2/mingw/mingw64/mingw-w64-x86_64-librsvg-2.50.3-3-any.pkg.tar.zst --noconfirm
-    - name: test
-      shell: msys2 {0}
-      run: date > foo.dat
-    - name: upload zip to selfnet mirror
-      shell: msys2 {0}
-      run: RSYNC_PASSWORD=${{ secrets.RSYNC_PASSWORD }} rsync -avz --stats *.dat rsync://horizon-eda@mirror-1.server.selfnet.de/horizon-eda/win64-ci
     - name: Build
       shell: msys2 {0}
       run: make -j2 WARNFLAGS="-Wall -Wshadow -Wno-attributes"
@@ -63,12 +57,12 @@ jobs:
     - name: set artifact name
       shell: msys2 {0}
       run: echo "artifact_name=horizon-win64-$(date +%Y-%m-%d-%H%M)" >> $GITHUB_ENV
-    - name: deploy to artifactory
+    - name: deploy to selfnet mirror
       if: github.event_name != 'pull_request'
       shell: msys2 {0}
       run: |
-        curl -u actions:${{ secrets.ARTIFACTORY }} -T dist/*.zip "https://horizoneda.jfrog.io/artifactory/horizon-win64-ci/$(basename dist/*.zip);commit=${{ github.sha }};ref=${{ github.ref }}" > deploy.json
-        echo "::notice title=Download this build::Get the zip archive from Artifactory: $(jq -r .downloadUri < deploy.json)"
+        RSYNC_PASSWORD=${{ secrets.RSYNC_PASSWORD }} rsync -avz --stats dist/*.zip rsync://horizon-eda@mirror-1.server.selfnet.de/horizon-eda/win64-ci
+        echo "::notice title=Download this build::Get the zip archive from the selfnet mirror: https://mirror.selfnet.de/horizon-eda/win64-ci/$(basename dist/*.zip)"
     - uses: actions/upload-artifact@v2-preview
       if: github.event_name == 'pull_request'
       with:
