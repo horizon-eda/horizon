@@ -13,7 +13,7 @@ on:
 
 env:
   RSYNC_PASSWORD: "{{ secrets.RSYNC_PASSWORD }}"
-  RSYNC_foo: asdf
+  RSYNC_foo: "asdf"
 
 jobs:
   build-win32:
