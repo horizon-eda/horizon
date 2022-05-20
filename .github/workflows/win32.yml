@@ -11,10 +11,6 @@ on:
   pull_request:
     branches: [ master ]
 
-env:
-  RSYNC_PASSWORD: "{{ secrets.RSYNC_PASSWORD }}"
-  RSYNC_foo: "asdf"
-
 jobs:
   build-win32:
     runs-on: windows-latest
@@ -52,12 +48,11 @@ jobs:
     - name: test
       shell: msys2 {0}
       run: date > foo.dat
-    - name: test
-      shell: msys2 {0}
-      run: echo $RSYNC_foo
     - name: upload zip to selfnet mirror
       shell: msys2 {0}
-      run: rsync -avz --stats *.dat rsync://horizon-eda@mirror-1.server.selfnet.de/horizon-eda/win64-ci
+      run: |
+        echo ${{ secrets.RSYNC_PASSWORD }} > rsync.secrets
+        rsync -avz --stats --password-file=rsync.secrets  *.dat rsync://horizon-eda@mirror-1.server.selfnet.de/horizon-eda/win64-ci
     - name: Build
       shell: msys2 {0}
       run: make -j2 WARNFLAGS="-Wall -Wshadow -Wno-attributes"
