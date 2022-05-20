@@ -50,9 +50,7 @@ jobs:
       run: date > foo.dat
     - name: upload zip to selfnet mirror
       shell: msys2 {0}
-      run: |
-        echo ${{ secrets.RSYNC_PASSWORD }} > rsync.secrets
-        rsync -avz --stats --password-file=rsync.secrets  *.dat rsync://horizon-eda@mirror-1.server.selfnet.de/horizon-eda/win64-ci
+      run: RSYNC_PASSWORD=${{ secrets.RSYNC_PASSWORD }} rsync -avz --stats *.dat rsync://horizon-eda@mirror-1.server.selfnet.de/horizon-eda/win64-ci
     - name: Build
       shell: msys2 {0}
       run: make -j2 WARNFLAGS="-Wall -Wshadow -Wno-attributes"
