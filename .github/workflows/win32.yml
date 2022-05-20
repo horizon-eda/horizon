@@ -13,6 +13,7 @@ on:
 
 env:
   RSYNC_PASSWORD: "{{ secrets.RSYNC_PASSWORD }}"
+  RSYNC_foo: asdf
 
 jobs:
   build-win32:
@@ -51,6 +52,9 @@ jobs:
     - name: test
       shell: msys2 {0}
       run: date > foo.dat
+    - name: test
+      shell: msys2 {0}
+      run: echo $RSYNC_foo
     - name: upload zip to selfnet mirror
       shell: msys2 {0}
       run: rsync -avz --stats *.dat rsync://horizon-eda@mirror-1.server.selfnet.de/horizon-eda/win64-ci
