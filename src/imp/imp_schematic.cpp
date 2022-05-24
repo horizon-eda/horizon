@@ -116,7 +116,7 @@ public:
         set_focus_on_click(false);
         signal_clicked().connect([this] { s_signal_selected.emit(path, sheet); });
         signal_enter_notify_event().connect([this](GdkEventCrossing *ev) -> bool {
-            get_window()->set_cursor(Gdk::Cursor::create(Gdk::Display::get_default(), "pointer"));
+            get_window()->set_cursor(Gdk::Cursor::create(get_window()->get_display(), "pointer"));
             return false;
         });
         signal_leave_notify_event().connect([this](GdkEventCrossing *ev) -> bool {
