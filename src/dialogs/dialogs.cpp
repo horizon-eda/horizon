@@ -556,7 +556,7 @@ bool Dialogs::update_plane(class Board &brd, class Plane *plane)
             gtk_grab_remove(invisible);
             gtk_widget_destroy(invisible);
 
-            parent->get_window()->set_cursor(Gdk::Cursor::create(parent->get_display(), ""));
+            parent->get_window()->set_cursor();
             done->disconnect();
             timeout.disconnect();
         }
