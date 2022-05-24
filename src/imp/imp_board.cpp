@@ -282,6 +282,15 @@ void ImpBoard::update_action_sensitivity()
             std::count_if(sel.begin(), sel.end(), [](const auto &x) { return x.type == ObjectType::BOARD_PACKAGE; });
     set_action_sensitive(ActionID::TUNING_ADD_TRACKS, have_tracks);
     set_action_sensitive(ActionID::TUNING_ADD_TRACKS_ALL, have_tracks);
+    {
+        const auto x = sel_find_exactly_one(sel, ObjectType::BOARD_PACKAGE);
+        bool sensitive = false;
+        if (x && core_board.get_board()->packages.count(x->uuid)) {
+            auto part = core_board.get_board()->packages.at(x->uuid).component->part;
+            sensitive = part && part->get_datasheet().size();
+        }
+        set_action_sensitive(ActionID::OPEN_DATASHEET, sensitive);
+    }
 
     bool can_select_more = std::any_of(sel.begin(), sel.end(), [](const auto &x) {
         switch (x.type) {
@@ -831,6 +840,16 @@ void ImpBoard::construct()
         }
 
         airwire_filter_window->set_only(nets);
+    });
+
+    connect_action(ActionID::OPEN_DATASHEET, [this](const auto &a) {
+        const auto x = sel_find_exactly_one(canvas->get_selection(), ObjectType::BOARD_PACKAGE);
+        if (x && core_board.get_board()->packages.count(x->uuid)) {
+            auto part = core_board.get_board()->packages.at(x->uuid).component->part;
+            if (part && part->get_datasheet().size())
+                gtk_show_uri_on_window(GTK_WINDOW(main_window->gobj()), part->get_datasheet().c_str(), GDK_CURRENT_TIME,
+                                       NULL);
+        }
     });
 
     if (m_meta.count("nets"))

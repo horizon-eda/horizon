@@ -121,5 +121,6 @@ enum class ActionID {
     MSD_TUNING_WINDOW,
     TOGGLE_PICTURES,
     VIEW_ACTUAL_SIZE,
+    OPEN_DATASHEET,
 };
 }

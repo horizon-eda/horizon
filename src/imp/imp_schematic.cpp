@@ -869,6 +869,16 @@ void ImpSchematic::construct()
         }
     });
 
+    connect_action(ActionID::OPEN_DATASHEET, [this](const auto &a) {
+        const auto x = sel_find_exactly_one(canvas->get_selection(), ObjectType::SCHEMATIC_SYMBOL);
+        if (x && core_schematic.get_sheet()->symbols.count(x->uuid)) {
+            auto part = core_schematic.get_sheet()->symbols.at(x->uuid).component->part;
+            if (part && part->get_datasheet().size())
+                gtk_show_uri_on_window(GTK_WINDOW(main_window->gobj()), part->get_datasheet().c_str(), GDK_CURRENT_TIME,
+                                       NULL);
+        }
+    });
+
     add_action_button_schematic(ActionID::PLACE_PART);
     add_action_button_schematic(ToolID::DRAW_NET);
     {
@@ -944,6 +954,16 @@ void ImpSchematic::update_action_sensitivity()
             can_higlight_group = comp->group;
             can_higlight_tag = comp->tag;
         }
+    }
+
+    {
+        const auto x = sel_find_exactly_one(sel, ObjectType::SCHEMATIC_SYMBOL);
+        bool sensitive = false;
+        if (x && core_schematic.get_sheet()->symbols.count(x->uuid)) {
+            auto part = core_schematic.get_sheet()->symbols.at(x->uuid).component->part;
+            sensitive = x && part && part->get_datasheet().size();
+        }
+        set_action_sensitive(ActionID::OPEN_DATASHEET, sensitive);
     }
 
     set_action_sensitive(ActionID::NEXT_SHEET, !core_schematic.get_block_symbol_mode());
