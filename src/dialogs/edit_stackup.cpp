@@ -1,11 +1,9 @@
 #include "edit_stackup.hpp"
-#include <iostream>
-#include <deque>
-#include <algorithm>
 #include "board/board.hpp"
 #include "board/board_layers.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "util/util.hpp"
+#include "util/gtk_util.hpp"
 #include "document/idocument_board.hpp"
 
 namespace horizon {
@@ -51,6 +49,7 @@ StackupLayerEditor::StackupLayerEditor(EditStackupDialog &parent, int ly, bool c
     pack_start(*la, false, false, 0);
 
     sp = Gtk::manage(new SpinButtonDim());
+    widget_remove_scroll_events(*sp);
     sp->set_range(0, 10_mm);
     sp->show();
 
