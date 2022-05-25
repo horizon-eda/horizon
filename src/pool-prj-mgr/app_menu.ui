@@ -24,7 +24,7 @@
         <attribute name="action">app.about</attribute>
       </item>
       <item>
-        <attribute name="label" translatable="yes">_Quit</attribute>
+        <attribute name="label" translatable="yes">Close all Windows</attribute>
         <attribute name="action">app.quit</attribute>
       </item>
     </section>
