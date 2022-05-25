@@ -344,7 +344,7 @@ bool PoolProjectManagerApplication::close_windows(std::vector<CloseOrHomeWindow>
         }
     }
     else {
-        for (auto win : windows) {
+        for (auto &[filenanme, win] : files_windows) {
             win.win.prepare_close();
             auto procs = win.win.get_processes();
             for (auto &it : procs) {
