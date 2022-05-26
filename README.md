@@ -31,7 +31,6 @@ Wanna chat about the project? Join #horizon-eda on libera.chat
 
 # Getting Started
 See the [the docs](https://docs.horizon-eda.org/en/latest/installation.html).
-Debian packages are hosted by [packagecloud](https://packagecloud.io/).
 
 # Included third-party software
 
