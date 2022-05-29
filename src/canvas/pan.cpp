@@ -37,10 +37,14 @@ void CanvasGL::pan_drag_move(GdkEventMotion *motion_event)
     }
 }
 
-void CanvasGL::pan_drag_move(GdkEventScroll *scroll_event)
+void CanvasGL::pan_drag_move(GdkEventScroll *scroll_event, ScrollDirection direction)
 {
     gdouble dx, dy;
     gdk_event_get_scroll_deltas((GdkEvent *)scroll_event, &dx, &dy);
+    if (direction == ScrollDirection::REVERSED) {
+        dx *= -1;
+        dy *= -1;
+    }
     offset.x -= dx * 50;
     offset.y -= dy * 50;
     update_viewmat();
@@ -91,12 +95,12 @@ static int tick_cb(GtkWidget *cwidget, GdkFrameClock *frame_clock, gpointer user
     return canvas->_animate_step(frame_clock);
 }
 
-void CanvasGL::pan_zoom(GdkEventScroll *scroll_event, bool to_cursor)
+void CanvasGL::pan_zoom(GdkEventScroll *scroll_event, ZoomTo zoom_to, ScrollDirection direction)
 {
     if (gesture_zoom->is_recognized() || gesture_drag->is_recognized())
         return;
     gdouble x, y;
-    if (to_cursor) {
+    if (zoom_to == ZoomTo::CURSOR) {
         gdk_event_get_coords((GdkEvent *)scroll_event, &x, &y);
     }
     else {
@@ -120,6 +124,8 @@ void CanvasGL::pan_zoom(GdkEventScroll *scroll_event, bool to_cursor)
         inc = -sy;
     }
     inc *= factor;
+    if (direction == ScrollDirection::REVERSED)
+        inc *= -1;
     if (smooth_zoom) {
         start_smooth_zoom(Coordf(x, y), inc);
     }

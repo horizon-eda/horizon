@@ -15,6 +15,7 @@ PreferencesRow::PreferencesRow(const std::string &title, const std::string &subt
         la->set_xalign(0);
         la->set_text(title);
         box->pack_start(*la, false, false, 0);
+        label_title = la;
     }
     {
         auto la = Gtk::manage(new Gtk::Label);
@@ -23,10 +24,21 @@ PreferencesRow::PreferencesRow(const std::string &title, const std::string &subt
         la->get_style_context()->add_class("dim-label");
         make_label_small(la);
         box->pack_start(*la, false, false, 0);
+        label_subtitle = la;
     }
 
     box->show_all();
     pack_start(*box, true, true, 0);
+}
+
+void PreferencesRow::set_title(const std::string &t)
+{
+    label_title->set_text(t);
+}
+
+void PreferencesRow::set_subtitle(const std::string &t)
+{
+    label_subtitle->set_text(t);
 }
 
 PreferencesRowBool::PreferencesRowBool(const std::string &title, const std::string &subtitle, Preferences &prefs,

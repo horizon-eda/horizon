@@ -495,6 +495,53 @@ void SpacenavPreferences::load_from_json(const json &j)
     }
 }
 
+static const LutEnumStr<InputDevicesPrefs::Device::Type> type_lut = {
+        {"auto", InputDevicesPrefs::Device::Type::AUTO},
+        {"touchpad", InputDevicesPrefs::Device::Type::TOUCHPAD},
+        {"trackpoint", InputDevicesPrefs::Device::Type::TRACKPOINT},
+};
+
+static InputDevicesPrefs::Device device_from_json(const json &j)
+{
+    InputDevicesPrefs::Device dev;
+    dev.type = type_lut.lookup(j.at("type").get<std::string>());
+    dev.invert_zoom = j.at("invert_zoom").get<bool>();
+    dev.invert_pan = j.at("invert_pan").get<bool>();
+    return dev;
+}
+
+static json serialize_device(const InputDevicesPrefs::Device &dev)
+{
+    json j;
+    j["type"] = type_lut.lookup_reverse(dev.type);
+    j["invert_zoom"] = dev.invert_zoom;
+    j["invert_pan"] = dev.invert_pan;
+    return j;
+}
+
+json InputDevicesPreferences::serialize() const
+{
+    json j;
+    auto o = json::object();
+    for (const auto &[k, v] : prefs.devices) {
+        o[k] = serialize_device(v);
+    }
+    j["devices"] = o;
+    return j;
+}
+
+void InputDevicesPreferences::load_from_json(const json &j)
+{
+    if (j.count("devices")) {
+        prefs.devices.clear();
+        auto &o = j.at("devices");
+        for (const auto &[k, v] : o.items()) {
+            prefs.devices.emplace(std::piecewise_construct, std::forward_as_tuple(k),
+                                  std::forward_as_tuple(device_from_json(v)));
+        }
+    }
+}
+
 json Preferences::serialize() const
 {
     json j;
@@ -515,6 +562,7 @@ json Preferences::serialize() const
     j["appearance"] = appearance.serialize();
     j["tool_bar"] = tool_bar.serialize();
     j["spacenav"] = spacenav.serialize();
+    j["input_devices"] = input_devices.serialize();
     j["show_pull_request_tools"] = show_pull_request_tools;
     j["hud_debug"] = hud_debug;
     return j;
@@ -566,6 +614,8 @@ void Preferences::load_from_json(const json &j)
         tool_bar.load_from_json(j.at("tool_bar"));
     if (j.count("spacenav"))
         spacenav.load_from_json(j.at("spacenav"));
+    if (j.count("input_devices"))
+        input_devices.load_from_json(j.at("input_devices"));
 }
 
 void Preferences::load()

@@ -1,6 +1,7 @@
 #pragma once
 #include "canvas/appearance.hpp"
 #include "canvas3d/spacenav_prefs.hpp"
+#include "canvas/input_devices_prefs.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include <sigc++/sigc++.h>
 #include <string>
@@ -152,6 +153,14 @@ public:
     json serialize() const;
 };
 
+class InputDevicesPreferences {
+public:
+    InputDevicesPrefs prefs;
+
+    void load_from_json(const json &j);
+    json serialize() const;
+};
+
 class Preferences {
 public:
     Preferences();
@@ -183,6 +192,7 @@ public:
     AppearancePreferences appearance;
     ToolBarPreferences tool_bar;
     SpacenavPreferences spacenav;
+    InputDevicesPreferences input_devices;
 
     bool show_pull_request_tools = false;
     bool hud_debug = false;

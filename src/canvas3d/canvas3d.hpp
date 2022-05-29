@@ -10,6 +10,8 @@
 #include <unordered_map>
 #include "canvas3d_base.hpp"
 #include "spacenav_prefs.hpp"
+#include "canvas/input_devices_prefs.hpp"
+#include "util/scroll_direction.hpp"
 #include <atomic>
 #include <thread>
 
@@ -83,6 +85,8 @@ public:
         return have_spnav;
     }
 
+    InputDevicesPrefs input_devices_prefs;
+
     ~Canvas3D();
 
 private:
@@ -99,9 +103,9 @@ private:
     bool on_button_release_event(GdkEventButton *button_event) override;
     bool on_scroll_event(GdkEventScroll *scroll_event) override;
 
-    void pan_zoom(GdkEventScroll *scroll_event);
-    void pan_drag_move(GdkEventScroll *scroll_event);
-    void pan_rotate(GdkEventScroll *scroll_event);
+    void pan_zoom(GdkEventScroll *scroll_event, ScrollDirection direction);
+    void pan_drag_move(GdkEventScroll *scroll_event, ScrollDirection direction);
+    void pan_rotate(GdkEventScroll *scroll_event, ScrollDirection direction);
 
     Glib::RefPtr<Gtk::GestureDrag> gesture_drag;
     glm::vec2 gesture_drag_center_orig;

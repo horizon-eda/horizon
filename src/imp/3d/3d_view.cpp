@@ -598,6 +598,7 @@ void View3DWindow::apply_preferences(const Preferences &prefs)
     canvas->touchpad_pan = prefs.zoom.touchpad_pan;
     canvas->set_appearance(prefs.canvas_layer.appearance);
     canvas->spacenav_prefs = prefs.spacenav.prefs;
+    canvas->input_devices_prefs = prefs.input_devices.prefs;
     spnav_buttons = prefs.spacenav.buttons;
     const auto av = ActionCatalogItem::AVAILABLE_IN_3D;
     for (auto &it : action_connections) {

@@ -17,6 +17,7 @@
 #include <iostream>
 #include <thread>
 #include "util/warp_cursor.hpp"
+#include "preferences/preferences_util.hpp"
 
 #ifdef HAVE_SPNAV
 #include <spnav.h>
@@ -302,42 +303,46 @@ void Canvas3D::rotate_gesture_update_cb(GdkEventSequence *seq)
 bool Canvas3D::on_scroll_event(GdkEventScroll *scroll_event)
 {
     auto *dev = gdk_event_get_source_device((GdkEvent *)scroll_event);
-    auto src = gdk_device_get_source(dev);
-    if (src == GDK_SOURCE_TRACKPOINT || (src == GDK_SOURCE_TOUCHPAD && touchpad_pan)) {
+    auto dev_info = preferences_get_device_info(dev, input_devices_prefs);
+    if (dev_info.src == GDK_SOURCE_TRACKPOINT || (dev_info.src == GDK_SOURCE_TOUCHPAD && touchpad_pan)) {
         if (scroll_event->state & GDK_CONTROL_MASK) {
-            pan_zoom(scroll_event);
+            pan_zoom(scroll_event, dev_info.zoom);
         }
         else if (scroll_event->state & GDK_SHIFT_MASK) {
-            pan_rotate(scroll_event);
+            pan_rotate(scroll_event, dev_info.zoom);
         }
         else {
-            pan_drag_move(scroll_event);
+            pan_drag_move(scroll_event, dev_info.pan);
         }
     }
     else {
-        pan_zoom(scroll_event);
+        pan_zoom(scroll_event, dev_info.zoom);
     }
 
     return Gtk::GLArea::on_scroll_event(scroll_event);
 }
 
 
-void Canvas3D::pan_drag_move(GdkEventScroll *scroll_event)
+void Canvas3D::pan_drag_move(GdkEventScroll *scroll_event, ScrollDirection direction)
 {
     gdouble dx, dy;
     gdk_event_get_scroll_deltas((GdkEvent *)scroll_event, &dx, &dy);
 
     auto delta = glm::vec2(dx * -50, dy * 50);
+    if (direction == ScrollDirection::REVERSED)
+        delta *= -1;
 
     set_center(get_center() + get_center_shift(delta));
 }
 
-void Canvas3D::pan_rotate(GdkEventScroll *scroll_event)
+void Canvas3D::pan_rotate(GdkEventScroll *scroll_event, ScrollDirection direction)
 {
     gdouble dx, dy;
     gdk_event_get_scroll_deltas((GdkEvent *)scroll_event, &dx, &dy);
 
     auto delta = -glm::vec2(dx, dy);
+    if (direction == ScrollDirection::REVERSED)
+        delta *= -1;
 
     set_cam_azimuth(get_cam_azimuth() - delta.x * 9);
     set_cam_elevation(get_cam_elevation() - delta.y * 9);
@@ -356,7 +361,7 @@ static float cam_dist_from_anim(float d)
     return pow(zoom_base, d);
 }
 
-void Canvas3D::pan_zoom(GdkEventScroll *scroll_event)
+void Canvas3D::pan_zoom(GdkEventScroll *scroll_event, ScrollDirection direction)
 {
     float inc = 0;
     float factor = 1;
@@ -374,6 +379,8 @@ void Canvas3D::pan_zoom(GdkEventScroll *scroll_event)
         inc = sy;
     }
     inc *= factor;
+    if (direction == ScrollDirection::REVERSED)
+        inc *= -1;
     if (smooth_zoom) {
         if (inc == 0)
             return;

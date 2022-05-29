@@ -8,6 +8,7 @@
 #include "preferences_window_stock_info.hpp"
 #include "preferences_window_misc.hpp"
 #include "preferences_window_spacenav.hpp"
+#include "preferences_window_input_devices.hpp"
 #include "canvas/color_palette.hpp"
 #include "board/board_layers.hpp"
 #include "pool/pool_manager.hpp"
@@ -68,6 +69,11 @@ PreferencesWindow::PreferencesWindow(Preferences &prefs) : Gtk::Window(), prefer
         stack->add(*ed, "in_tool_keys", "In-tool keys");
         ed->show();
         ed->unreference();
+    }
+    {
+        auto ed = new InputDevicesPreferencesEditor(preferences);
+        stack->add(*ed, "input_devices", "Input devices");
+        ed->show();
     }
 #ifdef HAVE_SPNAV
     {

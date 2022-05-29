@@ -13,6 +13,8 @@
 #include "snap_filter.hpp"
 #include "picture_renderer.hpp"
 #include "selection_filter.hpp"
+#include "input_devices_prefs.hpp"
+#include "util/scroll_direction.hpp"
 
 namespace horizon {
 class CanvasGL : public Canvas, public Gtk::GLArea {
@@ -196,6 +198,8 @@ public:
 
     bool show_pictures = true;
 
+    InputDevicesPrefs input_devices_prefs;
+
 protected:
     void push() override;
     void request_push() override;
@@ -248,11 +252,14 @@ private:
 
     PictureRenderer picture_renderer;
 
+    enum class ZoomTo { CURSOR, CENTER };
+
     void pan_drag_begin(GdkEventButton *button_event);
     void pan_drag_end(GdkEventButton *button_event);
     void pan_drag_move(GdkEventMotion *motion_event);
-    void pan_drag_move(GdkEventScroll *scroll_event);
-    void pan_zoom(GdkEventScroll *scroll_event, bool to_cursor = true);
+    void pan_drag_move(GdkEventScroll *scroll_event, ScrollDirection scroll_direction);
+
+    void pan_zoom(GdkEventScroll *scroll_event, ZoomTo zoom_to, ScrollDirection scroll_direction);
     void start_smooth_zoom(const Coordf &c, float inc);
     void cursor_move(GdkEvent *motion_event);
     void hover_prelight_update(GdkEvent *motion_event);

@@ -770,6 +770,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/preferences/preferences_window_misc.cpp\
 	src/pool-prj-mgr/preferences/preferences_row.cpp\
 	src/pool-prj-mgr/preferences/preferences_window_spacenav.cpp\
+	src/pool-prj-mgr/preferences/preferences_window_input_devices.cpp\
 	src/pool-prj-mgr/preferences/action_editor.cpp\
 	src/imp/action.cpp\
 	src/imp/action_catalog.cpp\

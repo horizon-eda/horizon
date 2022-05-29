@@ -13,6 +13,12 @@ public:
 
 protected:
     Preferences &preferences;
+    void set_title(const std::string &t);
+    void set_subtitle(const std::string &t);
+
+private:
+    Gtk::Label *label_title = nullptr;
+    Gtk::Label *label_subtitle = nullptr;
 };
 
 
