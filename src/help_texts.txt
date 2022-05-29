@@ -38,3 +38,7 @@ A plane completely enclosing another one needs a higher fill order than the encl
 #ROUTING_OFFSET
 When routing or dragging a track, this offset gets added to the clearance specified in the rules.
 You can override it in the router tool.
+
+#INPUT_DEVICES
+Select invert zoom/pan to reverse the scrolling direction for zooming or panning.
+If a touchpad or trackpoint isn't detected as such, you can manually set the device type.

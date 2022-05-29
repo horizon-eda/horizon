@@ -8,6 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "board/board_layers.hpp"
 #include "bitmap_font_util.hpp"
+#include "preferences/preferences_util.hpp"
 
 namespace horizon {
 std::pair<float, Coordf> CanvasGL::get_scale_and_offset() const
@@ -332,20 +333,20 @@ bool CanvasGL::on_scroll_event(GdkEventScroll *scroll_event)
 {
 #if GTK_CHECK_VERSION(3, 22, 0)
     auto *dev = gdk_event_get_source_device((GdkEvent *)scroll_event);
-    auto src = gdk_device_get_source(dev);
-    if (src == GDK_SOURCE_TRACKPOINT || (src == GDK_SOURCE_TOUCHPAD && touchpad_pan)) {
+    auto dev_info = preferences_get_device_info(dev, input_devices_prefs);
+    if (dev_info.src == GDK_SOURCE_TRACKPOINT || (dev_info.src == GDK_SOURCE_TOUCHPAD && touchpad_pan)) {
         if (scroll_event->state & GDK_CONTROL_MASK) {
-            pan_zoom(scroll_event, false);
+            pan_zoom(scroll_event, ZoomTo::CENTER, dev_info.zoom);
         }
         else {
-            pan_drag_move(scroll_event);
+            pan_drag_move(scroll_event, dev_info.pan);
         }
     }
     else {
-        pan_zoom(scroll_event);
+        pan_zoom(scroll_event, ZoomTo::CURSOR, dev_info.zoom);
     }
 #else
-    pan_zoom(scroll_event);
+    pan_zoom(scroll_event, ZoomTo::CURSOR, ScrollDirection::NORMAL);
 #endif
 
     return Gtk::GLArea::on_scroll_event(scroll_event);
