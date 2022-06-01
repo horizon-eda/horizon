@@ -163,8 +163,8 @@ void CanvasPDF::img_polygon(const Polygon &ipoly, bool tr)
                         painter.LineToMM(to_um(p.x), to_um(p.y));
                     first = false;
                 }
+                painter.ClosePath();
             }
-            painter.ClosePath();
         }
         if (fill)
             painter.Fill(true);
