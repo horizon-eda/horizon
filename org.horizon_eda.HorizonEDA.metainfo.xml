@@ -31,6 +31,19 @@
   </screenshots>
 
   <url type="homepage">https://horizon-eda.org/</url>
+  <url type="bugtracker">https://github.com/horizon-eda/horizon/issues</url>
+  <url type="help">https://docs.horizon-eda.org</url>
+  <url type="vcs-browser">https://github.com/horizon-eda/horizon</url>
+
+  <recommends>
+    <control>touch</control>
+  </recommends>
+
+  <requires>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <display_length compare="ge">medium</display_length>
+  </requires>
 
   <provides>
     <binary>horizon-eda</binary>
