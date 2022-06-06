@@ -72,6 +72,8 @@ public:
     PreferencesGroup(const std::string &title);
     void add_row(PreferencesRow &row);
 
+    void set_placeholder(Gtk::Widget &w);
+
 private:
     Gtk::ListBox *listbox = nullptr;
 };

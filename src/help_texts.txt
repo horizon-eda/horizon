@@ -40,5 +40,7 @@ When routing or dragging a track, this offset gets added to the clearance specif
 You can override it in the router tool.
 
 #INPUT_DEVICES
-Select invert zoom/pan to reverse the scrolling direction for zooming or panning.
 If a touchpad or trackpoint isn't detected as such, you can manually set the device type.
+
+#INPUT_DEVICE_TYPES
+Select invert zoom/pan to reverse the scrolling direction for zooming or panning.

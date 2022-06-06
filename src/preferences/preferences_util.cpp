@@ -55,6 +55,22 @@ DeviceInfo preferences_get_device_info(GdkDevice *dev, const class InputDevicesP
             src = GDK_SOURCE_TOUCHPAD;
         else if (d.type == InputDevicesPrefs::Device::Type::TRACKPOINT)
             src = GDK_SOURCE_TRACKPOINT;
+    }
+    InputDevicesPrefs::Device::Type type = InputDevicesPrefs::Device::Type::MOUSE;
+    switch (src) {
+    case GDK_SOURCE_TRACKPOINT:
+        type = InputDevicesPrefs::Device::Type::TRACKPOINT;
+        break;
+
+    case GDK_SOURCE_TOUCHPAD:
+        type = InputDevicesPrefs::Device::Type::TOUCHPAD;
+        break;
+
+    default:
+        break;
+    }
+    if (prefs.device_types.count(type)) {
+        auto &d = prefs.device_types.at(type);
         return {src, get_scroll_direction(d.invert_zoom), get_scroll_direction(d.invert_pan)};
     }
     return {src, ScrollDirection::NORMAL, ScrollDirection::NORMAL};

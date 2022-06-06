@@ -499,12 +499,19 @@ static const LutEnumStr<InputDevicesPrefs::Device::Type> type_lut = {
         {"auto", InputDevicesPrefs::Device::Type::AUTO},
         {"touchpad", InputDevicesPrefs::Device::Type::TOUCHPAD},
         {"trackpoint", InputDevicesPrefs::Device::Type::TRACKPOINT},
+        {"mouse", InputDevicesPrefs::Device::Type::MOUSE},
 };
 
 static InputDevicesPrefs::Device device_from_json(const json &j)
 {
     InputDevicesPrefs::Device dev;
     dev.type = type_lut.lookup(j.at("type").get<std::string>());
+    return dev;
+}
+
+static InputDevicesPrefs::DeviceType device_type_from_json(const json &j)
+{
+    InputDevicesPrefs::DeviceType dev;
     dev.invert_zoom = j.at("invert_zoom").get<bool>();
     dev.invert_pan = j.at("invert_pan").get<bool>();
     return dev;
@@ -514,6 +521,12 @@ static json serialize_device(const InputDevicesPrefs::Device &dev)
 {
     json j;
     j["type"] = type_lut.lookup_reverse(dev.type);
+    return j;
+}
+
+static json serialize_device_type(const InputDevicesPrefs::DeviceType &dev)
+{
+    json j;
     j["invert_zoom"] = dev.invert_zoom;
     j["invert_pan"] = dev.invert_pan;
     return j;
@@ -522,11 +535,20 @@ static json serialize_device(const InputDevicesPrefs::Device &dev)
 json InputDevicesPreferences::serialize() const
 {
     json j;
-    auto o = json::object();
-    for (const auto &[k, v] : prefs.devices) {
-        o[k] = serialize_device(v);
+    {
+        auto o = json::object();
+        for (const auto &[k, v] : prefs.devices) {
+            o[k] = serialize_device(v);
+        }
+        j["devices"] = o;
     }
-    j["devices"] = o;
+    {
+        auto o = json::object();
+        for (const auto &[k, v] : prefs.device_types) {
+            o[type_lut.lookup_reverse(k)] = serialize_device_type(v);
+        }
+        j["device_types"] = o;
+    }
     return j;
 }
 
@@ -538,6 +560,14 @@ void InputDevicesPreferences::load_from_json(const json &j)
         for (const auto &[k, v] : o.items()) {
             prefs.devices.emplace(std::piecewise_construct, std::forward_as_tuple(k),
                                   std::forward_as_tuple(device_from_json(v)));
+        }
+    }
+    if (j.count("device_types")) {
+        prefs.device_types.clear();
+        auto &o = j.at("device_types");
+        for (const auto &[k, v] : o.items()) {
+            prefs.device_types.emplace(std::piecewise_construct, std::forward_as_tuple(type_lut.lookup(k)),
+                                       std::forward_as_tuple(device_type_from_json(v)));
         }
     }
 }

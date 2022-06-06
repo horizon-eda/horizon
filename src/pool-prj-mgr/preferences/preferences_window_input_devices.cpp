@@ -36,26 +36,6 @@ PreferencesRowDevice::PreferencesRowDevice(Glib::RefPtr<Gdk::Device> dev, Prefer
 {
     auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 10));
     const auto name = dev->get_name();
-    {
-        auto x = Gtk::manage(new Gtk::CheckButton("Invert zoom"));
-        box->pack_start(*x, false, false, 0);
-        if (prefs.input_devices.prefs.devices.count(name))
-            x->set_active(prefs.input_devices.prefs.devices.at(name).invert_zoom);
-        x->signal_toggled().connect([this, name, x] {
-            preferences.input_devices.prefs.devices[name].invert_zoom = x->get_active();
-            preferences.signal_changed().emit();
-        });
-    }
-    {
-        auto x = Gtk::manage(new Gtk::CheckButton("Invert pan"));
-        box->pack_start(*x, false, false, 0);
-        if (prefs.input_devices.prefs.devices.count(name))
-            x->set_active(prefs.input_devices.prefs.devices.at(name).invert_pan);
-        x->signal_toggled().connect([this, name, x] {
-            preferences.input_devices.prefs.devices[name].invert_pan = x->get_active();
-            preferences.signal_changed().emit();
-        });
-    }
 
     auto combo = Gtk::manage(new Gtk::ComboBoxText);
     combo->set_valign(Gtk::ALIGN_CENTER);
@@ -98,47 +78,134 @@ std::string PreferencesRowDevice::get_device_name() const
     return device->get_name();
 }
 
-InputDevicesPreferencesEditor::InputDevicesPreferencesEditor(Preferences &prefs)
-    : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10), preferences(prefs)
+class PreferencesRowDeviceType : public PreferencesRow {
+public:
+    PreferencesRowDeviceType(InputDevicesPrefs::Device::Type type, Preferences &prefs);
+
+private:
+    const InputDevicesPrefs::Device::Type type;
+};
+
+static const std::map<InputDevicesPrefs::Device::Type, std::string> type_names = {
+        {InputDevicesPrefs::Device::Type::MOUSE, "Mouse"},
+        {InputDevicesPrefs::Device::Type::TOUCHPAD, "Touchpad"},
+        {InputDevicesPrefs::Device::Type::TRACKPOINT, "Trackpoint"},
+};
+
+PreferencesRowDeviceType::PreferencesRowDeviceType(InputDevicesPrefs::Device::Type ty, Preferences &prefs)
+    : PreferencesRow(type_names.at(ty), "NONE", prefs), type(ty)
 {
-    auto gr = Gtk::manage(new PreferencesGroup("Devices"));
+    auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 10));
+    {
+        auto x = Gtk::manage(new Gtk::CheckButton("Invert zoom"));
+        box->pack_start(*x, false, false, 0);
+        if (prefs.input_devices.prefs.device_types.count(type))
+            x->set_active(prefs.input_devices.prefs.device_types.at(type).invert_zoom);
+        x->signal_toggled().connect([this, x] {
+            preferences.input_devices.prefs.device_types[type].invert_zoom = x->get_active();
+            preferences.signal_changed().emit();
+        });
+    }
+    {
+        auto x = Gtk::manage(new Gtk::CheckButton("Invert pan"));
+        box->pack_start(*x, false, false, 0);
+        if (prefs.input_devices.prefs.device_types.count(type))
+            x->set_active(prefs.input_devices.prefs.device_types.at(type).invert_pan);
+        x->signal_toggled().connect([this, x] {
+            preferences.input_devices.prefs.device_types[type].invert_pan = x->get_active();
+            preferences.signal_changed().emit();
+        });
+    }
+
+    pack_start(*box, false, false, 0);
+    box->show_all();
+}
+
+InputDevicesPreferencesEditor::InputDevicesPreferencesEditor(Preferences &prefs)
+    : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 20), preferences(prefs)
+{
+    set_homogeneous(true);
     property_margin() = 20;
     set_halign(Gtk::ALIGN_CENTER);
-
-    auto sg = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
-
-    signal_realize().connect([this, gr, sg] {
-        auto seat = get_window()->get_display()->get_default_seat();
-        auto devices = seat->get_slaves(Gdk::SEAT_CAPABILITY_ALL_POINTING);
-        for (auto dev : devices) {
-            const std::string name = dev->get_name();
-            if (name.find("Virtual core XTEST") == 0)
-                continue;
-            auto row = Gtk::manage(new PreferencesRowDevice(dev, preferences, sg));
-            gr->add_row(*row);
-            rows.push_back(row);
+    auto sgv = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_VERTICAL);
+    {
+        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10));
+        auto gr = Gtk::manage(new PreferencesGroup("Devices"));
+        {
+            auto la = Gtk::manage(new Gtk::Label("No devices found"));
+            la->get_style_context()->add_class("dim-label");
+            la->property_margin() = 10;
+            sgv->add_widget(*la);
+            gr->set_placeholder(*la);
+            la->show();
         }
-    });
 
-    add_events(Gdk::POINTER_MOTION_MASK);
-    signal_motion_notify_event().connect([this](GdkEventMotion *ev) {
-        auto dev = gdk_event_get_source_device((GdkEvent *)ev);
-        for (auto row : rows) {
-            row->set_current(row->get_device_name() == gdk_device_get_name(dev));
+        auto sg = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
+
+        signal_realize().connect([this, gr, sg, sgv] {
+            auto seat = get_window()->get_display()->get_default_seat();
+            auto devices = seat->get_slaves(Gdk::SEAT_CAPABILITY_ALL_POINTING);
+            for (auto dev : devices) {
+                const std::string name = dev->get_name();
+                if (dev->get_vendor_id().size() == 0 && dev->get_product_id().size() == 0)
+                    continue;
+                auto row = Gtk::manage(new PreferencesRowDevice(dev, preferences, sg));
+                gr->add_row(*row);
+                rows.push_back(row);
+                sgv->add_widget(*row);
+            }
+        });
+
+        add_events(Gdk::POINTER_MOTION_MASK);
+        signal_motion_notify_event().connect([this](GdkEventMotion *ev) {
+            auto dev = gdk_event_get_source_device((GdkEvent *)ev);
+            for (auto row : rows) {
+                row->set_current(row->get_device_name() == gdk_device_get_name(dev));
+            }
+            return false;
+        });
+
+        box->pack_start(*gr, false, false, 0);
+        gr->show();
+
+        {
+            auto la = Gtk::manage(new Gtk::Label(HelpTexts::INPUT_DEVICES));
+            la->set_line_wrap(true);
+            la->set_max_width_chars(0);
+            la->set_xalign(0);
+            la->set_margin_start(2);
+            box->pack_start(*la, false, false, 0);
+            la->show();
         }
-        return false;
-    });
-
-    pack_start(*gr, false, false, 0);
-    gr->show();
+        pack_start(*box, true, true, 0);
+        box->show();
+    }
 
     {
-        auto la = Gtk::manage(new Gtk::Label(HelpTexts::INPUT_DEVICES));
-        la->set_line_wrap(true);
-        la->set_xalign(0);
-        la->set_margin_start(2);
-        pack_start(*la, false, false, 0);
-        la->show();
+        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10));
+        auto gr = Gtk::manage(new PreferencesGroup("Device Types"));
+        using Type = InputDevicesPrefs::Device::Type;
+        for (const auto type : {Type::MOUSE, Type::TOUCHPAD, Type::TRACKPOINT}) {
+            auto row = Gtk::manage(new PreferencesRowDeviceType(type, preferences));
+            sgv->add_widget(*row);
+            gr->add_row(*row);
+        }
+
+        box->pack_start(*gr, false, false, 0);
+        gr->show();
+
+        {
+            auto la = Gtk::manage(new Gtk::Label(HelpTexts::INPUT_DEVICE_TYPES));
+            la->set_line_wrap(true);
+            la->set_max_width_chars(0);
+            la->set_xalign(0);
+            la->set_margin_start(2);
+            box->pack_start(*la, false, false, 0);
+            la->show();
+        }
+
+        pack_start(*box, true, true, 0);
+        box->show();
     }
 }
 } // namespace horizon

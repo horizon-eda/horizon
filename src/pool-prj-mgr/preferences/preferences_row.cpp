@@ -14,16 +14,16 @@ PreferencesRow::PreferencesRow(const std::string &title, const std::string &subt
         auto la = Gtk::manage(new Gtk::Label);
         la->set_xalign(0);
         la->set_text(title);
-        box->pack_start(*la, false, false, 0);
+        box->pack_start(*la, true, true, 0);
         label_title = la;
     }
-    {
+    if (subtitle != "NONE") {
         auto la = Gtk::manage(new Gtk::Label);
         la->set_xalign(0);
         la->set_text(subtitle);
         la->get_style_context()->add_class("dim-label");
         make_label_small(la);
-        box->pack_start(*la, false, false, 0);
+        box->pack_start(*la, true, true, 0);
         label_subtitle = la;
     }
 
@@ -38,7 +38,8 @@ void PreferencesRow::set_title(const std::string &t)
 
 void PreferencesRow::set_subtitle(const std::string &t)
 {
-    label_subtitle->set_text(t);
+    if (label_subtitle)
+        label_subtitle->set_text(t);
 }
 
 PreferencesRowBool::PreferencesRowBool(const std::string &title, const std::string &subtitle, Preferences &prefs,
@@ -92,6 +93,11 @@ PreferencesGroup::PreferencesGroup(const std::string &title) : Gtk::Box(Gtk::ORI
         }
     });
     pack_start(*fr, false, false, 0);
+}
+
+void PreferencesGroup::set_placeholder(Gtk::Widget &w)
+{
+    listbox->set_placeholder(w);
 }
 
 void PreferencesGroup::add_row(PreferencesRow &row)
