@@ -151,7 +151,7 @@ private:
     std::map<std::pair<uint64_t, uint64_t>, unsigned int> symbols_rect; // w,h -> symbol index
     std::map<std::pair<uint64_t, uint64_t>, unsigned int> symbols_oval; // w,h -> symbol index
 
-    template <typename T, typename... Args> T &add_feature(Args &&... args)
+    template <typename T, typename... Args> T &add_feature(Args &&...args)
     {
         auto f = std::make_unique<T>(features.size(), std::forward<Args>(args)...);
         auto &r = *f;

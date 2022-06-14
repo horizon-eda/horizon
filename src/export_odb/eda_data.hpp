@@ -112,7 +112,7 @@ public:
 
         std::list<std::unique_ptr<Subnet>> subnets;
 
-        template <typename T, typename... Args> T &add_subnet(Args &&... args)
+        template <typename T, typename... Args> T &add_subnet(Args &&...args)
         {
             auto f = std::make_unique<T>(subnets.size(), std::forward<Args>(args)...);
             auto &r = *f;

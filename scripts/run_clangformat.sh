@@ -8,20 +8,20 @@
 # corrections are inserted in-place.
 
 # Find clang-format, in priority order, unless overridden by user.
-CLANG_FORMAT=${CLANG_FORMAT:-$(command -v clang-format-9)}
-CLANG_FORMAT=${CLANG_FORMAT:-$(command -v clang-format-9.0)}
-CLANG_FORMAT=${CLANG_FORMAT:-$(command -v clang-format-90)}
+CLANG_FORMAT=${CLANG_FORMAT:-$(command -v clang-format-11)}
+CLANG_FORMAT=${CLANG_FORMAT:-$(command -v clang-format-11.0)}
+CLANG_FORMAT=${CLANG_FORMAT:-$(command -v clang-format-110)}
 CLANG_FORMAT=${CLANG_FORMAT:-$(command -v clang-format)}
 
 if [ ! -z $CLANG_FORMAT ]; then
-    CLANG_FORMAT_VERSION="$(${CLANG_FORMAT} -version | cut -d " " -f 3 | cut -d "." -f 1)"
+    CLANG_FORMAT_VERSION="$(${CLANG_FORMAT} -version | cut -d " " -f 4 | cut -d "." -f 1)"
 
     # Check version
-    if [ "$CLANG_FORMAT_VERSION" = "9" ]; then
-    # clang-format major version is 9.0
+    if [ "$CLANG_FORMAT_VERSION" = "11" ]; then
+    # clang-format major version is 11.0
 	CLANG_BIN=$CLANG_FORMAT
     else
-        echo "clang-format version 9 required. The following was found:"
+        echo "clang-format version 11 required. The following was found:"
         $CLANG_FORMAT -version
         exit -1
     fi

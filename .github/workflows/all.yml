@@ -21,12 +21,12 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install preliminary dependencies
       run: sudo apt-get update -y && sudo apt-get install curl gnupg apt-transport-https -y
-    - name: Add clang 9.0 to apt sources
-      run: echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main" | sudo tee -a /etc/apt/sources.list
+    - name: Add clang 11.0 to apt sources
+      run: echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-11 main" | sudo tee -a /etc/apt/sources.list
     - name: Add LLVM apt key
       run: curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
     - name: Install dependencies
-      run: sudo apt-get update -y && sudo apt-get install git clang-format-9 -y
+      run: sudo apt-get update -y && sudo apt-get install git clang-format-11 -y
     - name: Style checker
       run: bash scripts/stylecheck.sh
 

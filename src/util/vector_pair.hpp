@@ -108,8 +108,8 @@ public:
     template <typename... Args1, typename... Args2>
     void emplace_back(std::tuple<Args1...> args1, std::tuple<Args2...> args2)
     {
-        std::apply([this](auto &&... args) { m_first.emplace_back(args...); }, args1);
-        std::apply([this](auto &&... args) { m_second.emplace_back(args...); }, args2);
+        std::apply([this](auto &&...args) { m_first.emplace_back(args...); }, args1);
+        std::apply([this](auto &&...args) { m_second.emplace_back(args...); }, args2);
     }
 
     std::pair<T1 &, T2 &> atm(size_t idx)

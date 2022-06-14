@@ -76,7 +76,7 @@ public:
         vec.push_back(value);
     }
 
-    template <class... Args> void emplace_back(Args &&... args)
+    template <class... Args> void emplace_back(Args &&...args)
     {
         vec.emplace_back(std::forward<Args>(args)...);
     }
