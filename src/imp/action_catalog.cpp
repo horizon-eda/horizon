@@ -1397,5 +1397,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(FLIP_NET_TIE),
         TOOL_LUT_ITEM(MOVE_TRACK_CONNECTION),
         TOOL_LUT_ITEM(MOVE_TRACK_CENTER),
+        TOOL_LUT_ITEM(SELECT_CONNECTED_LINES),
 };
 } // namespace horizon
