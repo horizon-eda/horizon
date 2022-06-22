@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 Mark Roszko <mark.roszko@gmail.com>
- * Copyright (C) 2018 KiCad Developers, see AUTHORS.txt for contributors.
+ * Copyright (C) 2018-2021 KiCad Developers, see AUTHORS.txt for contributors.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,13 +19,12 @@
 #include "sexpr/sexpr_parser.h"
 #include "sexpr/sexpr_exception.h"
 #include <cctype>
+#include <cstdlib>     /* strtod */
 #include <iterator>
 #include <stdexcept>
-#include <stdlib.h>     /* strtod */
 
 #include <fstream>
 #include <streambuf>
-//#include <macros.h>
 
 namespace SEXPR
 {
@@ -39,13 +38,14 @@ namespace SEXPR
     {
     }
 
-    SEXPR* PARSER::Parse( const std::string &aString )
+    std::unique_ptr<SEXPR> PARSER::Parse( const std::string& aString )
     {
         std::string::const_iterator it = aString.begin();
         return parseString( aString, it );
     }
 
-    SEXPR* PARSER::parseString( const std::string& aString, std::string::const_iterator& it )
+    std::unique_ptr<SEXPR> PARSER::parseString(
+            const std::string& aString, std::string::const_iterator& it )
     {
         for( ; it != aString.end(); ++it )
         {
@@ -59,7 +59,8 @@ namespace SEXPR
             {
                 std::advance( it, 1 );
 
-                SEXPR_LIST* list = new SEXPR_LIST( m_lineNumber );
+                auto list = std::make_unique<SEXPR_LIST>( m_lineNumber );
+
                 while( it != aString.end() && *it != ')' )
                 {
                     //there may be newlines in between atoms of a list, so detect these here
@@ -72,8 +73,8 @@ namespace SEXPR
                         continue;
                     }
 
-                    SEXPR* item = parseString( aString, it );
-                    list->AddChild( item );
+                    std::unique_ptr<SEXPR> item = parseString( aString, it );
+                    list->AddChild( item.release() );
                 }
 
                 if( it != aString.end() )
@@ -83,33 +84,40 @@ namespace SEXPR
             }
             else if( *it == ')' )
             {
-                return NULL;
+                return nullptr;
             }
             else if( *it == '"' )
             {
-                size_t startPos = std::distance(aString.begin(), it) + 1;
-                size_t closingPos = startPos > 0 ? startPos - 1 : startPos;
+                ++it;
 
-                // find the closing quote character, be sure it is not escaped
-                do
+                auto starting_it = it;
+
+                for( ; it != aString.end(); ++it )
                 {
-                    closingPos = aString.find_first_of( '"', closingPos + 1 );
+                    auto ch = *it;
+
+                    if( ch == '\\' )
+                    {
+                        // Skip the next escaped character
+                        if( ++it == aString.end() )
+                            break;
+
+                        continue;
+                    }
+
+                    if( ch == '"' )
+                        break;
                 }
-                while( closingPos != std::string::npos
-                        && ( closingPos > 0 && aString[closingPos - 1] == '\\' ) );
 
-                if( closingPos != std::string::npos )
-                {
-                    SEXPR_STRING* str = new SEXPR_STRING(
-                        aString.substr( startPos, closingPos - startPos ),m_lineNumber );
-                    std::advance( it, closingPos - startPos + 2 );
-
-                    return str;
-                }
-                else
-                {
+                if( it == aString.end() )
                     throw PARSE_EXCEPTION("missing closing quote");
-                }
+
+                auto str = std::make_unique<SEXPR_STRING>( std::string( starting_it, it ),
+                        m_lineNumber );
+
+                ++it;
+                return str;
+
             }
             else
             {
@@ -125,17 +133,18 @@ namespace SEXPR
                         ( tmp.size() > 1 && tmp[0] == '-'
                           && tmp.find_first_not_of( "0123456789.", 1 ) == std::string::npos ) )
                     {
-                        SEXPR* res;
+                        std::unique_ptr<SEXPR> res;
 
                         if( tmp.find( '.' ) != std::string::npos )
                         {
-                            res = new SEXPR_DOUBLE( strtod( tmp.c_str(), NULL ), m_lineNumber );
+                            res = std::make_unique<SEXPR_DOUBLE>(
+                                    strtod( tmp.c_str(), nullptr ), m_lineNumber );
                             //floating point type
                         }
                         else
                         {
-                            res = new SEXPR_INTEGER(
-                                strtoll( tmp.c_str(), NULL, 0 ), m_lineNumber );
+                            res = std::make_unique<SEXPR_INTEGER>(
+                                    strtoll( tmp.c_str(), nullptr, 0 ), m_lineNumber );
                         }
 
                         std::advance( it, closingPos - startPos );
@@ -143,7 +152,7 @@ namespace SEXPR
                     }
                     else
                     {
-                        SEXPR_SYMBOL* str = new SEXPR_SYMBOL( tmp, m_lineNumber );
+                        auto str = std::make_unique<SEXPR_SYMBOL>( tmp, m_lineNumber );
                         std::advance( it, closingPos - startPos );
 
                         return str;
@@ -156,6 +165,6 @@ namespace SEXPR
             }
         }
 
-        return NULL;
+        return nullptr;
     }
 }

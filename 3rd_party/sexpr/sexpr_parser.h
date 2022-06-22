@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2016 Mark Roszko <mark.roszko@gmail.com>
+ * Copyright (C) 2021 KiCad Developers, see AUTHORS.txt for contributors.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +20,8 @@
 #define SEXPR_PARSER_H_
 
 #include "sexpr/sexpr.h"
+
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -30,12 +33,13 @@ namespace SEXPR
     public:
         PARSER();
         ~PARSER();
-        SEXPR* Parse( const std::string &aString );
-        SEXPR* ParseFromFile( const std::string &aFilename );
-        static std::string GetFileContents( const std::string &aFilename );
+        std::unique_ptr<SEXPR> Parse( const std::string& aString );
+        std::unique_ptr<SEXPR> ParseFromFile( const std::string& aFilename );
+        static std::string GetFileContents( const std::string& aFilename );
 
     private:
-        SEXPR* parseString( const std::string& aString, std::string::const_iterator& it );
+        std::unique_ptr<SEXPR> parseString(
+                const std::string& aString, std::string::const_iterator& it );
         static const std::string whitespaceCharacters;
         int m_lineNumber;
     };

@@ -45,7 +45,7 @@ See the [the docs](https://docs.horizon-eda.org/en/latest/installation.html).
 | delaunator               | Delaunator C++            | 6f2879967bc96a9bcdbacf418e560e9f2e170ace | https://github.com/abellgithub/delaunator-cpp                           | MIT          |
 | footag                   | footag                    | 99116328abe8f53e71831b446d35e93ee7128ef3 | https://github.com/endofexclusive/footag                                | GPLv3        |
 | router                   | KiCad router              | 6.0.4                                    | https://gitlab.com/kicad/code/kicad/-/tree/6.0.4/pcbnew/router          | GPLv3        |
-| sexpr                    | KiCad s-expression parser | 5.1.6                                    | https://gitlab.com/kicad/code/kicad/-/tree/5.1.6/utils/kicad2step/sexpr | GPLv3        |
+| sexpr                    | KiCad s-expression parser | 6.0.4                                    | https://gitlab.com/kicad/code/kicad/-/tree/6.0.4/libs/sexpr             | GPLv3        |
 
 
 - https://github.com/russdill/pybis

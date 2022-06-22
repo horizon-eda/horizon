@@ -128,7 +128,9 @@ namespace SEXPR
     {
         if( m_type != SEXPR_TYPE::SEXPR_TYPE_ATOM_SYMBOL )
         {
-            throw INVALID_TYPE_EXCEPTION("SEXPR is not a symbol type!");
+            std::string err_msg( "GetSymbol(): SEXPR is not a symbol type! error line ");
+            err_msg += std::to_string( GetLineNumber() );
+            throw INVALID_TYPE_EXCEPTION( err_msg );
         }
 
         return static_cast< SEXPR_SYMBOL const * >(this)->m_value;
@@ -145,7 +147,7 @@ namespace SEXPR
         return static_cast< SEXPR_LIST* >(this);
     }
 
-    std::string SEXPR::AsString( size_t aLevel )
+    std::string SEXPR::AsString( size_t aLevel ) const
     {
         std::string result;
 
@@ -156,7 +158,7 @@ namespace SEXPR
                 result = "\n";
             }
 
-            result.append( aLevel* 4, ' ' );
+            result.append( aLevel * 2, ' ' );
             aLevel++;
             result += "(";
 
@@ -375,7 +377,7 @@ namespace SEXPR
             }
             else
             {
-                throw std::invalid_argument( "SEXPR is not a symbol type!" );
+                throw std::invalid_argument( "operator>>: SEXPR is not a symbol type!" );
             }
         }
         else
