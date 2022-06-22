@@ -98,6 +98,9 @@ jobs:
     - name: Check app versions
       if: ${{ matrix.target == 'build/horizon.so' }}
       run: python3 scripts/check_app_versions.py
+    - name: Build and run tests
+      if: ${{ matrix.target != 'build/horizon.so' }}
+      run: make -j2 CXX=${{ matrix.os.cxx }} CC=${{ matrix.os.cc }} WARNFLAGS="-Wall -Wshadow -Wno-parentheses" test
 
   build-arch:
     strategy:

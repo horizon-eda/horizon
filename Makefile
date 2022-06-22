@@ -5,7 +5,7 @@ PROGS       = $(addprefix $(BUILDDIR)/horizon-,imp eda)
 all: $(PROGS)
 pymodule: $(BUILDDIR)/horizon.so
 
-.PHONY: all pymodule install install-man
+.PHONY: all pymodule install install-man test
 
 SRC_COMMON = \
 	src/util/uuid.cpp \
@@ -888,7 +888,15 @@ SRC_OCE_EXPORT = \
 	src/export_step/export_step.cpp\
 	src/import_step/step_importer.cpp\
 
-SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_PGM_TEST) $(SRC_POOL_PRJ_MGR) $(SRC_GEN_PKG) $(SRC_PR_REVIEW))
+SRC_TESTS = \
+	3rd_party/catch2/catch_amalgamated.cpp\
+	src/util/text_data.cpp \
+	src/canvas/hershey_fonts.cpp \
+	src/tests/tool_lut.cpp\
+	src/imp/action_catalog.cpp\
+	src/imp/action.cpp\
+
+SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_PGM_TEST) $(SRC_TESTS) $(SRC_POOL_PRJ_MGR) $(SRC_GEN_PKG) $(SRC_PR_REVIEW))
 
 INC = -Isrc -isystem 3rd_party -I$(BUILDDIR)/gen
 
@@ -1004,6 +1012,7 @@ OBJ_POOL_UTIL    = $(addprefix $(OBJDIR)/,$(SRC_POOL_UTIL:.cpp=.o))
 OBJ_PRJ_UTIL     = $(addprefix $(OBJDIR)/,$(SRC_PRJ_UTIL:.cpp=.o))
 OBJ_POOL_PRJ_MGR = $(addprefix $(OBJDIR)/,$(SRC_POOL_PRJ_MGR:.cpp=.o)) $(OBJ_RES)
 OBJ_PGM_TEST     = $(addprefix $(OBJDIR)/,$(SRC_PGM_TEST:.cpp=.o))
+OBJ_TESTS        = $(addprefix $(OBJDIR)/,$(SRC_TESTS:.cpp=.o))
 OBJ_GEN_PKG      = $(addprefix $(OBJDIR)/,$(SRC_GEN_PKG:.cpp=.o))
 OBJ_PR_REVIEW    = $(addprefix $(OBJDIR)/,$(SRC_PR_REVIEW:.cpp=.o))
 
@@ -1080,6 +1089,10 @@ $(BUILDDIR)/horizon-pgm-test: $(OBJ_COMMON) $(OBJ_PGM_TEST)
 	$(ECHO) " $@"
 	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
+$(BUILDDIR)/horizon-tests: $(OBJ_COMMON) $(OBJ_TESTS)
+	$(ECHO) " $@"
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4 libpng gtkmm-3.0) -o $@
+
 $(BUILDDIR)/horizon-gen-pkg: $(OBJ_COMMON) $(OBJ_GEN_PKG)
 	$(ECHO) " $@"
 	$(QUIET)$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4 libpng) -o $@
@@ -1142,6 +1155,9 @@ install-man:
 	$(INSTALL) -m 644 man/horizon-eda.1 $(DESTDIR)$(MANDIR)/horizon-eda.1
 	$(INSTALL) -m 644 man/horizon-imp.1 $(DESTDIR)$(MANDIR)/horizon-imp.1
 
+test: $(BUILDDIR)/horizon-tests
+	$<
+
 clean: clean_router clean_oce clean_res
 	$(RM) $(OBJ_ALL) $(BUILDDIR)/horizon-imp $(BUILDDIR)/horizon-pool $(BUILDDIR)/horizon-prj $(BUILDDIR)/horizon-pool-mgr $(BUILDDIR)/horizon-prj-mgr $(BUILDDIR)/horizon-pgm-test $(BUILDDIR)/horizon-gen-pkg $(BUILDDIR)/horizon-eda $(OBJ_ALL:.o=.d) $(GENDIR)/resources.cpp $(GENDIR)/version_gen.cpp $(OBJ_COMMON) $(OBJ_COMMON:.o=.d)
 	$(RM) $(BUILDDIR)/horizon.so
@@ -1158,6 +1174,7 @@ clean_oce:
 
 clean_res:
 	$(RM) $(OBJ_RES)
+
 
 -include  $(OBJ_ALL:.o=.d)
 -include  $(OBJ_ROUTER:.o=.d)
