@@ -474,7 +474,7 @@ void PoolNotebook::handle_move_rename(ObjectType ty, const UUID &uu)
         chooser->set_current_folder(Glib::path_get_dirname(filename));
         auto resp = gtk_native_dialog_run(GTK_NATIVE_DIALOG(native));
         if (resp == GTK_RESPONSE_ACCEPT) {
-            const std::string new_filename = chooser->get_filename();
+            const std::string new_filename = append_dot_json(chooser->get_filename());
             try {
                 std::string e;
                 if (!pool.check_filename(ty, new_filename, &e)) {
