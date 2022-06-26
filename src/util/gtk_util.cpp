@@ -389,4 +389,38 @@ void open_directory(Gtk::Window &win, const std::string &filename)
 #endif
 }
 
+bool run_native_filechooser_with_retry(Glib::RefPtr<Gtk::FileChooser> chooser, const std::string &msg,
+                                       std::function<void()> fun)
+{
+    auto native = GTK_FILE_CHOOSER_NATIVE(chooser->gobj());
+    auto top = Glib::wrap(gtk_native_dialog_get_transient_for(GTK_NATIVE_DIALOG(native)), false);
+    if (!native)
+        throw std::runtime_error("filechooser isn't native");
+    std::string folder;
+    while (1) {
+        if (folder.size())
+            chooser->set_current_folder(folder);
+        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+            folder = Glib::path_get_dirname(chooser->get_filename());
+            try {
+                fun();
+                return true;
+            }
+            catch (const std::exception &e) {
+                Gtk::MessageDialog md(*top, msg, false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+                md.set_secondary_text(e.what());
+                md.run();
+            }
+            catch (const Gio::Error &e) {
+                Gtk::MessageDialog md(*top, msg, false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+                md.set_secondary_text(e.what());
+                md.run();
+            }
+        }
+        else {
+            return false;
+        }
+    }
+}
+
 } // namespace horizon

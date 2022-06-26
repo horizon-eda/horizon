@@ -300,11 +300,24 @@ bool Pool::check_filename(ObjectType type, const std::string &filename, std::str
         return false;
     }
     if (type == ObjectType::PADSTACK) {
+        auto file = Gio::File::create_for_path(filename);
         const std::string bp_ps = Glib::build_filename(base_path, type_names.at(type));
-        if (Gio::File::create_for_path(filename)->has_prefix(Gio::File::create_for_path(bp_ps)))
+        if (file->has_prefix(Gio::File::create_for_path(bp_ps)))
             return true;
-        const std::string bp_pkg = Glib::build_filename(base_path, type_names.at(type));
-        if (Gio::File::create_for_path(filename)->has_prefix(Gio::File::create_for_path(bp_pkg))) {
+        const std::string bp_pkg = Glib::build_filename(base_path, type_names.at(ObjectType::PACKAGE));
+        if (file->has_prefix(Gio::File::create_for_path(bp_pkg))) {
+            auto parent_dir_name = file->get_parent()->get_basename();
+            if (parent_dir_name != "padstacks") {
+                if (error_msg)
+                    *error_msg = "package-local padstacks must be in the padstacks directory of a package";
+                return false;
+                auto pkg_json = Glib::build_filename(file->get_parent()->get_parent()->get_path(), "package.json");
+                if (!Glib::file_test(pkg_json, Glib::FILE_TEST_IS_REGULAR)) {
+                    if (error_msg)
+                        *error_msg = "parent directory of padstacks doesn't contain a package.json file";
+                    return false;
+                }
+            }
             return true;
         }
         if (error_msg)
@@ -321,6 +334,14 @@ bool Pool::check_filename(ObjectType type, const std::string &filename, std::str
         return r;
     }
 }
+
+void Pool::check_filename_throw(ObjectType type, const std::string &filename) const
+{
+    std::string e;
+    if (!check_filename(type, filename, &e))
+        throw std::runtime_error(e);
+}
+
 
 std::map<std::string, UUID> Pool::get_actually_included_pools(bool include_self)
 {

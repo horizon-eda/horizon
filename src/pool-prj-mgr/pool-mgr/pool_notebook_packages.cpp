@@ -9,6 +9,7 @@
 #include "util/win32_undef.hpp"
 #include "widgets/preview_canvas.hpp"
 #include "import_kicad_package_window.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 void PoolNotebook::handle_edit_package(const UUID &uu)
@@ -27,32 +28,24 @@ void PoolNotebook::handle_create_package()
     chooser->set_current_name("package");
     chooser->set_current_folder(Glib::build_filename(base_path, "packages"));
 
-    while (true) {
-        chooser->set_current_folder(Glib::build_filename(base_path, "packages"));
-        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-            std::string fn = chooser->get_filename();
-            Glib::Dir dir(fn);
-            int n = 0;
-            for (const auto &it : dir) {
-                (void)it;
-                n++;
-            }
-            if (n > 0) {
-                Gtk::MessageDialog md(*top, "Folder must be empty", false /* use_markup */, Gtk::MESSAGE_ERROR,
-                                      Gtk::BUTTONS_OK);
-                md.run();
-                continue;
-            }
-            else {
-                auto fi = Gio::File::create_for_path(Glib::build_filename(fn, "padstacks"));
-                fi->make_directory_with_parents();
-                Package pkg(horizon::UUID::random());
-                auto pkg_filename = Glib::build_filename(fn, "package.json");
-                save_json_to_file(pkg_filename, pkg.serialize());
-                appwin.spawn(PoolProjectManagerProcess::Type::IMP_PACKAGE, {pkg_filename});
-            }
+    std::string pkg_filename;
+    auto success = run_native_filechooser_with_retry(chooser, "Error saving package", [this, chooser, &pkg_filename] {
+        std::string filename = chooser->get_filename();
+        pool.check_filename_throw(ObjectType::PACKAGE, filename);
+        Glib::Dir dir(filename);
+        for (const auto &it : dir) {
+            throw std::runtime_error("Folder must be empty");
         }
-        break;
+        auto fi = Gio::File::create_for_path(Glib::build_filename(filename, "padstacks"));
+        fi->make_directory_with_parents();
+        Package pkg(horizon::UUID::random());
+        pkg_filename = Glib::build_filename(filename, "package.json");
+        save_json_to_file(pkg_filename, pkg.serialize());
+    });
+
+    if (success) {
+        pool_update({pkg_filename});
+        appwin.spawn(PoolProjectManagerProcess::Type::IMP_PACKAGE, {pkg_filename});
     }
 }
 
@@ -69,14 +62,23 @@ void PoolNotebook::handle_create_padstack_for_package(const UUID &uu)
     chooser->set_current_name("pad.json");
     auto pkg_filename = pool.get_filename(ObjectType::PACKAGE, uu);
     auto pkg_dir = Glib::path_get_dirname(pkg_filename);
-    chooser->set_current_folder(Glib::build_filename(pkg_dir, "padstacks"));
+    const auto padstack_dir = Glib::build_filename(pkg_dir, "padstacks");
+    chooser->set_current_folder(padstack_dir);
+    std::string filename;
+    auto success = run_native_filechooser_with_retry(
+            chooser, "Error creating padstack", [this, chooser, &filename, &padstack_dir] {
+                filename = append_dot_json(chooser->get_filename());
+                if (!Gio::File::create_for_path(filename)->has_prefix(Gio::File::create_for_path(padstack_dir)))
+                    throw std::runtime_error("incorrect directory");
 
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-        std::string fn = append_dot_json(chooser->get_filename());
-        Padstack ps(horizon::UUID::random());
-        ps.name = "Pad";
-        save_json_to_file(fn, ps.serialize());
-        appwin.spawn(PoolProjectManagerProcess::Type::IMP_PADSTACK, {fn});
+                Padstack ps(horizon::UUID::random());
+                ps.name = "Pad";
+                save_json_to_file(filename, ps.serialize());
+            });
+
+    if (success) {
+        pool_update({filename});
+        appwin.spawn(PoolProjectManagerProcess::Type::IMP_PADSTACK, {filename});
     }
 }
 
@@ -97,34 +99,23 @@ void PoolNotebook::handle_duplicate_package(const UUID &uu)
     chooser->set_current_folder(pkg_dirname);
     chooser->set_current_name(pkg_basename + "-copy");
 
-    while (true) {
-        chooser->set_current_folder(pkg_dirname);
-        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-            std::string fn = chooser->get_filename();
 
-            Glib::Dir dir(fn);
-            int n = 0;
-            for (const auto &it : dir) {
-                (void)it;
-                n++;
-            }
-            if (n > 0) {
-                Gtk::MessageDialog md(*top, "Folder must be empty", false /* use_markup */, Gtk::MESSAGE_ERROR,
-                                      Gtk::BUTTONS_OK);
-                md.run();
-                continue;
-            }
-            else {
-                std::vector<std::string> filenames;
-                DuplicatePartWidget::duplicate_package(pool, uu, fn, Glib::path_get_basename(fn), &filenames);
-                std::string new_pkg_filename = Glib::build_filename(fn, "package.json");
-                pool_update_done_cb = [this, new_pkg_filename] {
-                    appwin.spawn(PoolProjectManagerProcess::Type::IMP_PACKAGE, {new_pkg_filename});
-                };
-                pool_update(filenames);
-            }
-        }
-        break;
+    std::vector<std::string> filenames;
+    std::string new_pkg_filename;
+    auto success = run_native_filechooser_with_retry(
+            chooser, "Error creating padstack", [this, chooser, &filenames, &uu, &new_pkg_filename] {
+                auto filename = chooser->get_filename();
+                pool.check_filename_throw(ObjectType::PACKAGE, filename);
+                DuplicatePartWidget::duplicate_package(pool, uu, filename, Glib::path_get_basename(filename),
+                                                       &filenames);
+                new_pkg_filename = Glib::build_filename(filename, "package.json");
+            });
+
+    if (success) {
+        pool_update_done_cb = [this, new_pkg_filename] {
+            appwin.spawn(PoolProjectManagerProcess::Type::IMP_PACKAGE, {new_pkg_filename});
+        };
+        pool_update(filenames);
     }
 }
 

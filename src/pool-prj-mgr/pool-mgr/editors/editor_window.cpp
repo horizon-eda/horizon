@@ -379,12 +379,16 @@ void EditorWindow::save()
         if (original_filename.size())
             chooser->set_current_folder(Glib::path_get_dirname(original_filename));
 
-        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-            if (iface)
-                iface->save();
-            std::string fn = append_dot_json(chooser->get_filename());
-            s_signal_filename_changed.emit(fn);
-            store->save_as(fn);
+        auto success = run_native_filechooser_with_retry(chooser, "Error saving " + object_descriptions.at(type).name,
+                                                         [this, chooser] {
+                                                             std::string fn = append_dot_json(chooser->get_filename());
+                                                             pool.check_filename_throw(type, fn);
+                                                             if (iface)
+                                                                 iface->save();
+                                                             store->save_as(fn);
+                                                             s_signal_filename_changed.emit(fn);
+                                                         });
+        if (success) {
             saved_version = store->get_required_version();
             s_signal_saved.emit(store->filename);
             save_button->set_label("Save");

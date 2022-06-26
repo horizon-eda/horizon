@@ -1,5 +1,6 @@
 #include "pool_notebook.hpp"
 #include "util/util.hpp"
+#include "util/gtk_util.hpp"
 #include "nlohmann/json.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "widgets/pool_browser_unit.hpp"
@@ -15,6 +16,15 @@ void PoolNotebook::handle_create_unit()
 void PoolNotebook::handle_edit_unit(const UUID &uu)
 {
     handle_edit_item(ObjectType::UNIT, uu);
+}
+
+static std::string get_existing_path(const std::string &p)
+{
+    Glib::RefPtr<Gio::File> file = Gio::File::create_for_path(p);
+    while (!file->query_exists()) {
+        file = file->get_parent();
+    }
+    return file->get_path();
 }
 
 void PoolNotebook::handle_create_symbol_for_unit(const UUID &uu)
@@ -33,19 +43,23 @@ void PoolNotebook::handle_create_symbol_for_unit(const UUID &uu)
                 Gio::File::create_for_path(Glib::build_filename(base_path, "units"))
                         ->get_relative_path(Gio::File::create_for_path(Glib::path_get_dirname(unit_filename)));
 
-        chooser->set_current_folder(Glib::build_filename(base_path, "symbols", unit_dirname_rel));
+        chooser->set_current_folder(get_existing_path(Glib::build_filename(base_path, "symbols", unit_dirname_rel)));
         chooser->set_current_name(Glib::path_get_basename(unit_filename));
     }
 
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-        std::string fn = append_dot_json(chooser->get_filename());
+    std::string filename;
+    auto success = run_native_filechooser_with_retry(chooser, "Error saving symbol", [this, chooser, &uu, &filename] {
+        filename = append_dot_json(chooser->get_filename());
+        pool.check_filename_throw(ObjectType::SYMBOL, filename);
         Symbol sym(horizon::UUID::random());
         auto unit = pool.get_unit(uu);
         sym.name = unit->name;
         sym.unit = unit;
-        save_json_to_file(fn, sym.serialize());
-        pool_update({fn});
-        appwin.spawn(PoolProjectManagerProcess::Type::IMP_SYMBOL, {fn});
+        save_json_to_file(filename, sym.serialize());
+    });
+    if (success) {
+        pool_update({filename});
+        appwin.spawn(PoolProjectManagerProcess::Type::IMP_SYMBOL, {filename});
     }
 }
 
@@ -65,12 +79,13 @@ void PoolNotebook::handle_create_entity_for_unit(const UUID &uu)
                 Gio::File::create_for_path(Glib::build_filename(base_path, "units"))
                         ->get_relative_path(Gio::File::create_for_path(Glib::path_get_dirname(unit_filename)));
 
-        chooser->set_current_folder(Glib::build_filename(base_path, "entities", unit_dirname_rel));
+        chooser->set_current_folder(get_existing_path(Glib::build_filename(base_path, "entities", unit_dirname_rel)));
         chooser->set_current_name(Glib::path_get_basename(unit_filename));
     }
-
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-        std::string fn = append_dot_json(chooser->get_filename());
+    std::string filename;
+    auto success = run_native_filechooser_with_retry(chooser, "Error saving entity", [this, chooser, &filename, &uu] {
+        filename = append_dot_json(chooser->get_filename());
+        pool.check_filename_throw(ObjectType::ENTITY, filename);
         Entity entity(horizon::UUID::random());
         auto unit = pool.get_unit(uu);
         entity.name = unit->name;
@@ -79,9 +94,11 @@ void PoolNotebook::handle_create_entity_for_unit(const UUID &uu)
         gate->unit = unit;
         gate->name = "Main";
 
-        save_json_to_file(fn, entity.serialize());
-        pool_update({fn});
-        appwin.spawn(PoolProjectManagerProcess::Type::ENTITY, {fn});
+        save_json_to_file(filename, entity.serialize());
+    });
+    if (success) {
+        pool_update({filename});
+        appwin.spawn(PoolProjectManagerProcess::Type::ENTITY, {filename});
     }
 }
 

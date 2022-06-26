@@ -5,6 +5,7 @@
 #include "widgets/pool_browser_padstack.hpp"
 #include "widgets/padstack_preview.hpp"
 #include "widgets/where_used_box.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 void PoolNotebook::handle_edit_padstack(const UUID &uu)
@@ -23,11 +24,16 @@ void PoolNotebook::handle_create_padstack()
     chooser->set_current_name("padstack.json");
     chooser->set_current_folder(Glib::build_filename(base_path, "padstacks"));
 
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-        std::string fn = append_dot_json(chooser->get_filename());
+    std::string filename;
+    auto success = run_native_filechooser_with_retry(chooser, "Error saving padstack", [this, chooser, &filename] {
+        filename = append_dot_json(chooser->get_filename());
+        pool.check_filename_throw(ObjectType::PADSTACK, filename);
         Padstack ps(horizon::UUID::random());
-        save_json_to_file(fn, ps.serialize());
-        appwin.spawn(PoolProjectManagerProcess::Type::IMP_PADSTACK, {fn});
+        save_json_to_file(filename, ps.serialize());
+    });
+    if (success) {
+        pool_update({filename});
+        appwin.spawn(PoolProjectManagerProcess::Type::IMP_PADSTACK, {filename});
     }
 }
 

@@ -77,6 +77,9 @@ void spinbutton_connect_activate(Gtk::SpinButton *sp, std::function<void()> cb);
 
 void open_directory(Gtk::Window &win, const std::string &filename);
 
+bool run_native_filechooser_with_retry(Glib::RefPtr<Gtk::FileChooser> chooser, const std::string &msg,
+                                       std::function<void()> fun);
+
 #define GET_WIDGET(name)                                                                                               \
     do {                                                                                                               \
         x->get_widget(#name, name);                                                                                    \

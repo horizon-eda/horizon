@@ -37,6 +37,10 @@ public:
     static const std::map<ObjectType, std::string> type_names;
     virtual std::map<std::string, UUID> get_actually_included_pools(bool include_self) = 0;
 
+    virtual bool check_filename(ObjectType type, const std::string &filename,
+                                std::string *error_msg = nullptr) const = 0;
+    virtual void check_filename_throw(ObjectType type, const std::string &filename) const = 0;
+
     virtual ~IPool()
     {
     }

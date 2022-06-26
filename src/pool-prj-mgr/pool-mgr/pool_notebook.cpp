@@ -21,6 +21,7 @@
 #include "widgets/where_used_box.hpp"
 #include "util/win32_undef.hpp"
 #include "util/fs_util.hpp"
+#include "util/gtk_util.hpp"
 #include "duplicate/duplicate_unit.hpp"
 #include "move_window.hpp"
 
@@ -142,35 +143,41 @@ void PoolNotebook::handle_duplicate_item(ObjectType ty, const UUID &uu)
     chooser->set_current_folder(it_dirname);
     chooser->set_current_name(DuplicateUnitWidget::insert_filename(it_basename, "-copy"));
 
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-        std::string fn = append_dot_json(chooser->get_filename());
-        switch (ty) {
-        case ObjectType::DECAL: {
-            Decal dec(*pool.get_decal(uu));
-            dec.name += " (Copy)";
-            dec.uuid = UUID::random();
-            save_json_to_file(fn, dec.serialize());
-        } break;
+    std::string filename;
+    auto success = run_native_filechooser_with_retry(
+            chooser, "Error saving " + object_descriptions.at(ty).name, [this, chooser, &filename, &uu, ty] {
+                filename = append_dot_json(chooser->get_filename());
+                pool.check_filename_throw(ty, filename);
+                switch (ty) {
+                case ObjectType::DECAL: {
+                    Decal dec(*pool.get_decal(uu));
+                    dec.name += " (Copy)";
+                    dec.uuid = UUID::random();
+                    save_json_to_file(filename, dec.serialize());
+                } break;
 
-        case ObjectType::FRAME: {
-            Frame fr(*pool.get_frame(uu));
-            fr.name += " (Copy)";
-            fr.uuid = UUID::random();
-            save_json_to_file(fn, fr.serialize());
-        } break;
+                case ObjectType::FRAME: {
+                    Frame fr(*pool.get_frame(uu));
+                    fr.name += " (Copy)";
+                    fr.uuid = UUID::random();
+                    save_json_to_file(filename, fr.serialize());
+                } break;
 
-        case ObjectType::PADSTACK: {
-            Padstack ps(*pool.get_padstack(uu));
-            ps.name += " (Copy)";
-            ps.uuid = UUID::random();
-            save_json_to_file(fn, ps.serialize());
-        } break;
+                case ObjectType::PADSTACK: {
+                    Padstack ps(*pool.get_padstack(uu));
+                    ps.name += " (Copy)";
+                    ps.uuid = UUID::random();
+                    save_json_to_file(filename, ps.serialize());
+                } break;
 
-        default:
-            throw std::runtime_error("Can't duplicate " + object_descriptions.at(ty).name);
-        }
-        pool_update({fn});
-        appwin.spawn(editor_type_map.at(ty), {fn});
+                default:
+                    throw std::runtime_error("Can't duplicate " + object_descriptions.at(ty).name);
+                }
+            });
+
+    if (success) {
+        pool_update({filename});
+        appwin.spawn(editor_type_map.at(ty), {filename});
     }
 }
 
@@ -470,36 +477,14 @@ void PoolNotebook::handle_move_rename(ObjectType ty, const UUID &uu)
             gtk_file_chooser_native_new("Move item", top->gobj(), GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
     auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
     chooser->set_current_name(Glib::path_get_basename(filename));
-    while (1) {
-        chooser->set_current_folder(Glib::path_get_dirname(filename));
-        auto resp = gtk_native_dialog_run(GTK_NATIVE_DIALOG(native));
-        if (resp == GTK_RESPONSE_ACCEPT) {
-            const std::string new_filename = append_dot_json(chooser->get_filename());
-            try {
-                std::string e;
-                if (!pool.check_filename(ty, new_filename, &e)) {
-                    throw std::runtime_error(e);
-                }
-                Gio::File::create_for_path(filename)->move(Gio::File::create_for_path(new_filename));
-                pool_update();
-                return;
-            }
-            catch (const std::exception &e) {
-                Gtk::MessageDialog md(*top, "Error moving item", false /* use_markup */, Gtk::MESSAGE_ERROR,
-                                      Gtk::BUTTONS_OK);
-                md.set_secondary_text(e.what());
-                md.run();
-            }
-            catch (const Gio::Error &e) {
-                Gtk::MessageDialog md(*top, "Error moving item", false /* use_markup */, Gtk::MESSAGE_ERROR,
-                                      Gtk::BUTTONS_OK);
-                md.set_secondary_text(e.what());
-                md.run();
-            }
-        }
-        else {
-            return;
-        }
+    chooser->set_current_folder(Glib::path_get_dirname(filename));
+    auto success = run_native_filechooser_with_retry(chooser, "Error moving item", [this, chooser, ty, filename] {
+        const std::string new_filename = append_dot_json(chooser->get_filename());
+        pool.check_filename_throw(ty, new_filename);
+        Gio::File::create_for_path(filename)->move(Gio::File::create_for_path(new_filename));
+    });
+    if (success) {
+        pool_update();
     }
 }
 

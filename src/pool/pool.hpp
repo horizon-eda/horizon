@@ -41,7 +41,8 @@ public:
     virtual std::string get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_out = nullptr);
     std::string get_rel_filename(ObjectType type, const UUID &uu);
     const std::string &get_base_path() const override;
-    bool check_filename(ObjectType type, const std::string &filename, std::string *error_msg = nullptr) const;
+    bool check_filename(ObjectType type, const std::string &filename, std::string *error_msg = nullptr) const override;
+    void check_filename_throw(ObjectType type, const std::string &filename) const override;
 
     SQLite::Database &get_db() override
     {
