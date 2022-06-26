@@ -979,7 +979,8 @@ void PartWizard::update_can_finish()
     check_entry_not_empty(part_mpn_entry, "MPN is empty", &mpn_valid);
     check_entry_not_empty(entity_name_entry, "Entity name is empty");
     check_entry_not_empty(entity_prefix_entry, "Entity prefix is empty");
-    valid = part_location_entry->check_ends_json(&part_filename_valid) && valid;
+    part_filename_valid = part_location_entry->check_ends_json();
+    valid = part_filename_valid && valid;
     valid = entity_location_entry->check_ends_json() && valid;
 
     std::set<std::string> symbol_filenames;

@@ -18,7 +18,7 @@ public:
         return s_signal_changed;
     }
 
-    bool check_ends_json(bool *v = nullptr);
+    bool check_ends_json();
     void set_append_json(bool s);
 
 private:

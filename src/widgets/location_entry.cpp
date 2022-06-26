@@ -101,23 +101,17 @@ void LocationEntry::handle_button()
     }
 }
 
-bool LocationEntry::check_ends_json(bool *v)
+bool LocationEntry::check_ends_json()
 {
-    bool r;
     std::string t = get_filename();
     if (!endswith(t, ".json")) {
         set_warning("Filename has to end in .json");
-        r = false;
-        if (v)
-            *v = false;
+        return false;
     }
     else {
         set_warning("");
-        r = true;
-        if (v)
-            *v = true;
+        return true;
     }
-    return r;
 }
 
 void LocationEntry::set_append_json(bool s)
