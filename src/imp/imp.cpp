@@ -1033,7 +1033,7 @@ void ImpBase::handle_drag()
         return;
     auto pos = canvas->get_cursor_pos_win();
     auto delta = pos - cursor_pos_drag_begin;
-    if (delta.mag_sq() > (50 * 50)) {
+    if (delta.mag() > 10) {
         clear_highlights();
         update_highlights();
         ToolArgs args;
