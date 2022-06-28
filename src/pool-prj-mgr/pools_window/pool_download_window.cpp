@@ -87,8 +87,9 @@ PoolDownloadWindow::PoolDownloadWindow(BaseObjectType *cobject, const Glib::RefP
     });
 
     download_dest_dir_button->signal_clicked().connect([this] {
-        GtkFileChooserNative *native = gtk_file_chooser_native_new(
-                "Select", GTK_WINDOW(this->gobj()), GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER, "Set", "_Cancel");
+        GtkFileChooserNative *native =
+                gtk_file_chooser_native_new("Select destination directory", GTK_WINDOW(this->gobj()),
+                                            GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, "Select", "_Cancel");
         auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
         chooser->set_filename(download_dest_dir_entry->get_text());
 

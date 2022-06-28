@@ -21,10 +21,9 @@ void PoolNotebook::handle_create_package()
 {
     auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
 
-    GtkFileChooserNative *native = gtk_file_chooser_native_new(
-            "Save Package", top->gobj(), GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER, "_Save", "_Cancel");
+    GtkFileChooserNative *native =
+            gtk_file_chooser_native_new("Save Package", top->gobj(), GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
     auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-    chooser->set_do_overwrite_confirmation(true);
     chooser->set_current_name("package");
     chooser->set_current_folder(Glib::build_filename(base_path, "packages"));
 
@@ -32,10 +31,6 @@ void PoolNotebook::handle_create_package()
     auto success = run_native_filechooser_with_retry(chooser, "Error saving package", [this, chooser, &pkg_filename] {
         std::string filename = chooser->get_filename();
         pool.check_filename_throw(ObjectType::PACKAGE, filename);
-        Glib::Dir dir(filename);
-        for (const auto &it : dir) {
-            throw std::runtime_error("Folder must be empty");
-        }
         auto fi = Gio::File::create_for_path(Glib::build_filename(filename, "padstacks"));
         fi->make_directory_with_parents();
         Package pkg(horizon::UUID::random());
@@ -88,10 +83,9 @@ void PoolNotebook::handle_duplicate_package(const UUID &uu)
         return;
     auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
 
-    GtkFileChooserNative *native = gtk_file_chooser_native_new(
-            "Save Package", top->gobj(), GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER, "_Save", "_Cancel");
+    GtkFileChooserNative *native =
+            gtk_file_chooser_native_new("Save Package", top->gobj(), GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
     auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-    chooser->set_do_overwrite_confirmation(true);
     auto pkg_filename = Glib::build_filename(pool.get_base_path(),
                                              Glib::path_get_dirname(pool.get_rel_filename(ObjectType::PACKAGE, uu)));
     auto pkg_basename = Glib::path_get_basename(pkg_filename);
@@ -103,7 +97,7 @@ void PoolNotebook::handle_duplicate_package(const UUID &uu)
     std::vector<std::string> filenames;
     std::string new_pkg_filename;
     auto success = run_native_filechooser_with_retry(
-            chooser, "Error creating padstack", [this, chooser, &filenames, &uu, &new_pkg_filename] {
+            chooser, "Error creating package", [this, chooser, &filenames, &uu, &new_pkg_filename] {
                 auto filename = chooser->get_filename();
                 pool.check_filename_throw(ObjectType::PACKAGE, filename);
                 DuplicatePartWidget::duplicate_package(pool, uu, filename, Glib::path_get_basename(filename),
