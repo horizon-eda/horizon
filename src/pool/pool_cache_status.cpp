@@ -59,18 +59,17 @@ PoolCacheStatus PoolCacheStatus::from_project_pool(class IPool &pool)
         std::string pool_filename;
 
         if (last_pool_uuid) {
-            if (!other_pools.count(last_pool_uuid)) {
-                throw std::runtime_error("pool " + (std::string)last_pool_uuid + " not found in included pools");
-            }
-            auto &other_pool = other_pools.at(last_pool_uuid);
-            try {
-                pool_filename = other_pool.get_filename(type, uuid);
-            }
-            catch (const SQLite::Error &e) {
-                throw;
-            }
-            catch (...) {
-                pool_filename = "";
+            if (other_pools.count(last_pool_uuid)) {
+                auto &other_pool = other_pools.at(last_pool_uuid);
+                try {
+                    pool_filename = other_pool.get_filename(type, uuid);
+                }
+                catch (const SQLite::Error &e) {
+                    throw;
+                }
+                catch (...) {
+                    pool_filename = "";
+                }
             }
         }
 
