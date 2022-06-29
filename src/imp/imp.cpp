@@ -36,6 +36,7 @@
 #include "action_icon.hpp"
 #include "grids_window.hpp"
 #include "widgets/msd_tuning_window.hpp"
+#include "pool/pool_manager.hpp"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>
@@ -1610,6 +1611,10 @@ bool ImpBase::handle_broadcast(const json &j)
         const auto &prefs = j.at("preferences");
         preferences.load_from_json(prefs);
         preferences.signal_changed().emit();
+        return true;
+    }
+    else if (op == "reload-pools") {
+        PoolManager::get().reload();
         return true;
     }
     return false;

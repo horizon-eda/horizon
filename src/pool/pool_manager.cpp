@@ -30,13 +30,13 @@ void PoolManager::init()
     }
 }
 
-PoolManager::PoolManager()
+bool PoolManager::reload()
 {
-    auto pool_prj_mgr_config = Glib::build_filename(get_config_dir(), "pool-project-manager.json");
     auto pool_config = Glib::build_filename(get_config_dir(), "pools.json");
     if (Glib::file_test(pool_config, Glib::FILE_TEST_IS_REGULAR)) {
         auto j = load_json_from_file(pool_config);
         if (j.count("pools")) {
+            pools.clear();
             auto o = j.at("pools");
             for (const auto &[pool_base_path, value] : o.items()) {
                 const auto enabled = value.get<bool>();
@@ -46,7 +46,17 @@ PoolManager::PoolManager()
                     set_pool_enabled_no_write(pool_base_path, enabled);
                 }
             }
+            return true;
         }
+    }
+    return false;
+}
+
+PoolManager::PoolManager()
+{
+    auto pool_prj_mgr_config = Glib::build_filename(get_config_dir(), "pool-project-manager.json");
+    if (reload()) {
+        // it's okay
     }
     else if (Glib::file_test(pool_prj_mgr_config, Glib::FILE_TEST_IS_REGULAR)) {
         auto j = load_json_from_file(pool_prj_mgr_config);
@@ -115,6 +125,7 @@ void PoolManager::write()
     json j;
     j["pools"] = o;
     save_json_to_file(Glib::build_filename(get_config_dir(), "pools.json"), j);
+    s_signal_written.emit();
 }
 
 void PoolManager::update_pool(const std::string &base_path)

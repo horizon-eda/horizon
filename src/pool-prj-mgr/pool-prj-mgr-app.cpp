@@ -18,6 +18,7 @@
 #include "util/zmq_helper.hpp"
 #include "pools_window/pools_window.hpp"
 #include "util/stock_info_provider.hpp"
+#include "pool/pool_manager.hpp"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>
@@ -175,6 +176,12 @@ void PoolProjectManagerApplication::on_startup()
         send_json(0, j);
     });
     preferences_apply_appearance(preferences);
+
+    PoolManager::get().signal_written().connect([this] {
+        json j;
+        j["op"] = "reload-pools";
+        send_json(0, j);
+    });
 
     log_window = new LogWindow();
     log_dispatcher.set_handler([this](const auto &it) { log_window->get_view()->push_log(it); });
