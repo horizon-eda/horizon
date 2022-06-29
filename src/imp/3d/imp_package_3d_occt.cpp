@@ -52,8 +52,11 @@ ImpPackage::ImportCanvas3D::get_model_filename(const BoardPackage &pkg, IPool &p
         }
         auto pkg_pool = PoolManager::get().get_by_uuid(pkg_pool_uuid);
         std::string bp;
-        if (pkg_pool && pkg_pool_uuid != this_pool_uuid) { // pkg is open in RO mode from included pool
-            bp = pkg_pool->base_path;
+        if (pkg_pool_uuid != this_pool_uuid) { // pkg is open in RO mode from included pool
+            if (pkg_pool)
+                bp = pkg_pool->base_path;
+            else
+                throw std::runtime_error("pool " + (std::string)pkg_pool_uuid + " not found");
         }
         else {
             bp = pool.get_base_path();

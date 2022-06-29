@@ -80,8 +80,12 @@ std::string Pool::get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_
                             std::forward_as_tuple(other_pool_uuid));
     const auto other_pool_info = PoolManager::get().get_by_uuid(other_pool_uuid);
 
-    if (other_pool_info && pool_info.uuid != other_pool_info->uuid) // don't override if item is in local pool
-        bp = other_pool_info->base_path;
+    if (pool_info.uuid != other_pool_uuid) { // don't override if item is in local pool
+        if (other_pool_info)
+            bp = other_pool_info->base_path;
+        else
+            throw std::runtime_error("pool " + (std::string)other_pool_uuid + " not found");
+    }
 
     return Glib::build_filename(bp, filename);
 }
