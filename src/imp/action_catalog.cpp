@@ -502,7 +502,7 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::ADD_PLANE},
-         {"Add plane", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
+         {"Assign plane", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::EDIT_PLANE},
          {"Edit plane", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
@@ -675,7 +675,7 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::ADD_KEEPOUT},
-         {"Add keepout", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
+         {"Assign keepout", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::EDIT_KEEPOUT},
