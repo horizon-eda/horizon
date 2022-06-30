@@ -98,6 +98,7 @@ PoolSettingsBox::PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 
     update_pools();
     update_actual();
+    PoolManager::get().signal_written().connect(sigc::mem_fun(*this, &PoolSettingsBox::update_pools));
 }
 
 PoolSettingsBox *PoolSettingsBox::create(IPool &p)
