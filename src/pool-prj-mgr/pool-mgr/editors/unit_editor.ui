@@ -12,11 +12,6 @@
     <property name="can-focus">False</property>
     <property name="icon-name">list-remove-symbolic</property>
   </object>
-  <object class="GtkImage" id="image3">
-    <property name="visible">True</property>
-    <property name="can-focus">False</property>
-    <property name="icon-name">view-refresh-symbolic</property>
-  </object>
   <object class="GtkBox" id="unit_editor">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
@@ -113,16 +108,44 @@
         <property name="margin-start">1</property>
         <property name="spacing">10</property>
         <child>
-          <object class="GtkLabel" id="label_name">
+          <object class="GtkButton" id="pin_button">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Pin</property>
-            <property name="xalign">0</property>
-            <attributes>
-              <attribute name="weight" value="bold"/>
-            </attributes>
+            <property name="can-focus">True</property>
+            <property name="focus-on-click">False</property>
+            <property name="receives-default">True</property>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Pin</property>
+                    <property name="xalign">0</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkImage" id="pin_sort_indicator">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">pan-down-symbolic</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
             <style>
-              <class name="dim-label"/>
+              <class name="editor-header-button"/>
             </style>
           </object>
           <packing>
@@ -132,16 +155,44 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel" id="label_direction">
+          <object class="GtkButton" id="direction_button">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Direction</property>
-            <property name="xalign">0</property>
-            <attributes>
-              <attribute name="weight" value="bold"/>
-            </attributes>
+            <property name="can-focus">True</property>
+            <property name="focus-on-click">False</property>
+            <property name="receives-default">True</property>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Direction</property>
+                    <property name="xalign">0</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkImage" id="direction_sort_indicator">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">pan-down-symbolic</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
             <style>
-              <class name="dim-label"/>
+              <class name="editor-header-button"/>
             </style>
           </object>
           <packing>
@@ -283,21 +334,6 @@ Click the plus icon to add pins.</property>
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="unit_pins_refresh">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Re-sort pins</property>
-            <property name="image">image3</property>
-            <property name="relief">none</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkCheckButton" id="cross_probing">
             <property name="label" translatable="yes">Cross probing</property>
             <property name="visible">True</property>
@@ -324,12 +360,12 @@ Click the plus icon to add pins.</property>
   </object>
   <object class="GtkSizeGroup" id="sg_direction">
     <widgets>
-      <widget name="label_direction"/>
+      <widget name="direction_button"/>
     </widgets>
   </object>
   <object class="GtkSizeGroup" id="sg_name">
     <widgets>
-      <widget name="label_name"/>
+      <widget name="pin_button"/>
     </widgets>
   </object>
   <object class="GtkSizeGroup" id="sg_names">

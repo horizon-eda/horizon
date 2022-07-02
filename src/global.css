@@ -60,6 +60,30 @@
   border-top-left-radius: 5px;
 }
 
+.editor-header-button {
+  /*padding: 5px 5px 5px 10px;*/
+  padding: 0;
+  border: none;
+  margin: 0;
+  font-weight: bold;
+  background: none;
+  box-shadow: none;
+  text-shadow: none;
+  border-radius:0;
+}
+
+.editor-header-button > * {
+  opacity: 0.5;
+}
+
+.editor-header-button:hover > * {
+  opacity: 0.75;
+}
+
+.editor-header-button:active > * {
+  opacity: 1;
+}
+
 .editor-header > *:not(:first-child) {
   border-left: 1px solid rgba(0,0,0,.1);
 }
@@ -71,7 +95,10 @@
 .editor-header {
   border-top: 1px solid rgba(0,0,0,.1);
   border-bottom: 1px solid rgba(0,0,0,.05);
+  background-color: @content_view_bg;
 }
+
+
 
 .help-button {
   min-height: 0px;

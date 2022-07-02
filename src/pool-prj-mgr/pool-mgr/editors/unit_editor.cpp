@@ -107,11 +107,20 @@ void PinEditor::focus()
 
 void UnitEditor::sort()
 {
-    pins_listbox->set_sort_func([](Gtk::ListBoxRow *a, Gtk::ListBoxRow *b) {
-        auto na = dynamic_cast<PinEditor *>(a->get_child())->pin->primary_name;
-        auto nb = dynamic_cast<PinEditor *>(b->get_child())->pin->primary_name;
-        return strcmp_natural(na, nb);
-    });
+    if (sort_helper.get_column() == "pin") {
+        pins_listbox->set_sort_func([this](Gtk::ListBoxRow *a, Gtk::ListBoxRow *b) {
+            auto na = dynamic_cast<PinEditor *>(a->get_child())->pin->primary_name;
+            auto nb = dynamic_cast<PinEditor *>(b->get_child())->pin->primary_name;
+            return sort_helper.transform_order(strcmp_natural(na, nb));
+        });
+    }
+    else if (sort_helper.get_column() == "direction") {
+        pins_listbox->set_sort_func([this](Gtk::ListBoxRow *a, Gtk::ListBoxRow *b) {
+            auto da = static_cast<int>(dynamic_cast<PinEditor *>(a->get_child())->pin->direction);
+            auto db = static_cast<int>(dynamic_cast<PinEditor *>(b->get_child())->pin->direction);
+            return sort_helper.transform_order(da - db);
+        });
+    }
     pins_listbox->invalidate_sort();
     pins_listbox->unset_sort_func();
 }
@@ -122,7 +131,6 @@ UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("unit_name", name_entry);
     x->get_widget("unit_manufacturer", manufacturer_entry);
     x->get_widget("unit_pins", pins_listbox);
-    x->get_widget("unit_pins_refresh", refresh_button);
     x->get_widget("pin_add", add_button);
     x->get_widget("pin_delete", delete_button);
     x->get_widget("cross_probing", cross_probing_cb);
@@ -154,8 +162,6 @@ UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         ed->unreference();
     }
 
-    refresh_button->signal_clicked().connect([this] { sort(); });
-
     delete_button->signal_clicked().connect(sigc::mem_fun(*this, &UnitEditor::handle_delete));
     add_button->signal_clicked().connect(sigc::mem_fun(*this, &UnitEditor::handle_add));
 
@@ -167,7 +173,10 @@ UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         return false;
     });
 
-    sort();
+    sort_helper.attach("pin", x);
+    sort_helper.attach("direction", x);
+    sort_helper.signal_changed().connect(sigc::mem_fun(*this, &UnitEditor::sort));
+    sort_helper.set_sort("pin", Gtk::SORT_ASCENDING);
 }
 
 void UnitEditor::handle_delete()

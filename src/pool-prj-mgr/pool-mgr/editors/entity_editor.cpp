@@ -10,6 +10,7 @@
 #include "widgets/help_button.hpp"
 #include "help_texts.hpp"
 #include "pool/ipool.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 
@@ -113,7 +114,6 @@ EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     }
     x->get_widget("entity_prefix", prefix_entry);
     x->get_widget("entity_gates", gates_listbox);
-    x->get_widget("entity_gates_refresh", refresh_button);
     x->get_widget("gate_add", add_button);
     x->get_widget("gate_delete", delete_button);
     entry_add_sanitizer(name_entry);
@@ -140,31 +140,32 @@ EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
         set_needs_save();
     });
 
-    gates_listbox->set_sort_func([](Gtk::ListBoxRow *a, Gtk::ListBoxRow *b) {
-        auto na = dynamic_cast<GateEditor *>(a->get_child())->gate->name;
-        auto nb = dynamic_cast<GateEditor *>(b->get_child())->gate->name;
-        if (na > nb) {
-            return 1;
-        }
-        else if (na < nb) {
-            return -1;
-        }
-        else {
-            return 0;
-        }
-    });
-
     for (auto &it : entity.gates) {
         auto ed = GateEditor::create(&it.second, this);
         ed->show_all();
         gates_listbox->append(*ed);
         ed->unreference();
     }
-    gates_listbox->invalidate_sort();
+
+    sort_helper.attach("gate", x);
+    sort_helper.signal_changed().connect(sigc::mem_fun(*this, &EntityEditor::sort));
+    sort_helper.set_sort("gate", Gtk::SORT_ASCENDING);
 
     add_button->signal_clicked().connect(sigc::mem_fun(*this, &EntityEditor::handle_add));
     delete_button->signal_clicked().connect(sigc::mem_fun(*this, &EntityEditor::handle_delete));
-    refresh_button->signal_clicked().connect([this] { gates_listbox->invalidate_sort(); });
+}
+
+void EntityEditor::sort()
+{
+    if (sort_helper.get_column() == "gate") {
+        gates_listbox->set_sort_func([this](Gtk::ListBoxRow *a, Gtk::ListBoxRow *b) {
+            auto na = dynamic_cast<GateEditor *>(a->get_child())->gate->name;
+            auto nb = dynamic_cast<GateEditor *>(b->get_child())->gate->name;
+            return sort_helper.transform_order(strcmp_natural(na, nb));
+        });
+    }
+    gates_listbox->invalidate_sort();
+    gates_listbox->unset_sort_func();
 }
 
 void EntityEditor::reload()

@@ -2,6 +2,7 @@
 #include <gtkmm.h>
 #include "common/common.hpp"
 #include "editor_interface.hpp"
+#include "util/sort_helper.hpp"
 
 namespace horizon {
 
@@ -20,7 +21,6 @@ private:
     Gtk::Entry *name_entry = nullptr;
     Gtk::Entry *manufacturer_entry = nullptr;
     Gtk::ListBox *pins_listbox = nullptr;
-    Gtk::Button *refresh_button = nullptr;
     Gtk::Button *add_button = nullptr;
     Gtk::Button *delete_button = nullptr;
     Gtk::CheckButton *cross_probing_cb = nullptr;
@@ -33,6 +33,8 @@ private:
     void handle_delete();
     void sort();
     void handle_activate(class PinEditor *ed);
+
+    SortHelper sort_helper;
 
     IPool &pool;
 };

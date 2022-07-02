@@ -2,6 +2,7 @@
 #include <gtkmm.h>
 #include "common/common.hpp"
 #include "editor_interface.hpp"
+#include "util/sort_helper.hpp"
 
 namespace horizon {
 
@@ -23,7 +24,6 @@ private:
     class TagEntry *tag_entry = nullptr;
 
     Gtk::ListBox *gates_listbox = nullptr;
-    Gtk::ToolButton *refresh_button = nullptr;
     Gtk::ToolButton *add_button = nullptr;
     Gtk::ToolButton *delete_button = nullptr;
 
@@ -35,6 +35,9 @@ private:
     void handle_add();
     void handle_delete();
     IPool &pool;
+
+    void sort();
+    SortHelper sort_helper;
 
     void bind_entry(Gtk::Entry *e, std::string &s);
 };

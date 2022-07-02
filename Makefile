@@ -843,6 +843,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/pool-mgr/move_window.cpp\
 	src/util/pool_check_schema_update.cpp\
 	src/widgets/sqlite_shell.cpp\
+	src/util/sort_helper.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp
