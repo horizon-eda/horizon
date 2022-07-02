@@ -25,6 +25,9 @@ private:
     std::map<std::pair<int, bool>, class SymbolPreviewBox *> previews;
     type_signal_load s_signal_load;
 
+    void zoom_to_fit();
+    sigc::connection intial_zoom_to_fit_conn;
+
     WindowStateStore state_store;
     Gtk::InfoBar *bar = nullptr;
 };

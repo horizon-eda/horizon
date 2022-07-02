@@ -12,12 +12,13 @@ SymbolPreviewWindow::SymbolPreviewWindow(Gtk::Window *parent) : Gtk::Window(), s
     hb->set_title("Symbol preview");
 
     auto fit_button = Gtk::manage(new Gtk::Button("Fit views"));
-    fit_button->signal_clicked().connect([this] {
-        for (auto &it : previews) {
-            it.second->zoom_to_fit();
-        }
-    });
+    fit_button->signal_clicked().connect(sigc::mem_fun(*this, &SymbolPreviewWindow::zoom_to_fit));
     hb->pack_start(*fit_button);
+
+    intial_zoom_to_fit_conn = signal_size_allocate().connect([this](const Gtk::Allocation &alloc) {
+        zoom_to_fit();
+        intial_zoom_to_fit_conn.disconnect();
+    });
 
     if (!state_store.get_default_set())
         set_default_size(800, 300);
@@ -78,6 +79,13 @@ SymbolPreviewWindow::SymbolPreviewWindow(Gtk::Window *parent) : Gtk::Window(), s
 
     add(*box);
     box->show_all();
+}
+
+void SymbolPreviewWindow::zoom_to_fit()
+{
+    for (auto &it : previews) {
+        it.second->zoom_to_fit();
+    }
 }
 
 void SymbolPreviewWindow::update(const class Symbol &sym)
