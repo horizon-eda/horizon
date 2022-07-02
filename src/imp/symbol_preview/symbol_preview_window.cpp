@@ -9,7 +9,7 @@ SymbolPreviewWindow::SymbolPreviewWindow(Gtk::Window *parent) : Gtk::Window(), s
     set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
     auto hb = Gtk::manage(new Gtk::HeaderBar());
     hb->set_show_close_button(true);
-    hb->set_title("Symbol preview");
+    hb->set_title("Text placement preview");
 
     auto fit_button = Gtk::manage(new Gtk::Button("Fit views"));
     fit_button->signal_clicked().connect(sigc::mem_fun(*this, &SymbolPreviewWindow::zoom_to_fit));

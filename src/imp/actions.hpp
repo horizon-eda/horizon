@@ -122,5 +122,6 @@ enum class ActionID {
     TOGGLE_PICTURES,
     VIEW_ACTUAL_SIZE,
     OPEN_DATASHEET,
+    SYMBOL_TEXT_PLACEMENT,
 };
 }

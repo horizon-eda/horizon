@@ -1076,6 +1076,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::TOOL, ToolID::MOVE_TRACK_CENTER},
          {"Move track arc center", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::SYMBOL_TEXT_PLACEMENT, ToolID::NONE},
+         {"Edit text placement", ActionGroup::SYMBOL, ActionCatalogItem::AVAILABLE_IN_SYMBOL,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1227,6 +1231,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(TOGGLE_PICTURES),
         ACTION_LUT_ITEM(VIEW_ACTUAL_SIZE),
         ACTION_LUT_ITEM(OPEN_DATASHEET),
+        ACTION_LUT_ITEM(SYMBOL_TEXT_PLACEMENT),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

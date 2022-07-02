@@ -68,11 +68,13 @@ void ImpSymbol::construct()
     symbol_preview_expand_window = new SymbolPreviewExpandWindow(main_window, core_symbol.get_symbol());
     core->signal_rebuilt().connect([this] { symbol_preview_expand_window->update(); });
 
+
+    connect_action(ActionID::SYMBOL_TEXT_PLACEMENT, [this](const auto &conn) { symbol_preview_window->present(); });
     {
-        auto button = Gtk::manage(new Gtk::Button("Preview…"));
+        auto button = Gtk::manage(new Gtk::Button("Text placement…"));
         main_window->header->pack_start(*button);
         button->show();
-        button->signal_clicked().connect([this] { symbol_preview_window->present(); });
+        button->signal_clicked().connect([this] { trigger_action(ActionID::SYMBOL_TEXT_PLACEMENT); });
     }
 
     unplaced_box = Gtk::manage(new UnplacedBox("Pin"));
