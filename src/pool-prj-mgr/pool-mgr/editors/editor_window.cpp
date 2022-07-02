@@ -162,9 +162,23 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
         check_color_box->set_valign(Gtk::ALIGN_CENTER);
         check_color_box->set_size_request(16, 16);
         box->pack_start(*check_color_box, false, false, 0);
-        auto la = Gtk::manage(new Gtk::Label("Checks"));
-        box->pack_start(*la, false, false, 0);
+        check_button_stack = Gtk::manage(new Gtk::Stack);
+        check_button_stack->set_transition_duration(150);
+        check_button_stack->set_transition_type(Gtk::STACK_TRANSITION_TYPE_SLIDE_UP_DOWN);
+        box->pack_start(*check_button_stack, false, false, 0);
         check_button->add(*box);
+        {
+            auto la = Gtk::manage(new Gtk::Label("Checks passed"));
+            la->show();
+            la->set_xalign(0);
+            check_button_stack->add(*la, "pass");
+        }
+        {
+            auto la = Gtk::manage(new Gtk::Label("Checks didn't pass"));
+            la->show();
+            la->set_xalign(0);
+            check_button_stack->add(*la, "fail");
+        }
     }
     check_popover = Gtk::manage(new Gtk::Popover);
     check_button->set_popover(*check_popover);
@@ -438,10 +452,12 @@ void EditorWindow::run_checks()
     check_color_box->set_color(rules_check_error_level_to_color(r.level));
     std::string s;
     if (r.level == RulesCheckErrorLevel::PASS) {
-        s += "Checks passed";
+        s = "Checks passed";
+        check_button_stack->set_visible_child("pass");
     }
     else {
-        s += "Checks didn't pass";
+        s = "Checks didn't pass";
+        check_button_stack->set_visible_child("fail");
     }
     s += "\n";
     for (const auto &it : r.errors) {

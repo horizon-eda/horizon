@@ -59,6 +59,7 @@ private:
     class PoolEditorInterface *iface = nullptr;
     Gtk::Button *save_button = nullptr;
     Gtk::MenuButton *check_button = nullptr;
+    Gtk::Stack *check_button_stack = nullptr;
     class ColorBox *check_color_box = nullptr;
     Gtk::Popover *check_popover = nullptr;
     Gtk::Label *check_label = nullptr;
