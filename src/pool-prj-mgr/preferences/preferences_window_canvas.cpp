@@ -47,11 +47,13 @@ static const std::map<ColorP, std::string> color_names = {
         {ColorP::SEARCH_CURRENT, "Current search marker"},
         {ColorP::SHADOW, "Highlight shadow"},
         {ColorP::NET_TIE, "Net tie"},
+        {ColorP::SYMBOL_BOUNDING_BOX, "Symbol bounding box"},
 };
 
-static const std::set<ColorP> colors_non_layer = {ColorP::NET,          ColorP::BUS,        ColorP::FRAME,
-                                                  ColorP::PIN,          ColorP::PIN_HIDDEN, ColorP::DIFFPAIR,
-                                                  ColorP::NOPOPULATE_X, ColorP::NET_TIE};
+static const std::set<ColorP> colors_non_layer = {
+        ColorP::NET,          ColorP::BUS,        ColorP::FRAME,
+        ColorP::PIN,          ColorP::PIN_HIDDEN, ColorP::DIFFPAIR,
+        ColorP::NOPOPULATE_X, ColorP::NET_TIE,    ColorP::SYMBOL_BOUNDING_BOX};
 
 static const std::set<ColorP> colors_layer = {ColorP::FRAG_ORPHAN, ColorP::AIRWIRE_ROUTER, ColorP::TEXT_OVERLAY,
                                               ColorP::HOLE,        ColorP::DIMENSION,      ColorP::AIRWIRE,

@@ -143,7 +143,7 @@ void TriangleRenderer::realize()
 
 class UBOBuffer {
 public:
-    static constexpr size_t ubo_size = 22; //  keep in sync with ubo.glsl
+    static constexpr size_t ubo_size = 23; //  keep in sync with ubo.glsl
     static_assert(static_cast<int>(ColorP::N_COLORS) == ubo_size, "ubo size mismatch");
     std::array<std::array<float, 4>, ubo_size> colors;
     std::array<std::array<float, 4>, 256> colors2; // keep in sync with shader

@@ -18,6 +18,7 @@ Appearance::Appearance()
     colors[ColorP::AIRWIRE] = {0, 1, 1};
     colors[ColorP::PIN] = {1, 1, 1};
     colors[ColorP::PIN_HIDDEN] = {.5, .5, .5};
+    colors[ColorP::SYMBOL_BOUNDING_BOX] = {.5, .5, .5};
     colors[ColorP::DIFFPAIR] = {.5, 1, 0};
     colors[ColorP::CURSOR_NORMAL] = {0, 1, 0};
     colors[ColorP::CURSOR_TARGET] = {1, 0, 0};

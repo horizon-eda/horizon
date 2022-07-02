@@ -24,6 +24,7 @@ enum class ColorP {
     NOPOPULATE_X,
     PROJECTION,
     NET_TIE,
+    SYMBOL_BOUNDING_BOX,
     N_COLORS,
     // colors after N_COLORS aren't part of the UBO
     BACKGROUND,
