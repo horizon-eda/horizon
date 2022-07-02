@@ -69,6 +69,28 @@ ToolPopover::ToolPopover(Gtk::Widget *parent, ActionCatalogItem::Availability av
     search_entry->signal_activate().connect(sigc::mem_fun(*this, &ToolPopover::emit_tool_activated));
     view->signal_row_activated().connect([this](auto a, auto b) { this->emit_tool_activated(); });
 
+    search_entry->signal_key_press_event().connect([this](GdkEventKey *ev) {
+        if (auto it = view->get_selection()->get_selected()) {
+            if (ev->keyval == GDK_KEY_Down) {
+                it++;
+                if (it == store_filtered->children().end())
+                    return false;
+            }
+            else if (ev->keyval == GDK_KEY_Up) {
+                if (it == store_filtered->children().begin())
+                    return false;
+                it--;
+            }
+            else {
+                return false;
+            }
+            view->set_cursor(store_filtered->get_path(it));
+            view->grab_focus();
+            return true;
+        }
+        return false;
+    });
+
     sc = Gtk::manage(new Gtk::ScrolledWindow());
     sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
     sc->set_shadow_type(Gtk::SHADOW_IN);
