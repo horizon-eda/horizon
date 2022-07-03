@@ -226,31 +226,6 @@ static std::string inc_pin_name(const std::string &s, int inc = 1)
     }
 }
 
-// adapted from gtklistbox.c
-static void listbox_ensure_row_visible(Gtk::ListBox *box, Gtk::ListBoxRow *row)
-{
-    Gtk::Widget *header = nullptr;
-    gint y, height;
-
-    auto adjustment = box->get_adjustment();
-    if (!adjustment)
-        return;
-
-    auto allocation = row->get_allocation();
-    y = allocation.get_y();
-    height = allocation.get_height();
-
-    /* If the row has a header, we want to ensure that it is visible as well. */
-    header = row->get_header();
-    if (GTK_IS_WIDGET(header) && gtk_widget_is_drawable(header->gobj())) {
-        auto header_allocation = header->get_allocation();
-        y = header_allocation.get_y();
-        height += header_allocation.get_height();
-    }
-
-    adjustment->clamp_page(y, y + height);
-}
-
 void UnitEditor::handle_add()
 {
     const Pin *pin_selected = nullptr;
@@ -298,7 +273,7 @@ void UnitEditor::handle_add()
             pins_listbox->unselect_all();
             pins_listbox->select_row(*row);
             ed_row->focus();
-            Glib::signal_idle().connect_once([this, row] { listbox_ensure_row_visible(pins_listbox, row); });
+            listbox_ensure_row_visible_new(pins_listbox, row);
             break;
         }
     }

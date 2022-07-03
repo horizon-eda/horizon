@@ -80,6 +80,9 @@ void open_directory(Gtk::Window &win, const std::string &filename);
 bool run_native_filechooser_with_retry(Glib::RefPtr<Gtk::FileChooser> chooser, const std::string &msg,
                                        std::function<void()> fun);
 
+void listbox_ensure_row_visible(Gtk::ListBox *box, Gtk::ListBoxRow *row);
+void listbox_ensure_row_visible_new(Gtk::ListBox *box, Gtk::ListBoxRow *row);
+
 #define GET_WIDGET(name)                                                                                               \
     do {                                                                                                               \
         x->get_widget(#name, name);                                                                                    \

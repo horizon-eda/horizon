@@ -423,4 +423,38 @@ bool run_native_filechooser_with_retry(Glib::RefPtr<Gtk::FileChooser> chooser, c
     }
 }
 
+// adapted from gtklistbox.c
+void listbox_ensure_row_visible(Gtk::ListBox *box, Gtk::ListBoxRow *row)
+{
+    Gtk::Widget *header = nullptr;
+    gint y, height;
+
+    auto adjustment = box->get_adjustment();
+    if (!adjustment)
+        return;
+
+    auto allocation = row->get_allocation();
+    y = allocation.get_y();
+    height = allocation.get_height();
+
+    /* If the row has a header, we want to ensure that it is visible as well. */
+    header = row->get_header();
+    if (GTK_IS_WIDGET(header) && gtk_widget_is_drawable(header->gobj())) {
+        auto header_allocation = header->get_allocation();
+        y = header_allocation.get_y();
+        height += header_allocation.get_height();
+    }
+
+    adjustment->clamp_page(y, y + height);
+}
+
+void listbox_ensure_row_visible_new(Gtk::ListBox *box, Gtk::ListBoxRow *row)
+{
+    auto conn = std::make_shared<sigc::connection>();
+    *conn = row->signal_size_allocate().connect_notify([box, row, conn](const auto &alloc) {
+        listbox_ensure_row_visible(box, row);
+        conn->disconnect();
+    });
+}
+
 } // namespace horizon
