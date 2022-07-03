@@ -55,6 +55,13 @@ void ImpLayer::construct_layer_box(bool pack)
     connect_action(ActionID::LAYER_INNER6, [this](const auto &a) { this->goto_layer(-6); });
     connect_action(ActionID::LAYER_INNER7, [this](const auto &a) { this->goto_layer(-7); });
     connect_action(ActionID::LAYER_INNER8, [this](const auto &a) { this->goto_layer(-8); });
+    connect_action(ActionID::CYCLE_LAYER_DISPLAY_MODE, [this](const auto &a) {
+        const auto layer = canvas->property_work_layer().get_value();
+        auto ld = canvas->get_layer_display(layer);
+        ld.mode = static_cast<LayerDisplay::Mode>((static_cast<int>(ld.mode) + 1)
+                                                  % static_cast<int>(LayerDisplay::Mode::N_MODES));
+        layer_box->set_layer_display(layer, ld);
+    });
 
     bool layers_loaded = false;
     if (!m_meta.is_null()) {

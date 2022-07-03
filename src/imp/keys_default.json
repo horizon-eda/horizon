@@ -2336,5 +2336,19 @@
             "8": []
         },
         "tool": "EDIT_TEXT"
+    },
+    {
+        "action": "CYCLE_LAYER_DISPLAY_MODE",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "m",
+                        "mod": 8
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
     }
 ]

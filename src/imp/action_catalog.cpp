@@ -1080,6 +1080,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::SYMBOL_TEXT_PLACEMENT, ToolID::NONE},
          {"Edit text placement", ActionGroup::SYMBOL, ActionCatalogItem::AVAILABLE_IN_SYMBOL,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::CYCLE_LAYER_DISPLAY_MODE, ToolID::NONE},
+         {"Cycle layer display mode", ActionGroup::LAYER, ActionCatalogItem::AVAILABLE_LAYERED,
+          ActionCatalogItem::FLAGS_IN_TOOL}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1232,6 +1236,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(VIEW_ACTUAL_SIZE),
         ACTION_LUT_ITEM(OPEN_DATASHEET),
         ACTION_LUT_ITEM(SYMBOL_TEXT_PLACEMENT),
+        ACTION_LUT_ITEM(CYCLE_LAYER_DISPLAY_MODE),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \
