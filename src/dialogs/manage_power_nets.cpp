@@ -10,9 +10,9 @@ class PowerNetEditor : public Gtk::Box {
 public:
     PowerNetEditor(Net &n, IBlockProvider &bl) : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4), net(n), blocks(bl)
     {
-        auto entry = Gtk::manage(new Gtk::Entry());
+        entry = Gtk::manage(new Gtk::Entry());
         entry->set_text(net.name);
-        entry->signal_changed().connect([this, entry] { net.name = entry->get_text(); });
+        entry->signal_changed().connect([this] { net.name = entry->get_text(); });
         pack_start(*entry, true, true, 0);
 
         auto style_la = Gtk::manage(new Gtk::Label("Style"));
@@ -55,7 +55,14 @@ public:
         show_all();
     }
 
+    void focus()
+    {
+        entry->grab_focus();
+    }
+
 private:
+    Gtk::Entry *entry = nullptr;
+
     Net &net;
     IBlockProvider &blocks;
 };
@@ -123,6 +130,7 @@ void ManagePowerNetsDialog::handle_add_power_net()
     net->is_power = true;
 
     auto ne = Gtk::manage(new PowerNetEditor(*net, blocks));
-    listbox->add(*ne);
+    listbox->prepend(*ne);
+    ne->focus();
 }
 } // namespace horizon
