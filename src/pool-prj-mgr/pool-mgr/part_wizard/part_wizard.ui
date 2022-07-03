@@ -285,8 +285,8 @@
   <object class="GtkBox" id="pad_editor">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
-    <property name="margin-left">10</property>
-    <property name="margin-right">10</property>
+    <property name="margin-start">5</property>
+    <property name="margin-end">5</property>
     <property name="margin-top">5</property>
     <property name="margin-bottom">5</property>
     <property name="spacing">10</property>
@@ -346,48 +346,16 @@
       </packing>
     </child>
     <child>
-      <object class="GtkBox">
+      <object class="GtkComboBox" id="combo_gate">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
-        <property name="spacing">5</property>
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Gate</property>
-            <style>
-              <class name="dim-label"/>
-            </style>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkComboBox" id="combo_gate">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="valign">center</property>
-            <property name="has-entry">True</property>
-            <child internal-child="entry">
-              <object class="GtkEntry">
-                <property name="can-focus">True</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
+        <property name="valign">center</property>
+        <property name="has-entry">True</property>
       </object>
       <packing>
         <property name="expand">False</property>
         <property name="fill">True</property>
-        <property name="position">5</property>
+        <property name="position">4</property>
       </packing>
     </child>
   </object>
@@ -428,25 +396,161 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkScrolledWindow">
-                    <property name="width-request">200</property>
+                  <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="hscrollbar-policy">never</property>
+                    <property name="can-focus">False</property>
+                    <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkViewport">
+                      <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="shadow-type">none</property>
+                        <property name="spacing">10</property>
                         <child>
-                          <object class="GtkListBox" id="pads_lb">
+                          <object class="GtkLabel" id="label13">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="selection-mode">multiple</property>
-                            <property name="activate-on-single-click">False</property>
+                            <property name="label" translatable="yes">Pad</property>
+                            <property name="xalign">0</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                            </attributes>
+                            <style>
+                              <class name="dim-label"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label14">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="label" translatable="yes">Pin name</property>
+                            <property name="xalign">0</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                            </attributes>
+                            <style>
+                              <class name="dim-label"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label15">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="label" translatable="yes">Direction</property>
+                            <property name="xalign">0</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                            </attributes>
+                            <style>
+                              <class name="dim-label"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label16">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="label" translatable="yes">Alternate names</property>
+                            <property name="xalign">0</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                            </attributes>
+                            <style>
+                              <class name="dim-label"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label17">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="label" translatable="yes">Gate</property>
+                            <property name="xalign">0</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                            </attributes>
+                            <style>
+                              <class name="dim-label"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <style>
+                              <class name="editor-header-spacer"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">5</property>
+                          </packing>
+                        </child>
+                        <style>
+                          <class name="editor-header"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScrolledWindow">
+                        <property name="width-request">200</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="hscrollbar-policy">never</property>
+                        <child>
+                          <object class="GtkViewport">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="shadow-type">none</property>
+                            <child>
+                              <object class="GtkListBox" id="pads_lb">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="selection-mode">multiple</property>
+                                <property name="activate-on-single-click">False</property>
+                              </object>
+                            </child>
                           </object>
                         </child>
                       </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
                     </child>
                   </object>
                   <packing>
@@ -1241,6 +1345,21 @@
       </object>
     </child>
   </object>
+  <object class="GtkSizeGroup" id="sg_alt_names">
+    <widgets>
+      <widget name="label16"/>
+    </widgets>
+  </object>
+  <object class="GtkSizeGroup" id="sg_direction">
+    <widgets>
+      <widget name="label15"/>
+    </widgets>
+  </object>
+  <object class="GtkSizeGroup" id="sg_gate">
+    <widgets>
+      <widget name="label17"/>
+    </widgets>
+  </object>
   <object class="GtkSizeGroup" id="sg_left">
     <widgets>
       <widget name="label1"/>
@@ -1251,6 +1370,16 @@
       <widget name="label6"/>
       <widget name="label7"/>
       <widget name="label8"/>
+    </widgets>
+  </object>
+  <object class="GtkSizeGroup" id="sg_pad">
+    <widgets>
+      <widget name="label13"/>
+    </widgets>
+  </object>
+  <object class="GtkSizeGroup" id="sg_pin_name">
+    <widgets>
+      <widget name="label14"/>
     </widgets>
   </object>
   <object class="GtkSizeGroup" id="sg_steps">

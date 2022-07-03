@@ -55,7 +55,11 @@ PadEditor::PadEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &
     };
 
 
-    parent->sg_name->add_widget(*pad_names_label);
+    parent->sg_pad->add_widget(*pad_names_label);
+    parent->sg_pin_name->add_widget(*pin_name_entry);
+    parent->sg_direction->add_widget(*dir_combo);
+    parent->sg_alt_names->add_widget(*pin_names_editor);
+    parent->sg_gate->add_widget(*combo_gate);
 
     for (const auto &it : Pin::direction_names) {
         dir_combo->append(std::to_string(static_cast<int>(it.first)), it.second);

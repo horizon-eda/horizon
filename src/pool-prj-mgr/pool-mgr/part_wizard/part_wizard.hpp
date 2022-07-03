@@ -48,7 +48,12 @@ private:
     Gtk::ToolButton *button_unlink_pads = nullptr;
     Gtk::ToolButton *button_import_pads = nullptr;
 
-    Glib::RefPtr<Gtk::SizeGroup> sg_name;
+    Glib::RefPtr<Gtk::SizeGroup> sg_pad;
+    Glib::RefPtr<Gtk::SizeGroup> sg_pin_name;
+    Glib::RefPtr<Gtk::SizeGroup> sg_direction;
+    Glib::RefPtr<Gtk::SizeGroup> sg_alt_names;
+    Glib::RefPtr<Gtk::SizeGroup> sg_gate;
+
     Gtk::Box *page_assign = nullptr;
     Gtk::Box *page_edit = nullptr;
     Gtk::Box *edit_left_box = nullptr;

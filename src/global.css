@@ -88,7 +88,7 @@
   border-left: 1px solid rgba(0,0,0,.1);
 }
 
-.editor-header label {
+.editor-header label:not(.editor-header-spacer) {
   padding: 5px 5px 5px 10px;
 }
 
@@ -97,7 +97,10 @@
   background-color: @content_view_bg;
 }
 
-
+.editor-header-spacer {
+  padding: 0;
+  border: 1px solid rgba(0,0,0,0);
+}
 
 .help-button {
   min-height: 0px;

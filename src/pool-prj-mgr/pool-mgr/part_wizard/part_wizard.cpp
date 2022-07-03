@@ -149,7 +149,11 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
 
     entity_prefix_entry->set_text("U");
 
-    sg_name = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
+    sg_pad = Glib::RefPtr<Gtk::SizeGroup>::cast_dynamic(x->get_object("sg_pad"));
+    sg_pin_name = Glib::RefPtr<Gtk::SizeGroup>::cast_dynamic(x->get_object("sg_pin_name"));
+    sg_direction = Glib::RefPtr<Gtk::SizeGroup>::cast_dynamic(x->get_object("sg_direction"));
+    sg_alt_names = Glib::RefPtr<Gtk::SizeGroup>::cast_dynamic(x->get_object("sg_alt_names"));
+    sg_gate = Glib::RefPtr<Gtk::SizeGroup>::cast_dynamic(x->get_object("sg_gate"));
 
     gate_name_store = Gtk::ListStore::create(list_columns);
 
