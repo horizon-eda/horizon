@@ -112,6 +112,7 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
         if (it.type == ObjectType::LINE_NET) { // need to erase net lines before symbols
             LineNet *line = &doc.c->get_sheet()->net_lines.at(it.uuid);
             doc.c->get_current_schematic()->delete_net_line(doc.c->get_sheet(), line);
+            doc.c->get_sheet()->update_bus_ripper_connections();
         }
         else if (it.type == ObjectType::POWER_SYMBOL) { // need to erase power
                                                         // symbols before
