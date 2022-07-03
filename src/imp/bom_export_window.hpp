@@ -56,6 +56,10 @@ private:
     bool can_export = true;
     void update_export_button();
 
+    Gtk::CheckButton *customize_check = nullptr;
+    Gtk::Revealer *customize_revealer = nullptr;
+    Gtk::Grid *customize_grid = nullptr;
+
     Glib::RefPtr<Gtk::SizeGroup> sg_manufacturer;
     Glib::RefPtr<Gtk::SizeGroup> sg_MPN;
     Glib::RefPtr<Gtk::SizeGroup> sg_orderable_MPN;

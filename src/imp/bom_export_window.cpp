@@ -71,6 +71,9 @@ BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     GET_WIDGET(rb_tol_1);
     GET_WIDGET(button_clear_similar);
     GET_WIDGET(button_set_similar);
+    GET_WIDGET(customize_revealer);
+    GET_WIDGET(customize_check);
+    GET_WIDGET(customize_grid);
 
     done_revealer_controller.attach(done_revealer, done_label, done_close_button);
 
@@ -157,6 +160,45 @@ BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 
     export_button->signal_clicked().connect(sigc::mem_fun(*this, &BOMExportWindow::generate));
 
+    {
+        int top = 0;
+        for (const auto &[id, name] : bom_column_names) {
+            auto entry = Gtk::manage(new Gtk::Entry);
+            entry->show();
+            auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5));
+            {
+                auto la = Gtk::manage(new Gtk::Label("Col:"));
+                la->get_style_context()->add_class("dim-label");
+                la->set_xalign(0);
+                box->pack_start(*la, true, true, 0);
+            }
+            {
+                auto la = Gtk::manage(new Gtk::Label(name));
+                la->get_style_context()->add_class("dim-label");
+                la->set_xalign(1);
+                box->pack_start(*la, true, true, 0);
+            }
+            box->show_all();
+
+            customize_grid->attach(*box, 0, top, 1, 1);
+            customize_grid->attach(*entry, 1, top, 1, 1);
+            top++;
+            bind_widget(entry, settings.csv_settings.column_names[id], [this](std::string &) {
+                s_signal_changed.emit();
+                update_preview();
+            });
+        }
+    }
+    customize_check->set_active(settings.csv_settings.custom_column_names);
+    customize_revealer->set_reveal_child(settings.csv_settings.custom_column_names);
+    customize_check->signal_toggled().connect([this] {
+        const auto a = customize_check->get_active();
+        customize_revealer->set_reveal_child(a);
+        settings.csv_settings.custom_column_names = a;
+        update_preview();
+        s_signal_changed.emit();
+    });
+
     update();
     update_export_button();
 }
@@ -224,7 +266,7 @@ void BOMExportWindow::update_preview()
 
     for (auto col : settings.csv_settings.columns) {
         auto cr_text = Gtk::manage(new Gtk::CellRendererText());
-        auto tvc = Gtk::manage(new Gtk::TreeViewColumn(bom_column_names.at(col)));
+        auto tvc = Gtk::manage(new Gtk::TreeViewColumn(settings.csv_settings.get_column_name(col)));
         tvc->set_resizable();
         tvc->pack_start(*cr_text, true);
         if (col == BOMColumn::REFDES) {

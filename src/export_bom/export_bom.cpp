@@ -32,7 +32,7 @@ void export_BOM(const std::string &filename, const class Block &block, const cla
         auto &x = out.back();
         x.reserve(cols.size());
         for (const auto &it : cols) {
-            x.push_back(bom_column_names.at(it));
+            x.push_back(settings.csv_settings.get_column_name(it));
         }
     }
 

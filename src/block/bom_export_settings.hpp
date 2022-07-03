@@ -31,6 +31,10 @@ public:
         enum class Order { ASC, DESC };
         Order order = Order::ASC;
 
+        bool custom_column_names = false;
+        std::map<BOMColumn, std::string> column_names;
+        const std::string &get_column_name(BOMColumn col) const;
+
         json serialize() const;
     };
 

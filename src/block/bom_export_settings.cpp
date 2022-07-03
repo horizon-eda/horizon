@@ -64,11 +64,30 @@ json BOMExportSettings::serialize() const
 }
 
 BOMExportSettings::CSVSettings::CSVSettings(const json &j)
-    : sort_column(bom_column_lut.lookup(j.at("sort_column"))), order(bom_order_lut.lookup(j.value("order", "asc")))
+    : sort_column(bom_column_lut.lookup(j.at("sort_column"))), order(bom_order_lut.lookup(j.value("order", "asc"))),
+      custom_column_names(j.value("custom_column_names", false))
 {
     for (const auto &it : j.at("columns")) {
         columns.push_back(bom_column_lut.lookup(it));
     }
+    if (j.count("column_names")) {
+        for (const auto &[col, name] : j.at("column_names").items()) {
+            column_names.emplace(bom_column_lut.lookup(col), name);
+        }
+    }
+    else {
+        for (const auto &[col, name] : bom_column_names) {
+            column_names.emplace(col, name);
+        }
+    }
+}
+
+const std::string &BOMExportSettings::CSVSettings::get_column_name(BOMColumn col) const
+{
+    if (custom_column_names && column_names.count(col))
+        return column_names.at(col);
+    else
+        return bom_column_names.at(col);
 }
 
 BOMExportSettings::CSVSettings::CSVSettings()
@@ -84,6 +103,13 @@ json BOMExportSettings::CSVSettings::serialize() const
     j["columns"] = json::array();
     for (const auto &it : columns) {
         j["columns"].push_back(bom_column_lut.lookup_reverse(it));
+    }
+    if (custom_column_names) {
+        j["custom_column_names"] = true;
+        j["column_names"] = json::object();
+        for (const auto &[col, name] : column_names) {
+            j["column_names"][bom_column_lut.lookup_reverse(col)] = name;
+        }
     }
 
     return j;
