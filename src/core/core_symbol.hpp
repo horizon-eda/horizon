@@ -60,6 +60,8 @@ public:
         return sym.version;
     }
 
+    void set_temp_mode();
+    void set_filename(const std::string &filename);
 
 private:
     std::map<UUID, Text> *get_text_map() override;

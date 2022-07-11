@@ -67,6 +67,11 @@ PoolProjectManagerProcess::PoolProjectManagerProcess(const UUID &uu, PoolProject
         }
         if (read_only)
             argv.push_back("-r");
+        if (is_temp) {
+            argv.push_back("-t");
+            filename.clear();
+        }
+
         proc = std::make_unique<EditorProcess>(argv, env, PreferencesProvider::get_prefs().capture_output);
         proc->signal_exited().connect([this](auto rc) {
             bool modified = false;
@@ -115,9 +120,16 @@ void PoolProjectManagerProcess::reload()
     }
 }
 
-std::string PoolProjectManagerProcess::get_filename()
+std::string PoolProjectManagerProcess::get_filename() const
 {
     return filename;
+}
+
+void PoolProjectManagerProcess::set_filename(const std::string &s)
+{
+    if (filename.size() && s != filename)
+        throw std::runtime_error("can't overwrite filename");
+    filename = s;
 }
 
 } // namespace horizon

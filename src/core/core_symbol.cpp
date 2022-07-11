@@ -335,6 +335,8 @@ const std::string &CoreSymbol::get_filename() const
 
 void CoreSymbol::save(const std::string &suffix)
 {
+    if (m_filename.empty())
+        throw std::runtime_error("filename is empty");
     s_signal_save.emit();
 
     json j = sym.serialize();
@@ -346,6 +348,17 @@ void CoreSymbol::delete_autosave()
 {
     if (Glib::file_test(m_filename + autosave_suffix, Glib::FILE_TEST_IS_REGULAR))
         Gio::File::create_for_path(m_filename + autosave_suffix)->remove();
+}
+
+void CoreSymbol::set_temp_mode()
+{
+    Gio::File::create_for_path(m_filename)->remove();
+    m_filename.clear();
+}
+
+void CoreSymbol::set_filename(const std::string &filename)
+{
+    m_filename = filename;
 }
 
 } // namespace horizon

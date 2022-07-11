@@ -19,7 +19,7 @@ class ImpPackage : public ImpLayer {
     friend class ImportCanvas3D;
 
 public:
-    ImpPackage(const std::string &package_filename, const std::string &pool_path);
+    ImpPackage(const std::string &package_filename, const std::string &pool_path, TempMode temp_mode);
 
     std::map<ObjectType, SelectionFilterInfo> get_selection_filter_info() const override;
 
@@ -94,7 +94,8 @@ private:
 
     class ParameterWindow *parameter_window = nullptr;
 
-
     void update_header();
+
+    bool set_filename() override;
 };
 } // namespace horizon

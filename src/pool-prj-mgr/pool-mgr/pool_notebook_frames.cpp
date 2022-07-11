@@ -15,28 +15,11 @@ void PoolNotebook::handle_edit_frame(const UUID &uu)
 
 void PoolNotebook::handle_create_frame()
 {
-    auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
-    UUID unit_uuid;
+    Frame fr(horizon::UUID::random());
+    std::string fn = pool.get_tmp_filename(ObjectType::SYMBOL, fr.uuid);
+    save_json_to_file(fn, fr.serialize());
 
-    GtkFileChooserNative *native =
-            gtk_file_chooser_native_new("Save Frame", top->gobj(), GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
-    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-    chooser->set_do_overwrite_confirmation(true);
-    chooser->set_current_folder(Glib::build_filename(base_path, "frames"));
-
-    std::string filename;
-    auto success = run_native_filechooser_with_retry(chooser, "Error saving frame", [this, chooser, &filename] {
-        filename = append_dot_json(chooser->get_filename());
-        pool.check_filename_throw(ObjectType::FRAME, filename);
-        Frame fr(horizon::UUID::random());
-        fr.name = "fixme";
-        save_json_to_file(filename, fr.serialize());
-    });
-
-    if (success) {
-        pool_update({filename});
-        appwin.spawn(PoolProjectManagerProcess::Type::IMP_FRAME, {filename});
-    }
+    appwin.spawn(PoolProjectManagerProcess::Type::IMP_FRAME, {fn}, PoolProjectManagerAppWindow::SpawnFlags::TEMP);
 }
 
 void PoolNotebook::handle_duplicate_frame(const UUID &uu)

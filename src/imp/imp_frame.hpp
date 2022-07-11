@@ -5,7 +5,7 @@
 namespace horizon {
 class ImpFrame : public ImpBase {
 public:
-    ImpFrame(const std::string &frame_filename, const std::string &pool_path);
+    ImpFrame(const std::string &frame_filename, const std::string &pool_path, TempMode temp_mode);
 
 protected:
     void construct() override;
@@ -24,5 +24,7 @@ private:
     Gtk::Entry *name_entry = nullptr;
 
     void update_header();
+
+    bool set_filename() override;
 };
 } // namespace horizon

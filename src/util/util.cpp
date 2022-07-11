@@ -544,6 +544,14 @@ void ensure_parent_dir(const std::string &path)
     }
 }
 
+std::string get_existing_path(const std::string &p)
+{
+    Glib::RefPtr<Gio::File> file = Gio::File::create_for_path(p);
+    while (!file->query_exists()) {
+        file = file->get_parent();
+    }
+    return file->get_path();
+}
 
 std::string append_dot_json(const std::string &s)
 {

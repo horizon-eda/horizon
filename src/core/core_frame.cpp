@@ -133,4 +133,15 @@ void CoreFrame::delete_autosave()
     if (Glib::file_test(m_frame_filename + autosave_suffix, Glib::FILE_TEST_IS_REGULAR))
         Gio::File::create_for_path(m_frame_filename + autosave_suffix)->remove();
 }
+
+void CoreFrame::set_temp_mode()
+{
+    Gio::File::create_for_path(m_frame_filename)->remove();
+    m_frame_filename.clear();
+}
+
+void CoreFrame::set_filename(const std::string &filename)
+{
+    m_frame_filename = filename;
+}
 } // namespace horizon

@@ -227,6 +227,8 @@ bool ImpBase::handle_close(const GdkEventAny *ev)
         case 2:
             if (force_end_tool()) {
                 trigger_action(ActionID::SAVE);
+                if (core->get_needs_save())
+                    return true; // saving didn't work, keep open
                 core->delete_autosave();
                 return false; // close
             }
@@ -528,7 +530,12 @@ void ImpBase::run(int argc, char *argv[])
     connect_action(ActionID::SELECTION_FILTER, [this](const auto &a) { selection_filter_dialog->present(); });
     connect_action(ActionID::SAVE, [this](const auto &a) {
         if (!read_only) {
+            if (core->get_filename().empty()) {
+                if (!set_filename())
+                    return;
+            }
             core->save();
+            save_button->set_label("Save");
             json j;
             this->get_save_meta(j);
             if (!j.is_null()) {
@@ -678,7 +685,9 @@ void ImpBase::run(int argc, char *argv[])
         set_action_sensitive(ActionID::SELECT_GRID, grids_window->has_grids());
     }
 
-    auto save_button = create_action_button(ActionID::SAVE);
+    save_button = create_action_button(ActionID::SAVE);
+    if (temp_mode)
+        save_button->set_label("Save as…");
     save_button->show();
     main_window->header->pack_start(*save_button);
     core->signal_needs_save().connect([this](bool v) {
@@ -1905,4 +1914,16 @@ void ImpBase::update_cursor(ToolID tool_id)
     cr->paint();
     win->set_cursor(Gdk::Cursor::create(win->get_display(), surf, 0, 0));
 }
+
+bool ImpBase::set_filename()
+{
+    throw std::runtime_error("set_filename not implemented");
+    return false;
+}
+
+void ImpBase::set_suggested_filename(const std::string &s)
+{
+    suggested_filename = s;
+}
+
 } // namespace horizon

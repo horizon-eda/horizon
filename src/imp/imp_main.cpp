@@ -103,6 +103,13 @@ int main(int argc, char *argv[])
     entry6.set_description("Read only");
     group.add_entry(entry6, read_only);
 
+    bool temp_mode_bool = false;
+    Glib::OptionEntry entry9;
+    entry9.set_long_name("temp");
+    entry9.set_short_name('t');
+    entry9.set_description("Temporary file mode");
+    group.add_entry(entry9, temp_mode_bool);
+
     std::vector<std::string> filenames;
     Glib::OptionEntry entry_f;
     entry_f.set_long_name(G_OPTION_REMAINING);
@@ -112,6 +119,10 @@ int main(int argc, char *argv[])
 
     options.set_main_group(group);
     options.parse(argc, argv);
+
+    horizon::ImpBase::TempMode temp_mode = horizon::ImpBase::TempMode::NO;
+    if (temp_mode_bool)
+        temp_mode = horizon::ImpBase::TempMode::YES;
 
     auto pool_base_path = Glib::getenv("HORIZON_POOL");
     horizon::setup_locale();
@@ -123,22 +134,32 @@ int main(int argc, char *argv[])
         imp.reset(new horizon::ImpSchematic(filenames.at(0), filenames.at(1), {pool_base_path}));
     }
     else if (mode_symbol) {
-        imp.reset(new horizon::ImpSymbol(filenames.at(0), pool_base_path));
+        imp.reset(new horizon::ImpSymbol(filenames.at(0), pool_base_path, temp_mode));
+        if (filenames.size() > 1)
+            imp->set_suggested_filename(filenames.at(1));
     }
     else if (mode_padstack) {
-        imp.reset(new horizon::ImpPadstack(filenames.at(0), pool_base_path));
+        imp.reset(new horizon::ImpPadstack(filenames.at(0), pool_base_path, temp_mode));
+        if (filenames.size() > 1)
+            imp->set_suggested_filename(filenames.at(1));
     }
     else if (mode_package) {
-        imp.reset(new horizon::ImpPackage(filenames.at(0), pool_base_path));
+        imp.reset(new horizon::ImpPackage(filenames.at(0), pool_base_path, temp_mode));
+        if (filenames.size() > 1)
+            imp->set_suggested_filename(filenames.at(1));
     }
     else if (mode_board) {
         imp.reset(new horizon::ImpBoard(filenames.at(0), filenames.at(1), filenames.at(2), {pool_base_path}));
     }
     else if (mode_frame) {
-        imp.reset(new horizon::ImpFrame(filenames.at(0), pool_base_path));
+        imp.reset(new horizon::ImpFrame(filenames.at(0), pool_base_path, temp_mode));
+        if (filenames.size() > 1)
+            imp->set_suggested_filename(filenames.at(1));
     }
     else if (mode_decal) {
-        imp.reset(new horizon::ImpDecal(filenames.at(0), pool_base_path));
+        imp.reset(new horizon::ImpDecal(filenames.at(0), pool_base_path, temp_mode));
+        if (filenames.size() > 1)
+            imp->set_suggested_filename(filenames.at(1));
     }
     else {
         std::cout << "wrong invocation" << std::endl;

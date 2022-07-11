@@ -277,4 +277,16 @@ void CorePackage::delete_autosave()
     if (Glib::file_test(m_filename + autosave_suffix, Glib::FILE_TEST_IS_REGULAR))
         Gio::File::create_for_path(m_filename + autosave_suffix)->remove();
 }
+
+void CorePackage::set_temp_mode()
+{
+    Gio::File::create_for_path(m_filename)->remove();
+    m_filename.clear();
+}
+
+void CorePackage::set_filename(const std::string &filename)
+{
+    m_filename = filename;
+}
+
 } // namespace horizon

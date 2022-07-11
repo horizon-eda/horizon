@@ -52,6 +52,9 @@ public:
         return package.version;
     }
 
+    void set_temp_mode();
+    void set_filename(const std::string &filename);
+
 private:
     std::map<UUID, Junction> *get_junction_map() override;
     std::map<UUID, Line> *get_line_map() override;

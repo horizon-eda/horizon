@@ -554,12 +554,20 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
     else if (op == "needs-save") {
         const auto pid = j.at("pid").get<int>();
         const auto needs_save = j.at("needs_save").get<bool>();
+        const auto filename = j.at("filename").get<std::string>();
         std::cout << "needs save " << pid << " " << needs_save << std::endl;
+        if (!needs_save) {
+            for (auto &it : processes) {
+                if (it.second.proc && it.second.proc->get_pid() == pid) {
+                    it.second.set_filename(filename);
+                }
+            }
+        }
         pids_need_save[pid] = needs_save;
         if (project && !needs_save)
             view_project.update_meta();
         if (!needs_save) {
-            s_signal_process_saved.emit(j.at("filename").get<std::string>());
+            s_signal_process_saved.emit(filename);
             if (auto proc = find_top_schematic_process()) {
                 if (proc->proc->get_pid() == pid) { // schematic got saved
                     if (auto proc_board = find_board_process()) {

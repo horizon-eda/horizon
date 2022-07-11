@@ -11,10 +11,6 @@ public:
     ImportKiCadPackageWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
                              class PoolProjectManagerAppWindow &aw);
     static ImportKiCadPackageWindow *create(class PoolProjectManagerAppWindow &aw);
-    std::vector<std::string> get_files_saved() const
-    {
-        return files_saved;
-    }
 
 private:
     class PoolProjectManagerAppWindow &appwin;
@@ -24,7 +20,6 @@ private:
     Gtk::Box *import_error_box = nullptr;
     std::optional<Package> package;
     class LogView *log_view = nullptr;
-    std::vector<std::string> files_saved;
     Gtk::Button *import_button;
 
     void update();
