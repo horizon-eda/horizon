@@ -110,4 +110,16 @@ void CoreDecal::delete_autosave()
     if (Glib::file_test(m_decal_filename + autosave_suffix, Glib::FILE_TEST_IS_REGULAR))
         Gio::File::create_for_path(m_decal_filename + autosave_suffix)->remove();
 }
+
+void CoreDecal::set_temp_mode()
+{
+    Gio::File::create_for_path(m_decal_filename)->remove();
+    m_decal_filename.clear();
+}
+
+void CoreDecal::set_filename(const std::string &filename)
+{
+    m_decal_filename = filename;
+}
+
 } // namespace horizon

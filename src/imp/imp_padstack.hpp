@@ -5,7 +5,7 @@
 namespace horizon {
 class ImpPadstack : public ImpLayer {
 public:
-    ImpPadstack(const std::string &symbol_filename, const std::string &pool_path);
+    ImpPadstack(const std::string &symbol_filename, const std::string &pool_path, TempMode temp_mode);
 
 protected:
     void construct() override;
@@ -29,5 +29,7 @@ private:
     class ParameterWindow *parameter_window = nullptr;
 
     void update_header();
+
+    bool set_filename() override;
 };
 } // namespace horizon

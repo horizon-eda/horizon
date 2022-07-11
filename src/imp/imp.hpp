@@ -1,5 +1,6 @@
 #pragma once
 #include "core/core.hpp"
+#include "gtkmm/button.h"
 #include "imp_interface.hpp"
 #include "keyseq_dialog.hpp"
 #include "main_window.hpp"
@@ -46,6 +47,8 @@ public:
     {
     }
     void set_read_only(bool v);
+    void set_suggested_filename(const std::string &s);
+    enum class TempMode { YES, NO };
 
     class SelectionFilterInfo {
     public:
@@ -261,6 +264,9 @@ protected:
         throw std::runtime_error("not implemented");
     }
 
+    bool temp_mode = false;
+    std::string suggested_filename;
+
 private:
     void fix_cursor_pos();
     Glib::RefPtr<Gio::FileMonitor> preferences_monitor;
@@ -354,5 +360,8 @@ private:
     unsigned int saved_version = 0;
 
     class MSDTuningWindow *msd_tuning_window = nullptr;
+
+    Gtk::Button *save_button = nullptr;
+    virtual bool set_filename();
 };
 } // namespace horizon

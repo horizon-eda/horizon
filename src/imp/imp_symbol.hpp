@@ -6,7 +6,7 @@
 namespace horizon {
 class ImpSymbol : public ImpBase {
 public:
-    ImpSymbol(const std::string &symbol_filename, const std::string &pool_path);
+    ImpSymbol(const std::string &symbol_filename, const std::string &pool_path, TempMode temp_mode);
 
 protected:
     void construct() override;
@@ -54,5 +54,7 @@ private:
 
     Canvas::SymbolMode symbol_mode = Canvas::SymbolMode::EDIT_PREVIEW;
     Glib::RefPtr<Gio::SimpleAction> toggle_junctions_and_hidden_names_action;
+
+    bool set_filename() override;
 };
 } // namespace horizon

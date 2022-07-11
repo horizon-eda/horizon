@@ -40,7 +40,8 @@ public:
         return s_signal_ready;
     }
     void reload();
-    std::string get_filename();
+    std::string get_filename() const;
+    void set_filename(const std::string &s);
 
 private:
     type_signal_exited s_signal_exited;

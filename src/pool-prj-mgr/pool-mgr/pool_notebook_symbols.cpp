@@ -27,30 +27,7 @@ void PoolNotebook::handle_create_symbol()
         }
     }
     if (unit_uuid) {
-        GtkFileChooserNative *native = gtk_file_chooser_native_new("Save Symbol", top->gobj(),
-                                                                   GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
-        auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-        chooser->set_do_overwrite_confirmation(true);
-        auto unit_filename = pool.get_filename(ObjectType::UNIT, unit_uuid);
-        auto basename = Gio::File::create_for_path(unit_filename)->get_basename();
-        chooser->set_current_folder(Glib::build_filename(base_path, "symbols"));
-        chooser->set_current_name(basename);
-
-        std::string filename;
-        auto success = run_native_filechooser_with_retry(chooser, "Error saving symbol",
-                                                         [this, chooser, &filename, &unit_uuid] {
-                                                             filename = append_dot_json(chooser->get_filename());
-                                                             pool.check_filename_throw(ObjectType::SYMBOL, filename);
-                                                             Symbol sym(horizon::UUID::random());
-                                                             auto unit = pool.get_unit(unit_uuid);
-                                                             sym.name = unit->name;
-                                                             sym.unit = unit;
-                                                             save_json_to_file(filename, sym.serialize());
-                                                         });
-        if (success) {
-            pool_update({filename});
-            appwin.spawn(PoolProjectManagerProcess::Type::IMP_SYMBOL, {filename});
-        }
+        handle_create_symbol_for_unit(unit_uuid);
     }
 }
 

@@ -8,14 +8,21 @@
 #include "core/tool_id.hpp"
 #include "widgets/action_button.hpp"
 #include "actions.hpp"
+#include "util/util.hpp"
+#include "util/gtk_util.hpp"
+#include <stdexcept>
 
 namespace horizon {
-ImpPadstack::ImpPadstack(const std::string &padstack_filename, const std::string &pool_path)
+ImpPadstack::ImpPadstack(const std::string &padstack_filename, const std::string &pool_path, TempMode tmp_mode)
     : ImpLayer(pool_path), core_padstack(padstack_filename, *pool), padstack(core_padstack.get_padstack())
 {
     core = &core_padstack;
     core_padstack.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_tool_change));
     view_angle = 0;
+    if (tmp_mode == TempMode::YES) {
+        core_padstack.set_temp_mode();
+        temp_mode = true;
+    }
 }
 
 void ImpPadstack::canvas_update()
@@ -174,5 +181,34 @@ void ImpPadstack::update_header()
     parameter_window->set_subtitle(name);
 }
 
+bool ImpPadstack::set_filename()
+{
+    GtkFileChooserNative *native = gtk_file_chooser_native_new("Save Padstack", GTK_WINDOW(main_window->gobj()),
+                                                               GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
+    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+    chooser->set_do_overwrite_confirmation(true);
+    if (suggested_filename.empty()) {
+        chooser->set_current_folder(Glib::build_filename(pool->get_base_path(), "padstacks"));
+    }
+    else {
+        auto fi = Gio::File::create_for_path(suggested_filename);
+        if (!fi->query_exists())
+            fi->make_directory_with_parents();
+        chooser->set_current_folder(suggested_filename);
+    }
+    chooser->set_current_name(name_entry->get_text() + ".json");
+
+    std::string filename;
+    auto success = run_native_filechooser_with_retry(chooser, "Error saving padstack", [this, chooser, &filename] {
+        filename = append_dot_json(chooser->get_filename());
+        if (suggested_filename.size()) {
+            if (!Gio::File::create_for_path(filename)->has_prefix(Gio::File::create_for_path(suggested_filename)))
+                throw std::runtime_error("package-local padstack must be in " + suggested_filename);
+        }
+        pool->check_filename_throw(ObjectType::PADSTACK, filename);
+        core_padstack.set_filename(filename);
+    });
+    return success;
+}
 
 }; // namespace horizon

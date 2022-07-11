@@ -132,27 +132,10 @@ void ImportKiCadPackageWindow::update()
 
 void ImportKiCadPackageWindow::handle_import()
 {
-    auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
-
-    GtkFileChooserNative *native =
-            gtk_file_chooser_native_new("Save Package", top->gobj(), GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
-    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-    chooser->set_current_name(package.value().name);
-    const auto base_path = appwin.pool->get_base_path();
-    while (true) {
-        chooser->set_current_folder(Glib::build_filename(base_path, "packages"));
-        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-            std::string fn = chooser->get_filename();
-            auto fi = Gio::File::create_for_path(Glib::build_filename(fn, "padstacks"));
-            fi->make_directory_with_parents();
-            const auto pkg_filename = Glib::build_filename(fn, "package.json");
-            save_json_to_file(pkg_filename, package.value().serialize());
-            appwin.spawn(PoolProjectManagerProcess::Type::IMP_PACKAGE, {pkg_filename});
-            files_saved.push_back(pkg_filename);
-            Gtk::Window::close();
-        }
-        break;
-    }
+    const auto fn = appwin.pool->get_tmp_filename(ObjectType::PACKAGE, package.value().uuid);
+    save_json_to_file(fn, package.value().serialize());
+    appwin.spawn(PoolProjectManagerProcess::Type::IMP_PACKAGE, {fn}, PoolProjectManagerAppWindow::SpawnFlags::TEMP);
+    Gtk::Window::close();
 }
 
 } // namespace horizon

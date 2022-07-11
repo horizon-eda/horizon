@@ -26,13 +26,17 @@
 #include "actions.hpp"
 
 namespace horizon {
-ImpPackage::ImpPackage(const std::string &package_filename, const std::string &pool_path)
+ImpPackage::ImpPackage(const std::string &package_filename, const std::string &pool_path, TempMode tmp_mode)
     : ImpLayer(pool_path), core_package(package_filename, *pool), package(core_package.get_package()),
       searcher(core_package), fake_block(UUID::random()), fake_board(UUID::random(), fake_block)
 {
     core = &core_package;
     core_package.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_tool_change));
     load_meta();
+    if (tmp_mode == TempMode::YES) {
+        core_package.set_temp_mode();
+        temp_mode = true;
+    }
 }
 
 void ImpPackage::canvas_update()
@@ -288,10 +292,6 @@ void ImpPackage::construct()
         core_package.set_needs_save();
     });
 
-    if (package.name.size() == 0) { // new package
-        entry_name->set_text(Glib::path_get_basename(Glib::path_get_dirname(core_package.get_filename())));
-    }
-
     hamburger_menu->append("Import DXF…", "win.import_dxf");
     add_tool_action(ToolID::IMPORT_DXF, "import_dxf");
 
@@ -435,6 +435,28 @@ std::vector<std::string> ImpPackage::get_view_hints()
 ImpPackage::~ImpPackage()
 {
     delete view_3d_window;
+}
+
+bool ImpPackage::set_filename()
+{
+    GtkFileChooserNative *native = gtk_file_chooser_native_new("Save Package", GTK_WINDOW(main_window->gobj()),
+                                                               GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
+    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+    chooser->set_do_overwrite_confirmation(true);
+    if (suggested_filename.empty()) {
+        chooser->set_current_folder(Glib::build_filename(pool->get_base_path(), "packages"));
+    }
+    chooser->set_current_name(entry_name->get_text());
+
+    std::string filename;
+    auto success = run_native_filechooser_with_retry(chooser, "Error saving package", [this, chooser, &filename] {
+        filename = chooser->get_filename();
+        pool->check_filename_throw(ObjectType::PACKAGE, filename);
+        auto fi = Gio::File::create_for_path(Glib::build_filename(filename, "padstacks"));
+        fi->make_directory_with_parents();
+        core_package.set_filename(Glib::build_filename(filename, "package.json"));
+    });
+    return success;
 }
 
 } // namespace horizon

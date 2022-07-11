@@ -5,7 +5,7 @@
 namespace horizon {
 class ImpDecal : public ImpLayer {
 public:
-    ImpDecal(const std::string &decal_filename, const std::string &pool_path);
+    ImpDecal(const std::string &decal_filename, const std::string &pool_path, TempMode temp_mode);
 
 protected:
     void construct() override;
@@ -27,5 +27,7 @@ private:
     Gtk::Entry *name_entry = nullptr;
 
     void update_header();
+
+    bool set_filename() override;
 };
 } // namespace horizon

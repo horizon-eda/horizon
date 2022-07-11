@@ -318,7 +318,8 @@ const std::string Core::autosave_suffix = ".autosave";
 
 void Core::autosave()
 {
-    save(autosave_suffix);
+    if (get_filename().size())
+        save(autosave_suffix);
 }
 
 Core::Core(IPool &pool, IPool *pool_caching)

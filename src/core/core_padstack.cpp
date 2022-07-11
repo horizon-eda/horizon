@@ -275,4 +275,15 @@ void CorePadstack::delete_autosave()
         Gio::File::create_for_path(m_filename + autosave_suffix)->remove();
 }
 
+void CorePadstack::set_temp_mode()
+{
+    Gio::File::create_for_path(m_filename)->remove();
+    m_filename.clear();
+}
+
+void CorePadstack::set_filename(const std::string &filename)
+{
+    m_filename = filename;
+}
+
 } // namespace horizon

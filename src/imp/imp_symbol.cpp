@@ -1,5 +1,6 @@
 #include "imp_symbol.hpp"
 #include "canvas/canvas_gl.hpp"
+#include <glibmm/miscutils.h>
 #include "header_button.hpp"
 #include "pool/part.hpp"
 #include "symbol_preview/symbol_preview_window.hpp"
@@ -11,13 +12,20 @@
 #include "help_texts.hpp"
 #include "actions.hpp"
 #include "rules/rules_window.hpp"
+#include "util/util.hpp"
+#include "util/gtk_util.hpp"
+#include <iostream>
 
 namespace horizon {
-ImpSymbol::ImpSymbol(const std::string &symbol_filename, const std::string &pool_path)
+ImpSymbol::ImpSymbol(const std::string &symbol_filename, const std::string &pool_path, TempMode tmp_mode)
     : ImpBase(pool_path), core_symbol(symbol_filename, *pool), symbol(core_symbol.get_symbol()), searcher(core_symbol)
 {
     core = &core_symbol;
     core_symbol.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_tool_change));
+    if (tmp_mode == TempMode::YES) {
+        core_symbol.set_temp_mode();
+        temp_mode = true;
+    }
 }
 
 void ImpSymbol::canvas_update()
@@ -311,6 +319,25 @@ unsigned int ImpSymbol::get_required_version() const
         return 1;
     else
         return 0;
+}
+
+bool ImpSymbol::set_filename()
+{
+    GtkFileChooserNative *native = gtk_file_chooser_native_new("Save Symbol", GTK_WINDOW(main_window->gobj()),
+                                                               GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
+    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+    chooser->set_do_overwrite_confirmation(true);
+
+    chooser->set_current_folder(get_existing_path(Glib::path_get_dirname(suggested_filename)));
+    chooser->set_current_name(Glib::path_get_basename(suggested_filename));
+
+    std::string filename;
+    auto success = run_native_filechooser_with_retry(chooser, "Error saving symbol", [this, chooser, &filename] {
+        filename = append_dot_json(chooser->get_filename());
+        pool->check_filename_throw(ObjectType::SYMBOL, filename);
+        core_symbol.set_filename(filename);
+    });
+    return success;
 }
 
 } // namespace horizon

@@ -6,14 +6,20 @@
 #include "widgets/action_button.hpp"
 #include "util/util.hpp"
 #include "widgets/layer_box.hpp"
+#include "util/util.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
-ImpDecal::ImpDecal(const std::string &decal_filename, const std::string &pool_path)
+ImpDecal::ImpDecal(const std::string &decal_filename, const std::string &pool_path, TempMode tmp_mode)
     : ImpLayer(pool_path), core_decal(decal_filename, *pool), decal(core_decal.get_decal())
 {
     core = &core_decal;
     core_decal.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_tool_change));
     view_angle = 0;
+    if (tmp_mode == TempMode::YES) {
+        core_decal.set_temp_mode();
+        temp_mode = true;
+    }
 }
 
 void ImpDecal::canvas_update()
@@ -88,6 +94,24 @@ void ImpDecal::load_default_layers()
     layer_box->load_from_json(
             json_from_resource("/org/horizon-eda/horizon/imp/"
                                "layer_display_decal.json"));
+}
+
+bool ImpDecal::set_filename()
+{
+    GtkFileChooserNative *native = gtk_file_chooser_native_new("Save Decal", GTK_WINDOW(main_window->gobj()),
+                                                               GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
+    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+    chooser->set_do_overwrite_confirmation(true);
+    chooser->set_current_folder(Glib::build_filename(pool->get_base_path(), "decals"));
+    chooser->set_current_name(name_entry->get_text() + ".json");
+
+    std::string filename;
+    auto success = run_native_filechooser_with_retry(chooser, "Error saving decal", [this, chooser, &filename] {
+        filename = append_dot_json(chooser->get_filename());
+        pool->check_filename_throw(ObjectType::DECAL, filename);
+        core_decal.set_filename(filename);
+    });
+    return success;
 }
 
 }; // namespace horizon

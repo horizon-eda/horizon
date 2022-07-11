@@ -28,6 +28,9 @@ public:
         return frame.version;
     }
 
+    void set_temp_mode();
+    void set_filename(const std::string &filename);
+
     bool get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID property,
                            class PropertyMeta &meta) override;
 
