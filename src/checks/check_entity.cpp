@@ -19,15 +19,13 @@ RulesCheckResult check_entity(const Entity &entity)
     if (needs_trim(entity.manufacturer)) {
         r.errors.emplace_back(RulesCheckErrorLevel::FAIL, "Manufacturer has trailing/leading whitespace");
     }
-    if (!check_prefix(entity.prefix))
-        r.errors.emplace_back(RulesCheckErrorLevel::FAIL, "Prefix doesn't match regex");
+    check_prefix(entity.prefix, r);
+
     if (entity.tags.size() == 0) {
         r.errors.emplace_back(RulesCheckErrorLevel::FAIL, "Tags must not be empty");
     }
     for (const auto &tag : entity.tags) {
-        if (!check_tag(tag)) {
-            r.errors.emplace_back(RulesCheckErrorLevel::FAIL, "Tag \"" + tag + "\" doesn't match regex");
-        }
+        check_tag(tag, r);
     }
     static auto re_gate_suffix = Glib::Regex::create("^[A-Z]+$");
     const auto n_gates = entity.gates.size();
@@ -68,7 +66,7 @@ RulesCheckResult check_entity(const Entity &entity)
                 Glib::ustring suffix(gate.suffix);
                 if (!re_gate_suffix->match(suffix)) {
                     r.errors.emplace_back(RulesCheckErrorLevel::FAIL,
-                                          "Gate suffix \"" + gate.suffix + "\" doesn't match regex");
+                                          "Gate suffix \"" + gate.suffix + "\" must be one or more capital letters");
                 }
             }
             if (gate.swap_group)

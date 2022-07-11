@@ -59,8 +59,7 @@ RulesCheckResult check_part(const Part &part)
     }
 
     if (part.override_prefix == Part::OverridePrefix::YES) {
-        if (!check_prefix(part.prefix))
-            r.errors.emplace_back(RulesCheckErrorLevel::FAIL, "Prefix doesn't match regex");
+        check_prefix(part.prefix, r);
     }
 
     for (const auto &[uu, mpn] : part.orderable_MPNs) {
@@ -74,9 +73,7 @@ RulesCheckResult check_part(const Part &part)
     }
 
     for (const auto &tag : part.tags) {
-        if (!check_tag(tag)) {
-            r.errors.emplace_back(RulesCheckErrorLevel::FAIL, "Tag \"" + tag + "\" doesn't match regex");
-        }
+        check_tag(tag, r);
     }
 
     {
