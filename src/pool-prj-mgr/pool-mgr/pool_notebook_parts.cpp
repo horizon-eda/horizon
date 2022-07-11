@@ -122,7 +122,7 @@ void PoolNotebook::construct_parts()
     add_action_button("Create", bbox, sigc::mem_fun(*this, &PoolNotebook::handle_create_part));
     add_action_button("Edit", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_edit_part));
     add_action_button("Duplicate", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_duplicate_part));
-    add_action_button("Create Part from Part", bbox, br,
+    add_action_button("Create derived Part", bbox, br,
                       sigc::mem_fun(*this, &PoolNotebook::handle_create_part_from_part));
 
     add_action_button("Part Wizard…", bbox, sigc::mem_fun(*this, &PoolNotebook::handle_part_wizard))
