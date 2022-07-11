@@ -42,3 +42,6 @@ wix/*.wixobj
 wix/*.wixpdb
 wix/files.wxs
 wix/version.wxi
+.cache
+.idea
+compile_commands.json
