@@ -15,6 +15,7 @@ versions:
     13: add ODB++ export
     14: add track connection offset
     15: add arc tracks
+    16: support relative paths for including boards
   schematic:
     1: add custom values on symbols
     2: add hierarchy

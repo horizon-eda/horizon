@@ -8,13 +8,13 @@ using json = nlohmann::json;
 
 class IncludedBoard {
 public:
-    IncludedBoard(const UUID &uu, const json &j);
-    IncludedBoard(const UUID &uu, const std::string &p);
+    IncludedBoard(const UUID &uu, const json &j, const std::string &parent_board_directory);
+    IncludedBoard(const UUID &uu, const std::string &p, const std::string &parent_board_directory);
     IncludedBoard(const IncludedBoard &other);
     json serialize() const;
     UUID get_uuid() const;
     std::string get_name() const;
-    void reload();
+    void reload(const std::string &parent_board_directory);
     bool is_valid() const;
 
     UUID uuid;

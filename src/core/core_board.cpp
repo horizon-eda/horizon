@@ -5,6 +5,7 @@
 #include "nlohmann/json.hpp"
 #include <giomm/file.h>
 #include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
 #include "pool/ipool.hpp"
 #include "pool/part.hpp"
 #include "util/picture_load.hpp"
@@ -785,7 +786,7 @@ void CoreBoard::reload_pool()
     m_pool.clear();
     m_pool_caching.clear();
     block.emplace(block->uuid, block_j, m_pool_caching, NoneBlockProvider::get());
-    brd.emplace(brd->uuid, brd_j, *block, m_pool_caching);
+    brd.emplace(brd->uuid, brd_j, *block, m_pool_caching, Glib::path_get_dirname(m_board_filename));
     keeper.restore(brd->pictures);
     history_clear();
     rebuild("reload pool");
