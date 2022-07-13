@@ -4,7 +4,7 @@ infile = sys.argv[2]
 
 texts = {}
 text_current = None
-for line in open(infile, "r") :
+for line in open(infile, "r", encoding="UTF-8") :
 	line = line.strip()
 	if line.startswith("#") :
 		text_current = line[1:]
