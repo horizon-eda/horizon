@@ -666,6 +666,10 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
     else if (op == "focus") {
         present(timestamp);
     }
+    else if (op == "open-project") {
+        const auto &filename = j.at("filename").get<std::string>();
+        app.open_pool_or_project(filename, timestamp);
+    }
     return nullptr;
 }
 

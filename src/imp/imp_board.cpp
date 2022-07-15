@@ -314,6 +314,7 @@ void ImpBoard::update_action_sensitivity()
     set_action_sensitive(ActionID::SHOW_IN_POOL_MANAGER, n_pkgs == 1 && sockets_connected);
     set_action_sensitive(ActionID::SHOW_IN_PROJECT_POOL_MANAGER, n_pkgs == 1 && sockets_connected);
     set_action_sensitive(ActionID::GO_TO_PROJECT_MANAGER, sockets_connected);
+    set_action_sensitive(ActionID::OPEN_PROJECT, sel_count_type(sel, ObjectType::BOARD_PANEL) == 1);
 
     ImpBase::update_action_sensitivity();
 }
@@ -849,6 +850,18 @@ void ImpBoard::construct()
             if (part && part->get_datasheet().size())
                 gtk_show_uri_on_window(GTK_WINDOW(main_window->gobj()), part->get_datasheet().c_str(), GDK_CURRENT_TIME,
                                        NULL);
+        }
+    });
+
+    connect_action(ActionID::OPEN_PROJECT, [this](const auto &a) {
+        const auto x = sel_find_exactly_one(canvas->get_selection(), ObjectType::BOARD_PANEL);
+        const auto &brd = *core_board.get_board();
+        if (x && brd.board_panels.count(x->uuid)) {
+            const auto &p = brd.board_panels.at(x->uuid);
+            json j;
+            j["op"] = "open-project";
+            j["filename"] = p.included_board->get_absolute_project_filename(brd.board_directory);
+            this->send_json(j);
         }
     });
 
