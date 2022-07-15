@@ -283,7 +283,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
     {
         settings_box = PoolSettingsBox::create(pool);
         settings_box->signal_open_pool().connect(
-                [this](auto pool_bp) { appwin.app.open_pool(Glib::build_filename(pool_bp, "pool.json")); });
+                [this](auto pool_bp) { appwin.app.open_pool_or_project(Glib::build_filename(pool_bp, "pool.json")); });
         settings_box->signal_saved().connect([this] { s_signal_saved.emit(); });
         pool_uuid = pool.get_pool_info().uuid;
 
@@ -373,7 +373,7 @@ void PoolNotebook::add_context_menu(PoolBrowser *br)
             [this, ty](const UUID &uu) {
                 auto x = get_pool_uuids(ty, uu);
                 if (auto pool2 = PoolManager::get().get_by_uuid(x.last ? x.last : x.pool)) {
-                    auto &win = appwin.app.open_pool(Glib::build_filename(pool2->base_path, "pool.json"));
+                    auto &win = appwin.app.open_pool_or_project(Glib::build_filename(pool2->base_path, "pool.json"));
                     win.pool_notebook_go_to(ty, uu);
                 }
             },

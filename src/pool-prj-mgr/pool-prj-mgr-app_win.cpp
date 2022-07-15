@@ -635,7 +635,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             pool_path = pool2->base_path;
         }
         if (pool_path.size()) {
-            auto &win = app.open_pool(Glib::build_filename(pool_path, "pool.json"), timestamp);
+            auto &win = app.open_pool_or_project(Glib::build_filename(pool_path, "pool.json"), timestamp);
             win.pool_notebook_go_to(type, uu);
         }
     }

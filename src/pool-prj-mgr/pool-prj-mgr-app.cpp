@@ -267,7 +267,8 @@ bool PoolProjectManagerApplication::present_existing_window(const std::string &p
     return false;
 }
 
-PoolProjectManagerAppWindow &PoolProjectManagerApplication::open_pool(const std::string &pool_json, guint32 timestamp)
+PoolProjectManagerAppWindow &PoolProjectManagerApplication::open_pool_or_project(const std::string &pool_json,
+                                                                                 guint32 timestamp)
 {
     PoolProjectManagerAppWindow *appwindow = nullptr;
     for (auto ws : get_windows()) {

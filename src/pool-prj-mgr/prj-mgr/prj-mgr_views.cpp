@@ -195,7 +195,7 @@ PoolProjectManagerViewProject::PoolProjectManagerViewProject(const Glib::RefPtr<
     builder->get_widget("prj_change_pools_button", change_button);
     change_button->signal_clicked().connect([this] {
         auto path = Glib::build_filename(win.project->pool_directory, "pool.json");
-        auto &win2 = win.app.open_pool(path);
+        auto &win2 = win.app.open_pool_or_project(path);
         win2.pool_notebook_show_settings_tab();
     });
 
@@ -240,7 +240,7 @@ void PoolProjectManagerViewProject::handle_button_part_browser()
 void PoolProjectManagerViewProject::handle_button_project_pool()
 {
     auto path = Glib::build_filename(win.project->pool_directory, "pool.json");
-    win.app.open_pool(path);
+    win.app.open_pool_or_project(path);
 }
 
 bool PoolProjectManagerViewProject::update_meta()

@@ -121,7 +121,7 @@ public:
             Gtk::Button *pool_info_open_button;
             GET_WIDGET(pool_info_open_button);
             pool_info_open_button->signal_clicked().connect(
-                    [this] { app.open_pool((fs::u8path(base_path) / "pool.json").u8string()); });
+                    [this] { app.open_pool_or_project((fs::u8path(base_path) / "pool.json").u8string()); });
         }
     }
     static PoolInfoBox *create(const PoolManagerPool &pool, PoolStatusProviderBase *prv,

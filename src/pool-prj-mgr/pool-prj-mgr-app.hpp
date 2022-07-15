@@ -45,7 +45,7 @@ public:
     void close_appwindows(std::set<Gtk::Window *> wins);
     Preferences &get_preferences();
 
-    class PoolProjectManagerAppWindow &open_pool(const std::string &pool_json, guint32 timestamp = 0);
+    class PoolProjectManagerAppWindow &open_pool_or_project(const std::string &pool_json, guint32 timestamp = 0);
 
     class PreferencesWindow *show_preferences_window(guint32 timestamp = 0);
     class PoolsWindow *show_pools_window(guint32 timestamp = 0);
