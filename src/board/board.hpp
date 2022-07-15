@@ -54,7 +54,7 @@ private:
     void vacuum_junctions();
 
 public:
-    Board(const UUID &uu, const json &, Block &block, IPool &pool);
+    Board(const UUID &uu, const json &, Block &block, IPool &pool, const std::string &board_directory);
     static Board new_from_file(const std::string &filename, Block &block, IPool &pool);
     Board(const UUID &uu, Block &block);
     static unsigned int get_app_version();
@@ -179,6 +179,8 @@ public:
 
     Outline get_outline() const;
     Outline get_outline_and_errors() const;
+
+    std::string board_directory; // for resolving relative paths in included boards
 
 private:
     unsigned int n_inner_layers = 0;

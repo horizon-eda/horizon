@@ -11,8 +11,11 @@
 #include "common/junction_util.hpp"
 #include "util/bbox_accumulator.hpp"
 #include "util/polygon_arc_removal_proxy.hpp"
+#include <filesystem>
 
 namespace horizon {
+
+namespace fs = std::filesystem;
 
 Board::StackupLayer::StackupLayer(int l) : layer(l)
 {
@@ -39,16 +42,16 @@ const LutEnumStr<Board::OutputFormat> Board::output_format_lut = {
         {"odb", Board::OutputFormat::ODB},
 };
 
-static const unsigned int app_version = 15;
+static const unsigned int app_version = 16;
 
 unsigned int Board::get_app_version()
 {
     return app_version;
 }
 
-Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool)
+Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool, const std::string &board_dir)
     : uuid(uu), block(&iblock), name(j.at("name").get<std::string>()), version(app_version, j),
-      n_inner_layers(j.value("n_inner_layers", 0))
+      board_directory(board_dir), n_inner_layers(j.value("n_inner_layers", 0))
 {
     Logger::log_info("loading board " + (std::string)uuid, Logger::Domain::BOARD);
     if (j.count("stackup")) {
@@ -194,7 +197,7 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool)
         const json &o = j["included_boards"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            load_and_log(included_boards, ObjectType::BOARD, std::forward_as_tuple(u, it.value()),
+            load_and_log(included_boards, ObjectType::BOARD, std::forward_as_tuple(u, it.value(), board_directory),
                          Logger::Domain::BOARD);
         }
     }
@@ -317,7 +320,7 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool)
 Board Board::new_from_file(const std::string &filename, Block &block, IPool &pool)
 {
     auto j = load_json_from_file(filename);
-    return Board(UUID(j.at("uuid").get<std::string>()), j, block, pool);
+    return Board(UUID(j.at("uuid").get<std::string>()), j, block, pool, fs::u8path(filename).parent_path().u8string());
 }
 
 
@@ -363,7 +366,8 @@ Board::Board(const Board &brd, CopyMode copy_mode)
       gerber_output_settings(brd.gerber_output_settings), odb_output_settings(brd.odb_output_settings),
       grid_settings(brd.grid_settings), airwires(brd.airwires), stackup(brd.stackup), colors(brd.colors),
       pdf_export_settings(brd.pdf_export_settings), step_export_settings(brd.step_export_settings),
-      pnp_export_settings(brd.pnp_export_settings), version(brd.version), n_inner_layers(brd.n_inner_layers)
+      pnp_export_settings(brd.pnp_export_settings), version(brd.version), board_directory(brd.board_directory),
+      n_inner_layers(brd.n_inner_layers)
 {
     if (copy_mode == CopyMode::DEEP) {
         packages = brd.packages;

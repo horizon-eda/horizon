@@ -9,12 +9,17 @@
 #include "blocks/blocks.hpp"
 #include "pool/project_pool.hpp"
 #include "logger/logger.hpp"
+#include <filesystem>
 
 namespace horizon {
-IncludedBoard::IncludedBoard(const UUID &uu, const std::string &p) : uuid(uu), project_filename(p)
+
+namespace fs = std::filesystem;
+
+IncludedBoard::IncludedBoard(const UUID &uu, const std::string &p, const std::string &parent_board_directory)
+    : uuid(uu), project_filename(p)
 {
     try {
-        reload();
+        reload(parent_board_directory);
     }
     catch (const std::exception &e) {
         Logger::log_warning("error loading included board", Logger::Domain::BOARD, e.what());
@@ -28,8 +33,8 @@ IncludedBoard::~IncludedBoard()
 {
 }
 
-IncludedBoard::IncludedBoard(const UUID &uu, const json &j)
-    : IncludedBoard(uu, j.at("project_filename").get<std::string>())
+IncludedBoard::IncludedBoard(const UUID &uu, const json &j, const std::string &parent_board_directory)
+    : IncludedBoard(uu, j.at("project_filename").get<std::string>(), parent_board_directory)
 {
 }
 
@@ -45,9 +50,17 @@ IncludedBoard::IncludedBoard(const IncludedBoard &other)
     }
 }
 
-void IncludedBoard::reload()
+std::string IncludedBoard::get_absolute_project_filename(const std::string &parent_board_directory) const
 {
-    auto prj = Project::new_from_file(project_filename);
+    auto project_path = fs::u8path(project_filename);
+    if (project_path.is_relative())
+        project_path = fs::weakly_canonical(fs::u8path(parent_board_directory) / project_path);
+    return project_path.u8string();
+}
+
+void IncludedBoard::reload(const std::string &parent_board_directory)
+{
+    auto prj = Project::new_from_file(get_absolute_project_filename(parent_board_directory));
     reset();
 
     try {

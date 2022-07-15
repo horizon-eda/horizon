@@ -5,8 +5,11 @@
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
 #include "board/board.hpp"
+#include <filesystem>
 
 namespace horizon {
+
+namespace fs = std::filesystem;
 
 class BoardEditor : public Gtk::Box {
 public:
@@ -25,28 +28,53 @@ public:
 
         auto reload_button = Gtk::manage(new Gtk::Button("Reload"));
         reload_button->signal_clicked().connect([this] {
-            inc.reload();
+            inc.reload(brd.board_directory);
             update_label();
         });
         lbox->pack_end(*reload_button, false, false, 0);
+
+        relative_button = Gtk::manage(new Gtk::Button("Make relative"));
+        relative_button->signal_clicked().connect([this] {
+            auto inc_path = fs::u8path(inc.project_filename);
+            const auto brd_path = fs::u8path(brd.board_directory);
+            if (inc_path.is_relative())
+                inc_path = fs::weakly_canonical(brd_path / inc_path);
+            else
+                inc_path = fs::relative(inc_path, brd_path);
+            entry->set_text(inc_path.generic_u8string());
+        });
+        lbox->pack_end(*relative_button, false, false, 0);
 
         box->pack_start(*lbox, true, true, 0);
 
         auto ebox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0));
         ebox->get_style_context()->add_class("linked");
-        auto entry = Gtk::manage(new Gtk::Entry);
+        entry = Gtk::manage(new Gtk::Entry);
+        entry->signal_changed().connect([this] {
+            try {
+                auto path = fs::u8path(static_cast<std::string>(entry->get_text()));
+                if (path.is_relative())
+                    relative_button->set_label("Make path absolute");
+                else
+                    relative_button->set_label("Make path relative");
+            }
+            catch (...) {
+                // don't care
+            }
+        });
         bind_widget(entry, inc.project_filename);
         ebox->pack_start(*entry, true, true, 0);
         auto button = Gtk::manage(new Gtk::Button("Browse…"));
-        button->signal_clicked().connect([this, entry] {
+        button->signal_clicked().connect([this] {
             auto fn = parent.ask_filename(entry->get_text());
             if (fn.size()) {
                 entry->set_text(fn);
-                inc.reload();
+                inc.reload(brd.board_directory);
                 update_label();
             }
         });
         ebox->pack_start(*button, false, false, 0);
+
 
         box->pack_start(*ebox, true, true, 0);
         box->show_all();
@@ -78,6 +106,8 @@ private:
     ManageIncludedBoardsDialog &parent;
     Board &brd;
     Gtk::Label *la = nullptr;
+    Gtk::Button *relative_button = nullptr;
+    Gtk::Entry *entry = nullptr;
     void update_label()
     {
         la->set_label(inc.get_name());
@@ -135,7 +165,8 @@ void ManageIncludedBoardsDialog::handle_add_board()
     if (fn.size()) {
         auto uu = UUID::random();
         auto &x = board.included_boards
-                          .emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, fn))
+                          .emplace(std::piecewise_construct, std::forward_as_tuple(uu),
+                                   std::forward_as_tuple(uu, fn, board.board_directory))
                           .first->second;
         auto ed = Gtk::manage(new BoardEditor(x, *this));
         listbox->add(*ed);
