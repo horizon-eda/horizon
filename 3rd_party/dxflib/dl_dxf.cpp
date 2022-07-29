@@ -129,14 +129,14 @@ bool DL_Dxf::in(const std::string& file, DL_CreationInterface* creationInterface
 /**
  * Reads a DXF file from an existing stream.
  *
- * @param stream The string stream.
+ * @param stream The input stream.
  * @param creationInterface
  *      Pointer to the class which takes care of the entities in the file.
  *
  * @retval true If \p file could be opened.
  * @retval false If \p file could not be opened.
  */
-bool DL_Dxf::in(std::stringstream& stream,
+bool DL_Dxf::in(std::istream& stream,
                 DL_CreationInterface* creationInterface) {
     
     if (stream.good()) {
@@ -193,9 +193,9 @@ bool DL_Dxf::readDxfGroups(FILE *fp, DL_CreationInterface* creationInterface) {
 
 
 /**
- * Same as above but for stringstreams.
+ * Same as above but for input streams.
  */
-bool DL_Dxf::readDxfGroups(std::stringstream& stream,
+bool DL_Dxf::readDxfGroups(std::istream& stream,
                            DL_CreationInterface* creationInterface) {
 
     static int line = 1;
@@ -263,10 +263,10 @@ bool DL_Dxf::getStrippedLine(std::string& s, unsigned int size, FILE *fp, bool s
 
 
 /**
- * Same as above but for stringstreams.
+ * Same as above but for input streams.
  */
 bool DL_Dxf::getStrippedLine(std::string &s, unsigned int size,
-                            std::stringstream& stream, bool stripSpace) {
+                            std::istream& stream, bool stripSpace) {
 
     if (!stream.eof()) {
         // Only the useful part of the line
@@ -1448,10 +1448,10 @@ bool DL_Dxf::handleLWPolylineData(DL_CreationInterface* /*creationInterface*/) {
         }
 
         if (groupCode<=30) {
-            if (vertexIndex>=0 && vertexIndex<maxVertices) {
+            if (vertexIndex>=0 && vertexIndex<maxVertices && vertexIndex>=0) {
                 vertices[4*vertexIndex + (groupCode/10-1)] = toReal(groupValue);
             }
-        } else if (groupCode==42 && vertexIndex<maxVertices) {
+        } else if (groupCode==42 && vertexIndex<maxVertices && vertexIndex>=0) {
             vertices[4*vertexIndex + 3] = toReal(groupValue);
         }
         return true;
@@ -1735,7 +1735,7 @@ void DL_Dxf::addAttribute(DL_CreationInterface* creationInterface) {
  */
 DL_DimensionData DL_Dxf::getDimData() {
     // generic dimension data:
-    return DL_DimensionData(
+    DL_DimensionData ret(
                // def point
                getRealValue(10, 0.0),
                getRealValue(20, 0.0),
@@ -1758,6 +1758,9 @@ DL_DimensionData DL_Dxf::getDimData() {
                getStringValue(3, ""),
                // angle
                getRealValue(53, 0.0));
+    ret.arrow1Flipped = getIntValue(74, 0)==1;
+    ret.arrow2Flipped = getIntValue(75, 0)==1;
+    return ret;
 }
 
 
@@ -1852,7 +1855,7 @@ void DL_Dxf::addDimAngular(DL_CreationInterface* creationInterface) {
     DL_DimensionData d = getDimData();
 
     // angular dimension:
-    DL_DimAngularData da(
+    DL_DimAngular2LData da(
         // definition point 1
         getRealValue(13, 0.0),
         getRealValue(23, 0.0),
@@ -2505,7 +2508,6 @@ void DL_Dxf::writeVertex(DL_WriterA& dw,
     if (version==DL_VERSION_2000) {
         dw.dxfReal(10, data.x);
         dw.dxfReal(20, data.y);
-        dw.dxfReal(30, data.z);
         if (fabs(data.bulge)>1.0e-10) {
             dw.dxfReal(42, data.bulge);
         }
@@ -2964,6 +2966,11 @@ void DL_Dxf::writeDimStyleOverrides(DL_WriterA& dw,
         dw.dxfString(1001, "ACAD");
         dw.dxfString(1000, "DSTYLE");
         dw.dxfString(1002, "{");
+        if (data.type&128) {
+            // custom text position:
+            dw.dxfInt(1070, 279);
+            dw.dxfInt(1070, 2);
+        }
         dw.dxfInt(1070, 144);
         dw.dxfReal(1040, data.linearFactor);
         dw.dxfInt(1070,40);
@@ -3008,6 +3015,8 @@ void DL_Dxf::writeDimAligned(DL_WriterA& dw,
     if (version>DL_VERSION_R12) {
         dw.dxfInt(71, data.attachmentPoint);
         dw.dxfInt(72, data.lineSpacingStyle); // opt
+        dw.dxfInt(74, data.arrow1Flipped);
+        dw.dxfInt(75, data.arrow2Flipped);
         dw.dxfReal(41, data.lineSpacingFactor); // opt
     }
 
@@ -3069,6 +3078,8 @@ void DL_Dxf::writeDimLinear(DL_WriterA& dw,
     if (version>DL_VERSION_R12) {
         dw.dxfInt(71, data.attachmentPoint);
         dw.dxfInt(72, data.lineSpacingStyle); // opt
+        dw.dxfInt(74, data.arrow1Flipped);
+        dw.dxfInt(75, data.arrow2Flipped);
         dw.dxfReal(41, data.lineSpacingFactor); // opt
     }
 
@@ -3136,6 +3147,8 @@ void DL_Dxf::writeDimRadial(DL_WriterA& dw,
     if (version>DL_VERSION_R12) {
         dw.dxfInt(71, data.attachmentPoint);
         dw.dxfInt(72, data.lineSpacingStyle); // opt
+        dw.dxfInt(74, data.arrow1Flipped);
+        //dw.dxfInt(75, data.arrow2Flipped);
         dw.dxfReal(41, data.lineSpacingFactor); // opt
     }
 
@@ -3195,6 +3208,8 @@ void DL_Dxf::writeDimDiametric(DL_WriterA& dw,
     if (version>DL_VERSION_R12) {
         dw.dxfInt(71, data.attachmentPoint);
         dw.dxfInt(72, data.lineSpacingStyle); // opt
+        dw.dxfInt(74, data.arrow1Flipped);
+        dw.dxfInt(75, data.arrow2Flipped);
         dw.dxfReal(41, data.lineSpacingFactor); // opt
     }
 
@@ -3227,9 +3242,9 @@ void DL_Dxf::writeDimDiametric(DL_WriterA& dw,
  * @param data Specific angular dimension data from the file
  * @param attrib Attributes
  */
-void DL_Dxf::writeDimAngular(DL_WriterA& dw,
+void DL_Dxf::writeDimAngular2L(DL_WriterA& dw,
                              const DL_DimensionData& data,
-                             const DL_DimAngularData& edata,
+                             const DL_DimAngular2LData& edata,
                              const DL_Attributes& attrib) {
 
     dw.entity("DIMENSION");
@@ -3254,6 +3269,8 @@ void DL_Dxf::writeDimAngular(DL_WriterA& dw,
     if (version>DL_VERSION_R12) {
         dw.dxfInt(71, data.attachmentPoint);
         dw.dxfInt(72, data.lineSpacingStyle); // opt
+        dw.dxfInt(74, data.arrow1Flipped);
+        dw.dxfInt(75, data.arrow2Flipped);
         dw.dxfReal(41, data.lineSpacingFactor); // opt
     }
 
@@ -3321,6 +3338,8 @@ void DL_Dxf::writeDimAngular3P(DL_WriterA& dw,
     if (version>DL_VERSION_R12) {
         dw.dxfInt(71, data.attachmentPoint);
         dw.dxfInt(72, data.lineSpacingStyle); // opt
+        dw.dxfInt(74, data.arrow1Flipped);
+        dw.dxfInt(75, data.arrow2Flipped);
         dw.dxfReal(41, data.lineSpacingFactor); // opt
     }
 
@@ -3390,6 +3409,8 @@ void DL_Dxf::writeDimOrdinate(DL_WriterA& dw,
     if (version>DL_VERSION_R12) {
         dw.dxfInt(71, data.attachmentPoint);
         dw.dxfInt(72, data.lineSpacingStyle); // opt
+        //dw.dxfInt(74, data.arrow1Flipped);
+        //dw.dxfInt(75, data.arrow2Flipped);
         dw.dxfReal(41, data.lineSpacingFactor); // opt
     }
 
@@ -3457,6 +3478,18 @@ void DL_Dxf::writeLeaderVertex(DL_WriterA& dw,
     if (version>DL_VERSION_R12) {
         dw.dxfReal(10, data.x);
         dw.dxfReal(20, data.y);
+    }
+}
+
+void DL_Dxf::writeLeaderEnd(DL_WriterA& dw,
+                 const DL_LeaderData& data) {
+    if (version==DL_VERSION_2000) {
+        dw.dxfString(1001, "ACAD");
+        dw.dxfString(1000, "DSTYLE");
+        dw.dxfString(1002, "{");
+        dw.dxfInt(1070,40);
+        dw.dxfReal(1040, data.dimScale);
+        dw.dxfString(1002, "}");
     }
 }
 
@@ -3664,7 +3697,7 @@ void DL_Dxf::writeHatchEdge(DL_WriterA& dw,
  *
  * @return IMAGEDEF handle. Needed for the IMAGEDEF counterpart.
  */
-int DL_Dxf::writeImage(DL_WriterA& dw,
+unsigned long DL_Dxf::writeImage(DL_WriterA& dw,
                        const DL_ImageData& data,
                        const DL_Attributes& attrib) {
 
@@ -3704,8 +3737,7 @@ int DL_Dxf::writeImage(DL_WriterA& dw,
     dw.dxfReal(23, data.height);
 
     // handle of IMAGEDEF object
-    int handle = dw.incHandle();
-    dw.dxfHex(340, handle);
+    unsigned long handle = dw.handle(340);
 
     // flags
     dw.dxfInt(70, 15);
@@ -4353,7 +4385,6 @@ void DL_Dxf::writeObjects(DL_WriterA& dw, const std::string& appDictionaryName) 
     dw.dxfString(  0, "SECTION");
     dw.dxfString(  2, "OBJECTS");
 
-
     dw.dxfString(  0, "DICTIONARY");
     dw.dxfHex(5, 0xC);
     dw.dxfString(100, "AcDbDictionary");
@@ -4703,12 +4734,9 @@ void DL_Dxf::writeAppDictionary(DL_WriterA& dw) {
     dw.dxfInt(281, 1);
 }
 
-int DL_Dxf::writeDictionaryEntry(DL_WriterA& dw, const std::string& name) {
+unsigned long DL_Dxf::writeDictionaryEntry(DL_WriterA& dw, const std::string& name) {
     dw.dxfString(  3, name);
-    int handle = dw.getNextHandle();
-    dw.dxfHex(350, handle);
-    dw.incHandle();
-    return handle;
+    return dw.handle(350);
 }
 
 void DL_Dxf::writeXRecord(DL_WriterA& dw, int handle, int value) {

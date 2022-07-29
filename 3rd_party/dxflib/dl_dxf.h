@@ -57,11 +57,11 @@ class DL_CreationInterface;
 class DL_WriterA;
 
 
-#define DL_VERSION "3.17.0.0"
+#define DL_VERSION "3.26.4.0"
 
 #define DL_VERSION_MAJOR    3
-#define DL_VERSION_MINOR    17
-#define DL_VERSION_REV      0
+#define DL_VERSION_MINOR    26
+#define DL_VERSION_REV      4
 #define DL_VERSION_BUILD    0
 
 #define DL_UNKNOWN               0
@@ -131,12 +131,12 @@ public:
     static bool getStrippedLine(std::string& s, unsigned int size,
                                FILE* stream, bool stripSpace = true);
     
-    bool readDxfGroups(std::stringstream& stream,
+    bool readDxfGroups(std::istream& stream,
                        DL_CreationInterface* creationInterface);
-    bool in(std::stringstream &stream,
+    bool in(std::istream &stream,
             DL_CreationInterface* creationInterface);
     static bool getStrippedLine(std::string& s, unsigned int size,
-                               std::stringstream& stream, bool stripSpace = true);
+                               std::istream& stream, bool stripSpace = true);
 
     static bool stripWhiteSpace(char** s, bool stripSpaces = true);
 
@@ -294,9 +294,9 @@ public:
                            const DL_DimensionData& data,
                            const DL_DimDiametricData& edata,
                            const DL_Attributes& attrib);
-    void writeDimAngular(DL_WriterA& dw,
+    void writeDimAngular2L(DL_WriterA& dw,
                          const DL_DimensionData& data,
-                         const DL_DimAngularData& edata,
+                         const DL_DimAngular2LData& edata,
                          const DL_Attributes& attrib);
     void writeDimAngular3P(DL_WriterA& dw,
                            const DL_DimensionData& data,
@@ -311,6 +311,8 @@ public:
                      const DL_Attributes& attrib);
     void writeLeaderVertex(DL_WriterA& dw,
                            const DL_LeaderVertexData& data);
+    void writeLeaderEnd(DL_WriterA& dw,
+                     const DL_LeaderData& data);
     void writeHatch1(DL_WriterA& dw,
                      const DL_HatchData& data,
                      const DL_Attributes& attrib);
@@ -324,7 +326,7 @@ public:
     void writeHatchEdge(DL_WriterA& dw,
                         const DL_HatchEdgeData& data);
 
-    int writeImage(DL_WriterA& dw,
+    unsigned long writeImage(DL_WriterA& dw,
                    const DL_ImageData& data,
                    const DL_Attributes& attrib);
 
@@ -355,7 +357,7 @@ public:
     void writeBlockRecord(DL_WriterA& dw, const std::string& name);
     void writeObjects(DL_WriterA& dw, const std::string& appDictionaryName = "");
     void writeAppDictionary(DL_WriterA& dw);
-    int writeDictionaryEntry(DL_WriterA& dw, const std::string& name);
+    unsigned long writeDictionaryEntry(DL_WriterA& dw, const std::string& name);
     void writeXRecord(DL_WriterA& dw, int handle, int value);
     void writeXRecord(DL_WriterA& dw, int handle, double value);
     void writeXRecord(DL_WriterA& dw, int handle, bool value);
