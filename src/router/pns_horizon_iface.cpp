@@ -923,6 +923,18 @@ horizon::BoardJunction *PNS_HORIZON_IFACE::find_junction(int layer, const horizo
     return nullptr;
 }
 
+std::set<horizon::BoardJunction *> PNS_HORIZON_IFACE::find_junctions(const horizon::Coordi &c)
+{
+    std::set<horizon::BoardJunction *> junctions;
+    const auto cu_layers = horizon::LayerRange(horizon::BoardLayers::TOP_COPPER, horizon::BoardLayers::BOTTOM_COPPER);
+    for (auto &[uu, ju] : board->junctions) {
+        if (ju.net && ju.position == c && ju.layer.overlaps(cu_layers)) {
+            junctions.insert(&ju);
+        }
+    }
+    return junctions;
+}
+
 void PNS_HORIZON_IFACE::AddItem(PNS::ITEM *aItem)
 {
     // std::cout << "!!!iface add item" << std::endl;
@@ -979,6 +991,7 @@ void PNS_HORIZON_IFACE::AddItem(PNS::ITEM *aItem)
                     ju->net = track->net;
                     conn.connect(ju);
                 }
+                conn.junc->connected_tracks.push_back(track->uuid);
             }
         };
         connect(track->from, from);
@@ -1002,9 +1015,25 @@ void PNS_HORIZON_IFACE::AddItem(PNS::ITEM *aItem)
             via->parameter_set = ps;
 
             horizon::Coordi c(pvia->Pos().x, pvia->Pos().y);
-            auto j = find_junction(10000, c);
-            if (j) {
-                via->junction = j;
+            auto junctions = find_junctions(c);
+            if (junctions.size()) {
+                auto new_junc = *junctions.begin();
+                via->junction = new_junc;
+                for (auto ju : junctions) {
+                    if (ju == new_junc)
+                        continue;
+                    junctions_maybe_erased.insert(ju);
+                    for (auto &track_uu : ju->connected_tracks) {
+                        if (board->tracks.count(track_uu)) {
+                            auto &track = board->tracks.at(track_uu);
+                            for (auto &it_ft : {&track.from, &track.to}) {
+                                if (it_ft->junc == ju) {
+                                    it_ft->connect(new_junc);
+                                }
+                            }
+                        }
+                    }
+                }
             }
             else {
                 auto juu = horizon::UUID::random();
@@ -1085,7 +1114,37 @@ bool PNS_HORIZON_IFACE::IsItemVisible(const PNS::ITEM *aItem) const
 
 void PNS_HORIZON_IFACE::UpdateItem(ITEM *aItem)
 {
-    throw std::runtime_error("UpdateItem not implemented");
+    switch (aItem->Kind()) {
+    case PNS::ITEM::VIA_T: {
+        PNS::VIA *pvia = static_cast<PNS::VIA *>(aItem);
+        auto via = aItem->Parent()->via;
+        assert(via);
+        via->junction->position.x = pvia->Pos().x;
+        via->junction->position.y = pvia->Pos().y;
+        // check if the via's position could merge junctions
+        auto junctions = find_junctions(via->junction->position);
+        for (auto ju : junctions) {
+            if (ju == via->junction)
+                continue;
+            if (ju->net != via->junction->net)
+                continue;
+            junctions_maybe_erased.insert(ju);
+            for (auto &track_uu : ju->connected_tracks) {
+                if (board->tracks.count(track_uu)) {
+                    auto &track = board->tracks.at(track_uu);
+                    for (auto &it_ft : {&track.from, &track.to}) {
+                        if (it_ft->junc == ju) {
+                            it_ft->connect(via->junction);
+                        }
+                    }
+                }
+            }
+        }
+
+    } break;
+    default:
+        throw std::runtime_error("UpdateItem not implemented for " + aItem->KindStr());
+    }
 }
 
 bool PNS_HORIZON_IFACE::IsFlashedOnLayer(const PNS::ITEM *aItem, int aLayer) const
