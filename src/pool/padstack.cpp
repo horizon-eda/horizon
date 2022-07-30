@@ -282,6 +282,12 @@ std::pair<Coordi, Coordi> Padstack::get_bbox(bool copper_only) const
             acc.accumulate(bb);
         }
     }
+    if (!copper_only) {
+        for (const auto &it : holes) {
+            const auto bb = it.second.placement.transform_bb(it.second.get_bbox());
+            acc.accumulate(bb);
+        }
+    }
     return acc.get_or_0();
 }
 

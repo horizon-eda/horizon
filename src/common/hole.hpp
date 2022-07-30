@@ -33,7 +33,7 @@ public:
     Shape shape = Shape::ROUND;
 
     Polygon to_polygon() const;
-
+    std::pair<Coordi, Coordi> get_bbox() const;
 
     UUID get_uuid() const;
 

@@ -64,6 +64,23 @@ Polygon Hole::to_polygon() const
     return poly;
 }
 
+std::pair<Coordi, Coordi> Hole::get_bbox() const
+{
+    switch (shape) {
+    case Shape::SLOT: {
+        const auto w = length / 2;
+        const auto h = diameter / 2;
+        return {Coordi(-w, -h), Coordi(w, h)};
+    } break;
+
+    case Shape::ROUND: {
+        const auto r = diameter / 2;
+        return {Coordi(-r, -r), Coordi(r, r)};
+    } break;
+    }
+    return {Coordi(), Coordi()};
+}
+
 Hole::Hole(const UUID &uu) : uuid(uu)
 {
 }
