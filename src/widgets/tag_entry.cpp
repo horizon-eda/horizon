@@ -1,6 +1,7 @@
 #include "tag_entry.hpp"
 #include "pool/ipool.hpp"
 #include "util/sqlite.hpp"
+#include "util/str_util.hpp"
 
 namespace horizon {
 
@@ -53,10 +54,14 @@ TagEntry::TagPopover::TagPopover(TagEntry *p) : Gtk::Popover(), parent(p)
     });
     if (parent->edit_mode) {
         search_entry->signal_activate().connect([this] {
-            parent->add_tag(search_entry->get_text());
-            search_entry->set_text("");
-            search_entry->grab_focus();
-            update_list();
+            std::string tag = search_entry->get_text();
+            trim(tag);
+            if (tag.size()) {
+                parent->add_tag(tag);
+                search_entry->set_text("");
+                search_entry->grab_focus();
+                update_list();
+            }
         });
     }
     else {
