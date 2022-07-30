@@ -52,12 +52,6 @@ jobs:
           - container: ubuntu:focal
             cxx: g++
             cc: gcc
-          - container: ubuntu:hirsute
-            cxx: g++
-            cc: gcc
-          - container: ubuntu:impish
-            cxx: g++
-            cc: gcc
           - container: ubuntu:jammy
             cxx: g++
             cc: gcc
