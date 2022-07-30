@@ -7,9 +7,9 @@ namespace horizon {
 
 class TagEntry::TagPopover : public Gtk::Popover {
 public:
-    TagPopover(TagEntry *p);
+    TagPopover(TagEntry &p);
 
-    TagEntry *parent;
+    TagEntry &parent;
     Gtk::SearchEntry *search_entry;
     class ListColumns : public Gtk::TreeModelColumnRecord {
     public:
@@ -31,7 +31,7 @@ public:
     void activate();
 };
 
-TagEntry::TagPopover::TagPopover(TagEntry *p) : Gtk::Popover(), parent(p)
+TagEntry::TagPopover::TagPopover(TagEntry &p) : Gtk::Popover(), parent(p)
 {
     auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 3));
     search_entry = Gtk::manage(new Gtk::SearchEntry());
@@ -43,7 +43,7 @@ TagEntry::TagPopover::TagPopover(TagEntry *p) : Gtk::Popover(), parent(p)
     search_entry->signal_changed().connect([this] {
         std::string search = search_entry->get_text();
         update_list();
-        if (!parent->edit_mode) {
+        if (!parent.edit_mode) {
             if (store->children().size())
                 view->get_selection()->select(store->children().begin());
             auto it = view->get_selection()->get_selected();
@@ -52,12 +52,12 @@ TagEntry::TagPopover::TagPopover(TagEntry *p) : Gtk::Popover(), parent(p)
             }
         }
     });
-    if (parent->edit_mode) {
+    if (parent.edit_mode) {
         search_entry->signal_activate().connect([this] {
             std::string tag = search_entry->get_text();
             trim(tag);
             if (tag.size()) {
-                parent->add_tag(tag);
+                parent.add_tag(tag);
                 search_entry->set_text("");
                 search_entry->grab_focus();
                 update_list();
@@ -73,7 +73,7 @@ TagEntry::TagPopover::TagPopover(TagEntry *p) : Gtk::Popover(), parent(p)
     view->get_selection()->set_mode(Gtk::SELECTION_BROWSE);
     view->append_column("Tag", list_columns.name);
     view->get_column(0)->set_expand(true);
-    if (!parent->edit_mode) {
+    if (!parent.edit_mode) {
         auto cr = Gtk::manage(new Gtk::CellRendererText());
         auto tvc = Gtk::manage(new Gtk::TreeViewColumn("N", *cr));
         tvc->add_attribute(cr->property_text(), list_columns.count);
@@ -123,7 +123,7 @@ void TagEntry::TagPopover::activate()
     if (it) {
         Gtk::TreeModel::Row row = *it;
         Glib::ustring tag = row[list_columns.name];
-        parent->add_tag(tag);
+        parent.add_tag(tag);
         search_entry->set_text("");
         search_entry->grab_focus();
         update_list();
@@ -133,11 +133,11 @@ void TagEntry::TagPopover::activate()
 void TagEntry::TagPopover::update_list()
 {
     store->clear();
-    if (parent->edit_mode) {
+    if (parent.edit_mode) {
         update_list_edit();
         return;
     }
-    auto tags_existing = parent->get_tags();
+    auto tags_existing = parent.get_tags();
     auto ntags = tags_existing.size();
     std::stringstream query;
     query << "SELECT tag, count(*) AS cnt, tag LIKE $pre AS prefix from tags "
@@ -159,7 +159,7 @@ void TagEntry::TagPopover::update_list()
     }
     query << "GROUP BY tag "
              "ORDER BY prefix DESC, cnt DESC";
-    SQLite::Query q(parent->pool.get_db(), query.str());
+    SQLite::Query q(parent.pool.get_db(), query.str());
     {
         size_t i = 0;
         for (const auto &it : tags_existing) {
@@ -174,7 +174,7 @@ void TagEntry::TagPopover::update_list()
         q.bind("$ntags", ntags);
     }
     q.bind("$tag", "%" + search_entry->get_text() + "%");
-    q.bind("$type", parent->type);
+    q.bind("$type", parent.type);
     while (q.step()) {
         Gtk::TreeModel::Row row = *store->append();
         row[list_columns.name] = q.get<std::string>(0);
@@ -184,7 +184,7 @@ void TagEntry::TagPopover::update_list()
 
 void TagEntry::TagPopover::update_list_edit()
 {
-    auto tags_existing = parent->get_tags();
+    auto tags_existing = parent.get_tags();
     auto ntags = tags_existing.size();
     std::stringstream query;
     query << "WITH ids_existing AS (SELECT uuid FROM tags WHERE type = $type "
@@ -203,7 +203,7 @@ void TagEntry::TagPopover::update_list_edit()
     query << "'') ";
     query << "GROUP BY tag "
              "ORDER BY prefix DESC, n_ex DESC, cnt DESC";
-    SQLite::Query q(parent->pool.get_db(), query.str());
+    SQLite::Query q(parent.pool.get_db(), query.str());
     {
         size_t i = 0;
         for (const auto &it : tags_existing) {
@@ -218,7 +218,7 @@ void TagEntry::TagPopover::update_list_edit()
         q.bind("$ntags", ntags);
     }
     q.bind("$tag", "%" + search_entry->get_text() + "%");
-    q.bind("$type", parent->type);
+    q.bind("$type", parent.type);
     while (q.step()) {
         Gtk::TreeModel::Row row = *store->append();
         row[list_columns.name] = q.get<std::string>(0);
@@ -240,13 +240,13 @@ TagEntry::TagEntry(IPool &p, ObjectType t, bool e)
     add_button->set_has_tooltip(false);
     pack_start(*add_button, false, false, 0);
 
-    auto popover = Gtk::manage(new TagPopover(this));
+    auto popover = Gtk::manage(new TagPopover(*this));
     add_button->set_popover(*popover);
 }
 
 class TagEntry::TagLabel : public Gtk::Box {
 public:
-    TagLabel(TagEntry *p, const std::string &t) : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 2), parent(p), tag(t)
+    TagLabel(TagEntry &p, const std::string &t) : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 2), parent(p), tag(t)
     {
         la = Gtk::manage(new Gtk::Label(t));
         pack_start(*la, false, false, 0);
@@ -258,12 +258,12 @@ public:
         bu->get_style_context()->add_class("tag-entry-tiny-button");
         bu->get_style_context()->add_class("dim-label");
         bu->show();
-        bu->signal_clicked().connect([this] { parent->remove_tag(tag); });
+        bu->signal_clicked().connect([this] { parent.remove_tag(tag); });
         pack_start(*bu, false, false, 0);
     }
 
 private:
-    TagEntry *parent;
+    TagEntry &parent;
     const std::string tag;
     Gtk::Label *la = nullptr;
     Gtk::Button *bu = nullptr;
@@ -271,7 +271,7 @@ private:
 
 void TagEntry::add_tag(const std::string &tag)
 {
-    auto w = Gtk::manage(new TagLabel(this, tag));
+    auto w = Gtk::manage(new TagLabel(*this, tag));
     w->show();
     box->pack_start(*w, false, false, 0);
     label_widgets.emplace(tag, w);
@@ -314,7 +314,7 @@ void TagEntry::set_tags(const std::set<std::string> &tags)
     }
     label_widgets.clear();
     for (const auto &tag : tags) {
-        auto w = Gtk::manage(new TagLabel(this, tag));
+        auto w = Gtk::manage(new TagLabel(*this, tag));
         w->show();
         box->pack_start(*w, false, false, 0);
         label_widgets.emplace(tag, w);
