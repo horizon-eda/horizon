@@ -3,7 +3,7 @@ name: Build Windows binaries
 on:
   push:
     branches:
-      - '*'
+      - '**'
       - '!appveyor-*'
       - '!freebsd-*'
       - '!pr-review*'
@@ -56,7 +56,7 @@ jobs:
       run: ./check_dll.sh
     - name: set artifact name
       shell: msys2 {0}
-      run: echo "artifact_name=horizon-win64-$(date +%Y-%m-%d-%H%M)-${{ github.ref_name }}" >> $GITHUB_ENV
+      run: echo "artifact_name=horizon-win64-$(date +%Y-%m-%d-%H%M)-$(echo ${{ github.ref_name }} | tr / -)" >> $GITHUB_ENV
     - name: deploy to selfnet mirror
       if: github.event_name != 'pull_request'
       shell: msys2 {0}
