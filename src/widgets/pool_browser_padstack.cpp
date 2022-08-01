@@ -30,6 +30,7 @@ void PoolBrowserPadstack::create_columns()
 void PoolBrowserPadstack::add_sort_controller_columns()
 {
     sort_controller->add_column(0, "padstacks.name");
+    sort_controller->add_column(mtime_column, "padstacks.mtime");
 }
 
 void PoolBrowserPadstack::set_package_uuid(const UUID &uu)
