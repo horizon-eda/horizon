@@ -1340,6 +1340,20 @@ struct PolyInfo {
     }
 };
 
+static void check_zero_length_edges(Board::Outline &outline, const Polygon &poly)
+{
+    for (size_t i = 0; i < poly.vertices.size(); i++) {
+        const auto p0 = poly.get_vertex(i).position;
+        const auto p1 = poly.get_vertex(i + 1).position;
+        if (p1 == p0) {
+            outline.errors.errors.emplace_back(RulesCheckErrorLevel::WARN, "Zero-length edge");
+            auto &x = outline.errors.errors.back();
+            x.has_location = true;
+            x.location = p0;
+        }
+    }
+};
+
 Board::Outline Board::get_outline(bool with_errors) const
 {
     std::vector<PolyInfo> polys;
@@ -1378,6 +1392,11 @@ Board::Outline Board::get_outline(bool with_errors) const
 
         if (ClipperLib::Orientation(outline_poly.path))
             outline.outline.reverse();
+
+        if (with_errors) {
+            check_zero_length_edges(outline, outline.outline);
+            outline.errors.update();
+        }
 
         return outline;
     }
@@ -1459,6 +1478,14 @@ Board::Outline Board::get_outline(bool with_errors) const
             if (!ClipperLib::Orientation(p.path))
                 outline.holes.back().reverse();
         }
+    }
+
+    if (with_errors) {
+        check_zero_length_edges(outline, outline.outline);
+        for (const auto &poly : outline.holes) {
+            check_zero_length_edges(outline, poly);
+        }
+        outline.errors.update();
     }
 
     return outline;
