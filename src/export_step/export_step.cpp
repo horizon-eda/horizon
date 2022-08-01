@@ -74,6 +74,8 @@ static TopoDS_Shape face_from_polyon(const Polygon &poly)
         const auto p2 = Coordd(v2.position) / 1e6;
 
         if (v1.type == Polygon::Vertex::Type::LINE) {
+            if (v1.position == v2.position)
+                continue;
             edge = BRepBuilderAPI_MakeEdge(gp_Pnt(p1.x, p1.y, 0.0), gp_Pnt(p2.x, p2.y, 0.0));
         }
         else {
