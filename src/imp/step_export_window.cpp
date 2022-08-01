@@ -111,7 +111,7 @@ void StepExportWindow::export_thread(STEPExportSettings my_settings)
 {
     try {
         export_step(
-                my_settings.filename, *core.get_board(), core.get_pool(), my_settings.include_3d_models,
+                my_settings.filename, *core.get_board(), core.get_pool_caching(), my_settings.include_3d_models,
                 [this](const std::string &msg) {
                     {
                         std::lock_guard<std::mutex> guard(msg_queue_mutex);
