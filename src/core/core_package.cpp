@@ -282,11 +282,13 @@ void CorePackage::set_temp_mode()
 {
     Gio::File::create_for_path(m_filename)->remove();
     m_filename.clear();
+    m_pictures_dir.clear();
 }
 
 void CorePackage::set_filename(const std::string &filename)
 {
     m_filename = filename;
+    m_pictures_dir = Glib::build_filename(Glib::path_get_dirname(filename), "pictures");
 }
 
 } // namespace horizon
