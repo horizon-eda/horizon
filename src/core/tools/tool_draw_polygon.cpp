@@ -26,7 +26,7 @@ ToolResponse ToolDrawPolygon::begin(const ToolArgs &args)
 
 void ToolDrawPolygon::append_vertex(const Coordi &c)
 {
-    if (last_vertex && last_vertex->position == c) {
+    if (last_vertex && last_vertex->position == vertex->position) {
         imp->tool_bar_flash("didn't create zero-length edge");
         return;
     }
