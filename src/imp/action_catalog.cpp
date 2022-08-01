@@ -1088,6 +1088,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::OPEN_PROJECT, ToolID::NONE},
          {"Open project", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_SPECIFIC}},
+
+        {{ActionID::CONVERT_TO_PAD, ToolID::NONE},
+         {"Convert to pad", ActionGroup::PACKAGE, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
+          ActionCatalogItem::FLAGS_SPECIFIC}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1242,6 +1246,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(SYMBOL_TEXT_PLACEMENT),
         ACTION_LUT_ITEM(CYCLE_LAYER_DISPLAY_MODE),
         ACTION_LUT_ITEM(OPEN_PROJECT),
+        ACTION_LUT_ITEM(CONVERT_TO_PAD),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

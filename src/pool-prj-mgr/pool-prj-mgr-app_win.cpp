@@ -240,6 +240,12 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
                     part_browser_window->pool_updated(path);
                 if (project && project->pool_directory == path)
                     view_project.update_pools_label();
+                {
+                    json j;
+                    j["op"] = "pool-updated";
+                    j["path"] = path;
+                    app.send_json(0, j);
+                }
             },
             *this));
 
@@ -669,6 +675,10 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
     else if (op == "open-project") {
         const auto &filename = j.at("filename").get<std::string>();
         app.open_pool_or_project(filename, timestamp);
+    }
+    else if (op == "update-pool") {
+        const auto filenames = j.at("filenames").get<std::vector<std::string>>();
+        app.signal_pool_items_edited().emit(filenames);
     }
     return nullptr;
 }

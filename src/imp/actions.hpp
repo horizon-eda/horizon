@@ -125,5 +125,6 @@ enum class ActionID {
     SYMBOL_TEXT_PLACEMENT,
     CYCLE_LAYER_DISPLAY_MODE,
     OPEN_PROJECT,
+    CONVERT_TO_PAD,
 };
 }

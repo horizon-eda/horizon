@@ -97,5 +97,12 @@ private:
     void update_header();
 
     bool set_filename() override;
+
+    void handle_convert_to_pad();
+    UUID converted_padstack;
+    std::set<UUID> converted_polygons;
+    Coordi converted_pad_position;
+
+    bool handle_broadcast(const json &j) override;
 };
 } // namespace horizon

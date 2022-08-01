@@ -6,6 +6,7 @@
 #include "header_button.hpp"
 #include "parameter_window.hpp"
 #include "pool/part.hpp"
+#include "util/util.hpp"
 #include "util/gtk_util.hpp"
 #include "util/geom_util.hpp"
 #include "util/pool_completion.hpp"
@@ -24,6 +25,7 @@
 #include <iomanip>
 #include "core/tool_id.hpp"
 #include "actions.hpp"
+#include "util/bbox_accumulator.hpp"
 
 namespace horizon {
 ImpPackage::ImpPackage(const std::string &package_filename, const std::string &pool_path, TempMode tmp_mode)
@@ -94,6 +96,21 @@ void ImpPackage::update_action_sensitivity()
                          sockets_connected && std::any_of(sel.begin(), sel.end(), [](const auto &x) {
                              return x.type == ObjectType::PAD;
                          }));
+    {
+        size_t poly_on_padstack_layers = 0;
+        for (const auto &it : sel) {
+            if (any_of(it.type, {ObjectType::POLYGON_ARC_CENTER, ObjectType::POLYGON_VERTEX, ObjectType::POLYGON_EDGE})
+                && core_package.get_package().polygons.count(it.uuid)) {
+                const auto &poly = *core_package.get_polygon(it.uuid);
+                if (any_of<int>(poly.layer,
+                                {BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER, BoardLayers::TOP_PASTE,
+                                 BoardLayers::BOTTOM_PASTE, BoardLayers::TOP_MASK, BoardLayers::BOTTOM_MASK}))
+                    poly_on_padstack_layers++;
+            }
+        }
+        set_action_sensitive(ActionID::CONVERT_TO_PAD, poly_on_padstack_layers && core_package.get_filename().size());
+    }
+
 
     ImpBase::update_action_sensitivity();
 }
@@ -311,6 +328,9 @@ void ImpPackage::construct()
         footprint_generator_window->show_all();
     });
 
+    connect_action(ActionID::CONVERT_TO_PAD, [this](auto &a) { handle_convert_to_pad(); });
+
+
     update_monitor();
 
     core_package.signal_save().connect([this, entry_manufacturer, entry_tags] {
@@ -345,6 +365,161 @@ void ImpPackage::construct()
     set_view_angle(0);
 }
 
+static std::optional<Shape> polygon_to_shape(const Polygon &poly)
+{
+    if (!poly.is_rect())
+        return {};
+    const auto v = poly.vertices.at(1).position - poly.vertices.at(0).position;
+    if (v.x && v.y) // not axis-aligned
+        return {};
+    const auto bb = poly.get_bbox();
+    const auto sz = bb.second - bb.first;
+    Shape sh(UUID::random());
+    sh.form = Shape::Form::RECTANGLE;
+    sh.params = {sz.x, sz.y};
+    sh.placement.shift = (bb.second + bb.first) / 2;
+    sh.layer = poly.layer;
+    return sh;
+}
+
+void ImpPackage::handle_convert_to_pad()
+{
+    auto sel = canvas->get_selection();
+
+    std::set<const Polygon *> polys;
+    for (const auto &it : sel) {
+        if (any_of(it.type, {ObjectType::POLYGON_ARC_CENTER, ObjectType::POLYGON_VERTEX, ObjectType::POLYGON_EDGE})) {
+            const auto &poly = *core_package.get_polygon(it.uuid);
+            if (any_of<int>(poly.layer, {BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER, BoardLayers::TOP_PASTE,
+                                         BoardLayers::BOTTOM_PASTE, BoardLayers::TOP_MASK, BoardLayers::BOTTOM_MASK}))
+                polys.insert(&poly);
+        }
+    }
+    if (polys.size() == 0)
+        return;
+
+    Padstack new_ps(UUID::random());
+
+    Dialogs dias;
+    dias.set_parent(main_window);
+    if (auto r = dias.ask_datum_string("Enter padstack name", "Pad"))
+        new_ps.name = *r;
+    else
+        return;
+
+    BBoxAccumulator<int64_t> bb_acc;
+    for (auto poly : polys) {
+        bb_acc.accumulate(poly->get_bbox());
+    }
+    auto bb = bb_acc.get();
+    const auto center = (bb.first + bb.second) / 2;
+
+    for (auto poly : polys) {
+        if (auto sh = polygon_to_shape(*poly)) {
+            sh->placement.shift -= center;
+            new_ps.shapes.emplace(sh->uuid, *sh);
+        }
+        else {
+            auto &newpoly = new_ps.polygons.emplace(UUID::random(), *poly).first->second;
+            for (auto &v : newpoly.vertices) {
+                v.position -= center;
+                v.arc_center -= center;
+            }
+        }
+    }
+
+    {
+        GtkFileChooserNative *native = gtk_file_chooser_native_new("Save Padstack", GTK_WINDOW(main_window->gobj()),
+                                                                   GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
+        auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+        chooser->set_do_overwrite_confirmation(true);
+
+        const auto padstack_directory =
+                Glib::build_filename(Glib::path_get_dirname(core_package.get_filename()), "padstacks");
+        chooser->set_current_folder(padstack_directory);
+
+        chooser->set_current_name("pad.json");
+
+        std::string filename;
+        const auto success = run_native_filechooser_with_retry(
+                chooser, "Error saving padstack", [this, chooser, &filename, &padstack_directory, &new_ps] {
+                    filename = append_dot_json(chooser->get_filename());
+                    if (!Gio::File::create_for_path(filename)->has_prefix(
+                                Gio::File::create_for_path(padstack_directory)))
+                        throw std::runtime_error("package-local padstack must be in " + padstack_directory);
+
+                    pool->check_filename_throw(ObjectType::PADSTACK, filename);
+                    save_json_to_file(filename, new_ps.serialize());
+                });
+        if (success) {
+            {
+                json j;
+                j["op"] = "update-pool";
+                j["filenames"] = {filename};
+                send_json(j);
+            }
+            converted_padstack = new_ps.uuid;
+            converted_polygons.clear();
+            for (const auto &it : polys) {
+                converted_polygons.insert(it->uuid);
+            }
+            converted_pad_position = center;
+        }
+    }
+}
+
+bool ImpPackage::handle_broadcast(const json &j)
+{
+    if (ImpBase::handle_broadcast(j))
+        return true;
+
+    const auto op = j.at("op").get<std::string>();
+    if (op == "pool-updated") {
+        const auto path = j.at("path").get<std::string>();
+        if (Gio::File::create_for_path(core_package.get_filename())->has_prefix(Gio::File::create_for_path(path))) {
+            if (converted_padstack) {
+                if (core_package.tool_is_active())
+                    return true;
+                const Padstack *padstack = nullptr;
+                try {
+                    padstack = pool->get_padstack(converted_padstack);
+                }
+                catch (...) {
+                    Logger::log_warning("converted padstack not found");
+                    return true;
+                }
+                auto &pkg = core_package.get_package();
+                for (const auto &it : converted_polygons) {
+                    pkg.polygons.erase(it);
+                }
+                {
+                    auto uu = UUID::random();
+                    auto &pad = pkg.pads.emplace(uu, Pad(uu, padstack)).first->second;
+                    pad.placement.shift = converted_pad_position;
+                    for (auto &p : padstack->parameters_required) {
+                        pad.parameter_set[p] = padstack->parameter_set.at(p);
+                    }
+                    if (pkg.pads.size() == 1) { // first pad
+                        pad.name = "1";
+                    }
+                    else {
+                        int max_name = pkg.get_max_pad_name();
+                        if (max_name > 0) {
+                            pad.name = std::to_string(max_name + 1);
+                        }
+                    }
+                    canvas->set_selection({SelectableRef{uu, ObjectType::PAD}});
+                }
+                converted_padstack = UUID();
+                core_package.rebuild("Convert to pad");
+                canvas_update();
+                core_package.set_needs_save();
+            }
+        }
+        return true;
+    }
+    return false;
+}
 
 void ImpPackage::update_highlights()
 {
