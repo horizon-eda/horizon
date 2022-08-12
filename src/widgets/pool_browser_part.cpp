@@ -48,7 +48,7 @@ void PoolBrowserPart::set_MPN(const std::string &s)
 void PoolBrowserPart::set_entity_uuid(const UUID &uu)
 {
     entity_uuid = uu;
-    search();
+    clear_search_once();
 }
 
 void PoolBrowserPart::set_include_base_parts(bool v)

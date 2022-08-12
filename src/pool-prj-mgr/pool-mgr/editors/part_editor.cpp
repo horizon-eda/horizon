@@ -891,6 +891,7 @@ void PartEditor::copy_from_other_part()
     PoolBrowserDialog dia(top, ObjectType::PART, pool);
     auto &br = dynamic_cast<PoolBrowserPart &>(dia.get_browser());
     br.set_entity_uuid(part.entity->uuid);
+    br.search();
     if (dia.run() == Gtk::RESPONSE_OK) {
         auto uu = br.get_selected();
         auto other_part = pool.get_part(uu);

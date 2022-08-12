@@ -376,6 +376,8 @@ std::optional<UUID> Dialogs::select_part(IPool &pool, const UUID &entity_uuid, c
     auto &br = dynamic_cast<PoolBrowserPart &>(dia.get_browser());
     br.set_show_none(show_none);
     br.set_entity_uuid(entity_uuid);
+    if (entity_uuid)
+        br.search();
     if (part_uuid) {
         auto part = pool.get_part(part_uuid);
         br.set_MPN(part->get_MPN());
