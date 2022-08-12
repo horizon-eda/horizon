@@ -96,13 +96,21 @@ std::string ProjectPool::get_filename(ObjectType type, const UUID &uu, UUID *poo
             src->copy(dst);
         }
 
-        SQLite::Query q(db, "UPDATE " + type_names.at(type)
-                                    + " SET filename = ?, pool_uuid = ?, last_pool_uuid = ? WHERE uuid = ?");
-        q.bind(1, dest);
-        q.bind(2, pool_info.uuid);
-        q.bind(3, item_pool_uuid);
-        q.bind(4, uu);
-        q.step();
+        {
+            SQLite::Query q(db, "UPDATE " + type_names.at(type)
+                                        + " SET filename = ?, pool_uuid = ?, last_pool_uuid = ? WHERE uuid = ?");
+            q.bind(1, dest);
+            q.bind(2, pool_info.uuid);
+            q.bind(3, item_pool_uuid);
+            q.bind(4, uu);
+            q.step();
+        }
+        {
+            // update last_updated to account for new file in pool
+            SQLite::Query q(db, "UPDATE last_updated SET time = ?");
+            q.bind_int64(1, std::filesystem::file_time_type::clock::now().time_since_epoch().count());
+            q.step();
+        }
         pool_uuid_cache[{type, uu}] = pool_info.uuid;
 
         if (pool_uuid_out)
