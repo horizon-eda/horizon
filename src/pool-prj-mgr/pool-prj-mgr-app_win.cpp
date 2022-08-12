@@ -463,6 +463,13 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
         part_browser_window->placed_part(part);
     }
     else if (op == "show-browser") {
+        part_browser_window->set_entity({}, "");
+        part_browser_window->present(timestamp);
+        part_browser_window->focus_search();
+    }
+    else if (op == "show-browser-assign") {
+        const UUID entity_uuid = j.at("entity").get<std::string>();
+        part_browser_window->set_entity(entity_uuid, j.at("hint").get<std::string>());
         part_browser_window->present(timestamp);
         part_browser_window->focus_search();
     }

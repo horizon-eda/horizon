@@ -444,6 +444,11 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
 
         {{ActionID::TOOL, ToolID::ASSIGN_PART},
          {"Assign part", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_NO_POPOVER | ActionCatalogItem::FLAGS_NO_MENU
+                  | ActionCatalogItem::FLAGS_NO_PREFERENCES}},
+
+        {{ActionID::TOOL, ToolID::CLEAR_PART},
+         {"Clear part", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::EDIT_SCHEMATIC_PROPERTIES},
@@ -1092,6 +1097,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::CONVERT_TO_PAD, ToolID::NONE},
          {"Convert to pad", ActionGroup::PACKAGE, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
           ActionCatalogItem::FLAGS_SPECIFIC}},
+
+        {{ActionID::ASSIGN_PART, ToolID::NONE},
+         {"Assign part", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_SPECIFIC}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1247,6 +1256,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(CYCLE_LAYER_DISPLAY_MODE),
         ACTION_LUT_ITEM(OPEN_PROJECT),
         ACTION_LUT_ITEM(CONVERT_TO_PAD),
+        ACTION_LUT_ITEM(ASSIGN_PART),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \
@@ -1291,6 +1301,7 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(PLACE_PAD),
         TOOL_LUT_ITEM(PASTE),
         TOOL_LUT_ITEM(ASSIGN_PART),
+        TOOL_LUT_ITEM(CLEAR_PART),
         TOOL_LUT_ITEM(MAP_PACKAGE),
         TOOL_LUT_ITEM(DRAW_TRACK),
         TOOL_LUT_ITEM(PLACE_VIA),
