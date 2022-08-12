@@ -126,5 +126,6 @@ enum class ActionID {
     CYCLE_LAYER_DISPLAY_MODE,
     OPEN_PROJECT,
     CONVERT_TO_PAD,
+    ASSIGN_PART,
 };
 }

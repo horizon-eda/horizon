@@ -611,6 +611,41 @@ void ImpSchematic::construct()
             this->send_json(j);
         }
     });
+    connect_action(ActionID::ASSIGN_PART, [this](const auto &a) {
+        const auto sel = canvas->get_selection();
+
+        if (!sockets_connected) {
+            this->tool_begin(ToolID::ASSIGN_PART);
+        }
+        else if (auto entity = entity_from_selection(sel)) {
+            canvas->set_selection_mode(CanvasGL::SelectionMode::NORMAL);
+            handle_selection_cross_probe();
+            std::set<const Component *> components;
+            const auto &sheet = *core_schematic.get_sheet();
+            for (const auto &it : sel) {
+                if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
+                    if (sheet.symbols.count(it.uuid))
+                        components.insert(sheet.symbols.at(it.uuid).component);
+                }
+            }
+            std::string hint;
+            for (const auto comp : components) {
+                if (hint.size())
+                    hint += ", ";
+                hint += core_schematic.get_top_block()
+                                ->get_component_info(*comp, core_schematic.get_instance_path())
+                                .refdes;
+            }
+            hint = "Assigning to " + hint;
+            json j;
+            j["op"] = "show-browser-assign";
+            j["time"] = gtk_get_current_event_time();
+            j["entity"] = (std::string)entity->uuid;
+            j["hint"] = hint;
+            allow_set_foreground_window(mgr_pid);
+            this->send_json(j);
+        }
+    });
 
     connect_action(ActionID::PREV_SHEET, sigc::mem_fun(*this, &ImpSchematic::handle_next_prev_sheet));
     connect_action(ActionID::NEXT_SHEET, sigc::mem_fun(*this, &ImpSchematic::handle_next_prev_sheet));
@@ -900,9 +935,33 @@ ActionButton &ImpSchematic::add_action_button_schematic(ActionToolID id)
     return b;
 }
 
+const Entity *ImpSchematic::entity_from_selection(const std::set<SelectableRef> &sel)
+{
+    if (core_schematic.get_block_symbol_mode())
+        return nullptr;
+    const Entity *entity = nullptr;
+    const auto &sheet = *core_schematic.get_sheet();
+    for (const auto &it : sel) {
+        if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
+            if (!sheet.symbols.count(it.uuid))
+                continue;
+            const auto &sym = sheet.symbols.at(it.uuid);
+            if (entity) {
+                if (entity != sym.component->entity) {
+                    return nullptr;
+                }
+            }
+            else {
+                entity = sym.component->entity;
+            }
+        }
+    }
+    return entity;
+}
+
 void ImpSchematic::update_action_sensitivity()
 {
-    auto sel = canvas->get_selection();
+    const auto sel = canvas->get_selection();
     const auto n_block_sym = sel_count_type(sel, ObjectType::SCHEMATIC_BLOCK_SYMBOL);
     if (sockets_connected) {
         json req;
@@ -977,6 +1036,9 @@ void ImpSchematic::update_action_sensitivity()
     set_action_sensitive(ActionID::EDIT_BLOCK_SYMBOL, have_block_sym);
     set_action_sensitive(ActionID::POP_OUT_OF_BLOCK, core_schematic.get_instance_path().size());
     set_action_sensitive(ActionID::GO_TO_BLOCK_SYMBOL, !core_schematic.current_block_is_top());
+
+    set_action_sensitive(ActionID::ASSIGN_PART, entity_from_selection(sel));
+
     ImpBase::update_action_sensitivity();
 }
 

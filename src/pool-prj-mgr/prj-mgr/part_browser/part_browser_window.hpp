@@ -41,6 +41,7 @@ public:
     void set_pool_cache_status(const class PoolCacheStatus &st);
     void focus_search();
     void pool_updated(const std::string &bp);
+    void set_entity(const UUID &uu, const std::string &hint);
 
 private:
     Gtk::Menu *add_search_menu = nullptr;
@@ -62,6 +63,7 @@ private:
     void handle_favorites_activated(Gtk::ListBoxRow *row);
     void handle_place_part();
     void handle_assign_part();
+    void handle_activate_part();
     sigc::connection fav_toggled_conn;
     std::set<Gtk::Widget *> search_views;
     Pool pool;
@@ -81,6 +83,10 @@ private:
 
     WindowStateStore state_store;
     std::optional<PanedStateStore> paned_state_store;
+
+    Gtk::InfoBar *entity_info_bar = nullptr;
+    Gtk::Label *entity_label = nullptr;
+    UUID entity_uuid;
 
     sigc::connection pool_updated_conn;
     bool needs_reload = false;

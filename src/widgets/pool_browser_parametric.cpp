@@ -389,6 +389,9 @@ void PoolBrowserParametric::search()
     if (packages.size()) {
         qs += " AND packages.name IN " + get_in("_package", packages.size());
     }
+    if (entity_uuid) {
+        qs += " AND parts.entity = $entity";
+    }
     for (const auto &it : filters_applied) {
         if (it.first.at(0) != '_') {
             if (it.second.size()) {
@@ -401,6 +404,8 @@ void PoolBrowserParametric::search()
     SQLite::Query q(pool_parametric.db, qs);
     bind_set(q, "_manufacturer", manufacturers);
     bind_set(q, "_package", packages);
+    if (entity_uuid)
+        q.bind("$entity", entity_uuid);
     bind_pool_selector_query(q);
     if (similar_part_uuid) {
         q.bind("$similar_part", similar_part_uuid);
@@ -468,6 +473,11 @@ void PoolBrowserParametric::update_filters()
     }
 }
 
+void PoolBrowserParametric::set_entity_uuid(const UUID &uu)
+{
+    entity_uuid = uu;
+    clear_search_once();
+}
 
 class PoolBrowserParametric::FilterAppliedLabel : public Gtk::Box {
 public:

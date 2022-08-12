@@ -39,7 +39,10 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
     x->get_widget("lb_favorites", lb_favorites);
     x->get_widget("lb_recent", lb_recent);
     x->get_widget("out_of_date_info_bar", out_of_date_info_bar);
+    x->get_widget("entity_label", entity_label);
+    x->get_widget("entity_info_bar", entity_info_bar);
     info_bar_hide(out_of_date_info_bar);
+    info_bar_hide(entity_info_bar);
 
     lb_favorites->set_header_func(sigc::ptr_fun(header_fun));
     lb_recent->set_header_func(sigc::ptr_fun(header_fun));
@@ -105,6 +108,8 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
 
     notebook->signal_switch_page().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_switch_page));
 
+    entity_info_bar->signal_response().connect([this](auto r) { set_entity({}, ""); });
+
     {
         Gtk::Paned *paned;
         GET_WIDGET(paned);
@@ -158,19 +163,31 @@ void PartBrowserWindow::handle_favorites_selected(Gtk::ListBoxRow *row)
 
 void PartBrowserWindow::handle_favorites_activated(Gtk::ListBoxRow *row)
 {
-    handle_place_part();
+    handle_activate_part();
 }
 
 void PartBrowserWindow::handle_place_part()
 {
-    if (part_current)
+    if (part_current) {
         s_signal_place_part.emit(part_current);
+        set_entity(entity_uuid, ""); // clear hint
+    }
 }
 
 void PartBrowserWindow::handle_assign_part()
 {
-    if (part_current)
+    if (part_current) {
         s_signal_assign_part.emit(part_current);
+        set_entity(entity_uuid, ""); // clear hint
+    }
+}
+
+void PartBrowserWindow::handle_activate_part()
+{
+    if (entity_uuid)
+        handle_assign_part();
+    else
+        handle_place_part();
 }
 
 void PartBrowserWindow::handle_fav_toggled()
@@ -393,6 +410,7 @@ PoolBrowserPart *PartBrowserWindow::add_search(const UUID &part)
 {
     auto ch = Gtk::manage(new PoolBrowserPart(pool, UUID(), "part_browser"));
     ch->set_include_base_parts(false);
+    ch->set_entity_uuid(entity_uuid);
     if (auto prv = StockInfoProvider::create(pool.get_base_path())) {
         ch->add_stock_info_provider(std::move(prv));
     }
@@ -413,7 +431,7 @@ PoolBrowserPart *PartBrowserWindow::add_search(const UUID &part)
 
     search_views.insert(ch);
     ch->signal_selected().connect(sigc::mem_fun(*this, &PartBrowserWindow::update_part_current));
-    ch->signal_activated().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_place_part));
+    ch->signal_activated().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_activate_part));
     if (part)
         ch->go_to(part);
     ch->focus_search();
@@ -427,6 +445,7 @@ PoolBrowserParametric *PartBrowserWindow::add_search_parametric(const std::strin
         ch->add_stock_info_provider(std::move(prv));
     }
     ch->add_copy_name_context_menu_item();
+    ch->set_entity_uuid(entity_uuid);
     ch->get_style_context()->add_class("background");
     auto tab_label = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0));
     auto la = Gtk::manage(new Gtk::Label(pool_parametric.get_tables().at(table_name).display_name));
@@ -444,7 +463,7 @@ PoolBrowserParametric *PartBrowserWindow::add_search_parametric(const std::strin
 
     search_views.insert(ch);
     ch->signal_selected().connect(sigc::mem_fun(*this, &PartBrowserWindow::update_part_current));
-    ch->signal_activated().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_place_part));
+    ch->signal_activated().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_activate_part));
 
     return ch;
 }
@@ -454,6 +473,37 @@ void PartBrowserWindow::focus_search()
     auto page = notebook->get_nth_page(notebook->get_current_page());
     if (auto br = dynamic_cast<PoolBrowserPart *>(page)) {
         br->focus_search();
+    }
+}
+
+void PartBrowserWindow::set_entity(const UUID &uu, const std::string &hint)
+{
+    entity_uuid = uu;
+    if (entity_uuid) {
+        auto entity = pool.get_entity(entity_uuid);
+        std::string label = "Only showing parts for Entity “" + entity->name + "”";
+        if (hint.size())
+            label += ", " + hint;
+        entity_label->set_text(label);
+        info_bar_show(entity_info_bar);
+        place_part_button->get_style_context()->remove_class("suggested-action");
+        assign_part_button->get_style_context()->add_class("suggested-action");
+    }
+    else {
+        info_bar_hide(entity_info_bar);
+        assign_part_button->get_style_context()->remove_class("suggested-action");
+        place_part_button->get_style_context()->add_class("suggested-action");
+    }
+    for (auto page : notebook->get_children()) {
+        if (auto ch = dynamic_cast<PoolBrowserPart *>(page)) {
+            ch->set_entity_uuid(entity_uuid);
+        }
+        else if (auto ch_para = dynamic_cast<PoolBrowserParametric *>(page)) {
+            ch_para->set_entity_uuid(entity_uuid);
+        }
+    }
+    if (auto ch = dynamic_cast<PoolBrowser *>(notebook->get_nth_page(notebook->get_current_page()))) {
+        ch->search_once();
     }
 }
 

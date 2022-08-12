@@ -17,6 +17,7 @@ public:
     }
     void add_copy_name_context_menu_item() override;
     void set_similar_part_uuid(const UUID &uu);
+    void set_entity_uuid(const UUID &uu);
     void filter_similar(const UUID &uu, float tol = .1);
 
 protected:
@@ -32,6 +33,7 @@ private:
     const PoolParametric::Table &table;
     std::map<std::string, std::reference_wrapper<const PoolParametric::Column>> columns;
     UUID similar_part_uuid;
+    UUID entity_uuid;
 
     class ListColumns : public Gtk::TreeModelColumnRecord {
     public:

@@ -3,6 +3,7 @@
 #include "tools/tool_add_part.hpp"
 #include "tools/tool_add_vertex.hpp"
 #include "tools/tool_assign_part.hpp"
+#include "tools/tool_clear_part.hpp"
 #include "tools/tool_bend_line_net.hpp"
 #include "tools/tool_delete.hpp"
 #include "tools/tool_disconnect.hpp"
@@ -213,6 +214,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::ASSIGN_PART:
         return std::make_unique<ToolAssignPart>(this, tool_id);
+
+    case ToolID::CLEAR_PART:
+        return std::make_unique<ToolClearPart>(this, tool_id);
 
     case ToolID::MAP_PACKAGE:
         return std::make_unique<ToolMapPackage>(this, tool_id);

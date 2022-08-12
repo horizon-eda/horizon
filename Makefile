@@ -306,6 +306,7 @@ SRC_IMP = \
 	src/core/tools/tool_place_pad.cpp\
 	src/core/tools/tool_paste.cpp\
 	src/core/tools/tool_assign_part.cpp\
+	src/core/tools/tool_clear_part.cpp\
 	src/core/tools/tool_map_package.cpp\
 	src/core/tools/tool_draw_track.cpp\
 	src/core/tools/tool_place_via.cpp\

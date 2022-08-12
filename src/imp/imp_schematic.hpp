@@ -53,6 +53,7 @@ private:
     void handle_move_to_other_sheet(const ActionConnection &conn);
     void handle_highlight_group_tag(const ActionConnection &conn);
     void handle_next_prev_sheet(const ActionConnection &conn);
+    const Entity *entity_from_selection(const std::set<SelectableRef> &sel);
 
     struct ViewInfo {
         float scale;
