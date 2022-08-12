@@ -10,7 +10,6 @@
 #include <glibmm/ustring.h>
 #include <glibmm/fileutils.h>
 #include "core/tool_id.hpp"
-#include <iostream>
 
 namespace horizon {
 
@@ -191,7 +190,6 @@ void Core::redo()
 {
     if (history_current + 1 == (int)history.size())
         return;
-    std::cout << "can redo" << std::endl;
     history_current++;
     history_load(history_current);
     signal_rebuilt().emit();
