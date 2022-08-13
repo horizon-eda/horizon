@@ -6,6 +6,7 @@
 #include "export_pdf_util.hpp"
 #include "schematic/iinstancce_mapping_provider.hpp"
 #include "util/bbox_accumulator.hpp"
+#include "pool/part.hpp"
 
 namespace horizon {
 
@@ -97,6 +98,15 @@ public:
             annot->SetBorderStyle(0, 0, 0);
             annot->SetDestination(first_pages.at(path));
         }
+        for (auto &[url, number, rect] : datasheet_annotations) {
+            auto page = document.GetPage(number);
+            auto annot = page->CreateAnnotation(PoDoFo::ePdfAnnotation_Link, rect);
+            annot->SetBorderStyle(0, 0, 0);
+
+            PoDoFo::PdfAction action(PoDoFo::ePdfAction_URI, &document);
+            action.SetURI(PoDoFo::PdfString(url));
+            annot->SetAction(action);
+        }
         document.Close();
     }
 
@@ -106,6 +116,7 @@ private:
     PoDoFo::PdfFont *font = nullptr;
     std::map<UUIDVec, PoDoFo::PdfDestination> first_pages;
     std::vector<std::tuple<UUIDVec, unsigned int, PoDoFo::PdfRect>> annotations;
+    std::vector<std::tuple<std::string, unsigned int, PoDoFo::PdfRect>> datasheet_annotations;
     PoDoFo::PdfOutlines *outlines = nullptr;
     CanvasPDF canvas;
     Callback cb;
@@ -180,6 +191,22 @@ private:
                             annotations.emplace_back(
                                     uuid_vec_append(path, sheet->block_symbols.at(ir.uuid).block_instance->uuid),
                                     page->GetPageNumber() - 1, rect);
+                        }
+                    }
+                    else if (ir.type == ObjectType::SCHEMATIC_SYMBOL) {
+                        if (it.is_box()) {
+                            const auto &sym = sheet->symbols.at(ir.uuid);
+                            if (sym.component->part && sym.component->part->get_datasheet().size()) {
+                                BBoxAccumulator<float> acc;
+
+                                for (const auto &c : it.get_corners()) {
+                                    acc.accumulate(c);
+                                }
+                                const auto [a, b] = acc.get();
+                                PoDoFo::PdfRect rect(to_pt(a.x), to_pt(a.y), to_pt(b.x - a.x), to_pt(b.y - a.y));
+                                datasheet_annotations.emplace_back(sym.component->part->get_datasheet(),
+                                                                   page->GetPageNumber() - 1, rect);
+                            }
                         }
                     }
                 }
