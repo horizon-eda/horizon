@@ -18,7 +18,7 @@ LIBS=(
 	zlib1.dll\
 	libintl-8.dll\
 	libsigc-2.0-0.dll\
-	libffi-7.dll\
+	libffi-8.dll\
 	libiconv-2.dll\
 	libpcre-1.dll\
 	libpcre2-8-0.dll\
