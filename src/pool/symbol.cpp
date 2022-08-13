@@ -257,6 +257,9 @@ std::pair<Coordi, Coordi> Symbol::get_bbox(bool all) const
     for (const auto &it : junctions) {
         acc.accumulate(it.second.position);
     }
+    for (const auto &it : arcs) {
+        acc.accumulate(it.second.get_bbox());
+    }
     for (const auto &it : pins) {
         acc.accumulate(it.second.position);
     }

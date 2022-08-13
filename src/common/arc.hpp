@@ -19,6 +19,7 @@ public:
     Arc(const UUID &uu, const json &j, class ObjectProvider &obj);
     Arc(UUID uu);
     void reverse();
+    std::pair<Coordi, Coordi> get_bbox() const;
 
     UUID uuid;
     uuid_ptr<Junction> to;
