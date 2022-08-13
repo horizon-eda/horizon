@@ -1068,7 +1068,7 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::TOGGLE_PICTURES, ToolID::NONE},
          {"Toggle pictures", ActionGroup::VIEW,
           ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD | ActionCatalogItem::AVAILABLE_IN_PACKAGE,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+          ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::VIEW_ACTUAL_SIZE, ToolID::NONE},
          {"View at actual size", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE,
