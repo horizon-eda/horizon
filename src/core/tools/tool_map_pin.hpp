@@ -17,7 +17,21 @@ public:
         };
     }
 
+    class Settings : public ToolSettings {
+    public:
+        json serialize() const override;
+        void load_from_json(const json &j) override;
+        Orientation orientation = Orientation::RIGHT;
+    };
+
+    ToolSettings *get_settings() override
+    {
+        return &settings;
+    }
+
 private:
+    Settings settings;
+
     std::vector<std::pair<const class Pin *, bool>> pins;
     std::optional<UUID> map_pin_dialog();
     unsigned int pin_index = 0;

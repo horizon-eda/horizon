@@ -6,6 +6,7 @@
 #include "util/util.hpp"
 #include "util/geom_util.hpp"
 #include "canvas/canvas_gl.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 
@@ -14,19 +15,27 @@ bool ToolMapPin::can_begin()
     return doc.y;
 }
 
+json ToolMapPin::Settings::serialize() const
+{
+    json j;
+    j["orientation"] = orientation_lut.lookup_reverse(orientation);
+    return j;
+}
+
+void ToolMapPin::Settings::load_from_json(const json &j)
+{
+    orientation = orientation_lut.lookup(j.value("orientation", ""), Orientation::RIGHT);
+}
+
 void ToolMapPin::create_pin(const UUID &uu)
 {
-    auto orientation = Orientation::RIGHT;
-    if (pin) {
-        orientation = pin->orientation;
-    }
     pin_last2 = pin_last;
     pin_last = pin;
 
     pin = &doc.y->insert_symbol_pin(uu);
     pin->length = 2.5_mm;
     pin->name = doc.y->get_symbol().unit->pins.at(uu).primary_name;
-    pin->orientation = orientation;
+    pin->orientation = settings.orientation;
     update_annotation();
 }
 
@@ -222,6 +231,7 @@ ToolResponse ToolMapPin::update(const ToolArgs &args)
         case InToolActionID::MIRROR:
             pin->orientation =
                     ToolHelperMove::transform_orientation(pin->orientation, args.action == InToolActionID::ROTATE);
+            settings.orientation = pin->orientation;
             break;
 
         default:;
