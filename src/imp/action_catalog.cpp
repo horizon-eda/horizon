@@ -1101,6 +1101,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::ASSIGN_PART, ToolID::NONE},
          {"Assign part", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_SPECIFIC}},
+
+        {{ActionID::TOGGLE_SNAP_TO_PAD_BBOX, ToolID::NONE},
+         {"Toggle snap to pad corners", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1257,6 +1261,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(OPEN_PROJECT),
         ACTION_LUT_ITEM(CONVERT_TO_PAD),
         ACTION_LUT_ITEM(ASSIGN_PART),
+        ACTION_LUT_ITEM(TOGGLE_SNAP_TO_PAD_BBOX),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

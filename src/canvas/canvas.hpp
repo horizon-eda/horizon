@@ -73,6 +73,8 @@ public:
     bool show_text_in_tracks = false;
     bool show_text_in_vias = false;
 
+    bool add_pad_bbox_targets = false;
+
     virtual bool get_flip_view() const
     {
         return false;

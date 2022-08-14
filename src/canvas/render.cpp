@@ -1402,11 +1402,21 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed, bool omi
         for (const auto &[pad_uuid, pad] : pkg.pads) {
             transform_save();
             transform.accumulate(pad.placement);
-            auto bb = pad.padstack.get_bbox();
+            const auto bb = pad.padstack.get_bbox();
             const auto layer = get_layer_for_padstack_type(pad.padstack.type);
             selectables.append(pad.uuid, ObjectType::PAD, {0, 0}, bb.first, bb.second, 0, layer);
             transform_restore();
             targets.emplace_back(pad.uuid, ObjectType::PAD, pad.placement.shift, 0, layer);
+            if (add_pad_bbox_targets) {
+                const auto bb_cu = pad.padstack.get_bbox(true);
+                size_t i = 1;
+                for (const auto x : {bb_cu.first.x, bb_cu.second.x}) {
+                    for (const auto y : {bb_cu.first.y, bb_cu.second.y}) {
+                        targets.emplace_back(pad.uuid, ObjectType::PAD, pad.placement.transform(Coordi(x, y)), i++,
+                                             layer);
+                    }
+                }
+            }
         }
         for (const auto &it : pkg.warnings) {
             render(it);

@@ -127,5 +127,6 @@ enum class ActionID {
     OPEN_PROJECT,
     CONVERT_TO_PAD,
     ASSIGN_PART,
+    TOGGLE_SNAP_TO_PAD_BBOX,
 };
 }

@@ -321,6 +321,24 @@ void ImpPackage::construct()
     view_options_menu_append_action("Bottom view", "win.bottom_view");
     view_options_menu_append_action("3D projection", "win.show_projection");
 
+    snap_to_pad_bbox_action = main_window->add_action_bool("snap_to_pad_bbox", false);
+    snap_to_pad_bbox_action->signal_change_state().connect([this](const Glib::VariantBase &v) {
+        auto b = Glib::VariantBase::cast_dynamic<Glib::Variant<bool>>(v).get();
+        if (b != canvas->add_pad_bbox_targets) {
+            trigger_action(ActionID::TOGGLE_SNAP_TO_PAD_BBOX);
+        }
+    });
+
+    view_options_menu_append_action("Snap to pad corners", "win.snap_to_pad_bbox");
+
+    connect_action(ActionID::TOGGLE_SNAP_TO_PAD_BBOX, [this](const auto &a) {
+        canvas->add_pad_bbox_targets = !canvas->add_pad_bbox_targets;
+        g_simple_action_set_state(snap_to_pad_bbox_action->gobj(), g_variant_new_boolean(canvas->add_pad_bbox_targets));
+        update_view_hints();
+        canvas_update_from_pp();
+    });
+
+
     add_view_angle_actions();
 
     connect_action(ActionID::FOOTPRINT_GENERATOR, [this](auto &a) {

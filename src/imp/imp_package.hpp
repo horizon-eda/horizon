@@ -76,6 +76,8 @@ private:
     std::vector<Coordi> projection_targets;
     Glib::RefPtr<Gio::SimpleAction> show_projection_action;
 
+    Glib::RefPtr<Gio::SimpleAction> snap_to_pad_bbox_action;
+
     std::string ask_3d_model_filename(const std::string &current_filename = "");
     void construct_3d();
     void update_model_editors();
