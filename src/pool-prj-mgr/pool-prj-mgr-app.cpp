@@ -102,6 +102,8 @@ void PoolProjectManagerApplication::UserConfig::load(const std::string &filename
     pool_doc_info_bar_dismissed = j.value("pool_doc_info_bar_dismissed", false);
     project_base_path = j.value("project_base_path", "");
     project_author = j.value("project_author", "");
+    if (j.count("project_pool"))
+        project_pool = j.at("project_pool").get<std::string>();
     if (j.count("recent")) {
         const json &o = j["recent"];
         for (const auto &[fn, v] : o.items()) {
@@ -127,6 +129,7 @@ void PoolProjectManagerApplication::UserConfig::save(const std::string &filename
     j["project_author"] = project_author;
     j["project_base_path"] = project_base_path;
     j["pool_doc_info_bar_dismissed"] = pool_doc_info_bar_dismissed;
+    j["project_pool"] = (std::string)project_pool;
     save_json_to_file(filename, j);
 }
 

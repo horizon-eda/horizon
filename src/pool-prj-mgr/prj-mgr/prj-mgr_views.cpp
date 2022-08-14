@@ -56,6 +56,8 @@ void PoolProjectManagerViewCreateProject::populate_pool_combo()
             project_pool_combo->append((std::string)it.second.uuid, it.second.name);
     }
     project_pool_combo->set_active(0);
+    if (win.app.user_config.project_pool)
+        project_pool_combo->set_active_id((std::string)win.app.user_config.project_pool);
 }
 
 std::optional<std::string> PoolProjectManagerViewCreateProject::create()
@@ -70,6 +72,7 @@ std::optional<std::string> PoolProjectManagerViewCreateProject::create()
             throw std::runtime_error("pool not found");
         win.app.user_config.project_author = meta_values.at("author");
         win.app.user_config.project_base_path = base_path;
+        win.app.user_config.project_pool = pool_uuid;
         return prj.create(meta_values, *pool);
     }
     catch (const std::exception &e) {

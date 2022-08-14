@@ -38,6 +38,7 @@ public:
         bool pool_doc_info_bar_dismissed = false;
         std::string project_author;
         std::string project_base_path;
+        UUID project_pool;
     };
 
     UserConfig user_config;
