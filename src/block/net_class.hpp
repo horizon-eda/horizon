@@ -11,7 +11,6 @@ public:
     NetClass(const UUID &uu);
     UUID uuid;
     std::string name;
-    bool is_default = false;
     UUID get_uuid() const;
 
     json serialize() const;
