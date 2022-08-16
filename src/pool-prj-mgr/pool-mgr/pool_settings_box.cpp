@@ -189,6 +189,9 @@ PoolListItem::PoolListItem(const UUID &uu, bool avail)
         if (pool)
             base_path = pool->base_path;
         la->set_xalign(0);
+        la->set_ellipsize(Pango::ELLIPSIZE_START);
+        if (pool)
+            la->set_tooltip_text(pool->base_path);
         pack_start(*la, true, true, 0);
         la->show();
     }
