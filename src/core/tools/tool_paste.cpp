@@ -243,6 +243,13 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
                     it_conn.second.net = &block->nets.at(net_xlat.at(it_conn.second.net.uuid));
             }
             block->components.emplace(u, comp);
+            if (comp.group && !block->group_names.count(comp.group)) {
+                block->group_names.emplace(comp.group,
+                                           j.at("group_names").at((std::string)comp.group).get<std::string>());
+            }
+            if (comp.tag && !block->tag_names.count(comp.tag)) {
+                block->tag_names.emplace(comp.tag, j.at("tag_names").at((std::string)comp.tag).get<std::string>());
+            }
         }
     }
     std::map<UUID, const UUID> symbol_xlat;

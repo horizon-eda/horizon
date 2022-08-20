@@ -113,10 +113,14 @@ void ClipboardSchematic::serialize(json &j)
     j["bus_rippers"] = json::object();
     j["block_instances"] = json::object();
     j["block_symbols"] = json::object();
+    j["group_names"] = json::object();
+    j["tag_names"] = json::object();
 
     const auto &bl = *doc.get_current_block();
 
     std::set<UUID> nets;
+    std::set<UUID> groups;
+    std::set<UUID> tags;
     std::map<UUID, const LineNet *> net_lines;
     std::map<UUID, const SchematicSymbol *> symbols;
     std::map<UUID, const BusRipper *> bus_rippers;
@@ -178,6 +182,10 @@ void ClipboardSchematic::serialize(json &j)
                 }
                 return true;
             });
+            if (comp.tag)
+                tags.insert(comp.tag);
+            if (comp.group)
+                groups.insert(comp.group);
             j["components"][(std::string)it.uuid] = comp.serialize();
         } break;
 
@@ -279,6 +287,15 @@ void ClipboardSchematic::serialize(json &j)
 
         default:;
         }
+    }
+
+    for (const auto &it : groups) {
+        if (bl.group_names.count(it))
+            j["group_names"][(std::string)it] = bl.group_names.at(it);
+    }
+    for (const auto &it : tags) {
+        if (bl.tag_names.count(it))
+            j["tag_names"][(std::string)it] = bl.tag_names.at(it);
     }
 }
 
