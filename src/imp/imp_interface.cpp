@@ -81,7 +81,7 @@ std::set<ObjectRef> &ImpInterface::get_highlights()
 
 void ImpInterface::tool_update_data(std::unique_ptr<ToolData> data)
 {
-    imp->tool_update_data(data);
+    imp->tool_update_data(std::move(data));
 }
 
 void ImpInterface::set_layer_display(int layer, const class LayerDisplay &ld)

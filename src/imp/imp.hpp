@@ -192,7 +192,7 @@ protected:
 
     bool read_only = false;
 
-    void tool_update_data(std::unique_ptr<ToolData> &data);
+    void tool_update_data(std::unique_ptr<ToolData> data);
 
     virtual void search_center(const Searcher::SearchResult &res);
     virtual ActionToolID get_doubleclick_action(ObjectType type, const UUID &uu);

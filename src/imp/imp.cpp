@@ -1668,7 +1668,7 @@ void ImpBase::set_read_only(bool v)
     read_only = v;
 }
 
-void ImpBase::tool_update_data(std::unique_ptr<ToolData> &data)
+void ImpBase::tool_update_data(std::unique_ptr<ToolData> data)
 {
 
     if (core->tool_is_active()) {
