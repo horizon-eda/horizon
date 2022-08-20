@@ -6,6 +6,7 @@
 #include "util/uuid_path.hpp"
 #include "util/uuid_ptr.hpp"
 #include "util/uuid_vec.hpp"
+#include "util/item_set.hpp"
 #include <map>
 #include <set>
 
@@ -91,6 +92,8 @@ public:
     Pin::Direction get_effective_direction(const UUIDPath<2> &path) const;
 
     std::string replace_text(const std::string &t, bool *replaced = nullptr) const;
+
+    ItemSet get_pool_items_used() const;
 
     json serialize() const;
     virtual ~Component()

@@ -238,6 +238,22 @@ const std::string &Component::get_prefix() const
         return entity->prefix;
 }
 
+ItemSet Component::get_pool_items_used() const
+{
+    ItemSet items_needed;
+
+    items_needed.emplace(ObjectType::ENTITY, entity->uuid);
+    for (const auto &it_gate : entity->gates) {
+        items_needed.emplace(ObjectType::UNIT, it_gate.second.unit->uuid);
+    }
+    if (part) {
+        const auto part_items = part->get_pool_items_used();
+        items_needed.insert(part_items.begin(), part_items.end());
+    }
+
+    return items_needed;
+}
+
 json Component::serialize() const
 {
     json j;

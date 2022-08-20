@@ -376,6 +376,21 @@ void Part::update_refs(IPool &pool)
     }
 }
 
+ItemSet Part::get_pool_items_used() const
+{
+    ItemSet items_needed;
+    auto part = this;
+    while (part) {
+        items_needed.emplace(ObjectType::PART, part->uuid);
+        items_needed.emplace(ObjectType::PACKAGE, part->package.uuid);
+        for (const auto &it_pad : part->package->pads) {
+            items_needed.emplace(ObjectType::PADSTACK, it_pad.second.pool_padstack->uuid);
+        }
+        part = part->base;
+    }
+    return items_needed;
+}
+
 unsigned int Part::get_required_version() const
 {
     const bool have_flags =

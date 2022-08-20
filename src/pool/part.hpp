@@ -7,6 +7,7 @@
 #include "package.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "util/file_version.hpp"
+#include "util/item_set.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -79,6 +80,8 @@ public:
     OverridePrefix override_prefix = OverridePrefix::NO;
     std::string prefix;
     const std::string &get_prefix() const;
+
+    ItemSet get_pool_items_used() const;
 
     unsigned int get_required_version() const;
 
