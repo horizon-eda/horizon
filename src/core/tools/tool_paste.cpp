@@ -199,6 +199,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
                     selection.emplace(u, ObjectType::POLYGON_ARC_CENTER, vertex);
                 selection.emplace(u, ObjectType::POLYGON_VERTEX, vertex++);
             }
+            fix_layer(x->layer);
         }
     }
     std::map<UUID, const UUID> net_xlat;
