@@ -22,10 +22,10 @@ void ClipboardBoard::expand_selection()
 
             case ObjectType::TRACK: {
                 const auto &track = brd.tracks.at(it.uuid);
-                if (track.from.is_junc() && track.to.is_junc()) {
+                if (track.from.is_junc())
                     new_sel.emplace(track.from.junc->uuid, ObjectType::JUNCTION);
+                if (track.to.is_junc())
                     new_sel.emplace(track.to.junc->uuid, ObjectType::JUNCTION);
-                }
             } break;
 
             default:;
