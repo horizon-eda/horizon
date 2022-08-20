@@ -1484,7 +1484,7 @@ void ImpBase::handle_maybe_drag(bool ctrl)
     }
 }
 
-void ImpBase::tool_process(ToolResponse &resp)
+void ImpBase::tool_process_one()
 {
     if (!core->tool_is_active()) {
         imp_interface->dialogs.close_nonmodal();
@@ -1504,6 +1504,19 @@ void ImpBase::tool_process(ToolResponse &resp)
             canvas->set_selection(core->get_tool_selection(),
                                   canvas->get_selection_mode() == CanvasGL::SelectionMode::NORMAL);
         }
+    }
+}
+
+void ImpBase::tool_process(ToolResponse &resp)
+{
+    tool_process_one();
+    while (auto args = core->get_pending_tool_args()) {
+        auto r = core->tool_update(*args);
+        if (r.next_tool != ToolID::NONE) {
+            Logger::log_critical("shouldn't have received next tool in deferred tool_update", Logger::Domain::CORE);
+            return;
+        }
+        tool_process_one();
     }
     if (resp.next_tool != ToolID::NONE) {
         clear_highlights();

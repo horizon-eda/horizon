@@ -13,12 +13,48 @@
 
 namespace horizon {
 
+Core::ToolStateSetter::ToolStateSetter(ToolState &s, ToolState target) : state(s)
+{
+    if (state != ToolState::NONE) {
+        Logger::log_critical("can't enter tool state " + tool_state_to_string(target) + " in state "
+                                     + tool_state_to_string(state),
+                             Logger::Domain::TOOL);
+        error = true;
+    }
+    else {
+        state = target;
+    }
+}
+
+std::string Core::ToolStateSetter::tool_state_to_string(ToolState s)
+{
+    switch (s) {
+    case ToolState::BEGINNING:
+        return "beginning";
+    case ToolState::UPDATING:
+        return "updating";
+    case ToolState::NONE:
+        return "none";
+    default:
+        return "??";
+    }
+}
+
+Core::ToolStateSetter::~ToolStateSetter()
+{
+    if (!error)
+        state = ToolState::NONE;
+}
+
 ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInterface *imp, bool transient)
 {
     if (tool_is_active()) {
         throw std::runtime_error("can't begin tool while tool is active");
         return ToolResponse::end();
     }
+    ToolStateSetter state_setter{tool_state, ToolState::BEGINNING};
+    if (state_setter.check_error())
+        return ToolResponse::end();
 
     update_rules(); // write rules to board, so tool has the current rules
     try {
@@ -125,8 +161,15 @@ std::pair<bool, bool> Core::tool_can_begin(ToolID tool_id, const std::set<Select
     return {r, s};
 }
 
-ToolResponse Core::tool_update(const ToolArgs &args)
+ToolResponse Core::tool_update(ToolArgs &args)
 {
+    if (tool_state != ToolState::NONE) {
+        pending_tool_args.emplace_back(std::move(args));
+        return {};
+    }
+    ToolStateSetter state_setter{tool_state, ToolState::UPDATING};
+    if (state_setter.check_error())
+        return ToolResponse::end();
     if (tool) {
         ToolResponse r;
         try {
@@ -145,6 +188,17 @@ ToolResponse Core::tool_update(const ToolArgs &args)
         return r;
     }
     return ToolResponse();
+}
+
+std::optional<ToolArgs> Core::get_pending_tool_args()
+{
+    if (tool_state != ToolState::NONE)
+        return {};
+    if (pending_tool_args.empty())
+        return {};
+    auto r = std::move(pending_tool_args.front());
+    pending_tool_args.pop_front();
+    return r;
 }
 
 void Core::rebuild(const std::string &comment)

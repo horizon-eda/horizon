@@ -334,6 +334,8 @@ private:
     InToolKeySequencesPreferences in_tool_key_sequeces_preferences;
     std::vector<ActionLabelInfo> in_tool_action_label_infos;
 
+    void tool_process_one();
+
     void show_preferences(std::optional<std::string> page = std::nullopt);
 
     void init_search();

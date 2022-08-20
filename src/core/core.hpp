@@ -72,7 +72,8 @@ public:
      */
     void rebuild(const std::string &comment);
     ToolResponse tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInterface *imp, bool transient = false);
-    ToolResponse tool_update(const ToolArgs &args);
+    ToolResponse tool_update(ToolArgs &args);
+    std::optional<ToolArgs> get_pending_tool_args();
     std::pair<bool, bool> tool_can_begin(ToolID tool_id, const std::set<SelectableRef> &selection);
     void save();
     void autosave();
@@ -184,8 +185,6 @@ protected:
     class IPool &m_pool;
     class IPool &m_pool_caching;
 
-    ToolID tool_id_current;
-    std::unique_ptr<ToolBase> tool = nullptr;
     type_signal_tool_changed s_signal_tool_changed;
     type_signal_rebuilt s_signal_rebuilt;
     type_signal_rebuilt s_signal_save;
@@ -233,5 +232,27 @@ private:
     std::set<SelectableRef> tool_selection;
     void maybe_end_tool(const ToolResponse &r);
     virtual void rebuild_internal(bool from_undo, const std::string &comment) = 0;
+
+    ToolID tool_id_current;
+    std::unique_ptr<ToolBase> tool = nullptr;
+    enum class ToolState { NONE, BEGINNING, UPDATING };
+    ToolState tool_state = ToolState::NONE;
+
+    std::list<ToolArgs> pending_tool_args;
+
+    class ToolStateSetter {
+    public:
+        ToolStateSetter(ToolState &s, ToolState target);
+        bool check_error() const
+        {
+            return error;
+        }
+        ~ToolStateSetter();
+
+    private:
+        ToolState &state;
+        bool error = false;
+        static std::string tool_state_to_string(ToolState s);
+    };
 };
 } // namespace horizon
