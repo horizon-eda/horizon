@@ -160,7 +160,6 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
 {
 
     Coordi cursor_pos = j.at("cursor_pos").get<std::vector<int64_t>>();
-    printf("Core %p\n", doc.r);
     selection.clear();
     shift = cursor_pos_canvas - cursor_pos;
 
@@ -209,7 +208,7 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
             selection.emplace(u, ObjectType::JUNCTION);
         }
     }
-    if (j.count("lines")) {
+    if (j.count("lines") && doc.r->has_object_type(ObjectType::LINE)) {
         const json &o = j["lines"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
@@ -220,7 +219,7 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
             selection.emplace(u, ObjectType::LINE);
         }
     }
-    if (j.count("arcs")) {
+    if (j.count("arcs") && doc.r->has_object_type(ObjectType::ARC)) {
         const json &o = j["arcs"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
@@ -252,7 +251,7 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
             }
         }
     }
-    if (j.count("holes")) {
+    if (j.count("holes") && doc.a) {
         const json &o = j["holes"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
@@ -262,7 +261,7 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
             selection.emplace(u, ObjectType::HOLE);
         }
     }
-    if (j.count("polygons")) {
+    if (j.count("polygons") && doc.r->has_object_type(ObjectType::POLYGON)) {
         const json &o = j["polygons"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
