@@ -292,7 +292,7 @@ int PNS_HORIZON_RULE_RESOLVER::DpCoupledNet(int aNet)
 
 int PNS_HORIZON_RULE_RESOLVER::DpNetPolarity(int aNet)
 {
-    if (m_iface->get_net_for_code(aNet)->diffpair_master)
+    if (m_iface->get_net_for_code(aNet)->diffpair_primary)
         return 1;
     else
         return -1;
@@ -304,7 +304,7 @@ bool PNS_HORIZON_RULE_RESOLVER::DpNetPair(const PNS::ITEM *aItem, int &aNetP, in
         return false;
     auto net = m_iface->get_net_for_code(aItem->Net());
     if (net->diffpair) {
-        if (net->diffpair_master) {
+        if (net->diffpair_primary) {
             aNetP = m_iface->get_net_code(net->uuid);
             aNetN = m_iface->get_net_code(net->diffpair->uuid);
         }

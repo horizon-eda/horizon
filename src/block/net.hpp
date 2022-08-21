@@ -24,7 +24,7 @@ public:
 
     uuid_ptr<class NetClass> net_class;
     uuid_ptr<Net> diffpair;
-    bool diffpair_master = false;
+    bool diffpair_primary = false;
 
     bool is_port = false;
     Pin::Direction port_direction = Pin::Direction::BIDIRECTIONAL;

@@ -50,7 +50,7 @@ bool ToolSetDiffpair::can_begin()
         }
         else { // one net
             if (nets.first->diffpair)
-                return nets.first->diffpair_master;
+                return nets.first->diffpair_primary;
             else
                 return true;
         }
@@ -70,21 +70,21 @@ ToolResponse ToolSetDiffpair::begin(const ToolArgs &args)
 
     if (tool_id == ToolID::CLEAR_DIFFPAIR) {
         auto net = nets.first;
-        if (net->diffpair_master) {
+        if (net->diffpair_primary) {
             net->diffpair = nullptr;
-            net->diffpair_master = false;
+            net->diffpair_primary = false;
         }
         else {
             net->diffpair->diffpair = nullptr;
-            net->diffpair->diffpair_master = false;
+            net->diffpair->diffpair_primary = false;
         }
         return ToolResponse::end();
     }
 
     if (!nets.second) { // only one net
         auto net = nets.first;
-        if (net->diffpair && !net->diffpair_master) {
-            imp->tool_bar_flash("Net is diffpair slave");
+        if (net->diffpair && !net->diffpair_primary) {
+            imp->tool_bar_flash("Net is diffpair secondary");
             return ToolResponse::end();
         }
 
@@ -96,7 +96,7 @@ ToolResponse ToolSetDiffpair::begin(const ToolArgs &args)
                 }
                 else {
                     net->diffpair = other_net;
-                    net->diffpair_master = true;
+                    net->diffpair_primary = true;
                     return ToolResponse::commit();
                 }
             }
@@ -109,7 +109,7 @@ ToolResponse ToolSetDiffpair::begin(const ToolArgs &args)
         if (nets.first->diffpair || nets.second->diffpair) {
             imp->tool_bar_flash("Net is already diffpair already");
         }
-        nets.first->diffpair_master = true;
+        nets.first->diffpair_primary = true;
         nets.first->diffpair = nets.second;
         return ToolResponse::commit();
     }

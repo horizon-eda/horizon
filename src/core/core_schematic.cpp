@@ -220,7 +220,7 @@ bool CoreSchematic::get_property(ObjectType type, const UUID &uu, ObjectProperty
         case ObjectProperty::ID::DIFFPAIR: {
             std::string s;
             if (net.diffpair) {
-                s = (net.diffpair_master ? "Master: " : "Slave: ") + net.diffpair->name;
+                s = (net.diffpair_primary ? "Pri: " : "Sec: ") + net.diffpair->name;
             }
             else {
                 s = "None";

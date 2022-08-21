@@ -127,11 +127,11 @@ Block::Block(const UUID &uu, const json &j, IPool &pool, class IBlockProvider &p
 void Block::update_diffpairs()
 {
     for (auto &it : nets) {
-        if (!it.second.diffpair_master)
+        if (!it.second.diffpair_primary)
             it.second.diffpair = nullptr;
     }
     for (auto &it : nets) {
-        if (it.second.diffpair_master) {
+        if (it.second.diffpair_primary) {
             if (nets.count(it.second.diffpair.uuid))
                 it.second.diffpair->diffpair = &it.second;
             else

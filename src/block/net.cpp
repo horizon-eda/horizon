@@ -26,7 +26,7 @@ Net::Net(const UUID &uu, const json &j)
         UUID diffpair_uuid(j.at("diffpair").get<std::string>());
         if (diffpair_uuid) {
             diffpair.uuid = diffpair_uuid;
-            diffpair_master = true;
+            diffpair_primary = true;
         }
     }
     if (j.count("power_symbol_style"))
@@ -55,7 +55,7 @@ json Net::serialize() const
     j["net_class"] = net_class->uuid;
     j["power_symbol_name_visible"] = power_symbol_name_visible;
     j["power_symbol_style"] = power_symbol_style_lut.lookup_reverse(power_symbol_style);
-    if (diffpair_master)
+    if (diffpair_primary)
         j["diffpair"] = diffpair->uuid;
     j["is_port"] = is_port;
     j["port_direction"] = Pin::direction_lut.lookup_reverse(port_direction);
