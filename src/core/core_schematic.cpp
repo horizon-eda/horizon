@@ -17,18 +17,16 @@ namespace horizon {
 namespace fs = std::filesystem;
 
 
-CoreSchematic::CoreSchematic(const std::string &blocks_filename, const std::string &pictures_dir, IPool &pool,
-                             IPool &pool_caching)
-    : Core(pool, &pool_caching), blocks(BlocksSchematic::new_from_file(blocks_filename, pool_caching)),
+CoreSchematic::CoreSchematic(const Filenames &fns, IPool &pool, IPool &pool_caching)
+    : Core(pool, &pool_caching), blocks(BlocksSchematic::new_from_file(fns.blocks, pool_caching)),
       rules(get_top_schematic()->rules), bom_export_settings(get_top_block()->bom_export_settings),
-      pdf_export_settings(get_top_schematic()->pdf_export_settings), m_blocks_filename(blocks_filename),
-      m_pictures_dir(pictures_dir)
+      pdf_export_settings(get_top_schematic()->pdf_export_settings), filenames(fns)
 {
     block_uuid = blocks->top_block;
     sheet_uuid = get_current_schematic()->get_sheet_at_index(1).uuid;
     for (auto &[uu, block] : blocks->blocks) {
-        block.schematic.load_pictures(m_pictures_dir);
-        block.symbol.load_pictures(m_pictures_dir);
+        block.schematic.load_pictures(filenames.pictures_dir);
+        block.symbol.load_pictures(filenames.pictures_dir);
     }
     rebuild("init");
 }
@@ -1031,7 +1029,7 @@ std::pair<Coordi, Coordi> CoreSchematic::get_bbox()
 
 const std::string &CoreSchematic::get_filename() const
 {
-    return m_blocks_filename;
+    return filenames.blocks;
 }
 
 void CoreSchematic::save(const std::string &suffix)
@@ -1040,7 +1038,7 @@ void CoreSchematic::save(const std::string &suffix)
     top.schematic.rules = rules;
     top.block.bom_export_settings = bom_export_settings;
     top.schematic.pdf_export_settings = pdf_export_settings;
-    save_json_to_file(m_blocks_filename + suffix, blocks->serialize());
+    save_json_to_file(filenames.blocks + suffix, blocks->serialize());
 
     std::list<const std::map<UUID, Picture> *> pictures;
     std::list<const std::map<UUID, Picture> *> sym_pictures;
@@ -1065,25 +1063,25 @@ void CoreSchematic::save(const std::string &suffix)
         }
         sym_pictures.push_back(&block.symbol.pictures);
     }
-    pictures_save(pictures, m_pictures_dir, "sch");
-    pictures_save(sym_pictures, m_pictures_dir, "sym");
+    pictures_save(pictures, filenames.pictures_dir, "sch");
+    pictures_save(sym_pictures, filenames.pictures_dir, "sym");
 }
 
 
 void CoreSchematic::delete_autosave()
 {
-    std::vector<fs::path> filenames;
-    filenames.push_back(fs::u8path(m_blocks_filename + autosave_suffix));
+    std::vector<fs::path> autosave_filenames;
+    autosave_filenames.push_back(fs::u8path(filenames.blocks + autosave_suffix));
     const auto bp = fs::u8path(blocks->base_path);
 
     for (const auto &[uu, block] : blocks->blocks) {
-        filenames.push_back(bp / fs::u8path(block.block_filename + autosave_suffix));
-        filenames.push_back(bp / fs::u8path(block.schematic_filename + autosave_suffix));
+        autosave_filenames.push_back(bp / fs::u8path(block.block_filename + autosave_suffix));
+        autosave_filenames.push_back(bp / fs::u8path(block.schematic_filename + autosave_suffix));
         if (block.symbol_filename.size())
-            filenames.push_back(bp / fs::u8path(block.symbol_filename + autosave_suffix));
+            autosave_filenames.push_back(bp / fs::u8path(block.symbol_filename + autosave_suffix));
     }
 
-    for (const auto &path : filenames) {
+    for (const auto &path : autosave_filenames) {
         fs::remove(path);
     }
 }

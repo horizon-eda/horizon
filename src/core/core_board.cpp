@@ -45,22 +45,21 @@ static Block get_flattend_block(const std::string &blocks_filename, IPool &pool)
     return blocks.get_top_block_item().block.flatten();
 }
 
-CoreBoard::CoreBoard(const std::string &board_filename, const std::string &blocks_filename,
-                     const std::string &pictures_dir, IPool &pool, IPool &pool_caching)
-    : Core(pool, &pool_caching), block(get_flattend_block(blocks_filename, pool_caching)),
-      brd(Board::new_from_file(board_filename, *block, pool_caching)), rules(brd->rules),
+CoreBoard::CoreBoard(const Filenames &fns, IPool &pool, IPool &pool_caching)
+    : Core(pool, &pool_caching), block(get_flattend_block(fns.blocks, pool_caching)),
+      brd(Board::new_from_file(fns.board, *block, pool_caching)), rules(brd->rules),
       gerber_output_settings(brd->gerber_output_settings), odb_output_settings(brd->odb_output_settings),
       pdf_export_settings(brd->pdf_export_settings), step_export_settings(brd->step_export_settings),
       pnp_export_settings(brd->pnp_export_settings), grid_settings(brd->grid_settings), colors(brd->colors),
-      m_board_filename(board_filename), m_blocks_filename(blocks_filename), m_pictures_dir(pictures_dir)
+      filenames(fns)
 {
-    brd->load_pictures(pictures_dir);
+    brd->load_pictures(filenames.pictures_dir);
     rebuild("init");
 }
 
 void CoreBoard::reload_netlist()
 {
-    block = get_flattend_block(m_blocks_filename, m_pool_caching);
+    block = get_flattend_block(filenames.blocks, m_pool_caching);
     brd->block = &*block;
     brd->update_refs();
     for (auto it = brd->packages.begin(); it != brd->packages.end();) {
@@ -786,7 +785,7 @@ void CoreBoard::reload_pool()
     m_pool.clear();
     m_pool_caching.clear();
     block.emplace(block->uuid, block_j, m_pool_caching, NoneBlockProvider::get());
-    brd.emplace(brd->uuid, brd_j, *block, m_pool_caching, Glib::path_get_dirname(m_board_filename));
+    brd.emplace(brd->uuid, brd_j, *block, m_pool_caching, Glib::path_get_dirname(filenames.board));
     keeper.restore(brd->pictures);
     history_clear();
     rebuild("reload pool");
@@ -795,7 +794,7 @@ void CoreBoard::reload_pool()
 
 json CoreBoard::get_meta()
 {
-    return get_meta_from_file(m_board_filename);
+    return get_meta_from_file(filenames.board);
 }
 
 std::pair<Coordi, Coordi> CoreBoard::get_bbox()
@@ -805,7 +804,7 @@ std::pair<Coordi, Coordi> CoreBoard::get_bbox()
 
 const std::string &CoreBoard::get_filename() const
 {
-    return m_board_filename;
+    return filenames.board;
 }
 
 void CoreBoard::save(const std::string &suffix)
@@ -819,14 +818,14 @@ void CoreBoard::save(const std::string &suffix)
     brd->grid_settings = grid_settings;
     brd->colors = colors;
     auto j = brd->serialize();
-    save_json_to_file(m_board_filename + suffix, j);
-    brd->save_pictures(m_pictures_dir);
+    save_json_to_file(filenames.board + suffix, j);
+    brd->save_pictures(filenames.pictures_dir);
 }
 
 void CoreBoard::delete_autosave()
 {
-    if (Glib::file_test(m_board_filename + autosave_suffix, Glib::FILE_TEST_IS_REGULAR))
-        Gio::File::create_for_path(m_board_filename + autosave_suffix)->remove();
+    if (Glib::file_test(filenames.board + autosave_suffix, Glib::FILE_TEST_IS_REGULAR))
+        Gio::File::create_for_path(filenames.board + autosave_suffix)->remove();
 }
 
 } // namespace horizon

@@ -27,10 +27,9 @@
 #include "in_tool_action.hpp"
 
 namespace horizon {
-ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename,
-                   const std::string &pictures_dir, const PoolParams &pool_params)
-    : ImpLayer(pool_params), core_board(board_filename, block_filename, pictures_dir, *pool, *pool_caching),
-      project_dir(Glib::path_get_dirname(board_filename)), searcher(core_board)
+ImpBoard::ImpBoard(const CoreBoard::Filenames &filenames, const PoolParams &pool_params)
+    : ImpLayer(pool_params), core_board(filenames, *pool, *pool_caching),
+      project_dir(Glib::path_get_dirname(filenames.board)), searcher(core_board)
 {
     core = &core_board;
     core_board.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_tool_change));

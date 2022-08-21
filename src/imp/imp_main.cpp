@@ -23,11 +23,6 @@
 #include <windows.h>
 #endif
 
-using horizon::Canvas;
-using horizon::LutEnumStr;
-using horizon::UUID;
-using std::cout;
-
 using json = nlohmann::json;
 
 int main(int argc, char *argv[])
@@ -131,7 +126,7 @@ int main(int argc, char *argv[])
 
     std::unique_ptr<horizon::ImpBase> imp = nullptr;
     if (mode_sch) {
-        imp.reset(new horizon::ImpSchematic(filenames.at(0), filenames.at(1), {pool_base_path}));
+        imp.reset(new horizon::ImpSchematic(filenames, {pool_base_path}));
     }
     else if (mode_symbol) {
         imp.reset(new horizon::ImpSymbol(filenames.at(0), pool_base_path, temp_mode));
@@ -149,7 +144,7 @@ int main(int argc, char *argv[])
             imp->set_suggested_filename(filenames.at(1));
     }
     else if (mode_board) {
-        imp.reset(new horizon::ImpBoard(filenames.at(0), filenames.at(1), filenames.at(2), {pool_base_path}));
+        imp.reset(new horizon::ImpBoard(filenames, {pool_base_path}));
     }
     else if (mode_frame) {
         imp.reset(new horizon::ImpFrame(filenames.at(0), pool_base_path, temp_mode));

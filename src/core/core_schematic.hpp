@@ -13,8 +13,16 @@ class CoreSchematic : public Core,
                       public virtual IDocumentBlockSymbol,
                       public IInstanceMappingProvider {
 public:
-    CoreSchematic(const std::string &blocks_filename, const std::string &pictures_dir, IPool &pool,
-                  IPool &pool_caching);
+    class Filenames {
+    public:
+        Filenames(const std::vector<std::string> &filenames) : blocks(filenames.at(0)), pictures_dir(filenames.at(1))
+        {
+        }
+        std::string blocks;
+        std::string pictures_dir;
+    };
+
+    CoreSchematic(const Filenames &schematic_filenames, IPool &pool, IPool &pool_caching);
     bool has_object_type(ObjectType ty) const override;
 
     Schematic *get_current_schematic() override;
@@ -121,8 +129,7 @@ private:
     UUID block_uuid;
     UUIDVec instance_path;
 
-    std::string m_blocks_filename;
-    std::string m_pictures_dir;
+    Filenames filenames;
 
     class HistoryItem : public Core::HistoryItem {
     public:

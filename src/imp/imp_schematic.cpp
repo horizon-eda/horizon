@@ -21,10 +21,9 @@
 #include <iostream>
 
 namespace horizon {
-ImpSchematic::ImpSchematic(const std::string &blocks_filename, const std::string &pictures_dir,
-                           const PoolParams &pool_params)
-    : ImpBase(pool_params), core_schematic(blocks_filename, pictures_dir, *pool, *pool_caching),
-      project_dir(Glib::path_get_dirname(blocks_filename)), searcher(core_schematic)
+ImpSchematic::ImpSchematic(const CoreSchematic::Filenames &filenames, const PoolParams &pool_params)
+    : ImpBase(pool_params), core_schematic(filenames, *pool, *pool_caching),
+      project_dir(Glib::path_get_dirname(filenames.blocks)), searcher(core_schematic)
 {
     core = &core_schematic;
     core_schematic.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpSchematic::handle_tool_change));

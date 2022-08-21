@@ -9,8 +9,18 @@
 namespace horizon {
 class CoreBoard : public Core, public DocumentBoard {
 public:
-    CoreBoard(const std::string &board_filename, const std::string &blocks_filename, const std::string &pictures_dir,
-              IPool &pool, IPool &pool_caching);
+    class Filenames {
+    public:
+        Filenames(const std::vector<std::string> &filenames)
+            : board(filenames.at(0)), blocks(filenames.at(1)), pictures_dir(filenames.at(2))
+        {
+        }
+        std::string board;
+        std::string blocks;
+        std::string pictures_dir;
+    };
+
+    CoreBoard(const Filenames &filenames, IPool &pool, IPool &pool_caching);
 
     class Block *get_top_block() override;
     class LayerProvider &get_layer_provider() override;
@@ -92,9 +102,7 @@ private:
 
     BoardColors colors;
 
-    std::string m_board_filename;
-    std::string m_blocks_filename;
-    std::string m_pictures_dir;
+    Filenames filenames;
 
     class HistoryItem : public Core::HistoryItem {
     public:

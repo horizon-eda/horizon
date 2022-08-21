@@ -6,8 +6,7 @@
 namespace horizon {
 class ImpBoard : public ImpLayer {
 public:
-    ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &pictures_dir,
-             const PoolParams &params);
+    ImpBoard(const CoreBoard::Filenames &filenames, const PoolParams &params);
 
     const std::map<int, Layer> &get_layers();
 

@@ -7,7 +7,7 @@ namespace horizon {
 class ImpSchematic : public ImpBase {
 
 public:
-    ImpSchematic(const std::string &blocks_filename, const std::string &pictures_dir, const PoolParams &params);
+    ImpSchematic(const CoreSchematic::Filenames &filenames, const PoolParams &params);
 
 protected:
     void construct() override;
