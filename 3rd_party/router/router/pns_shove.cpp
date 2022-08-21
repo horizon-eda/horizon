@@ -623,11 +623,13 @@ SHOVE::SHOVE_STATUS SHOVE::onCollidingLine( LINE& aCurrent, LINE& aObstacle )
     LINE shovedLine( aObstacle );
 
     SHOVE_STATUS rv = ShoveObstacleLine( aCurrent, aObstacle, shovedLine );
-
-    Dbg()->BeginGroup( "on-colliding-line" );
-    Dbg()->AddLine( aObstacle.CLine(), RED, 100000, "obstacle-line" );
-    Dbg()->AddLine( aCurrent.CLine(), GREEN, 150000, "current-line" );
-    Dbg()->AddLine( shovedLine.CLine(), BLUE, 200000, "shoved-line" );
+    if(Dbg())
+    {
+        Dbg()->BeginGroup( "on-colliding-line" );
+        Dbg()->AddLine( aObstacle.CLine(), RED, 100000, "obstacle-line" );
+        Dbg()->AddLine( aCurrent.CLine(), GREEN, 150000, "current-line" );
+        Dbg()->AddLine( shovedLine.CLine(), BLUE, 200000, "shoved-line" );
+    }
 
     if( rv == SH_OK )
     {
