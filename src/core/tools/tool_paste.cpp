@@ -280,6 +280,7 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
         }
     }
     std::map<UUID, const UUID> net_xlat;
+    std::set<Net *> new_nets;
     if (j.count("nets") && doc.c && doc.c->get_current_block()) {
         const json &o = j["nets"];
         auto block = doc.c->get_current_block();
@@ -301,10 +302,24 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
                 net_new->is_power = net_from_json.is_power;
                 net_new->name = net_name;
                 net_new->power_symbol_style = net_from_json.power_symbol_style;
+                if (net_from_json.diffpair_primary) {
+                    net_new->diffpair_primary = true;
+                    net_new->diffpair.uuid = net_from_json.diffpair.uuid;
+                }
+                new_nets.insert(net_new);
             }
             if (net_new)
                 net_xlat.emplace(it.key(), net_new->uuid);
         }
+        for (auto net : new_nets) {
+            if (net->diffpair_primary) {
+                if (net_xlat.count(net->diffpair.uuid))
+                    net->diffpair = &block->nets.at(net_xlat.at(net->diffpair.uuid));
+                else
+                    net->diffpair_primary = false;
+            }
+        }
+        block->update_diffpairs();
     }
 
     std::map<UUID, const UUID> component_xlat;

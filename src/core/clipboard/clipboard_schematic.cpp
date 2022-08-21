@@ -231,8 +231,6 @@ void ClipboardSchematic::serialize(json &j)
 
         case ObjectType::NET: {
             auto net = bl.nets.at(it.uuid);
-            net.diffpair = nullptr;
-            net.diffpair_primary = false;
             j["nets"][(std::string)it.uuid] = net.serialize();
         } break;
 
