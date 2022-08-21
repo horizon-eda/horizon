@@ -37,6 +37,7 @@
 #include "grids_window.hpp"
 #include "widgets/msd_tuning_window.hpp"
 #include "pool/pool_manager.hpp"
+#include "core/tools/tool_data_pool_updated.hpp"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>
@@ -1638,6 +1639,13 @@ bool ImpBase::handle_broadcast(const json &j)
     else if (op == "reload-pools") {
         PoolManager::get().reload();
         return true;
+    }
+    else if (op == "pool-updated") {
+        const auto path = j.at("path").get<std::string>();
+        if (core->tool_is_active() && path == pool->get_base_path()) {
+            tool_update_data(std::make_unique<ToolDataPoolUpdated>());
+        }
+        return false; // so that derived imps can handle this as well
     }
     return false;
 }

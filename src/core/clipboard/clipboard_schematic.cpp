@@ -4,6 +4,7 @@
 #include "nlohmann/json.hpp"
 #include "util/util.hpp"
 #include "pool/entity.hpp"
+#include "pool/ipool.hpp"
 
 namespace horizon {
 
@@ -125,6 +126,7 @@ void ClipboardSchematic::serialize(json &j)
     std::map<UUID, const SchematicSymbol *> symbols;
     std::map<UUID, const BusRipper *> bus_rippers;
     std::map<UUID, const SchematicBlockSymbol *> block_symbols;
+    ItemSet pool_items_needed;
     for (const auto &it : selection) {
         switch (it.type) {
         case ObjectType::NET:
@@ -156,6 +158,10 @@ void ClipboardSchematic::serialize(json &j)
         switch (it.type) {
         case ObjectType::COMPONENT: {
             auto comp = bl.components.at(it.uuid);
+            {
+                ItemSet comp_items = comp.get_pool_items_used();
+                pool_items_needed.insert(comp_items.begin(), comp_items.end());
+            }
             comp.refdes = comp.get_prefix() + "?";
             map_erase_if(comp.connections, [&nets](auto &x) {
                 if (x.second.net == nullptr) // keep NC pins
@@ -213,9 +219,11 @@ void ClipboardSchematic::serialize(json &j)
             j["block_instances"][(std::string)it.uuid] = inst.serialize();
         } break;
 
-        case ObjectType::SCHEMATIC_SYMBOL:
-            j["symbols"][(std::string)it.uuid] = doc.get_sheet()->symbols.at(it.uuid).serialize();
-            break;
+        case ObjectType::SCHEMATIC_SYMBOL: {
+            const auto &sym = doc.get_sheet()->symbols.at(it.uuid);
+            j["symbols"][(std::string)it.uuid] = sym.serialize();
+            pool_items_needed.emplace(ObjectType::SYMBOL, sym.symbol.uuid);
+        } break;
 
         case ObjectType::SCHEMATIC_BLOCK_SYMBOL:
             j["block_symbols"][(std::string)it.uuid] = doc.get_sheet()->block_symbols.at(it.uuid).serialize();
@@ -287,6 +295,15 @@ void ClipboardSchematic::serialize(json &j)
 
         default:;
         }
+    }
+
+    j["pool_base_path"] = doc.get_pool_caching().get_base_path();
+    {
+        auto items = json::array();
+        for (const auto &[type, uu] : pool_items_needed) {
+            items.push_back({object_type_lut.lookup_reverse(type), (std::string)uu});
+        }
+        j["pool_items_needed"] = items;
     }
 
     for (const auto &it : groups) {

@@ -139,5 +139,12 @@ Coordi ImpInterface::transform_arrow_keys(const Coordi &c) const
     }
 }
 
+void ImpInterface::pool_update(const std::vector<std::string> &filenames)
+{
+    json j;
+    j["op"] = "update-pool";
+    j["filenames"] = filenames;
+    imp->send_json(j);
+}
 
 } // namespace horizon

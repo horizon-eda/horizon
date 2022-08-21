@@ -17,9 +17,12 @@
 #include "core/tool_id.hpp"
 #include "util/picture_util.hpp"
 #include "blocks/blocks_schematic.hpp"
+#include "pool/pool.hpp"
+#include <filesystem>
+#include "tool_data_pool_updated.hpp"
 
 namespace horizon {
-
+namespace fs = std::filesystem;
 ToolPaste::ToolPaste(IDocument *c, ToolID tid) : ToolBase(c, tid), ToolHelperMove(c, tid), ToolHelperMerge(c, tid)
 {
 }
@@ -82,6 +85,80 @@ public:
 
 ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canvas)
 {
+    ItemSet items_needed;
+    if (doc.c && j.count("pool_items_needed") && j.count("pool_base_path")
+        && j.at("pool_base_path").get<std::string>() != doc.r->get_pool().get_base_path()) {
+        auto &db = doc.r->get_pool().get_db();
+        db.execute("CREATE TEMP TABLE 'paste_items_needed' ('type' TEXT NOT NULL, 'uuid' TEXT NOT NULL);");
+        {
+            SQLite::Query q_insert(db, "INSERT INTO paste_items_NEEDED VALUES (?, ?)");
+            for (const auto &it : j.at("pool_items_needed")) {
+                q_insert.reset();
+                q_insert.bind(1, it.at(0).get<std::string>());
+                q_insert.bind(2, it.at(1).get<std::string>());
+                q_insert.step();
+            }
+        }
+        SQLite::Query q(db,
+                        "SELECT paste_items_needed.type, paste_items_needed.uuid FROM paste_items_needed LEFT JOIN "
+                        "all_items_view USING (uuid) WHERE "
+                        "all_items_view.uuid IS NULL");
+        while (q.step()) {
+            items_needed.emplace(object_type_lut.lookup(q.get<std::string>(0)), q.get<std::string>(1));
+        }
+        db.execute("DROP TABLE paste_items_needed");
+    }
+    if (items_needed.size()) {
+        Pool paste_pool(j.at("pool_base_path").get<std::string>());
+        for (const auto &[type, uu] : items_needed) {
+            const auto src_filename = fs::u8path(paste_pool.get_filename(type, uu));
+            const auto dest_dir = fs::u8path(doc.r->get_pool().get_base_path()) / Pool::type_names.at(type) / "cache";
+            fs::create_directories(dest_dir);
+            if (type == ObjectType::PACKAGE) {
+                const auto dest_pkg_dir = dest_dir / (((std::string)uu));
+                fs::create_directories(dest_pkg_dir);
+                fs::copy(src_filename, dest_pkg_dir / "package.json");
+            }
+            else if (type == ObjectType::PADSTACK) {
+                SQLite::Query q(paste_pool.db, "SELECT package FROM padstacks WHERE uuid = ?");
+                q.bind(1, uu);
+                if (q.step()) {
+                    const UUID package_uuid = q.get<std::string>(0);
+                    if (package_uuid) {
+                        const auto dest_padstack_dir = fs::u8path(doc.r->get_pool().get_base_path())
+                                                       / Pool::type_names.at(ObjectType::PACKAGE) / "cache"
+                                                       / (std::string)package_uuid / "padstacks";
+                        fs::create_directories(dest_padstack_dir);
+                        fs::copy(src_filename, dest_padstack_dir / (((std::string)uu) + ".json"));
+                    }
+                    else {
+                        fs::copy(src_filename, dest_dir / (((std::string)uu) + ".json"));
+                    }
+                }
+                else {
+                    throw std::runtime_error("padstack not found???");
+                }
+            }
+            else {
+                fs::copy(src_filename, dest_dir / (((std::string)uu) + ".json"));
+            }
+        }
+        imp->pool_update({});
+        pool_update_pending = true;
+        update_tip();
+        imp->tool_bar_set_actions({
+                {InToolActionID::RMB},
+        });
+        return ToolResponse();
+    }
+    else {
+        return really_begin_paste(j, cursor_pos_canvas);
+    }
+}
+
+ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_pos_canvas)
+{
+
     Coordi cursor_pos = j.at("cursor_pos").get<std::vector<int64_t>>();
     printf("Core %p\n", doc.r);
     selection.clear();
@@ -539,12 +616,6 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
         }
     }
     update_airwires();
-    return ToolResponse();
-}
-
-ToolResponse ToolPaste::begin(const ToolArgs &args)
-{
-    update_tip();
     imp->tool_bar_set_actions({
             {InToolActionID::LMB},
             {InToolActionID::RMB},
@@ -552,6 +623,12 @@ ToolResponse ToolPaste::begin(const ToolArgs &args)
             {InToolActionID::MIRROR},
             {InToolActionID::RESTRICT},
     });
+    return ToolResponse();
+}
+
+ToolResponse ToolPaste::begin(const ToolArgs &args)
+{
+    update_tip();
     if (auto data = dynamic_cast<ToolDataPaste *>(args.data.get())) {
         paste_data = data->paste_data;
         return begin_paste(paste_data, args.coords);
@@ -589,6 +666,9 @@ void ToolPaste::update_tip()
     if (paste_data == nullptr && pic == nullptr) { // wait for data
         imp->tool_bar_set_tip("waiting for paste data");
     }
+    else if (pool_update_pending) {
+        imp->tool_bar_set_tip("waiting for pool update");
+    }
     else {
         auto delta = get_delta();
         imp->tool_bar_set_tip(coord_to_string(delta, true) + " " + restrict_mode_to_string());
@@ -599,27 +679,38 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
 {
     if (paste_data == nullptr && pic == nullptr) { // wait for data
         if (args.type == ToolEventType::DATA) {
-            auto data = dynamic_cast<ToolDataPaste *>(args.data.get());
-            if (data->paste_data != nullptr) {
-                paste_data = data->paste_data;
-                return begin_paste(paste_data, args.coords);
+            if (auto data = dynamic_cast<ToolDataPaste *>(args.data.get())) {
+                if (data->paste_data != nullptr) {
+                    paste_data = data->paste_data;
+                    return begin_paste(paste_data, args.coords);
+                }
+                else if (data->pixbuf) {
+                    pic = doc.r->insert_picture(UUID::random());
+                    pic->placement.shift = args.coords;
+                    pic->data = picture_data_from_pixbuf(data->pixbuf);
+                    pic->data_uuid = pic->data->uuid;
+                    float width = 10_mm;
+                    pic->px_size = width / pic->data->width;
+                    selection.clear();
+                    selection.emplace(pic->uuid, ObjectType::PICTURE);
+                    update_tip();
+                    move_init(args.coords);
+                }
+                else {
+                    imp->tool_bar_flash("Empty Buffer");
+                    return ToolResponse::end();
+                }
             }
-            else if (data->pixbuf) {
-                pic = doc.r->insert_picture(UUID::random());
-                pic->placement.shift = args.coords;
-                pic->data = picture_data_from_pixbuf(data->pixbuf);
-                pic->data_uuid = pic->data->uuid;
-                float width = 10_mm;
-                pic->px_size = width / pic->data->width;
-                selection.clear();
-                selection.emplace(pic->uuid, ObjectType::PICTURE);
-                update_tip();
-                move_init(args.coords);
-            }
-            else {
-                imp->tool_bar_flash("Empty Buffer");
-                return ToolResponse::end();
-            }
+        }
+    }
+    else if (pool_update_pending) {
+        if (dynamic_cast<ToolDataPoolUpdated *>(args.data.get())) {
+            pool_update_pending = false;
+            return really_begin_paste(paste_data, args.coords);
+        }
+        else if (args.type == ToolEventType::ACTION
+                 && any_of(args.action, {InToolActionID::RMB, InToolActionID::CANCEL})) {
+            return ToolResponse::end();
         }
     }
     else {

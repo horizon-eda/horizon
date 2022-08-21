@@ -29,6 +29,8 @@ private:
     json paste_data;
     class Picture *pic = nullptr;
     ToolResponse begin_paste(const json &j, const Coordi &cursor_pos);
+    ToolResponse really_begin_paste(const json &j, const Coordi &cursor_pos);
+    bool pool_update_pending = false;
     void update_tip();
     std::set<UUID> nets;
     void update_airwires();

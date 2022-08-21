@@ -44,6 +44,8 @@ public:
         return s_signal_request_length_tuning_ref;
     }
 
+    void pool_update(const std::vector<std::string> &filenames);
+
 private:
     class ImpBase *imp;
     type_signal_request_length_tuning_ref s_signal_request_length_tuning_ref;
