@@ -226,7 +226,8 @@ void PoolProjectManagerViewProject::open_top_schematic()
 void PoolProjectManagerViewProject::open_board()
 {
     auto prj = win.project.get();
-    std::vector<std::string> args = {prj->board_filename, prj->blocks_filename, prj->pictures_directory};
+    std::vector<std::string> args = {prj->board_filename, prj->planes_filename, prj->blocks_filename,
+                                     prj->pictures_directory};
     auto proc = win.spawn(PoolProjectManagerProcess::Type::IMP_BOARD, args);
     if (proc.spawned) {
         board_spinner->set_active(true);

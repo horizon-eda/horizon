@@ -16,6 +16,7 @@ versions:
     14: add track connection offset
     15: add arc tracks
     16: support relative paths for including boards
+    17: save plane fragements to a separate file
   schematic:
     1: add custom values on symbols
     2: add hierarchy
@@ -28,6 +29,7 @@ versions:
   project:
     1: replace pool cache with project pool
     2: add hierarchy
+    3: save plane fragements to a separate file
   part:
     1: add flags
     2: add prefix override

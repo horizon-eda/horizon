@@ -33,7 +33,7 @@ static void mkdir_if_not_exists(const std::string &dir, bool keep)
     }
 }
 
-static const unsigned int app_version = 2;
+static const unsigned int app_version = 3;
 
 unsigned int Project::get_app_version()
 {
@@ -44,6 +44,7 @@ Project::Project(const UUID &uu, const json &j, const std::string &base)
     : base_path(base), uuid(uu), blocks_filename(Glib::build_filename(base, j.value("blocks_filename", "blocks.json"))),
       pictures_directory(Glib::build_filename(base, j.value("pictures_directory", "pictures"))),
       board_filename(Glib::build_filename(base, j.at("board_filename").get<std::string>())),
+      planes_filename(Glib::build_filename(base, j.value("planes_filename", "planes.json"))),
       pool_directory(Glib::build_filename(base, j.value("pool_directory", "pool"))), version(app_version, j),
       title_old(j.value("title", "")), name_old(j.value("name", "")),
       vias_directory_old(Glib::build_filename(base, j.value("vias_directory", "vias"))),
@@ -259,6 +260,7 @@ json Project::serialize() const
     j["vias_directory"] = get_filename_rel(vias_directory_old);
     j["pictures_filename"] = get_filename_rel(pictures_directory);
     j["board_filename"] = get_filename_rel(board_filename);
+    j["planes_filename"] = get_filename_rel(planes_filename);
     j["pool_cache_directory"] = get_filename_rel(pool_cache_directory_old);
     j["pool_directory"] = get_filename_rel(pool_directory);
     j["blocks_filename"] = get_filename_rel(blocks_filename);

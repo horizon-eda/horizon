@@ -161,6 +161,11 @@ public:
     std::set<UUID> airwires_expand;
 
     json serialize() const;
+    json serialize_planes() const;
+    void load_planes(const json &j);
+    void load_planes_from_file(const std::string &filename);
+    void save_planes(const std::string &filename);
+
     void save_pictures(const std::string &dir) const;
     void load_pictures(const std::string &dir);
 

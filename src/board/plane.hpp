@@ -80,12 +80,14 @@ public:
     {
         return revision;
     }
+    void load_fragments(const json &j);
 
     Type get_type() const override;
     UUID get_uuid() const override;
     std::string get_name() const;
 
     json serialize() const;
+    json serialize_fragments() const;
 
 private:
     unsigned int revision = 0;

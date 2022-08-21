@@ -12,10 +12,11 @@ public:
     class Filenames {
     public:
         Filenames(const std::vector<std::string> &filenames)
-            : board(filenames.at(0)), blocks(filenames.at(1)), pictures_dir(filenames.at(2))
+            : board(filenames.at(0)), planes(filenames.at(1)), blocks(filenames.at(2)), pictures_dir(filenames.at(3))
         {
         }
         std::string board;
+        std::string planes;
         std::string blocks;
         std::string pictures_dir;
     };

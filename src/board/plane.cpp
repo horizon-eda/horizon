@@ -114,10 +114,27 @@ json Plane::serialize() const
     j["priority"] = priority;
     j["from_rules"] = from_rules;
     j["settings"] = settings.serialize();
+    return j;
+}
+
+void Plane::load_fragments(const json &j)
+{
+    if (j.count("fragments")) {
+        fragments.clear();
+        for (const auto &it : j.at("fragments")) {
+            fragments.emplace_back(it);
+        }
+        revision++;
+    }
+}
+
+json Plane::serialize_fragments() const
+{
     auto frags = json::array();
     for (const auto &it : fragments) {
         frags.push_back(it.serialize());
     }
+    json j;
     j["fragments"] = frags;
     return j;
 }

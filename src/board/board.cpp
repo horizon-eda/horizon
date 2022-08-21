@@ -42,7 +42,7 @@ const LutEnumStr<Board::OutputFormat> Board::output_format_lut = {
         {"odb", Board::OutputFormat::ODB},
 };
 
-static const unsigned int app_version = 16;
+static const unsigned int app_version = 17;
 
 unsigned int Board::get_app_version()
 {
@@ -1246,6 +1246,34 @@ json Board::serialize() const
         }
     }
     return j;
+}
+
+
+json Board::serialize_planes() const
+{
+    json j;
+    j["planes"] = json::object();
+    for (const auto &it : planes) {
+        j["planes"][(std::string)it.first] = it.second.serialize_fragments();
+    }
+    return j;
+}
+
+void Board::load_planes(const json &j)
+{
+    if (j.count("planes")) {
+        for (const auto &[uu, it] : j.at("planes").items()) {
+            if (planes.count(uu)) {
+                auto &plane = planes.at(uu);
+                plane.load_fragments(it);
+            }
+        }
+    }
+}
+
+void Board::load_planes_from_file(const std::string &filename)
+{
+    load_planes(load_json_from_file(filename));
 }
 
 void Board::save_pictures(const std::string &dir) const

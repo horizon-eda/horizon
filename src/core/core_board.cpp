@@ -54,6 +54,8 @@ CoreBoard::CoreBoard(const Filenames &fns, IPool &pool, IPool &pool_caching)
       filenames(fns)
 {
     brd->load_pictures(filenames.pictures_dir);
+    if (Glib::file_test(filenames.planes, Glib::FILE_TEST_IS_REGULAR))
+        brd->load_planes_from_file(filenames.planes);
     rebuild("init");
 }
 
@@ -782,10 +784,12 @@ void CoreBoard::reload_pool()
     keeper.save(brd->pictures);
     const auto brd_j = brd->serialize();
     const auto block_j = block->serialize();
+    const auto planes_j = brd->serialize_planes();
     m_pool.clear();
     m_pool_caching.clear();
     block.emplace(block->uuid, block_j, m_pool_caching, NoneBlockProvider::get());
     brd.emplace(brd->uuid, brd_j, *block, m_pool_caching, Glib::path_get_dirname(filenames.board));
+    brd->load_planes(planes_j);
     keeper.restore(brd->pictures);
     history_clear();
     rebuild("reload pool");
@@ -819,6 +823,7 @@ void CoreBoard::save(const std::string &suffix)
     brd->colors = colors;
     auto j = brd->serialize();
     save_json_to_file(filenames.board + suffix, j);
+    save_json_to_file(filenames.planes + suffix, brd->serialize_planes());
     brd->save_pictures(filenames.pictures_dir);
 }
 

@@ -32,6 +32,7 @@ public:
     std::string blocks_filename;
     std::string pictures_directory;
     std::string board_filename;
+    std::string planes_filename;
     std::string pool_directory;
 
     FileVersion version;
