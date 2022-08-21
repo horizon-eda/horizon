@@ -304,7 +304,7 @@ bool PNS_HORIZON_RULE_RESOLVER::DpNetPair(const PNS::ITEM *aItem, int &aNetP, in
         return false;
     auto net = m_iface->get_net_for_code(aItem->Net());
     if (net->diffpair) {
-        if (net->diffpair_primary) {
+        if (net->diffpair_primary && net->diffpair) {
             aNetP = m_iface->get_net_code(net->uuid);
             aNetN = m_iface->get_net_code(net->diffpair->uuid);
         }

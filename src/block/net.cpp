@@ -55,7 +55,7 @@ json Net::serialize() const
     j["net_class"] = net_class->uuid;
     j["power_symbol_name_visible"] = power_symbol_name_visible;
     j["power_symbol_style"] = power_symbol_style_lut.lookup_reverse(power_symbol_style);
-    if (diffpair_primary)
+    if (diffpair_primary && diffpair)
         j["diffpair"] = diffpair->uuid;
     j["is_port"] = is_port;
     j["port_direction"] = Pin::direction_lut.lookup_reverse(port_direction);

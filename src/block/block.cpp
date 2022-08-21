@@ -132,10 +132,13 @@ void Block::update_diffpairs()
     }
     for (auto &it : nets) {
         if (it.second.diffpair_primary) {
-            if (nets.count(it.second.diffpair.uuid))
+            if (nets.count(it.second.diffpair.uuid)) {
                 it.second.diffpair->diffpair = &it.second;
-            else
+            }
+            else {
                 it.second.diffpair = nullptr;
+                it.second.diffpair_primary = false;
+            }
         }
     }
 }
