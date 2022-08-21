@@ -1366,7 +1366,7 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
             if (version.get_app() < version.get_file()) {
                 project_read_only = true;
             }
-            if (version.get_app() > version.get_file()) {
+            if (version.get_file() < 2) {
                 // need to create blocks.json
                 project->create_blocks();
                 project_needs_save = true;
