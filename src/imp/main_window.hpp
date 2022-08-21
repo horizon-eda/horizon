@@ -99,6 +99,7 @@ private:
     Gtk::Stack *tool_bar_stack = nullptr;
     Gtk::Label *tool_bar_action_tip_label = nullptr;
     Gtk::Box *tool_bar_box = nullptr;
+    Gtk::Box *tool_bar_actions_box = nullptr;
     class ReflowBox *tool_bar_actions_reflow_box = nullptr;
     sigc::connection tip_timeout_connection;
     std::string flash_text;

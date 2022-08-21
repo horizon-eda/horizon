@@ -59,7 +59,6 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     GET_WIDGET(grid_reset_origin_button);
     GET_WIDGET(tool_bar_action_tip_label);
     {
-        Gtk::Box *tool_bar_actions_box = nullptr;
         GET_WIDGET(tool_bar_actions_box);
         tool_bar_actions_reflow_box = Gtk::manage(new ReflowBox());
         tool_bar_actions_reflow_box->property_spacing() = 10;
@@ -302,12 +301,14 @@ void MainWindow::tool_bar_clear_actions()
 {
     for (auto ch : tool_bar_actions_reflow_box->get_children())
         delete ch;
+    tool_bar_actions_box->hide();
 }
 
 void MainWindow::tool_bar_append_action(Gtk::Widget &w)
 {
     w.show();
     tool_bar_actions_reflow_box->append(w);
+    tool_bar_actions_box->show();
 }
 
 void MainWindow::set_version_info(const std::string &s)
