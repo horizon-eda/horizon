@@ -41,6 +41,8 @@ bool ToolSetGroup::can_begin()
         return comps.size() == 1 && ((*comps.begin())->group);
     case ToolID::RENAME_TAG:
         return comps.size() == 1 && ((*comps.begin())->tag);
+    case ToolID::SET_TAGS_FROM_REFDES:
+        return comps.size() > 1;
     default:
         return false;
     }
@@ -122,6 +124,14 @@ ToolResponse ToolSetGroup::begin(const ToolArgs &args)
         }
         else {
             return ToolResponse::end();
+        }
+    } break;
+
+    case ToolID::SET_TAGS_FROM_REFDES: {
+        for (auto comp : comps) {
+            auto new_tag = UUID::random();
+            block.tag_names.emplace(new_tag, doc.c->get_top_block()->get_refdes(*comp, doc.c->get_instance_path()));
+            comp->tag = new_tag;
         }
     } break;
 

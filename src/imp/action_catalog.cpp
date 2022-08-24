@@ -340,6 +340,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Highlight tag", ActionGroup::GROUP_TAG, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_SPECIFIC}},
 
+        {{ActionID::TOOL, ToolID::SET_TAGS_FROM_REFDES},
+         {"Set tags from ref. desig.", ActionGroup::GROUP_TAG, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::SEARCH, ToolID::NONE},
          {"Search", ActionGroup::SEARCH,
           ActionCatalogItem::AVAILABLE_IN_PACKAGE | ActionCatalogItem::AVAILABLE_IN_SYMBOL
@@ -1360,6 +1364,7 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(CLEAR_TAG),
         TOOL_LUT_ITEM(RENAME_TAG),
         TOOL_LUT_ITEM(TOGGLE_GROUP_TAG_VISIBLE),
+        TOOL_LUT_ITEM(SET_TAGS_FROM_REFDES),
         TOOL_LUT_ITEM(COPY_PLACEMENT),
         TOOL_LUT_ITEM(COPY_TRACKS),
         TOOL_LUT_ITEM(TUNE_TRACK),
