@@ -11,6 +11,7 @@
 #include "pool/entity.hpp"
 #include "util/util.hpp"
 #include "util/geom_util.hpp"
+#include "util/selection_util.hpp"
 #include "core/clipboard/clipboard.hpp"
 #include <iostream>
 #include <gtkmm.h>
@@ -20,6 +21,10 @@
 #include "pool/pool.hpp"
 #include <filesystem>
 #include "tool_data_pool_updated.hpp"
+#include "tool_helper_paste.hpp"
+#include "util/range_util.hpp"
+#include "board/board_layers.hpp"
+#include "logger/logger.hpp"
 
 namespace horizon {
 namespace fs = std::filesystem;
@@ -31,13 +36,15 @@ bool ToolPaste::can_begin()
 {
     if (tool_id == ToolID::PASTE)
         return true;
+    else if (tool_id == ToolID::PASTE_RELATIVE)
+        return doc.b && (sel_count_type(selection, ObjectType::BOARD_PACKAGE) == 1);
     else
         return selection.size();
 }
 
 bool ToolPaste::is_specific()
 {
-    return tool_id == ToolID::DUPLICATE;
+    return tool_id != ToolID::PASTE;
 }
 
 class JunctionProvider : public ObjectProvider {
@@ -64,11 +71,34 @@ void ToolPaste::fix_layer(int &la)
     if (doc.r->get_layer_provider().get_layers().count(la) == 0) {
         la = 0;
     }
+    if (doc.b && ref_pkg && target_pkg && ref_pkg->flip != target_pkg->flip) {
+        doc.b->get_board()->flip_package_layer(la);
+    }
 }
 
-void ToolPaste::apply_shift(Coordi &c, const Coordi &cursor_pos)
+void ToolPaste::transform(Coordi &c) const
 {
-    c += shift;
+    Placement p{c};
+    transform(p, ObjectType::BOARD_PACKAGE);
+    c = p.shift;
+}
+
+void ToolPaste::transform(Placement &p, ObjectType type) const
+{
+    if (target_pkg && ref_pkg) {
+        switch (type) {
+        case ObjectType::BOARD_PACKAGE:
+        case ObjectType::BOARD_DECAL:
+            p = transform_package_placement_to_new_reference(p, ref_pkg->placement, target_pkg->placement);
+            break;
+
+        default:
+            p = transform_text_placement_to_new_reference(p, ref_pkg->placement, target_pkg->placement);
+        }
+    }
+    else {
+        p.shift += shift;
+    }
 }
 
 class ToolDataPaste : public ToolData {
@@ -162,17 +192,51 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
     Coordi cursor_pos = j.at("cursor_pos").get<std::vector<int64_t>>();
     selection.clear();
     shift = cursor_pos_canvas - cursor_pos;
+    std::map<UUID, PackageInfo> pkgs_from_paste;
+    std::map<UUID, Net *> board_net_xlat;
+    std::set<UUID> pkg_texts;
+    if (target_pkg) {
+        for (const auto &[k, v] : j.at("packages").items()) {
+            pkgs_from_paste.emplace(std::piecewise_construct, std::forward_as_tuple(k), std::forward_as_tuple(k, v));
+        }
+        // find target pkg in pkgs_from_paste
+        auto pkgs_from_paste_values = pkgs_from_paste | ranges::view::values;
+        ref_pkg = find_if_ptr(pkgs_from_paste_values, [this](auto &x) { return x.tag == target_pkg->component->tag; });
+        if (!ref_pkg) {
+            imp->tool_bar_flash("reference package not found");
+            return ToolResponse::end();
+        }
+        auto pkgs_from_board = doc.b->get_board()->packages | ranges::views::values;
+        for (const auto &ppkg : pkgs_from_paste_values) {
+            pkg_texts.insert(ppkg.texts.begin(), ppkg.texts.end());
+            auto bpkg = find_if_ptr(pkgs_from_board, [this, &ppkg](const auto &x) {
+                return x.component->tag == ppkg.tag && x.component->group == ref_pkg->group;
+            });
+            if (bpkg && bpkg->package.uuid == ppkg.package) {
+                auto conns =
+                        ppkg.connections
+                        | ranges::views::filter([bpkg](const auto &x) { return bpkg->package.pads.count(x.first); })
+                        | ranges::views::transform([bpkg](const auto &x) {
+                              return std::make_pair(x.second, bpkg->package.pads.at(x.first).net);
+                          })
+                        | ranges::views::filter([](const auto &x) { return x.second; });
+                board_net_xlat.insert(conns.begin(), conns.end());
+            }
+        }
+    }
 
     std::map<UUID, const UUID> text_xlat;
     if (j.count("texts") && doc.r->has_object_type(ObjectType::TEXT)) {
         const json &o = j["texts"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            if (pkg_texts.count(it.key()))
+                continue;
             auto u = UUID::random();
             text_xlat.emplace(it.key(), u);
             auto x = doc.r->insert_text(u);
             *x = Text(u, it.value());
+            transform(x->placement, ObjectType::TEXT);
             fix_layer(x->layer);
-            apply_shift(x->placement.shift, cursor_pos_canvas);
             selection.emplace(u, ObjectType::TEXT);
         }
     }
@@ -182,8 +246,8 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
             auto u = UUID::random();
             auto x = doc.r->insert_dimension(u);
             *x = Dimension(u, it.value());
-            apply_shift(x->p0, cursor_pos_canvas);
-            apply_shift(x->p1, cursor_pos_canvas);
+            transform(x->p0);
+            transform(x->p1);
             selection.emplace(u, ObjectType::DIMENSION, 0);
             selection.emplace(u, ObjectType::DIMENSION, 1);
         }
@@ -204,7 +268,7 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
                 if (block.nets.count(net_uu))
                     junction_nets.emplace(u, &block.nets.at(net_uu));
             }
-            apply_shift(x->position, cursor_pos_canvas);
+            transform(x->position);
             selection.emplace(u, ObjectType::JUNCTION);
         }
     }
@@ -237,7 +301,7 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             auto &x = doc.k->get_package().pads.emplace(u, Pad(u, it.value(), doc.r->get_pool())).first->second;
-            apply_shift(x.placement.shift, cursor_pos_canvas);
+            transform(x.placement, ObjectType::PAD);
             pads.push_back(&x);
             selection.emplace(u, ObjectType::PAD);
         }
@@ -257,10 +321,11 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
             auto u = UUID::random();
             auto x = doc.r->insert_hole(u);
             *x = Hole(u, it.value());
-            apply_shift(x->placement.shift, cursor_pos_canvas);
+            transform(x->placement, ObjectType::HOLE);
             selection.emplace(u, ObjectType::HOLE);
         }
     }
+    std::map<UUID, Polygon *> polygon_xlat;
     if (j.count("polygons") && doc.r->has_object_type(ObjectType::POLYGON)) {
         const json &o = j["polygons"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -269,13 +334,25 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
             *x = Polygon(u, it.value());
             int vertex = 0;
             for (auto &itv : x->vertices) {
-                itv.arc_center += shift;
-                itv.position += shift;
+                transform(itv.arc_center);
+                transform(itv.position);
                 if (itv.type == Polygon::Vertex::Type::ARC)
                     selection.emplace(u, ObjectType::POLYGON_ARC_CENTER, vertex);
                 selection.emplace(u, ObjectType::POLYGON_VERTEX, vertex++);
             }
+            polygon_xlat.emplace(it.key(), x);
             fix_layer(x->layer);
+        }
+    }
+    if (j.count("planes") && doc.b) {
+        for (const auto &[uu, it] : j.at("planes").items()) {
+            Plane plane{UUID::random(), it, nullptr};
+            if (polygon_xlat.count(plane.polygon.uuid) && board_net_xlat.count(plane.net.uuid)) {
+                plane.polygon = polygon_xlat.at(plane.polygon.uuid);
+                plane.net = board_net_xlat.at(plane.net.uuid);
+                auto &x = doc.b->get_board()->planes.emplace(plane.uuid, plane).first->second;
+                x.polygon->usage = &x;
+            }
         }
     }
     std::map<UUID, const UUID> net_xlat;
@@ -359,7 +436,7 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
                 it_txt = doc.r->get_text(text_xlat.at(it_txt.uuid));
             }
             sheet->expand_symbol(u, *doc.c->get_current_schematic());
-            x->placement.shift += shift;
+            transform(x->placement, ObjectType::SCHEMATIC_SYMBOL);
             selection.emplace(u, ObjectType::SCHEMATIC_SYMBOL);
         }
     }
@@ -403,7 +480,7 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
                 auto &x = sheet->block_symbols.emplace(u, sym).first->second;
                 sheet->expand_block_symbol(u, *doc.c->get_current_schematic());
                 doc.c->get_top_schematic()->update_sheet_mapping();
-                x.placement.shift += shift;
+                transform(x.placement, ObjectType::SCHEMATIC_BLOCK_SYMBOL);
                 selection.emplace(u, ObjectType::SCHEMATIC_BLOCK_SYMBOL);
             }
         }
@@ -515,7 +592,7 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             auto &x = doc.a->get_padstack().shapes.emplace(u, Shape(u, it.value())).first->second;
-            x.placement.shift += shift;
+            transform(x.placement, ObjectType::SHAPE);
             selection.emplace(u, ObjectType::SHAPE);
         }
     }
@@ -531,11 +608,15 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
             x->expand(*brd);
             if (brd->block->nets.count(x->net_set.uuid)) {
                 x->net_set = &brd->block->nets.at(x->net_set.uuid);
-                nets.insert(x->net_set->uuid);
+            }
+            else if (board_net_xlat.count(x->net_set.uuid)) {
+                x->net_set = board_net_xlat.at(x->net_set.uuid);
             }
             else {
                 x->net_set = nullptr;
             }
+            if (x->net_set)
+                nets.insert(x->net_set->uuid);
             x->junction = &brd->junctions.at(junction_xlat.at(x->junction.uuid));
             x->junction->net = x->net_set;
             selection.emplace(u, ObjectType::VIA);
@@ -552,6 +633,34 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
                               .first->second;
             x->to.junc = &brd->junctions.at(junction_xlat.at(x->to.junc.uuid));
             x->from.junc = &brd->junctions.at(junction_xlat.at(x->from.junc.uuid));
+            fix_layer(x->layer);
+            struct ConnInfo {
+                ConnInfo(const std::string &w, Track::Connection &c) : where(w), conn(c)
+                {
+                }
+                const std::string where;
+                Track::Connection &conn;
+            };
+            std::vector<ConnInfo> conns = {{"from_pad", x->from}, {"to_pad", x->to}};
+            auto board_pkgs = brd->packages | ranges::views::values;
+            for (auto &conn_info : conns) {
+                if (it.value().count(conn_info.where)) {
+                    Track::Connection conn{it.value().at(conn_info.where)};
+                    if (pkgs_from_paste.count(conn.package.uuid)) {
+                        const auto &ppkg = pkgs_from_paste.at(conn.package.uuid);
+                        auto bpkg = find_if_ptr(board_pkgs, [this, &ppkg](auto &k) {
+                            return k.component->tag == ppkg.tag && k.component->group == target_pkg->component->group;
+                        });
+                        if (bpkg && bpkg->package.pads.count(conn.pad.uuid)) {
+                            auto &pad = bpkg->package.pads.at(conn.pad.uuid);
+                            conn_info.conn.connect(bpkg, &pad);
+                            if (pad.net)
+                                doc.b->get_board()->airwires_expand.insert(pad.net->uuid);
+                            doc.b->get_board()->expand_flags |= Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES;
+                        }
+                    }
+                }
+            }
             selection.emplace(u, ObjectType::TRACK);
         }
     }
@@ -571,7 +680,7 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
                 x->net = nullptr;
             }
             x->padstack.apply_parameter_set(x->parameter_set);
-            apply_shift(x->placement.shift, cursor_pos_canvas);
+            transform(x->placement, ObjectType::BOARD_HOLE);
             selection.emplace(u, ObjectType::BOARD_HOLE);
         }
     }
@@ -587,7 +696,7 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
                                   .emplace(std::piecewise_construct, std::forward_as_tuple(u),
                                            std::forward_as_tuple(u, it.value(), *brd))
                                   .first->second;
-                apply_shift(x->placement.shift, cursor_pos_canvas);
+                transform(x->placement, ObjectType::BOARD_PANEL);
                 selection.emplace(u, ObjectType::BOARD_PANEL);
             }
         }
@@ -601,7 +710,8 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
                               .emplace(std::piecewise_construct, std::forward_as_tuple(u),
                                        std::forward_as_tuple(u, it.value(), doc.r->get_pool_caching(), *brd))
                               .first->second;
-            apply_shift(x.placement.shift, cursor_pos_canvas);
+            transform(x.placement, ObjectType::BOARD_DECAL);
+            x.set_flip(x.placement.mirror, *brd);
             selection.emplace(u, ObjectType::BOARD_DECAL);
         }
     }
@@ -630,13 +740,8 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
         }
     }
     update_airwires();
-    imp->tool_bar_set_actions({
-            {InToolActionID::LMB},
-            {InToolActionID::RMB},
-            {InToolActionID::ROTATE},
-            {InToolActionID::MIRROR},
-            {InToolActionID::RESTRICT},
-    });
+    if (tool_id == ToolID::PASTE_RELATIVE)
+        return ToolResponse::commit();
     return ToolResponse();
 }
 
@@ -646,6 +751,10 @@ ToolResponse ToolPaste::begin(const ToolArgs &args)
     if (auto data = dynamic_cast<ToolDataPaste *>(args.data.get())) {
         paste_data = data->paste_data;
         return begin_paste(paste_data, args.coords);
+    }
+
+    if (tool_id == ToolID::PASTE_RELATIVE) {
+        target_pkg = &doc.b->get_board()->packages.at(sel_find_one(selection, ObjectType::BOARD_PACKAGE).uuid);
     }
 
     if (tool_id == ToolID::DUPLICATE) {

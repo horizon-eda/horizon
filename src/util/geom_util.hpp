@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "common/common.hpp"
+#include "util/placement.hpp"
 
 namespace horizon {
 
@@ -30,4 +31,10 @@ double angle_to_rad(int angle);
 int angle_from_rad(double rad);
 int wrap_angle(int angle);
 template <typename T> T c2pi(T x);
+
+Placement transform_package_placement_to_new_reference(Placement pl, Placement old_ref, Placement new_ref);
+
+Placement transform_text_placement_to_new_reference(Placement pl, Placement old_ref, Placement new_ref);
+
+
 } // namespace horizon

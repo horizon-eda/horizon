@@ -65,7 +65,7 @@ public:
         json serialize() const;
     };
 
-    Plane(const UUID &uu, const json &j, class Board &brd);
+    Plane(const UUID &uu, const json &j, class Board *brd);
     Plane(const UUID &uu);
     UUID uuid;
     uuid_ptr<Net> net;

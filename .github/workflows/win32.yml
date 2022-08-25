@@ -36,6 +36,7 @@ jobs:
           mingw-w64-x86_64-libarchive
           mingw-w64-x86_64-curl-winssl
           mingw-w64-x86_64-jq
+          mingw-w64-x86_64-range-v3
           zip
           unzip
           make

@@ -1109,6 +1109,14 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::TOGGLE_SNAP_TO_PAD_BBOX, ToolID::NONE},
          {"Toggle snap to pad corners", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::PASTE_PLACEMENT},
+         {"Paste placement", ActionGroup::CLIPBOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::PASTE_RELATIVE},
+         {"Paste relative", ActionGroup::CLIPBOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1439,5 +1447,7 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(MOVE_TRACK_CONNECTION),
         TOOL_LUT_ITEM(MOVE_TRACK_CENTER),
         TOOL_LUT_ITEM(SELECT_CONNECTED_LINES),
+        TOOL_LUT_ITEM(PASTE_PLACEMENT),
+        TOOL_LUT_ITEM(PASTE_RELATIVE),
 };
 } // namespace horizon
