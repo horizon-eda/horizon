@@ -188,7 +188,6 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
 
 ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_pos_canvas)
 {
-
     Coordi cursor_pos = j.at("cursor_pos").get<std::vector<int64_t>>();
     selection.clear();
     shift = cursor_pos_canvas - cursor_pos;
@@ -200,7 +199,7 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
             pkgs_from_paste.emplace(std::piecewise_construct, std::forward_as_tuple(k), std::forward_as_tuple(k, v));
         }
         // find target pkg in pkgs_from_paste
-        auto pkgs_from_paste_values = pkgs_from_paste | ranges::view::values;
+        auto pkgs_from_paste_values = pkgs_from_paste | ranges::views::values;
         ref_pkg = find_if_ptr(pkgs_from_paste_values, [this](auto &x) { return x.tag == target_pkg->component->tag; });
         if (!ref_pkg) {
             imp->tool_bar_flash("reference package not found");
