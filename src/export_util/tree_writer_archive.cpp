@@ -78,6 +78,9 @@ std::ostream &TreeWriterArchive::create_file_internal(const fs::path &path)
     archive_entry_set_pathname(ar_entry, path.u8string().c_str());
     archive_entry_set_filetype(ar_entry, AE_IFREG);
     archive_entry_set_perm(ar_entry, 0644);
+    const time_t file_time = 1485716817; // Sun Jan 29 20:06:57 2017 (first commit)
+    archive_entry_set_ctime(ar_entry, file_time, 0);
+    archive_entry_set_mtime(ar_entry, file_time, 0);
 
     created_files.insert(path);
 
