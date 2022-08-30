@@ -77,11 +77,14 @@ json PlaneSettings::serialize() const
     return j;
 }
 
-Plane::Plane(const UUID &uu, const json &j, Board &brd)
-    : uuid(uu), net(&brd.block->nets.at(j.at("net").get<std::string>())),
-      polygon(&brd.polygons.at(j.at("polygon").get<std::string>())), from_rules(j.value("from_rules", true)),
-      priority(j.value("priority", 0))
+Plane::Plane(const UUID &uu, const json &j, Board *brd)
+    : uuid(uu), net(j.at("net").get<std::string>()), polygon(j.at("polygon").get<std::string>()),
+      from_rules(j.value("from_rules", true)), priority(j.value("priority", 0))
 {
+    if (brd) {
+        net.update(brd->block->nets);
+        polygon.update(brd->polygons);
+    }
     if (j.count("settings")) {
         settings = PlaneSettings(j.at("settings"));
     }

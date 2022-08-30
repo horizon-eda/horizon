@@ -159,7 +159,7 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool, const st
         const json &o = j["planes"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            load_and_log(planes, ObjectType::PLANE, std::forward_as_tuple(u, it.value(), *this), Logger::Domain::BOARD);
+            load_and_log(planes, ObjectType::PLANE, std::forward_as_tuple(u, it.value(), this), Logger::Domain::BOARD);
         }
     }
     if (j.count("keepouts")) {
