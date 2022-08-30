@@ -24,13 +24,16 @@ public:
 
 private:
     void fix_layer(int &la);
-    void apply_shift(Coordi &c, const Coordi &cursor_pos);
     Coordi shift;
+    const class BoardPackage *target_pkg = nullptr;
+    const class PastedPackage *ref_pkg = nullptr;
     json paste_data;
     class Picture *pic = nullptr;
     ToolResponse begin_paste(const json &j, const Coordi &cursor_pos);
     ToolResponse really_begin_paste(const json &j, const Coordi &cursor_pos);
     bool pool_update_pending = false;
+    void transform(Coordi &c) const;
+    void transform(class Placement &p, ObjectType type) const;
     void update_tip();
     std::set<UUID> nets;
     void update_airwires();

@@ -393,6 +393,7 @@ SRC_IMP = \
 	src/core/tools/tool_move_track_connection.cpp\
 	src/core/tools/tool_helper_pick_pad.cpp\
 	src/core/tools/tool_move_track_center.cpp\
+	src/core/tools/tool_paste_placement.cpp\
 	src/document/documents.cpp\
 	src/core/clipboard/clipboard.cpp\
 	src/core/clipboard/clipboard_padstack.cpp\
@@ -610,6 +611,7 @@ SRC_IMP = \
 	src/widgets/multi_pad_selector.cpp\
 	src/util/done_revealer_controller.cpp\
 	src/widgets/reflow_box.cpp\
+	src/util/pasted_package.cpp\
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\

@@ -171,5 +171,7 @@ enum class ToolID {
     MOVE_TRACK_CONNECTION,
     MOVE_TRACK_CENTER,
     CLEAR_PART,
+    PASTE_PLACEMENT,
+    PASTE_RELATIVE,
 };
 } // namespace horizon

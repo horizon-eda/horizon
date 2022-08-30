@@ -139,4 +139,46 @@ template <typename T> T c2pi(T x)
 template float c2pi<float>(float);
 template double c2pi<double>(double);
 
+
+Placement transform_package_placement_to_new_reference(Placement pl, Placement old_ref, Placement new_ref)
+{
+
+    if (old_ref.mirror) {
+        old_ref.invert_angle();
+        pl.invert_angle();
+    }
+
+    pl.make_relative(old_ref);
+    Placement out = new_ref;
+
+    if (new_ref.mirror) {
+        pl.invert_angle();
+        pl.shift.x = -pl.shift.x;
+        pl.mirror = !pl.mirror;
+        out.mirror = !out.mirror;
+    }
+
+    out.accumulate(pl);
+
+    return out;
+}
+
+Placement transform_text_placement_to_new_reference(Placement pl, Placement old_ref, Placement new_ref)
+{
+    if (old_ref.mirror) {
+        old_ref.invert_angle();
+    }
+
+    pl.make_relative(old_ref);
+    Placement out = new_ref;
+
+    if (new_ref.mirror) {
+        out.invert_angle();
+    }
+
+    out.accumulate(pl);
+
+    return out;
+}
+
 } // namespace horizon
