@@ -98,10 +98,15 @@ void FaceRenderer::realize()
     GET_LOC(this, view);
     GET_LOC(this, proj);
     GET_LOC(this, cam_normal);
+    GET_LOC(this, cam_pos);
     GET_LOC(this, z_top);
     GET_LOC(this, z_bottom);
     GET_LOC(this, highlight_intensity);
+    GET_LOC(this, ambient_intensity);
+    GET_LOC(this, specular_intensity);
     GET_LOC(this, pick_base);
+    GET_LOC(this, light_pos);
+    GET_LOC(this, light_color);
 }
 
 void FaceRenderer::push()
@@ -131,17 +136,24 @@ void FaceRenderer::push()
 void FaceRenderer::render()
 {
     if (ca.models_loading_mutex.try_lock()) {
+        glm::vec3 light_color(ca.light_color.r, ca.light_color.g, ca.light_color.b);
         glUseProgram(program);
         glBindVertexArray(vao);
 
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, glm::value_ptr(ca.viewmat));
         glUniformMatrix4fv(proj_loc, 1, GL_FALSE, glm::value_ptr(ca.projmat));
         glUniform3fv(cam_normal_loc, 1, glm::value_ptr(ca.cam_normal));
+        glUniform3fv(cam_pos_loc, 1, glm::value_ptr(ca.cam_position));
+        glUniform3fv(light_pos_loc, 1, glm::value_ptr(ca.light_pos));
+        glUniform3fv(light_color_loc, 1, glm::value_ptr(light_color));
         glUniform1f(z_top_loc, ca.get_layer(BoardLayers::TOP_COPPER).offset + 5 * ca.explode
                                        + ca.get_layer(BoardLayers::TOP_COPPER).thickness);
         glUniform1f(z_bottom_loc, ca.get_layer(BoardLayers::BOTTOM_COPPER).offset
                                           + (ca.get_layer(BoardLayers::BOTTOM_COPPER).explode_mul - 4) * ca.explode);
         glUniform1f(highlight_intensity_loc, ca.highlight_intensity);
+        glUniform1f(ambient_intensity_loc, ca.ambient_intensity);
+        glUniform1f(specular_intensity_loc, ca.specular_intensity);
+
 
         for (const auto &[filename, it] : ca.models) {
             if (it.pushed) {

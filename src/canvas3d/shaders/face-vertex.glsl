@@ -12,6 +12,7 @@ in vec3 model_rotation;
 
 out vec3 normal_to_fragment;
 out vec3 color_to_fragment;
+out vec3 pos_to_fragment;
 flat out uint instance_to_fragment;
 
 uniform float z_top;
@@ -73,6 +74,7 @@ void main() {
     n4 = rotationMatrix(vec3(0,1,0), 3.14159)*n4;
    }
   gl_Position = proj*view*vec4((p4.xyz+vec3(offset, z)),1);
+  pos_to_fragment = gl_Position.xyz;
   normal_to_fragment = normalize(n4.xyz);
   instance_to_fragment = uint(gl_InstanceID);
 }

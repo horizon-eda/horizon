@@ -23,9 +23,14 @@ private:
     GLuint view_loc;
     GLuint proj_loc;
     GLuint cam_normal_loc;
+    GLuint cam_pos_loc;
     GLuint z_top_loc;
     GLuint z_bottom_loc;
+    GLuint ambient_intensity_loc;
+    GLuint specular_intensity_loc;
     GLuint highlight_intensity_loc;
     GLuint pick_base_loc;
+    GLuint light_pos_loc;
+    GLuint light_color_loc;
 };
 } // namespace horizon

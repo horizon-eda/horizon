@@ -63,6 +63,8 @@ public:
     GET_SET_PICK(cam_fov, float)
     GET_SET_PICK(center, glm::vec2)
     GET_SET_PICK(projection, Projection)
+    GET_SET_PICK(ambient_intensity, float)
+    GET_SET_PICK(specular_intensity, float)
 
 #undef GET_SET
 #undef GET_SET_X
@@ -127,8 +129,11 @@ protected:
     Color solder_mask_color = {0, .5, 0};
     Color silkscreen_color = {1, 1, 1};
     Color substrate_color = {.2, .15, 0};
+    Color light_color = {1, 1, 1};
     float explode = 0;
     float highlight_intensity = .5;
+    float specular_intensity = 1;
+    float ambient_intensity = .9;
 
     float cam_azimuth = 90;
     float cam_elevation = 45;
@@ -250,6 +255,8 @@ private:
     glm::mat4 viewmat;
     glm::mat4 projmat;
     glm::vec3 cam_normal;
+    glm::vec3 cam_position = {100, 100, 0};
+    glm::vec3 light_pos = {30, 30, 100};
 
     float package_height_max = 0;
     std::vector<FaceVertex> face_vertex_buffer;  // vertices of all models, sequentially
