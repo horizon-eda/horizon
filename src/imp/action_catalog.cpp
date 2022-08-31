@@ -362,13 +362,6 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
                   | ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
-        {{ActionID::TOOL, ToolID::COPY_PLACEMENT},
-         {"Copy placement", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
-          ActionCatalogItem::FLAGS_DEFAULT}},
-
-        {{ActionID::TOOL, ToolID::COPY_TRACKS},
-         {"Copy tracks", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
-
         {{ActionID::TOOL, ToolID::SMASH},
          {"Smash", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
@@ -1373,8 +1366,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(RENAME_TAG),
         TOOL_LUT_ITEM(TOGGLE_GROUP_TAG_VISIBLE),
         TOOL_LUT_ITEM(SET_TAGS_FROM_REFDES),
-        TOOL_LUT_ITEM(COPY_PLACEMENT),
-        TOOL_LUT_ITEM(COPY_TRACKS),
         TOOL_LUT_ITEM(TUNE_TRACK),
         TOOL_LUT_ITEM(TUNE_DIFFPAIR),
         TOOL_LUT_ITEM(TUNE_DIFFPAIR_SKEW),

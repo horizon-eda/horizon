@@ -341,8 +341,6 @@ SRC_IMP = \
 	src/core/tools/tool_generate_courtyard.cpp\
 	src/core/tools/tool_generate_silkscreen.cpp\
 	src/core/tools/tool_set_group.cpp\
-	src/core/tools/tool_copy_placement.cpp\
-	src/core/tools/tool_copy_tracks.cpp\
 	src/core/tools/tool_swap_nets.cpp\
 	src/core/tools/tool_line_loop_to_polygon.cpp\
 	src/core/tools/tool_lines_to_tracks.cpp\

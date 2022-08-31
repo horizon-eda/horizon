@@ -71,7 +71,6 @@ public:
     void disconnect_package(BoardPackage *pkg);
 
     void smash_package(BoardPackage *pkg);
-    void copy_package_silkscreen_texts(BoardPackage *dest, const BoardPackage *src);
     void unsmash_package(BoardPackage *pkg);
     void smash_package_silkscreen_graphics(BoardPackage *pkg);
     void smash_package_outline(BoardPackage &pkg);

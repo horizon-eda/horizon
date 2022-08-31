@@ -55,8 +55,6 @@
 #include "tools/tool_generate_courtyard.hpp"
 #include "tools/tool_generate_silkscreen.hpp"
 #include "tools/tool_set_group.hpp"
-#include "tools/tool_copy_placement.hpp"
-#include "tools/tool_copy_tracks.hpp"
 #include "tools/tool_swap_nets.hpp"
 #include "tools/tool_line_loop_to_polygon.hpp"
 #include "tools/tool_lines_to_tracks.hpp"
@@ -331,12 +329,6 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     case ToolID::RENAME_TAG:
     case ToolID::SET_TAGS_FROM_REFDES:
         return std::make_unique<ToolSetGroup>(this, tool_id);
-
-    case ToolID::COPY_PLACEMENT:
-        return std::make_unique<ToolCopyPlacement>(this, tool_id);
-
-    case ToolID::COPY_TRACKS:
-        return std::make_unique<ToolCopyTracks>(this, tool_id);
 
     case ToolID::SWAP_NETS:
         return std::make_unique<ToolSwapNets>(this, tool_id);
