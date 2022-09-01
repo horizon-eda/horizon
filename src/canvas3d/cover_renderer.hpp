@@ -26,5 +26,12 @@ private:
     GLuint layer_offset_loc;
     GLuint layer_color_loc;
     GLuint cam_normal_loc;
+    GLuint cam_pos_loc;
+    GLuint light_pos_loc;
+    GLuint light_color_loc;
+    GLuint ambient_intensity_loc;
+    GLuint specular_intensity_loc;
+    GLuint specular_power_loc;
+    GLuint diffuse_intensity_loc;
 };
 } // namespace horizon

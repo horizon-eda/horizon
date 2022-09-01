@@ -28,6 +28,8 @@ private:
     GLuint z_bottom_loc;
     GLuint ambient_intensity_loc;
     GLuint specular_intensity_loc;
+    GLuint specular_power_loc;
+    GLuint diffuse_intensity_loc;
     GLuint highlight_intensity_loc;
     GLuint pick_base_loc;
     GLuint light_pos_loc;

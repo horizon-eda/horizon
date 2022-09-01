@@ -265,6 +265,7 @@ void Canvas3DBase::render(RenderBackground mode)
     float theta = glm::radians(90 - cam_elevation);
     auto cam_offset = glm::vec3(r * sin(theta) * cos(phi), r * sin(theta) * sin(phi), r * cos(theta));
     auto cam_pos = cam_offset + glm::vec3(center, 0);
+    cam_position = cam_pos;
 
     glm::vec3 right(sin(phi - 3.14f / 2.0f), cos(phi - 3.14f / 2.0f), 0);
 

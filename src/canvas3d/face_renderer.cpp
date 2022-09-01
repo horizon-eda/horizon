@@ -104,6 +104,8 @@ void FaceRenderer::realize()
     GET_LOC(this, highlight_intensity);
     GET_LOC(this, ambient_intensity);
     GET_LOC(this, specular_intensity);
+    GET_LOC(this, specular_power);
+    GET_LOC(this, diffuse_intensity);
     GET_LOC(this, pick_base);
     GET_LOC(this, light_pos);
     GET_LOC(this, light_color);
@@ -144,7 +146,7 @@ void FaceRenderer::render()
         glUniformMatrix4fv(proj_loc, 1, GL_FALSE, glm::value_ptr(ca.projmat));
         glUniform3fv(cam_normal_loc, 1, glm::value_ptr(ca.cam_normal));
         glUniform3fv(cam_pos_loc, 1, glm::value_ptr(ca.cam_position));
-        glUniform3fv(light_pos_loc, 1, glm::value_ptr(ca.light_pos));
+        glUniform3fv(light_pos_loc, 1, glm::value_ptr(ca.light_position));
         glUniform3fv(light_color_loc, 1, glm::value_ptr(light_color));
         glUniform1f(z_top_loc, ca.get_layer(BoardLayers::TOP_COPPER).offset + 5 * ca.explode
                                        + ca.get_layer(BoardLayers::TOP_COPPER).thickness);
@@ -153,6 +155,8 @@ void FaceRenderer::render()
         glUniform1f(highlight_intensity_loc, ca.highlight_intensity);
         glUniform1f(ambient_intensity_loc, ca.ambient_intensity);
         glUniform1f(specular_intensity_loc, ca.specular_intensity);
+        glUniform1f(specular_power_loc, ca.specular_power);
+        glUniform1f(diffuse_intensity_loc, ca.diffuse_intensity);
 
 
         for (const auto &[filename, it] : ca.models) {

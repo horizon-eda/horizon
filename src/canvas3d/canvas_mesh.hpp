@@ -30,6 +30,11 @@ public:
         float thickness = 0.035;
         float alpha = 1;
         float explode_mul = 0;
+        float specular_intensity = 0.3;
+        float specular_power = 16;
+        float ambient_intensity = .3;
+        float diffuse_intensity = 0.8;
+
         std::atomic_bool done = false;
     };
 

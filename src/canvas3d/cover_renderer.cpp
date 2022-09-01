@@ -61,6 +61,13 @@ void CoverRenderer::realize()
     GET_LOC(this, layer_offset);
     GET_LOC(this, layer_color);
     GET_LOC(this, cam_normal);
+    GET_LOC(this, cam_pos);
+    GET_LOC(this, ambient_intensity);
+    GET_LOC(this, specular_intensity);
+    GET_LOC(this, specular_power);
+    GET_LOC(this, diffuse_intensity);
+    GET_LOC(this, light_pos);
+    GET_LOC(this, light_color);
 }
 
 void CoverRenderer::push()
@@ -91,6 +98,10 @@ void CoverRenderer::render(int layer)
     auto co = ca.get_layer_color(layer);
     gl_color_to_uniform_4f(layer_color_loc, co, ca.get_layer(layer).alpha);
     glUniform1f(layer_offset_loc, ca.get_layer_offset(layer));
+    glUniform1f(ambient_intensity_loc, ca.get_layer(layer).ambient_intensity);
+    glUniform1f(specular_intensity_loc, ca.get_layer(layer).specular_intensity);
+    glUniform1f(specular_power_loc, ca.get_layer(layer).specular_power);
+    glUniform1f(diffuse_intensity_loc, ca.get_layer(layer).diffuse_intensity);
     glDrawArrays(GL_TRIANGLES, layer_offsets[layer], ca.get_layer(layer).tris.size());
     if (is_opaque) {
         glUniform1f(layer_offset_loc, ca.get_layer_offset(layer) + ca.get_layer_thickness(layer));
@@ -101,12 +112,17 @@ void CoverRenderer::render(int layer)
 
 void CoverRenderer::render()
 {
+    glm::vec3 light_color(ca.light_color.r, ca.light_color.g, ca.light_color.b);
+
     glUseProgram(program);
     glBindVertexArray(vao);
 
     glUniformMatrix4fv(view_loc, 1, GL_FALSE, glm::value_ptr(ca.viewmat));
     glUniformMatrix4fv(proj_loc, 1, GL_FALSE, glm::value_ptr(ca.projmat));
     glUniform3fv(cam_normal_loc, 1, glm::value_ptr(ca.cam_normal));
+    glUniform3fv(cam_pos_loc, 1, glm::value_ptr(ca.cam_position));
+    glUniform3fv(light_pos_loc, 1, glm::value_ptr(ca.light_position));
+    glUniform3fv(light_color_loc, 1, glm::value_ptr(light_color));
 
     for (const auto &it : layer_offsets) {
         if (ca.get_layer(it.first).alpha == 1 && ca.layer_is_visible(it.first))

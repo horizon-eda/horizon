@@ -132,13 +132,17 @@ protected:
     Color light_color = {1, 1, 1};
     float explode = 0;
     float highlight_intensity = .5;
-    float specular_intensity = 1;
-    float ambient_intensity = .9;
+    float specular_intensity = 30;
+    float specular_power = 32;
+    float ambient_intensity = .6;
+    float diffuse_intensity = 1;
 
     float cam_azimuth = 90;
     float cam_elevation = 45;
     float cam_distance = 20;
     float cam_fov = 45;
+    glm::vec3 cam_position;
+    glm::vec3 light_position = {30, 30, 100};
     glm::vec2 center;
 
     Projection projection = Projection::PERSP;
@@ -255,8 +259,6 @@ private:
     glm::mat4 viewmat;
     glm::mat4 projmat;
     glm::vec3 cam_normal;
-    glm::vec3 cam_position = {100, 100, 0};
-    glm::vec3 light_pos = {30, 30, 100};
 
     float package_height_max = 0;
     std::vector<FaceVertex> face_vertex_buffer;  // vertices of all models, sequentially
