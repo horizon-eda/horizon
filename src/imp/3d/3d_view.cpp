@@ -110,10 +110,12 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     explode_adj->signal_value_changed().connect([explode_adj, this] { canvas->set_explode(explode_adj->get_value()); });
 
     auto ambient_adj = Glib::RefPtr<Gtk::Adjustment>::cast_dynamic(x->get_object("ambient_adj"));
-    ambient_adj->signal_value_changed().connect([ambient_adj, this] { canvas->set_ambient_intensity(ambient_adj->get_value()); });
+    ambient_adj->signal_value_changed().connect(
+            [ambient_adj, this] { canvas->set_ambient_intensity(ambient_adj->get_value()); });
 
     auto specular_adj = Glib::RefPtr<Gtk::Adjustment>::cast_dynamic(x->get_object("specular_adj"));
-    specular_adj->signal_value_changed().connect([specular_adj, this] { canvas->set_specular_intensity(specular_adj->get_value()); });
+    specular_adj->signal_value_changed().connect(
+            [specular_adj, this] { canvas->set_specular_intensity(specular_adj->get_value()); });
 
     GET_WIDGET(background_top_color_button);
     bind_color_button(background_top_color_button, &Canvas3D::set_background_top_color, [this] {
