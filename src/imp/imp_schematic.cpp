@@ -1539,6 +1539,10 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
             new_sheet->arcs.insert(std::make_pair(it.uuid, std::move(old_sheet->arcs.at(it.uuid))));
             old_sheet->arcs.erase(it.uuid);
         } break;
+        case ObjectType::PICTURE: {
+            new_sheet->pictures.insert(std::make_pair(it.uuid, std::move(old_sheet->pictures.at(it.uuid))));
+            old_sheet->pictures.erase(it.uuid);
+        } break;
 
         default:;
         }
