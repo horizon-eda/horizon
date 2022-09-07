@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.22.2 -->
+<interface>
+  <requires lib="gtk+" version="3.20"/>
+  <object class="GtkAdjustment" id="price_adj">
+    <property name="upper">100000</property>
+    <property name="step_increment">0.01</property>
+    <property name="page_increment">1</property>
+  </object>
+  <object class="GtkAdjustment" id="stock_adj">
+    <property name="upper">10000000000000000</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkWindow" id="window">
+    <property name="can_focus">False</property>
+    <property name="default_width">480</property>
+    <property name="default_height">270</property>
+    <child type="titlebar">
+      <object class="GtkHeaderBar">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="title" translatable="yes">Stock Editor</property>
+        <child>
+          <object class="GtkButton" id="save_button">
+            <property name="label" translatable="yes">Save</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <style>
+              <class name="suggested-action"/>
+            </style>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="cancel_button">
+            <property name="label" translatable="yes">Cancel</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkGrid">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_left">6</property>
+        <property name="margin_right">6</property>
+        <property name="margin_top">6</property>
+        <property name="margin_bottom">6</property>
+        <property name="row_spacing">6</property>
+        <property name="column_spacing">6</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Stock</property>
+            <property name="xalign">1</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="loc_entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="primary_icon_tooltip_text" translatable="yes">Inventory location code</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSpinButton">
+            <property name="name">stock_spinbox</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="primary_icon_tooltip_text" translatable="yes">Quantity in stock</property>
+            <property name="adjustment">stock_adj</property>
+            <property name="numeric">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSpinButton">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="primary_icon_tooltip_text" translatable="yes">Unit price for BOM.</property>
+            <property name="adjustment">price_adj</property>
+            <property name="digits">5</property>
+            <property name="numeric">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="last_updated_value_label">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">N/A</property>
+            <property name="xalign">0</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="part_label">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">part_num</property>
+            <property name="xalign">0</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="last_updated_label">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Last Updated</property>
+            <property name="xalign">1</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Location</property>
+            <property name="xalign">1</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Price</property>
+            <property name="xalign">1</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Part</property>
+            <property name="xalign">1</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

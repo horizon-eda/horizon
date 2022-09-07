@@ -112,6 +112,11 @@ void Query::get(int idx, int &r) const
     r = sqlite3_column_int(stmt, idx);
 }
 
+void Query::get(int idx, double &r) const
+{
+    r = sqlite3_column_double(stmt, idx);
+}
+
 void Query::get(int idx, sqlite3_int64 &r) const
 {
     r = sqlite3_column_int64(stmt, idx);
@@ -140,6 +145,14 @@ void Query::bind(int idx, int v)
         throw Error(rc, sqlite3_errmsg(db.db));
     }
 }
+
+void Query::bind(int idx, double v)
+{
+    if (const auto rc = sqlite3_bind_double(stmt, idx, v) != SQLITE_OK) {
+        throw Error(rc, sqlite3_errmsg(db.db));
+    }
+}
+
 void Query::bind(const char *name, int v)
 {
     bind(sqlite3_bind_parameter_index(stmt, name), v);

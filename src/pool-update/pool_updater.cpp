@@ -351,7 +351,7 @@ std::vector<std::string> PoolUpdater::update_included_pools()
         paths.push_back(path);
         SQLite::Query q(db, "INSERT INTO pools_included (uuid, level) VALUES (?, ?)");
         q.bind(1, it);
-        q.bind(2, --order);
+        q.bind(2, (int)--order);
         q.step();
     }
     db.execute("COMMIT");

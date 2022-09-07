@@ -33,7 +33,8 @@ static const LutEnumStr<Appearance::CursorSize> cursor_size_lut = {
 static const LutEnumStr<Preferences::StockInfoProviderSel> stock_info_provider_lut = {
         {"none", Preferences::StockInfoProviderSel::NONE},
         {"partinfo", Preferences::StockInfoProviderSel::PARTINFO},
-        {"digikey", Preferences::StockInfoProviderSel::DIGIKEY}};
+        {"digikey", Preferences::StockInfoProviderSel::DIGIKEY},
+        {"local", Preferences::StockInfoProviderSel::LOCAL}};
 
 #ifdef G_OS_WIN32
 static const bool capture_output_default = true;
@@ -395,6 +396,18 @@ json DigiKeyApiPreferences::serialize() const
     return j;
 }
 
+void LocalStockPreferences::load_from_json(const json &j)
+{
+    database_path = j.at("database_path").get<std::string>();
+}
+
+json LocalStockPreferences::serialize() const
+{
+    json j;
+    j["database_path"] = database_path;
+    return j;
+}
+
 json ActionBarPreferences::serialize() const
 {
     json j;
@@ -637,6 +650,8 @@ void Preferences::load_from_json(const json &j)
         partinfo.load_from_json(j.at("partinfo"));
     if (j.count("digikey_api"))
         digikey_api.load_from_json(j.at("digikey_api"));
+    if (j.count("localstock"))
+        localstock.load_from_json(j.at("localstock"));
     if (j.count("undo_redo"))
         undo_redo.load_from_json(j.at("undo_redo"));
     if (j.count("appearance"))

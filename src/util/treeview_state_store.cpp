@@ -58,7 +58,7 @@ bool TreeViewStateStore::save()
     for (const auto &[col, width] : column_widths) {
         SQLite::Query q(db, "INSERT or replace into widths VALUES (?,?)");
         q.bind(1, get_key(col));
-        q.bind(2, width);
+        q.bind(2, (int)width);
         q.step();
     }
     db.execute("COMMIT");

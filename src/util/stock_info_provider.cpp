@@ -3,6 +3,7 @@
 #include "preferences/preferences.hpp"
 #include "stock_info_provider_partinfo.hpp"
 #include "stock_info_provider_digikey.hpp"
+#include "stock_info_provider_local.hpp"
 
 namespace horizon {
 std::unique_ptr<StockInfoProvider> StockInfoProvider::create(const std::string &pool_base_path)
@@ -22,6 +23,8 @@ std::unique_ptr<StockInfoProvider> StockInfoProvider::create(const std::string &
         if (StockInfoProviderDigiKey::is_valid())
             return std::make_unique<StockInfoProviderDigiKey>(pool_base_path);
         break;
+    case Preferences::StockInfoProviderSel::LOCAL:
+        return std::make_unique<StockInfoProviderLocal>(pool_base_path);
     }
     return nullptr;
 }

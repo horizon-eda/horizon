@@ -4,6 +4,7 @@
 #include "util/util.hpp"
 #include "preferences_window_stock_info_partinfo.hpp"
 #include "preferences_window_stock_info_digikey.hpp"
+#include "preferences_window_stock_info_local.hpp"
 #include "widgets/generic_combo_box.hpp"
 #include "preferences/preferences.hpp"
 
@@ -19,6 +20,7 @@ StockInfoPreferencesEditor::StockInfoPreferencesEditor(Preferences &prefs)
     provider_combo->append(Sel::NONE, "None");
     provider_combo->append(Sel::PARTINFO, "Partinfo");
     provider_combo->append(Sel::DIGIKEY, "Digi-Key");
+    provider_combo->append(Sel::LOCAL, "Local database");
     provider_combo->set_active_key(preferences.stock_info_provider);
     provider_combo->signal_changed().connect([this, provider_combo] {
         preferences.stock_info_provider = provider_combo->get_active_key();
@@ -46,6 +48,11 @@ StockInfoPreferencesEditor::StockInfoPreferencesEditor(Preferences &prefs)
     {
         auto editor = DigiKeyApiPreferencesEditor::create(prefs);
         stack->add(*editor, std::to_string(static_cast<int>(Sel::DIGIKEY)));
+        editor->unreference();
+    }
+    {
+        auto editor = LocalStockPreferencesEditor::create(prefs);
+        stack->add(*editor, std::to_string(static_cast<int>(Sel::LOCAL)));
         editor->unreference();
     }
     pack_start(*stack, true, true, 0);

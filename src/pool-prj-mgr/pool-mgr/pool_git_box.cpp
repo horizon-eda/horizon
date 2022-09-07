@@ -211,7 +211,7 @@ void PoolGitBox::status_cb(const char *path, unsigned int status_flags)
     if (!(status_flags & GIT_STATUS_IGNORED)) {
         q_status->reset();
         q_status->bind(1, std::string(path));
-        q_status->bind(2, status_flags);
+        q_status->bind(2, (int)status_flags);
         q_status->step();
     }
 }

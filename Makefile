@@ -573,6 +573,8 @@ SRC_IMP = \
 	src/util/stock_info_provider.cpp\
 	src/util/stock_info_provider_partinfo.cpp\
 	src/util/stock_info_provider_digikey.cpp\
+	src/util/stock_info_provider_local.cpp\
+	src/util/stock_info_provider_local_editor.cpp\
 	src/util/http_client.cpp\
 	src/widgets/column_chooser.cpp\
 	src/util/csv_util.cpp\
@@ -783,6 +785,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/preferences/preferences_window_stock_info.cpp\
 	src/pool-prj-mgr/preferences/preferences_window_stock_info_partinfo.cpp\
 	src/pool-prj-mgr/preferences/preferences_window_stock_info_digikey.cpp\
+	src/pool-prj-mgr/preferences/preferences_window_stock_info_local.cpp\
 	src/pool-prj-mgr/preferences/digikey_auth_window.cpp\
 	src/pool-prj-mgr/preferences/preferences_window_misc.cpp\
 	src/pool-prj-mgr/preferences/preferences_row.cpp\
@@ -807,6 +810,8 @@ SRC_POOL_PRJ_MGR = \
 	src/util/stock_info_provider.cpp\
 	src/util/stock_info_provider_partinfo.cpp\
 	src/util/stock_info_provider_digikey.cpp\
+	src/util/stock_info_provider_local.cpp\
+	src/util/stock_info_provider_local_editor.cpp\
 	src/widgets/help_button.cpp\
 	src/pool-prj-mgr/pool-mgr/kicad_symbol_import_wizard/kicad_symbol_import_wizard.cpp\
 	src/pool-prj-mgr/pool-mgr/kicad_symbol_import_wizard/gate_editor.cpp\

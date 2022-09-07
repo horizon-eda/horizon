@@ -32,6 +32,8 @@
     <file>pool-prj-mgr/pools_window/pool_download_window.ui</file>
     <file>util/stock_info_provider_partinfo_schema.sql</file>
     <file>util/stock_info_provider_digikey_schema.sql</file>
+    <file>util/stock_info_provider_local_schema.sql</file>
+    <file>util/stock_info_provider_local_editor.ui</file>
     <file>pool-prj-mgr/preferences/digikey_auth_window.ui</file>
 
     <file preprocess="xml-stripblanks">icons/scalable/actions/edit-schematic-symbolic.svg</file>

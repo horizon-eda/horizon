@@ -6,6 +6,7 @@
 #include <sigc++/sigc++.h>
 #include <string>
 #include "imp/action_catalog.hpp"
+#include <gtkmm.h>
 
 namespace horizon {
 using json = nlohmann::json;
@@ -106,6 +107,14 @@ public:
     json serialize() const;
 };
 
+class LocalStockPreferences {
+public:
+    std::string database_path = Glib::build_filename(Glib::get_user_cache_dir(), "horizon-stock-info.db");
+
+    void load_from_json(const json &j);
+    json serialize() const;
+};
+
 class ActionBarPreferences {
 public:
     bool enable = true;
@@ -180,11 +189,13 @@ public:
     ZoomPreferences zoom;
     bool capture_output = false;
 
-    enum class StockInfoProviderSel { NONE, PARTINFO, DIGIKEY };
+    enum class StockInfoProviderSel { NONE, PARTINFO, DIGIKEY, LOCAL };
     StockInfoProviderSel stock_info_provider = StockInfoProviderSel::NONE;
 
     PartInfoPreferences partinfo;
     DigiKeyApiPreferences digikey_api;
+    LocalStockPreferences localstock;
+
     ActionBarPreferences action_bar;
     InToolKeySequencesPreferences in_tool_key_sequences;
     MousePreferences mouse;
