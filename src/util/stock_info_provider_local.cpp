@@ -366,20 +366,6 @@ void StockInfoProviderLocal::handle_click(GdkEventButton *ev)
     }
 }
 
-static std::string get_currency_sign(const std::string &s)
-{
-    static const std::map<std::string, std::string> signs = {
-            {"USD", "$"},
-            {"EUR", "€"},
-            {"EUR", "€"},
-            {"GBP", "£"},
-    };
-    if (signs.count(s))
-        return signs.at(s);
-    else
-        return s + " ";
-}
-
 void StockInfoProviderLocalWorker::update_parts(const std::list<UUID> &aparts)
 {
     {

@@ -25,7 +25,7 @@ StockInfoProviderLocalEditor::StockInfoProviderLocalEditor(BaseObjectType *cobje
     // TODO: Part number??
     part_label->set_text((std::string)record->get_uuid());
 
-    if (record->last_updated) {
+    if (record->last_updated.to_unix() > 0) {
         last_updated_value_label->set_text(record->last_updated.format("%c"));
     }
     else {
