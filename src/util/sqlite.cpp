@@ -146,7 +146,7 @@ void Query::bind(int idx, int v)
     }
 }
 
-void Query::bind(int idx, double v)
+void Query::bind_double(int idx, double v)
 {
     if (const auto rc = sqlite3_bind_double(stmt, idx, v) != SQLITE_OK) {
         throw Error(rc, sqlite3_errmsg(db.db));

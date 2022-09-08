@@ -1,6 +1,5 @@
 #include "stock_info_provider_local.hpp"
 #include "stock_info_provider_local_editor.hpp"
-#include <thread>
 #include "nlohmann/json.hpp"
 #include "preferences/preferences_provider.hpp"
 #include "util/gtk_util.hpp"
@@ -76,198 +75,38 @@ private:
     SQLite::Database stock_db;
 };
 
-
-class StockInfoProviderLocalWorker {
-
-public:
-    StockInfoProviderLocalWorker(const std::string &pool_base_path, Glib::Dispatcher &disp)
-        : pool(pool_base_path), stock_mgr(LocalStockManager::get()), dispatcher(disp),
-          prefs(PreferencesProvider::get_prefs().localstock)
-    {
-        auto worker_thread = std::thread(&StockInfoProviderLocalWorker::worker_wrapper, this);
-        worker_thread.detach();
-    }
-    std::list<std::shared_ptr<StockInfoRecord>> get_records();
-    void update_parts(const std::list<UUID> &aparts);
-    void save_record(std::shared_ptr<StockInfoRecordLocal> record)
-    {
-        std::unique_lock<std::mutex> lk(records_to_save_mutex);
-        records_to_save.emplace_back(record);
-    }
-
-    void load_more();
-    void exit()
-    {
-        worker_exit = true;
-        {
-            std::unique_lock<std::mutex> lk(parts_mutex);
-            parts.clear();
-            parts_rev++;
-        }
-
-        dispatcher_lock.lock();
-        cond.notify_all();
-    }
-
-    unsigned int get_n_items_from_cache() const
-    {
-        return n_items_from_cache;
-    }
-
-    unsigned int get_n_items_to_fetch() const
-    {
-        return n_items_to_fetch;
-    }
-
-    unsigned int get_n_items_fetched() const
-    {
-        return n_items_fetched;
-    }
-
-private:
-    Pool pool;
-    class LocalStockManager &stock_mgr;
-    void worker();
-    void worker_wrapper()
-    {
-        worker();
-        delete this;
-    }
-    void add_record(const UUID &uu, const json &j);
-
-    bool worker_exit = false;
-    std::condition_variable cond;
-    std::list<UUID> parts;
-    unsigned int parts_rev = 0;
-    std::mutex parts_mutex;
-
-    std::mutex records_mutex;
-    std::list<std::shared_ptr<StockInfoRecord>> records;
-    std::mutex records_to_save_mutex;
-    std::list<std::shared_ptr<StockInfoRecordLocal>> records_to_save;
-
-    std::mutex dispatcher_lock;
-    Glib::Dispatcher &dispatcher;
-    LocalStockPreferences prefs;
-    void emit();
-
-    unsigned int n_items_from_cache = 0;
-    unsigned int n_items_to_fetch = 0;
-    unsigned int n_items_fetched = 0;
-};
-
-void StockInfoProviderLocalWorker::emit()
+StockInfoRecordLocal::StockInfoRecordLocal(const UUID &uu) : uuid(uu), last_updated(Glib::DateTime::create_now_local(0))
 {
-    if (dispatcher_lock.try_lock()) {
-        dispatcher.emit();
-        dispatcher_lock.unlock();
-    }
 }
 
-void StockInfoProviderLocalWorker::add_record(const UUID &uu, const json &j)
+bool StockInfoRecordLocal::load()
 {
-    auto record = std::make_shared<StockInfoRecordLocal>();
-    record->uuid = uu;
-    record->stock = j.at("qty").get<int>();
-    record->price = j.at("price").get<double>();
-    record->location = j.at("location").get<std::string>();
-    const auto t = j.at("last_updated").get<sqlite3_int64>();
-    record->last_updated = Glib::DateTime::create_now_local(t);
-    record->state = StockInfoRecordLocal::State::FOUND;
-    std::unique_lock<std::mutex> lk(records_mutex);
-    records.emplace_back(record);
-}
-
-void StockInfoProviderLocalWorker::worker()
-{
-    unsigned int my_parts_rev = 0;
-    while (1) {
-        std::list<UUID> my_parts;
-        {
-            std::unique_lock<std::mutex> lk(parts_mutex);
-            cond.wait(lk, [this, &my_parts_rev] { return parts_rev != my_parts_rev; });
-            my_parts_rev = parts_rev;
-            my_parts = parts;
-        }
-        if (worker_exit) {
-            std::cout << "worker bye" << std::endl;
-            return;
-        }
-        std::cout << "got parts " << my_parts.size() << std::endl;
-        std::list<UUID> parts_not_in_db;
-        bool cancel = false;
-        n_items_from_cache = 0;
-        for (const auto &it : my_parts) {
-            const auto cr = stock_mgr.query(it);
-            if (cr.first) {
-                add_record(it, cr.second);
-                n_items_from_cache++;
-            }
-            else {
-                parts_not_in_db.emplace_back(it);
-            }
-
-            if (my_parts_rev != parts_rev) {
-                cancel = true;
-                break;
-            }
-            if (worker_exit) {
-                std::cout << "worker bye" << std::endl;
-                return;
-            }
-            emit();
-        }
-        if (cancel)
-            continue;
-
-        if (parts_not_in_db.size()) {
-            std::unique_lock<std::mutex> lk(records_mutex);
-
-            for (const auto &uu : parts_not_in_db) {
-                auto record = std::make_shared<StockInfoRecordLocal>();
-                record->uuid = uu;
-                record->state = StockInfoRecordLocal::State::NOT_FOUND;
-                records.emplace_back(record);
-            }
-            emit();
-        }
-
-        if (records_to_save.size()) {
-            std::unique_lock<std::mutex> lk(records_to_save_mutex);
-            for (const auto &it : records_to_save) {
-                if (const auto p = dynamic_cast<StockInfoRecordLocal *>(it.get())) {
-                    stock_mgr.save(*p);
-                }
-            }
-            records_to_save.clear();
-            emit();
-        }
-
-        emit();
+    const auto cr = LocalStockManager::get().query(uuid);
+    if (cr.first) {
+        auto j = cr.second;
+        stock = j.at("qty").get<int>();
+        price = j.at("price").get<double>();
+        location = j.at("location").get<std::string>();
+        if (const auto t = j.at("last_updated").get<sqlite3_int64>())
+            last_updated = Glib::DateTime::create_now_local(t);
+        state = StockInfoRecordLocal::State::FOUND;
     }
-    std::cout << "worker bye" << std::endl;
-}
-
-std::list<std::shared_ptr<StockInfoRecord>> StockInfoProviderLocalWorker::get_records()
-{
-    std::list<std::shared_ptr<StockInfoRecord>> r;
-    {
-        std::unique_lock<std::mutex> lk(records_mutex);
-        r = records;
-        records.clear();
+    else {
+        state = StockInfoRecordLocal::State::NOT_FOUND;
     }
-    return r;
+    return cr.first;
 }
 
-StockInfoProviderLocal::StockInfoProviderLocal(const std::string &pool_base_path)
-    : worker(new StockInfoProviderLocalWorker(pool_base_path, dispatcher))
+bool StockInfoRecordLocal::save()
+{
+    return LocalStockManager::get().save(*this);
+}
+
+StockInfoProviderLocal::StockInfoProviderLocal(const std::string &pool_base_path) : pool(pool_base_path)
 {
     dispatcher.connect([this] {
         if (status_label) {
-            std::string txt = format_digits(worker->get_n_items_from_cache(), 5) + " from database";
-            if (worker->get_n_items_to_fetch()) {
-                txt += ", fetching " + format_m_of_n(worker->get_n_items_fetched(), worker->get_n_items_to_fetch());
-            }
+            std::string txt = format_digits(n_in_stock, 5) + " in local stock";
             status_label->set_text(txt);
         }
     });
@@ -275,18 +114,20 @@ StockInfoProviderLocal::StockInfoProviderLocal(const std::string &pool_base_path
 
 void StockInfoProviderLocal::update_parts(const std::list<UUID> &parts)
 {
-    worker->update_parts(parts);
-}
-
-void StockInfoProviderLocal::update_stock_info(std::shared_ptr<StockInfoRecordLocal> record)
-{
-    worker->save_record(record);
-    worker->load_more();
+    records.clear();
+    n_in_stock = 0;
+    for (const auto &part : parts) {
+        auto record = std::make_shared<StockInfoRecordLocal>(part);
+        if (record->load())
+            n_in_stock += 1;
+        records.push_back(record);
+    }
+    dispatcher.emit();
 }
 
 std::list<std::shared_ptr<StockInfoRecord>> StockInfoProviderLocal::get_records()
 {
-    return worker->get_records();
+    return records;
 }
 
 void StockInfoProviderLocal::add_columns(Gtk::TreeView *atreeview,
@@ -358,7 +199,7 @@ void StockInfoProviderLocal::handle_click(GdkEventButton *ev)
 
                 auto v = treeview->get_model()->get_iter(path)->get_value(column);
                 if (auto p = std::dynamic_pointer_cast<StockInfoRecordLocal>(v)) {
-                    auto ed = StockInfoProviderLocalEditor::create(*this, p);
+                    auto ed = StockInfoProviderLocalEditor::create(p);
                     ed->show();
                 }
             }
@@ -366,29 +207,8 @@ void StockInfoProviderLocal::handle_click(GdkEventButton *ev)
     }
 }
 
-void StockInfoProviderLocalWorker::update_parts(const std::list<UUID> &aparts)
-{
-    {
-        std::unique_lock<std::mutex> lk(parts_mutex);
-        parts = aparts;
-        parts_rev++;
-    }
-    cond.notify_all();
-}
-
-void StockInfoProviderLocalWorker::load_more()
-{
-    {
-        std::unique_lock<std::mutex> lk(parts_mutex);
-        parts_rev++;
-    }
-    cond.notify_all();
-}
-
-
 StockInfoProviderLocal::~StockInfoProviderLocal()
 {
-    worker->exit();
 }
 
 Gtk::Widget *StockInfoProviderLocal::create_status_widget()

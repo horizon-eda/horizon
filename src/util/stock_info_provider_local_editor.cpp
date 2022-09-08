@@ -5,9 +5,8 @@
 namespace horizon {
 
 StockInfoProviderLocalEditor::StockInfoProviderLocalEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
-                                                           StockInfoProviderLocal &s,
                                                            std::shared_ptr<StockInfoRecordLocal> r)
-    : Gtk::Window(cobject), provider(s), record(r)
+    : Gtk::Window(cobject), record(r)
 {
     stock_adj = Glib::RefPtr<Gtk::Adjustment>::cast_dynamic(x->get_object("stock_adj"));
     price_adj = Glib::RefPtr<Gtk::Adjustment>::cast_dynamic(x->get_object("price_adj"));
@@ -23,7 +22,7 @@ StockInfoProviderLocalEditor::StockInfoProviderLocalEditor(BaseObjectType *cobje
     loc_entry->set_text(record->location);
 
     // TODO: Part number??
-    part_label->set_text((std::string)record->get_uuid());
+    part_label->set_text((std::string)record->uuid);
 
     if (record->last_updated.to_unix() > 0) {
         last_updated_value_label->set_text(record->last_updated.format("%c"));
@@ -37,7 +36,7 @@ StockInfoProviderLocalEditor::StockInfoProviderLocalEditor(BaseObjectType *cobje
         record->stock = stock_adj->get_value();
         record->price = price_adj->get_value();
         record->location = loc_entry->get_text();
-        provider.update_stock_info(record);
+        record->save();
         this->close();
     });
 
@@ -45,13 +44,12 @@ StockInfoProviderLocalEditor::StockInfoProviderLocalEditor(BaseObjectType *cobje
 }
 
 
-StockInfoProviderLocalEditor *StockInfoProviderLocalEditor::create(StockInfoProviderLocal &s,
-                                                                   std::shared_ptr<StockInfoRecordLocal> r)
+StockInfoProviderLocalEditor *StockInfoProviderLocalEditor::create(std::shared_ptr<StockInfoRecordLocal> r)
 {
     StockInfoProviderLocalEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/org/horizon-eda/horizon/util/stock_info_provider_local_editor.ui");
-    x->get_widget_derived("window", w, s, r);
+    x->get_widget_derived("window", w, r);
     w->reference();
     return w;
 }

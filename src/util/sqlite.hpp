@@ -38,7 +38,7 @@ public:
     void bind(int idx, const std::string &v, bool copy = true);
     void bind(const char *name, const std::string &v, bool copy = true);
     void bind(int idx, int v);
-    void bind(int idx, double v);
+    void bind_double(int idx, double v);
     void bind(const char *name, int v);
     void bind_int64(int idx, sqlite3_int64 v);
     void bind_int64(const char *name, sqlite3_int64 v);

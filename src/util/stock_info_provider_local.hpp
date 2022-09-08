@@ -17,6 +17,7 @@ using json = nlohmann::json;
 
 class StockInfoRecordLocal : public StockInfoRecord {
 public:
+    StockInfoRecordLocal(const UUID &uu);
     const UUID &get_uuid() const override
     {
         return uuid;
@@ -38,9 +39,9 @@ public:
             }
         }
     }
-
+    UUID uuid;
     enum class State { FOUND, NOT_FOUND, NOT_AVAILABLE, NOT_LOADED };
-    State state = State::FOUND;
+    State state = State::NOT_LOADED;
     class OrderablePart {
     public:
         std::string MPN;
@@ -50,9 +51,14 @@ public:
     int stock = -1;
     double price = 0;
     std::string location = "";
-    std::string currency;
     Glib::DateTime last_updated;
-    UUID uuid;
+
+
+    // Load stock info from the local database
+    bool load();
+
+    // Save stock info into local database
+    bool save();
 };
 
 class StockInfoProviderLocal : public StockInfoProvider {
@@ -60,14 +66,15 @@ public:
     StockInfoProviderLocal(const std::string &pool_base_path);
     void add_columns(Gtk::TreeView *treeview, Gtk::TreeModelColumn<std::shared_ptr<StockInfoRecord>> column) override;
     void update_parts(const std::list<UUID> &parts) override;
-    void update_stock_info(std::shared_ptr<StockInfoRecordLocal> record);
     std::list<std::shared_ptr<StockInfoRecord>> get_records() override;
     Gtk::Widget *create_status_widget() override;
     ~StockInfoProviderLocal();
 
 private:
     Gtk::Label *status_label = nullptr;
-    class StockInfoProviderLocalWorker *worker = nullptr;
+    std::list<std::shared_ptr<StockInfoRecord>> records;
+    Pool pool;
+    int n_in_stock;
 
     void handle_click(GdkEventButton *ev);
     Gtk::TreeView *treeview = nullptr;

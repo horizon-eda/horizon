@@ -36,7 +36,7 @@ bool PanedStateStore::save()
     db.execute("BEGIN");
     SQLite::Query q(db, "INSERT or replace into widths VALUES (?,?)");
     q.bind(1, prefix);
-    q.bind(2, (int)position);
+    q.bind(2, position);
     q.step();
     db.execute("COMMIT");
     return false;
