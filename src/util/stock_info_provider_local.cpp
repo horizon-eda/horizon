@@ -1,6 +1,5 @@
 #include "stock_info_provider_local.hpp"
 #include "stock_info_provider_local_editor.hpp"
-#include "nlohmann/json.hpp"
 #include "preferences/preferences_provider.hpp"
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
@@ -15,7 +14,7 @@
 namespace horizon {
 
 static const int min_user_version = 1; // keep in sync with schema
-
+static const std::string database_schema = "/org/horizon-eda/horizon/util/stock_info_provider_local_schema.sql";
 
 class LocalStockManager {
 public:
@@ -25,54 +24,48 @@ public:
         return inst;
     }
 
-    std::pair<bool, json> query(const UUID &part)
+    bool query(StockInfoRecordLocal &record)
     {
-        SQLite::Query q(stock_db, "SELECT qty, price, location, last_updated FROM stock_info WHERE uuid=?");
-        q.bind(1, part);
-        if (q.step()) {
-            json j;
-            j["qty"] = q.get<int>(0);
-            j["price"] = q.get<double>(1);
-            j["location"] = q.get<std::string>(2);
-            j["last_updated"] = q.get<sqlite3_int64>(3);
-            return {true, j};
+        search_query.reset();
+        search_query.bind(1, {record.uuid.get_bytes(), 16});
+        if (search_query.step()) {
+            record.stock = search_query.get<int>(0);
+            record.price = search_query.get<double>(1);
+            record.location = search_query.get<std::string>(2);
+            record.last_updated = Glib::DateTime::create_now_local(search_query.get<sqlite3_int64>(3));
+            return true;
         }
-        else {
-            return {false, nullptr};
-        }
+        return false;
     }
 
     bool save(const StockInfoRecordLocal &record)
     {
-        SQLite::Query q(stock_db,
-                        "INSERT OR REPLACE INTO stock_info "
-                        "(uuid, qty, price, location, last_updated) VALUES(?, ?, ?, ?, ?) ");
-        q.bind(1, record.uuid);
-        q.bind(2, record.stock);
-        q.bind(3, record.price);
-        q.bind(4, record.location);
-        q.bind_int64(5, Glib::DateTime::create_now_local().to_unix());
-        return q.step();
+        insert_query.reset();
+        insert_query.bind(1, {record.uuid.get_bytes(), 16});
+        insert_query.bind(2, record.stock);
+        insert_query.bind(3, record.price);
+        insert_query.bind(4, record.location);
+        insert_query.bind_int64(5, Glib::DateTime::create_now_local().to_unix());
+        return insert_query.step();
     }
 
 private:
     LocalStockManager()
         : prefs(PreferencesProvider::get_prefs().localstock),
-          stock_db(prefs.database_path, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, 10000)
+          stock_db(prefs.database_path, database_schema, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, 10000,
+                   min_user_version),
+          insert_query(stock_db,
+                       "INSERT OR REPLACE INTO stock_info "
+                       "(uuid, qty, price, location, last_updated) VALUES(?, ?, ?, ?, ?) "),
+          search_query(stock_db, "SELECT qty, price, location, last_updated FROM stock_info WHERE uuid=?")
     {
-        int user_version = stock_db.get_user_version();
-        if (user_version < min_user_version) {
-            // update schema
-            auto bytes = Gio::Resource::lookup_data_global(
-                    "/org/horizon-eda/horizon/util/"
-                    "stock_info_provider_local_schema.sql");
-            gsize size{bytes->get_size() + 1}; // null byte
-            auto data = (const char *)bytes->get_data(size);
-            stock_db.execute(data);
-        }
     }
     LocalStockPreferences prefs;
     SQLite::Database stock_db;
+    // Reuse prepared statements to supposively speed up queries
+    // see https://www.sqlite.org/cintro.htm
+    SQLite::Query insert_query;
+    SQLite::Query search_query;
 };
 
 StockInfoRecordLocal::StockInfoRecordLocal(const UUID &uu) : uuid(uu), last_updated(Glib::DateTime::create_now_local(0))
@@ -81,20 +74,14 @@ StockInfoRecordLocal::StockInfoRecordLocal(const UUID &uu) : uuid(uu), last_upda
 
 bool StockInfoRecordLocal::load()
 {
-    const auto cr = LocalStockManager::get().query(uuid);
-    if (cr.first) {
-        auto j = cr.second;
-        stock = j.at("qty").get<int>();
-        price = j.at("price").get<double>();
-        location = j.at("location").get<std::string>();
-        if (const auto t = j.at("last_updated").get<sqlite3_int64>())
-            last_updated = Glib::DateTime::create_now_local(t);
+    const auto found = LocalStockManager::get().query(*this);
+    if (found) {
         state = StockInfoRecordLocal::State::FOUND;
     }
     else {
         state = StockInfoRecordLocal::State::NOT_FOUND;
     }
-    return cr.first;
+    return found;
 }
 
 bool StockInfoRecordLocal::save()

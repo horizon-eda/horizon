@@ -1,5 +1,6 @@
 #include "sqlite.hpp"
 #include <glib.h>
+#include <giomm.h>
 #include <string.h>
 #include "util/util.hpp"
 #include "util/uuid.hpp"
@@ -36,6 +37,19 @@ Database::Database(const std::string &filename, int flags, int timeout_ms)
     if (const auto rc =
                 sqlite3_create_collation(db, "naturalCompare", SQLITE_UTF8, nullptr, natural_compare) != SQLITE_OK) {
         throw Error(rc, sqlite3_errmsg(db));
+    }
+}
+
+Database::Database(const std::string &filename, const std::string &schema, int flags, int timeout_ms, int min_version)
+    : Database(filename, flags, timeout_ms)
+{
+    int user_version = get_user_version();
+    if (user_version < min_version) {
+        // update schema
+        auto bytes = Gio::Resource::lookup_data_global(schema);
+        gsize size{bytes->get_size() + 1}; // null byte
+        auto data = (const char *)bytes->get_data(size);
+        execute(data);
     }
 }
 
@@ -127,6 +141,12 @@ void Query::get(int idx, ObjectType &r) const
     r = object_type_lut.lookup(get<std::string>(idx));
 }
 
+void Query::get(int idx, Blob &b) const
+{
+    b.ptr = sqlite3_column_blob(stmt, idx);
+    b.len = sqlite3_column_bytes(stmt, idx);
+}
+
 void Query::bind(int idx, const std::string &v, bool copy)
 {
     if (const auto rc =
@@ -185,6 +205,13 @@ void Query::bind(int idx, ObjectType v)
 void Query::bind(const char *name, ObjectType v)
 {
     bind(name, object_type_lut.lookup_reverse(v));
+}
+
+void Query::bind(int idx, const Blob &b)
+{
+    if (const auto rc = sqlite3_bind_blob(stmt, idx, b.ptr, b.len, SQLITE_STATIC) != SQLITE_OK) {
+        throw Error(rc, sqlite3_errmsg(db.db));
+    }
 }
 
 void Query::reset()

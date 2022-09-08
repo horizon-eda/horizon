@@ -22,6 +22,11 @@ protected:
     noncopyable &operator=(noncopyable const &) = delete;
 };
 
+typedef struct Blob {
+    const void *ptr;
+    uint32_t len;
+} Blob;
+
 class Query : noncopyable {
 public:
     Query(class Database &d, const std::string &sql);
@@ -46,6 +51,7 @@ public:
     void bind(const char *name, const horizon::UUID &v);
     void bind(int idx, ObjectType type);
     void bind(const char *name, ObjectType type);
+    void bind(int idx, const Blob &b);
     void reset();
 
     int get_column_count();
@@ -61,6 +67,7 @@ private:
     void get(int idx, double &r) const;
     void get(int idx, sqlite3_int64 &r) const;
     void get(int idx, ObjectType &r) const;
+    void get(int idx, Blob &b) const;
 };
 
 class Error : public std::runtime_error {
@@ -76,6 +83,8 @@ class Database {
 
 public:
     Database(const std::string &filename, int flags = SQLITE_OPEN_READONLY, int timeout_ms = 0);
+    Database(const std::string &filename, const std::string &schema, int flags = SQLITE_OPEN_READONLY,
+             int timeout_ms = 0, int min_version = 1);
     ~Database();
     void execute(const std::string &query);
     void execute(const char *query);

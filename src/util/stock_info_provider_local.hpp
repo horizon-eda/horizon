@@ -1,10 +1,5 @@
 #pragma once
 #include "stock_info_provider.hpp"
-#include "http_client.hpp"
-#include <condition_variable>
-#include <mutex>
-#include <thread>
-#include "nlohmann/json_fwd.hpp"
 #include "pool/pool.hpp"
 #include <glibmm/datetime.h>
 
@@ -12,8 +7,6 @@ namespace horizon {
 namespace SQLite {
 class Database;
 }
-
-using json = nlohmann::json;
 
 class StockInfoRecordLocal : public StockInfoRecord {
 public:
@@ -23,36 +16,13 @@ public:
         return uuid;
     }
 
-    void append(const StockInfoRecord &aother) override
-    {
-        auto other = dynamic_cast<const StockInfoRecordLocal &>(aother);
-        if (other.stock >= stock) {
-            stock = other.stock;
-            state = other.state;
-            for (auto &it : other.parts) {
-                parts.push_front(it);
-            }
-        }
-        else {
-            for (auto &it : other.parts) {
-                parts.push_back(it);
-            }
-        }
-    }
     UUID uuid;
     enum class State { FOUND, NOT_FOUND, NOT_AVAILABLE, NOT_LOADED };
     State state = State::NOT_LOADED;
-    class OrderablePart {
-    public:
-        std::string MPN;
-        json j;
-    };
-    std::list<OrderablePart> parts;
     int stock = -1;
     double price = 0;
     std::string location = "";
     Glib::DateTime last_updated;
-
 
     // Load stock info from the local database
     bool load();
