@@ -132,8 +132,8 @@ protected:
     Color light_color = {1, 1, 1};
     float explode = 0;
     float highlight_intensity = .5;
-    float specular_intensity = 30;
-    float specular_power = 32;
+    float specular_intensity = 20;
+    float specular_power = 64;
     float ambient_intensity = .6;
     float diffuse_intensity = 1;
 
@@ -142,7 +142,7 @@ protected:
     float cam_distance = 20;
     float cam_fov = 45;
     glm::vec3 cam_position;
-    glm::vec3 light_position = {30, 30, 100};
+    glm::vec3 light_position;
     glm::vec2 center;
 
     Projection projection = Projection::PERSP;

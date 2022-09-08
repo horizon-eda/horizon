@@ -113,7 +113,6 @@ void CoverRenderer::render(int layer)
 void CoverRenderer::render()
 {
     glm::vec3 light_color(ca.light_color.r, ca.light_color.g, ca.light_color.b);
-
     glUseProgram(program);
     glBindVertexArray(vao);
 

@@ -73,8 +73,9 @@ void main() {
     p4 = rotationMatrix(vec3(0,1,0), 3.14159)*p4;
     n4 = rotationMatrix(vec3(0,1,0), 3.14159)*n4;
    }
-  gl_Position = proj*view*vec4((p4.xyz+vec3(offset, z)),1);
-  pos_to_fragment = gl_Position.xyz;
+  pos_to_fragment = p4.xyz+vec3(offset, z);
+  gl_Position = proj*view*vec4(pos_to_fragment,1);
+
   normal_to_fragment = normalize(n4.xyz);
   instance_to_fragment = uint(gl_InstanceID);
 }

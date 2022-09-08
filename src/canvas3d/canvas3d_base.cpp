@@ -265,7 +265,6 @@ void Canvas3DBase::render(RenderBackground mode)
     float theta = glm::radians(90 - cam_elevation);
     auto cam_offset = glm::vec3(r * sin(theta) * cos(phi), r * sin(theta) * sin(phi), r * cos(theta));
     auto cam_pos = cam_offset + glm::vec3(center, 0);
-    cam_position = cam_pos;
 
     glm::vec3 right(sin(phi - 3.14f / 2.0f), cos(phi - 3.14f / 2.0f), 0);
 
@@ -297,6 +296,15 @@ void Canvas3DBase::render(RenderBackground mode)
     }
 
     cam_normal = glm::normalize(cam_offset);
+    cam_position = cam_pos;
+
+    auto light_phi = glm::radians(cam_azimuth + 15);
+    auto light_theta = glm::radians(90 - cam_elevation * 5 / 4);
+    float light_r = cam_distance * 2;
+    auto light_offset = glm::vec3(light_r * sin(light_theta) * cos(light_phi),
+                                  light_r * sin(light_theta) * sin(light_phi), light_r * cos(light_theta));
+    light_position = light_offset + glm::vec3(center, 0);
+
     wall_renderer.render();
 
     if (show_models)
