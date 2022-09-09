@@ -9,6 +9,8 @@
 
 namespace horizon {
 
+static const char *pin_name_sep = " · ";
+
 static const LutEnumStr<SchematicSymbol::PinDisplayMode> pdm_lut = {
         {"selected_only", SchematicSymbol::PinDisplayMode::SELECTED_ONLY},
         {"both", SchematicSymbol::PinDisplayMode::BOTH},
@@ -181,7 +183,7 @@ static std::string append_tilde(const std::string &s)
 static void append_pin_name(std::string &name, const std::string &x)
 {
     if (name.size())
-        name += " ";
+        name += pin_name_sep;
     name += append_tilde(x);
 }
 
@@ -203,12 +205,12 @@ void SchematicSymbol::apply_pin_names()
         for (auto &it_pin : symbol.pins) {
             auto pin_uuid = it_pin.first;
             for (auto &[alt_uu, pin_name] : gate->unit->pins.at(pin_uuid).names) {
-                it_pin.second.name += append_tilde(pin_name.name) + " ";
+                it_pin.second.name += append_tilde(pin_name.name) + pin_name_sep;
             }
             UUIDPath<2> path(gate->uuid, pin_uuid);
 
             if (const auto &n = get_custom_pin_name(*component, path); n.size())
-                it_pin.second.name += append_tilde(n) + " ";
+                it_pin.second.name += append_tilde(n) + pin_name_sep;
 
             it_pin.second.name += "(" + append_tilde(gate->unit->pins.at(pin_uuid).primary_name) + ")";
         }

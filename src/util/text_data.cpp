@@ -276,6 +276,8 @@ static unsigned int codepoint_to_hershey(gunichar c, TextData::Font font)
         case 0x3bc: // U+03BC GREEK SMALL LETTER MU
         case 0xb5:  // U+00B5 MICRO SIGN
             return 638;
+        case 0xb7: // U+00B7 MIDDLE DOT
+            return 729;
         case 0x2126: // U+2126 OHM SIGN
         case 0x3a9:  // U+03A9 GREEK CAPITAL LETTER OMEGA
             return 550;
