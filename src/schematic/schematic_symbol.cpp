@@ -9,7 +9,7 @@
 
 namespace horizon {
 
-const char *pin_name_sep = " · ";
+static const char *pin_name_sep = " · ";
 
 static const LutEnumStr<SchematicSymbol::PinDisplayMode> pdm_lut = {
         {"selected_only", SchematicSymbol::PinDisplayMode::SELECTED_ONLY},
