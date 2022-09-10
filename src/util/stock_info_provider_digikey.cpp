@@ -243,6 +243,8 @@ public:
                 parts.push_back(it);
             }
         }
+        if (currency.empty())
+            currency = other.currency;
     }
 
     enum class State { FOUND, NOT_FOUND, NOT_AVAILABLE, NOT_LOADED };
