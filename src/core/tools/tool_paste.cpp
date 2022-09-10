@@ -740,6 +740,13 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
     update_airwires();
     if (tool_id == ToolID::PASTE_RELATIVE)
         return ToolResponse::commit();
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+            {InToolActionID::ROTATE},
+            {InToolActionID::MIRROR},
+            {InToolActionID::RESTRICT},
+    });
     return ToolResponse();
 }
 
