@@ -55,6 +55,9 @@ jobs:
           - container: ubuntu:jammy
             cxx: g++
             cc: gcc
+          - container: ubuntu:kinetic
+            cxx: g++
+            cc: gcc
           - container: debian:buster
             cxx: g++
             cc: gcc
