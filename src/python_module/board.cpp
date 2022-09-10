@@ -19,7 +19,7 @@
 
 class BoardWrapper : public horizon::DocumentBoard {
 public:
-    BoardWrapper(const horizon::Project &prj);
+    BoardWrapper(const horizon::Project &prj, PlaneMode mode);
     horizon::ProjectPool pool;
     horizon::Block block;
     horizon::Board board;
@@ -81,9 +81,9 @@ public:
     }
 };
 
-class BoardWrapper *create_board_wrapper(const horizon::Project &prj)
+class BoardWrapper *create_board_wrapper(const horizon::Project &prj, PlaneMode plane_mode)
 {
-    return new BoardWrapper(prj);
+    return new BoardWrapper(prj, plane_mode);
 }
 
 
@@ -93,12 +93,15 @@ static horizon::Block get_flattend_block(const std::string &blocks_filename, hor
     return blocks.get_top_block_item().block.flatten();
 }
 
-BoardWrapper::BoardWrapper(const horizon::Project &prj)
+BoardWrapper::BoardWrapper(const horizon::Project &prj, PlaneMode plane_mode)
     : pool(prj.pool_directory, false), block(get_flattend_block(prj.blocks_filename, pool)),
       board(horizon::Board::new_from_file(prj.board_filename, block, pool))
 {
     board.expand();
-    board.update_planes();
+    if (plane_mode == PlaneMode::LOAD_FROM_FILE)
+        board.load_planes_from_file(prj.planes_filename);
+    else
+        board.update_planes();
 }
 
 

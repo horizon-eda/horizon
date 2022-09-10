@@ -28,12 +28,18 @@ static PyObject *PyProject_open_top_schematic(PyObject *pself)
     return reinterpret_cast<PyObject *>(sch);
 }
 
-static PyObject *PyProject_open_board(PyObject *pself)
+static PyObject *PyProject_open_board(PyObject *pself, PyObject *args, PyObject *kwargs)
 {
+    int update_planes = true;
+    char update_planes_s[] = "update_planes";
+    char *keywords[] = {update_planes_s, NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|p", keywords, &update_planes))
+        return NULL;
     auto self = reinterpret_cast<PyProject *>(pself);
     class BoardWrapper *board = nullptr;
     try {
-        board = create_board_wrapper(self->project->project);
+        const auto plane_mode = update_planes ? PlaneMode::UPDATE : PlaneMode::LOAD_FROM_FILE;
+        board = create_board_wrapper(self->project->project, plane_mode);
     }
     catch (const std::exception &e) {
         PyErr_SetString(PyExc_IOError, e.what());
@@ -92,7 +98,7 @@ static int PyProject_init(PyObject *pself, PyObject *args, PyObject *kwds)
 
 static PyMethodDef PyProject_methods[] = {
         {"open_top_schematic", (PyCFunction)PyProject_open_top_schematic, METH_NOARGS, "Open top block"},
-        {"open_board", (PyCFunction)PyProject_open_board, METH_NOARGS, "Open board"},
+        {"open_board", (PyCFunction)PyProject_open_board, METH_VARARGS | METH_KEYWORDS, "Open board"},
         {NULL} /* Sentinel */
 };
 
