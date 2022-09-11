@@ -11,6 +11,8 @@
 #include <iomanip>
 #include <atomic>
 #include <iostream>
+#include <range/v3/view.hpp>
+#include <range/v3/algorithm.hpp>
 
 namespace horizon {
 
@@ -399,7 +401,11 @@ void StockInfoProviderDigiKeyWorker::add_record(const UUID &uu, const json &j, c
         try {
             const auto &o = find_product(j, manufacturer);
             if (!o.is_null()) {
-                stock = o.at("QuantityAvailable").get<int>();
+                stock = ranges::max(
+                        ranges::views::concat(ranges::views::single(o.at("QuantityAvailable").get<int>()),
+                                              o.at("AlternatePackaging") | ranges::views::transform([](const json &x) {
+                                                  return x.at("QuantityAvailable").get<int>();
+                                              })));
                 record->stock = stock;
                 record->currency = j.at("SearchLocaleUsed").at("Currency").get<std::string>();
                 record->parts.emplace_back();
