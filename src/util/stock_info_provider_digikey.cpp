@@ -734,13 +734,20 @@ void StockInfoProviderDigiKey::construct_popover(const StockInfoRecordDigiKey &r
             la->set_xalign(0);
             la->set_markup(make_link_markup(it_part.j.at("PrimaryDatasheet").get<std::string>(), descr) + "\n"
                            + make_link_markup(it_part.j.at("ProductUrl").get<std::string>(),
-                                              it_part.j.at("DigiKeyPartNumber").get<std::string>())
-                           + "\n"
-                           + Glib::Markup::escape_text(it_part.j.at("Packaging").at("Value").get<std::string>()));
+                                              it_part.j.at("DigiKeyPartNumber").get<std::string>()));
             box->pack_start(*la, false, false, 0);
+            la->set_margin_bottom(4);
         }
 
         {
+            auto pbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+            {
+                const auto moq = it_part.j.at("MinimumOrderQuantity").get<int>();
+                const auto pkg = it_part.j.at("Packaging").at("Value").get<std::string>();
+                auto la = Gtk::manage(new Gtk::Label(pkg + " (MOQ " + std::to_string(moq) + ")"));
+                la->set_xalign(0);
+                pbox->pack_start(*la, false, false, 0);
+            }
             auto gr = Gtk::manage(new Gtk::Grid);
             gr->set_column_spacing(8);
             int top = 0;
@@ -766,9 +773,32 @@ void StockInfoProviderDigiKey::construct_popover(const StockInfoRecordDigiKey &r
                     break;
             }
             gr->set_margin_start(4);
-            gr->set_margin_bottom(8);
-            box->pack_start(*gr, false, false, 0);
+            gr->set_margin_bottom(4);
+            pbox->pack_start(*gr, false, false, 0);
+            box->pack_start(*pbox, false, false, 0);
         }
+
+        for (auto &alt_pkg : it_part.j.at("AlternatePackaging")) {
+            const auto pkg = alt_pkg.at("Packaging").at("Value").get<std::string>();
+            const auto moq = alt_pkg.at("MinimumOrderQuantity").get<int>();
+            const auto price = alt_pkg.at("UnitPrice").get<double>();
+            auto pbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+            {
+                auto la = Gtk::manage(new Gtk::Label(pkg + " (MOQ " + std::to_string(moq) + ")"));
+                la->set_xalign(0);
+                pbox->pack_start(*la, false, false, 0);
+            }
+            {
+                std::ostringstream oss;
+                oss << get_currency_sign(rec.currency) << std::fixed << std::setprecision(3) << price;
+                auto la = Gtk::manage(new Gtk::Label(oss.str()));
+                la->set_xalign(0);
+                la->set_margin_start(4);
+                pbox->pack_start(*la, false, false, 0);
+            }
+            box->pack_start(*pbox, false, false, 0);
+        }
+
 
         box->show_all();
         stack->add(*box, std::to_string(i_part), it_part.MPN);
