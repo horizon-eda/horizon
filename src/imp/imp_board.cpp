@@ -988,10 +988,7 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
                     nets.insert(tr.net);
             }
         }
-        s += "Layers: ";
-        for (auto layer : layers) {
-            s += core->get_layer_provider().get_layers().at(layer).name + " ";
-        }
+        s += "Layers: " + get_hud_text_for_layers(layers);
         s += "\nTotal length: " + dim_to_string(length, false);
 
         if (n == 2) {

@@ -7,6 +7,8 @@
 #include "pool/part.hpp"
 #include "block/block.hpp"
 #include "board/board_junction.hpp"
+#include <range/v3/view.hpp>
+#include <string_view>
 
 namespace horizon {
 void ImpBase::hud_update()
@@ -46,10 +48,7 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
                 length += (li->from->position - li->to->position).magd();
             }
         }
-        s += "Layers: ";
-        for (auto layer : layers) {
-            s += core->get_layer_provider().get_layers().at(layer).name + " ";
-        }
+        s += "Layers: " + get_hud_text_for_layers(layers);
         s += "\nTotal length: " + dim_to_string(length, false);
         sel_erase_type(sel, ObjectType::LINE);
     }
@@ -204,6 +203,15 @@ std::string ImpBase::get_hud_text_for_net(const Net *net)
 
     trim(s);
     return s;
+}
+
+std::string ImpBase::get_hud_text_for_layers(const std::set<int> &layers)
+{
+    using namespace std::literals;
+    return layers | ranges::views::transform([this](auto layer) {
+               return core->get_layer_provider().get_layers().at(layer).name;
+           })
+           | ranges::views::join(", "sv) | ranges::to<std::string>();
 }
 
 const Block &ImpBase::get_block_for_group_tag_names()
