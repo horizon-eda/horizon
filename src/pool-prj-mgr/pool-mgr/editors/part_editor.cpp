@@ -194,7 +194,14 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("entity_label", w_entity_label);
     x->get_widget("package_label", w_package_label);
     x->get_widget("change_package_button", w_change_package_button);
-    x->get_widget("model_combo", w_model_combo);
+    {
+        Gtk::Box *model_box;
+        x->get_widget("model_box", model_box);
+        w_model_combo = Gtk::manage(new std::remove_pointer_t<decltype(w_model_combo)>);
+        w_model_combo->get_cr_text().property_ellipsize() = Pango::ELLIPSIZE_END;
+        w_model_combo->show();
+        model_box->pack_start(*w_model_combo, true, true, 0);
+    }
     x->get_widget("model_inherit", w_model_inherit);
     x->get_widget("base_label", w_base_label);
     {
@@ -441,7 +448,7 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
 
     update_mapped();
     populate_models();
-    w_model_combo->set_active_id((std::string)part.model);
+    w_model_combo->set_active_key(part.model);
 
     if (part.base) {
         w_model_inherit->set_active(part.inherit_model);
@@ -660,7 +667,7 @@ void PartEditor::update_model_inherit()
 {
     auto active = w_model_inherit->get_active();
     if (active) {
-        w_model_combo->set_active_id((std::string)part.base->model);
+        w_model_combo->set_active_key(part.base->model);
     }
     w_model_combo->set_sensitive(!active);
 }
@@ -754,7 +761,7 @@ void PartEditor::change_package()
         update_entries();
         update_mapped();
         populate_models();
-        w_model_combo->set_active_id((std::string)part.package->default_model);
+        w_model_combo->set_active_key(part.package->default_model);
         set_needs_save();
     }
 }
@@ -769,10 +776,7 @@ void PartEditor::save()
 {
     part.inherit_model = w_model_inherit->get_active();
 
-    if (w_model_combo->get_active_row_number() != -1)
-        part.model = UUID(w_model_combo->get_active_id());
-    else
-        part.model = UUID();
+    part.model = w_model_combo->get_active_key();
 
     part.inherit_tags = w_tags_inherit->get_active();
 

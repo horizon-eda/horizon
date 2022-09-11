@@ -3,6 +3,7 @@
 #include "common/common.hpp"
 #include "pool/part.hpp"
 #include "editor_interface.hpp"
+#include "widgets/generic_combo_box.hpp"
 
 namespace horizon {
 
@@ -33,7 +34,7 @@ private:
     Gtk::Label *w_package_label = nullptr;
     Gtk::Label *w_base_label = nullptr;
     Gtk::Button *w_change_package_button = nullptr;
-    Gtk::ComboBoxText *w_model_combo = nullptr;
+    GenericComboBox<UUID> *w_model_combo = nullptr;
     Gtk::ToggleButton *w_model_inherit = nullptr;
 
     class TagEntry *w_tags = nullptr;
