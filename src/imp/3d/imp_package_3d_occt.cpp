@@ -43,7 +43,7 @@ ImpPackage::ImportCanvas3D::get_model_filename(const BoardPackage &pkg, IPool &p
     auto model = pkg.package.get_model(pkg.model);
     if (model) {
         UUID this_pool_uuid = pool.get_pool_info().uuid;
-        UUID pkg_pool_uuid;
+        UUID pkg_pool_uuid = this_pool_uuid;
         try {
             pool.get_package(pkg.package.uuid, &pkg_pool_uuid);
         }
