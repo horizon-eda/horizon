@@ -24,7 +24,13 @@ WhereUsedBox::WhereUsedBox(IPool &p) : Gtk::Box(Gtk::Orientation::ORIENTATION_VE
         });
         view->append_column(*tvc);
     }
-    view->append_column("Name", list_columns.name);
+    {
+        auto cr = Gtk::manage(new Gtk::CellRendererText());
+        cr->property_ellipsize().set_value(Pango::ELLIPSIZE_END);
+        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Name", *cr));
+        tvc->add_attribute(cr->property_text(), list_columns.name);
+        view->append_column(*tvc);
+    }
     view->show();
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());
     sc->set_shadow_type(Gtk::SHADOW_IN);
