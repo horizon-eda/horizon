@@ -74,6 +74,7 @@ void PadParameterSetWindow::load_pad()
 {
     UUID uu(combo->get_active_id());
     pad_current = &pkg.pads.at(uu);
+    unset_focus();
     if (editor)
         delete editor;
     editor = Gtk::manage(new ParameterSetEditor(&pad_current->parameter_set, false));
