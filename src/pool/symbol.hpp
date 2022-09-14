@@ -109,6 +109,8 @@ public:
 
     unsigned int get_required_version() const;
 
+    void update_junction_connections();
+
 private:
     void update_refs();
 };

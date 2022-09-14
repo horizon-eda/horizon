@@ -7,6 +7,7 @@
 #include "nlohmann/json.hpp"
 #include <algorithm>
 #include "util/bbox_accumulator.hpp"
+#include "common/junction_util.hpp"
 
 namespace horizon {
 
@@ -249,6 +250,17 @@ void Symbol::expand(PinDisplayMode mode)
             pins.erase(uu);
         }
     }
+}
+
+void Symbol::update_junction_connections()
+{
+
+    for (auto &[uu, it] : junctions) {
+        it.clear();
+    }
+
+    JunctionUtil::update(lines);
+    JunctionUtil::update(arcs);
 }
 
 std::pair<Coordi, Coordi> Symbol::get_bbox(bool all) const

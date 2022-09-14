@@ -268,6 +268,7 @@ std::string CoreSymbol::get_display_name(ObjectType type, const UUID &uu)
 void CoreSymbol::rebuild_internal(bool from_undo, const std::string &comment)
 {
     sym.expand(pin_display_mode);
+    sym.update_junction_connections();
     rebuild_finish(from_undo, comment);
 }
 
