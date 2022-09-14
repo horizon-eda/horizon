@@ -9,6 +9,8 @@ public:
     ToolWindow(Gtk::Window *parent, class ImpInterface *intf);
     void set_use_ok(bool okay);
 
+    virtual ~ToolWindow() = default;
+
 protected:
     Gtk::Button *ok_button = nullptr;
     Gtk::Button *cancel_button = nullptr;
