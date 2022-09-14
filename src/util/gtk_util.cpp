@@ -244,6 +244,7 @@ void install_esc_to_close(Gtk::Window &win)
 {
     win.signal_key_press_event().connect([&win](GdkEventKey *ev) {
         if (ev->keyval == GDK_KEY_Escape) {
+            win.unset_focus();
             win.close();
             return true;
         }
