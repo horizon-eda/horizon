@@ -348,5 +348,13 @@
                 "mod": 0
             }
         ]
+    ],
+    "TOGGLE_NAME_ORIENTATION": [
+        [
+            {
+                "key": "t",
+                "mod": 0
+            }
+        ]
     ]
 }

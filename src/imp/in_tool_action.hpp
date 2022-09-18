@@ -54,6 +54,7 @@ enum class InToolActionID {
     // place pin
     AUTOPLACE_NEXT_PIN,
     AUTOPLACE_ALL_PINS,
+    TOGGLE_NAME_ORIENTATION,
 
     // rotate arbitrary
     TOGGLE_ANGLE_SNAP,

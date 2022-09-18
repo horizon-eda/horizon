@@ -13,7 +13,15 @@ public:
     {
         using I = InToolActionID;
         return {
-                I::LMB, I::CANCEL, I::RMB, I::ROTATE, I::MIRROR, I::EDIT, I::AUTOPLACE_ALL_PINS, I::AUTOPLACE_NEXT_PIN,
+                I::LMB,
+                I::CANCEL,
+                I::RMB,
+                I::ROTATE,
+                I::MIRROR,
+                I::EDIT,
+                I::AUTOPLACE_ALL_PINS,
+                I::AUTOPLACE_NEXT_PIN,
+                I::TOGGLE_NAME_ORIENTATION,
         };
     }
 

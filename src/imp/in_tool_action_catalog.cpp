@@ -48,6 +48,8 @@ const std::map<InToolActionID, InToolActionCatalogItem> in_tool_action_catalog =
          {"autoplace next", ToolID::MAP_PIN, InToolActionCatalogItem::FLAGS_DEFAULT}},
         {InToolActionID::AUTOPLACE_ALL_PINS,
          {"autoplace all", ToolID::MAP_PIN, InToolActionCatalogItem::FLAGS_DEFAULT}},
+        {InToolActionID::TOGGLE_NAME_ORIENTATION,
+         {"name orientation", ToolID::MAP_PIN, InToolActionCatalogItem::FLAGS_DEFAULT}},
 
         {InToolActionID::TOGGLE_ANGLE_SNAP,
          {"toggle angle snap", ToolID::ROTATE_ARBITRARY, InToolActionCatalogItem::FLAGS_DEFAULT}},
@@ -135,6 +137,7 @@ const LutEnumStr<InToolActionID> in_tool_action_lut = {
         LUT_ITEM(POLYGON_CORNER_RADIUS),
         LUT_ITEM(AUTOPLACE_NEXT_PIN),
         LUT_ITEM(AUTOPLACE_ALL_PINS),
+        LUT_ITEM(TOGGLE_NAME_ORIENTATION),
         LUT_ITEM(TOGGLE_ANGLE_SNAP),
         LUT_ITEM(LENGTH_TUNING_LENGTH),
         LUT_ITEM(LENGTH_TUNING_AMPLITUDE_INC),

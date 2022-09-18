@@ -144,6 +144,7 @@ void ToolMapPin::update_tip()
     actions.emplace_back(InToolActionID::RMB);
     actions.emplace_back(InToolActionID::ROTATE);
     actions.emplace_back(InToolActionID::MIRROR);
+    actions.emplace_back(InToolActionID::TOGGLE_NAME_ORIENTATION);
     actions.emplace_back(InToolActionID::EDIT, "select pin");
     if (can_autoplace()) {
         actions.emplace_back(InToolActionID::AUTOPLACE_NEXT_PIN);
@@ -232,6 +233,13 @@ ToolResponse ToolMapPin::update(const ToolArgs &args)
             pin->orientation =
                     ToolHelperMove::transform_orientation(pin->orientation, args.action == InToolActionID::ROTATE);
             settings.orientation = pin->orientation;
+            break;
+
+        case InToolActionID::TOGGLE_NAME_ORIENTATION:
+            if (pin->name_orientation == PinNameOrientation::IN_LINE)
+                pin->name_orientation = PinNameOrientation::PERPENDICULAR;
+            else
+                pin->name_orientation = PinNameOrientation::IN_LINE;
             break;
 
         default:;
