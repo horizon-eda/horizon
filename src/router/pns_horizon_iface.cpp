@@ -225,8 +225,12 @@ int PNS_HORIZON_RULE_RESOLVER::Clearance(const PNS::ITEM *aA, const PNS::ITEM *a
     }
 
     int layer = UNDEFINED_LAYER;
-    if (!layers_a.IsMultilayer() && !layers_b.IsMultilayer()) // all on single layer
-        layer = layers_b.Start();
+    if (!layers_a.IsMultilayer() && !layers_b.IsMultilayer()) { // all on single layer
+        if (layers_b.Start() != UNDEFINED_LAYER)
+            layer = layers_b.Start();
+        else
+            layer = layers_a.Start();
+    }
     else if (!layers_a.IsMultilayer() && layers_b.IsMultilayer()) // b is multi
         layer = layers_a.Start();
     else if (layers_a.IsMultilayer() && !layers_b.IsMultilayer()) // a is muli
