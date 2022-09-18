@@ -6,6 +6,10 @@
 
 namespace horizon {
 
+#define CHECK_ENUM_VAL(v, i) static_assert(static_cast<int>(v) == (i))
+CHECK_ENUM_VAL(ColorP::AIRWIRE, 13);
+#undef CHECK_ENUM_VAL
+
 static GLuint create_vao(GLuint program, GLuint &vbo_out, GLuint &ebo_out)
 {
     GLuint p0_index = 0;

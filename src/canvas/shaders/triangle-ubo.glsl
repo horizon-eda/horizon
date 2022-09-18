@@ -43,7 +43,7 @@ bool get_discard(vec2 fc) {
 }
 
 vec3 get_color(int color, int color2) {
-	if(color2 != 0 && (color == 0 || color == 12 /*airwire*/)) {
+	if(color2 != 0 && (color == 0 || color == 13 /*airwire*/)) {
 		return colors2[color2];
 	}
 	else {
