@@ -15,5 +15,10 @@ private:
     class SchematicSymbol &sym;
     class GatePinEditor *editor = nullptr;
     void handle_import();
+
+    Gtk::SearchEntry *search_entry = nullptr;
+    Gtk::Revealer *search_revealer = nullptr;
+    Gtk::ToggleButton *search_button = nullptr;
+    void update_search();
 };
 } // namespace horizon

@@ -16,6 +16,45 @@
 
 namespace horizon {
 
+class CheckButtonWithHighlight : public Gtk::CheckButton {
+public:
+    CheckButtonWithHighlight(const Glib::ustring &labels) : label_orig(labels), label_orig_casefold(labels.casefold())
+    {
+        label = Gtk::manage(new Gtk::Label(labels));
+        label->show();
+        add(*label);
+    }
+
+    bool search(const Glib::ustring &s)
+    {
+        if (s.empty()) {
+            label->set_text(label_orig);
+            return true;
+        }
+
+        // if one of them isn't ascii the casefold represantation might have more/less chars and mess up the
+        // highlighting
+        if (!s.is_ascii() || !label_orig.is_ascii())
+            return false;
+        const auto needle = s.casefold();
+        if (auto pos = label_orig_casefold.find(needle); pos != Glib::ustring::npos) {
+            Glib::ustring l = Glib::Markup::escape_text(label_orig.substr(0, pos))
+                              + "<span bgcolor=\"yellow\" color=\"black\">"
+                              + Glib::Markup::escape_text(label_orig.substr(pos, needle.size())) + "</span>"
+                              + Glib::Markup::escape_text(label_orig.substr(pos + needle.size()));
+            label->set_markup(l);
+            return true;
+        }
+        label->set_text(label_orig);
+        return false;
+    }
+
+private:
+    Gtk::Label *label = nullptr;
+    const Glib::ustring label_orig;
+    const Glib::ustring label_orig_casefold;
+};
+
 class PinNamesBox : public Gtk::Box, public Changeable {
 public:
     PinNamesBox(Component *c, const UUIDPath<2> &p)
@@ -29,8 +68,9 @@ public:
         pack_start(*fbox, true, true, 0);
 
         {
-            auto primary_button = Gtk::manage(new Gtk::CheckButton(
+            auto primary_button = Gtk::manage(new CheckButtonWithHighlight(
                     pin.primary_name + " (primary, " + Pin::direction_abbreviations.at(pin.direction) + ")"));
+            check_buttons.push_back(primary_button);
             if (comp->alt_pins.count(path))
                 primary_button->set_active(comp->alt_pins.at(path).use_primary_name);
             primary_button->signal_toggled().connect([this, primary_button] {
@@ -42,8 +82,9 @@ public:
 
         {
             for (const auto &[uu, name] : pin.names) {
-                auto cb = Gtk::manage(
-                        new Gtk::CheckButton(name.name + " (" + Pin::direction_abbreviations.at(name.direction) + ")"));
+                auto cb = Gtk::manage(new CheckButtonWithHighlight(
+                        name.name + " (" + Pin::direction_abbreviations.at(name.direction) + ")"));
+                check_buttons.push_back(cb);
                 if (comp->alt_pins.count(path))
                     cb->set_active(comp->alt_pins.at(path).pin_names.count(uu));
                 const UUID alt_uu = uu;
@@ -115,6 +156,16 @@ public:
         custom_cb->set_active(true);
     }
 
+    bool set_search(const std::string &s)
+    {
+        bool found_any = false;
+        for (auto ch : check_buttons) {
+            if (ch->search(s))
+                found_any = true;
+        }
+        return found_any;
+    }
+
 private:
     Component *comp;
     UUIDPath<2> path;
@@ -122,6 +173,7 @@ private:
     Gtk::Entry *custom_entry = nullptr;
     Gtk::CheckButton *custom_cb = nullptr;
     Gtk::ComboBoxText *dir_combo = nullptr;
+    std::vector<CheckButtonWithHighlight *> check_buttons;
 
     void add_remove_name(const UUID &name, bool add)
     {
@@ -152,6 +204,11 @@ public:
     PinNamesBox *get_box()
     {
         return box;
+    }
+
+    void set_search(const std::string &s)
+    {
+        get_parent()->set_visible(box->set_search(s));
     }
 
 private:
@@ -197,9 +254,22 @@ public:
         return boxes;
     }
 
+    void set_search(const std::string &s)
+    {
+        search_string = s;
+        trim(search_string);
+        for (auto ch : get_children()) {
+            auto &row = dynamic_cast<Gtk::ListBoxRow &>(*ch);
+            auto &box = dynamic_cast<GatePinRow &>(*row.get_child());
+            box.set_search(search_string);
+        }
+    }
+
 private:
     Glib::RefPtr<Gtk::SizeGroup> sg;
     std::vector<PinNamesBox *> boxes;
+
+    std::string search_string;
 };
 
 void SymbolPinNamesWindow::handle_import()
@@ -281,8 +351,38 @@ SymbolPinNamesWindow::SymbolPinNamesWindow(Gtk::Window *parent, ImpInterface *in
     import_button->signal_clicked().connect(sigc::mem_fun(*this, &SymbolPinNamesWindow::handle_import));
     box2->pack_start(*import_button, false, false, 0);
 
-    auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
-    box->pack_start(*sep, false, false, 0);
+    search_button = Gtk::manage(new Gtk::ToggleButton);
+    search_button->set_image_from_icon_name("edit-find-symbolic", Gtk::ICON_SIZE_BUTTON);
+    box2->pack_start(*search_button, false, false, 0);
+
+    search_revealer = Gtk::manage(new Gtk::Revealer);
+    search_revealer->set_transition_duration(100);
+    auto search_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
+
+    {
+        auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+        search_box->pack_start(*sep, false, false, 0);
+    }
+
+    search_entry = Gtk::manage(new Gtk::SearchEntry);
+    search_entry->property_margin() = 8;
+    search_box->pack_start(*search_entry, false, false, 0);
+
+    search_revealer->add(*search_box);
+    box->pack_start(*search_revealer, false, false, 0);
+
+    {
+        auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+        box->pack_start(*sep, false, false, 0);
+    }
+    search_button->signal_toggled().connect([this] {
+        search_revealer->set_reveal_child(search_button->get_active());
+        if (search_button->get_active())
+            search_entry->grab_focus();
+        update_search();
+    });
+    search_entry->signal_changed().connect(sigc::mem_fun(*this, &SymbolPinNamesWindow::update_search));
+    search_entry->signal_stop_search().connect([this] { search_button->set_active(false); });
 
     editor = Gtk::manage(new GatePinEditor(sym.component, sym.gate));
     editor->signal_changed().connect([this] { emit_event(ToolDataWindow::Event::UPDATE); });
@@ -292,10 +392,26 @@ SymbolPinNamesWindow::SymbolPinNamesWindow(Gtk::Window *parent, ImpInterface *in
     sc->add(*editor);
     box->pack_start(*sc, true, true, 0);
 
+    signal_key_press_event().connect([this](GdkEventKey *ev) {
+        if (ev->keyval == GDK_KEY_f && (ev->state & GDK_CONTROL_MASK)) {
+            search_button->set_active(true);
+            return true;
+        }
+        return false;
+    });
+
 
     add(*box);
 
     show_all();
+}
+
+void SymbolPinNamesWindow::update_search()
+{
+    if (search_revealer->get_reveal_child())
+        editor->set_search(search_entry->get_text());
+    else
+        editor->set_search("");
 }
 
 static void ensure_row_visible(GtkListBox *box, GtkListBoxRow *row)
@@ -323,6 +439,7 @@ static void ensure_row_visible(GtkListBox *box, GtkListBoxRow *row)
 
 void SymbolPinNamesWindow::go_to_pin(const UUID &uu)
 {
+    search_button->set_active(false);
     for (auto ed : editor->get_boxes()) {
         if (ed->get_pin().uuid == uu) {
             editor->unselect_all();
