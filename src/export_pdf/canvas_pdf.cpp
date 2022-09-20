@@ -232,7 +232,6 @@ static Coordd pdf_arc_segment(PoDoFo::PdfPainter &painter, const Coordd c, const
 static void pdf_arc(PoDoFo::PdfPainter &painter, const Coordd start, const Coordd c, const Coordd end, bool cw)
 {
     const auto r = (start - c).mag();
-    const auto ctr = Coordd(c.x, c.y);
 
     // Get angles relative to the x axis
     double a0 = (start - c).angle();
@@ -257,7 +256,7 @@ static void pdf_arc(PoDoFo::PdfPainter &painter, const Coordd start, const Coord
     while (std::abs(e) > 1e-6) {
         const auto d = (cw) ? std::max(e, da) : std::min(e, da);
         const auto a = a0 + d;
-        pdf_arc_segment(painter, ctr, r, a0, a);
+        pdf_arc_segment(painter, c, r, a0, a);
         a0 = a;
         e = a1 - a0;
     }
