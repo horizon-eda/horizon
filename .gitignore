@@ -45,3 +45,4 @@ wix/version.wxi
 .cache
 .idea
 compile_commands.json
+*.kate-swp
