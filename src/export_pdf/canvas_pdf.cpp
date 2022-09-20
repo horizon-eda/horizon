@@ -198,7 +198,7 @@ void CanvasPDF::img_hole(const Hole &hole)
 }
 
 // c is the arc center.
-// angles must be in radians, c and r must be in a PDF "pt" unit.
+// angles must be in radians, c and r must be in mm.
 // See "How to determine the control points of a Bézier curve that approximates a
 // small circular arc" by Richard ADeVeneza, Nov 2004
 // https://www.tinaja.com/glib/bezcirc2.pdf
@@ -206,15 +206,15 @@ static Coordd pdf_arc_segment(PoDoFo::PdfPainter &painter, const Coordd c, const
 {
     const auto da = a0 - a1;
     assert(da != 0);
-    assert(std::abs(da) <= M_PI / 2 + 1e-6);
+    assert(std::abs(da) <= M_PI / 2.0 + 1e-6);
 
     // Shift to bisect at x axis
-    const auto theta = (a0 + a1) / 2;
-    const auto phi = da / 2;
+    const auto theta = (a0 + a1) / 2.0;
+    const auto phi = da / 2.0;
 
     // Compute points of unit circle for given delta angle
     const auto p0 = Coordd(cos(phi), sin(phi));
-    const auto p1 = Coordd((4 - p0.x) / 3, (1 - p0.x) * (3 - p0.x) / (3 * p0.y));
+    const auto p1 = Coordd((4.0 - p0.x) / 3.0, (1.0 - p0.x) * (3.0 - p0.x) / (3.0 * p0.y));
     const auto p2 = Coordd(p1.x, -p1.y);
     const auto p3 = Coordd(p0.x, -p0.y);
 
@@ -223,14 +223,16 @@ static Coordd pdf_arc_segment(PoDoFo::PdfPainter &painter, const Coordd c, const
     const auto c2 = p2.rotate(theta) * r + c;
     const auto c3 = p3.rotate(theta) * r + c;
 
-    painter.CubicBezierTo(c1.x, c1.y, c2.x, c2.y, c3.x, c3.y);
+    painter.CubicBezierTo(to_um(c1.x) * CONVERSION_CONSTANT, to_um(c1.y) * CONVERSION_CONSTANT,
+                          to_um(c2.x) * CONVERSION_CONSTANT, to_um(c2.y) * CONVERSION_CONSTANT,
+                          to_um(c3.x) * CONVERSION_CONSTANT, to_um(c3.y) * CONVERSION_CONSTANT);
     return c3; // end point
 }
 
 static void pdf_arc(PoDoFo::PdfPainter &painter, const Coordd start, const Coordd c, const Coordd end, bool cw)
 {
-    const auto r = to_pt((start - c).mag());
-    const auto ctr = Coordd(to_pt(c.x), to_pt(c.y));
+    const auto r = (start - c).mag();
+    const auto ctr = Coordd(c.x, c.y);
 
     // Get angles relative to the x axis
     double a0 = (start - c).angle();
@@ -238,13 +240,13 @@ static void pdf_arc(PoDoFo::PdfPainter &painter, const Coordd start, const Coord
 
     // Circle or large arc
     if (cw && a0 <= a1) {
-        a0 += 2 * M_PI;
+        a0 += 2.0 * M_PI;
     }
     else if (!cw && a0 >= a1) {
-        a0 -= 2 * M_PI;
+        a0 -= 2.0 * M_PI;
     }
 
-    const double da = (cw) ? -M_PI / 2 : M_PI / 2;
+    const double da = (cw) ? -M_PI / 2.0 : M_PI / 2.0;
     if (cw) {
         assert(a0 > a1);
     }
