@@ -1362,18 +1362,27 @@ bool ImpBase::handle_click(const GdkEventButton *button_event)
 
     bool need_menu = false;
     if (core->tool_is_active() && button_event->button != 2 && !(button_event->state & Gdk::SHIFT_MASK)
-        && button_event->type != GDK_2BUTTON_PRESS && button_event->type != GDK_3BUTTON_PRESS) {
-        ToolArgs args;
-        args.type = ToolEventType::ACTION;
-        if (button_event->button == 1)
-            args.action = InToolActionID::LMB;
-        else
-            args.action = InToolActionID::RMB;
-        args.coords = canvas->get_cursor_pos();
-        args.target = canvas->get_current_target();
-        args.work_layer = canvas->property_work_layer();
-        ToolResponse r = core->tool_update(args);
-        tool_process(r);
+        && button_event->type != GDK_3BUTTON_PRESS) {
+        const bool is_doubleclick = button_event->type == GDK_2BUTTON_PRESS;
+        const bool tool_supports_doubleclick = core->get_tool_actions().count(InToolActionID::LMB_DOUBLE);
+        if (tool_supports_doubleclick || !is_doubleclick) {
+            ToolArgs args;
+            args.type = ToolEventType::ACTION;
+            if (button_event->button == 1) {
+                if (is_doubleclick)
+                    args.action = InToolActionID::LMB_DOUBLE;
+                else
+                    args.action = InToolActionID::LMB;
+            }
+            else {
+                args.action = InToolActionID::RMB;
+            }
+            args.coords = canvas->get_cursor_pos();
+            args.target = canvas->get_current_target();
+            args.work_layer = canvas->property_work_layer();
+            ToolResponse r = core->tool_update(args);
+            tool_process(r);
+        }
     }
     else if (!core->tool_is_active() && button_event->type == GDK_2BUTTON_PRESS) {
         auto sel = canvas->get_selection();

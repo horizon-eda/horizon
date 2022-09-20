@@ -923,12 +923,15 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
             }
             else if (args.type == ToolEventType::ACTION) {
                 switch (args.action) {
-                case InToolActionID::LMB: {
-                    wrapper->updateEndItem(args);
+                case InToolActionID::LMB:
+                case InToolActionID::LMB_DOUBLE: {
+                    if (args.action == InToolActionID::LMB)
+                        wrapper->updateEndItem(args);
 
                     const bool was_placing_via = router->IsPlacingVia();
+                    const bool force_finish = args.action == InToolActionID::LMB_DOUBLE;
 
-                    if (router->FixRoute(wrapper->m_endSnapPoint, wrapper->m_endItem)) {
+                    if (router->FixRoute(wrapper->m_endSnapPoint, wrapper->m_endItem, force_finish) || force_finish) {
                         router->CommitRouting();
                         router->StopRouting();
                         imp->canvas_update();

@@ -7,6 +7,7 @@ enum class InToolActionID {
     // common
     LMB,
     LMB_RELEASE,
+    LMB_DOUBLE,
     RMB,
     ROTATE,
     ROTATE_CURSOR,
