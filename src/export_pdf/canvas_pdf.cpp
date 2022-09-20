@@ -283,7 +283,7 @@ void CanvasPDF::draw_polygon(const Polygon &ipoly, bool tr)
         }
         else if (it->type == Polygon::Vertex::Type::ARC) {
             Coordd end = it_next->position;
-            Coordd c = project_onto_perp_bisector(end, p, it->arc_center);
+            Coordd c = project_onto_perp_bisector(end, it->position, it->arc_center);
             if (!first)
                 painter.LineToMM(to_um(p.x), to_um(p.y));
 
