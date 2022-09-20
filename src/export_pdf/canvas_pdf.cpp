@@ -252,7 +252,7 @@ static void pdf_arc(PoDoFo::PdfPainter &painter, const Coordd start, const Coord
         assert(a0 < a1);
     }
     double e = a1 - a0;
-    while (std::abs(e) > 0) {
+    while (std::abs(e) > 1e-6) {
         const auto d = (cw) ? std::max(e, da) : std::min(e, da);
         const auto a = a0 + d;
         pdf_arc_segment(painter, ctr, r, a0, a);
