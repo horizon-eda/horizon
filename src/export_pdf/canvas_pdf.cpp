@@ -206,15 +206,15 @@ static Coordd pdf_arc_segment(PoDoFo::PdfPainter &painter, const Coordd c, const
 {
     const auto da = a0 - a1;
     assert(da != 0);
-    assert(std::abs(da) <= M_PI / 2.0 + 1e-6);
+    assert(std::abs(da) <= M_PI / 2 + 1e-6);
 
     // Shift to bisect at x axis
-    const auto theta = (a0 + a1) / 2.0;
-    const auto phi = da / 2.0;
+    const auto theta = (a0 + a1) / 2;
+    const auto phi = da / 2;
 
     // Compute points of unit circle for given delta angle
     const auto p0 = Coordd(cos(phi), sin(phi));
-    const auto p1 = Coordd((4.0 - p0.x) / 3.0, (1.0 - p0.x) * (3.0 - p0.x) / (3.0 * p0.y));
+    const auto p1 = Coordd((4 - p0.x) / 3, (1 - p0.x) * (3 - p0.x) / (3 * p0.y));
     const auto p2 = Coordd(p1.x, -p1.y);
     const auto p3 = Coordd(p0.x, -p0.y);
 
@@ -239,13 +239,13 @@ static void pdf_arc(PoDoFo::PdfPainter &painter, const Coordd start, const Coord
 
     // Circle or large arc
     if (cw && a0 <= a1) {
-        a0 += 2.0 * M_PI;
+        a0 += 2 * M_PI;
     }
     else if (!cw && a0 >= a1) {
-        a0 -= 2.0 * M_PI;
+        a0 -= 2 * M_PI;
     }
 
-    const double da = (cw) ? -M_PI / 2.0 : M_PI / 2.0;
+    const double da = (cw) ? -M_PI / 2 : M_PI / 2;
     if (cw) {
         assert(a0 > a1);
     }
