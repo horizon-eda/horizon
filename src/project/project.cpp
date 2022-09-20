@@ -158,6 +158,8 @@ std::string Project::create(const std::map<std::string, std::string> &meta, cons
     board_filename = Glib::build_filename(base_path, "board.json");
     save_json_to_file(board_filename, board.serialize());
 
+    planes_filename = Glib::build_filename(base_path, "planes.json");
+
     auto prj_filename = Glib::build_filename(base_path, name + ".hprj");
     save_json_to_file(prj_filename, serialize());
 
