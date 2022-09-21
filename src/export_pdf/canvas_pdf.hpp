@@ -4,11 +4,6 @@
 
 namespace horizon {
 
-template <typename T> static T to_um(T x)
-{
-    return x / 1000;
-}
-
 template <typename T> static T to_pt(T x)
 {
     return x * .000002834645669291339;
@@ -16,7 +11,7 @@ template <typename T> static T to_pt(T x)
 
 class CanvasPDF : public Canvas {
 public:
-    CanvasPDF(PoDoFo::PdfPainterMM &painter, PoDoFo::PdfFont &font, const class PDFExportSettings &settings);
+    CanvasPDF(PoDoFo::PdfPainter &painter, PoDoFo::PdfFont &font, const class PDFExportSettings &settings);
     void push() override
     {
     }
@@ -32,7 +27,7 @@ public:
     }
 
 private:
-    PoDoFo::PdfPainterMM &painter;
+    PoDoFo::PdfPainter &painter;
     PoDoFo::PdfFont &font;
     const PDFExportSettings &settings;
     const PoDoFo::PdfFontMetrics *metrics;

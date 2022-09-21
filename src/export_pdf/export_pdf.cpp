@@ -112,7 +112,7 @@ public:
 
 private:
     PoDoFo::PdfStreamedDocument document;
-    PoDoFo::PdfPainterMM painter;
+    PoDoFo::PdfPainter painter;
     PoDoFo::PdfFont *font = nullptr;
     std::map<UUIDVec, PoDoFo::PdfDestination> first_pages;
     std::vector<std::tuple<UUIDVec, unsigned int, PoDoFo::PdfRect>> annotations;
