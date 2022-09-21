@@ -4,11 +4,6 @@
 
 namespace horizon {
 
-template <typename T> static T to_um(T x)
-{
-    return x / 1000;
-}
-
 template <typename T> static T to_pt(T x)
 {
     return x * .000002834645669291339;
