@@ -19,7 +19,7 @@ void export_pdf(const class Board &brd, const class PDFExportSettings &settings,
     cb("Initializing", 0);
 
     PoDoFo::PdfStreamedDocument document(settings.output_filename.c_str());
-    PoDoFo::PdfPainterMM painter;
+    PoDoFo::PdfPainter painter;
     painter.SetPrecision(9);
     auto info = document.GetInfo();
     info->SetCreator("horizon EDA");

@@ -16,7 +16,7 @@ template <typename T> static T to_pt(T x)
 
 class CanvasPDF : public Canvas {
 public:
-    CanvasPDF(PoDoFo::PdfPainterMM &painter, PoDoFo::PdfFont &font, const class PDFExportSettings &settings);
+    CanvasPDF(PoDoFo::PdfPainter &painter, PoDoFo::PdfFont &font, const class PDFExportSettings &settings);
     void push() override
     {
     }
@@ -32,7 +32,7 @@ public:
     }
 
 private:
-    PoDoFo::PdfPainterMM &painter;
+    PoDoFo::PdfPainter &painter;
     PoDoFo::PdfFont &font;
     const PDFExportSettings &settings;
     const PoDoFo::PdfFontMetrics *metrics;

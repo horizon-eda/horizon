@@ -4,7 +4,7 @@
 
 namespace horizon {
 
-void render_picture(PoDoFo::PdfDocument &doc, PoDoFo::PdfPainterMM &painter, const Picture &pic, const Placement &tr)
+void render_picture(PoDoFo::PdfDocument &doc, PoDoFo::PdfPainter &painter, const Picture &pic, const Placement &tr)
 {
     PoDoFo::PdfImage img(&doc);
     Placement pl = tr;
@@ -48,7 +48,7 @@ void render_picture(PoDoFo::PdfDocument &doc, PoDoFo::PdfPainterMM &painter, con
     const int64_t h = pic.data->height * pic.px_size;
     const auto p = Coordd(w, h) / -2;
     const double sz = pic.px_size / (1e3 / CONVERSION_CONSTANT);
-    painter.DrawImageMM(to_um(p.x), to_um(p.y), &img, sz, sz);
+    painter.DrawImage(to_pt(p.x), to_pt(p.y), &img, sz, sz);
     painter.Restore();
 }
 } // namespace horizon
