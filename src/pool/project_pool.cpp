@@ -55,7 +55,8 @@ std::string ProjectPool::get_filename(ObjectType type, const UUID &uu, UUID *poo
 
     UUID item_pool_uuid;
     auto filename = Pool::get_filename(type, uu, &item_pool_uuid);
-    if (item_pool_uuid == pool_info.uuid) { // item is from this pool or already cached
+    if (item_pool_uuid == pool_info.uuid || item_pool_uuid == Pool::tmp_pool_uuid) {
+        // item is from this pool or already cached, or from temporary directory
         if (pool_uuid_out)
             *pool_uuid_out = item_pool_uuid;
         return filename;
