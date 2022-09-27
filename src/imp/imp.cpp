@@ -1675,7 +1675,7 @@ void ImpBase::set_monitor_items(const ItemSet &items)
 {
     std::set<std::string> filenames;
     std::transform(items.begin(), items.end(), std::inserter(filenames, filenames.begin()),
-                   [this](const auto &it) { return pool_caching->get_filename(it.first, it.second); });
+                   [this](const auto &it) { return pool->get_filename(it.first, it.second); });
     file_monitor_delay_connection.disconnect();
     file_monitor_delay_connection = Glib::signal_timeout().connect_seconds(
             [this, filenames] {
