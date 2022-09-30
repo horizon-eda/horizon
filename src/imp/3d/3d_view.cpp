@@ -117,6 +117,10 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     specular_adj->signal_value_changed().connect(
             [specular_adj, this] { canvas->set_specular_intensity(specular_adj->get_value()); });
 
+    auto diffuse_adj = Glib::RefPtr<Gtk::Adjustment>::cast_dynamic(x->get_object("diffuse_adj"));
+    diffuse_adj->signal_value_changed().connect(
+            [diffuse_adj, this] { canvas->set_diffuse_intensity(diffuse_adj->get_value()); });
+
     GET_WIDGET(background_top_color_button);
     bind_color_button(background_top_color_button, &Canvas3D::set_background_top_color, [this] {
         if (!setting_background_color_from_preset && background_color_preset_combo)

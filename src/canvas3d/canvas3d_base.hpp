@@ -65,6 +65,7 @@ public:
     GET_SET_PICK(projection, Projection)
     GET_SET_PICK(ambient_intensity, float)
     GET_SET_PICK(specular_intensity, float)
+    GET_SET_PICK(diffuse_intensity, float)
 
 #undef GET_SET
 #undef GET_SET_X
@@ -132,10 +133,10 @@ protected:
     Color light_color = {1, 1, 1};
     float explode = 0;
     float highlight_intensity = .5;
-    float specular_intensity = 20;
-    float specular_power = 64;
-    float ambient_intensity = .6;
-    float diffuse_intensity = 1;
+    float specular_intensity = 0.4;
+    float specular_power = 16;
+    float ambient_intensity = .3;
+    float diffuse_intensity = 1.4;
 
     float cam_azimuth = 90;
     float cam_elevation = 45;

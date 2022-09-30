@@ -300,7 +300,7 @@ void Canvas3DBase::render(RenderBackground mode)
 
     auto light_phi = glm::radians(cam_azimuth + 15);
     auto light_theta = glm::radians(90 - cam_elevation * 5 / 4);
-    float light_r = cam_distance * 2;
+    float light_r = cam_dist_max;
     auto light_offset = glm::vec3(light_r * sin(light_theta) * cos(light_phi),
                                   light_r * sin(light_theta) * sin(light_phi), light_r * cos(light_theta));
     light_position = light_offset + glm::vec3(center, 0);

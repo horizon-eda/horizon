@@ -28,6 +28,11 @@ void main() {
   float spec = pow(max(dot(cam_normal, halfway_dir), 0.0), specular_power);
   vec3 specular = specular_intensity * spec * light_color;
 
-  outputColor = vec4(color_to_fragment*(ambient + diffuse + specular), 1);
+  vec3 color = color_to_fragment*(ambient + diffuse + specular);
+
+  // Gamma correction
+  color = pow(color, vec3(1.0/1.5));
+
+  outputColor = vec4(color, 1);
   pick = pick_base + instance_to_fragment;
 }
