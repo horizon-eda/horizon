@@ -36,6 +36,7 @@
 #include <BRepTools_WireExplorer.hxx>
 #include <ShapeAnalysis_Edge.hxx>
 #include <BRepAdaptor_Curve.hxx>
+#include <ShapeFix_Shell.hxx>
 
 #include <TDF_ChildIterator.hxx>
 #include <TDF_LabelSequence.hxx>
@@ -238,6 +239,8 @@ bool STEPImporter::processFace(const TopoDS_Face &face, Quantity_Color *color, c
         glm::vec4 vg(x, y, z, 0);
 #endif
         auto vt = mat * vg;
+        if (face.Orientation() == TopAbs_REVERSED)
+            vt = -vt;
         vt /= vt.length();
         face_out.normals.emplace_back(vt.x, vt.y, vt.z);
     }
@@ -275,7 +278,10 @@ bool STEPImporter::processShell(const TopoDS_Shape &shape, Quantity_Color *color
     TopoDS_Iterator it;
     bool ret = false;
 
-    for (it.Initialize(shape, false, false); it.More(); it.Next()) {
+    ShapeFix_Shell fixer = ShapeFix_Shell(TopoDS::Shell(shape));
+    fixer.Perform();
+
+    for (it.Initialize(fixer.Shell(), false, false); it.More(); it.Next()) {
         const TopoDS_Face &face = TopoDS::Face(it.Value());
 
         if (processFace(face, color, mat))
