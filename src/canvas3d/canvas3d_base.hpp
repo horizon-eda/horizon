@@ -63,9 +63,6 @@ public:
     GET_SET_PICK(cam_fov, float)
     GET_SET_PICK(center, glm::vec2)
     GET_SET_PICK(projection, Projection)
-    GET_SET_PICK(ambient_intensity, float)
-    GET_SET_PICK(specular_intensity, float)
-    GET_SET_PICK(diffuse_intensity, float)
 
 #undef GET_SET
 #undef GET_SET_X
