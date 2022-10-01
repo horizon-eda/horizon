@@ -52,6 +52,16 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+    <release version="2.3.90" date="2022-10-01">
+      <url>https://github.com/horizon-eda/horizon/releases/tag/v2.3.90</url>
+      <description>
+        <p>What's new</p>
+        <ul>
+          <li>Curved tracks</li>
+          <li>Improved copy/paste across projects</li>
+        </ul>
+      </description>
+    </release>
     <release version="2.3.0" date="2022-05-04">
       <url>https://github.com/horizon-eda/horizon/releases/tag/v2.3.0</url>
       <description>
