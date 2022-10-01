@@ -1,6 +1,6 @@
 major = 2
-minor = 3
+minor = 4
 micro = 0
-name = "Iceblink"
+name = "Jupiter"
 
 string = ".".join(str(x) for x in (major, minor, micro))

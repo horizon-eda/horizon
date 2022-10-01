@@ -1,3 +1,170 @@
+# Version 2.4.0
+
+## New Features
+
+### Board Editor
+
+ - Support for curved tracks (05c31efabccd3496a44f61e2eaccf2ab1cb0e230)
+ - Tools for copying package placement and other items across projects (f5821bec5159cc6e4b8beaf8c848d0d3fe2286d5, f5821bec5159cc6e4b8beaf8c848d0d3fe2286d5)
+
+### Schematic Editor
+
+ - BOM format customisation (2ad36a68f1a2aafc650b0f553e70265f75bb92e4)
+
+## Enhancements
+
+### Board Editor
+
+ - save plane fragments to separate file (2305470d9027c10d23fd7219e0f77692a5ec63fb)
+ - check for zero-length edges in outline polygons (0c3b1ea234215ded41d117c620fc8490d324170e)
+ - add action for opening project of included board (da88ab542888c93229c4d1f57e59a01bdc7a424d)
+ - support relative paths for including boards (2a1b80a3d746900514d81b04c41daac2934160d3)
+ - rename add plane/keepout tool to asssign plane/keepout for better discoverability (1751de31cfed70a8accd90f6a3eac90444fe487f)
+ - gerber output: output arcs as such (04292035d693e3708c59d21025fcee0be3a89a89)
+
+### Schematic Editor
+
+ - copy pool items from source when pasting from other project (0b747dbad5bd3a9e534552d8de4d618e1b66d064)
+ - support moving pictures to other sheet (4e2dec13aac1a9a8aff1e363fb267e0f5bfe3bba)
+ - new tool for setting tags based on reference designators (2acc6c06244c0f6b983e49cb9f4152f34dc66ec4)
+ - copy/paste diffpairs across projects (5d9836b0e4cae2cb4a0e9fd18d8ac6a6ad07dcdb)
+ - copy/paste group and tag names (84fcec768395e0a11e18ee0ca82f6aae17582a39)
+ - include datasheet links in exported PDF (e9de49915208335e65839049b9eb13c996cd57fe)
+ - take arcs in symbols into account for selection box (cc5a9d31c5dd954de12160ac26843b3504dd3eeb)
+ - use part browser for assigning parts (b7dc846f239a59a0a2e4a8da4b9d5775b800a72f)
+
+### Symbol Editor
+
+ - remember pin orientation across invocations of place pin tool (206df6844fdac089fd298b69b8957feeb5fb2d99)
+ - rename preview to text placement (82790600e4983b45ed7990cc0961d8a81ec3f086)
+ - automatically fit symbol previews (e3e998f1835e4fd964c3bc6fa5d15752a7dcf9e6)
+ - make bounding box color configurable (6305e9b166990f611084e57a8193e40304239c4e)
+
+### Package Editor
+
+ - support snapping to pad corners (6e946362f271264ab49b857f2b5398a3488fbb73)
+ - take holes into account for pad bounding box calculation (d81981f59d53e15967de557a68ddc148b689ca0a)
+
+### Editors
+
+ - Draw polygon tool: don't create zero-length edges (c25582e4e444b78218fe0537468c75d61c09234a)
+ - Action for cycling layer display mode (6d332fb4ece06d25b8cc7b632482fa0d7723877d)
+ - improved handling of arrow keys in tool popover (04da67c8db459213c51e6532e0d027da7b758f4b)
+ - lower drag threshold to 10px (17eb3f56038a10fec45bb027c6c40b3a2d21580c)
+ - Action for opening datasheet on symbols and packages (9eaf02c5330dc4b27e9e9d3e1043333feaaa9ae8)
+ - Option for vertical tool bar in preferences (dd36b4435cef502bf6f94649699a6abbf0648691)
+
+### Pool Manager
+
+ - make check messages in editors more clear (a5a278b42c3854de6465b848f0c779ee015020cc)
+ - don't ask for filename when creating pool items (fd06c2ba44f0c281959a0acfe5e79170c4fe4f68)
+ - Part wizard: use column headers (91360cd25ea1477fa6dedb8a5244bb0b4bda1602)
+ - make lists in Unit and Entity editors sortable by clicking on headers (6df7e3d298a10577aa29a80327065c43c5700c07)
+ - show check status in button label (f380a73c991f2f4c36b678a35dda5a535b59c631)
+ - automatically reload list of available pools (10c253eed75d24f48c429562cfdadcd1fa0e96d4)
+
+### Pool And Project Manager
+
+ - prevent saving items to the wrong directory (fd88e2c499763ad9ad3ca216b404289019434285)
+
+### Project Manager
+
+ - remember selected project pool (1b5b50ffc51f13f239c27c38fb157d80f00a54b8)
+
+### Digi-Key Stock Info
+
+ - show pricing for alternate packagings (f15ad6410ca299f30edf042ab3ae9ffd19c2f270)
+
+### Python Module
+
+ - support using planes as saved instead of updating them (456fbbc315204c2dcdf811947bfb49af2f6664ea)
+
+## Bugfixes
+
+### Board Editor
+
+ - PDF export: correctly export small arcs as encountered on padstacks with rounded corners (16ac7d984809b6b3e106ecf5bd142ed2e067aa0f)
+ - correctly represent polygon arcs in PDF export if the arc's center isn't on the perpendicular bisector (49d41516948c4e72adc6244fcfedeeb370e7052f)
+ - Fabrication output: set modification time for improved compatibility with board manufacturers (7a0db52ecbf5c0c45f1d96dc60f36223fc95bf28)
+ - properly copy junctions for tracks connected to pad and junction (c9e310116962a560f4308b299b27b26566448bc5)
+ - STEP Export: copy step models to project pool if needed (fedcf8afe7df68fd806d932b9ce7245ad5230d46)
+ - STEP export: don't crash on zero-length edges in outline polygons (b36d297f30607afe42875a71fc9cbbeabc92be44)
+ - PDF Export: properly close paths used for planes (372cd800f8c3cd4c23f2c35400260052c5a26976)
+ - prevent cursor from disappearing after updating planes (83b8dd77d3ffba3eee0a9d190c4c8badb1b52d2a)
+ - properly show meander tuning status (c1d3386ec04d5080637dd682646fe8e0ecb61d78)
+ - ODB++ output: correctly draw mirrored arcs (5df1814d94ad0943052b2b1488d266fe82337e8f)
+ - gerber output: correctly draw outline arcs  in mirrored packages (04292035d693e3708c59d21025fcee0be3a89a89)
+ - don't crash on unfilled planes (91e9293f492f6748155a6412f494679bba33f9b0)
+
+### Schematic Editor
+
+ - don't crash when deleting one leg of a diffpair and saving (fd624da21ff73220b51ac68337c5028d099c9c73)
+ - don't crash when deleting bus ripper and attached net line (ae92db2a902d2f50f169e7330f3a6b6521f1f52b)
+ - properly handle pools that are installed while the editor is running (c4bfb893a2c26edad5da29780254ec3304655ca8)
+ - don't crash if unplaced pin is not connected (f906b24c83be2189ccbb47868e92e65df6ffdb25)
+
+### Package Editor
+
+ - don't crash in edit pad dialog when changing pads with the mouse wheel while ther's still a pending edit in a spinbutton in one of the parameters (b69b25162e8c6c25840306eb092b908014fa2422)
+ - properly handle pads with empty bounding box (89ac96b6252067b67449c3389b5cc4a5dfa891b5)
+
+### Symbol Editor
+
+ - support merging junctions (25434a16e14693b51a39f92f69ec76b6f55b5104)
+
+### Editors
+
+ - don't accidentally cache dependencies when opening items in a project pool (cd62c70bd4651a90a0f5fdb51659869ad836b4ec)
+ - don't crash when pressing escape in non-modal tool windows if there's a pending edit in a spinbutton (e8ab00bb84929c5c4f5469ca7696f2ed7ca7a771)
+ - don't try to paste objects into editors that don't support them (9fac140b92536ab6e68a805d6426aac243df70f1)
+ - fix pasting polygons on non-existing layers (23a3b1c533f2488d520ecc585af68162150cc138)
+ - allow toggling pictures when a tool is active (a73dd7600fd4acf01b50c6ecbfa81c5b3cb17594)
+ - properly draw arcs with overlapping ends (76e68fe4426e0fb91b23c0434ecf08a5344d956a)
+
+### Pool Manager
+
+ - don't crash in symbol editor launched from part wizard if in a project pool (95ce0bc8639d0a3b5c1449170cb7d018dae3b415)
+ - prevent long names in the where used box from making the info panel to wide (d5cf85d64a8acdf755906526d8f2c757f70554d9)
+ - ellipsize paths in settings tab if needed (11e02a1fc8f186764a677f0997efb79ac324a145)
+ - support sorting padstacks by last modified time (167c3542e8d5d8f10469c7f3a767fae996158f8c)
+ - Tags editor: don't add empty tags (6aa6a3f504825dca6bce5b594e358f35a3901639)
+
+### Part Editor
+
+ - ellipsize package and 3D model name to prevent window from getting too wide (675f183e0a8738c5fda44319dae678eac77a81bf)
+
+### Project Manager
+
+ - don't update pool when opening a project after a new item has been added to the project pool (1766df2702e34113caaa2bc91c55679442189931)
+
+### Pool and Project Manager
+
+ - automatically append .json when moving/renaming pool items (9819146e551102ac3d8986d9799ac50b6b28a13a)
+ - support adding keybinding for Select connected lines tool (015ba35cf6ea3fe6793be7efffe741e6ea1010bf)
+ - don't crash when closing windows that don't have an open pool/project (3b080737428eeb310834a8417fae33bb8329f202)
+
+### Digi-Key Stock Info
+
+ - take stock from all packagings into account (9376eac80439efadfa5d4945940e7476d59c8997)
+ - show currency on first search (2364c3150fe99c80407c9c9ad77a575799db5d47)
+
+# Version 2.3.1
+
+## Bugfixes
+
+### Board Editor
+
+ - Clearance checks: don't crash on unfilled planes (418f15d550621f098f1304e62013da5ace59debd)
+ - prevent cursor from disappearing after updating planes (c4a8411187c9d2404f05c99401ba8f1175230e07)
+
+### Schematic Editor
+
+ - Connectivity checks: don't crash if unplaced pin is not connected (1cf64d051e756c387f2bf657d923e1443699594f)
+
+### Pool and proejct manager
+
+ - don't crash when closing windows that don't have an open pool/project (268b2f5df253f3d93cb57abdde834ad841ca8223)
+
 # Version 2.3.0
 
 ## New features
