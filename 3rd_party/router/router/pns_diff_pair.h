@@ -495,6 +495,8 @@ private:
 
         if( m_hasVias )
             aLine.AppendVia( aVia );
+        else
+            aLine.RemoveVia();
     }
 
     SHAPE_LINE_CHAIN m_n, m_p;
