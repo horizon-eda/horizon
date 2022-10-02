@@ -9,6 +9,10 @@
 
 namespace horizon {
 
+double to_pt(double x_nm)
+{
+    return x_nm * .000002834645669291339;
+}
 
 CanvasPDF::CanvasPDF(PoDoFo::PdfPainter &p, PoDoFo::PdfFont &f, const PDFExportSettings &s)
     : Canvas::Canvas(), painter(p), font(f), settings(s), metrics(font.GetFontMetrics())

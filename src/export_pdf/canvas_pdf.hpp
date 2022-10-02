@@ -4,10 +4,7 @@
 
 namespace horizon {
 
-template <typename T> static T to_pt(T x)
-{
-    return x * .000002834645669291339;
-}
+double to_pt(double x_nm);
 
 class CanvasPDF : public Canvas {
 public:
