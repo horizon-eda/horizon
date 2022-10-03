@@ -68,6 +68,8 @@ void IncludedBoard::reload(const std::string &parent_board_directory)
         auto blocks = Blocks::new_from_file(prj.blocks_filename, *pool);
         block = std::make_unique<Block>(blocks.get_top_block_item().block.flatten());
         board = std::make_unique<Board>(horizon::Board::new_from_file(prj.board_filename, *block, *pool));
+        if (fs::is_regular_file(fs::u8path(prj.planes_filename)))
+            board->load_planes_from_file(prj.planes_filename);
         board->expand();
     }
     catch (...) {
