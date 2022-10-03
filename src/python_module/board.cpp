@@ -16,6 +16,7 @@
 #include "pool/project_pool.hpp"
 #include "rules/rule_descr.hpp"
 #include "3d_image_exporter.hpp"
+#include <filesystem>
 
 class BoardWrapper : public horizon::DocumentBoard {
 public:
@@ -97,11 +98,16 @@ BoardWrapper::BoardWrapper(const horizon::Project &prj, PlaneMode plane_mode)
     : pool(prj.pool_directory, false), block(get_flattend_block(prj.blocks_filename, pool)),
       board(horizon::Board::new_from_file(prj.board_filename, block, pool))
 {
+    namespace fs = std::filesystem;
+
     board.expand();
-    if (plane_mode == PlaneMode::LOAD_FROM_FILE)
-        board.load_planes_from_file(prj.planes_filename);
-    else
+    if (plane_mode == PlaneMode::LOAD_FROM_FILE) {
+        if (fs::is_regular_file(fs::u8path(prj.planes_filename)))
+            board.load_planes_from_file(prj.planes_filename);
+    }
+    else {
         board.update_planes();
+    }
 }
 
 
