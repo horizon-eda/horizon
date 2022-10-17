@@ -2,7 +2,7 @@ FROM debian:buster AS build
 COPY src /src
 RUN apt-get update
 RUN apt-get upgrade
-RUN apt-get install -y build-essential libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git python3-cairo-dev libosmesa6-dev
+RUN apt-get install -y build-essential libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git python3-cairo-dev libosmesa6-dev
 WORKDIR /src
 RUN make -j$(nproc) build/horizon.so LDFLAGS=-lstdc++fs
 RUN strip build/horizon.so

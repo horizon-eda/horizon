@@ -32,10 +32,10 @@
 #include <ostream>                      // for operator<<, ostream, basic_os...
 #include <type_traits>                  // for swap
 
-#include <core/optional.h>
+#include <optional>
 #include <math/vector2d.h>
 
-typedef OPT<VECTOR2I> OPT_VECTOR2I;
+typedef std::optional<VECTOR2I> OPT_VECTOR2I;
 
 class SEG
 {

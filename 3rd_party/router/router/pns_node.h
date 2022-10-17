@@ -147,7 +147,7 @@ protected:
 class NODE
 {
 public:
-    typedef OPT<OBSTACLE>         OPT_OBSTACLE;
+    typedef std::optional<OBSTACLE>         OPT_OBSTACLE;
     typedef std::vector<ITEM*>    ITEM_VECTOR;
     typedef std::vector<OBSTACLE> OBSTACLES;
 

@@ -126,14 +126,14 @@ SHAPE_ARC::SHAPE_ARC( const SEG& aSegmentA, const SEG& aSegmentB, int aRadius, i
     }
     else
     {
-        VECTOR2I pToA = aSegmentA.B - p.get();
-        VECTOR2I pToB = aSegmentB.B - p.get();
+        VECTOR2I pToA = aSegmentA.B - p.value();
+        VECTOR2I pToB = aSegmentB.B - p.value();
 
         if( pToA.EuclideanNorm() == 0 )
-            pToA = aSegmentA.A - p.get();
+            pToA = aSegmentA.A - p.value();
 
         if( pToB.EuclideanNorm() == 0 )
-            pToB = aSegmentB.A - p.get();
+            pToB = aSegmentB.A - p.value();
 
         double pToAangle = ArcTangente( pToA.y, pToA.x );
         double pToBangle = ArcTangente( pToB.y, pToB.x );
@@ -145,8 +145,8 @@ SHAPE_ARC::SHAPE_ARC( const SEG& aSegmentA, const SEG& aSegmentB, int aRadius, i
 
         VECTOR2I arcCenter;
 
-        arcCenter.x = p.get().x + KiROUND( distPC * cos( DECIDEG2RAD( angPC ) ) );
-        arcCenter.y = p.get().y + KiROUND( distPC * sin( DECIDEG2RAD( angPC ) ) );
+        arcCenter.x = p.value().x + KiROUND( distPC * cos( DECIDEG2RAD( angPC ) ) );
+        arcCenter.y = p.value().y + KiROUND( distPC * sin( DECIDEG2RAD( angPC ) ) );
 
         // The end points of the arc are the orthogonal projected lines from the line segments
         // to the center of the arc

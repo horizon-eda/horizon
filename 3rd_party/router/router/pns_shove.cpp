@@ -800,7 +800,7 @@ NODE* SHOVE::reduceSpringback( const ITEM_SET& aHeadSet, VIA_HANDLE& aDraggedVia
         if( spTag.m_node == m_springbackDoNotTouchNode )
             break;
 
-        OPT<OBSTACLE> obs = spTag.m_node->CheckColliding( aHeadSet );
+        std::optional<OBSTACLE> obs = spTag.m_node->CheckColliding( aHeadSet );
 
         if( !obs && !spTag.m_locked )
         {

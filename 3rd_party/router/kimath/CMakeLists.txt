@@ -48,7 +48,7 @@ target_include_directories( kimath PUBLIC
     $<TARGET_PROPERTY:rtree,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
-# core/optional.h is needed for OPT types
+# optional is needed for OPT types
 target_include_directories( kimath PRIVATE
     ${PROJECT_SOURCE_DIR}/include
     ${wxWidgets_LIBRARIES}
