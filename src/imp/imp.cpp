@@ -980,6 +980,7 @@ void ImpBase::show_preferences(std::optional<std::string> page)
 {
     json j;
     j["op"] = "preferences";
+    j["time"] = gtk_get_current_event_time();
     if (page) {
         j["page"] = *page;
     }
