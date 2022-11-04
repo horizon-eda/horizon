@@ -799,6 +799,8 @@ void CoreSchematic::set_instance_path(const UUIDVec &path)
 {
     if (tool_is_active())
         return;
+    if (path == instance_path)
+        return;
     if (path.size() && !get_top_block()->block_instance_mappings.count(path)) {
         Logger::log_critical("instance mapping not found", Logger::Domain::SCHEMATIC, uuid_vec_to_string(path));
         return;
