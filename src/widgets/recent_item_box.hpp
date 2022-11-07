@@ -12,8 +12,11 @@ public:
         return s_signal_remove;
     }
 
+    const std::string &get_name() const;
+
 private:
     const Glib::DateTime time;
+    const std::string name;
     void update_time();
     Gtk::Label *time_label = nullptr;
     Gtk::Menu menu;

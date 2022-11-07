@@ -2,8 +2,8 @@
 #include "util/gtk_util.hpp"
 
 namespace horizon {
-RecentItemBox::RecentItemBox(const std::string &name, const std::string &pa, const Glib::DateTime &ti)
-    : path(pa), time(ti)
+RecentItemBox::RecentItemBox(const std::string &aname, const std::string &pa, const Glib::DateTime &ti)
+    : path(pa), time(ti), name(aname)
 {
     auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 6));
     box->property_margin() = 12;
@@ -60,6 +60,11 @@ RecentItemBox::RecentItemBox(const std::string &name, const std::string &pa, con
     });
     add(*box);
     show_all();
+}
+
+const std::string &RecentItemBox::get_name() const
+{
+    return name;
 }
 
 void RecentItemBox::update_time()

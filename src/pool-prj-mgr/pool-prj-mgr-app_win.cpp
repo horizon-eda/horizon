@@ -59,6 +59,10 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     builder->get_widget("header", header);
     builder->get_widget("recent_pools_listbox", recent_pools_listbox);
     builder->get_widget("recent_projects_listbox", recent_projects_listbox);
+    builder->get_widget("recent_pools_search_entry", recent_pools_search_entry);
+    builder->get_widget("recent_projects_search_entry", recent_projects_search_entry);
+    builder->get_widget("recent_pools_placeholder_stack", recent_pools_placeholder_stack);
+    builder->get_widget("recent_projects_placeholder_stack", recent_projects_placeholder_stack);
     builder->get_widget("pool_box", pool_box);
     builder->get_widget("pool_update_status_label", pool_update_status_label);
     builder->get_widget("pool_update_status_rev", pool_update_status_rev);
@@ -231,6 +235,12 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
         return false;
     });
 
+    recent_pools_search_entry->signal_search_changed().connect(
+            [this] { update_recent_search(*recent_pools_search_entry, *recent_pools_listbox); });
+    recent_projects_search_entry->signal_search_changed().connect(
+            [this] { update_recent_search(*recent_projects_search_entry, *recent_projects_listbox); });
+    recent_projects_search_entry->grab_focus();
+
     pool_update_dispatcher.connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_pool_update_progress));
     app.signal_pool_items_edited().connect(
             sigc::track_obj([this](const auto &filenames) { pool_update(filenames); }, *this));
@@ -248,6 +258,22 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
                 }
             },
             *this));
+
+    {
+        Gtk::Button *button;
+        builder->get_widget("manage_pools_button", button);
+        button->signal_clicked().connect([this] { app.show_pools_window(); });
+    }
+    {
+        Gtk::Button *button;
+        builder->get_widget("open_project_button", button);
+        button->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_open));
+    }
+    {
+        Gtk::Button *button;
+        builder->get_widget("new_project_button", button);
+        button->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_new_project));
+    }
 
     check_mtimes_dispatcher.connect([this] { pool_update(); });
 }
@@ -903,6 +929,9 @@ void PoolProjectManagerAppWindow::update_recent_items()
             });
         }
     }
+    update_recent_placeholder(*recent_pools_placeholder_stack, *recent_pools_listbox);
+    update_recent_placeholder(*recent_projects_placeholder_stack, *recent_projects_listbox);
+    update_recent_searches();
 }
 
 void PoolProjectManagerAppWindow::prepare_close()
@@ -1003,6 +1032,7 @@ void PoolProjectManagerAppWindow::set_view_mode(ViewMode mode)
         update_recent_items();
         set_version_info("");
         info_bar_hide(info_bar_installation_uuid_mismatch);
+        clear_recent_searches();
         break;
 
     case ViewMode::POOL:
@@ -1773,6 +1803,43 @@ void PoolProjectManagerAppWindow::set_version_info(const std::string &s)
     else {
         info_bar_hide(info_bar_version);
     }
+}
+
+void PoolProjectManagerAppWindow::update_recent_search(Gtk::SearchEntry &entry, Gtk::ListBox &lb)
+{
+    std::string needle = entry.get_text();
+    trim(needle);
+    const auto uneedle = Glib::ustring(needle).casefold();
+    for (auto child : lb.get_children()) {
+        if (auto row = dynamic_cast<Gtk::ListBoxRow *>(child)) {
+            if (auto box = dynamic_cast<RecentItemBox *>(row->get_child())) {
+                const bool visible = (uneedle.size() == 0)
+                                     || (Glib::ustring(box->get_name()).casefold().find(needle) != Glib::ustring::npos);
+                row->set_visible(visible);
+            }
+        }
+    }
+}
+
+void PoolProjectManagerAppWindow::update_recent_placeholder(Gtk::Stack &stack, Gtk::ListBox &lb)
+{
+    const bool has_children = lb.get_children().size();
+    if (has_children)
+        stack.set_visible_child("search");
+    else
+        stack.set_visible_child("none");
+}
+
+void PoolProjectManagerAppWindow::update_recent_searches()
+{
+    update_recent_search(*recent_pools_search_entry, *recent_pools_listbox);
+    update_recent_search(*recent_projects_search_entry, *recent_projects_listbox);
+}
+
+void PoolProjectManagerAppWindow::clear_recent_searches()
+{
+    recent_pools_search_entry->set_text("");
+    recent_projects_search_entry->set_text("");
 }
 
 } // namespace horizon

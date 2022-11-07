@@ -107,6 +107,10 @@ private:
     Gtk::HeaderBar *header = nullptr;
     Gtk::ListBox *recent_pools_listbox = nullptr;
     Gtk::ListBox *recent_projects_listbox = nullptr;
+    Gtk::SearchEntry *recent_pools_search_entry = nullptr;
+    Gtk::SearchEntry *recent_projects_search_entry = nullptr;
+    Gtk::Stack *recent_pools_placeholder_stack = nullptr;
+    Gtk::Stack *recent_projects_placeholder_stack = nullptr;
     std::vector<Gtk::ListBox *> recent_listboxes;
     Gtk::Box *pool_box = nullptr;
     class PoolNotebook *pool_notebook = nullptr;
@@ -228,6 +232,12 @@ private:
     std::string get_pool_base_path() const;
 
     std::string get_gitignore_filename() const;
+
+    void update_recent_search(Gtk::SearchEntry &entry, Gtk::ListBox &lb);
+    void update_recent_searches();
+    void clear_recent_searches();
+
+    void update_recent_placeholder(Gtk::Stack &stack, Gtk::ListBox &lb);
 
 public:
     zmq::context_t &zctx;
