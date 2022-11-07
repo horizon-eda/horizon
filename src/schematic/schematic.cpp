@@ -549,17 +549,7 @@ void Schematic::expand_connectivity(bool careful)
             it_sym.second.net->is_power = true;
             it_sym.second.net->is_power_forced = true;
         }
-        for (auto &[uu, label] : sheet.net_labels) {
-            if (block->nets.count(label.last_net))
-                block->nets.at(label.last_net).keep = true;
-        }
     }
-
-    if (!careful) {
-        block->vacuum_nets();
-        block->vacuum_group_tag_names();
-    }
-
 
     block->update_diffpairs();
 
@@ -747,8 +737,16 @@ void Schematic::expand_connectivity(bool careful)
                 label.last_net = label.junction->net->uuid;
             else
                 label.last_net = UUID();
+
+            if (block->nets.count(label.last_net))
+                block->nets.at(label.last_net).keep = true;
         }
         sheet.update_junction_connections();
+    }
+
+    if (!careful) {
+        block->vacuum_nets();
+        block->vacuum_group_tag_names();
     }
 
 
