@@ -313,6 +313,7 @@ void PoolsWindow::add_pool(const std::string &path)
         auto cpath = chooser->get_file()->get_parent()->get_path();
         pool_check_schema_update(cpath, *this);
         mgr.add_pool(cpath);
+        app.add_recent_item(chooser->get_file()->get_path());
         update();
     }
 }

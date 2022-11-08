@@ -136,6 +136,7 @@ void PoolProjectManagerApplication::UserConfig::save(const std::string &filename
 void PoolProjectManagerApplication::add_recent_item(const std::string &path)
 {
     user_config.recent_items[path] = Glib::DateTime::create_now_local();
+    s_signal_recent_items_changed.emit();
 }
 
 

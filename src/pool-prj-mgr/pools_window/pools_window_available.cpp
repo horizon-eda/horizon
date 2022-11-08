@@ -4,6 +4,7 @@
 #include "nlohmann/json.hpp"
 #include "pool/pool_manager.hpp"
 #include "pool_download_window.hpp"
+#include "pool-prj-mgr/pool-prj-mgr-app.hpp"
 #include "util/http_client.hpp"
 
 namespace horizon {
@@ -171,8 +172,9 @@ void PoolsWindow::show_download_window(const PoolIndex *idx)
     win->present();
     win->signal_hide().connect([win] { delete win; });
     win->signal_downloaded().connect(sigc::track_obj(
-            [this] {
+            [this](auto filename) {
                 stack->set_visible_child("installed");
+                app.add_recent_item(filename);
                 update();
             },
             *this));

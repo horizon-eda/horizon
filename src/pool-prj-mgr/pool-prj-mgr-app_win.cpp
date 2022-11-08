@@ -275,6 +275,8 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
         button->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_new_project));
     }
 
+    app.signal_recent_items_changed().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::update_recent_items));
+
     check_mtimes_dispatcher.connect([this] { pool_update(); });
 }
 

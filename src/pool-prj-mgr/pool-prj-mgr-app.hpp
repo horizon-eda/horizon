@@ -64,6 +64,12 @@ public:
         return s_signal_pool_updated;
     }
 
+    typedef sigc::signal<void> type_signal_recent_items_changed;
+    type_signal_recent_items_changed signal_recent_items_changed()
+    {
+        return s_signal_recent_items_changed;
+    }
+
     struct CloseOrHomeWindow {
         class PoolProjectManagerAppWindow &win;
         bool close = true;
@@ -97,6 +103,7 @@ private:
 
     type_signal_pool_items_edited s_signal_pool_items_edited;
     type_signal_pool_updated s_signal_pool_updated;
+    type_signal_recent_items_changed s_signal_recent_items_changed;
 
     std::string get_config_filename();
 

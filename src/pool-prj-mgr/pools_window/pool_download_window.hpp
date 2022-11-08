@@ -10,7 +10,7 @@ public:
     PoolDownloadWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const class PoolIndex *idx);
     static PoolDownloadWindow *create(const class PoolIndex *idx);
 
-    typedef sigc::signal<void> type_signal_downloaded;
+    typedef sigc::signal<void, std::string> type_signal_downloaded;
     type_signal_downloaded signal_downloaded()
     {
         return s_signal_downloaded;

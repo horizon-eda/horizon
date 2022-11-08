@@ -81,7 +81,7 @@ PoolDownloadWindow::PoolDownloadWindow(BaseObjectType *cobject, const Glib::RefP
                 return;
             }
             PoolManager::get().add_pool(download_dest_dir_entry->get_text());
-            s_signal_downloaded.emit();
+            s_signal_downloaded.emit(Glib::build_filename(download_dest_dir_entry->get_text(), "pool.json"));
             close();
         }
     });
