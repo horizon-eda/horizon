@@ -23,6 +23,8 @@ public:
     void send_json(int pid, const json &j);
     zmq::context_t zctx;
 
+
+    void add_recent_item(const std::string &path);
     class UserConfig {
     private:
         friend PoolProjectManagerApplication;
@@ -31,8 +33,6 @@ public:
         void save(const std::string &filename);
 
     public:
-        void add_recent_item(const std::string &path);
-
         std::map<std::string, Glib::DateTime> recent_items;
         std::deque<UUID> part_favorites;
         bool pool_doc_info_bar_dismissed = false;

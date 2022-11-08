@@ -979,7 +979,7 @@ bool PoolProjectManagerAppWindow::really_close_pool_or_project()
         }
         if (pool_notebook)
             pool_notebook->prepare_close();
-        app.user_config.add_recent_item(Glib::build_filename(pool->get_base_path(), "pool.json"));
+        app.add_recent_item(Glib::build_filename(pool->get_base_path(), "pool.json"));
         delete pool_notebook;
         info_bar_hide(info_bar_pool_not_added);
         pool_notebook = nullptr;
@@ -993,7 +993,7 @@ bool PoolProjectManagerAppWindow::really_close_pool_or_project()
             md.run();
             return false;
         }
-        app.user_config.add_recent_item(project_filename);
+        app.add_recent_item(project_filename);
         info_bar_hide(info_bar_gitignore);
         project.reset();
         cleanup();
@@ -1315,7 +1315,7 @@ void PoolProjectManagerAppWindow::check_pool_update(const std::string &base_path
 void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &file)
 {
     auto path = file->get_path();
-    app.user_config.add_recent_item(path);
+    app.add_recent_item(path);
 
     if (app.present_existing_window(path))
         return;

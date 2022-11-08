@@ -133,9 +133,9 @@ void PoolProjectManagerApplication::UserConfig::save(const std::string &filename
     save_json_to_file(filename, j);
 }
 
-void PoolProjectManagerApplication::UserConfig::add_recent_item(const std::string &path)
+void PoolProjectManagerApplication::add_recent_item(const std::string &path)
 {
-    recent_items[path] = Glib::DateTime::create_now_local();
+    user_config.recent_items[path] = Glib::DateTime::create_now_local();
 }
 
 
