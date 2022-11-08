@@ -908,7 +908,7 @@ LIBS_COMMON = sqlite3
 ifneq ($(OS),Windows_NT)
 	LIBS_COMMON += uuid
 endif
-LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libgit2 libcurl glm libpng libarchive
+LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libgit2 libcurl libpng libarchive
 
 OPTIMIZE = -fdata-sections -ffunction-sections -O3
 DEBUGFLAGS = -g3
