@@ -1154,6 +1154,10 @@ void ImpBoard::handle_maybe_drag(bool ctrl)
         ImpBase::handle_maybe_drag(ctrl);
         return;
     }
+    if (!canvas->selection_filter.can_select(SelectableRef(UUID(), ObjectType::TRACK, 0, target.layer))) {
+        ImpBase::handle_maybe_drag(ctrl);
+        return;
+    }
     canvas->inhibit_drag_selection();
     target_drag_begin = target;
     cursor_pos_drag_begin = canvas->get_cursor_pos_win();
