@@ -172,10 +172,18 @@ void SelectionFilterDialog::update_filter()
     for (const auto &it : checkbuttons) {
         auto &filter = selection_filter.object_filter[it.first];
         if (it.second.layer_buttons.size() == 0) {
-            if (work_layer_only && !it.second.work_layer_only_enabled)
+            if (work_layer_only && !it.second.work_layer_only_enabled) {
+                filter.layers.clear();
                 filter.other_layers = false;
-            else
+            }
+            else if (work_layer_only && it.second.work_layer_only_enabled) {
+                filter.layers = {{work_layer, true}};
+                filter.other_layers = false;
+            }
+            else {
+                filter.layers.clear();
                 filter.other_layers = it.second.checkbutton->get_active();
+            }
         }
         else {
             if (work_layer_only) {
