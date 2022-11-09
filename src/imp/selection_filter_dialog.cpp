@@ -170,26 +170,26 @@ SelectionFilterDialog::SelectionFilterDialog(Gtk::Window *parent, SelectionFilte
 void SelectionFilterDialog::update_filter()
 {
     for (const auto &it : checkbuttons) {
+        auto &filter = selection_filter.object_filter[it.first];
         if (it.second.layer_buttons.size() == 0) {
             if (work_layer_only && !it.second.work_layer_only_enabled)
-                selection_filter.object_filter[it.first].other_layers = false;
+                filter.other_layers = false;
             else
-                selection_filter.object_filter[it.first].other_layers = it.second.checkbutton->get_active();
+                filter.other_layers = it.second.checkbutton->get_active();
         }
         else {
             if (work_layer_only) {
-                selection_filter.object_filter[it.first].other_layers = false;
+                filter.other_layers = false;
                 if (it.second.checkbutton->get_active())
-                    selection_filter.object_filter[it.first].layers = {{work_layer, true}};
+                    filter.layers = {{work_layer, true}};
                 else
-                    selection_filter.object_filter[it.first].layers.clear();
+                    filter.layers.clear();
             }
             else {
                 if (it.second.other_layer_checkbutton)
-                    selection_filter.object_filter[it.first].other_layers =
-                            it.second.other_layer_checkbutton->get_active();
+                    filter.other_layers = it.second.other_layer_checkbutton->get_active();
                 for (auto &it_la : it.second.layer_buttons) {
-                    selection_filter.object_filter[it.first].layers[it_la.first] = it_la.second->get_active();
+                    filter.layers[it_la.first] = it_la.second->get_active();
                 }
             }
         }
