@@ -111,6 +111,8 @@ jobs:
     needs: stylecheck
     steps:
     - uses: actions/checkout@v2
+    - name: Install updates
+      run: pacman -Syu --noconfirm
     - name: Install dependencies
       run: pacman -Sy --needed --noconfirm zeromq gtkmm3 cairomm librsvg sqlite3 libgit2 curl opencascade glm podofo libarchive python libspnav
     - name: Install python dependencies
