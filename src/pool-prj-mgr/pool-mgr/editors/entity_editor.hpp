@@ -1,12 +1,12 @@
 #pragma once
 #include <gtkmm.h>
 #include "common/common.hpp"
-#include "editor_interface.hpp"
+#include "editor_base.hpp"
 #include "util/sort_helper.hpp"
 
 namespace horizon {
 
-class EntityEditor : public Gtk::Box, public PoolEditorInterface {
+class EntityEditor : public Gtk::Box, public PoolEditorBase {
     friend class GateEditor;
 
 public:

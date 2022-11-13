@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 namespace horizon {
-class PoolEditorInterface : public PoolGotoProvider {
+class PoolEditorBase : public PoolGotoProvider {
 public:
     virtual void reload()
     {
@@ -49,12 +49,12 @@ protected:
     }
 
     class LoadingSetter {
-        friend PoolEditorInterface;
-        LoadingSetter(PoolEditorInterface &i) : iface(i)
+        friend PoolEditorBase;
+        LoadingSetter(PoolEditorBase &i) : iface(i)
         {
             iface.loading = true;
         }
-        PoolEditorInterface &iface;
+        PoolEditorBase &iface;
 
     public:
         ~LoadingSetter()

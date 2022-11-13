@@ -2,12 +2,12 @@
 #include <gtkmm.h>
 #include "common/common.hpp"
 #include "pool/part.hpp"
-#include "editor_interface.hpp"
+#include "editor_base.hpp"
 #include "widgets/generic_combo_box.hpp"
 
 namespace horizon {
 
-class PartEditor : public Gtk::Box, public PoolEditorInterface {
+class PartEditor : public Gtk::Box, public PoolEditorBase {
 public:
     PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Part &p, class IPool &po,
                class PoolParametric &pp, const std::string &fn);

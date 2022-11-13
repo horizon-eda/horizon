@@ -62,7 +62,7 @@ public:
 private:
     ObjectType type;
     std::unique_ptr<EditorWindowStore> store = nullptr;
-    class PoolEditorInterface *iface = nullptr;
+    class PoolEditorBase *iface = nullptr;
     Gtk::Button *save_button = nullptr;
     Gtk::MenuButton *check_button = nullptr;
     Gtk::Stack *check_button_stack = nullptr;
