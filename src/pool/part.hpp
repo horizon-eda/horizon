@@ -80,6 +80,7 @@ public:
     OverridePrefix override_prefix = OverridePrefix::NO;
     std::string prefix;
     const std::string &get_prefix() const;
+    OverridePrefix get_override_prefix() const;
 
     ItemSet get_pool_items_used() const;
 

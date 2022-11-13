@@ -270,6 +270,16 @@ const std::string &Part::get_prefix() const
     }
 }
 
+Part::OverridePrefix Part::get_override_prefix() const
+{
+    if (base && override_prefix == OverridePrefix::INHERIT)
+        return base->get_override_prefix();
+    else if (override_prefix == OverridePrefix::INHERIT)
+        return OverridePrefix::NO;
+    else
+        return override_prefix;
+}
+
 Part::Part(const UUID &uu) : uuid(uu), version(app_version)
 {
     attributes[Attribute::MPN] = {false, ""};
