@@ -15,7 +15,6 @@ using json = nlohmann::json;
 class Part {
 private:
     Part(const UUID &uu, const json &j, class IPool &pool);
-    const std::string empty;
 
 public:
     class PadMapItem {

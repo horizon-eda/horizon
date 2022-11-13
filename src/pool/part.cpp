@@ -184,6 +184,7 @@ const std::string &Part::get_attribute(Attribute a) const
         }
     }
     else {
+        static const std::string empty;
         return empty;
     }
 }
