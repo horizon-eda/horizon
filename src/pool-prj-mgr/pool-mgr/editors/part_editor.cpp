@@ -210,6 +210,8 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("entity_label", w_entity_label);
     x->get_widget("package_label", w_package_label);
     x->get_widget("change_package_button", w_change_package_button);
+    x->get_widget("set_base_menu_item", w_set_base_menu_item);
+    x->get_widget("clear_base_menu_item", w_clear_base_menu_item);
     {
         Gtk::Box *model_box;
         x->get_widget("model_box", model_box);
@@ -308,6 +310,9 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     }
 
     w_change_package_button->signal_clicked().connect(sigc::mem_fun(*this, &PartEditor::change_package));
+    w_set_base_menu_item->signal_activate().connect(sigc::mem_fun(*this, &PartEditor::change_base));
+    w_clear_base_menu_item->signal_activate().connect(sigc::mem_fun(*this, &PartEditor::clear_base));
+
 
     w_tags_inherit->signal_toggled().connect([this] {
         if (is_loading())
@@ -576,6 +581,7 @@ void PartEditor::load()
     w_tags_inherit->set_active(part.inherit_tags);
     w_tags->set_tags(part.tags);
     w_change_package_button->set_sensitive(!part.base);
+    w_clear_base_menu_item->set_sensitive(part.base);
 
 
     if (part.base) {
@@ -839,6 +845,105 @@ void PartEditor::change_package()
         load();
         set_needs_save();
     }
+}
+
+bool PartEditor::check_base(const UUID &new_base)
+{
+    bool r = true;
+    auto &db = pool.get_db();
+    db.execute("DROP VIEW IF EXISTS part_deps");
+    {
+        db.execute(
+                        "CREATE TEMPORARY view part_deps AS SELECT uuid, dep_uuid FROM dependencies WHERE "
+                        "type = 'part' AND dep_type = 'part' AND uuid != '" + (std::string)part.uuid + "' "
+                        "UNION SELECT '" + (std::string)part.uuid + "', '" + (std::string) new_base+ "'");
+    }
+    {
+        SQLite::Query q(db,
+                        "WITH FindRoot AS ( "
+                        "SELECT uuid, dep_uuid, uuid as path, 0 AS Distance "
+                        "FROM part_deps WHERE uuid = $part "
+                        "UNION ALL "
+                        "SELECT C.uuid, P.dep_uuid, C.path || ' > ' || P.uuid, C.Distance + 1 "
+                        "FROM part_deps AS P "
+                        " JOIN FindRoot AS C "
+                        " ON C.dep_uuid = P.uuid AND P.dep_uuid != P.uuid AND C.dep_uuid != C.uuid "
+                        ") "
+                        "SELECT * "
+                        "FROM FindRoot AS R "
+                        "WHERE R.uuid = R.dep_uuid AND R.Distance > 0");
+        q.bind("$part", part.uuid);
+        while (q.step()) {
+            r = false;
+            break;
+        }
+    }
+
+    db.execute("DROP VIEW IF EXISTS part_deps");
+    return r;
+}
+
+void PartEditor::change_base()
+{
+    auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
+    PoolBrowserDialog dia(top, ObjectType::PART, pool);
+    {
+        auto &br = dynamic_cast<PoolBrowserPart &>(dia.get_browser());
+        br.set_entity_uuid(part.entity->uuid);
+        br.search();
+    }
+    while (dia.run() == Gtk::RESPONSE_OK) {
+        const auto selected_part_uuid = dia.get_browser().get_selected();
+        if (part.base && part.base->uuid == selected_part_uuid)
+            return;
+        if (selected_part_uuid == part.uuid || !check_base(selected_part_uuid)) {
+            Gtk::MessageDialog md(dia, "Can't set as base part", false /* use_markup */, Gtk::MESSAGE_ERROR,
+                                  Gtk::BUTTONS_OK);
+            md.set_secondary_text("Cyclic dependency");
+            md.run();
+            continue;
+        }
+        auto new_base = pool.get_part(selected_part_uuid);
+        set_base(new_base);
+        load();
+        set_needs_save();
+        return;
+    }
+}
+
+void PartEditor::set_base(const Part *new_base)
+{
+    auto old_base = part.base;
+    part.base = new_base;
+    if (new_base) {
+        set_package(*part.base->package);
+    }
+    else {
+        for (auto &[attr, v] : part.attributes) {
+            v.first = false;
+        }
+        for (auto &[flag, st] : part.flags) {
+            if (st == Part::FlagState::INHERIT && old_base)
+                st = old_base->get_flag(flag) ? Part::FlagState::SET : Part::FlagState::CLEAR;
+        }
+        if (part.inherit_tags) {
+            auto inherited_tags = old_base->get_tags();
+            part.tags.insert(inherited_tags.begin(), inherited_tags.end());
+        }
+        if (part.override_prefix == Part::OverridePrefix::INHERIT)
+            part.override_prefix = old_base->get_override_prefix();
+        if (part.override_prefix == Part::OverridePrefix::YES)
+            part.prefix = old_base->get_prefix();
+        part.inherit_model = false;
+        part.inherit_tags = false;
+    }
+}
+
+void PartEditor::clear_base()
+{
+    set_base(nullptr);
+    load();
+    set_needs_save();
 }
 
 void PartEditor::reload()

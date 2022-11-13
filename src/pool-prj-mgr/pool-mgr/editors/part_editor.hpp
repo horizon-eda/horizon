@@ -35,6 +35,8 @@ private:
     Gtk::Label *w_package_label = nullptr;
     Gtk::Label *w_base_label = nullptr;
     Gtk::Button *w_change_package_button = nullptr;
+    Gtk::MenuItem *w_set_base_menu_item = nullptr;
+    Gtk::MenuItem *w_clear_base_menu_item = nullptr;
     GenericComboBox<UUID> *w_model_combo = nullptr;
     Gtk::ToggleButton *w_model_inherit = nullptr;
 
@@ -117,6 +119,10 @@ private:
     void update_entries();
     void change_package();
     void set_package(const Package &pkg);
+    void set_base(const Part *part);
+    bool check_base(const UUID &new_base_uuid);
+    void change_base();
+    void clear_base();
     void populate_models();
     void update_model_inherit();
     void map_pin(Gtk::TreeModel::iterator it_pin);
@@ -128,7 +134,6 @@ private:
     std::map<Part::OverridePrefix, Gtk::RadioButton *> override_prefix_radio_buttons;
 
     std::map<Part::Flag, class FlagEditor *> flag_editors;
-
     class ParametricEditor *parametric_editor = nullptr;
     void update_parametric_editor();
     std::map<std::string, std::map<std::string, std::string>> parametric_data;
