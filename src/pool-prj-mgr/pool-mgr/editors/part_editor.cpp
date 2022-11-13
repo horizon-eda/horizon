@@ -226,7 +226,6 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("pad_stat", w_pad_stat);
     x->get_widget("parametric_box", w_parametric_box);
     x->get_widget("parametric_table_combo", w_parametric_table_combo);
-    x->get_widget("copy_parametric_from_base", w_parametric_from_base);
     x->get_widget("orderable_MPNs_label", w_orderable_MPNs_label);
     x->get_widget("orderable_MPNs_box", w_orderable_MPNs_box);
     x->get_widget("orderable_MPNs_add_button", w_orderable_MPNs_add_button);
@@ -237,7 +236,6 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("override_prefix_yes_button", w_override_prefix_yes_button);
     x->get_widget("override_prefix_entry", w_override_prefix_entry);
     sg_parametric_label = decltype(sg_parametric_label)::cast_dynamic(x->get_object("sg_parametric_label"));
-    w_parametric_from_base->hide();
 
     w_entity_label->set_track_visited_links(false);
     w_entity_label->signal_activate_link().connect(
@@ -502,12 +500,6 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     w_parametric_table_combo->signal_changed().connect([this] {
         update_parametric_editor();
         set_needs_save();
-    });
-    w_parametric_from_base->set_sensitive(part.base);
-    w_parametric_from_base->signal_clicked().connect([this] {
-        if (part.base) {
-            set_needs_save();
-        }
     });
 
     w_orderable_MPNs_add_button->signal_clicked().connect([this] {

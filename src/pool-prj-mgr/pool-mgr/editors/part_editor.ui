@@ -763,18 +763,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="copy_parametric_from_base">
-                    <property name="label" translatable="yes">Copy from base</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="pack-type">end</property>
-                    <property name="position">1</property>
-                  </packing>
+                  <placeholder/>
                 </child>
               </object>
               <packing>

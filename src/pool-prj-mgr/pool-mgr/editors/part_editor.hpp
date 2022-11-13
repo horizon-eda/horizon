@@ -53,7 +53,6 @@ private:
 
     Gtk::ComboBoxText *w_parametric_table_combo = nullptr;
     Gtk::Box *w_parametric_box = nullptr;
-    Gtk::Button *w_parametric_from_base = nullptr;
 
     Gtk::Label *w_orderable_MPNs_label = nullptr;
     Gtk::Button *w_orderable_MPNs_add_button = nullptr;
