@@ -8,7 +8,7 @@ public:
     virtual void reload()
     {
     }
-    virtual void save()
+    void save()
     {
         needs_save = false;
         s_signal_needs_save.emit();

@@ -159,10 +159,12 @@ ParametricEditor::ParametricEditor(PoolParametric &p, const std::string &t)
 
 void ParametricEditor::update(const std::map<std::string, std::string> &params)
 {
+    s_signal_changed.block();
     for (auto &it : params) {
         if (editors.count(it.first))
             editors.at(it.first)->set_value(it.second);
     }
+    s_signal_changed.unblock();
 }
 
 std::map<std::string, std::string> ParametricEditor::get_values()

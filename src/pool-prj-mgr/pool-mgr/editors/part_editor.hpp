@@ -13,7 +13,6 @@ public:
                class PoolParametric &pp);
     static PartEditor *create(class Part &p, class IPool &po, class PoolParametric &pp);
     void reload() override;
-    void save() override;
 
     virtual ~PartEditor(){};
 
@@ -125,6 +124,8 @@ private:
 
     class ParametricEditor *parametric_editor = nullptr;
     void update_parametric_editor();
+    std::map<std::string, std::map<std::string, std::string>> parametric_data;
+
     class OrderableMPNEditor *create_orderable_MPN_editor(const UUID &uu);
 };
 } // namespace horizon

@@ -295,7 +295,10 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     w_change_package_button->signal_clicked().connect(sigc::mem_fun(*this, &PartEditor::change_package));
 
     w_tags_inherit->set_active(part.inherit_tags);
-    w_tags_inherit->signal_toggled().connect([this] { set_needs_save(); });
+    w_tags_inherit->signal_toggled().connect([this] {
+        part.inherit_tags = w_tags_inherit->get_active();
+        set_needs_save();
+    });
 
     w_tags->set_tags(part.tags);
     w_tags->signal_changed().connect([this] {
@@ -453,6 +456,7 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     if (part.base) {
         w_model_inherit->set_active(part.inherit_model);
         w_model_inherit->signal_toggled().connect([this] {
+            part.inherit_model = w_model_inherit->get_active();
             set_needs_save();
             update_model_inherit();
         });
@@ -462,7 +466,10 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         w_model_inherit->set_sensitive(false);
     }
 
-    w_model_combo->signal_changed().connect([this] { set_needs_save(); });
+    w_model_combo->signal_changed().connect([this] {
+        part.model = w_model_combo->get_active_key();
+        set_needs_save();
+    });
 
     w_parametric_table_combo->append("", "None");
     for (const auto &it : pool_parametric.get_tables()) {
@@ -474,11 +481,15 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         if (pool_parametric.get_tables().count(tab)) {
             w_parametric_table_combo->set_active_id(tab);
         }
+        parametric_data[tab] = part.parametric;
     }
     update_parametric_editor();
+    if (parametric_editor) {
+        parametric_editor->update(part.parametric);
+    }
     w_parametric_table_combo->signal_changed().connect([this] {
-        set_needs_save();
         update_parametric_editor();
+        set_needs_save();
     });
     w_parametric_from_base->set_sensitive(part.base);
     w_parametric_from_base->signal_clicked().connect([this] {
@@ -772,25 +783,6 @@ void PartEditor::reload()
     update_entries();
 }
 
-void PartEditor::save()
-{
-    part.inherit_model = w_model_inherit->get_active();
-
-    part.model = w_model_combo->get_active_key();
-
-    part.inherit_tags = w_tags_inherit->get_active();
-
-    if (parametric_editor) {
-        part.parametric = parametric_editor->get_values();
-    }
-    else {
-        part.parametric.clear();
-    }
-
-    PoolEditorInterface::save();
-}
-
-
 void PartEditor::update_treeview()
 {
     pin_store->freeze_notify();
@@ -871,21 +863,30 @@ void PartEditor::populate_models()
 
 void PartEditor::update_parametric_editor()
 {
-    auto chs = w_parametric_box->get_children();
-    if (chs.size()) {
-        delete chs.back();
+    if (parametric_editor) {
+        delete parametric_editor;
+        parametric_editor = nullptr;
     }
-    parametric_editor = nullptr;
     auto tab = w_parametric_table_combo->get_active_id();
     if (pool_parametric.get_tables().count(tab)) {
         auto ed = Gtk::manage(new ParametricEditor(pool_parametric, tab));
         ed->show();
         w_parametric_box->pack_start(*ed, true, true, 0);
-        if (part.parametric.count("table") && part.parametric.at("table") == tab) {
-            ed->update(part.parametric);
+        if (parametric_data.count(tab)) {
+            const auto &values = parametric_data.at(tab);
+            ed->update(values);
+            part.parametric = values;
         }
         parametric_editor = ed;
-        parametric_editor->signal_changed().connect([this] { set_needs_save(); });
+        parametric_editor->signal_changed().connect([this] {
+            auto values = parametric_editor->get_values();
+            parametric_data[values.at("table")] = values;
+            part.parametric = values;
+            set_needs_save();
+        });
+    }
+    else {
+        part.parametric.clear();
     }
 }
 
