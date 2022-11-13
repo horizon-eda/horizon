@@ -31,7 +31,8 @@ PoolBrowserDialog::PoolBrowserDialog(Gtk::Window *parent, ObjectType type, IPool
         use_preview = false;
         break;
     case ObjectType::PART:
-        browser = Gtk::manage(new PoolBrowserPart(pool));
+        browser = Gtk::manage(new PoolBrowserPart(pool, {}, "dialog"));
+        set_default_size(900, 600);
         set_title("Select Part");
         use_preview = false;
         break;
