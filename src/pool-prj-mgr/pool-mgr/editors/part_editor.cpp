@@ -500,6 +500,7 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     w_parametric_table_combo->signal_changed().connect([this] {
         if (is_loading())
             return;
+        w_parametric_table_combo->grab_focus();
         update_parametric_editor();
         set_needs_save();
     });
