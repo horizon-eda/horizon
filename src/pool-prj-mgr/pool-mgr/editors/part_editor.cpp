@@ -15,6 +15,7 @@
 #include <range/v3/view.hpp>
 #include "util/range_util.hpp"
 #include "nlohmann/json.hpp"
+#include "checks/check_part.hpp"
 
 namespace horizon {
 class EntryWithInheritance : public Gtk::Box {
@@ -194,9 +195,10 @@ private:
     std::map<Part::FlagState, Gtk::RadioButton *> buttons;
 };
 
-PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Part &p, IPool &po,
-                       PoolParametric &pp, const std::string &fn)
-    : Gtk::Box(cobject), part(p), pool(po), pool_parametric(pp), filename(fn)
+PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const std::string &fn, IPool &po,
+                       PoolParametric &pp)
+    : Gtk::Box(cobject), PoolEditorBase(fn, po),
+      part(filename.size() ? Part::new_from_file(filename, pool) : Part(UUID::random())), pool_parametric(pp)
 {
 
     auto add_entry = [x](const char *name) {
@@ -1150,12 +1152,49 @@ void PartEditor::copy_from_other_part()
     }
 }
 
-PartEditor *PartEditor::create(Part &p, IPool &po, PoolParametric &pp, const std::string &fn)
+void PartEditor::save_as(const std::string &fn)
+{
+    unset_needs_save();
+    filename = fn;
+    save_json_to_file(fn, part.serialize());
+}
+
+std::string PartEditor::get_name() const
+{
+    return part.get_MPN();
+}
+
+const UUID &PartEditor::get_uuid() const
+{
+    return part.uuid;
+}
+
+RulesCheckResult PartEditor::run_checks() const
+{
+    return check_part(part);
+}
+
+const FileVersion &PartEditor::get_version() const
+{
+    return part.version;
+}
+
+unsigned int PartEditor::get_required_version() const
+{
+    return part.get_required_version();
+}
+
+ObjectType PartEditor::get_type() const
+{
+    return ObjectType::PART;
+}
+
+PartEditor *PartEditor::create(const std::string &fn, IPool &po, PoolParametric &pp)
 {
     PartEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/pool-mgr/editors/part_editor.ui");
-    x->get_widget_derived("part_editor", w, p, po, pp, fn);
+    x->get_widget_derived("part_editor", w, fn, po, pp);
     w->reference();
     return w;
 }

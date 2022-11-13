@@ -11,6 +11,8 @@
 #include "help_texts.hpp"
 #include "pool/ipool.hpp"
 #include "util/util.hpp"
+#include "checks/check_entity.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 
@@ -100,8 +102,10 @@ void EntityEditor::bind_entry(Gtk::Entry *e, std::string &s)
     });
 }
 
-EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Entity &e, IPool &p)
-    : Gtk::Box(cobject), entity(e), pool(p)
+EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const std::string &fn,
+                           IPool &p)
+    : Gtk::Box(cobject), PoolEditorBase(fn, p),
+      entity(filename.size() ? Entity::new_from_file(filename, pool) : Entity(UUID::random()))
 {
     x->get_widget("entity_name", name_entry);
     x->get_widget("entity_manufacturer", manufacturer_entry);
@@ -242,12 +246,44 @@ void EntityEditor::handle_add()
     set_needs_save();
 }
 
-EntityEditor *EntityEditor::create(Entity &e, class IPool &p)
+void EntityEditor::save_as(const std::string &fn)
+{
+    unset_needs_save();
+    filename = fn;
+    save_json_to_file(fn, entity.serialize());
+}
+
+std::string EntityEditor::get_name() const
+{
+    return entity.name;
+}
+
+const UUID &EntityEditor::get_uuid() const
+{
+    return entity.uuid;
+}
+
+RulesCheckResult EntityEditor::run_checks() const
+{
+    return check_entity(entity);
+}
+
+const FileVersion &EntityEditor::get_version() const
+{
+    return entity.version;
+}
+
+ObjectType EntityEditor::get_type() const
+{
+    return ObjectType::ENTITY;
+}
+
+EntityEditor *EntityEditor::create(const std::string &fn, class IPool &p)
 {
     EntityEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/pool-mgr/editors/entity_editor.ui");
-    x->get_widget_derived("entity_editor", w, e, p);
+    x->get_widget_derived("entity_editor", w, fn, p);
     w->reference();
     return w;
 }

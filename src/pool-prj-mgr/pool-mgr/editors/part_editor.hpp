@@ -4,24 +4,30 @@
 #include "pool/part.hpp"
 #include "editor_base.hpp"
 #include "widgets/generic_combo_box.hpp"
+#include "pool/part.hpp"
 
 namespace horizon {
 
 class PartEditor : public Gtk::Box, public PoolEditorBase {
 public:
-    PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Part &p, class IPool &po,
-               class PoolParametric &pp, const std::string &fn);
-    static PartEditor *create(class Part &p, class IPool &po, class PoolParametric &pp, const std::string &fn);
+    PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const std::string &filename,
+               class IPool &po, class PoolParametric &pp);
+    static PartEditor *create(const std::string &filename, class IPool &po, class PoolParametric &pp);
     void reload() override;
+
+    void save_as(const std::string &fn) override;
+    std::string get_name() const override;
+    const UUID &get_uuid() const override;
+    RulesCheckResult run_checks() const override;
+    const FileVersion &get_version() const override;
+    unsigned int get_required_version() const override;
+    ObjectType get_type() const override;
 
     virtual ~PartEditor(){};
 
 private:
-    class Part &part;
-    class IPool &pool;
+    Part part;
     class PoolParametric &pool_parametric;
-    const std::string &filename;
-
     void load();
 
     class EntryWithInheritance *w_mpn = nullptr;

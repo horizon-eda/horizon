@@ -8,24 +8,6 @@
 #include "rules/rules.hpp"
 
 namespace horizon {
-class EditorWindowStore {
-public:
-    EditorWindowStore(const std::string &fn);
-    void save();
-    virtual void save_as(const std::string &fn) = 0;
-    virtual std::string get_name() const = 0;
-    virtual const UUID &get_uuid() const = 0;
-    virtual const class FileVersion &get_version() const = 0;
-    virtual unsigned int get_required_version() const;
-    virtual ObjectType get_type() const = 0;
-    std::string filename;
-
-    virtual RulesCheckResult run_checks() const = 0;
-
-    virtual ~EditorWindowStore()
-    {
-    }
-};
 
 class EditorWindow : public Gtk::Window, public PoolGotoProvider {
 public:
@@ -61,7 +43,6 @@ public:
 
 private:
     ObjectType type;
-    std::unique_ptr<EditorWindowStore> store = nullptr;
     class PoolEditorBase *iface = nullptr;
     Gtk::Button *save_button = nullptr;
     Gtk::MenuButton *check_button = nullptr;

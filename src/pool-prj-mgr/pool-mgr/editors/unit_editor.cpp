@@ -9,6 +9,8 @@
 #include "widgets/help_button.hpp"
 #include "help_texts.hpp"
 #include "widgets/pin_names_editor.hpp"
+#include "nlohmann/json.hpp"
+#include "checks/check_unit.hpp"
 
 namespace horizon {
 
@@ -125,8 +127,10 @@ void UnitEditor::sort()
     pins_listbox->unset_sort_func();
 }
 
-UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Unit &u, class IPool &p)
-    : Gtk::Box(cobject), unit(u), pool(p)
+UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const std::string &fn,
+                       class IPool &p)
+    : Gtk::Box(cobject), PoolEditorBase(fn, p),
+      unit(filename.size() ? Unit::new_from_file(filename) : Unit(UUID::random()))
 {
     x->get_widget("unit_name", name_entry);
     x->get_widget("unit_manufacturer", manufacturer_entry);
@@ -322,13 +326,51 @@ void UnitEditor::select(const ItemSet &items)
     }
 }
 
-UnitEditor *UnitEditor::create(Unit &u, class IPool &p)
+void UnitEditor::save_as(const std::string &fn)
+{
+    unset_needs_save();
+    filename = fn;
+    save_json_to_file(fn, unit.serialize());
+}
+
+std::string UnitEditor::get_name() const
+{
+    return unit.name;
+}
+
+const UUID &UnitEditor::get_uuid() const
+{
+    return unit.uuid;
+}
+
+RulesCheckResult UnitEditor::run_checks() const
+{
+    return check_unit(unit);
+}
+
+const FileVersion &UnitEditor::get_version() const
+{
+    return unit.version;
+}
+
+unsigned int UnitEditor::get_required_version() const
+{
+    return unit.get_required_version();
+}
+
+ObjectType UnitEditor::get_type() const
+{
+    return ObjectType::UNIT;
+}
+
+UnitEditor *UnitEditor::create(const std::string &fn, class IPool &p)
 {
     UnitEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/pool-mgr/editors/unit_editor.ui");
-    x->get_widget_derived("unit_editor", w, u, p);
+    x->get_widget_derived("unit_editor", w, fn, p);
     w->reference();
     return w;
 }
+
 } // namespace horizon

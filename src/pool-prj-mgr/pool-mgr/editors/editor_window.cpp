@@ -18,131 +18,6 @@
 
 namespace horizon {
 
-EditorWindowStore::EditorWindowStore(const std::string &fn) : filename(fn)
-{
-}
-
-void EditorWindowStore::save()
-{
-    save_as(filename);
-}
-
-unsigned int EditorWindowStore::get_required_version() const
-{
-    return get_version().get_app();
-}
-
-class UnitStore : public EditorWindowStore {
-public:
-    UnitStore(const std::string &fn)
-        : EditorWindowStore(fn), unit(filename.size() ? Unit::new_from_file(filename) : Unit(UUID::random()))
-    {
-    }
-    void save_as(const std::string &fn) override
-    {
-        save_json_to_file(fn, unit.serialize());
-        filename = fn;
-    }
-    std::string get_name() const override
-    {
-        return unit.name;
-    }
-    const UUID &get_uuid() const override
-    {
-        return unit.uuid;
-    }
-    RulesCheckResult run_checks() const override
-    {
-        return check_unit(unit);
-    }
-    const FileVersion &get_version() const override
-    {
-        return unit.version;
-    }
-    unsigned int get_required_version() const override
-    {
-        return unit.get_required_version();
-    }
-    ObjectType get_type() const override
-    {
-        return ObjectType::UNIT;
-    }
-    Unit unit;
-};
-
-class EntityStore : public EditorWindowStore {
-public:
-    EntityStore(const std::string &fn, class IPool &pool)
-        : EditorWindowStore(fn),
-          entity(filename.size() ? Entity::new_from_file(filename, pool) : Entity(UUID::random()))
-    {
-    }
-    void save_as(const std::string &fn) override
-    {
-        save_json_to_file(fn, entity.serialize());
-        filename = fn;
-    }
-    std::string get_name() const override
-    {
-        return entity.name;
-    }
-    const UUID &get_uuid() const override
-    {
-        return entity.uuid;
-    }
-    RulesCheckResult run_checks() const override
-    {
-        return check_entity(entity);
-    }
-    const FileVersion &get_version() const override
-    {
-        return entity.version;
-    }
-    ObjectType get_type() const override
-    {
-        return ObjectType::ENTITY;
-    }
-    Entity entity;
-};
-
-class PartStore : public EditorWindowStore {
-public:
-    PartStore(const std::string &fn, class IPool &pool)
-        : EditorWindowStore(fn), part(filename.size() ? Part::new_from_file(filename, pool) : Part(UUID::random()))
-    {
-    }
-    void save_as(const std::string &fn) override
-    {
-        save_json_to_file(fn, part.serialize());
-        filename = fn;
-    }
-    std::string get_name() const override
-    {
-        return part.get_MPN();
-    }
-    const UUID &get_uuid() const override
-    {
-        return part.uuid;
-    }
-    RulesCheckResult run_checks() const override
-    {
-        return check_part(part);
-    }
-    const FileVersion &get_version() const override
-    {
-        return part.version;
-    }
-    unsigned int get_required_version() const override
-    {
-        return part.get_required_version();
-    }
-    ObjectType get_type() const override
-    {
-        return ObjectType::PART;
-    }
-    Part part;
-};
-
 EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p, class PoolParametric *pp,
                            bool a_read_only, bool is_temp)
     : Gtk::Window(), type(ty), pool(*p), pool_parametric(pp),
@@ -196,25 +71,19 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
     Gtk::Widget *editor = nullptr;
     switch (type) {
     case ObjectType::UNIT: {
-        auto st = new UnitStore(filename);
-        store.reset(st);
-        auto ed = UnitEditor::create(st->unit, pool);
+        auto ed = UnitEditor::create(filename, pool);
         editor = ed;
         iface = ed;
         hb->set_title("Unit Editor");
     } break;
     case ObjectType::ENTITY: {
-        auto st = new EntityStore(filename, pool);
-        store.reset(st);
-        auto ed = EntityEditor::create(st->entity, pool);
+        auto ed = EntityEditor::create(filename, pool);
         editor = ed;
         iface = ed;
         hb->set_title("Entity Editor");
     } break;
     case ObjectType::PART: {
-        auto st = new PartStore(filename, pool);
-        store.reset(st);
-        auto ed = PartEditor::create(st->part, pool, *pool_parametric, st->filename);
+        auto ed = PartEditor::create(filename, pool, *pool_parametric);
         editor = ed;
         iface = ed;
         hb->set_title("Part Editor");
@@ -238,14 +107,14 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
     }
 
     {
-        const auto &version = store->get_version();
+        const auto &version = iface->get_version();
         if (version.get_app() < version.get_file()) {
-            info_bar_label->set_markup(version.get_message(store->get_type()));
+            info_bar_label->set_markup(version.get_message(iface->get_type()));
             read_only = true;
             info_bar_show(info_bar);
         }
     }
-    saved_version = store->get_version().get_file();
+    saved_version = iface->get_version().get_file();
 
     editor->show();
     box->pack_start(*editor, true, true, 0);
@@ -256,10 +125,10 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
 
     if (is_temp) {
         Gio::File::create_for_path(filename)->remove();
-        store->filename.clear();
+        iface->filename.clear();
     }
 
-    if (store->filename.size()) {
+    if (iface->filename.size()) {
         save_button->set_label("Save");
     }
     else {
@@ -335,10 +204,10 @@ void EditorWindow::update_version_warning()
 {
     if (read_only)
         return;
-    if (store->get_required_version() > saved_version) {
-        const auto &t = object_descriptions.at(store->get_type()).name;
+    if (iface->get_required_version() > saved_version) {
+        const auto &t = object_descriptions.at(iface->get_type()).name;
         info_bar_label->set_markup("Saving this " + t + " will update it from version " + std::to_string(saved_version)
-                                   + " to " + std::to_string(store->get_required_version()) + " . "
+                                   + " to " + std::to_string(iface->get_required_version()) + " . "
                                    + FileVersion::learn_more_markup);
         info_bar_show(info_bar);
     }
@@ -366,20 +235,18 @@ void EditorWindow::save()
 {
     if (read_only)
         return;
-    if (store->filename.size()) {
-        if (iface)
-            iface->save();
-        store->save();
-        saved_version = store->get_required_version();
+    if (iface->filename.size()) {
+        iface->save_as(iface->filename);
+        saved_version = iface->get_required_version();
         need_update = true;
-        s_signal_saved.emit(store->filename);
+        s_signal_saved.emit(iface->filename);
     }
     else {
         GtkFileChooserNative *native = gtk_file_chooser_native_new("Save", GTK_WINDOW(gobj()),
                                                                    GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
         auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
         chooser->set_do_overwrite_confirmation(true);
-        chooser->set_current_name(store->get_name() + ".json");
+        chooser->set_current_name(iface->get_name() + ".json");
         switch (type) {
         case ObjectType::UNIT:
             chooser->set_current_folder(Glib::build_filename(pool.get_base_path(), "units"));
@@ -399,14 +266,12 @@ void EditorWindow::save()
                                                          [this, chooser] {
                                                              std::string fn = append_dot_json(chooser->get_filename());
                                                              pool.check_filename_throw(type, fn);
-                                                             if (iface)
-                                                                 iface->save();
-                                                             store->save_as(fn);
+                                                             iface->save_as(fn);
                                                              s_signal_filename_changed.emit(fn);
                                                          });
         if (success) {
-            saved_version = store->get_required_version();
-            s_signal_saved.emit(store->filename);
+            saved_version = iface->get_required_version();
+            s_signal_saved.emit(iface->filename);
             save_button->set_label("Save");
             need_update = true;
         }
@@ -417,14 +282,12 @@ void EditorWindow::save()
 
 std::string EditorWindow::get_filename() const
 {
-    return store->filename;
+    return iface->filename;
 }
 
 void EditorWindow::reload()
 {
-    if (iface) {
-        iface->reload();
-    }
+    iface->reload();
 }
 
 bool EditorWindow::get_need_update() const
@@ -445,12 +308,12 @@ void EditorWindow::select(const ItemSet &items)
 
 const UUID &EditorWindow::get_uuid() const
 {
-    return store->get_uuid();
+    return iface->get_uuid();
 }
 
 void EditorWindow::run_checks()
 {
-    auto r = store->run_checks();
+    auto r = iface->run_checks();
     check_color_box->set_color(rules_check_error_level_to_color(r.level));
     std::string s;
     if (r.level == RulesCheckErrorLevel::PASS) {
