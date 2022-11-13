@@ -214,7 +214,7 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
     case ObjectType::PART: {
         auto st = new PartStore(filename, pool);
         store.reset(st);
-        auto ed = PartEditor::create(st->part, pool, *pool_parametric);
+        auto ed = PartEditor::create(st->part, pool, *pool_parametric, st->filename);
         editor = ed;
         iface = ed;
         hb->set_title("Part Editor");
@@ -278,6 +278,7 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
         }
         update_version_warning();
     });
+    iface->signal_extra_file_saved().connect([this](const auto &fn) { s_signal_saved.emit(fn); });
     run_checks();
 
     if (!state_store.get_default_set())

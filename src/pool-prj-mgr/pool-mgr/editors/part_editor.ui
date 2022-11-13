@@ -121,6 +121,14 @@
         <property name="use-underline">True</property>
       </object>
     </child>
+    <child>
+      <object class="GtkMenuItem" id="create_base_menu_item">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="label" translatable="yes">Create</property>
+        <property name="use-underline">True</property>
+      </object>
+    </child>
   </object>
   <object class="GtkBox" id="part_editor">
     <property name="visible">True</property>

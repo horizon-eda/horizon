@@ -28,6 +28,12 @@ public:
         return s_signal_needs_save;
     }
 
+    typedef sigc::signal<void, std::string> type_signal_extra_file_saved;
+    type_signal_extra_file_saved signal_extra_file_saved()
+    {
+        return s_signal_extra_file_saved;
+    }
+
 protected:
     void set_needs_save()
     {
@@ -63,6 +69,8 @@ protected:
     {
         return loading;
     }
+
+    type_signal_extra_file_saved s_signal_extra_file_saved;
 
 private:
     bool loading = false;

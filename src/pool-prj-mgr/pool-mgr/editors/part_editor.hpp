@@ -10,8 +10,8 @@ namespace horizon {
 class PartEditor : public Gtk::Box, public PoolEditorInterface {
 public:
     PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Part &p, class IPool &po,
-               class PoolParametric &pp);
-    static PartEditor *create(class Part &p, class IPool &po, class PoolParametric &pp);
+               class PoolParametric &pp, const std::string &fn);
+    static PartEditor *create(class Part &p, class IPool &po, class PoolParametric &pp, const std::string &fn);
     void reload() override;
 
     virtual ~PartEditor(){};
@@ -20,6 +20,7 @@ private:
     class Part &part;
     class IPool &pool;
     class PoolParametric &pool_parametric;
+    const std::string &filename;
 
     void load();
 
@@ -37,6 +38,7 @@ private:
     Gtk::Button *w_change_package_button = nullptr;
     Gtk::MenuItem *w_set_base_menu_item = nullptr;
     Gtk::MenuItem *w_clear_base_menu_item = nullptr;
+    Gtk::MenuItem *w_create_base_menu_item = nullptr;
     GenericComboBox<UUID> *w_model_combo = nullptr;
     Gtk::ToggleButton *w_model_inherit = nullptr;
 
@@ -123,6 +125,7 @@ private:
     bool check_base(const UUID &new_base_uuid);
     void change_base();
     void clear_base();
+    void create_base();
     void populate_models();
     void update_model_inherit();
     void map_pin(Gtk::TreeModel::iterator it_pin);
@@ -140,5 +143,7 @@ private:
     Glib::RefPtr<Gtk::SizeGroup> sg_parametric_label;
 
     class OrderableMPNEditor *create_orderable_MPN_editor(const UUID &uu);
+
+    UUID pending_base_part;
 };
 } // namespace horizon

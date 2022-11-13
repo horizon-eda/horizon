@@ -14,6 +14,7 @@
 #include "pool/ipool.hpp"
 #include <range/v3/view.hpp>
 #include "util/range_util.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 class EntryWithInheritance : public Gtk::Box {
@@ -194,8 +195,8 @@ private:
 };
 
 PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Part &p, IPool &po,
-                       PoolParametric &pp)
-    : Gtk::Box(cobject), part(p), pool(po), pool_parametric(pp)
+                       PoolParametric &pp, const std::string &fn)
+    : Gtk::Box(cobject), part(p), pool(po), pool_parametric(pp), filename(fn)
 {
 
     auto add_entry = [x](const char *name) {
@@ -212,6 +213,7 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("change_package_button", w_change_package_button);
     x->get_widget("set_base_menu_item", w_set_base_menu_item);
     x->get_widget("clear_base_menu_item", w_clear_base_menu_item);
+    x->get_widget("create_base_menu_item", w_create_base_menu_item);
     {
         Gtk::Box *model_box;
         x->get_widget("model_box", model_box);
@@ -312,6 +314,7 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     w_change_package_button->signal_clicked().connect(sigc::mem_fun(*this, &PartEditor::change_package));
     w_set_base_menu_item->signal_activate().connect(sigc::mem_fun(*this, &PartEditor::change_base));
     w_clear_base_menu_item->signal_activate().connect(sigc::mem_fun(*this, &PartEditor::clear_base));
+    w_create_base_menu_item->signal_activate().connect(sigc::mem_fun(*this, &PartEditor::create_base));
 
 
     w_tags_inherit->signal_toggled().connect([this] {
@@ -947,10 +950,60 @@ void PartEditor::clear_base()
     set_needs_save();
 }
 
+void PartEditor::create_base()
+{
+    auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
+
+    GtkFileChooserNative *native =
+            gtk_file_chooser_native_new("Save", top->gobj(), GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
+    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+    chooser->set_do_overwrite_confirmation(true);
+
+
+    chooser->set_current_folder(Glib::path_get_dirname(filename));
+
+    run_native_filechooser_with_retry(chooser, "Error saving Part", [this, chooser] {
+        std::string fn = append_dot_json(chooser->get_filename());
+        pool.check_filename_throw(ObjectType::PART, fn);
+        Part new_part = part;
+        new_part.flags.at(Part::Flag::BASE_PART) = Part::FlagState::SET;
+        auto &mpn = new_part.attributes.at(Part::Attribute::MPN);
+        if (!mpn.first)
+            mpn.second = mpn.second + " (Base part)";
+        new_part.uuid = UUID::random();
+        save_json_to_file(fn, new_part.serialize());
+        s_signal_extra_file_saved.emit(fn);
+        pending_base_part = new_part.uuid;
+    });
+}
+
 void PartEditor::reload()
 {
     part.update_refs(pool);
     update_entries();
+    if (pending_base_part) {
+        const Part *new_base = nullptr;
+        try {
+            new_base = pool.get_part(pending_base_part);
+        }
+        catch (...) {
+            // doesn't seem to exist yet...
+        }
+        if (new_base) {
+            set_base(new_base);
+            for (auto &[attr, value] : part.attributes) {
+                value.first = true;
+            }
+            part.tags.clear();
+            part.inherit_tags = true;
+            part.inherit_model = true;
+            if (new_base->override_prefix != Part::OverridePrefix::NO)
+                part.override_prefix = Part::OverridePrefix::INHERIT;
+            pending_base_part = UUID();
+            load();
+            set_needs_save();
+        }
+    }
 }
 
 void PartEditor::update_treeview()
@@ -1096,12 +1149,12 @@ void PartEditor::copy_from_other_part()
     }
 }
 
-PartEditor *PartEditor::create(Part &p, IPool &po, PoolParametric &pp)
+PartEditor *PartEditor::create(Part &p, IPool &po, PoolParametric &pp, const std::string &fn)
 {
     PartEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/pool-mgr/editors/part_editor.ui");
-    x->get_widget_derived("part_editor", w, p, po, pp);
+    x->get_widget_derived("part_editor", w, p, po, pp, fn);
     w->reference();
     return w;
 }
