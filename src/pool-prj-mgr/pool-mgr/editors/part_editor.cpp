@@ -12,6 +12,7 @@
 #include "util/pool_completion.hpp"
 #include "parametric.hpp"
 #include "pool/ipool.hpp"
+#include <range/v3/view.hpp>
 
 namespace horizon {
 class EntryWithInheritance : public Gtk::Box {
@@ -235,6 +236,7 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("override_prefix_no_button", w_override_prefix_no_button);
     x->get_widget("override_prefix_yes_button", w_override_prefix_yes_button);
     x->get_widget("override_prefix_entry", w_override_prefix_entry);
+    sg_parametric_label = decltype(sg_parametric_label)::cast_dynamic(x->get_object("sg_parametric_label"));
     w_parametric_from_base->hide();
 
     w_entity_label->set_track_visited_links(false);
@@ -470,6 +472,16 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         part.model = w_model_combo->get_active_key();
         set_needs_save();
     });
+
+    {
+        namespace rv = ranges::views;
+        const auto maxlen =
+                ranges::max(pool_parametric.get_tables() | rv::transform([](const auto &x) { return x.second.columns; })
+                            | rv::join | rv::transform([](const auto &x) { return x.display_name.size(); }));
+        Gtk::Label *la;
+        x->get_widget("label_table", la);
+        la->set_width_chars(maxlen);
+    }
 
     w_parametric_table_combo->append("", "None");
     for (const auto &it : pool_parametric.get_tables()) {
@@ -869,7 +881,7 @@ void PartEditor::update_parametric_editor()
     }
     auto tab = w_parametric_table_combo->get_active_id();
     if (pool_parametric.get_tables().count(tab)) {
-        auto ed = Gtk::manage(new ParametricEditor(pool_parametric, tab));
+        auto ed = Gtk::manage(new ParametricEditor(pool_parametric, tab, sg_parametric_label));
         ed->show();
         w_parametric_box->pack_start(*ed, true, true, 0);
         if (parametric_data.count(tab)) {

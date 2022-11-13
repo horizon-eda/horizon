@@ -10,7 +10,7 @@ namespace horizon {
 
 class ParametricEditor : public Gtk::Grid, public Changeable {
 public:
-    ParametricEditor(PoolParametric &p, const std::string &t);
+    ParametricEditor(PoolParametric &p, const std::string &t, Glib::RefPtr<Gtk::SizeGroup> sg);
 
     void update(const std::map<std::string, std::string> &params);
 

@@ -787,7 +787,6 @@
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="halign">start</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">10</property>
                 <child>
@@ -796,10 +795,11 @@
                     <property name="can-focus">False</property>
                     <property name="spacing">10</property>
                     <child>
-                      <object class="GtkLabel">
+                      <object class="GtkLabel" id="label_table">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Table</property>
+                        <property name="xalign">1</property>
                         <style>
                           <class name="dim-label"/>
                         </style>
@@ -814,8 +814,6 @@
                       <object class="GtkComboBoxText" id="parametric_table_combo">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="halign">start</property>
-                        <property name="margin-end">20</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -1122,6 +1120,11 @@ other part</property>
     <widgets>
       <widget name="box1"/>
       <widget name="box2"/>
+    </widgets>
+  </object>
+  <object class="GtkSizeGroup" id="sg_parametric_label">
+    <widgets>
+      <widget name="label_table"/>
     </widgets>
   </object>
 </interface>

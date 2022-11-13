@@ -127,7 +127,7 @@ private:
 };
 
 
-ParametricEditor::ParametricEditor(PoolParametric &p, const std::string &t)
+ParametricEditor::ParametricEditor(PoolParametric &p, const std::string &t, Glib::RefPtr<Gtk::SizeGroup> sg)
     : Gtk::Grid(), pool(p), table(pool.get_tables().at(t))
 {
     set_row_spacing(10);
@@ -154,9 +154,10 @@ ParametricEditor::ParametricEditor(PoolParametric &p, const std::string &t)
         if (w && e) {
             auto ne = Gtk::manage(new NullableParamEditor(w, e, col));
             ne->show();
-            grid_attach_label_and_widget(this, col.display_name, ne, top);
             editors[col.name] = ne;
             ne->signal_changed().connect([this] { s_signal_changed.emit(); });
+            auto la = grid_attach_label_and_widget(this, col.display_name, ne, top);
+            sg->add_widget(*la);
         }
     }
 }

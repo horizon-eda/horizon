@@ -125,6 +125,7 @@ private:
     class ParametricEditor *parametric_editor = nullptr;
     void update_parametric_editor();
     std::map<std::string, std::map<std::string, std::string>> parametric_data;
+    Glib::RefPtr<Gtk::SizeGroup> sg_parametric_label;
 
     class OrderableMPNEditor *create_orderable_MPN_editor(const UUID &uu);
 };
