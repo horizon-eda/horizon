@@ -84,7 +84,7 @@ public:
     }
 };
 
-class NullableParamEditor : public Gtk::Box, public ParametricParamEditor {
+class NullableParamEditor : public Gtk::Box, public ParametricParamEditor, public Changeable {
 public:
     NullableParamEditor(Gtk::Widget *w, ParametricParamEditor *e, const PoolParametric::Column &c)
         : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0), ParametricParamEditor(c), widget(w), editor(e)
@@ -99,7 +99,10 @@ public:
         nullbutton->set_sensitive(!column.required);
 
         if (!column.required)
-            nullbutton->signal_toggled().connect([this] { widget->set_sensitive(!nullbutton->get_active()); });
+            nullbutton->signal_toggled().connect([this] {
+                widget->set_sensitive(!nullbutton->get_active());
+                s_signal_changed.emit();
+            });
     }
 
     std::string get_value() override
@@ -153,6 +156,7 @@ ParametricEditor::ParametricEditor(PoolParametric &p, const std::string &t)
             ne->show();
             grid_attach_label_and_widget(this, col.display_name, ne, top);
             editors[col.name] = ne;
+            ne->signal_changed().connect([this] { s_signal_changed.emit(); });
         }
     }
 }
