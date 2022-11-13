@@ -13,6 +13,7 @@
 #include "parametric.hpp"
 #include "pool/ipool.hpp"
 #include <range/v3/view.hpp>
+#include "util/range_util.hpp"
 
 namespace horizon {
 class EntryWithInheritance : public Gtk::Box {
@@ -142,7 +143,7 @@ private:
 
 class FlagEditor : public Gtk::Box, public Changeable {
 public:
-    FlagEditor(Part::FlagState &a_state, bool has_inherit) : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0), state(a_state)
+    FlagEditor() : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0)
     {
         get_style_context()->add_class("linked");
         static const std::vector<std::pair<Part::FlagState, std::string>> states = {
@@ -153,29 +154,43 @@ public:
         Gtk::RadioButton *group = nullptr;
         for (const auto &[st, name] : states) {
             auto bu = Gtk::manage(new Gtk::RadioButton(name));
+            buttons.emplace(st, bu);
             bu->set_mode(false);
             if (group)
                 bu->join_group(*group);
             else
                 group = bu;
-            if (st == Part::FlagState::INHERIT && !has_inherit)
-                bu->set_sensitive(false);
-            if (state == st)
-                bu->set_active(true);
             bu->show();
             pack_start(*bu, false, false, 0);
-            Part::FlagState st2 = st;
-            bu->signal_toggled().connect([this, bu, st2] {
+            bu->signal_toggled().connect([this, bu] {
                 if (bu->get_active()) {
-                    state = st2;
                     s_signal_changed.emit();
                 }
             });
         }
     }
 
+    Part::FlagState get_state() const
+    {
+        for (auto [st, button] : buttons) {
+            if (button->get_active())
+                return st;
+        }
+        return Part::FlagState::CLEAR;
+    }
+
+    void set_state(Part::FlagState st)
+    {
+        buttons.at(st)->set_active(true);
+    }
+
+    void set_can_inherit(bool inh)
+    {
+        buttons.at(Part::FlagState::INHERIT)->set_sensitive(inh);
+    }
+
 private:
-    Part::FlagState &state;
+    std::map<Part::FlagState, Gtk::RadioButton *> buttons;
 };
 
 PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Part &p, IPool &po,
@@ -237,6 +252,10 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("override_prefix_entry", w_override_prefix_entry);
     sg_parametric_label = decltype(sg_parametric_label)::cast_dynamic(x->get_object("sg_parametric_label"));
 
+    override_prefix_radio_buttons = {{Part::OverridePrefix::NO, w_override_prefix_no_button},
+                                     {Part::OverridePrefix::INHERIT, w_override_prefix_inherit_button},
+                                     {Part::OverridePrefix::YES, w_override_prefix_yes_button}};
+
     w_entity_label->set_track_visited_links(false);
     w_entity_label->signal_activate_link().connect(
             [this](const std::string &url) {
@@ -274,34 +293,32 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
 
 
     for (auto &it : attr_editors) {
-        it.second->property_can_inherit() = part.base;
-        it.second->set_text_this(part.attributes.at(it.first).second);
-        if (part.base) {
-            it.second->set_text_inherit(part.base->attributes.at(it.first).second);
-            it.second->property_inherit() = part.attributes.at(it.first).first;
-        }
         it.second->entry->signal_changed().connect([this, it] {
+            if (is_loading())
+                return;
             part.attributes[it.first] = it.second->get_as_pair();
             set_needs_save();
         });
         it.second->button->signal_toggled().connect([this, it] {
+            if (is_loading())
+                return;
             part.attributes[it.first] = it.second->get_as_pair();
             set_needs_save();
         });
     }
 
-    update_entries();
-
     w_change_package_button->signal_clicked().connect(sigc::mem_fun(*this, &PartEditor::change_package));
 
-    w_tags_inherit->set_active(part.inherit_tags);
     w_tags_inherit->signal_toggled().connect([this] {
+        if (is_loading())
+            return;
         part.inherit_tags = w_tags_inherit->get_active();
         set_needs_save();
     });
 
-    w_tags->set_tags(part.tags);
     w_tags->signal_changed().connect([this] {
+        if (is_loading())
+            return;
         part.tags = w_tags->get_tags();
         set_needs_save();
     });
@@ -355,12 +372,8 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
 
     pad_store->set_sort_column(pad_list_columns.pad_name, Gtk::SORT_ASCENDING);
 
-    update_treeview();
-
-    update_map_buttons();
     w_tv_pads->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &PartEditor::update_map_buttons));
     w_tv_pins->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &PartEditor::update_map_buttons));
-    w_change_package_button->set_sensitive(!part.base);
 
     w_button_unmap->signal_clicked().connect([this] {
         auto sel = w_tv_pads->get_selection();
@@ -373,6 +386,7 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
             row[pad_list_columns.gate_uuid] = UUID();
         }
         update_mapped();
+        update_pad_map();
         set_needs_save();
     });
 
@@ -406,6 +420,7 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
             }
         }
         update_mapped();
+        update_pad_map();
         set_needs_save();
     });
 
@@ -448,25 +463,17 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         tree_view_scroll_to_selection(w_tv_pads);
     });
     w_button_copy_from_other->signal_clicked().connect(sigc::mem_fun(*this, &PartEditor::copy_from_other_part));
-
-    update_mapped();
-    populate_models();
-    w_model_combo->set_active_key(part.model);
-
-    if (part.base) {
-        w_model_inherit->set_active(part.inherit_model);
-        w_model_inherit->signal_toggled().connect([this] {
-            part.inherit_model = w_model_inherit->get_active();
-            set_needs_save();
-            update_model_inherit();
-        });
+    w_model_inherit->signal_toggled().connect([this] {
+        if (is_loading())
+            return;
+        part.inherit_model = w_model_inherit->get_active();
+        set_needs_save();
         update_model_inherit();
-    }
-    else {
-        w_model_inherit->set_sensitive(false);
-    }
+    });
 
     w_model_combo->signal_changed().connect([this] {
+        if (is_loading())
+            return;
         part.model = w_model_combo->get_active_key();
         set_needs_save();
     });
@@ -485,19 +492,9 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     for (const auto &it : pool_parametric.get_tables()) {
         w_parametric_table_combo->append(it.first, it.second.display_name);
     }
-    w_parametric_table_combo->set_active_id("");
-    if (part.parametric.count("table")) {
-        std::string tab = part.parametric.at("table");
-        if (pool_parametric.get_tables().count(tab)) {
-            w_parametric_table_combo->set_active_id(tab);
-        }
-        parametric_data[tab] = part.parametric;
-    }
-    update_parametric_editor();
-    if (parametric_editor) {
-        parametric_editor->update(part.parametric);
-    }
     w_parametric_table_combo->signal_changed().connect([this] {
+        if (is_loading())
+            return;
         update_parametric_editor();
         set_needs_save();
     });
@@ -511,11 +508,6 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         update_orderable_MPNs_label();
     });
 
-    for (const auto &it : part.orderable_MPNs) {
-        create_orderable_MPN_editor(it.first);
-    }
-    update_orderable_MPNs_label();
-
     {
         static const std::map<Part::Flag, std::string> flag_names = {
                 {Part::Flag::BASE_PART, "Base part"},
@@ -524,37 +516,120 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         };
         int top = 0;
         for (const auto &[fl, name] : flag_names) {
-            auto ed = Gtk::manage(new FlagEditor(part.flags.at(fl), part.base));
-            ed->signal_changed().connect([this] {
+            auto ed = Gtk::manage(new FlagEditor());
+            flag_editors.emplace(fl, ed);
+            const auto fl2 = fl;
+            ed->signal_changed().connect([this, ed, fl2] {
+                if (is_loading())
+                    return;
+                part.flags.at(fl2) = ed->get_state();
                 set_needs_save();
                 update_flags_label();
             });
             grid_attach_label_and_widget(w_flags_grid, name, ed, top);
         }
     }
-    update_flags_label();
 
-    {
-        w_override_prefix_inherit_button->set_sensitive(part.base);
-        std::map<Part::OverridePrefix, Gtk::RadioButton *> rbs = {
-                {Part::OverridePrefix::NO, w_override_prefix_no_button},
-                {Part::OverridePrefix::INHERIT, w_override_prefix_inherit_button},
-                {Part::OverridePrefix::YES, w_override_prefix_yes_button},
-        };
-        bind_widget<Part::OverridePrefix>(rbs, part.override_prefix, [this](auto v) {
-            update_prefix_entry();
-            set_needs_save();
+
+    for (auto [ov, rb] : override_prefix_radio_buttons) {
+        auto ov2 = ov;
+        auto &rb2 = *rb;
+        rb2.signal_toggled().connect([this, &rb2, ov2] {
+            if (is_loading())
+                return;
+            if (rb2.get_active()) {
+                part.override_prefix = ov2;
+                update_prefix_entry();
+                set_needs_save();
+            }
         });
-        update_prefix_entry();
     }
 
     w_override_prefix_entry->signal_changed().connect([this] {
         if (part.override_prefix == Part::OverridePrefix::YES) {
+            if (is_loading())
+                return;
             part.prefix = w_override_prefix_entry->get_text();
             set_needs_save();
         }
     });
+
+    load();
 }
+
+void PartEditor::load()
+{
+    auto loading_setter = set_loading();
+    for (auto &[attr, entry] : attr_editors) {
+        entry->property_can_inherit() = part.base;
+        entry->set_text_this(part.attributes.at(attr).second);
+        if (part.base) {
+            entry->set_text_inherit(part.base->attributes.at(attr).second);
+            entry->property_inherit() = part.attributes.at(attr).first;
+        }
+        else {
+            entry->property_inherit() = false;
+        }
+    }
+    update_entries();
+
+    w_tags_inherit->set_active(part.inherit_tags);
+    w_tags->set_tags(part.tags);
+    w_change_package_button->set_sensitive(!part.base);
+
+
+    if (part.base) {
+        w_model_inherit->set_active(part.inherit_model);
+        w_model_inherit->set_sensitive(true);
+    }
+    else {
+        w_model_inherit->set_active(false);
+        w_model_inherit->set_sensitive(false);
+    }
+    update_model_inherit();
+
+
+    update_treeview();
+
+    update_map_buttons();
+
+    update_mapped();
+    populate_models();
+    w_model_combo->set_active_key(part.model);
+
+
+    if (part.parametric.count("table")) {
+        std::string tab = part.parametric.at("table");
+        parametric_data[tab] = part.parametric;
+        if (pool_parametric.get_tables().count(tab)) {
+            w_parametric_table_combo->set_active_id(tab);
+        }
+        else {
+            w_parametric_table_combo->set_active_id("");
+        }
+    }
+    else {
+        w_parametric_table_combo->set_active_id("");
+    }
+    update_parametric_editor();
+
+    for (const auto &it : part.orderable_MPNs) {
+        create_orderable_MPN_editor(it.first);
+    }
+    update_orderable_MPNs_label();
+
+    override_prefix_radio_buttons.at(part.override_prefix)->set_active(true);
+
+    w_override_prefix_inherit_button->set_sensitive(part.base);
+    update_prefix_entry();
+
+    for (auto [fl, ed] : flag_editors) {
+        ed->set_can_inherit(part.base);
+        ed->set_state(part.flags.at(fl));
+    }
+    update_flags_label();
+}
+
 class OrderableMPNEditor *PartEditor::create_orderable_MPN_editor(const UUID &uu)
 {
     auto ed = Gtk::manage(new OrderableMPNEditor(part, uu));
@@ -674,12 +749,15 @@ void PartEditor::map_pin(Gtk::TreeModel::iterator it_pin)
             }
         }
         update_mapped();
+        update_pad_map();
         set_needs_save();
     }
 }
 
 void PartEditor::update_model_inherit()
 {
+    if (!part.base)
+        return;
     auto active = w_model_inherit->get_active();
     if (active) {
         w_model_combo->set_active_key(part.base->model);
@@ -697,8 +775,6 @@ static std::string append_with_slash(const std::string &s)
 
 void PartEditor::update_entries()
 {
-
-
     if (part.base) {
         w_base_label->set_markup(
                 "<a href=\"" + (std::string)part.base->uuid + "\">"
@@ -737,46 +813,30 @@ void PartEditor::update_entries()
     w_tags_inherit->set_sensitive(part.base);
 }
 
+void PartEditor::set_package(const Package &package)
+{
+    const auto &old_package = *part.package;
+    part.package = &package;
+    part.model = part.package->default_model;
+    const auto old_pad_map = part.pad_map;
+    part.pad_map.clear();
+    for (const auto &[uu, pad] : part.package->pads) {
+        const auto &pad_name = pad.name;
+        if (auto it = find_if_ptr(old_pad_map, [&pad_name, &old_package](const auto &x) {
+                return old_package.pads.at(x.first).name == pad_name;
+            })) {
+            part.pad_map.emplace(uu, it->second);
+        }
+    }
+}
+
 void PartEditor::change_package()
 {
     auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
     PoolBrowserDialog dia(top, ObjectType::PACKAGE, pool);
     if (dia.run() == Gtk::RESPONSE_OK) {
-        set_needs_save();
-        part.package = pool.get_package(dia.get_browser().get_selected());
-        auto ch = pad_store->children();
-        std::set<UUID> pads_exisiting;
-        for (auto it = ch.begin(); it != ch.end();) {
-            Gtk::TreeModel::Row row = *it;
-            auto pad_name = row[pad_list_columns.pad_name];
-            UUID pad_uuid;
-            for (const auto &it_pad : part.package->pads) {
-                if (it_pad.second.name == pad_name) {
-                    pad_uuid = it_pad.second.uuid;
-                    break;
-                }
-            }
-            if (pad_uuid) {
-                row[pad_list_columns.pad_uuid] = pad_uuid;
-                pads_exisiting.insert(pad_uuid);
-                it++;
-            }
-            else {
-                pad_store->erase(it++);
-            }
-        }
-        for (const auto &it : part.package->pads) {
-            if (pads_exisiting.count(it.first) == 0) {
-                Gtk::TreeModel::Row row = *(pad_store->append());
-                row[pad_list_columns.pad_uuid] = it.first;
-                row[pad_list_columns.pad_name] = it.second.name;
-            }
-        }
-
-        update_entries();
-        update_mapped();
-        populate_models();
-        w_model_combo->set_active_key(part.package->default_model);
+        set_package(*pool.get_package(dia.get_browser().get_selected()));
+        load();
         set_needs_save();
     }
 }
@@ -846,7 +906,10 @@ void PartEditor::update_mapped()
     }
     w_pin_stat->set_text(std::to_string(pin_store->children().size() - pins_mapped.size()) + " pins not mapped");
     w_pad_stat->set_text(std::to_string(n_pads_not_mapped) + " pads not mapped");
+}
 
+void PartEditor::update_pad_map()
+{
     part.pad_map.clear();
     for (const auto &it : pad_store->children()) {
         if (it[pad_list_columns.gate_uuid] != UUID() && part.package->pads.count(it[pad_list_columns.pad_uuid])) {

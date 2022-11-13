@@ -1,6 +1,7 @@
 #pragma once
 #include "util/pool_goto_provider.hpp"
 #include "util/item_set.hpp"
+#include <stdexcept>
 
 namespace horizon {
 class PoolEditorInterface : public PoolGotoProvider {
@@ -30,11 +31,41 @@ public:
 protected:
     void set_needs_save()
     {
+        if (loading)
+            throw std::runtime_error("set_needs_save called while loading");
         needs_save = true;
         s_signal_needs_save.emit();
     }
 
+    class LoadingSetter {
+        friend PoolEditorInterface;
+        LoadingSetter(PoolEditorInterface &i) : iface(i)
+        {
+            iface.loading = true;
+        }
+        PoolEditorInterface &iface;
+
+    public:
+        ~LoadingSetter()
+        {
+            iface.loading = false;
+        }
+    };
+    friend LoadingSetter;
+
+    [[nodiscard]] LoadingSetter set_loading()
+    {
+        return LoadingSetter(*this);
+    }
+
+
+    bool is_loading() const
+    {
+        return loading;
+    }
+
 private:
+    bool loading = false;
     bool needs_save = false;
     type_signal_needs_save s_signal_needs_save;
 };

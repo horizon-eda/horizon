@@ -21,6 +21,8 @@ private:
     class IPool &pool;
     class PoolParametric &pool_parametric;
 
+    void load();
+
     class EntryWithInheritance *w_mpn = nullptr;
     class EntryWithInheritance *w_value = nullptr;
     class EntryWithInheritance *w_manufacturer = nullptr;
@@ -107,12 +109,14 @@ private:
     PadListColumns pad_list_columns;
 
     Glib::RefPtr<Gtk::ListStore> pad_store;
+    void update_pad_map();
 
     void update_orderable_MPNs_label();
     void update_treeview();
     void update_mapped();
     void update_entries();
     void change_package();
+    void set_package(const Package &pkg);
     void populate_models();
     void update_model_inherit();
     void map_pin(Gtk::TreeModel::iterator it_pin);
@@ -120,6 +124,10 @@ private:
     void update_map_buttons();
     void update_flags_label();
     void update_prefix_entry();
+
+    std::map<Part::OverridePrefix, Gtk::RadioButton *> override_prefix_radio_buttons;
+
+    std::map<Part::Flag, class FlagEditor *> flag_editors;
 
     class ParametricEditor *parametric_editor = nullptr;
     void update_parametric_editor();
