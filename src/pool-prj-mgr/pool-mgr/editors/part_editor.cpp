@@ -991,6 +991,7 @@ void PartEditor::reload()
         }
         if (new_base) {
             set_base(new_base);
+            s_signal_open_item.emit(ObjectType::PART, new_base->uuid);
             for (auto &[attr, value] : part.attributes) {
                 value.first = true;
             }

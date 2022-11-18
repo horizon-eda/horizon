@@ -268,6 +268,7 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
 
     assert(iface);
     iface->signal_goto().connect([this](ObjectType t, UUID uu) { s_signal_goto.emit(t, uu); });
+    iface->signal_open_item().connect([this](ObjectType t, UUID uu) { s_signal_open_item.emit(t, uu); });
     if (!read_only) {
         save_button->set_sensitive(iface->get_needs_save());
         iface->signal_needs_save().connect([this] { save_button->set_sensitive(iface->get_needs_save()); });

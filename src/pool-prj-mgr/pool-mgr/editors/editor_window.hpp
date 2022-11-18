@@ -53,6 +53,12 @@ public:
         return s_signal_saved;
     }
 
+    type_signal_goto signal_open_item()
+    {
+        return s_signal_open_item;
+    }
+
+
 private:
     ObjectType type;
     std::unique_ptr<EditorWindowStore> store = nullptr;
@@ -79,5 +85,7 @@ private:
 
     unsigned int saved_version = 0;
     void update_version_warning();
+
+    type_signal_goto s_signal_open_item;
 };
 } // namespace horizon

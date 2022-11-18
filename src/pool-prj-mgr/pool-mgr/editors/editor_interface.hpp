@@ -34,6 +34,11 @@ public:
         return s_signal_extra_file_saved;
     }
 
+    type_signal_goto signal_open_item()
+    {
+        return s_signal_open_item;
+    }
+
 protected:
     void set_needs_save()
     {
@@ -71,6 +76,7 @@ protected:
     }
 
     type_signal_extra_file_saved s_signal_extra_file_saved;
+    type_signal_goto s_signal_open_item;
 
 private:
     bool loading = false;

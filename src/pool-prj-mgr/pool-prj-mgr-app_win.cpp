@@ -1518,6 +1518,7 @@ PoolProjectManagerAppWindow::SpawnResult PoolProjectManagerAppWindow::spawn(Pool
                         .first->second;
         if (proc.win && pool_notebook) {
             proc.win->signal_goto().connect(sigc::mem_fun(pool_notebook, &PoolNotebook::go_to));
+            proc.win->signal_open_item().connect(sigc::mem_fun(pool_notebook, &PoolNotebook::edit_item));
         }
         proc.signal_exited().connect([uu, this](int status, bool need_update) {
             auto real_filename = processes.at(uu).get_filename();
