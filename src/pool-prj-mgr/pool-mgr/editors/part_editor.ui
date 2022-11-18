@@ -356,6 +356,7 @@
                 <property name="can-focus">False</property>
                 <property name="label" translatable="yes">label</property>
                 <property name="selectable">True</property>
+                <property name="ellipsize">end</property>
                 <property name="xalign">0</property>
               </object>
               <packing>
@@ -706,6 +707,7 @@
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">label</property>
                     <property name="selectable">True</property>
+                    <property name="ellipsize">end</property>
                     <property name="xalign">0</property>
                   </object>
                   <packing>
