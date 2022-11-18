@@ -9,7 +9,7 @@
 namespace horizon {
 void PoolNotebook::handle_edit_entity(const UUID &uu)
 {
-    handle_edit_item(ObjectType::ENTITY, uu);
+    edit_item(ObjectType::ENTITY, uu);
 }
 
 void PoolNotebook::handle_create_entity()

@@ -11,7 +11,7 @@
 namespace horizon {
 void PoolNotebook::handle_edit_part(const UUID &uu)
 {
-    handle_edit_item(ObjectType::PART, uu);
+    edit_item(ObjectType::PART, uu);
 }
 
 void PoolNotebook::handle_create_part()

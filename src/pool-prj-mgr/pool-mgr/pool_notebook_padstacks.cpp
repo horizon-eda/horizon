@@ -10,7 +10,7 @@
 namespace horizon {
 void PoolNotebook::handle_edit_padstack(const UUID &uu)
 {
-    handle_edit_item(ObjectType::PADSTACK, uu);
+    edit_item(ObjectType::PADSTACK, uu);
 }
 
 void PoolNotebook::handle_create_padstack()

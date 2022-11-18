@@ -14,7 +14,7 @@
 namespace horizon {
 void PoolNotebook::handle_edit_package(const UUID &uu)
 {
-    handle_edit_item(ObjectType::PACKAGE, uu);
+    edit_item(ObjectType::PACKAGE, uu);
 }
 
 void PoolNotebook::handle_create_package()

@@ -30,6 +30,7 @@ public:
     bool get_needs_save() const;
     void save();
     void go_to(ObjectType type, const UUID &uu);
+    void edit_item(ObjectType ty, const UUID &uu);
     class PoolSettingsBox &get_pool_settings_box();
     const UUID &get_pool_uuid() const;
     ~PoolNotebook();
@@ -122,7 +123,6 @@ private:
     void add_context_menu(class PoolBrowser *br);
 
     Pool::ItemPoolInfo get_pool_uuids(ObjectType ty, const UUID &uu);
-    void handle_edit_item(ObjectType ty, const UUID &uu);
     void handle_duplicate_item(ObjectType ty, const UUID &uu);
 
     void install_search_once(Gtk::Widget *page, PoolBrowser *browser);

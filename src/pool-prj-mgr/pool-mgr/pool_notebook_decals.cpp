@@ -10,7 +10,7 @@
 namespace horizon {
 void PoolNotebook::handle_edit_decal(const UUID &uu)
 {
-    handle_edit_item(ObjectType::DECAL, uu);
+    edit_item(ObjectType::DECAL, uu);
 }
 
 void PoolNotebook::handle_create_decal()

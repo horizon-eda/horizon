@@ -15,7 +15,7 @@ void PoolNotebook::handle_create_unit()
 
 void PoolNotebook::handle_edit_unit(const UUID &uu)
 {
-    handle_edit_item(ObjectType::UNIT, uu);
+    edit_item(ObjectType::UNIT, uu);
 }
 
 void PoolNotebook::handle_create_symbol_for_unit(const UUID &uu)

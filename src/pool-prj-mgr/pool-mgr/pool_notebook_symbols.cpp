@@ -11,7 +11,7 @@
 namespace horizon {
 void PoolNotebook::handle_edit_symbol(const UUID &uu)
 {
-    handle_edit_item(ObjectType::SYMBOL, uu);
+    edit_item(ObjectType::SYMBOL, uu);
 }
 
 void PoolNotebook::handle_create_symbol()

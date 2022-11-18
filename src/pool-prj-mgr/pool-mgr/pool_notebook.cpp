@@ -114,7 +114,7 @@ static const std::map<OT, PT> editor_type_map = {
         {OT::FRAME, PT::IMP_FRAME},   {OT::DECAL, PT::IMP_DECAL},
 };
 
-void PoolNotebook::handle_edit_item(ObjectType ty, const UUID &uu)
+void PoolNotebook::edit_item(ObjectType ty, const UUID &uu)
 {
     if (!uu)
         return;

@@ -10,7 +10,7 @@
 namespace horizon {
 void PoolNotebook::handle_edit_frame(const UUID &uu)
 {
-    handle_edit_item(ObjectType::FRAME, uu);
+    edit_item(ObjectType::FRAME, uu);
 }
 
 void PoolNotebook::handle_create_frame()
