@@ -94,21 +94,24 @@ Frame &CoreFrame::get_frame()
     return frame;
 }
 
-CoreFrame::HistoryItem::HistoryItem(const Frame &fr, const std::string &cm) : Core::HistoryItem(cm), frame(fr)
+class HistoryItemFrame : public HistoryManager::HistoryItem {
+public:
+    HistoryItemFrame(const Frame &fr, const std::string &cm) : HistoryManager::HistoryItem(cm), frame(fr)
+    {
+    }
+    Frame frame;
+};
+
+std::unique_ptr<HistoryManager::HistoryItem> CoreFrame::make_history_item(const std::string &comment)
 {
+    return std::make_unique<HistoryItemFrame>(frame, comment);
 }
 
-void CoreFrame::history_push(const std::string &comment)
+void CoreFrame::history_load(const HistoryManager::HistoryItem &it)
 {
-    history.push_back(std::make_unique<CoreFrame::HistoryItem>(frame, comment));
-}
-
-void CoreFrame::history_load(unsigned int i)
-{
-    const auto &x = dynamic_cast<CoreFrame::HistoryItem &>(*history.at(history_current));
+    const auto &x = dynamic_cast<const HistoryItemFrame &>(it);
     frame = x.frame;
     frame.expand();
-    s_signal_rebuilt.emit();
 }
 
 std::pair<Coordi, Coordi> CoreFrame::get_bbox()

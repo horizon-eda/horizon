@@ -944,19 +944,26 @@ const BlockSymbol &CoreSchematic::get_canvas_data_block_symbol()
     return get_block_symbol();
 }
 
-void CoreSchematic::history_push(const std::string &comment)
+class HistoryItemSchematic : public HistoryManager::HistoryItem {
+public:
+    HistoryItemSchematic(const BlocksSchematic &bl, const std::string &cm) : HistoryManager::HistoryItem(cm), blocks(bl)
+    {
+    }
+    BlocksSchematic blocks;
+};
+
+std::unique_ptr<HistoryManager::HistoryItem> CoreSchematic::make_history_item(const std::string &comment)
 {
-    history.push_back(std::make_unique<CoreSchematic::HistoryItem>(*blocks, comment));
+    return std::make_unique<HistoryItemSchematic>(*blocks, comment);
 }
 
-void CoreSchematic::history_load(unsigned int i)
+void CoreSchematic::history_load(const HistoryManager::HistoryItem &it)
 {
-    const auto &x = dynamic_cast<CoreSchematic::HistoryItem &>(*history.at(history_current));
+    const auto &x = dynamic_cast<const HistoryItemSchematic &>(it);
     blocks.emplace(x.blocks);
     // required to get refdes right
     fix_current_block();
     blocks->blocks.at(block_uuid).schematic.expand(false, this);
-    s_signal_rebuilt.emit();
 }
 
 std::string CoreSchematic::get_history_comment_context() const

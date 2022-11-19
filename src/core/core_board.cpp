@@ -757,19 +757,24 @@ void CoreBoard::update_rules()
     brd->rules = rules;
 }
 
-CoreBoard::HistoryItem::HistoryItem(const Block &b, const Board &r, const std::string &cm)
-    : Core::HistoryItem(cm), block(b), brd(shallow_copy, r)
+class HistoryItemBoard : public HistoryManager::HistoryItem {
+public:
+    HistoryItemBoard(const Block &b, const Board &r, const std::string &cm)
+        : HistoryManager::HistoryItem(cm), block(b), brd(shallow_copy, r)
+    {
+    }
+    Block block;
+    Board brd;
+};
+
+std::unique_ptr<HistoryManager::HistoryItem> CoreBoard::make_history_item(const std::string &comment)
 {
+    return std::make_unique<HistoryItemBoard>(*block, *brd, comment);
 }
 
-void CoreBoard::history_push(const std::string &comment)
+void CoreBoard::history_load(const HistoryManager::HistoryItem &it)
 {
-    history.push_back(std::make_unique<CoreBoard::HistoryItem>(*block, *brd, comment));
-}
-
-void CoreBoard::history_load(unsigned int i)
-{
-    const auto &x = dynamic_cast<CoreBoard::HistoryItem &>(*history.at(history_current));
+    const auto &x = dynamic_cast<const HistoryItemBoard &>(it);
     brd.emplace(shallow_copy, x.brd);
     block.emplace(x.block);
     brd->block = &*block;

@@ -217,16 +217,23 @@ void CorePadstack::rebuild_internal(bool from_undo, const std::string &comment)
     rebuild_finish(from_undo, comment);
 }
 
-void CorePadstack::history_push(const std::string &comment)
+class HistoryItemPadstack : public HistoryManager::HistoryItem {
+public:
+    HistoryItemPadstack(const Padstack &s, const std::string &cm) : HistoryManager::HistoryItem(cm), padstack(s)
+    {
+    }
+    Padstack padstack;
+};
+
+std::unique_ptr<HistoryManager::HistoryItem> CorePadstack::make_history_item(const std::string &comment)
 {
-    history.push_back(std::make_unique<CorePadstack::HistoryItem>(padstack, comment));
+    return std::make_unique<HistoryItemPadstack>(padstack, comment);
 }
 
-void CorePadstack::history_load(unsigned int i)
+void CorePadstack::history_load(const HistoryManager::HistoryItem &it)
 {
-    const auto &x = dynamic_cast<CorePadstack::HistoryItem &>(*history.at(history_current));
+    const auto &x = dynamic_cast<const HistoryItemPadstack &>(it);
     padstack = x.padstack;
-    s_signal_rebuilt.emit();
 }
 
 const Padstack &CorePadstack::get_canvas_data()

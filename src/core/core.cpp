@@ -98,7 +98,7 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
                                          + action_catalog.at({ActionID::TOOL, tool_id}).name,
                                  Logger::Domain::CORE, e.what());
             tool_id_current = ToolID::NONE;
-            history_load(history_current);
+            history_load(history_manager.get_current());
             rebuild_internal(true, "undo");
             return ToolResponse::end();
         }
@@ -126,7 +126,7 @@ void Core::maybe_end_tool(const ToolResponse &r)
             rebuild_internal(false, comment);
         }
         else if (r.result == ToolResponse::Result::REVERT) {
-            history_load(history_current);
+            history_load(history_manager.get_current());
             rebuild_internal(true, "undo");
         }
         else if (r.result == ToolResponse::Result::END) { // did nothing
@@ -180,7 +180,7 @@ ToolResponse Core::tool_update(ToolArgs &args)
             s_signal_tool_changed.emit(ToolID::NONE);
             Logger::log_critical("exception thrown in tool_update", Logger::Domain::CORE, e.what());
             tool_id_current = ToolID::NONE;
-            history_load(history_current);
+            history_load(history_manager.get_current());
             rebuild_internal(true, "undo");
             return ToolResponse::end();
         }
@@ -209,16 +209,12 @@ void Core::rebuild(const std::string &comment)
 void Core::rebuild_finish(bool from_undo, const std::string &comment)
 {
     if (!from_undo) {
-        while (history_current + 1 != (int)history.size()) {
-            history.pop_back();
-        }
-        assert(history_current + 1 == (int)history.size());
+
+        std::string comment_str = comment;
         if (const auto comment_ctx = get_history_comment_context(); comment_ctx.size())
-            history_push(comment + " " + comment_ctx);
-        else
-            history_push(comment);
-        history_current++;
-        history_trim();
+            comment_str += " " + comment_ctx;
+
+        history_manager.push(make_history_item(comment_str));
     }
     s_signal_rebuilt.emit();
     signal_can_undo_redo().emit();
@@ -231,75 +227,50 @@ std::string Core::get_history_comment_context() const
 
 void Core::undo()
 {
-    if (history_current) {
-        history_current--;
-        history_load(history_current);
-        signal_rebuilt().emit();
-        signal_can_undo_redo().emit();
-        set_needs_save();
-    }
+    if (!history_manager.can_undo())
+        return;
+    history_load(history_manager.undo());
+    signal_rebuilt().emit();
+    set_needs_save();
 }
 
 void Core::redo()
 {
-    if (history_current + 1 == (int)history.size())
+    if (!history_manager.can_redo())
         return;
-    history_current++;
-    history_load(history_current);
+    history_load(history_manager.redo());
     signal_rebuilt().emit();
-    signal_can_undo_redo().emit();
     set_needs_save();
 }
 
-static const std::string empty_string;
-
 const std::string &Core::get_undo_comment() const
 {
-    if (can_undo()) {
-        return history.at(history_current)->comment;
-    }
-    else {
-        return empty_string;
-    }
+    return history_manager.get_undo_comment();
 }
 
 const std::string &Core::get_redo_comment() const
 {
-    if (can_redo()) {
-        return history.at(history_current + 1)->comment;
-    }
-    else {
-        return empty_string;
-    }
+    return history_manager.get_redo_comment();
 }
 
 void Core::history_clear()
 {
-    history.clear();
-    history_current = -1;
-}
-
-void Core::history_trim()
-{
-    while (history.size() > history_max) {
-        history.pop_front();
-        history_current--;
-    }
+    history_manager.clear();
 }
 
 void Core::set_history_max(unsigned int m)
 {
-    history_max = m;
+    history_manager.set_history_max(m);
 }
 
 bool Core::can_redo() const
 {
-    return history_current + 1 != (int)history.size();
+    return history_manager.can_redo();
 }
 
 bool Core::can_undo() const
 {
-    return history_current;
+    return history_manager.can_undo();
 }
 
 void Core::set_property_begin()
@@ -377,6 +348,7 @@ void Core::autosave()
 Core::Core(IPool &pool, IPool *pool_caching)
     : m_pool(pool), m_pool_caching(pool_caching ? *pool_caching : pool), tool_id_current(ToolID::NONE)
 {
+    history_manager.signal_changed().connect([this] { s_signal_can_undo_redo.emit(); });
 }
 
 

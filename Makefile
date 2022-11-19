@@ -275,6 +275,7 @@ SRC_IMP = \
 	$(SRC_CANVAS_GL) \
 	src/document/document.cpp \
 	src/document/document_board.cpp \
+	src/util/history_manager.cpp \
 	src/core/core.cpp \
 	src/core/tool.cpp \
 	src/core/create_tool.cpp \

@@ -72,20 +72,24 @@ Decal &CoreDecal::get_decal()
     return decal;
 }
 
-CoreDecal::HistoryItem::HistoryItem(const Decal &dec, const std::string &cm) : Core::HistoryItem(cm), decal(dec)
+
+class HistoryItemDecal : public HistoryManager::HistoryItem {
+public:
+    HistoryItemDecal(const Decal &dec, const std::string &cm) : HistoryManager::HistoryItem(cm), decal(dec)
+    {
+    }
+    Decal decal;
+};
+
+std::unique_ptr<HistoryManager::HistoryItem> CoreDecal::make_history_item(const std::string &comment)
 {
+    return std::make_unique<HistoryItemDecal>(decal, comment);
 }
 
-void CoreDecal::history_push(const std::string &comment)
+void CoreDecal::history_load(const HistoryManager::HistoryItem &it)
 {
-    history.push_back(std::make_unique<CoreDecal::HistoryItem>(decal, comment));
-}
-
-void CoreDecal::history_load(unsigned int i)
-{
-    const auto &x = dynamic_cast<CoreDecal::HistoryItem &>(*history.at(history_current));
+    const auto &x = dynamic_cast<const HistoryItemDecal &>(it);
     decal = x.decal;
-    s_signal_rebuilt.emit();
 }
 
 std::pair<Coordi, Coordi> CoreDecal::get_bbox()

@@ -272,17 +272,24 @@ void CoreSymbol::rebuild_internal(bool from_undo, const std::string &comment)
     rebuild_finish(from_undo, comment);
 }
 
-void CoreSymbol::history_push(const std::string &comment)
+class HistoryItemSymbol : public HistoryManager::HistoryItem {
+public:
+    HistoryItemSymbol(const Symbol &s, const std::string &cm) : HistoryManager::HistoryItem(cm), sym(s)
+    {
+    }
+    Symbol sym;
+};
+
+std::unique_ptr<HistoryManager::HistoryItem> CoreSymbol::make_history_item(const std::string &comment)
 {
-    history.push_back(std::make_unique<CoreSymbol::HistoryItem>(sym, comment));
+    return std::make_unique<HistoryItemSymbol>(sym, comment);
 }
 
-void CoreSymbol::history_load(unsigned int i)
+void CoreSymbol::history_load(const HistoryManager::HistoryItem &it)
 {
-    const auto &x = dynamic_cast<CoreSymbol::HistoryItem &>(*history.at(history_current));
+    const auto &x = dynamic_cast<const HistoryItemSymbol &>(it);
     sym = x.sym;
     sym.expand(pin_display_mode);
-    s_signal_rebuilt.emit();
 }
 
 LayerProvider &CoreSymbol::get_layer_provider()

@@ -9,7 +9,7 @@
 #include "tool_pub.hpp"
 #include "document/document.hpp"
 #include "util/placement.hpp"
-
+#include "util/history_manager.hpp"
 namespace horizon {
 
 enum class ToolID;
@@ -198,24 +198,12 @@ protected:
 
     void rebuild_finish(bool from_undo, const std::string &comment);
 
-    class HistoryItem {
-    public:
-        HistoryItem(const std::string &c) : comment(c)
-        {
-        }
-        const std::string comment;
-        virtual ~HistoryItem()
-        {
-        }
-    };
-    std::deque<std::unique_ptr<HistoryItem>> history;
-    int history_current = -1;
-    size_t history_max = 50;
-    virtual void history_push(const std::string &comment) = 0;
-    virtual void history_load(unsigned int i) = 0;
+    HistoryManager history_manager;
+
+    virtual std::unique_ptr<HistoryManager::HistoryItem> make_history_item(const std::string &comment) = 0;
+    virtual void history_load(const HistoryManager::HistoryItem &it) = 0;
     virtual std::string get_history_comment_context() const;
     void history_clear();
-    void history_trim();
 
     bool property_transaction = false;
 

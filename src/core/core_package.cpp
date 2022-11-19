@@ -220,14 +220,22 @@ void CorePackage::rebuild_internal(bool from_undo, const std::string &comment)
     rebuild_finish(from_undo, comment);
 }
 
-void CorePackage::history_push(const std::string &comment)
+class HistoryItemPackage : public HistoryManager::HistoryItem {
+public:
+    HistoryItemPackage(const Package &k, const std::string &cm) : HistoryManager::HistoryItem(cm), package(k)
+    {
+    }
+    Package package;
+};
+
+std::unique_ptr<HistoryManager::HistoryItem> CorePackage::make_history_item(const std::string &comment)
 {
-    history.push_back(std::make_unique<CorePackage::HistoryItem>(package, comment));
+    return std::make_unique<HistoryItemPackage>(package, comment);
 }
 
-void CorePackage::history_load(unsigned int i)
+void CorePackage::history_load(const HistoryManager::HistoryItem &it)
 {
-    const auto &x = dynamic_cast<CorePackage::HistoryItem &>(*history.at(history_current));
+    const auto &x = dynamic_cast<const HistoryItemPackage &>(it);
     package = x.package;
 }
 

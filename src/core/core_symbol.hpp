@@ -73,16 +73,9 @@ private:
 
     SymbolRules rules;
 
-    class HistoryItem : public Core::HistoryItem {
-    public:
-        HistoryItem(const Symbol &s, const std::string &cm) : Core::HistoryItem(cm), sym(s)
-        {
-        }
-        Symbol sym;
-    };
     void rebuild_internal(bool from_undo, const std::string &comment) override;
-    void history_push(const std::string &comment) override;
-    void history_load(unsigned int i) override;
+    std::unique_ptr<HistoryManager::HistoryItem> make_history_item(const std::string &comment) override;
+    void history_load(const HistoryManager::HistoryItem &it) override;
     void save(const std::string &suffix) override;
     void delete_autosave() override;
 };
