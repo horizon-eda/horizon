@@ -47,13 +47,7 @@ GateEditor::GateEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     entry_add_sanitizer(name_entry);
     entry_add_sanitizer(suffix_entry);
 
-    unit_label->set_track_visited_links(false);
-    unit_label->signal_activate_link().connect(
-            [this](const std::string &url) {
-                parent->s_signal_goto.emit(ObjectType::UNIT, UUID(url));
-                return true;
-            },
-            false);
+    parent->label_make_item_link(*unit_label, ObjectType::UNIT);
 
     name_entry->set_text(gate->name);
     name_entry->signal_changed().connect([this] {

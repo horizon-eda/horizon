@@ -262,27 +262,9 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
                                      {Part::OverridePrefix::INHERIT, w_override_prefix_inherit_button},
                                      {Part::OverridePrefix::YES, w_override_prefix_yes_button}};
 
-    w_entity_label->set_track_visited_links(false);
-    w_entity_label->signal_activate_link().connect(
-            [this](const std::string &url) {
-                s_signal_goto.emit(ObjectType::ENTITY, UUID(url));
-                return true;
-            },
-            false);
-    w_base_label->set_track_visited_links(false);
-    w_base_label->signal_activate_link().connect(
-            [this](const std::string &url) {
-                s_signal_goto.emit(ObjectType::PART, UUID(url));
-                return true;
-            },
-            false);
-    w_package_label->set_track_visited_links(false);
-    w_package_label->signal_activate_link().connect(
-            [this](const std::string &url) {
-                s_signal_goto.emit(ObjectType::PACKAGE, UUID(url));
-                return true;
-            },
-            false);
+    label_make_item_link(*w_entity_label, ObjectType::ENTITY);
+    label_make_item_link(*w_base_label, ObjectType::PART);
+    label_make_item_link(*w_package_label, ObjectType::PACKAGE);
 
     w_mpn = add_entry("part_mpn_box");
     w_value = add_entry("part_value_box");

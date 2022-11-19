@@ -2,7 +2,7 @@
 #include "util/pool_goto_provider.hpp"
 #include "util/item_set.hpp"
 #include "rules/rules.hpp"
-#include <stdexcept>
+#include <gtkmm.h>
 
 namespace horizon {
 class PoolEditorBase : public PoolGotoProvider {
@@ -95,6 +95,8 @@ protected:
 
     type_signal_extra_file_saved s_signal_extra_file_saved;
     type_signal_goto s_signal_open_item;
+
+    void label_make_item_link(Gtk::Label &la, ObjectType type);
 
 private:
     bool loading = false;
