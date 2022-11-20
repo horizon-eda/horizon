@@ -2,6 +2,7 @@
 #include "util/pool_goto_provider.hpp"
 #include "util/item_set.hpp"
 #include "rules/rules.hpp"
+#include "util/history_manager.hpp"
 #include <gtkmm.h>
 
 namespace horizon {
@@ -32,6 +33,13 @@ public:
 
     std::string filename;
 
+    void undo();
+    void redo();
+
+    bool can_undo() const;
+    bool can_redo() const;
+
+    void history_append(const std::string &comment);
     typedef sigc::signal<void> type_signal_needs_save;
     type_signal_needs_save signal_needs_save()
     {
@@ -52,17 +60,19 @@ public:
 protected:
     IPool &pool;
 
-    void unset_needs_save()
-    {
-        needs_save = false;
-        s_signal_needs_save.emit();
-    }
+    HistoryManager history_manager;
+
+    virtual std::unique_ptr<HistoryManager::HistoryItem> make_history_item(const std::string &comment) = 0;
+    virtual void history_load(const HistoryManager::HistoryItem &it) = 0;
 
     void set_needs_save()
     {
-        if (loading)
-            throw std::runtime_error("set_needs_save called while loading");
-        needs_save = true;
+        set_needs_save(false);
+    }
+
+    void unset_needs_save()
+    {
+        needs_save = false;
         s_signal_needs_save.emit();
     }
 
@@ -102,5 +112,15 @@ private:
     bool loading = false;
     bool needs_save = false;
     type_signal_needs_save s_signal_needs_save;
+
+    void set_needs_save(bool from_undo)
+    {
+        if (loading)
+            throw std::runtime_error("set_needs_save called while loading");
+        needs_save = true;
+        if (!from_undo)
+            history_append("edit");
+        s_signal_needs_save.emit();
+    }
 };
 } // namespace horizon

@@ -200,7 +200,7 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     : Gtk::Box(cobject), PoolEditorBase(fn, po),
       part(filename.size() ? Part::new_from_file(filename, pool) : Part(UUID::random())), pool_parametric(pp)
 {
-
+    history_append("init");
     auto add_entry = [x](const char *name) {
         Gtk::Box *t;
         x->get_widget(name, t);
@@ -1171,6 +1171,28 @@ ObjectType PartEditor::get_type() const
 {
     return ObjectType::PART;
 }
+
+class HistoryItemPart : public HistoryManager::HistoryItem {
+public:
+    HistoryItemPart(const Part &p, const std::string &cm) : HistoryManager::HistoryItem(cm), part(p)
+    {
+    }
+    Part part;
+};
+
+std::unique_ptr<HistoryManager::HistoryItem> PartEditor::make_history_item(const std::string &comment)
+{
+    return std::make_unique<HistoryItemPart>(part, comment);
+}
+
+void PartEditor::history_load(const HistoryManager::HistoryItem &it)
+{
+    const auto &x = dynamic_cast<const HistoryItemPart &>(it);
+    part = x.part;
+    part.update_refs(pool);
+    load();
+}
+
 
 PartEditor *PartEditor::create(const std::string &fn, IPool &po, PoolParametric &pp)
 {

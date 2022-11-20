@@ -51,5 +51,8 @@ private:
     SortHelper sort_helper;
 
     void bind_entry(Gtk::Entry *e, std::string &s);
+
+    std::unique_ptr<HistoryManager::HistoryItem> make_history_item(const std::string &comment) override;
+    void history_load(const HistoryManager::HistoryItem &it) override;
 };
 } // namespace horizon

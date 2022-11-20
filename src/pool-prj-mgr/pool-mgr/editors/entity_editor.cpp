@@ -102,6 +102,8 @@ EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     : Gtk::Box(cobject), PoolEditorBase(fn, p),
       entity(filename.size() ? Entity::new_from_file(filename, pool) : Entity(UUID::random()))
 {
+    history_append("init");
+
     x->get_widget("entity_name", name_entry);
     x->get_widget("entity_manufacturer", manufacturer_entry);
     {
@@ -290,6 +292,26 @@ const FileVersion &EntityEditor::get_version() const
 ObjectType EntityEditor::get_type() const
 {
     return ObjectType::ENTITY;
+}
+
+class HistoryItemEntity : public HistoryManager::HistoryItem {
+public:
+    HistoryItemEntity(const Entity &e, const std::string &cm) : HistoryManager::HistoryItem(cm), entity(e)
+    {
+    }
+    Entity entity;
+};
+
+std::unique_ptr<HistoryManager::HistoryItem> EntityEditor::make_history_item(const std::string &comment)
+{
+    return std::make_unique<HistoryItemEntity>(entity, comment);
+}
+
+void EntityEditor::history_load(const HistoryManager::HistoryItem &it)
+{
+    const auto &x = dynamic_cast<const HistoryItemEntity &>(it);
+    entity = x.entity;
+    load();
 }
 
 EntityEditor *EntityEditor::create(const std::string &fn, class IPool &p)

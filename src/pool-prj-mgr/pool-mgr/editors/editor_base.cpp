@@ -42,4 +42,36 @@ void PoolEditorBase::label_make_item_link(Gtk::Label &la, ObjectType type)
             false);
 }
 
+bool PoolEditorBase::can_redo() const
+{
+    return history_manager.can_redo();
+}
+
+bool PoolEditorBase::can_undo() const
+{
+    return history_manager.can_undo();
+}
+
+void PoolEditorBase::history_append(const std::string &comment)
+{
+    history_manager.push(make_history_item(comment));
+}
+
+void PoolEditorBase::undo()
+{
+    if (!history_manager.can_undo())
+        return;
+    history_load(history_manager.undo());
+    set_needs_save(true);
+}
+
+void PoolEditorBase::redo()
+{
+    if (!history_manager.can_redo())
+        return;
+    history_load(history_manager.redo());
+    set_needs_save(true);
+}
+
+
 } // namespace horizon

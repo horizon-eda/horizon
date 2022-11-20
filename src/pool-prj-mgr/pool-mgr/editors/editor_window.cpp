@@ -30,6 +30,24 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
     save_button = Gtk::manage(new Gtk::Button());
     hb->pack_start(*save_button);
 
+    {
+        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
+        box->get_style_context()->add_class("linked");
+
+        undo_button = Gtk::manage(new Gtk::Button);
+        undo_button->set_tooltip_text("Undo");
+        undo_button->set_image_from_icon_name("edit-undo-symbolic", Gtk::ICON_SIZE_BUTTON);
+        box->pack_start(*undo_button, false, false, 0);
+
+        redo_button = Gtk::manage(new Gtk::Button);
+        redo_button->set_tooltip_text("Redo");
+        redo_button->set_image_from_icon_name("edit-redo-symbolic", Gtk::ICON_SIZE_BUTTON);
+        box->pack_start(*redo_button, false, false, 0);
+
+        hb->pack_start(*box);
+        box->show_all();
+    }
+
     check_button = Gtk::manage(new Gtk::MenuButton());
     {
         auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5));
@@ -91,6 +109,17 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
     default:;
     }
 
+    update_undo_redo();
+    undo_button->signal_clicked().connect([this] {
+        iface->undo();
+        update_undo_redo();
+    });
+    redo_button->signal_clicked().connect([this] {
+        iface->redo();
+        update_undo_redo();
+    });
+
+
     auto box = Gtk::manage(new Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 0));
     add(*box);
     box->show();
@@ -140,7 +169,10 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
     iface->signal_open_item().connect([this](ObjectType t, UUID uu) { s_signal_open_item.emit(t, uu); });
     if (!read_only) {
         save_button->set_sensitive(iface->get_needs_save());
-        iface->signal_needs_save().connect([this] { save_button->set_sensitive(iface->get_needs_save()); });
+        iface->signal_needs_save().connect([this] {
+            save_button->set_sensitive(iface->get_needs_save());
+            update_undo_redo();
+        });
     }
     iface->signal_needs_save().connect([this] {
         if (iface->get_needs_save()) {
@@ -330,6 +362,12 @@ void EditorWindow::run_checks()
     }
     trim(s);
     check_label->set_text(s);
+}
+
+void EditorWindow::update_undo_redo()
+{
+    undo_button->set_sensitive(iface->can_undo());
+    redo_button->set_sensitive(iface->can_redo());
 }
 
 } // namespace horizon

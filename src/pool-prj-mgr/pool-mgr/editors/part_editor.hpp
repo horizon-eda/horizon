@@ -151,5 +151,8 @@ private:
     class OrderableMPNEditor *create_orderable_MPN_editor(const UUID &uu);
 
     UUID pending_base_part;
+
+    std::unique_ptr<HistoryManager::HistoryItem> make_history_item(const std::string &comment) override;
+    void history_load(const HistoryManager::HistoryItem &it) override;
 };
 } // namespace horizon

@@ -136,6 +136,7 @@ UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     : Gtk::Box(cobject), PoolEditorBase(fn, p),
       unit(filename.size() ? Unit::new_from_file(filename) : Unit(UUID::random()))
 {
+    history_append("init");
     x->get_widget("unit_name", name_entry);
     x->get_widget("unit_manufacturer", manufacturer_entry);
     x->get_widget("unit_pins", pins_listbox);
@@ -381,6 +382,26 @@ unsigned int UnitEditor::get_required_version() const
 ObjectType UnitEditor::get_type() const
 {
     return ObjectType::UNIT;
+}
+
+class HistoryItemUnit : public HistoryManager::HistoryItem {
+public:
+    HistoryItemUnit(const Unit &u, const std::string &cm) : HistoryManager::HistoryItem(cm), unit(u)
+    {
+    }
+    Unit unit;
+};
+
+std::unique_ptr<HistoryManager::HistoryItem> UnitEditor::make_history_item(const std::string &comment)
+{
+    return std::make_unique<HistoryItemUnit>(unit, comment);
+}
+
+void UnitEditor::history_load(const HistoryManager::HistoryItem &it)
+{
+    const auto &x = dynamic_cast<const HistoryItemUnit &>(it);
+    unit = x.unit;
+    load();
 }
 
 UnitEditor *UnitEditor::create(const std::string &fn, class IPool &p)

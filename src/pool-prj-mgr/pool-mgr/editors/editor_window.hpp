@@ -52,6 +52,9 @@ private:
     Gtk::Label *check_label = nullptr;
     Gtk::InfoBar *info_bar = nullptr;
     Gtk::Label *info_bar_label = nullptr;
+    Gtk::Button *undo_button = nullptr;
+    Gtk::Button *redo_button = nullptr;
+    void update_undo_redo();
     class IPool &pool;
     class PoolParametric *pool_parametric;
     bool need_update = false;

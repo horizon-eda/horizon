@@ -715,6 +715,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/pool-mgr/pool_notebook_frames.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_notebook_decals.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_notebook_parametric.cpp\
+	src/util/history_manager.cpp\
 	src/pool-prj-mgr/pool-mgr/editors/editor_base.cpp\
 	src/pool-prj-mgr/pool-mgr/editors/unit_editor.cpp\
 	src/pool-prj-mgr/pool-mgr/editors/part_editor.cpp\
