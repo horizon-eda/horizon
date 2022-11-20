@@ -32,8 +32,9 @@ public:
     void clear();
 
 private:
-    std::deque<std::unique_ptr<const HistoryItem>> history;
-    int history_current = -1;
+    std::shared_ptr<const HistoryItem> history_current;
+    std::deque<std::shared_ptr<const HistoryItem>> undo_stack;
+    std::deque<std::shared_ptr<const HistoryItem>> redo_stack;
 
     unsigned int history_max = 50;
     void trim();
