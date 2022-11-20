@@ -905,6 +905,7 @@ void PartEditor::set_base(const Part *new_base)
     part.base = new_base;
     if (new_base) {
         set_package(*part.base->package);
+        part.pad_map = part.base->pad_map;
     }
     else {
         for (auto &[attr, v] : part.attributes) {
