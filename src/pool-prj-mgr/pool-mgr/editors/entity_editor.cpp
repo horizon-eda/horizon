@@ -89,8 +89,9 @@ GateEditor *GateEditor::create(Gate *g, EntityEditor *pa)
 
 void EntityEditor::bind_entry(Gtk::Entry *e, std::string &s)
 {
-    e->set_text(s);
     e->signal_changed().connect([this, e, &s] {
+        if (is_loading())
+            return;
         s = e->get_text();
         set_needs_save();
     });
@@ -132,18 +133,12 @@ EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     manufacturer_entry->set_completion(create_pool_manufacturer_completion(pool));
     bind_entry(prefix_entry, entity.prefix);
 
-    tag_entry->set_tags(entity.tags);
     tag_entry->signal_changed().connect([this] {
+        if (is_loading())
+            return;
         entity.tags = tag_entry->get_tags();
         set_needs_save();
     });
-
-    for (auto &it : entity.gates) {
-        auto ed = GateEditor::create(&it.second, this);
-        ed->show_all();
-        gates_listbox->append(*ed);
-        ed->unreference();
-    }
 
     sort_helper.attach("gate", x);
     sort_helper.signal_changed().connect(sigc::mem_fun(*this, &EntityEditor::sort));
@@ -151,6 +146,29 @@ EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
 
     add_button->signal_clicked().connect(sigc::mem_fun(*this, &EntityEditor::handle_add));
     delete_button->signal_clicked().connect(sigc::mem_fun(*this, &EntityEditor::handle_delete));
+
+    load();
+}
+
+void EntityEditor::load()
+{
+    auto loading_setter = set_loading();
+
+    name_entry->set_text(entity.name);
+    manufacturer_entry->set_text(entity.manufacturer);
+    prefix_entry->set_text(entity.prefix);
+
+    tag_entry->set_tags(entity.tags);
+
+    for (auto ch : gates_listbox->get_children()) {
+        delete ch;
+    }
+    for (auto &it : entity.gates) {
+        auto ed = GateEditor::create(&it.second, this);
+        ed->show_all();
+        gates_listbox->append(*ed);
+        ed->unreference();
+    }
 }
 
 void EntityEditor::sort()
@@ -180,6 +198,8 @@ void EntityEditor::reload()
 void EntityEditor::handle_delete()
 {
     auto rows = gates_listbox->get_selected_rows();
+    if (rows.size() == 0)
+        return;
     std::set<int> indices;
     std::set<UUID> uuids;
     for (auto &row : rows) {
@@ -235,9 +255,9 @@ void EntityEditor::handle_add()
             }
 
             gates_listbox->invalidate_sort();
+            set_needs_save();
         }
     }
-    set_needs_save();
 }
 
 void EntityEditor::save_as(const std::string &fn)

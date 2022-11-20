@@ -86,8 +86,12 @@ PinEditor::PinEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &
     dir_combo->set_active_id(std::to_string(static_cast<int>(pin->direction)));
     dir_combo->signal_changed().connect([this, propagate] {
         pin->direction = static_cast<Pin::Direction>(std::stoi(dir_combo->get_active_id()));
+        if (parent->propagating)
+            return;
+        parent->propagating = true;
         propagate([this](PinEditor *ed) { ed->dir_combo->set_active_id(dir_combo->get_active_id()); });
         parent->set_needs_save();
+        parent->propagating = false;
     });
 }
 
@@ -147,24 +151,19 @@ UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
 
     HelpButton::pack_into(x, "box_names", HelpTexts::UNIT_PIN_ALT_NAMES);
 
-    name_entry->set_text(unit.name);
     name_entry->signal_changed().connect([this] {
+        if (is_loading())
+            return;
         unit.name = name_entry->get_text();
         set_needs_save();
     });
-    manufacturer_entry->set_text(unit.manufacturer);
     manufacturer_entry->set_completion(create_pool_manufacturer_completion(pool));
     manufacturer_entry->signal_changed().connect([this] {
+        if (is_loading())
+            return;
         unit.manufacturer = manufacturer_entry->get_text();
         set_needs_save();
     });
-
-    for (auto &it : unit.pins) {
-        auto ed = PinEditor::create(&it.second, this);
-        ed->show_all();
-        pins_listbox->append(*ed);
-        ed->unreference();
-    }
 
     delete_button->signal_clicked().connect(sigc::mem_fun(*this, &UnitEditor::handle_delete));
     add_button->signal_clicked().connect(sigc::mem_fun(*this, &UnitEditor::handle_add));
@@ -180,12 +179,33 @@ UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     sort_helper.attach("pin", x);
     sort_helper.attach("direction", x);
     sort_helper.signal_changed().connect(sigc::mem_fun(*this, &UnitEditor::sort));
+
+    load();
+}
+
+void UnitEditor::load()
+{
+    auto loading_setter = set_loading();
+
+    name_entry->set_text(unit.name);
+    manufacturer_entry->set_text(unit.manufacturer);
+    for (auto ch : pins_listbox->get_children()) {
+        delete ch;
+    }
+    for (auto &it : unit.pins) {
+        auto ed = PinEditor::create(&it.second, this);
+        ed->show_all();
+        pins_listbox->append(*ed);
+        ed->unreference();
+    }
     sort_helper.set_sort("pin", Gtk::SORT_ASCENDING);
 }
 
 void UnitEditor::handle_delete()
 {
     auto rows = pins_listbox->get_selected_rows();
+    if (rows.size() == 0)
+        return;
     std::set<int> indices;
     std::set<UUID> uuids;
     for (auto &row : rows) {

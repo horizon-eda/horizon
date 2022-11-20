@@ -46,5 +46,7 @@ private:
     void handle_activate(class PinEditor *ed);
 
     SortHelper sort_helper;
+    void load();
+    bool propagating = false;
 };
 } // namespace horizon

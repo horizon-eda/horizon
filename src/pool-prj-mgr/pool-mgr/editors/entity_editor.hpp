@@ -27,6 +27,9 @@ public:
 
 private:
     class Entity entity;
+
+    void load();
+
     Gtk::Entry *name_entry = nullptr;
     Gtk::Entry *manufacturer_entry = nullptr;
     Gtk::Entry *prefix_entry = nullptr;
