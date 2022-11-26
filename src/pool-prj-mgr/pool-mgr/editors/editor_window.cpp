@@ -28,6 +28,7 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
     set_titlebar(*hb);
 
     save_button = Gtk::manage(new Gtk::Button());
+    save_button->add_accelerator("clicked", get_accel_group(), GDK_KEY_s, Gdk::CONTROL_MASK, Gtk::ACCEL_VISIBLE);
     hb->pack_start(*save_button);
 
     {
@@ -35,12 +36,16 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
         box->get_style_context()->add_class("linked");
 
         undo_button = Gtk::manage(new Gtk::Button);
-        undo_button->set_tooltip_text("Undo");
+        undo_button->set_tooltip_text("Undo (Ctrl+z)");
         undo_button->set_image_from_icon_name("edit-undo-symbolic", Gtk::ICON_SIZE_BUTTON);
+        undo_button->add_accelerator("clicked", get_accel_group(), GDK_KEY_z, Gdk::CONTROL_MASK, Gtk::ACCEL_VISIBLE);
         box->pack_start(*undo_button, false, false, 0);
 
         redo_button = Gtk::manage(new Gtk::Button);
-        redo_button->set_tooltip_text("Redo");
+        redo_button->set_tooltip_text("Redo (Ctrl+y, Ctrl+Z)");
+        redo_button->add_accelerator("clicked", get_accel_group(), GDK_KEY_z, Gdk::CONTROL_MASK | Gdk::SHIFT_MASK,
+                                     Gtk::ACCEL_VISIBLE);
+        redo_button->add_accelerator("clicked", get_accel_group(), GDK_KEY_y, Gdk::CONTROL_MASK, Gtk::ACCEL_VISIBLE);
         redo_button->set_image_from_icon_name("edit-redo-symbolic", Gtk::ICON_SIZE_BUTTON);
         box->pack_start(*redo_button, false, false, 0);
 
