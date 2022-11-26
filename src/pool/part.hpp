@@ -63,8 +63,8 @@ public:
         Column(const std::string &d, const std::string &v) : display_name(d), value(v)
         {
         }
-        const std::string display_name;
-        const std::string value;
+        std::string display_name;
+        std::string value;
     };
     std::map<std::string, Column> parametric_formatted;
 
