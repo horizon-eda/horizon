@@ -64,6 +64,7 @@ jobs:
           - container: debian:bullseye
             cxx: clang
             cc: clang
+            stdlib: -stdlib=libc++
           - container: debian:bullseye
             cxx: g++
             cc: gcc
@@ -81,12 +82,12 @@ jobs:
         apt-get install -y locales
         locale-gen ${{ env.LANG }}
     - name: Install dependencies
-      run: apt-get install git build-essential ${{ matrix.os.cxx }} libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libarchive-dev git libspnav-dev -y
+      run: apt-get install git build-essential ${{ matrix.os.cxx }} libc++-dev libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libarchive-dev git libspnav-dev -y
     - name: Install python dependencies
       if: ${{ matrix.target == 'build/horizon.so' }}
       run: apt-get install python3-cairo-dev libosmesa6-dev python3-yaml -y
     - name: Build
-      run: make -j2 CXX=${{ matrix.os.cxx }} CC=${{ matrix.os.cc }} WARNFLAGS="-Wall -Wshadow -Wno-parentheses" ${{ matrix.target }}
+      run: make -j2 CXX=${{ matrix.os.cxx }} CC=${{ matrix.os.cc }} STDLIB=${{ matrix.os.stdlib }} WARNFLAGS="-Wall -Wshadow -Wno-parentheses" ${{ matrix.target }}
     - name: Check version
       run: python3 check_version.py
     - name: Test python module
@@ -103,6 +104,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        compiler:
+          - cxx: g++
+            cc: gcc
+          - cxx: clang
+            cc: clang
+            stdlib: -stdlib=libc++
         target:
           - all
           - build/horizon.so
@@ -114,14 +121,14 @@ jobs:
     - name: Install updates
       run: pacman -Syu --noconfirm
     - name: Install dependencies
-      run: pacman -Sy --needed --noconfirm zeromq gtkmm3 cairomm librsvg sqlite3 libgit2 curl opencascade glm podofo libarchive python libspnav
+      run: pacman -Sy --needed --noconfirm zeromq gtkmm3 cairomm librsvg sqlite3 libgit2 curl opencascade glm podofo libarchive python libspnav ${{ matrix.compiler.cc }} libc++
     - name: Install python dependencies
       if: ${{ matrix.target == 'build/horizon.so' }}
       run: pacman -S --needed --noconfirm mesa python-cairo python-yaml
     - name: Build LD_PRELOAD kludge
       run: gcc -shared -fPIC -o close_range.so scripts/close_range.c
     - name: Build
-      run: LD_PRELOAD=$PWD/close_range.so make -j2 ${{ matrix.target }}
+      run: LD_PRELOAD=$PWD/close_range.so make -j2 ${{ matrix.target }} CXX=${{ matrix.compiler.cxx }} CC=${{ matrix.compiler.cc }} STDLIB=${{ matrix.compiler.stdlib }}
     - name: Check version
       run: python3 check_version.py
     - name: Test python module
