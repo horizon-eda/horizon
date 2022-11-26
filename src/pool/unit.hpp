@@ -29,7 +29,7 @@ public:
     Pin(const UUID &uu, const json &j);
     Pin(const UUID &uu);
 
-    const UUID uuid;
+    UUID uuid;
     /**
      * The Pin's primary name. i.e. PB0 on an MCU.
      */
