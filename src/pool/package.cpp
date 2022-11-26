@@ -118,7 +118,7 @@ int Package::Model::get_rotation(unsigned int ax) const
     }
 }
 
-static const unsigned int app_version = 0;
+static const unsigned int app_version = 1;
 
 unsigned int Package::get_app_version()
 {

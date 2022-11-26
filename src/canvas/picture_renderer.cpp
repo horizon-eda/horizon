@@ -58,6 +58,8 @@ void PictureRenderer::realize()
     GET_LOC(this, angle);
     GET_LOC(this, tex);
     GET_LOC(this, opacity);
+    GET_LOC(this, border_color);
+    GET_LOC(this, line_width);
 }
 
 void PictureRenderer::render(bool on_top)
@@ -79,6 +81,15 @@ void PictureRenderer::render(bool on_top)
             glUniform2f(size_loc, tex.first->width * it.px_size / 2, tex.first->height * it.px_size / 2);
             glUniform1f(angle_loc, it.angle);
             glUniform1f(opacity_loc, it.opacity);
+            {
+                auto color = ca.get_color(ColorP::PICTURE_BORDER);
+                glUniform3f(border_color_loc, color.r, color.g, color.b);
+            }
+
+            if (it.show_border)
+                glUniform1f(line_width_loc, ca.appearance.min_line_width);
+            else
+                glUniform1f(line_width_loc, -10);
 
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         }

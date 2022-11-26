@@ -17,6 +17,7 @@ versions:
     15: add arc tracks
     16: support relative paths for including boards
     17: save plane fragements to a separate file
+    18: add optional borders to pictures
   schematic:
     1: add custom values on symbols
     2: add hierarchy
@@ -26,6 +27,7 @@ versions:
     6: add net ties
     7: keep nets on unconnected labels
     8: add BOM export customisation
+    9: add optional borders to pictures
   project:
     1: replace pool cache with project pool
     2: add hierarchy
@@ -39,3 +41,5 @@ versions:
     1: add default frame
   unit:
     1: use UUIDs for alternate pin names
+  package:
+    1: add optional borders to pictures

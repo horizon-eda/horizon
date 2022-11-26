@@ -1785,6 +1785,7 @@ void Canvas::render(const Picture &pic, bool interactive)
     x.px_size = pic.px_size;
     x.data = pic.data;
     x.on_top = pic.on_top;
+    x.show_border = pic.get_show_border();
     x.opacity = pic.opacity;
     if (interactive) {
         float w = pic.data->width * pic.px_size;

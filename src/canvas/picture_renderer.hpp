@@ -32,6 +32,8 @@ private:
     GLuint angle_loc;
     GLuint tex_loc;
     GLuint opacity_loc;
+    GLuint border_color_loc;
+    GLuint line_width_loc;
 
     std::map<UUID, std::pair<std::shared_ptr<const PictureData>, GLuint>> textures;
     void cache_picture(std::shared_ptr<const PictureData> d);

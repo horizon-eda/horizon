@@ -321,6 +321,7 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                   {ObjectProperty::ID::SIZE, {ObjectProperty::Type::LENGTH, "Pixel size", 3}},
                   {ObjectProperty::ID::ON_TOP, {ObjectProperty::Type::BOOL, "On top", 4}},
                   {ObjectProperty::ID::OPACITY, {ObjectProperty::Type::OPACITY, "Opacity", 5}},
+                  {ObjectProperty::ID::SHOW_BORDER, {ObjectProperty::Type::BOOL, "Border", 6}},
           }}},
         {ObjectType::DECAL, {"Decal", "Decals", {}}},
         {ObjectType::BOARD_DECAL,

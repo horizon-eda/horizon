@@ -39,6 +39,7 @@ Appearance::Appearance()
     colors[ColorP::NOPOPULATE_X] = {.8, .4, .4};
     colors[ColorP::PROJECTION] = {.7, .8, .3};
     colors[ColorP::NET_TIE] = {1, .1, .5};
+    colors[ColorP::PICTURE_BORDER] = {.8, .8, .8};
 
     layer_colors[BoardLayers::TOP_NOTES] = {1, 1, 1};
     layer_colors[BoardLayers::OUTLINE_NOTES] = {.6, .6, 0};

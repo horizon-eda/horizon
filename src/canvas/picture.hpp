@@ -11,6 +11,7 @@ public:
     float px_size;
     bool on_top;
     float opacity;
+    bool show_border;
     std::shared_ptr<const PictureData> data;
 };
 } // namespace horizon

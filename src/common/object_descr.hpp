@@ -85,6 +85,7 @@ public:
         ALLOW_UPSIDE_DOWN,
         DIRECTION,
         IS_PORT,
+        SHOW_BORDER,
     };
     ObjectProperty(Type t, const std::string &l, int o = 0, const std::vector<std::pair<int, std::string>> &its = {})
         : type(t), label(l), enum_items(its), order(o)

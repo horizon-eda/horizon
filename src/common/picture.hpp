@@ -16,6 +16,10 @@ public:
     Placement placement;
     bool on_top = false;
     float opacity = 1;
+    bool show_border = false;
+    bool get_show_border() const;
+
+    static constexpr float min_opacity = 1e-3;
 
     uint64_t px_size = 1;
     std::shared_ptr<const PictureData> data;

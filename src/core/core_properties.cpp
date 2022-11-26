@@ -221,6 +221,10 @@ bool Core::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
             dynamic_cast<PropertyValueDouble &>(value).value = pic->opacity;
             return true;
 
+        case ObjectProperty::ID::SHOW_BORDER:
+            dynamic_cast<PropertyValueBool &>(value).value = pic->get_show_border();
+            return true;
+
         case ObjectProperty::ID::POSITION_X:
         case ObjectProperty::ID::POSITION_Y:
         case ObjectProperty::ID::ANGLE:
@@ -414,6 +418,10 @@ bool Core::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
             pic->opacity = dynamic_cast<const PropertyValueDouble &>(value).value;
             break;
 
+        case ObjectProperty::ID::SHOW_BORDER:
+            pic->show_border = dynamic_cast<const PropertyValueBool &>(value).value;
+            break;
+
         case ObjectProperty::ID::POSITION_X:
         case ObjectProperty::ID::POSITION_Y:
         case ObjectProperty::ID::ANGLE:
@@ -484,6 +492,14 @@ bool Core::get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID
             return false;
         }
         break;
+    case ObjectType::PICTURE:
+        switch (property) {
+        case ObjectProperty::ID::SHOW_BORDER:
+            meta.is_settable = get_picture(uu)->opacity > Picture::min_opacity;
+            return true;
+        default:
+            return false;
+        }
     default:
         return false;
     }

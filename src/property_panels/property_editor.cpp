@@ -424,7 +424,7 @@ Gtk::Widget *PropertyEditorOpacity::create_editor()
 {
     PropertyEditorDouble::create_editor();
     ScopedBlock block(connections);
-    sp->set_range(.1, 1);
+    sp->set_range(0, 1);
     sp->set_increments(.1, .1);
     sp->set_digits(1);
     return sp;
