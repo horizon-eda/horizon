@@ -538,7 +538,7 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         });
     }
 
-    w_override_prefix_entry->signal_changed().connect([this] {
+    override_prefix_entry_connection = w_override_prefix_entry->signal_changed().connect([this] {
         if (part.override_prefix == Part::OverridePrefix::YES) {
             if (is_loading())
                 return;
@@ -700,6 +700,7 @@ void PartEditor::update_flags_label()
 
 void PartEditor::update_prefix_entry()
 {
+    override_prefix_entry_connection.block();
     switch (part.override_prefix) {
     case Part::OverridePrefix::NO:
         w_override_prefix_entry->set_sensitive(false);
@@ -716,6 +717,7 @@ void PartEditor::update_prefix_entry()
         w_override_prefix_entry->set_text(part.prefix);
         break;
     }
+    override_prefix_entry_connection.unblock();
 }
 
 void PartEditor::map_pin(Gtk::TreeModel::iterator it_pin)
@@ -1088,6 +1090,10 @@ void PartEditor::update_parametric_editor()
             const auto &values = parametric_data.at(tab);
             ed->update(values);
             part.parametric = values;
+        }
+        else {
+            part.parametric.clear();
+            part.parametric.emplace("table", tab);
         }
         parametric_editor = ed;
         parametric_editor->signal_changed().connect([this] {

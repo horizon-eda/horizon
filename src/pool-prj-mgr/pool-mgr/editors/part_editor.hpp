@@ -77,6 +77,7 @@ private:
     Gtk::RadioButton *w_override_prefix_no_button = nullptr;
     Gtk::RadioButton *w_override_prefix_yes_button = nullptr;
     Gtk::Entry *w_override_prefix_entry = nullptr;
+    sigc::connection override_prefix_entry_connection;
 
     class PinListColumns : public Gtk::TreeModelColumnRecord {
     public:
