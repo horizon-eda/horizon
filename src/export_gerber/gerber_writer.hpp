@@ -28,7 +28,8 @@ public:
     void draw_line(const Coordi &from, const Coordi &to, uint64_t width);
     void draw_arc(const Coordi &from, const Coordi &to, const Coordi &center, bool flip, uint64_t width);
     void draw_padstack(const Padstack &ps, int layer, const Placement &transform);
-    void draw_region(const ClipperLib::Path &path, bool dark = true, int prio = 0);
+    void draw_polygon(const ClipperLib::Path &path);
+    void draw_fragments(const ClipperLib::Paths &paths);
     const std::string &get_filename();
 
 private:
@@ -116,10 +117,13 @@ private:
 
     std::deque<Line> lines;
     std::deque<Arc> arcs;
-    std::deque<Region> regions;
+    ClipperLib::Paths fragments;
+    std::deque<ClipperLib::Path> polygons;
     std::deque<std::pair<unsigned int, Coordi>> pads;
     void write_decimal(int64_t x, bool comma = true);
     void write_prim(const ApertureMacro::PrimitiveOutline *prim);
     void write_prim(const ApertureMacro::PrimitiveCenterLine *prim);
+    void write_polynode(const ClipperLib::PolyNode *node);
+    void write_path(const ClipperLib::Path &path);
 };
 } // namespace horizon
