@@ -215,27 +215,62 @@ void GerberWriter::write_pads()
     }
 }
 
+void GerberWriter::draw_polygon(const ClipperLib::Path &path)
+{
+    polygons.emplace_back(path);
+}
+
+void GerberWriter::draw_fragments(const ClipperLib::Paths &paths)
+{
+    fragments.insert(fragments.end(), paths.begin(), paths.end());
+}
+
+void GerberWriter::write_path(const ClipperLib::Path &path)
+{
+    write_line("G36*");
+    ofs << Coordi(path.back().X, path.back().Y) << "D02*"
+        << "\r\n";
+    for (const auto &pt : path) {
+        ofs << Coordi(pt.X, pt.Y) << "D01*"
+            << "\r\n";
+    }
+    write_line("D02*");
+    write_line("G37*");
+}
+
+void GerberWriter::write_polynode(const ClipperLib::PolyNode *node)
+{
+    assert(node->IsHole() == false);
+
+    write_line("%LPD*%");
+    write_path(node->Contour);
+
+    for (auto child : node->Childs) {
+        assert(child->IsHole() == true);
+        write_line("%LPC*%");
+        write_path(child->Contour);
+
+        for (auto child2 : child->Childs) { // add fragments in holes
+            write_polynode(child2);
+        }
+    }
+}
+
 void GerberWriter::write_regions()
 {
     write_line("G01*");
-    std::stable_sort(regions.begin(), regions.end(),
-                     [](const auto &a, const auto &b) { return a.priority > b.priority; });
-    for (const auto &it : regions) {
-        if (it.dark) {
-            write_line("%LPD*%");
-        }
-        else {
-            write_line("%LPC*%");
-        }
-        write_line("G36*");
-        ofs << Coordi(it.path.back().X, it.path.back().Y) << "D02*"
-            << "\r\n";
-        for (const auto &pt : it.path) {
-            ofs << Coordi(pt.X, pt.Y) << "D01*"
-                << "\r\n";
-        }
-        write_line("D02*");
-        write_line("G37*");
+    ClipperLib::Clipper clipper;
+
+    clipper.AddPaths(fragments, ClipperLib::ptSubject, true);
+    ClipperLib::PolyTree tree;
+    clipper.Execute(ClipperLib::ctUnion, tree, ClipperLib::pftNonZero);
+    for (const auto node : tree.Childs) {
+        write_polynode(node);
+    }
+
+    write_line("%LPD*%");
+    for (const auto &poly : polygons) {
+        write_path(poly);
     }
 }
 
@@ -249,11 +284,6 @@ void GerberWriter::draw_arc(const Coordi &from, const Coordi &to, const Coordi &
 {
     auto ap = get_or_create_aperture_circle(width);
     arcs.emplace_back(from, to, project_onto_perp_bisector(from, to, center).to_coordi(), flip, ap);
-}
-
-void GerberWriter::draw_region(const ClipperLib::Path &path, bool dark, int prio)
-{
-    regions.emplace_back(path, dark, prio);
 }
 
 void GerberWriter::draw_padstack(const Padstack &ps, int layer, const Placement &transform)

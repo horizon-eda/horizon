@@ -53,11 +53,7 @@ void CanvasGerber::img_polygon(const Polygon &ipoly, bool tr)
     else if (auto plane = dynamic_cast<const Plane *>(ipoly.usage.ptr)) {
         if (GerberWriter *wr = exporter.get_writer_for_layer(ipoly.layer)) {
             for (const auto &frag : plane->fragments) {
-                bool dark = true; // first path ist outline, the rest are holes
-                for (const auto &path : frag.paths) {
-                    wr->draw_region(transform_path(transform, path), dark, plane->priority);
-                    dark = false;
-                }
+                wr->draw_fragments(frag.paths);
             }
         }
     }
@@ -78,7 +74,7 @@ void CanvasGerber::img_polygon(const Polygon &ipoly, bool tr)
                                }
                                return ClipperLib::IntPoint(p.x, p.y);
                            });
-            wr->draw_region(path, true, -1);
+            wr->draw_polygon(path);
         }
     }
 }
