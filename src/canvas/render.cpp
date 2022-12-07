@@ -328,13 +328,15 @@ void Canvas::render(const Track &track, bool interactive)
     auto width = track.width;
     if (interactive)
         object_ref_push(ObjectType::TRACK, track.uuid);
-    img_net(track.net);
-    img_patch_type(PatchType::TRACK);
-    if (track.is_arc()) {
-        img_arc(track.from.get_position(), track.to.get_position(), track.center.value(), track.width, track.layer);
-    }
-    else {
-        img_line(track.from.get_position(), track.to.get_position(), width, track.layer);
+    if (img_mode) {
+        img_net(track.net);
+        img_patch_type(PatchType::TRACK);
+        if (track.is_arc()) {
+            img_arc(track.from.get_position(), track.to.get_position(), track.center.value(), track.width, track.layer);
+        }
+        else {
+            img_line(track.from.get_position(), track.to.get_position(), width, track.layer);
+        }
     }
     img_patch_type(PatchType::OTHER);
     img_net(nullptr);
