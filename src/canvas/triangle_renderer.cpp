@@ -3,6 +3,7 @@
 #include "gl_util.hpp"
 #include <glm/gtc/type_ptr.hpp>
 #include "bitmap_font_util.hpp"
+#include <range/v3/view.hpp>
 
 namespace horizon {
 
@@ -276,6 +277,9 @@ void TriangleRenderer::render_layer_batch(int layer, HighlightMode highlight_mod
         case Type::ARC:
             glUseProgram(program_arc);
             break;
+
+        case Type::N_TYPES:
+            throw std::runtime_error("N_TYPES is not a type");
         }
         switch (highlight_mode) {
         case HighlightMode::ONLY: // only highlighted, skip not highlighted
@@ -458,7 +462,9 @@ void TriangleRenderer::push()
     for (const auto &[layer, tris] : triangles) {
         const auto &ld = ca.get_layer_display(layer);
         glBufferSubData(GL_ARRAY_BUFFER, ofs * sizeof(Triangle), tris.size() * sizeof(Triangle), tris.first.data());
-        std::map<BatchKey, std::vector<unsigned int>> type_indices;
+        for (auto &x : type_indices) {
+            x.clear();
+        }
         unsigned int i = 0;
         for (const auto &[tri, tri_info] : tris) {
             const bool hidden = tri_info.flags & TriangleInfo::FLAG_HIDDEN;
@@ -498,11 +504,14 @@ void TriangleRenderer::push()
                                        || (tri.color == static_cast<int>(ColorP::LAYER_HIGHLIGHT_LIGHTEN));
                 const bool do_stencil = tri_info.type == TriangleInfo::Type::PAD;
                 const BatchKey key{ty, highlight, do_stencil};
-                type_indices[key].push_back(i + ofs);
+                type_indices.at(key.hash()).push_back(i + ofs);
             }
             i++;
         }
-        for (const auto &[key, elems] : type_indices) {
+        for (const auto [i, elems] : type_indices | ranges::views::enumerate) {
+            if (elems.size() == 0)
+                continue;
+            const auto key = BatchKey::unhash(i);
             auto el_offset = elements.size();
             elements.insert(elements.end(), elems.begin(), elems.end());
             layer_offsets[layer][key] = {el_offset, elems.size()};

@@ -18,13 +18,27 @@ public:
 
 private:
     const CanvasGL &ca;
-    enum class Type { TRIANGLE, LINE, LINE0, LINE_BUTT, GLYPH, CIRCLE, ARC, ARC0 };
+    enum class Type { TRIANGLE, LINE, LINE0, LINE_BUTT, GLYPH, CIRCLE, ARC, ARC0, N_TYPES };
+    static_assert(static_cast<int>(Type::N_TYPES) <= 8);
     const std::map<int, vector_pair<Triangle, TriangleInfo>> &triangles;
 
     struct BatchKey {
         Type type;
         bool highlight;
         bool stencil;
+
+        unsigned int hash() const
+        {
+            return (static_cast<unsigned int>(type) & 0x7) | (highlight << 3) | (stencil << 4);
+        }
+
+        static BatchKey unhash(unsigned int h)
+        {
+            return BatchKey{static_cast<Type>(h & 0x7), !!(h & (1 << 3)), !!(h & (1 << 4))};
+        }
+
+        static constexpr unsigned int hash_max = 0x7 | (1 << 3) | (1 << 4);
+        static_assert(hash_max == 0b11'111);
 
     private:
         auto tie() const
@@ -73,5 +87,7 @@ private:
     void render_annotations(bool top);
     std::array<float, 4> apply_highlight(const class Color &color, HighlightMode mode, int layer) const;
     int stencil = 0;
+
+    std::array<std::vector<unsigned int>, BatchKey::hash_max + 1> type_indices;
 };
 } // namespace horizon
