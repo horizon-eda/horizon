@@ -184,12 +184,20 @@ clearance_cu_worker_intersect(const PatchesVector &patches, const PatchesExpande
                     }
                     e.location = acc.get();
 
-                    const auto cu_layer = BoardLayers::is_copper(key1.layer) ? key1.layer : key2.layer;
                     e.comment = patch_type_names.at(key1.type) + get_net_name(net1) + " near "
-                                + patch_type_names.at(key2.type) + get_net_name(net2) + " on layer "
-                                + brd.get_layers().at(cu_layer).name;
+                                + patch_type_names.at(key2.type) + get_net_name(net2);
+
+                    if (BoardLayers::is_copper(key1.layer) || BoardLayers::is_copper(key2.layer)) {
+                        const auto cu_layer = BoardLayers::is_copper(key1.layer) ? key1.layer : key2.layer;
+                        e.comment += " on layer " + brd.get_layers().at(cu_layer).name;
+                        e.layers.insert(cu_layer);
+                    }
+                    else { // pth
+                        e.layers.insert(BoardLayers::TOP_COPPER);
+                        e.layers.insert(BoardLayers::BOTTOM_COPPER);
+                    }
+
                     e.error_polygons = {ite};
-                    e.layers.insert(cu_layer);
                 }
             }
         }
