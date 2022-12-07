@@ -943,12 +943,18 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
         triangle_type_current = TriangleInfo::Type::PLANE_FILL;
         const auto &tris = fragment_cache.get_triangles(*plane);
         object_ref_push(ObjectType::PLANE, plane->uuid);
+        const bool transform_is_identity = transform.is_identity();
+
         begin_group(poly.layer);
         for (const auto &tri : tris) {
-            add_triangle(poly.layer, transform.transform(tri[0]), transform.transform(tri[1]),
-                         transform.transform(tri[2]), co);
+            if (transform_is_identity)
+                add_triangle(poly.layer, tri[0], tri[1], tri[2], co);
+            else
+                add_triangle(poly.layer, transform.transform(tri[0]), transform.transform(tri[1]),
+                             transform.transform(tri[2]), co);
         }
         triangle_type_current = TriangleInfo::Type::NONE;
+
 
         for (const auto &frag : plane->fragments) {
             ColorP co_orphan = co;
@@ -959,14 +965,14 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
                 for (size_t i = 0; i < path.size(); i++) {
                     auto &c0 = path[i];
                     auto &c1 = path[(i + 1) % path.size()];
-                    draw_line(Coordf(c0.X, c0.Y), Coordf(c1.X, c1.Y), co_orphan, poly.layer);
+                    draw_line(Coordf(c0.X, c0.Y), Coordf(c1.X, c1.Y), co_orphan, poly.layer, !transform_is_identity);
                 }
             }
         }
         if (plane->fragments.size() == 0) { // empty, draw poly outline
             for (size_t i = 0; i < poly.vertices.size(); i++) {
                 draw_line(poly.vertices[i].position, poly.vertices[(i + 1) % poly.vertices.size()].position, co,
-                          poly.layer);
+                          poly.layer, !transform_is_identity);
             }
         }
         end_group();

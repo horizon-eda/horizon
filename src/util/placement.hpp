@@ -68,6 +68,12 @@ public:
     {
         shift = {0, 0}, angle = 0, mirror = false;
     }
+
+    bool is_identity() const
+    {
+        return shift.x == 0 && shift.y == 0 && angle == 0 && mirror == false;
+    }
+
     void make_relative(const Placement &to);
     void accumulate(const Placement &p);
     void invert_angle();
