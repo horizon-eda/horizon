@@ -18,7 +18,7 @@ public:
     }
 
 private:
-    const class Padstack *padstack = nullptr;
+    std::shared_ptr<const class Padstack> padstack;
     class Pad *temp = nullptr;
     ParameterSet temp_param;
     void create_pad(const Coordi &c);

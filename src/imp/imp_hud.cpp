@@ -221,7 +221,7 @@ const Block &ImpBase::get_block_for_group_tag_names()
 
 std::string ImpBase::get_hud_text_for_component(const Component *comp)
 {
-    const Part *part = comp->part;
+    const Part *part = comp->part.get();
     if (!part) {
         std::string s = "No part\n";
         s += "Entity: " + Glib::Markup::escape_text(comp->entity->name);

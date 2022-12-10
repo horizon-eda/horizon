@@ -36,9 +36,10 @@ LocationEntry *PartWizard::pack_location_entry(const Glib::RefPtr<Gtk::Builder> 
 
 PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const UUID &pkg_uuid,
                        const std::string &bp, class Pool &po, PoolProjectManagerAppWindow &aw)
-    : Gtk::Window(cobject), pool_base_path(bp), pool(po), part(UUID::random()), entity(UUID::random()), appwin(aw),
-      state_store(this, "part-wizard")
+    : Gtk::Window(cobject), pool_base_path(bp), pool(po), part(UUID::random()),
+      entity(std::make_shared<Entity>(UUID::random())), appwin(aw), state_store(this, "part-wizard")
 {
+    part.entity = entity;
     x->get_widget("header", header);
     x->get_widget("stack", stack);
     x->get_widget("button_back", button_back);
@@ -168,8 +169,6 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         return strcmp_natural(na, nb);
     });
 
-    part.entity = &entity;
-
     button_link_pads->signal_clicked().connect(sigc::mem_fun(*this, &PartWizard::handle_link));
     button_unlink_pads->signal_clicked().connect(sigc::mem_fun(*this, &PartWizard::handle_unlink));
     button_import_pads->signal_clicked().connect(sigc::mem_fun(*this, &PartWizard::handle_import));
@@ -230,7 +229,7 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     });
 }
 
-void PartWizard::set_pkg(const Package *p)
+void PartWizard::set_pkg(std::shared_ptr<const Package> p)
 {
     if (pkg)
         return;
@@ -392,9 +391,9 @@ std::string PartWizard::get_rel_part_filename()
 
 void PartWizard::finish()
 {
-    entity.name = entity_name_entry->get_text();
-    entity.prefix = entity_prefix_entry->get_text();
-    entity.tags = entity_tags_entry->get_tags();
+    entity->name = entity_name_entry->get_text();
+    entity->prefix = entity_prefix_entry->get_text();
+    entity->tags = entity_tags_entry->get_tags();
 
     part.attributes[Part::Attribute::MPN] = {false, part_mpn_entry->get_text()};
     part.attributes[Part::Attribute::VALUE] = {false, part_value_entry->get_text()};
@@ -403,7 +402,7 @@ void PartWizard::finish()
     part.attributes[Part::Attribute::DESCRIPTION] = {false, part_description_entry->get_text()};
     part.tags = part_tags_entry->get_tags();
 
-    entity.manufacturer = part.get_manufacturer();
+    entity->manufacturer = part.get_manufacturer();
 
     std::vector<std::string> filenames;
     filenames.push_back(entity_location_entry->get_filename());
@@ -417,7 +416,7 @@ void PartWizard::finish()
             filenames.push_back(unit_filename);
             filenames.push_back(symbol_filename);
 
-            auto unit = &units.at(ed->gate->name);
+            auto unit = units.at(ed->gate->name);
             assert(unit == ed->gate->unit);
 
             ed->gate->suffix = ed->suffix_entry->get_text();
@@ -451,7 +450,7 @@ void PartWizard::finish()
             save_json_to_file(symbol_filename_dest, sym.serialize());
         }
     }
-    save_json_to_file(entity_location_entry->get_filename(), entity.serialize());
+    save_json_to_file(entity_location_entry->get_filename(), part.entity->serialize());
     save_json_to_file(part_location_entry->get_filename(), part.serialize());
 }
 
@@ -724,7 +723,7 @@ void PartWizard::prepare_edit()
     auto children = edit_left_box->get_children();
     for (auto ch : children) {
         if (auto ed = dynamic_cast<GateEditorWizard *>(ch)) {
-            if (!entity.gates.count(ed->gate.uuid)) {
+            if (!entity->gates.count(ed->gate.uuid)) {
                 delete ed;
             }
             else {
@@ -734,7 +733,7 @@ void PartWizard::prepare_edit()
     }
 
 
-    for (auto &it : entity.gates) {
+    for (auto &it : entity->gates) {
         if (!gates_avail.count(&it.second)) {
             auto ed = GateEditorWizard::create(&it.second, this);
             edit_left_box->pack_start(*ed, false, false, 0);
@@ -819,9 +818,9 @@ void PartWizard::update_part()
         if (pin_name.size()) {
             if (!units.count(gate_name)) {
                 auto uu = UUID::random();
-                units.emplace(gate_name, uu);
+                units.emplace(gate_name, std::make_shared<Unit>(uu));
             }
-            Unit *u = &units.at(gate_name);
+            auto u = units.at(gate_name);
             units_used.insert(u->uuid);
             Pin *pin = nullptr;
             {
@@ -843,18 +842,18 @@ void PartWizard::update_part()
 
             Gate *gate = nullptr;
             {
-                auto gi = std::find_if(entity.gates.begin(), entity.gates.end(),
+                auto gi = std::find_if(entity->gates.begin(), entity->gates.end(),
                                        [gate_name](const auto &a) { return a.second.name == gate_name; });
-                if (gi != entity.gates.end()) {
+                if (gi != entity->gates.end()) {
                     gate = &gi->second;
                 }
             }
             if (!gate) {
                 auto uu = UUID::random();
-                gate = &entity.gates.emplace(uu, uu).first->second;
+                gate = &entity->gates.emplace(uu, uu).first->second;
             }
             gate->name = gate_name;
-            gate->unit = &units.at(gate_name);
+            gate->unit = units.at(gate_name);
 
             for (auto pad : ed->pads) {
                 part.pad_map.emplace(std::piecewise_construct, std::forward_as_tuple(pad->uuid),
@@ -863,10 +862,10 @@ void PartWizard::update_part()
         }
     }
 
-    map_erase_if(entity.gates, [units_used](auto x) { return units_used.count(x.second.unit->uuid) == 0; });
+    map_erase_if(entity->gates, [units_used](auto x) { return units_used.count(x.second.unit->uuid) == 0; });
 
     for (auto it = units.begin(); it != units.end();) {
-        auto uu = it->second.uuid;
+        auto uu = it->second->uuid;
         if (units_used.count(uu) == 0) {
             {
                 auto unit_filename = pool.get_tmp_filename(ObjectType::UNIT, uu);
@@ -887,21 +886,21 @@ void PartWizard::update_part()
         }
     }
     for (auto &it : units) {
-        map_erase_if(it.second.pins, [pins_used](auto x) { return pins_used.count(x.second.uuid) == 0; });
+        map_erase_if(it.second->pins, [pins_used](auto x) { return pins_used.count(x.second.uuid) == 0; });
     }
 
 
     for (const auto &it : units) {
-        if (!symbols.count(it.second.uuid)) {
+        if (!symbols.count(it.second->uuid)) {
             Symbol sym(UUID::random());
-            sym.unit = &it.second;
+            sym.unit = it.second;
             sym.name = "edit me";
             auto filename = pool.get_tmp_filename(ObjectType::SYMBOL, sym.uuid);
             save_json_to_file(filename, sym.serialize());
             symbols.emplace(sym.unit->uuid, sym.uuid);
         }
-        auto filename = pool.get_tmp_filename(ObjectType::UNIT, it.second.uuid);
-        save_json_to_file(filename, it.second.serialize());
+        auto filename = pool.get_tmp_filename(ObjectType::UNIT, it.second->uuid);
+        save_json_to_file(filename, it.second->serialize());
     }
 }
 
@@ -957,7 +956,7 @@ void PartWizard::autofill()
 
 void PartWizard::reload()
 {
-    part.package = pool.get_package(part.package.uuid);
+    part.package = pool.get_package(part.package->uuid);
 }
 
 void PartWizard::update_can_finish()
@@ -993,7 +992,7 @@ void PartWizard::update_can_finish()
     std::set<std::string> unit_names;
 
     gates_valid = true;
-    int n_gates = entity.gates.size();
+    int n_gates = entity->gates.size();
 
     auto children = edit_left_box->get_children();
     for (auto ch : children) {
@@ -1087,16 +1086,16 @@ void PartWizard::update_steps()
     bool all_symbol_pins_mapped = true;
     for (const auto &it : units) {
         unsigned int n_mapped = 0;
-        if (symbol_pins_mapped.count(it.second.uuid)) {
-            n_mapped = symbol_pins_mapped.at(it.second.uuid);
+        if (symbol_pins_mapped.count(it.second->uuid)) {
+            n_mapped = symbol_pins_mapped.at(it.second->uuid);
         }
-        if (n_mapped < it.second.pins.size()) {
+        if (n_mapped < it.second->pins.size()) {
             all_symbol_pins_mapped = false;
             break;
         }
     }
 
-    if (entity.gates.size() == 1) {
+    if (entity->gates.size() == 1) {
         if (mpn_valid) {
             progress = 1;
             if (part_filename_valid) {
@@ -1156,7 +1155,7 @@ PartWizard *PartWizard::create(const UUID &pkg_uuid, const std::string &bp, clas
 PartWizard::~PartWizard()
 {
     for (auto &it : units) {
-        auto filename = pool.get_tmp_filename(ObjectType::UNIT, it.second.uuid);
+        auto filename = pool.get_tmp_filename(ObjectType::UNIT, it.second->uuid);
         Gio::File::create_for_path(filename)->remove();
     }
     for (auto &it : symbols) {

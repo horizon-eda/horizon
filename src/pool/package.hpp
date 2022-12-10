@@ -112,7 +112,7 @@ public:
     UUID default_model;
     const Model *get_model(const UUID &uu = UUID()) const;
 
-    const class Package *alternate_for = nullptr;
+    std::shared_ptr<const class Package> alternate_for = nullptr;
 
     FileVersion version;
 

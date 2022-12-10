@@ -12,7 +12,7 @@ Pad::Pad(const UUID &uu, const json &j, IPool &pool)
         parameter_set = parameter_set_from_json(j.at("parameter_set"));
     }
 }
-Pad::Pad(const UUID &uu, const Padstack *ps) : uuid(uu), pool_padstack(ps), padstack(*ps)
+Pad::Pad(const UUID &uu, std::shared_ptr<const Padstack> ps) : uuid(uu), pool_padstack(ps), padstack(*ps)
 {
 }
 

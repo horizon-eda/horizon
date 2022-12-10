@@ -118,7 +118,7 @@ void PoolNotebook::construct_entities()
             preview->clear();
             return;
         }
-        auto entity = pool.get_entity(sel);
+        auto entity = pool.get_entity(sel).get();
         preview->load(entity);
         info_box->load(entity);
     });

@@ -239,7 +239,7 @@ void PartPreview::load(const Part *p)
 
     entity_preview->load(part);
 
-    const class Package *pkg = part->package;
+    const class Package *pkg = part->package.get();
     combo_package->append(pkg->uuid, pkg->name + " (Primary)");
 
     SQLite::Query q(pool.get_db(),

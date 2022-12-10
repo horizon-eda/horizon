@@ -264,7 +264,7 @@ void RuleEditorThermals::update_pads()
         if (rule2->match_component.component) {
             const auto &comp = core.get_top_block()->components.at(rule2->match_component.component);
             if (comp.part)
-                pkg = comp.part->package;
+                pkg = comp.part->package.get();
             for (const auto &[uu, bpkg] : dynamic_cast<IDocumentBoard &>(core).get_board()->packages) {
                 if (bpkg.component->uuid == comp.uuid) {
                     pkg = &bpkg.package;
@@ -281,13 +281,13 @@ void RuleEditorThermals::update_pads()
                 pkgs.insert(bpkg.package.uuid);
         }
         if (pkgs.size() == 1) {
-            pkg = core.get_pool().get_package(*pkgs.begin());
+            pkg = core.get_pool().get_package(*pkgs.begin()).get();
         }
     } break;
 
     case RuleMatchComponent::Mode::PART: {
         if (rule2->match_component.part)
-            pkg = core.get_pool().get_part(rule2->match_component.part)->package;
+            pkg = core.get_pool().get_part(rule2->match_component.part)->package.get();
     } break;
     }
 

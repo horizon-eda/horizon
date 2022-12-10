@@ -311,6 +311,7 @@ void EntityEditor::history_load(const HistoryManager::HistoryItem &it)
 {
     const auto &x = dynamic_cast<const HistoryItemEntity &>(it);
     entity = x.entity;
+    entity.update_refs(pool);
     load();
 }
 

@@ -248,7 +248,6 @@ void CorePackage::reload_pool()
 {
     m_pool.clear();
     package.update_refs(m_pool);
-    history_clear();
     rebuild("reload pool");
     s_signal_can_undo_redo.emit();
 }

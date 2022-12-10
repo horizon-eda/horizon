@@ -98,17 +98,17 @@ public:
 std::list<KiCadSymbol> parse_kicad_library(const std::string &filename);
 class KiCadSymbolImporter {
 public:
-    KiCadSymbolImporter(const KiCadSymbol &sym, const class Package *pkg, bool merge_pins);
+    KiCadSymbolImporter(const KiCadSymbol &sym, std::shared_ptr<const class Package> pkg, bool merge_pins);
 
-    const Entity &get_entity();
+    std::shared_ptr<const Entity> get_entity();
     const Part *get_part();
-    const std::list<Unit> &get_units();
+    const std::list<std::shared_ptr<Unit>> &get_units();
     const std::list<Symbol> &get_symbols();
 
 private:
-    Entity entity;
+    std::shared_ptr<Entity> entity;
     Part part;
-    std::list<Unit> units;
+    std::list<std::shared_ptr<Unit>> units;
     std::list<Symbol> symbols;
     // const KiCadSymbol &symbol;
     // const class Package *package;

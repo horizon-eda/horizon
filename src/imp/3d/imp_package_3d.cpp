@@ -109,7 +109,7 @@ void ImpPackage::update_fake_board()
         auto &fake_package = fake_board.packages.emplace(uu, uu).first->second;
         fake_package.package = package;
         fake_package.package.models = core_package.models;
-        fake_package.pool_package = &package;
+        fake_package.pool_package = std::make_unique<Package>(package);
         fake_package.model = current_model;
     }
 }

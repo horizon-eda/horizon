@@ -12,9 +12,9 @@ using json = nlohmann::json;
 class Pad {
 public:
     Pad(const UUID &uu, const json &, class IPool &pool);
-    Pad(const UUID &uu, const Padstack *ps);
+    Pad(const UUID &uu, std::shared_ptr<const Padstack> ps);
     UUID uuid;
-    uuid_ptr<const Padstack> pool_padstack;
+    std::shared_ptr<const Padstack> pool_padstack;
     Padstack padstack;
     Placement placement;
     std::string name;

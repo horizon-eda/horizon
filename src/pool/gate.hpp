@@ -2,7 +2,6 @@
 #include "nlohmann/json_fwd.hpp"
 #include "unit.hpp"
 #include "util/uuid.hpp"
-#include "util/uuid_ptr.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -16,7 +15,7 @@ public:
     std::string name;
     std::string suffix;
     unsigned int swap_group = 0;
-    uuid_ptr<const Unit> unit;
+    std::shared_ptr<const Unit> unit;
 
     json serialize() const;
 };

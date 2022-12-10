@@ -21,7 +21,7 @@ BOMExportSettings::BOMExportSettings(const json &j, IPool &pool)
     }
     if (j.count("concrete_parts")) {
         for (const auto &[key, value] : j.at("concrete_parts").items()) {
-            const Part *part = nullptr;
+            std::shared_ptr<const Part> part = nullptr;
             try {
                 part = pool.get_part(value.get<std::string>());
             }
@@ -37,7 +37,7 @@ BOMExportSettings::BOMExportSettings(const json &j, IPool &pool)
 void BOMExportSettings::update_refs(IPool &pool)
 {
     for (auto &[k, v] : concrete_parts) {
-        v.ptr = pool.get_part(v.uuid);
+        v = pool.get_part(v->uuid);
     }
 }
 

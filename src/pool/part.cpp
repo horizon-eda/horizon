@@ -377,10 +377,10 @@ UUID Part::get_uuid() const
 
 void Part::update_refs(IPool &pool)
 {
-    entity = pool.get_entity(entity.uuid);
-    package = pool.get_package(package.uuid);
-    if (base.ptr)
-        base = pool.get_part(base.uuid);
+    entity = pool.get_entity(entity->uuid);
+    package = pool.get_package(package->uuid);
+    if (base)
+        base = pool.get_part(base->uuid);
     for (auto &it : pad_map) {
         it.second.gate = &entity->gates.at(it.second.gate.uuid);
         it.second.pin = &it.second.gate->unit->pins.at(it.second.pin.uuid);
@@ -393,11 +393,11 @@ ItemSet Part::get_pool_items_used() const
     auto part = this;
     while (part) {
         items_needed.emplace(ObjectType::PART, part->uuid);
-        items_needed.emplace(ObjectType::PACKAGE, part->package.uuid);
+        items_needed.emplace(ObjectType::PACKAGE, part->package->uuid);
         for (const auto &it_pad : part->package->pads) {
             items_needed.emplace(ObjectType::PADSTACK, it_pad.second.pool_padstack->uuid);
         }
-        part = part->base;
+        part = part->base.get();
     }
     return items_needed;
 }

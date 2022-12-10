@@ -71,7 +71,7 @@ void EntityPreview::load(const Entity *e)
 
 void EntityPreview::load(const Part *p)
 {
-    load(p->entity, p);
+    load(p->entity.get(), p);
 }
 
 void EntityPreview::clear()

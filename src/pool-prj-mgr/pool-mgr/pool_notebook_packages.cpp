@@ -171,7 +171,7 @@ void PoolNotebook::construct_packages()
             canvas->clear();
             return;
         }
-        info_box->load(pool.get_package(sel));
+        info_box->load(pool.get_package(sel).get());
         canvas->load(ObjectType::PACKAGE, sel);
     });
     append_page(*paned, "Packages");

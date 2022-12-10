@@ -28,8 +28,8 @@ public:
     ~PartWizard();
 
 private:
-    const class Package *pkg = nullptr;
-    void set_pkg(const Package *p);
+    std::shared_ptr<const class Package> pkg;
+    void set_pkg(std::shared_ptr<const Package> p);
     std::string pool_base_path;
     class Pool &pool;
 
@@ -77,7 +77,7 @@ private:
     Gtk::Grid *steps_grid = nullptr;
 
     Part part;
-    Entity entity;
+    std::shared_ptr<Entity> entity;
 
     class ListColumns : public Gtk::TreeModelColumnRecord {
     public:
@@ -140,7 +140,7 @@ private:
     Mode mode = Mode::ASSIGN;
     void set_mode(Mode mo);
     void prepare_edit();
-    std::map<std::string, Unit> units;
+    std::map<std::string, std::shared_ptr<Unit>> units;
     std::map<UUID, UUID> symbols;                    // unit UUID -> symbol UUID
     std::map<UUID, unsigned int> symbol_pins_mapped; // unit UUID -> pins mapped
     void update_symbol_pins_mapped();

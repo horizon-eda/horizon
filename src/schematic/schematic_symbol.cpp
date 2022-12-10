@@ -42,7 +42,7 @@ SchematicSymbol::SchematicSymbol(const UUID &uu, const json &j, IPool &pool, Blo
         }
     }
 }
-SchematicSymbol::SchematicSymbol(const UUID &uu, const Symbol *sym)
+SchematicSymbol::SchematicSymbol(const UUID &uu, std::shared_ptr<const Symbol> sym)
     : uuid(uu), pool_symbol(sym), symbol(*sym), display_all_pads(false)
 {
 }

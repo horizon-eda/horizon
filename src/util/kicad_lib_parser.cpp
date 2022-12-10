@@ -454,43 +454,44 @@ static Orientation conv(Orientation o)
         return o;
     }
 }
-KiCadSymbolImporter::KiCadSymbolImporter(const KiCadSymbol &ksym, const class Package *pkg, bool merge_pins)
-    : entity(UUID::random()), part(UUID::random())
+KiCadSymbolImporter::KiCadSymbolImporter(const KiCadSymbol &ksym, std::shared_ptr<const class Package> pkg,
+                                         bool merge_pins)
+    : entity(std::make_shared<Entity>(UUID::random())), part(UUID::random())
 {
     char suffix = 0;
     if (ksym.parts.size() > 1)
         suffix = 'A';
-    entity.name = ksym.name;
-    entity.prefix = ksym.prefix;
+    entity->name = ksym.name;
+    entity->prefix = ksym.prefix;
     part.attributes[Part::Attribute::MPN] = {false, ksym.name};
     part.attributes[Part::Attribute::DESCRIPTION] = {false, ksym.description};
     part.attributes[Part::Attribute::DATASHEET] = {false, ksym.datasheet};
-    part.entity = &entity;
+    part.entity = entity;
     part.package = pkg;
     for (const auto &it : ksym.parts) {
-        units.emplace_back(UUID::random());
+        units.emplace_back(std::make_unique<Unit>(UUID::random()));
         symbols.emplace_back(UUID::random());
-        auto &unit = units.back();
+        auto unit = units.back();
         auto &sym = symbols.back();
-        sym.unit = &unit;
+        sym.unit = unit;
 
         std::string sfx;
         if (suffix) {
             sfx = std::string(1, suffix);
             suffix++;
         }
-        unit.name = ksym.name + " " + sfx;
-        trim(unit.name);
-        sym.name = unit.name;
+        unit->name = ksym.name + " " + sfx;
+        trim(unit->name);
+        sym.name = unit->name;
 
         auto gate_uu = UUID::random();
-        auto &gate = entity.gates.emplace(gate_uu, gate_uu).first->second;
+        auto &gate = entity->gates.emplace(gate_uu, gate_uu).first->second;
         if (suffix)
             gate.name = sfx;
         else
             gate.name = "Main";
         gate.suffix = sfx;
-        gate.unit = &unit;
+        gate.unit = unit;
 
         std::map<std::string, UUID> pin_names;
 
@@ -498,7 +499,7 @@ KiCadSymbolImporter::KiCadSymbolImporter(const KiCadSymbol &ksym, const class Pa
             if (!merge_pins || it_pin.name == "~" || (merge_pins && !pin_names.count(it_pin.name))) {
                 auto pin_uu = UUID::random();
                 pin_names.emplace(it_pin.name, pin_uu);
-                auto &pin = unit.pins.emplace(pin_uu, pin_uu).first->second;
+                auto &pin = unit->pins.emplace(pin_uu, pin_uu).first->second;
                 auto &sym_pin = sym.pins.emplace(pin_uu, pin_uu).first->second;
                 pin.primary_name = it_pin.name;
                 pin.direction = it_pin.direction;
@@ -524,7 +525,7 @@ KiCadSymbolImporter::KiCadSymbolImporter(const KiCadSymbol &ksym, const class Pa
                                         [&it_pin](const auto &x) { return x.second.name == it_pin.pad; });
                 if (pad != pkg->pads.end()) {
                     part.pad_map.emplace(std::piecewise_construct, std::forward_as_tuple(pad->second.uuid),
-                                         std::forward_as_tuple(&gate, &unit.pins.at(pin_names.at(it_pin.name))));
+                                         std::forward_as_tuple(&gate, &unit->pins.at(pin_names.at(it_pin.name))));
                 }
             }
         }
@@ -591,7 +592,7 @@ KiCadSymbolImporter::KiCadSymbolImporter(const KiCadSymbol &ksym, const class Pa
     }
 }
 
-const Entity &KiCadSymbolImporter::get_entity()
+std::shared_ptr<const Entity> KiCadSymbolImporter::get_entity()
 {
     return entity;
 }
@@ -602,7 +603,7 @@ const Part *KiCadSymbolImporter::get_part()
     else
         return nullptr;
 }
-const std::list<Unit> &KiCadSymbolImporter::get_units()
+const std::list<std::shared_ptr<Unit>> &KiCadSymbolImporter::get_units()
 {
     return units;
 }

@@ -298,7 +298,7 @@ void Package::operator=(Package const &pkg)
 void Package::update_refs(IPool &pool)
 {
     for (auto &it : pads) {
-        it.second.pool_padstack = pool.get_padstack(it.second.pool_padstack.uuid);
+        it.second.pool_padstack = pool.get_padstack(it.second.pool_padstack->uuid);
         it.second.padstack = *it.second.pool_padstack;
     }
     update_refs();

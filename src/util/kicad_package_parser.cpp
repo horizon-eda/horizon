@@ -239,7 +239,7 @@ void KiCadPackageParser::parse_pad(const SEXPR::SEXPR *data)
     else {
         log_cb("Pad '" + name + "' is unsupported", "type=" + type + " shape=" + shape);
     }
-    const Padstack *padstack = nullptr;
+    std::shared_ptr<const Padstack> padstack;
     if (padstack_name.size()) {
         padstack = pool.get_well_known_padstack(padstack_name);
         if (!padstack) {

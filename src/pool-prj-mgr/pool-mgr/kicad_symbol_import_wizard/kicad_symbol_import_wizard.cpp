@@ -367,7 +367,7 @@ void KiCadSymbolImportWizard::set_mode(KiCadSymbolImportWizard::Mode mo)
     update_buttons();
 }
 
-void KiCadSymbolImportWizard::import(const Package *pkg)
+void KiCadSymbolImportWizard::import(std::shared_ptr<const Package> pkg)
 {
     set_mode(Mode::EDIT);
 
@@ -375,8 +375,8 @@ void KiCadSymbolImportWizard::import(const Package *pkg)
     auto &units = importer.get_units();
     auto &syms = importer.get_symbols();
 
-    auto &entity = importer.get_entity();
-    entity_uuid = entity.uuid;
+    auto entity = importer.get_entity();
+    entity_uuid = entity->uuid;
     if (auto part = importer.get_part()) {
         part_uuid = part->uuid;
         auto filename = pool.get_tmp_filename(ObjectType::PART, part_uuid);
@@ -386,11 +386,11 @@ void KiCadSymbolImportWizard::import(const Package *pkg)
 
     {
         auto filename = pool.get_tmp_filename(ObjectType::ENTITY, entity_uuid);
-        save_json_to_file(filename, entity.serialize());
+        save_json_to_file(filename, entity->serialize());
     }
     for (const auto &it : units) {
-        auto filename = pool.get_tmp_filename(ObjectType::UNIT, it.uuid);
-        save_json_to_file(filename, it.serialize());
+        auto filename = pool.get_tmp_filename(ObjectType::UNIT, it->uuid);
+        save_json_to_file(filename, it->serialize());
     }
     for (const auto &it : syms) {
         auto filename = pool.get_tmp_filename(ObjectType::SYMBOL, it.uuid);
@@ -399,7 +399,7 @@ void KiCadSymbolImportWizard::import(const Package *pkg)
     }
     {
         std::vector<const Gate *> gates_sorted;
-        std::transform(entity.gates.begin(), entity.gates.end(), std::back_inserter(gates_sorted),
+        std::transform(entity->gates.begin(), entity->gates.end(), std::back_inserter(gates_sorted),
                        [](auto &x) { return &x.second; });
         std::sort(gates_sorted.begin(), gates_sorted.end(),
                   [](const auto a, const auto b) { return strcmp_natural(a->name, b->name) < 0; });

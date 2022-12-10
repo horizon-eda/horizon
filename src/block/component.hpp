@@ -45,8 +45,8 @@ public:
     UUID get_uuid() const;
 
     UUID uuid;
-    const class Entity *entity = nullptr;
-    const class Part *part = nullptr;
+    std::shared_ptr<const class Entity> entity = nullptr;
+    std::shared_ptr<const class Part> part = nullptr;
     std::string refdes;
     std::string value;
     UUID group;

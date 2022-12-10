@@ -19,7 +19,7 @@ public:
     }
 
 private:
-    const class Padstack *padstack = nullptr;
+    std::shared_ptr<const class Padstack> padstack = nullptr;
     class BoardHole *temp = nullptr;
     void create_hole(const Coordi &c);
 };

@@ -156,11 +156,11 @@ void PackageInfoBox::load(const Package *package)
             q.bind(1, package->uuid);
             while (q.step()) {
                 UUID uu = q.get<std::string>(0);
-                padstacks[pool.get_padstack(uu)] = {0, true};
+                padstacks[pool.get_padstack(uu).get()] = {0, true};
             }
         }
         for (const auto &it : package->pads) {
-            padstacks[it.second.pool_padstack].first++;
+            padstacks[it.second.pool_padstack.get()].first++;
         }
         for (const auto &it : padstacks) {
             Gtk::TreeModel::Row row = *store->append();

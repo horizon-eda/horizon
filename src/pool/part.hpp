@@ -48,11 +48,11 @@ public:
 
     std::set<std::string> tags;
     bool inherit_tags = false;
-    uuid_ptr<const class Entity> entity;
-    uuid_ptr<const class Package> package;
+    std::shared_ptr<const class Entity> entity;
+    std::shared_ptr<const class Package> package;
     UUID model;
     bool inherit_model = true;
-    uuid_ptr<const class Part> base;
+    std::shared_ptr<const class Part> base;
 
     void update_refs(IPool &pool);
     UUID get_uuid() const;

@@ -249,7 +249,7 @@ void PartBrowserWindow::update_favorites()
     for (const auto &it : favorites) {
         const Part *part = nullptr;
         try {
-            part = pool.get_part(it);
+            part = pool.get_part(it).get();
         }
         catch (const std::runtime_error &e) {
             part = nullptr;
@@ -353,7 +353,7 @@ void PartBrowserWindow::update_part_current()
     assign_part_button->set_sensitive(part_current && can_assign);
     fav_button->set_sensitive(part_current);
     if (part_current) {
-        auto part = pool.get_part(part_current);
+        auto part = pool.get_part(part_current).get();
         preview->load(part);
     }
     else {

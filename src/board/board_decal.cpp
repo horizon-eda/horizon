@@ -13,7 +13,8 @@ BoardDecal::BoardDecal(const UUID &uu, const json &j, IPool &pool, const Board &
     set_flip(flip, brd); // calls update_layers
 }
 
-BoardDecal::BoardDecal(const UUID &uu, const Decal &dec) : uuid(uu), pool_decal(&dec), decal(*pool_decal)
+BoardDecal::BoardDecal(const UUID &uu, std::shared_ptr<const Decal> dec)
+    : uuid(uu), pool_decal(dec), decal(*pool_decal)
 {
     update_layers();
 }

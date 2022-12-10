@@ -15,9 +15,9 @@ using json = nlohmann::json;
 class SchematicSymbol {
 public:
     SchematicSymbol(const UUID &uu, const json &, class IPool &pool, Block *block = nullptr);
-    SchematicSymbol(const UUID &uu, const Symbol *sym);
+    SchematicSymbol(const UUID &uu, std::shared_ptr<const Symbol> sym);
     UUID uuid;
-    const Symbol *pool_symbol;
+    std::shared_ptr<const Symbol> pool_symbol;
     Symbol symbol;
     uuid_ptr<Component> component;
     uuid_ptr<const Gate> gate;

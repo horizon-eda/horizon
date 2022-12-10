@@ -371,7 +371,7 @@ void BOMExportWindow::update()
     for (const auto &it : doc.get_top_block()->get_instantiated_blocks_and_top()) {
         for (const auto &[uu, comp] : it.block.components) {
             if (comp.part) {
-                parts[comp.part]++;
+                parts[comp.part.get()]++;
             }
         }
     }

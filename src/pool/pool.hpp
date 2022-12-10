@@ -26,15 +26,16 @@ public:
      * @param base_path Path to the pool containing the pool.db
      */
     Pool(const std::string &base_path, bool read_only = true);
-    const class Unit *get_unit(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
-    const class Entity *get_entity(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
-    const class Symbol *get_symbol(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
-    const class Padstack *get_padstack(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
-    const class Padstack *get_well_known_padstack(const std::string &name, UUID *pool_uuid_out = nullptr) override;
-    const class Package *get_package(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
-    const class Part *get_part(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
-    const class Frame *get_frame(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
-    const class Decal *get_decal(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
+    std::shared_ptr<const class Unit> get_unit(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
+    std::shared_ptr<const class Entity> get_entity(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
+    std::shared_ptr<const class Symbol> get_symbol(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
+    std::shared_ptr<const class Padstack> get_padstack(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
+    std::shared_ptr<const class Padstack> get_well_known_padstack(const std::string &name,
+                                                                  UUID *pool_uuid_out = nullptr) override;
+    std::shared_ptr<const class Package> get_package(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
+    std::shared_ptr<const class Part> get_part(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
+    std::shared_ptr<const class Frame> get_frame(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
+    std::shared_ptr<const class Decal> get_decal(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
     std::set<UUID> get_alternate_packages(const UUID &uu) override;
     std::string get_model_filename(const UUID &pkg_uuid, const UUID &model_uuid) override;
 
@@ -91,14 +92,14 @@ protected:
 
     std::string get_flat_filename(ObjectType type, const UUID &uu) const;
 
-    std::map<UUID, Unit> units;
-    std::map<UUID, Entity> entities;
-    std::map<UUID, Symbol> symbols;
-    std::map<UUID, Padstack> padstacks;
-    std::map<UUID, Package> packages;
-    std::map<UUID, Part> parts;
-    std::map<UUID, Frame> frames;
-    std::map<UUID, Decal> decals;
+    std::map<UUID, std::shared_ptr<Unit>> units;
+    std::map<UUID, std::shared_ptr<Entity>> entities;
+    std::map<UUID, std::shared_ptr<Symbol>> symbols;
+    std::map<UUID, std::shared_ptr<Padstack>> padstacks;
+    std::map<UUID, std::shared_ptr<Package>> packages;
+    std::map<UUID, std::shared_ptr<Part>> parts;
+    std::map<UUID, std::shared_ptr<Frame>> frames;
+    std::map<UUID, std::shared_ptr<Decal>> decals;
     std::map<std::pair<ObjectType, UUID>, UUID> pool_uuid_cache;
     void get_pool_uuid(ObjectType type, const UUID &uu, UUID *pool_uuid_out);
 };
