@@ -796,7 +796,6 @@ void CoreBoard::reload_pool()
     brd.emplace(brd->uuid, brd_j, *block, m_pool_caching, Glib::path_get_dirname(filenames.board));
     brd->load_planes(planes_j);
     keeper.restore(brd->pictures);
-    history_clear();
     rebuild("reload pool");
     s_signal_can_undo_redo.emit();
 }

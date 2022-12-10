@@ -871,9 +871,9 @@ void Board::smash_package(BoardPackage *pkg)
     const Package *ppkg;
 
     if (pkg->alternate_package)
-        ppkg = pkg->alternate_package;
+        ppkg = pkg->alternate_package.get();
     else
-        ppkg = pkg->pool_package;
+        ppkg = pkg->pool_package.get();
 
     for (const auto &it : ppkg->texts) {
         if (BoardLayers::is_silkscreen(it.second.layer)) { // top or bottom silkscreen

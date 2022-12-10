@@ -554,7 +554,7 @@ void PartEditor::load()
 {
     auto loading_setter = set_loading();
     for (auto &[attr, entry] : attr_editors) {
-        entry->property_can_inherit() = part.base;
+        entry->property_can_inherit() = part.base.get();
         entry->set_text_this(part.attributes.at(attr).second);
         if (part.base) {
             entry->set_text_inherit(part.base->attributes.at(attr).second);
@@ -569,7 +569,7 @@ void PartEditor::load()
     w_tags_inherit->set_active(part.inherit_tags);
     w_tags->set_tags(part.tags);
     w_change_package_button->set_sensitive(!part.base);
-    w_clear_base_menu_item->set_sensitive(part.base);
+    w_clear_base_menu_item->set_sensitive(part.base.get());
 
 
     if (part.base) {
@@ -614,11 +614,11 @@ void PartEditor::load()
 
     override_prefix_radio_buttons.at(part.override_prefix)->set_active(true);
 
-    w_override_prefix_inherit_button->set_sensitive(part.base);
+    w_override_prefix_inherit_button->set_sensitive(part.base.get());
     update_prefix_entry();
 
     for (auto [fl, ed] : flag_editors) {
-        ed->set_can_inherit(part.base);
+        ed->set_can_inherit(part.base.get());
         ed->set_state(part.flags.at(fl));
     }
     update_flags_label();
@@ -806,20 +806,20 @@ void PartEditor::update_entries()
         w_tags_inherited->set_text("");
     }
 
-    w_tags_inherit->set_sensitive(part.base);
+    w_tags_inherit->set_sensitive(part.base.get());
 }
 
-void PartEditor::set_package(const Package &package)
+void PartEditor::set_package(std::shared_ptr<const Package> package)
 {
-    const auto &old_package = *part.package;
-    part.package = &package;
+    const auto old_package = part.package;
+    part.package = package;
     part.model = part.package->default_model;
     const auto old_pad_map = part.pad_map;
     part.pad_map.clear();
     for (const auto &[uu, pad] : part.package->pads) {
         const auto &pad_name = pad.name;
         if (auto it = find_if_ptr(old_pad_map, [&pad_name, &old_package](const auto &x) {
-                return old_package.pads.at(x.first).name == pad_name;
+                return old_package->pads.at(x.first).name == pad_name;
             })) {
             part.pad_map.emplace(uu, it->second);
         }
@@ -831,7 +831,7 @@ void PartEditor::change_package()
     auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
     PoolBrowserDialog dia(top, ObjectType::PACKAGE, pool);
     if (dia.run() == Gtk::RESPONSE_OK) {
-        set_package(*pool.get_package(dia.get_browser().get_selected()));
+        set_package(pool.get_package(dia.get_browser().get_selected()));
         load();
         set_needs_save();
     }
@@ -901,12 +901,12 @@ void PartEditor::change_base()
     }
 }
 
-void PartEditor::set_base(const Part *new_base)
+void PartEditor::set_base(std::shared_ptr<const Part> new_base)
 {
     auto old_base = part.base;
     part.base = new_base;
     if (new_base) {
-        set_package(*part.base->package);
+        set_package(part.base->package);
         part.pad_map = part.base->pad_map;
     }
     else {
@@ -968,8 +968,10 @@ void PartEditor::reload()
 {
     part.update_refs(pool);
     update_entries();
+    update_treeview();
+    update_mapped();
     if (pending_base_part) {
-        const Part *new_base = nullptr;
+        std::shared_ptr<const Part> new_base;
         try {
             new_base = pool.get_part(pending_base_part);
         }

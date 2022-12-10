@@ -11,7 +11,7 @@ using json = nlohmann::json;
 class BoardDecal {
 public:
     BoardDecal(const UUID &uu, const json &, class IPool &pool, const class Board &brd);
-    BoardDecal(const UUID &uu, const Decal &dec);
+    BoardDecal(const UUID &uu, std::shared_ptr<const Decal> dec);
     UUID uuid;
 
     const LayerRange &get_layers() const;
@@ -29,7 +29,7 @@ public:
     json serialize() const;
 
 private:
-    const Decal *pool_decal;
+    std::shared_ptr<const Decal> pool_decal;
     Decal decal;
 
     bool flip = false;

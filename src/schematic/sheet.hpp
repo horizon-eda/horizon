@@ -101,7 +101,7 @@ public:
 
     Junction *get_junction(const UUID &uu) override;
 
-    uuid_ptr<const Frame> pool_frame;
+    std::shared_ptr<const Frame> pool_frame;
     Frame frame;
 
     json serialize() const;

@@ -25,7 +25,7 @@ Via::Via(const UUID &uu, const json &j, IPool &pool, Board *brd)
     }
 }
 
-Via::Via(const UUID &uu, const Padstack *ps) : uuid(uu), pool_padstack(ps), padstack(*pool_padstack)
+Via::Via(const UUID &uu, std::shared_ptr<const Padstack> ps) : uuid(uu), pool_padstack(ps), padstack(*pool_padstack)
 {
     parameter_set[ParameterID::VIA_DIAMETER] = .5_mm;
     parameter_set[ParameterID::HOLE_DIAMETER] = .2_mm;

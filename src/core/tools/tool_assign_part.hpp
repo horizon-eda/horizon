@@ -15,7 +15,7 @@ public:
     }
 
 private:
-    const class Entity *get_entity();
+    std::shared_ptr<const class Entity> get_entity();
     class Component *comp;
 };
 } // namespace horizon

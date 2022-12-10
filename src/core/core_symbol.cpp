@@ -322,8 +322,7 @@ Symbol &CoreSymbol::get_symbol()
 void CoreSymbol::reload_pool()
 {
     m_pool.clear();
-    sym.unit = m_pool.get_unit(sym.unit.uuid);
-    history_clear();
+    sym.unit = m_pool.get_unit(sym.unit->uuid);
     rebuild("reload pool");
     s_signal_can_undo_redo.emit();
 }

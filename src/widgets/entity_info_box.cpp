@@ -133,7 +133,7 @@ void EntityInfoBox::load(const Entity *entity)
             Gtk::TreeModel::Row row = *store->append();
             row[list_columns.name] = it.second.name;
             row[list_columns.suffix] = it.second.suffix;
-            row[list_columns.unit] = it.second.unit.ptr;
+            row[list_columns.unit] = it.second.unit.get();
         }
     }
 }

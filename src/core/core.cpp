@@ -253,11 +253,6 @@ const std::string &Core::get_redo_comment() const
     return history_manager.get_redo_comment();
 }
 
-void Core::history_clear()
-{
-    history_manager.clear();
-}
-
 void Core::set_history_max(unsigned int m)
 {
     history_manager.set_history_max(m);

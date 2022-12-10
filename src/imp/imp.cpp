@@ -1690,8 +1690,7 @@ void ImpBase::handle_file_changed(const Glib::RefPtr<Gio::File> &file1, const Gl
                                   Gio::FileMonitorEvent ev)
 {
     main_window->show_nonmodal(
-            "Pool has changed", "Reload pool", [this] { trigger_action(ActionID::RELOAD_POOL); },
-            "This will clear the undo/redo history");
+            "Pool has changed", "Reload pool", [this] { trigger_action(ActionID::RELOAD_POOL); }, "");
 }
 
 void ImpBase::set_read_only(bool v)

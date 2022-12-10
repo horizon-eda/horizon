@@ -1007,7 +1007,7 @@ int Reviewer::main(int c_argc, char *c_argv[])
                 auto fake_pkg_uu = UUID::random();
                 auto &fake_package = fake_board.packages.emplace(fake_pkg_uu, fake_pkg_uu).first->second;
                 fake_package.package = pkg;
-                fake_package.pool_package = &pkg;
+                fake_package.pool_package = std::make_shared<Package>(pkg);
 
                 Image3DExporter ex(fake_board, *pool, 1024, 1024);
                 ex.view_all();

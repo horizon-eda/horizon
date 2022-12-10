@@ -203,7 +203,6 @@ protected:
     virtual std::unique_ptr<HistoryManager::HistoryItem> make_history_item(const std::string &comment) = 0;
     virtual void history_load(const HistoryManager::HistoryItem &it) = 0;
     virtual std::string get_history_comment_context() const;
-    void history_clear();
 
     bool property_transaction = false;
 

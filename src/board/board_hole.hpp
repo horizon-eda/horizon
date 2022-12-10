@@ -12,9 +12,9 @@ using json = nlohmann::json;
 class BoardHole {
 public:
     BoardHole(const UUID &uu, const json &, class Block *block, class IPool &pool);
-    BoardHole(const UUID &uu, const Padstack *ps);
+    BoardHole(const UUID &uu, std::shared_ptr<const Padstack> ps);
     UUID uuid;
-    const Padstack *pool_padstack;
+    std::shared_ptr<const Padstack> pool_padstack;
     Padstack padstack;
     Placement placement;
     ParameterSet parameter_set;

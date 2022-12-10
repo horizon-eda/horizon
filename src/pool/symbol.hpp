@@ -91,7 +91,7 @@ public:
     void apply_expand(const Symbol &ref, unsigned int ex);
 
     UUID uuid;
-    uuid_ptr<const Unit> unit;
+    std::shared_ptr<const Unit> unit;
     std::string name;
     std::map<UUID, SymbolPin> pins;
     std::map<UUID, Junction> junctions;

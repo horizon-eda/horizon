@@ -127,8 +127,8 @@ private:
     void update_mapped();
     void update_entries();
     void change_package();
-    void set_package(const Package &pkg);
-    void set_base(const Part *part);
+    void set_package(std::shared_ptr<const Package> pkg);
+    void set_base(std::shared_ptr<const Part> part);
     bool check_base(const UUID &new_base_uuid);
     void change_base();
     void clear_base();

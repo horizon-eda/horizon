@@ -18,10 +18,10 @@ public:
     BoardPackage(shallow_copy_t sh, const BoardPackage &other);
     UUID uuid;
     uuid_ptr<Component> component;
-    const Package *alternate_package = nullptr;
+    std::shared_ptr<const Package> alternate_package;
     UUID model;
 
-    const Package *pool_package;
+    std::shared_ptr<const Package> pool_package;
     Package package;
     bool update_package(const class Board &brd);
     void update_texts(const class Board &brd);

@@ -13,9 +13,9 @@ bool ToolAssignPart::can_begin()
     return get_entity() != nullptr;
 }
 
-const Entity *ToolAssignPart::get_entity()
+std::shared_ptr<const Entity> ToolAssignPart::get_entity()
 {
-    const Entity *entity = nullptr;
+    std::shared_ptr<const Entity> entity = nullptr;
     for (const auto &it : selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
             auto &sym = doc.c->get_sheet()->symbols.at(it.uuid);
@@ -35,7 +35,7 @@ const Entity *ToolAssignPart::get_entity()
 
 ToolResponse ToolAssignPart::begin(const ToolArgs &args)
 {
-    const Entity *entity = get_entity();
+    auto entity = get_entity();
 
     if (!entity) {
         return ToolResponse::end();

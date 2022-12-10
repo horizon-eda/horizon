@@ -118,7 +118,7 @@ void PoolNotebook::construct_units()
             info_box->load(nullptr);
             return;
         }
-        auto unit = pool.get_unit(sel);
+        auto unit = pool.get_unit(sel).get();
         preview->load(unit);
         info_box->load(unit);
     });

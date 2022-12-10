@@ -498,7 +498,7 @@ bool ImpPackage::handle_broadcast(const json &j)
             if (converted_padstack) {
                 if (core_package.tool_is_active())
                     return true;
-                const Padstack *padstack = nullptr;
+                std::shared_ptr<const Padstack> padstack = nullptr;
                 try {
                     padstack = pool->get_padstack(converted_padstack);
                 }

@@ -22,7 +22,7 @@ void PoolNotebook::construct_parametric()
                 preview->load(nullptr);
                 return;
             }
-            auto part = pool.get_part(sel);
+            auto part = pool.get_part(sel).get();
             preview->load(part);
         });
         paned->add2(*preview);

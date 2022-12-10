@@ -446,9 +446,9 @@ BOMRows Block::get_BOM(const BOMExportSettings &settings) const
             if (comp.part) {
                 const Part *part;
                 if (settings.concrete_parts.count(comp.part->uuid))
-                    part = settings.concrete_parts.at(comp.part->uuid);
+                    part = settings.concrete_parts.at(comp.part->uuid).get();
                 else
-                    part = comp.part;
+                    part = comp.part.get();
                 if (part->get_flag(Part::Flag::EXCLUDE_BOM))
                     continue;
                 rows[part].refdes.push_back(comp_info.refdes);

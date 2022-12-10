@@ -61,7 +61,7 @@ json Entity::serialize() const
 void Entity::update_refs(IPool &pool)
 {
     for (auto &it : gates) {
-        it.second.unit = pool.get_unit(it.second.unit.uuid);
+        it.second.unit = pool.get_unit(it.second.unit->uuid);
     }
 }
 

@@ -946,12 +946,12 @@ const Entity *ImpSchematic::entity_from_selection(const std::set<SelectableRef> 
                 continue;
             const auto &sym = sheet.symbols.at(it.uuid);
             if (entity) {
-                if (entity != sym.component->entity) {
+                if (entity != sym.component->entity.get()) {
                     return nullptr;
                 }
             }
             else {
-                entity = sym.component->entity;
+                entity = sym.component->entity.get();
             }
         }
     }

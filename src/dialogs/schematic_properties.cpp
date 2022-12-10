@@ -382,7 +382,7 @@ void SchematicPropertiesDialog::add_sheet()
         const auto block = row_sel.get_value(tree_columns.block);
         auto &sch = doc.get_blocks().blocks.at(block).schematic;
         auto &sheet = sch.add_sheet();
-        const Frame *frame = nullptr;
+        std::shared_ptr<const Frame> frame;
         for (const auto sh : sch.get_sheets_sorted()) {
             if (sh->pool_frame)
                 frame = sh->pool_frame;

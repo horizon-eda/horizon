@@ -167,7 +167,7 @@ void PoolNotebook::construct_parts()
             preview->load(nullptr);
             return;
         }
-        auto part = pool.get_part(sel);
+        auto part = pool.get_part(sel).get();
         preview->load(part);
     });
 

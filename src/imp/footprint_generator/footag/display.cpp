@@ -340,7 +340,7 @@ static const char *padstack_names[] = {
 
 static_assert(sizeof(padstack_names) / sizeof(padstack_names[0]) == FOOTAG_PADSTACK_NUM, "sizes dont match");
 
-static const Padstack *getpadstack(IPool &pool, enum footag_padstack stack)
+static std::shared_ptr<const Padstack> getpadstack(IPool &pool, enum footag_padstack stack)
 {
     const std::string ps_name = padstack_names[stack];
     auto ps = pool.get_well_known_padstack(ps_name);

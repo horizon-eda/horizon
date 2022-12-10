@@ -16,7 +16,7 @@ BoardHole::BoardHole(const UUID &uu, const json &j, Block *block, IPool &pool)
             net.uuid = j.at("net").get<std::string>();
     }
 }
-BoardHole::BoardHole(const UUID &uu, const Padstack *ps) : uuid(uu), pool_padstack(ps), padstack(*ps)
+BoardHole::BoardHole(const UUID &uu, std::shared_ptr<const Padstack> ps) : uuid(uu), pool_padstack(ps), padstack(*ps)
 {
 }
 

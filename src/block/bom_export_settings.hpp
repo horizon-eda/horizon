@@ -17,8 +17,8 @@ public:
 
     enum class Format { CSV };
     Format format = Format::CSV;
-    std::map<UUID, UUID> orderable_MPNs;                       // part->orderable MPN
-    std::map<UUID, uuid_ptr<const class Part>> concrete_parts; // part->part
+    std::map<UUID, UUID> orderable_MPNs;                              // part->orderable MPN
+    std::map<UUID, std::shared_ptr<const class Part>> concrete_parts; // part->part
     void update_refs(class IPool &pool);
 
     class CSVSettings {

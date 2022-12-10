@@ -53,7 +53,7 @@ private:
     std::list<KiCadSymbol> k_symbols;
     const KiCadSymbol *k_sym = nullptr;
     void select_symbol();
-    void import(const Package *pkg);
+    void import(std::shared_ptr<const Package> pkg);
 
     Gtk::Button *button_part_edit = nullptr;
     Gtk::Button *button_autofill = nullptr;

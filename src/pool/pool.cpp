@@ -149,59 +149,61 @@ void Pool::get_pool_uuid(ObjectType type, const UUID &uu, UUID *pool_uuid_out)
         *pool_uuid_out = pool_uuid_cache.at(std::make_pair(type, uu));
 }
 
-const Unit *Pool::get_unit(const UUID &uu, UUID *pool_uuid_out)
+template <class TValue, class... Args>
+void emplace_to_map(std::map<UUID, std::shared_ptr<TValue>> &map, const UUID &uu, Args &&...args)
+{
+    map.emplace(uu, std::make_shared<TValue>(TValue::new_from_file(std::forward<Args>(args)...)));
+}
+
+std::shared_ptr<const Unit> Pool::get_unit(const UUID &uu, UUID *pool_uuid_out)
 {
     if (units.count(uu) == 0) {
         std::string path = get_filename(ObjectType::UNIT, uu, pool_uuid_out);
-        Unit u = Unit::new_from_file(path);
-        units.insert(std::make_pair(uu, u));
+        emplace_to_map(units, uu, path);
     }
     else {
         get_pool_uuid(ObjectType::UNIT, uu, pool_uuid_out);
     }
-    return &units.at(uu);
+    return units.at(uu);
 }
 
-const Entity *Pool::get_entity(const UUID &uu, UUID *pool_uuid_out)
+std::shared_ptr<const Entity> Pool::get_entity(const UUID &uu, UUID *pool_uuid_out)
 {
     if (entities.count(uu) == 0) {
         std::string path = get_filename(ObjectType::ENTITY, uu, pool_uuid_out);
-        Entity e = Entity::new_from_file(path, *this);
-        entities.insert(std::make_pair(uu, e));
+        emplace_to_map(entities, uu, path, *this);
     }
     else {
         get_pool_uuid(ObjectType::ENTITY, uu, pool_uuid_out);
     }
-    return &entities.at(uu);
+    return entities.at(uu);
 }
 
-const Symbol *Pool::get_symbol(const UUID &uu, UUID *pool_uuid_out)
+std::shared_ptr<const Symbol> Pool::get_symbol(const UUID &uu, UUID *pool_uuid_out)
 {
     if (symbols.count(uu) == 0) {
         std::string path = get_filename(ObjectType::SYMBOL, uu, pool_uuid_out);
-        Symbol s = Symbol::new_from_file(path, *this);
-        symbols.insert(std::make_pair(uu, s));
+        emplace_to_map(symbols, uu, path, *this);
     }
     else {
         get_pool_uuid(ObjectType::SYMBOL, uu, pool_uuid_out);
     }
-    return &symbols.at(uu);
+    return symbols.at(uu);
 }
 
-const Package *Pool::get_package(const UUID &uu, UUID *pool_uuid_out)
+std::shared_ptr<const Package> Pool::get_package(const UUID &uu, UUID *pool_uuid_out)
 {
     if (packages.count(uu) == 0) {
         std::string path = get_filename(ObjectType::PACKAGE, uu, pool_uuid_out);
-        Package p = Package::new_from_file(path, *this);
-        packages.emplace(uu, p);
+        emplace_to_map(packages, uu, path, *this);
     }
     else {
         get_pool_uuid(ObjectType::PACKAGE, uu, pool_uuid_out);
     }
-    return &packages.at(uu);
+    return packages.at(uu);
 }
 
-const Padstack *Pool::get_well_known_padstack(const std::string &name, UUID *pool_uuid_out)
+std::shared_ptr<const Padstack> Pool::get_well_known_padstack(const std::string &name, UUID *pool_uuid_out)
 {
     SQLite::Query q(db, "SELECT uuid FROM padstacks WHERE well_known_name = ?");
     q.bind(1, name);
@@ -214,56 +216,52 @@ const Padstack *Pool::get_well_known_padstack(const std::string &name, UUID *poo
     }
 }
 
-const Padstack *Pool::get_padstack(const UUID &uu, UUID *pool_uuid_out)
+std::shared_ptr<const Padstack> Pool::get_padstack(const UUID &uu, UUID *pool_uuid_out)
 {
     if (padstacks.count(uu) == 0) {
         std::string path = get_filename(ObjectType::PADSTACK, uu, pool_uuid_out);
-        Padstack p = Padstack::new_from_file(path);
-        padstacks.insert(std::make_pair(uu, p));
+        emplace_to_map(padstacks, uu, path);
     }
     else {
         get_pool_uuid(ObjectType::PADSTACK, uu, pool_uuid_out);
     }
-    return &padstacks.at(uu);
+    return padstacks.at(uu);
 }
 
-const Part *Pool::get_part(const UUID &uu, UUID *pool_uuid_out)
+std::shared_ptr<const Part> Pool::get_part(const UUID &uu, UUID *pool_uuid_out)
 {
     if (parts.count(uu) == 0) {
         std::string path = get_filename(ObjectType::PART, uu, pool_uuid_out);
-        Part p = Part::new_from_file(path, *this);
-        parts.insert(std::make_pair(uu, p));
+        emplace_to_map(parts, uu, path, *this);
     }
     else {
         get_pool_uuid(ObjectType::PART, uu, pool_uuid_out);
     }
-    return &parts.at(uu);
+    return parts.at(uu);
 }
 
-const Frame *Pool::get_frame(const UUID &uu, UUID *pool_uuid_out)
+std::shared_ptr<const Frame> Pool::get_frame(const UUID &uu, UUID *pool_uuid_out)
 {
     if (frames.count(uu) == 0) {
         std::string path = get_filename(ObjectType::FRAME, uu, pool_uuid_out);
-        Frame f = Frame::new_from_file(path);
-        frames.insert(std::make_pair(uu, f));
+        emplace_to_map(frames, uu, path);
     }
     else {
         get_pool_uuid(ObjectType::FRAME, uu, pool_uuid_out);
     }
-    return &frames.at(uu);
+    return frames.at(uu);
 }
 
-const Decal *Pool::get_decal(const UUID &uu, UUID *pool_uuid_out)
+std::shared_ptr<const Decal> Pool::get_decal(const UUID &uu, UUID *pool_uuid_out)
 {
     if (decals.count(uu) == 0) {
         std::string path = get_filename(ObjectType::DECAL, uu, pool_uuid_out);
-        Decal d = Decal::new_from_file(path);
-        decals.insert(std::make_pair(uu, d));
+        emplace_to_map(decals, uu, path);
     }
     else {
         get_pool_uuid(ObjectType::DECAL, uu, pool_uuid_out);
     }
-    return &decals.at(uu);
+    return decals.at(uu);
 }
 
 std::set<UUID> Pool::get_alternate_packages(const UUID &uu)
