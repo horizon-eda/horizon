@@ -314,6 +314,7 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool, const st
     gerber_output_settings.update_for_board(*this);
     odb_output_settings.update_for_board(*this);
     update_pdf_export_settings(pdf_export_settings);
+    rules.update_for_board(*this);
     update_refs(); // fill in smashed texts
 }
 

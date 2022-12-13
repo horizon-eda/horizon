@@ -171,6 +171,8 @@ void EditStackupDialog::ok_clicked()
             }
         }
     }
+    auto &rules = dynamic_cast<BoardRules &>(*core.get_rules());
+    rules.update_for_board(board);
     map_erase_if(board.tracks, [this](const auto &x) { return board.get_layers().count(x.second.layer) == 0; });
     map_erase_if(board.polygons, [this](const auto &x) { return board.get_layers().count(x.second.layer) == 0; });
     map_erase_if(board.lines, [this](const auto &x) { return board.get_layers().count(x.second.layer) == 0; });
