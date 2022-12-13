@@ -70,6 +70,8 @@ public:
         return true;
     }
 
+    void update_for_board(const Board &brd);
+
 private:
     std::map<UUID, RuleHoleSize> rule_hole_size;
     std::map<UUID, RuleTrackWidth> rule_track_width;

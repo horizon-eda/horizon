@@ -226,6 +226,18 @@ void BoardRules::cleanup(const Block *block)
     }
 }
 
+void BoardRules::update_for_board(const Board &brd)
+{
+    // make sure that default width exist for all copper layers
+    for (auto &[idx, layer] : brd.get_layers()) {
+        if (layer.copper) {
+            for (auto &[uu, rule] : rule_track_width) {
+                rule.widths[idx];
+            }
+        }
+    }
+}
+
 void BoardRules::apply(RuleID id, Board &brd, IPool &pool) const
 {
     brd.rules = *this;
