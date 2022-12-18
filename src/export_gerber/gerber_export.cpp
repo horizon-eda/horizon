@@ -71,7 +71,7 @@ static void add_file(TreeWriter &writer, const std::string &filename)
 void GerberExporter::generate_zip()
 {
     const std::string zip_file = Glib::build_filename(settings.output_directory, settings.prefix + ".zip");
-    TreeWriterArchive tree_writer(zip_file, TreeWriterArchive::Type::ZIP);
+    TreeWriterArchive tree_writer(fs::u8path(zip_file), TreeWriterArchive::Type::ZIP);
 
     for (auto &it : writers) {
         add_file(tree_writer, it.second.get_filename());

@@ -51,7 +51,7 @@ std::vector<BlocksBase::BlockItemInfo> BlocksBase::blocks_sorted_from_json(const
     BlocksDependencyGraph graph(top_block);
 
     for (const auto &[uu, it] : blocks_info) {
-        const auto block_filename = (fs::u8path(base_path) / it.block_filename).u8string();
+        const auto block_filename = (fs::u8path(base_path) / fs::u8path(it.block_filename)).u8string();
         try {
             const auto blocks_inst = Block::peek_instantiated_blocks(block_filename);
             graph.add_block(uu, blocks_inst);
@@ -209,7 +209,7 @@ public:
         for (const auto &block : blocks_sorted_from_json(j)) {
             for (const auto &fn : {block.symbol_filename, block.block_filename, block.schematic_filename}) {
                 if (fn.size()) {
-                    filenames.push_back((base / fn).u8string());
+                    filenames.push_back((base / fs::u8path(fn)).u8string());
                 }
             }
         }
