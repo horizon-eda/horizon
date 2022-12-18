@@ -84,7 +84,8 @@ RulesCheckResult check_part(const Part &part)
             }
         }
         for (const auto &[pad, pin] : part.pad_map) {
-            all_pins.erase(std::make_pair(pin.gate->uuid, pin.pin->uuid));
+            if (pin.gate && pin.pin)
+                all_pins.erase(std::make_pair(pin.gate->uuid, pin.pin->uuid));
         }
         for (const auto &[gate, pin] : all_pins) {
             r.errors.emplace_back(RulesCheckErrorLevel::WARN,

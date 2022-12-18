@@ -964,9 +964,24 @@ void PartEditor::create_base()
     });
 }
 
+static void part_update_refs_or_0(Part &part, IPool &pool)
+{
+    part.entity = pool.get_entity(part.entity->uuid);
+    part.package = pool.get_package(part.package->uuid);
+    if (part.base)
+        part.base = pool.get_part(part.base->uuid);
+    for (auto &[pad, it] : part.pad_map) {
+        it.gate.update(part.entity->gates);
+        if (it.gate)
+            it.pin.update(it.gate->unit->pins);
+        else
+            it.pin.ptr = nullptr;
+    }
+}
+
 void PartEditor::reload()
 {
-    part.update_refs(pool);
+    part_update_refs_or_0(part, pool);
     update_entries();
     update_treeview();
     update_mapped();
@@ -1021,10 +1036,12 @@ void PartEditor::update_treeview()
             row[pad_list_columns.pad_name] = it.second.name;
             if (part.pad_map.count(it.first)) {
                 const auto &x = part.pad_map.at(it.first);
-                row[pad_list_columns.gate_uuid] = x.gate->uuid;
-                row[pad_list_columns.gate_name] = x.gate->name;
-                row[pad_list_columns.pin_uuid] = x.pin->uuid;
-                row[pad_list_columns.pin_name] = x.pin->primary_name;
+                if (x.gate && x.pin) {
+                    row[pad_list_columns.gate_uuid] = x.gate->uuid;
+                    row[pad_list_columns.gate_name] = x.gate->name;
+                    row[pad_list_columns.pin_uuid] = x.pin->uuid;
+                    row[pad_list_columns.pin_name] = x.pin->primary_name;
+                }
             }
         }
     }
@@ -1197,7 +1214,7 @@ void PartEditor::history_load(const HistoryManager::HistoryItem &it)
 {
     const auto &x = dynamic_cast<const HistoryItemPart &>(it);
     part = x.part;
-    part.update_refs(pool);
+    part_update_refs_or_0(part, pool);
     load();
 }
 
