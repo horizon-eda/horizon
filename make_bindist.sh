@@ -50,7 +50,7 @@ LIBS=(
 	librsvg-2-2.dll\
 	libxml2-2.dll\
 	liblzma-5.dll\
-	libtiff-5.dll\
+	libtiff-6.dll\
 	libzmq.dll\
 	libsodium-23.dll\
 	libcurl-4.dll\
