@@ -89,6 +89,7 @@ public:
     const std::string &get_redo_comment() const;
 
     void set_history_max(unsigned int m);
+    void set_history_never_forgets(bool x);
 
     inline bool tool_is_active()
     {

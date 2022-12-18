@@ -8,9 +8,7 @@
 namespace horizon {
 class PoolEditorBase : public PoolGotoProvider {
 public:
-    PoolEditorBase(const std::string &fn, class IPool &apool) : filename(fn), pool(apool)
-    {
-    }
+    PoolEditorBase(const std::string &fn, class IPool &apool);
 
     virtual void reload()
     {
@@ -122,5 +120,7 @@ private:
             history_append("edit");
         s_signal_needs_save.emit();
     }
+
+    void apply_preferences();
 };
 } // namespace horizon

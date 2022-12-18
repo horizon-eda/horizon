@@ -171,6 +171,12 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
             r->bind();
             gr->add_row(*r);
         }
+        {
+            auto r = Gtk::manage(new PreferencesRowBool("Undo/redo that never forgets",
+                                                        "Don't clear redo stack when editing", preferences,
+                                                        preferences.undo_redo.never_forgets));
+            gr->add_row(*r);
+        }
     }
     {
         auto gr = Gtk::manage(new PreferencesGroup("Action Bar"));

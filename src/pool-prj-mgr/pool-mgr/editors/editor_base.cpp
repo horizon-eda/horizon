@@ -1,7 +1,20 @@
 #include "editor_base.hpp"
 #include "util/file_version.hpp"
+#include "preferences/preferences.hpp"
+#include "preferences/preferences_provider.hpp"
 
 namespace horizon {
+
+PoolEditorBase::PoolEditorBase(const std::string &fn, class IPool &apool) : filename(fn), pool(apool)
+{
+    PreferencesProvider::get().signal_changed().connect(sigc::mem_fun(*this, &PoolEditorBase::apply_preferences));
+}
+
+void PoolEditorBase::apply_preferences()
+{
+    history_manager.set_never_forgets(PreferencesProvider::get_prefs().undo_redo.never_forgets);
+}
+
 unsigned int PoolEditorBase::get_required_version() const
 {
     return get_version().get_app();

@@ -1,6 +1,9 @@
 #include "history_manager.hpp"
 #include <stdexcept>
 #include <assert.h>
+#include <range/v3/view.hpp>
+#include <range/v3/action.hpp>
+#include <set>
 
 namespace horizon {
 void HistoryManager::clear()
@@ -11,9 +14,18 @@ void HistoryManager::clear()
     s_signal_changed.emit();
 }
 
+static size_t count_unique(const std::deque<std::shared_ptr<const HistoryManager::HistoryItem>> &items)
+{
+    auto unique_items = items | ranges::views::transform([](auto x) { return x.get(); })
+                        | ranges::to<std::set<const HistoryManager::HistoryItem *>>();
+    return unique_items.size();
+}
+
 void HistoryManager::trim()
 {
-    while (undo_stack.size() > history_max) {
+    while (count_unique(undo_stack) > history_max) {
+        if (undo_stack.front().use_count() > 1)
+            return;
         undo_stack.pop_front();
     }
 }
@@ -21,6 +33,11 @@ void HistoryManager::trim()
 void HistoryManager::set_history_max(unsigned int m)
 {
     history_max = m;
+}
+
+void HistoryManager::set_never_forgets(bool x)
+{
+    never_forgets = x;
 }
 
 bool HistoryManager::can_redo() const
@@ -87,9 +104,14 @@ void HistoryManager::push(std::unique_ptr<const HistoryItem> it)
     if (history_current)
         undo_stack.push_back(history_current);
 
-    redo_stack.clear();
+    if (redo_stack.size()) {
+        if (never_forgets) {
+            ranges::actions::insert(undo_stack, undo_stack.end(), redo_stack | ranges::views::reverse);
+            undo_stack.push_back(history_current);
+        }
+        redo_stack.clear();
+    }
     history_current = std::move(it);
-
     trim();
     s_signal_changed.emit();
 }

@@ -27,6 +27,7 @@ public:
     const std::string &get_redo_comment() const;
 
     void set_history_max(unsigned int m);
+    void set_never_forgets(bool x);
 
     void push(std::unique_ptr<const HistoryItem> it);
     void clear();
@@ -37,6 +38,7 @@ private:
     std::deque<std::shared_ptr<const HistoryItem>> redo_stack;
 
     unsigned int history_max = 50;
+    bool never_forgets = true;
     void trim();
 };
 } // namespace horizon

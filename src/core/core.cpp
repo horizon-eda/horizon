@@ -258,6 +258,11 @@ void Core::set_history_max(unsigned int m)
     history_manager.set_history_max(m);
 }
 
+void Core::set_history_never_forgets(bool x)
+{
+    history_manager.set_never_forgets(x);
+}
+
 bool Core::can_redo() const
 {
     return history_manager.can_redo();
