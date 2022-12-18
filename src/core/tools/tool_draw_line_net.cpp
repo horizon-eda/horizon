@@ -271,8 +271,6 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                 set_snap_filter();
             }
             else { // already have net line
-                component_floating = nullptr;
-                block_instance_floating = nullptr;
                 if (args.target.type == ObjectType::JUNCTION) {
                     ju = &doc.c->get_sheet()->junctions.at(args.target.path.at(0));
                     auto do_merge = merge_bus_net(temp_line_head->net, temp_line_head->bus, ju->net, ju->bus);
