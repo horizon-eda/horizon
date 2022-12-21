@@ -265,7 +265,7 @@ RulesCheckResult BoardRules::check_clearance_copper(const Board &brd, RulesCheck
                 if ((it_is_copper && it.key.layer == other.key.layer) || (it_is_barrel || other_is_barrel)) {
                     const int layer = it_is_copper ? it.key.layer : other.key.layer;
                     const auto clearance =
-                            get_clearance_copper(net_it, net_other, layer)->get_clearance(it.key.type, other.key.type);
+                            get_clearance_copper(net_it, net_other, layer).get_clearance(it.key.type, other.key.type);
 
                     if (bbox_test_overlap(it.bbox, other.bbox, clearance)) {
                         patch_pairs.push_back({i, j, clearance});

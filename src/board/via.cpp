@@ -43,7 +43,7 @@ void Via::expand(const Board &brd)
 {
     padstack = *pool_padstack;
     ParameterSet ps_via = parameter_set;
-    ps_via.emplace(ParameterID::VIA_SOLDER_MASK_EXPANSION, brd.rules.get_parameters()->via_solder_mask_expansion);
+    ps_via.emplace(ParameterID::VIA_SOLDER_MASK_EXPANSION, brd.rules.get_parameters().via_solder_mask_expansion);
     padstack.apply_parameter_set(ps_via);
     padstack.expand_inner(brd.get_n_inner_layers());
 }

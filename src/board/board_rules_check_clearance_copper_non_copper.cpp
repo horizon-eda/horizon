@@ -32,7 +32,7 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board &brd,
                 Net *net = it.first.net ? &brd.block->nets.at(it.first.net) : nullptr;
 
                 auto clearance = get_clearance_copper_other(net, it.first.layer)
-                                         ->get_clearance(it.first.type, PatchType::HOLE_NPTH);
+                                         .get_clearance(it.first.type, PatchType::HOLE_NPTH);
 
                 // expand npth patch by clearance
                 ClipperLib::ClipperOffset ofs;
@@ -110,11 +110,8 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board &brd,
             Net *net = p_non_other.net ? &brd.block->nets.at(p_non_other.net) : nullptr;
 
             // figure out the clearance between this patch pair
-            uint64_t clearance = 0;
-            auto rule_clearance = get_clearance_copper_other(net, p_non_other.layer);
-            if (rule_clearance) {
-                clearance = rule_clearance->get_clearance(p_non_other.type, p_other.type);
-            }
+            const auto &rule_clearance = get_clearance_copper_other(net, p_non_other.layer);
+            const auto clearance = rule_clearance.get_clearance(p_non_other.type, p_other.type);
 
             // expand one of them by the clearance
             ClipperLib::ClipperOffset ofs;
@@ -177,8 +174,8 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board &brd,
 
             Net *net = it.first.net ? &brd.block->nets.at(it.first.net) : nullptr;
 
-            auto clearance = get_clearance_copper_other(net, it.first.layer)
-                                     ->get_clearance(it.first.type, PatchType::BOARD_EDGE);
+            auto clearance =
+                    get_clearance_copper_other(net, it.first.layer).get_clearance(it.first.type, PatchType::BOARD_EDGE);
 
             // contract board outline patch by clearance
             ClipperLib::ClipperOffset ofs;

@@ -492,8 +492,8 @@ RulesCheckResult BoardRules::check_clearance_same_net(const Board &brd, RulesChe
             if (r.check_cancelled(cancel))
                 return r;
             const Net *net = p1.net ? &brd.block->nets.at(p1.net) : nullptr;
-            auto rule = get_clearance_same_net(net, layer);
-            auto clearance = rule->get_clearance(p1.type, p2.type);
+            const auto &rule = get_clearance_same_net(net, layer);
+            auto clearance = rule.get_clearance(p1.type, p2.type);
             if (clearance >= 0) {
                 // expand p1 patch by clearance
                 ClipperLib::ClipperOffset ofs;

@@ -44,14 +44,14 @@ public:
     void cleanup(const class Block *block);
 
     uint64_t get_default_track_width(const class Net *net, int layer) const;
-    const RuleClearanceCopper *get_clearance_copper(const Net *net_a, const Net *net_b, int layer) const;
-    const RuleClearanceCopperOther *get_clearance_copper_other(const Net *net, int layer) const;
-    const RuleDiffpair *get_diffpair(const NetClass *net_class, int layer) const;
-    const RuleClearanceCopperKeepout *get_clearance_copper_keepout(const Net *net, const KeepoutContour *contour) const;
-    const RuleClearanceSameNet *get_clearance_same_net(const Net *net, int layer) const;
+    const RuleClearanceCopper &get_clearance_copper(const Net *net_a, const Net *net_b, int layer) const;
+    const RuleClearanceCopperOther &get_clearance_copper_other(const Net *net, int layer) const;
+    const RuleDiffpair &get_diffpair(const NetClass *net_class, int layer) const;
+    const RuleClearanceCopperKeepout &get_clearance_copper_keepout(const Net *net, const KeepoutContour *contour) const;
+    const RuleClearanceSameNet &get_clearance_same_net(const Net *net, int layer) const;
     uint64_t get_max_clearance() const;
 
-    const RuleParameters *get_parameters() const;
+    const RuleParameters &get_parameters() const;
 
     UUID get_via_padstack_uuid(const class Net *net) const;
     const ParameterSet &get_via_parameter_set(const class Net *net) const;

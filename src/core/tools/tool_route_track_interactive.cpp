@@ -642,11 +642,11 @@ bool ToolWrapper::prepareInteractive()
             return false;
         }
 
-        auto rules_dp =
+        const auto &rules_dp =
                 tool->rules->get_diffpair(net->net_class, PNS::PNS_HORIZON_IFACE::layer_from_router(routingLayer));
-        sizes.SetDiffPairGap(rules_dp->track_gap);
-        sizes.SetDiffPairWidth(rules_dp->track_width);
-        sizes.SetDiffPairViaGap(rules_dp->via_gap);
+        sizes.SetDiffPairGap(rules_dp.track_gap);
+        sizes.SetDiffPairWidth(rules_dp.track_width);
+        sizes.SetDiffPairViaGap(rules_dp.via_gap);
         sizes.SetDiffPairViaGapSameAsTraceGap(false);
         sizes.SetTrackWidthIsExplicit(true);
     }

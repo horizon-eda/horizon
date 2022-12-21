@@ -174,11 +174,11 @@ int PNS_HORIZON_RULE_RESOLVER::Clearance(const PNS::ITEM *aA, const PNS::ITEM *a
         // fixme: handle multiple layers for non-edge thing
         auto layer = layers.Start();
 
-        auto clearance = m_rules->get_clearance_copper_other(net, PNS_HORIZON_IFACE::layer_from_router(layer));
-        int64_t routing_offset = clearance->routing_offset;
+        const auto &clearance = m_rules->get_clearance_copper_other(net, PNS_HORIZON_IFACE::layer_from_router(layer));
+        int64_t routing_offset = clearance.routing_offset;
         if (m_iface->get_override_routing_offset() >= 0)
             routing_offset = m_iface->get_override_routing_offset();
-        return clearance->get_clearance(pt, horizon::PatchType::BOARD_EDGE) + routing_offset;
+        return clearance.get_clearance(pt, horizon::PatchType::BOARD_EDGE) + routing_offset;
     }
 
     if ((parent_a && parent_a->pad && parent_a->pad->padstack.type == horizon::Padstack::Type::MECHANICAL)
@@ -199,11 +199,11 @@ int PNS_HORIZON_RULE_RESOLVER::Clearance(const PNS::ITEM *aA, const PNS::ITEM *a
         // fixme: handle multiple layers for non-npth thing
         auto layer = layers.Start();
 
-        auto clearance = m_rules->get_clearance_copper_other(net, PNS_HORIZON_IFACE::layer_from_router(layer));
-        int64_t routing_offset = clearance->routing_offset;
+        const auto &clearance = m_rules->get_clearance_copper_other(net, PNS_HORIZON_IFACE::layer_from_router(layer));
+        int64_t routing_offset = clearance.routing_offset;
         if (m_iface->get_override_routing_offset() >= 0)
             routing_offset = m_iface->get_override_routing_offset();
-        return clearance->get_clearance(pt, horizon::PatchType::HOLE_NPTH) + routing_offset;
+        return clearance.get_clearance(pt, horizon::PatchType::HOLE_NPTH) + routing_offset;
     }
 
     if ((parent_a && parent_a->keepout) || (parent_b && parent_b->keepout)) { // one is keepout
@@ -240,13 +240,13 @@ int PNS_HORIZON_RULE_RESOLVER::Clearance(const PNS::ITEM *aA, const PNS::ITEM *a
 
     assert(layer != UNDEFINED_LAYER);
 
-    auto clearance = m_rules->get_clearance_copper(net_a, net_b, PNS_HORIZON_IFACE::layer_from_router(layer));
+    const auto &clearance = m_rules->get_clearance_copper(net_a, net_b, PNS_HORIZON_IFACE::layer_from_router(layer));
 
-    int64_t routing_offset = clearance->routing_offset;
+    int64_t routing_offset = clearance.routing_offset;
     if (m_iface->get_override_routing_offset() >= 0)
         routing_offset = m_iface->get_override_routing_offset();
 
-    return clearance->get_clearance(pt_a, pt_b) + routing_offset;
+    return clearance.get_clearance(pt_a, pt_b) + routing_offset;
 }
 
 int PNS_HORIZON_RULE_RESOLVER::HoleClearance(const PNS::ITEM *aA, const PNS::ITEM *aB)

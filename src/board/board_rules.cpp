@@ -621,69 +621,69 @@ uint64_t BoardRules::get_default_track_width(const Net *net, int layer) const
 
 static const RuleClearanceCopper fallback_clearance_copper = UUID();
 
-const RuleClearanceCopper *BoardRules::get_clearance_copper(const Net *net1, const Net *net2, int layer) const
+const RuleClearanceCopper &BoardRules::get_clearance_copper(const Net *net1, const Net *net2, int layer) const
 {
     for (auto ru : rule_sorted_clearance_copper) {
         if (ru->enabled
             && ((ru->match_1.match(net1) && ru->match_2.match(net2))
                 || (ru->match_1.match(net2) && ru->match_2.match(net1)))
             && (ru->layer == layer || ru->layer == 10000)) {
-            return ru;
+            return *ru;
         }
     }
-    return &fallback_clearance_copper;
+    return fallback_clearance_copper;
 }
 
 static const RuleClearanceCopperOther fallback_clearance_copper_non_copper = UUID();
 
-const RuleClearanceCopperOther *BoardRules::get_clearance_copper_other(const Net *net, int layer) const
+const RuleClearanceCopperOther &BoardRules::get_clearance_copper_other(const Net *net, int layer) const
 {
     auto rules = get_rules_sorted<RuleClearanceCopperOther>();
     for (auto ru : rules) {
         if (ru->enabled && (ru->match.match(net) && (ru->layer == layer || ru->layer == 10000))) {
-            return ru;
+            return *ru;
         }
     }
-    return &fallback_clearance_copper_non_copper;
+    return fallback_clearance_copper_non_copper;
 }
 
 static const RuleDiffpair diffpair_fallback = UUID();
 
-const RuleDiffpair *BoardRules::get_diffpair(const NetClass *net_class, int layer) const
+const RuleDiffpair &BoardRules::get_diffpair(const NetClass *net_class, int layer) const
 {
     auto rules = get_rules_sorted<RuleDiffpair>();
     for (auto ru : rules) {
         if (ru->enabled && (ru->net_class == net_class->uuid && (ru->layer == layer || ru->layer == 10000))) {
-            return ru;
+            return *ru;
         }
     }
-    return &diffpair_fallback;
+    return diffpair_fallback;
 }
 
 static const RuleClearanceCopperKeepout keepout_fallback = UUID();
 
-const RuleClearanceCopperKeepout *BoardRules::get_clearance_copper_keepout(const Net *net,
+const RuleClearanceCopperKeepout &BoardRules::get_clearance_copper_keepout(const Net *net,
                                                                            const KeepoutContour *contour) const
 {
     auto rules = get_rules_sorted<RuleClearanceCopperKeepout>();
     for (auto ru : rules) {
         if (ru->enabled && ru->match.match(net) && ru->match_keepout.match(contour)) {
-            return ru;
+            return *ru;
         }
     }
-    return &keepout_fallback;
+    return keepout_fallback;
 }
 static const RuleClearanceSameNet same_net_fallback = UUID();
 
-const RuleClearanceSameNet *BoardRules::get_clearance_same_net(const Net *net, int layer) const
+const RuleClearanceSameNet &BoardRules::get_clearance_same_net(const Net *net, int layer) const
 {
     auto rules = get_rules_sorted<RuleClearanceSameNet>();
     for (auto ru : rules) {
         if (ru->enabled && ru->match.match(net) && (ru->layer == layer || ru->layer == 10000)) {
-            return ru;
+            return *ru;
         }
     }
-    return &same_net_fallback;
+    return same_net_fallback;
 }
 
 
@@ -717,9 +717,9 @@ uint64_t BoardRules::get_max_clearance() const
     return max_clearance;
 }
 
-const RuleParameters *BoardRules::get_parameters() const
+const RuleParameters &BoardRules::get_parameters() const
 {
-    return &rule_parameters;
+    return rule_parameters;
 }
 
 UUID BoardRules::get_via_padstack_uuid(const Net *net) const

@@ -173,14 +173,12 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
                 int64_t clearance = 0;
                 if (patch.first.type != PatchType::HOLE_NPTH) { // copper
                     auto patch_net = patch.first.net ? &block->nets.at(patch.first.net) : nullptr;
-                    auto rule_clearance = rules.get_clearance_copper(plane->net, patch_net, poly.layer);
-                    if (rule_clearance) {
-                        clearance = rule_clearance->get_clearance(patch.first.type, PatchType::PLANE);
-                    }
+                    const auto &rule_clearance = rules.get_clearance_copper(plane->net, patch_net, poly.layer);
+                    clearance = rule_clearance.get_clearance(patch.first.type, PatchType::PLANE);
                 }
                 else { // npth
                     clearance = rules.get_clearance_copper_other(plane->net, poly.layer)
-                                        ->get_clearance(PatchType::PLANE, PatchType::HOLE_NPTH);
+                                        .get_clearance(PatchType::PLANE, PatchType::HOLE_NPTH);
                 }
 
                 auto patch_bb = get_paths_bb(patch.second);
@@ -204,7 +202,7 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
         }
 
         auto text_clearance = rules.get_clearance_copper_other(plane->net, poly.layer)
-                                      ->get_clearance(PatchType::PLANE, PatchType::TEXT);
+                                      .get_clearance(PatchType::PLANE, PatchType::TEXT);
         if (status_cb)
             status_cb(*plane, "Adding text cutouts…");
         // add text cutouts
@@ -256,8 +254,8 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
                     && keepout->patch_types_cu.count(PatchType::PLANE)) {
                     if (cancel)
                         return;
-                    auto clearance = rules.get_clearance_copper_keepout(plane->net, &it_keepout)
-                                             ->get_clearance(PatchType::PLANE);
+                    auto clearance =
+                            rules.get_clearance_copper_keepout(plane->net, &it_keepout).get_clearance(PatchType::PLANE);
 
                     ClipperLib::Paths keepout_contour_expanded;
                     ClipperLib::ClipperOffset ofs;
@@ -296,7 +294,7 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
             ofs.ArcTolerance = 10e3;
             ofs.AddPaths(board_outline, jt, ClipperLib::etClosedPolygon);
             auto clearance = rules.get_clearance_copper_other(plane->net, poly.layer)
-                                     ->get_clearance(PatchType::PLANE, PatchType::BOARD_EDGE);
+                                     .get_clearance(PatchType::PLANE, PatchType::BOARD_EDGE);
             ofs.Execute(paths_ofs, -1.0 * (clearance + plane->settings.min_width / 2 + twiddle * 2));
         }
 

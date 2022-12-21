@@ -728,7 +728,7 @@ void Board::expand_some()
         }
     }
 
-    auto params = rules.get_parameters();
+    const auto &params = rules.get_parameters();
     if (expand_flags & EXPAND_VIAS) {
         for (auto &it : vias) {
             it.second.expand(*this);
@@ -737,7 +737,7 @@ void Board::expand_some()
     for (auto &it : holes) {
         it.second.padstack = *it.second.pool_padstack;
         ParameterSet ps_hole = it.second.parameter_set;
-        ps_hole.emplace(ParameterID::HOLE_SOLDER_MASK_EXPANSION, params->hole_solder_mask_expansion);
+        ps_hole.emplace(ParameterID::HOLE_SOLDER_MASK_EXPANSION, params.hole_solder_mask_expansion);
         it.second.padstack.apply_parameter_set(ps_hole);
         it.second.padstack.expand_inner(n_inner_layers);
         if (it.second.padstack.type == Padstack::Type::HOLE && it.second.net == nullptr) {
@@ -805,12 +805,12 @@ void Board::expand_some()
 
 ParameterSet Board::get_parameters() const
 {
-    auto params = rules.get_parameters();
+    const auto &params = rules.get_parameters();
     ParameterSet pset = {
-            {ParameterID::COURTYARD_EXPANSION, params->courtyard_expansion},
-            {ParameterID::PASTE_MASK_CONTRACTION, params->paste_mask_contraction},
-            {ParameterID::SOLDER_MASK_EXPANSION, params->solder_mask_expansion},
-            {ParameterID::HOLE_SOLDER_MASK_EXPANSION, params->hole_solder_mask_expansion},
+            {ParameterID::COURTYARD_EXPANSION, params.courtyard_expansion},
+            {ParameterID::PASTE_MASK_CONTRACTION, params.paste_mask_contraction},
+            {ParameterID::SOLDER_MASK_EXPANSION, params.solder_mask_expansion},
+            {ParameterID::HOLE_SOLDER_MASK_EXPANSION, params.hole_solder_mask_expansion},
     };
     return pset;
 }
