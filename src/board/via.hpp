@@ -25,7 +25,9 @@ public:
 
     ParameterSet parameter_set;
 
-    bool from_rules = true;
+    enum class Source { LOCAL, RULES };
+
+    Source source = Source::RULES;
     bool locked = false;
 
     LayerRange span;

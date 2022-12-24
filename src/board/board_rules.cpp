@@ -265,7 +265,7 @@ void BoardRules::apply(RuleID id, Board &brd, IPool &pool) const
     else if (id == RuleID::VIA) {
         for (auto &it : brd.vias) {
             auto &via = it.second;
-            if (via.from_rules && via.junction->net) {
+            if (via.source == Via::Source::RULES && via.junction->net) {
                 if (auto ps = pool.get_padstack(get_via_padstack_uuid(via.junction->net))) {
                     via.parameter_set = get_via_parameter_set(via.junction->net);
                     via.pool_padstack = ps;

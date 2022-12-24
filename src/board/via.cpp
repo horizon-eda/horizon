@@ -8,10 +8,15 @@
 
 namespace horizon {
 
+static const LutEnumStr<Via::Source> source_lut = {
+        {"rules", Via::Source::RULES},
+        {"local", Via::Source::LOCAL},
+};
+
 Via::Via(const UUID &uu, const json &j, IPool &pool, Board *brd)
     : uuid(uu), pool_padstack(pool.get_padstack(j.at("padstack").get<std::string>())), padstack(*pool_padstack),
-      parameter_set(parameter_set_from_json(j.at("parameter_set"))), from_rules(j.at("from_rules")),
-      locked(j.value("locked", false)), span(BoardLayers::layer_range_through)
+      parameter_set(parameter_set_from_json(j.at("parameter_set"))), locked(j.value("locked", false)),
+      span(BoardLayers::layer_range_through)
 {
     if (brd)
         junction = &brd->junctions.at(j.at("junction").get<std::string>());
@@ -27,6 +32,17 @@ Via::Via(const UUID &uu, const json &j, IPool &pool, Board *brd)
 
     if (j.count("span"))
         span = LayerRange(j.at("span"));
+
+    if (j.count("source")) {
+        source = source_lut.lookup(j.at("source"));
+    }
+    else {
+        const auto from_rules = j.at("from_rules").get<bool>();
+        if (from_rules)
+            source = Source::RULES;
+        else
+            source = Source::LOCAL;
+    }
 }
 
 Via::Via(const UUID &uu, std::shared_ptr<const Padstack> ps)
@@ -39,8 +55,8 @@ Via::Via(const UUID &uu, std::shared_ptr<const Padstack> ps)
 
 Via::Via(shallow_copy_t sh, const Via &other)
     : uuid(other.uuid), net_set(other.net_set), junction(other.junction), pool_padstack(other.pool_padstack),
-      padstack(other.padstack.uuid), parameter_set(other.parameter_set), from_rules(other.from_rules),
-      locked(other.locked), span(other.span)
+      padstack(other.padstack.uuid), parameter_set(other.parameter_set), source(other.source), locked(other.locked),
+      span(other.span)
 {
 }
 
@@ -59,7 +75,8 @@ json Via::serialize() const
     j["junction"] = (std::string)junction->uuid;
     j["padstack"] = (std::string)pool_padstack->uuid;
     j["parameter_set"] = parameter_set_serialize(parameter_set);
-    j["from_rules"] = from_rules;
+    j["from_rules"] = source == Source::RULES;
+    j["source"] = source_lut.lookup_reverse(source);
     j["locked"] = locked;
     if (net_set)
         j["net_set"] = (std::string)net_set->uuid;

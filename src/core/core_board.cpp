@@ -268,7 +268,7 @@ bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID
         auto via = &brd->vias.at(uu);
         switch (property) {
         case ObjectProperty::ID::FROM_RULES:
-            dynamic_cast<PropertyValueBool &>(value).value = via->from_rules;
+            dynamic_cast<PropertyValueInt &>(value).value = static_cast<int>(via->source);
             return true;
 
         case ObjectProperty::ID::LOCKED:
@@ -548,7 +548,7 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
         auto via = &brd->vias.at(uu);
         switch (property) {
         case ObjectProperty::ID::FROM_RULES:
-            via->from_rules = dynamic_cast<const PropertyValueBool &>(value).value;
+            via->source = static_cast<Via::Source>(dynamic_cast<const PropertyValueInt &>(value).value);
             break;
 
         case ObjectProperty::ID::LOCKED:
