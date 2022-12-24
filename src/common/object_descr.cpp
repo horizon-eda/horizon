@@ -4,6 +4,7 @@
 #include "schematic/schematic_symbol.hpp"
 #include "shape.hpp"
 #include "pool/symbol.hpp"
+#include "board/via.hpp"
 
 namespace horizon {
 
@@ -91,7 +92,14 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
          {"Via",
           "Vias",
           {
-                  {ObjectProperty::ID::FROM_RULES, {ObjectProperty::Type::BOOL, "From rules", 1}},
+                  {ObjectProperty::ID::FROM_RULES,
+                   {ObjectProperty::Type::ENUM,
+                    "Source",
+                    1,
+                    {
+                            {static_cast<int>(Via::Source::RULES), "Rules"},
+                            {static_cast<int>(Via::Source::LOCAL), "Local"},
+                    }}},
                   {ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Net", 0}},
                   {ObjectProperty::ID::LOCKED, {ObjectProperty::Type::BOOL, "Locked", 2}},
                   {ObjectProperty::ID::SPAN, {ObjectProperty::Type::LAYER_RANGE, "Span", 3}},

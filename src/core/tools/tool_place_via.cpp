@@ -55,7 +55,7 @@ void ToolPlaceVia::create_attached()
                    ->vias.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, ps))
                    .first->second;
     via->junction = temp;
-    via->from_rules = true;
+    via->source = Via::Source::RULES;
     via->net_set = net;
     via->junction->net = net;
     via->parameter_set = rules->get_via_parameter_set(net);
