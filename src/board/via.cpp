@@ -11,6 +11,7 @@ namespace horizon {
 static const LutEnumStr<Via::Source> source_lut = {
         {"rules", Via::Source::RULES},
         {"local", Via::Source::LOCAL},
+        {"definition", Via::Source::DEFINITION},
 };
 
 Via::Via(const UUID &uu, const json &j, IPool &pool, Board *brd)
@@ -43,6 +44,8 @@ Via::Via(const UUID &uu, const json &j, IPool &pool, Board *brd)
         else
             source = Source::LOCAL;
     }
+    if (j.count("definition"))
+        definition = j.at("definition").get<std::string>();
 }
 
 Via::Via(const UUID &uu, std::shared_ptr<const Padstack> ps)
@@ -55,8 +58,8 @@ Via::Via(const UUID &uu, std::shared_ptr<const Padstack> ps)
 
 Via::Via(shallow_copy_t sh, const Via &other)
     : uuid(other.uuid), net_set(other.net_set), junction(other.junction), pool_padstack(other.pool_padstack),
-      padstack(other.padstack.uuid), parameter_set(other.parameter_set), source(other.source), locked(other.locked),
-      span(other.span)
+      padstack(other.padstack.uuid), parameter_set(other.parameter_set), source(other.source),
+      definition(other.definition), locked(other.locked), span(other.span)
 {
 }
 
@@ -82,6 +85,8 @@ json Via::serialize() const
         j["net_set"] = (std::string)net_set->uuid;
     if (span != BoardLayers::layer_range_through)
         j["span"] = span.serialize();
+    if (source == Source::DEFINITION)
+        j["definition"] = (std::string)definition;
     return j;
 }
 } // namespace horizon

@@ -33,4 +33,12 @@ protected:
     class LayerComboBox *create_layer_combo(int &layer, bool show_any);
     type_signal_updated s_signal_updated;
 };
+
+class RuleEditorWithoutEnable : public RuleEditor {
+public:
+    RuleEditorWithoutEnable(Rule &r, class IDocument &c) : RuleEditor(r, c, HasEnable::NO)
+    {
+    }
+};
+
 } // namespace horizon

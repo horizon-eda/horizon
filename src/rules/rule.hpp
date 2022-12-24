@@ -16,6 +16,7 @@ enum class RuleID {
     CONNECTIVITY,
     PARAMETERS,
     VIA,
+    VIA_DEFINITIONS,
     CLEARANCE_COPPER_OTHER,
     PLANE,
     DIFFPAIR,

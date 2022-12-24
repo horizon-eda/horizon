@@ -39,6 +39,7 @@
 #include "router_settings_window.hpp"
 #include "edit_custom_value.hpp"
 #include "map_net_tie.hpp"
+#include "select_via_definition.hpp"
 #include <glibmm.h>
 #include "pool/ipool.hpp"
 #include "widgets/net_selector.hpp"
@@ -216,6 +217,19 @@ std::optional<UUID> Dialogs::select_block(const BlocksSchematic &blocks)
     }
 }
 
+std::optional<UUID> Dialogs::select_via_definition(const RuleViaDefinitions &rule, const LayerProvider &lprv,
+                                                   class IPool &pool)
+{
+    SelectViaDefinitionDialog dia(parent, rule, lprv, pool);
+    auto r = dia.run();
+    if (r == Gtk::RESPONSE_OK && dia.valid) {
+        return dia.selected_uuid;
+    }
+    else {
+        return {};
+    }
+}
+
 
 bool Dialogs::edit_shapes(std::set<Shape *> shapes)
 {
@@ -223,9 +237,10 @@ bool Dialogs::edit_shapes(std::set<Shape *> shapes)
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::edit_via(std::set<class Via *> &vias, class IPool &pool, IPool &pool_caching)
+bool Dialogs::edit_via(std::set<class Via *> &vias, class IPool &pool, IPool &pool_caching,
+                       const class LayerProvider &prv, const class RuleViaDefinitions &defs)
 {
-    EditViaDialog dia(parent, vias, pool, pool_caching);
+    EditViaDialog dia(parent, vias, pool, pool_caching, prv, defs);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 

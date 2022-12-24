@@ -109,6 +109,7 @@
     <file>imp/rules/rule_editor_hole_size.ui</file>
     <file>imp/rules/rule_editor_track_width.ui</file>
     <file>imp/rules/rule_editor_clearance_copper.ui</file>
+    <file>imp/rules/rule_editor_via_definitions.ui</file>
     <file>imp/rules/rule_export.ui</file>
     <file>imp/fab_output.ui</file>
     <file>imp/bom_export.ui</file>

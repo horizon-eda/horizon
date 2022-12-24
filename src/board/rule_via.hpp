@@ -22,7 +22,14 @@ public:
     bool can_export() const override;
 
     RuleMatch match;
+
+    enum class Mode { SET_PADSTACK_AND_PARAMETERS, CHECK_DEFINITION };
+
+    Mode mode = Mode::SET_PADSTACK_AND_PARAMETERS;
+
     UUID padstack;
     ParameterSet parameter_set;
+
+    std::set<UUID> definitions;
 };
 } // namespace horizon

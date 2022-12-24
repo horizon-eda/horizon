@@ -91,7 +91,7 @@ private:
     ParameterSetEditor *parent;
 };
 
-ParameterSetEditor::ParameterSetEditor(ParameterSet *ps, bool populate_init)
+ParameterSetEditor::ParameterSetEditor(ParameterSet *ps, bool populate_init, Style style)
     : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), parameter_set(ps)
 {
     add_button = Gtk::manage(new Gtk::MenuButton());
@@ -122,6 +122,9 @@ ParameterSetEditor::ParameterSetEditor(ParameterSet *ps, bool populate_init)
 
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());
     sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+    if (style == Style::BORDER)
+        sc->set_shadow_type(Gtk::SHADOW_IN);
+
     listbox = Gtk::manage(new Gtk::ListBox());
     listbox->set_selection_mode(Gtk::SELECTION_NONE);
     listbox->set_header_func(&header_fun);
@@ -132,7 +135,7 @@ ParameterSetEditor::ParameterSetEditor(ParameterSet *ps, bool populate_init)
         populate();
 
     sc->show_all();
-    {
+    if (style == Style::SEPARATOR) {
         auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
         sep->show();
         pack_start(*sep, false, false, 0);

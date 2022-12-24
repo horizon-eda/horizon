@@ -99,11 +99,13 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                     1,
                     {
                             {static_cast<int>(Via::Source::RULES), "Rules"},
+                            {static_cast<int>(Via::Source::DEFINITION), "Definition"},
                             {static_cast<int>(Via::Source::LOCAL), "Local"},
                     }}},
                   {ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Net", 0}},
                   {ObjectProperty::ID::LOCKED, {ObjectProperty::Type::BOOL, "Locked", 2}},
                   {ObjectProperty::ID::SPAN, {ObjectProperty::Type::LAYER_RANGE, "Span", 3}},
+                  {ObjectProperty::ID::VIA_DEFINITION, {ObjectProperty::Type::NET_CLASS, "Definition", 4}},
                   {ObjectProperty::ID::POSITION_X, {ObjectProperty::Type::DIM, "Position X", 5}},
                   {ObjectProperty::ID::POSITION_Y, {ObjectProperty::Type::DIM, "Position Y", 6}},
           }}},

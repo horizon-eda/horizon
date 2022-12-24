@@ -34,6 +34,9 @@ enum class InToolActionID {
     NET_LABEL_SIZE_DEC,
     FLIP_ARC,
 
+    // place via
+    SELECT_VIA_DEFINITION,
+
     // draw polygon
     TOGGLE_ARC,
 
@@ -66,6 +69,7 @@ enum class InToolActionID {
     LENGTH_TUNING_SPACING_INC,
     LENGTH_TUNING_SPACING_DEC,
     TOGGLE_VIA,
+    PLACE_DEFINED_VIA,
     TRACK_WIDTH_DEFAULT,
     ROUTER_SETTINGS,
     CLEARANCE_OFFSET,

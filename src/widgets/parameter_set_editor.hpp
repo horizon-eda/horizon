@@ -11,7 +11,8 @@ class ParameterSetEditor : public Gtk::Box, public Changeable {
     friend class ParameterEditor;
 
 public:
-    ParameterSetEditor(ParameterSet *ps, bool populate_init = true);
+    enum class Style { SEPARATOR, BORDER };
+    ParameterSetEditor(ParameterSet *ps, bool populate_init = true, Style style = Style::SEPARATOR);
     void populate();
     void focus_first();
     void set_button_margin_left(int margin);

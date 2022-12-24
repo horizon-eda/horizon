@@ -301,6 +301,22 @@
             }
         ]
     ],
+    "PLACE_DEFINED_VIA": [
+        [
+            {
+                "key": "V",
+                "mod": 0
+            }
+        ]
+    ],
+    "SELECT_VIA_DEFINITION": [
+        [
+            {
+                "key": "d",
+                "mod": 0
+            }
+        ]
+    ],
     "TRACK_WIDTH_DEFAULT": [
         [
             {

@@ -21,7 +21,8 @@ BoardRules::BoardRules(const BoardRules &other)
       rule_shorted_pads(other.rule_shorted_pads), rule_thermals(other.rule_thermals),
       rule_clearance_silkscreen_exposed_copper(other.rule_clearance_silkscreen_exposed_copper),
       rule_parameters(other.rule_parameters), rule_preflight_checks(other.rule_preflight_checks),
-      rule_net_ties(other.rule_net_ties), rule_board_connectivity(other.rule_board_connectivity)
+      rule_net_ties(other.rule_net_ties), rule_board_connectivity(other.rule_board_connectivity),
+      rule_via_definitions(other.rule_via_definitions)
 {
     update_sorted();
 }
@@ -45,6 +46,7 @@ void BoardRules::operator=(const BoardRules &other)
     rule_preflight_checks = other.rule_preflight_checks;
     rule_net_ties = other.rule_net_ties;
     rule_board_connectivity = other.rule_board_connectivity;
+    rule_via_definitions = other.rule_via_definitions;
 
     update_sorted();
 }
@@ -179,6 +181,10 @@ void BoardRules::import_rules(const json &j, const RuleImportMap &import_map)
         const json &o = j["parameters"];
         rule_parameters = RuleParameters(o, import_map);
     }
+    if (j.count("via_definitions")) {
+        const json &o = j["via_definitions"];
+        rule_via_definitions = RuleViaDefinitions(o, import_map);
+    }
 }
 
 void BoardRules::cleanup(const Block *block)
@@ -274,6 +280,19 @@ void BoardRules::apply(RuleID id, Board &brd, IPool &pool) const
             }
         }
     }
+    else if (id == RuleID::VIA_DEFINITIONS) {
+        for (auto &[uu, via] : brd.vias) {
+            if (via.source == Via::Source::DEFINITION) {
+                if (rule_via_definitions.via_definitions.count(via.definition)) {
+                    auto &def = rule_via_definitions.via_definitions.at(via.definition);
+                    via.pool_padstack = pool.get_padstack(def.padstack);
+                    via.span = def.span;
+                    via.parameter_set = def.parameters;
+                    via.expand(brd);
+                }
+            }
+        }
+    }
     else if (id == RuleID::PLANE) {
         for (auto &it : brd.planes) {
             auto &plane = it.second;
@@ -318,6 +337,7 @@ json BoardRules::serialize_or_export(Rule::SerializeMode mode) const
 
     j["clearance_silkscreen_exposed_copper"] = rule_clearance_silkscreen_exposed_copper.serialize();
     j["parameters"] = rule_parameters.serialize();
+    j["via_definitions"] = rule_via_definitions.serialize();
     return j;
 }
 
@@ -339,6 +359,7 @@ std::vector<RuleID> BoardRules::get_rule_ids() const
             RuleID::HOLE_SIZE,
 
             RuleID::VIA,
+            RuleID::VIA_DEFINITIONS,
             RuleID::PLANE,
             RuleID::THERMALS,
             RuleID::DIFFPAIR,
@@ -368,6 +389,9 @@ const Rule &BoardRules::get_rule(RuleID id) const
     }
     else if (id == RuleID::BOARD_CONNECTIVITY) {
         return rule_board_connectivity;
+    }
+    else if (id == RuleID::VIA_DEFINITIONS) {
+        return rule_via_definitions;
     }
     throw std::runtime_error("rule does not exist");
 }

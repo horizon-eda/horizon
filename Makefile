@@ -81,6 +81,8 @@ SRC_COMMON = \
 	src/board/rule_layer_pair.cpp\
 	src/board/rule_clearance_same_net.cpp\
 	src/board/rule_board_connectivity.cpp\
+	src/board/rule_via_definitions.cpp\
+	src/board/via_definition.cpp\
 	3rd_party/delaunator/delaunator.cpp\
 	src/board/airwires.cpp\
 	src/board/gerber_output_settings.cpp\
@@ -443,6 +445,7 @@ SRC_IMP = \
 	src/dialogs/edit_text_window.cpp\
 	src/dialogs/plane_update.cpp\
 	src/dialogs/map_net_tie.cpp\
+	src/dialogs/select_via_definition.cpp\
 	src/util/sort_controller.cpp\
 	src/core/core_symbol.cpp\
 	src/core/core_schematic.cpp\
@@ -519,6 +522,7 @@ SRC_IMP = \
 	src/imp/rules/rule_editor_clearance_same_net.cpp\
 	src/imp/rules/rule_editor_shorted_pads.cpp\
 	src/imp/rules/rule_editor_thermals.cpp\
+	src/imp/rules/rule_editor_via_definitions.cpp\
 	src/imp/rules/import.cpp\
 	src/imp/rules/export.cpp\
 	src/widgets/location_entry.cpp\
@@ -613,6 +617,7 @@ SRC_IMP = \
 	src/util/done_revealer_controller.cpp\
 	src/widgets/reflow_box.cpp\
 	src/util/pasted_package.cpp\
+	src/widgets/layer_range_editor.cpp\
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\
