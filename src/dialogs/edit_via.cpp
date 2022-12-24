@@ -45,7 +45,7 @@ EditViaDialog::EditViaDialog(Gtk::Window *parent, std::set<Via *> &vias, IPool &
     padstack_apply_all_button->set_tooltip_text("Apply to all selected vias");
     padstack_apply_all_button->signal_clicked().connect([this, vias, &pool_caching] {
         for (auto &via : vias) {
-            if (!via->from_rules) {
+            if (via->source == Via::Source::LOCAL) {
                 via->pool_padstack = pool_caching.get_padstack(button_vp->property_selected_uuid());
             }
         }
@@ -57,7 +57,10 @@ EditViaDialog::EditViaDialog(Gtk::Window *parent, std::set<Via *> &vias, IPool &
     rules_apply_all_button->set_tooltip_text("Apply to all selected vias");
     rules_apply_all_button->signal_clicked().connect([this, vias] {
         for (auto &via : vias) {
-            via->from_rules = cb_from_rules->get_active();
+            if (cb_from_rules->get_active())
+                via->source = Via::Source::RULES;
+            else
+                via->source = Via::Source::LOCAL;
             update_sensitive();
         }
     });
@@ -106,7 +109,7 @@ EditViaDialog::EditViaDialog(Gtk::Window *parent, std::set<Via *> &vias, IPool &
         }
         button_vp->property_selected_uuid() = via->pool_padstack->uuid;
         button_vp->property_selected_uuid().signal_changed().connect([this, via, &pool_caching] {
-            if (!via->from_rules)
+            if (via->source == Via::Source::LOCAL)
                 via->pool_padstack = pool_caching.get_padstack(button_vp->property_selected_uuid());
         });
         button_vp->set_hexpand(true);
@@ -116,9 +119,12 @@ EditViaDialog::EditViaDialog(Gtk::Window *parent, std::set<Via *> &vias, IPool &
         if (cb_from_rules)
             delete cb_from_rules;
         cb_from_rules = Gtk::manage(new Gtk::CheckButton("From rules"));
-        cb_from_rules->set_active(via->from_rules);
+        cb_from_rules->set_active(via->source == Via::Source::RULES);
         cb_from_rules->signal_toggled().connect([this, via] {
-            via->from_rules = cb_from_rules->get_active();
+            if (cb_from_rules->get_active())
+                via->source = Via::Source::RULES;
+            else
+                via->source = Via::Source::LOCAL;
             update_sensitive();
         });
         grid->attach(*cb_from_rules, 1, 1, 1, 1);
