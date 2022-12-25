@@ -3,9 +3,9 @@
 
 namespace horizon {
 class RuleEditorClearanceSilkscreenExposedCopper : public RuleEditor {
-    using RuleEditor::RuleEditor;
-
 public:
+    RuleEditorClearanceSilkscreenExposedCopper(Rule &r, class IDocument &c);
+
     void populate() override;
 
 private:
