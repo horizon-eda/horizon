@@ -6,6 +6,11 @@
 
 namespace horizon {
 
+RuleEditorClearanceSilkscreenExposedCopper::RuleEditorClearanceSilkscreenExposedCopper(Rule &r, class IDocument &c)
+    : RuleEditor(r, c, dynamic_cast<RuleParameters *>(&r) ? HasEnable::NO : HasEnable::YES)
+{
+}
+
 SpinButtonDim *RuleEditorClearanceSilkscreenExposedCopper::create_sp_dim(const std::string &label)
 {
     auto la = Gtk::manage(new Gtk::Label(label));

@@ -7,8 +7,13 @@
 #include "common/layer_provider.hpp"
 
 namespace horizon {
-RuleEditor::RuleEditor(Rule &r, class IDocument &c) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 20), rule(r), core(c)
+RuleEditor::RuleEditor(Rule &r, class IDocument &c, HasEnable has_enable)
+    : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 20), rule(r), core(c)
 {
+    if (has_enable != HasEnable::YES) {
+        set_margin_top(20);
+        return;
+    }
     enable_cb = Gtk::manage(new Gtk::CheckButton("Enable this rule"));
     enable_cb->set_margin_start(20);
     enable_cb->set_margin_top(20);
