@@ -8,7 +8,8 @@
 namespace horizon {
 class RuleEditor : public Gtk::Box {
 public:
-    RuleEditor(Rule &r, class IDocument &c);
+    enum class HasEnable { YES, NO };
+    RuleEditor(Rule &r, class IDocument &c, HasEnable has_enable = HasEnable::YES);
     Rule &get_rule()
     {
         return rule;
