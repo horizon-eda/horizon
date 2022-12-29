@@ -62,6 +62,7 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
         {ObjectType::PADSTACK, {"Padstack", "Padstacks", {}}},
         {ObjectType::PART, {"Part", "Parts", {}}},
         {ObjectType::LINE_NET, {"Net line", "Net lines", {}}},
+        {ObjectType::BUS, {"Bus", "Buses", {}}},
         {ObjectType::BUS_LABEL, {"Bus label", "Bus labels", {}}},
         {ObjectType::BUS_RIPPER, {"Bus ripper", "Bus rippers", {}}},
         {ObjectType::SCHEMATIC_SYMBOL,
