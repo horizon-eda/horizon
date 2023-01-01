@@ -62,6 +62,7 @@ public:
         bool orphan = false;
         ClipperLib::Paths paths;              // first path is outline, others are holes
         bool contains(const Coordi &c) const; // checks if point is in area defined by paths
+        int64_t get_area() const;
         json serialize() const;
     };
 

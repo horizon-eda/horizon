@@ -128,5 +128,6 @@ enum class ActionID {
     CONVERT_TO_PAD,
     ASSIGN_PART,
     TOGGLE_SNAP_TO_PAD_BBOX,
+    SELECT_PLANE,
 };
 }

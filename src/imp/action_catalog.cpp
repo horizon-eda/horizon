@@ -1110,6 +1110,9 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::TOOL, ToolID::PASTE_RELATIVE},
          {"Paste relative", ActionGroup::CLIPBOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::SELECT_PLANE, ToolID::NONE},
+         {"Select plane", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1267,6 +1270,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(CONVERT_TO_PAD),
         ACTION_LUT_ITEM(ASSIGN_PART),
         ACTION_LUT_ITEM(TOGGLE_SNAP_TO_PAD_BBOX),
+        ACTION_LUT_ITEM(SELECT_PLANE),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

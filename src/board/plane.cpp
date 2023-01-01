@@ -158,6 +158,17 @@ bool Plane::Fragment::contains(const Coordi &c) const
     }
 }
 
+int64_t Plane::Fragment::get_area() const
+{
+    int64_t area = 0;
+    int64_t sign = 1;
+    for (const auto &path : paths) {
+        area += sign * std::abs(ClipperLib::Area(path));
+        sign = -1;
+    }
+    return area;
+}
+
 Plane::Fragment::Fragment(const json &j) : orphan(j.at("orphan"))
 {
     const auto &j_paths = j.at("paths");

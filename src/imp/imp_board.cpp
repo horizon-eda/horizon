@@ -315,6 +315,9 @@ void ImpBoard::update_action_sensitivity()
     set_action_sensitive(ActionID::GO_TO_PROJECT_MANAGER, sockets_connected);
     set_action_sensitive(ActionID::OPEN_PROJECT, sel_count_type(sel, ObjectType::BOARD_PANEL) == 1);
 
+    const auto n_planes = core_board.get_board()->planes.size();
+    set_action_sensitive(ActionID::SELECT_PLANE, n_planes > 0);
+
     ImpBase::update_action_sensitivity();
 }
 
@@ -862,6 +865,32 @@ void ImpBoard::construct()
             j["filename"] = p.included_board->get_absolute_project_filename(brd.board_directory);
             this->send_json(j);
         }
+    });
+
+    connect_action(ActionID::SELECT_PLANE, [this](const auto &a) {
+        const auto pos = canvas->get_cursor_pos();
+        const auto &brd = *core_board.get_board();
+        std::vector<std::pair<const Polygon *, int64_t>> candidates;
+        for (auto &[uu, it] : brd.planes) {
+            if (!canvas->layer_is_visible(it.polygon->layer))
+                continue;
+
+            for (auto &frag : it.fragments) {
+                if (frag.contains(pos))
+                    candidates.emplace_back(it.polygon, frag.get_area());
+            }
+        }
+
+        if (!candidates.size())
+            return;
+
+        std::sort(candidates.begin(), candidates.end(),
+                  [](const auto &a, const auto &b) { return a.second < b.second; });
+
+        const auto &poly = candidates.front();
+
+        canvas->set_selection({{poly.first->uuid, ObjectType::POLYGON_VERTEX, 0}});
+        canvas->set_selection_mode(CanvasGL::SelectionMode::NORMAL);
     });
 
     if (m_meta.count("nets"))
