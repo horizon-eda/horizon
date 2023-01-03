@@ -17,4 +17,13 @@ ClipperLib::Path transform_path(const Placement &transform, const ClipperLib::Pa
                    [transform](const auto &x) { return transform_intpt(transform, x); });
     return r;
 }
+
+ClipperLib::Paths transform_paths(const Placement &transform, const ClipperLib::Paths &paths)
+{
+    ClipperLib::Paths r;
+    r.reserve(paths.size());
+    std::transform(paths.begin(), paths.end(), std::back_inserter(r),
+                   [transform](const auto &x) { return transform_path(transform, x); });
+    return r;
+}
 } // namespace horizon

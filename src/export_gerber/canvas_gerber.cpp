@@ -53,7 +53,7 @@ void CanvasGerber::img_polygon(const Polygon &ipoly, bool tr)
     else if (auto plane = dynamic_cast<const Plane *>(ipoly.usage.ptr)) {
         if (GerberWriter *wr = exporter.get_writer_for_layer(ipoly.layer)) {
             for (const auto &frag : plane->fragments) {
-                wr->draw_fragments(frag.paths);
+                wr->draw_fragments(transform_paths(transform, frag.paths));
             }
         }
     }
