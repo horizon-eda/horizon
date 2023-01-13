@@ -33,6 +33,7 @@
 #include <filesystem>
 #include "util/fs_util.hpp"
 #include "widgets/sqlite_shell.hpp"
+#include "widgets/forced_pool_update_dialog.hpp"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>
@@ -1303,13 +1304,30 @@ void PoolProjectManagerAppWindow::check_mtimes(const std::string &path)
 
 void PoolProjectManagerAppWindow::check_pool_update(const std::string &base_path)
 {
+    bool updated = false;
     if (check_schema_update(base_path)) {
         // it's okay, pool got updated
+        updated = true;
     }
-    else if (check_pool_update_inc(base_path)) {
+
+    { // check that all included pools are usable
+        Pool my_pool(base_path);
+        for (auto &[bp, uu] : my_pool.get_actually_included_pools(false)) {
+            PoolInfo pool_info(bp);
+            if (!pool_info.is_usable()) {
+                ForcedPoolUpdateDialog dia(bp, *this);
+                while (dia.run() != 1) {
+                }
+            }
+        }
+    }
+
+    if (check_pool_update_inc(base_path)) {
         pool_update();
+        updated = true;
     }
-    else {
+
+    if (!updated) {
         check_mtimes_thread = std::thread(&PoolProjectManagerAppWindow::check_mtimes, this, base_path);
     }
 }
