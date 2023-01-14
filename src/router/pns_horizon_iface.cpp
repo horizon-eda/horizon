@@ -32,6 +32,14 @@ int PNS_HORIZON_IFACE::layer_to_router(int l)
         return In3_Cu;
     case horizon::BoardLayers::IN4_COPPER:
         return In4_Cu;
+    case horizon::BoardLayers::IN5_COPPER:
+        return In5_Cu;
+    case horizon::BoardLayers::IN6_COPPER:
+        return In6_Cu;
+    case horizon::BoardLayers::IN7_COPPER:
+        return In7_Cu;
+    case horizon::BoardLayers::IN8_COPPER:
+        return In8_Cu;
     default:
         return UNDEFINED_LAYER;
     }
@@ -60,6 +68,18 @@ int PNS_HORIZON_IFACE::layer_from_router(int l)
         break;
     case In4_Cu:
         lo = horizon::BoardLayers::IN4_COPPER;
+        break;
+    case In5_Cu:
+        lo = horizon::BoardLayers::IN5_COPPER;
+        break;
+    case In6_Cu:
+        lo = horizon::BoardLayers::IN6_COPPER;
+        break;
+    case In7_Cu:
+        lo = horizon::BoardLayers::IN7_COPPER;
+        break;
+    case In8_Cu:
+        lo = horizon::BoardLayers::IN8_COPPER;
         break;
     case UNDEFINED_LAYER:
         lo = 10000;

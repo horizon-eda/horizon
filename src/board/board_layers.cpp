@@ -38,6 +38,10 @@ std::string BoardLayers::get_layer_name(int l)
     case IN2_COPPER:
     case IN3_COPPER:
     case IN4_COPPER:
+    case IN5_COPPER:
+    case IN6_COPPER:
+    case IN7_COPPER:
+    case IN8_COPPER:
         return "Inner " + std::to_string(-l);
 
     case BOTTOM_COPPER:
@@ -68,20 +72,22 @@ std::string BoardLayers::get_layer_name(int l)
 }
 
 static const std::vector<int> layers = {
-        BoardLayers::TOP_NOTES,      BoardLayers::OUTLINE_NOTES,     BoardLayers::L_OUTLINE,
-        BoardLayers::TOP_COURTYARD,  BoardLayers::TOP_ASSEMBLY,      BoardLayers::TOP_PACKAGE,
-        BoardLayers::TOP_PASTE,      BoardLayers::TOP_SILKSCREEN,    BoardLayers::TOP_MASK,
-        BoardLayers::TOP_COPPER,     BoardLayers::IN1_COPPER,        BoardLayers::IN2_COPPER,
-        BoardLayers::IN3_COPPER,     BoardLayers::IN4_COPPER,        BoardLayers::BOTTOM_COPPER,
-        BoardLayers::BOTTOM_MASK,    BoardLayers::BOTTOM_SILKSCREEN, BoardLayers::BOTTOM_PASTE,
-        BoardLayers::BOTTOM_PACKAGE, BoardLayers::BOTTOM_ASSEMBLY,   BoardLayers::BOTTOM_COURTYARD,
-        BoardLayers::BOTTOM_NOTES};
+        BoardLayers::TOP_NOTES,        BoardLayers::OUTLINE_NOTES,  BoardLayers::L_OUTLINE,
+        BoardLayers::TOP_COURTYARD,    BoardLayers::TOP_ASSEMBLY,   BoardLayers::TOP_PACKAGE,
+        BoardLayers::TOP_PASTE,        BoardLayers::TOP_SILKSCREEN, BoardLayers::TOP_MASK,
+        BoardLayers::TOP_COPPER,       BoardLayers::IN1_COPPER,     BoardLayers::IN2_COPPER,
+        BoardLayers::IN3_COPPER,       BoardLayers::IN4_COPPER,     BoardLayers::IN5_COPPER,
+        BoardLayers::IN6_COPPER,       BoardLayers::IN7_COPPER,     BoardLayers::IN8_COPPER,
+        BoardLayers::BOTTOM_COPPER,    BoardLayers::BOTTOM_MASK,    BoardLayers::BOTTOM_SILKSCREEN,
+        BoardLayers::BOTTOM_PASTE,     BoardLayers::BOTTOM_PACKAGE, BoardLayers::BOTTOM_ASSEMBLY,
+        BoardLayers::BOTTOM_COURTYARD, BoardLayers::BOTTOM_NOTES,
+};
 
 const std::vector<int> &BoardLayers::get_layers()
 {
     return layers;
 }
 
-const unsigned int BoardLayers::max_inner_layers = 4;
+const unsigned int BoardLayers::max_inner_layers = 8;
 
 } // namespace horizon

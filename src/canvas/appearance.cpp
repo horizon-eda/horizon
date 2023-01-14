@@ -54,6 +54,10 @@ Appearance::Appearance()
     layer_colors[BoardLayers::IN2_COPPER] = {1, 1, 0};
     layer_colors[BoardLayers::IN3_COPPER] = {1, 1, 0};
     layer_colors[BoardLayers::IN4_COPPER] = {1, 1, 0};
+    layer_colors[BoardLayers::IN5_COPPER] = {1, 1, 0};
+    layer_colors[BoardLayers::IN6_COPPER] = {1, 1, 0};
+    layer_colors[BoardLayers::IN7_COPPER] = {1, 1, 0};
+    layer_colors[BoardLayers::IN8_COPPER] = {1, 1, 0};
     layer_colors[BoardLayers::BOTTOM_COPPER] = {0, .5, 0};
     layer_colors[BoardLayers::BOTTOM_MASK] = {.25, .5, .25};
     layer_colors[BoardLayers::BOTTOM_SILKSCREEN] = {.9, .9, .9};
