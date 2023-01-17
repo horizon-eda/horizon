@@ -143,6 +143,7 @@ UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("pin_add", add_button);
     x->get_widget("pin_delete", delete_button);
     x->get_widget("cross_probing", cross_probing_cb);
+    x->get_widget("pin_count", pin_count);
     entry_add_sanitizer(name_entry);
     entry_add_sanitizer(manufacturer_entry);
 
@@ -200,6 +201,7 @@ void UnitEditor::load()
         ed->unreference();
     }
     sort_helper.set_sort("pin", Gtk::SORT_ASCENDING);
+    update_pin_count();
 }
 
 void UnitEditor::handle_delete()
@@ -230,6 +232,7 @@ void UnitEditor::handle_delete()
             pins_listbox->select_row(*row);
     }
     set_needs_save();
+    update_pin_count();
 }
 
 static std::string inc_pin_name(const std::string &s, int inc = 1)
@@ -303,6 +306,7 @@ void UnitEditor::handle_add()
         }
     }
     set_needs_save();
+    update_pin_count();
 }
 
 void UnitEditor::handle_activate(PinEditor *ed)
@@ -330,6 +334,17 @@ void UnitEditor::handle_activate(PinEditor *ed)
         }
         i++;
     }
+}
+
+void UnitEditor::update_pin_count()
+{
+    const uint32_t n = unit.pins.size();
+    std::string s = std::to_string(n);
+    if (n == 1)
+        s += " pin";
+    else
+        s += " pins";
+    pin_count->set_text(s);
 }
 
 void UnitEditor::select(const ItemSet &items)
