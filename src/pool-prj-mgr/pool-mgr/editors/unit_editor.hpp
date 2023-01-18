@@ -35,7 +35,7 @@ private:
     Gtk::Button *add_button = nullptr;
     Gtk::Button *delete_button = nullptr;
     Gtk::CheckButton *cross_probing_cb = nullptr;
-    Gtk::Label *pin_count = nullptr;
+    Gtk::Label *pin_count_label = nullptr;
 
     Glib::RefPtr<Gtk::SizeGroup> sg_direction;
     Glib::RefPtr<Gtk::SizeGroup> sg_name;

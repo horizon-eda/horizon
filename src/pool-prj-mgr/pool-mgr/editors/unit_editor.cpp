@@ -143,7 +143,7 @@ UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("pin_add", add_button);
     x->get_widget("pin_delete", delete_button);
     x->get_widget("cross_probing", cross_probing_cb);
-    x->get_widget("pin_count", pin_count);
+    x->get_widget("pin_count", pin_count_label);
     entry_add_sanitizer(name_entry);
     entry_add_sanitizer(manufacturer_entry);
 
@@ -181,6 +181,8 @@ UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     sort_helper.attach("pin", x);
     sort_helper.attach("direction", x);
     sort_helper.signal_changed().connect(sigc::mem_fun(*this, &UnitEditor::sort));
+
+    label_set_tnum(pin_count_label);
 
     load();
 }
@@ -344,7 +346,7 @@ void UnitEditor::update_pin_count()
         s += " pin";
     else
         s += " pins";
-    pin_count->set_text(s);
+    pin_count_label->set_text(s);
 }
 
 void UnitEditor::select(const ItemSet &items)
