@@ -20,7 +20,6 @@ LIBS=(
 	libsigc-2.0-0.dll\
 	libffi-8.dll\
 	libiconv-2.dll\
-	libpcre-1.dll\
 	libpcre2-8-0.dll\
 	libatkmm-1.6-1.dll\
 	libatk-1.0-0.dll\
@@ -90,7 +89,7 @@ LIBS=(
 	libpsl-5.dll\
 	libthai-0.dll\
 	libdatrie-1.dll\
-	libcrypto-1_1-x64.dll\
+	libcrypto-3-x64.dll\
 	libpodofo.dll\
 	libidn-12.dll\
 	libarchive-13.dll\
@@ -102,6 +101,7 @@ LIBS=(
 	libwebp-7.dll\
 	libjbig-0.dll\
 	libLerc.dll\
+	libsharpyuv-0.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
 )
