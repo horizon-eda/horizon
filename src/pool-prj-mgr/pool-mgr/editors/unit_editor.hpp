@@ -35,6 +35,7 @@ private:
     Gtk::Button *add_button = nullptr;
     Gtk::Button *delete_button = nullptr;
     Gtk::CheckButton *cross_probing_cb = nullptr;
+    Gtk::Label *pin_count_label = nullptr;
 
     Glib::RefPtr<Gtk::SizeGroup> sg_direction;
     Glib::RefPtr<Gtk::SizeGroup> sg_name;
@@ -44,6 +45,7 @@ private:
     void handle_delete();
     void sort();
     void handle_activate(class PinEditor *ed);
+    void update_pin_count();
 
     SortHelper sort_helper;
     void load();
