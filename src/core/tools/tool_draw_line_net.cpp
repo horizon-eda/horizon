@@ -418,6 +418,8 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                     temp_junc_head->net = net;
                     temp_junc_head->bus = bus;
                     set_snap_filter();
+                    component_floating = nullptr;
+                    block_instance_floating = nullptr;
                 }
             }
 
