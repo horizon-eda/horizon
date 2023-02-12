@@ -15,10 +15,17 @@ TreeViewStateStore::TreeViewStateStore(Gtk::TreeView *tv, const std::string &pr)
 
 void TreeViewStateStore::realize()
 {
-    const auto n_col = view->get_n_columns();
-    for (unsigned int i = 0; i < n_col; i++) {
+    const int n_col = view->get_n_columns();
+    // don't attach to last visible column
+    int last_visible = -1;
+    for (int i = 0; i < n_col; i++) {
         auto col = view->get_column(i);
-        if (col->get_resizable()) {
+        if (col->get_visible() && col->get_resizable())
+            last_visible = i;
+    }
+    for (int i = 0; i < n_col; i++) {
+        auto col = view->get_column(i);
+        if (col->get_resizable() && i != last_visible) {
             SQLite::Query q(db, "SELECT width FROM widths WHERE key = ?");
             q.bind(1, get_key(i));
             if (q.step()) {
