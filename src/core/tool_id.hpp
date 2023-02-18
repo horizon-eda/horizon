@@ -171,5 +171,6 @@ enum class ToolID {
     CLEAR_PART,
     PASTE_PLACEMENT,
     PASTE_RELATIVE,
+    PASTE_PART,
 };
 } // namespace horizon

@@ -1113,6 +1113,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
 
         {{ActionID::SELECT_PLANE, ToolID::NONE},
          {"Select plane", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::PASTE_PART},
+         {"Paste part", ActionGroup::CLIPBOARD, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1444,5 +1448,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(SELECT_CONNECTED_LINES),
         TOOL_LUT_ITEM(PASTE_PLACEMENT),
         TOOL_LUT_ITEM(PASTE_RELATIVE),
+        TOOL_LUT_ITEM(PASTE_PART),
 };
 } // namespace horizon

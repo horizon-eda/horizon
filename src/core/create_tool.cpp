@@ -100,6 +100,7 @@
 #include "tools/tool_move_track_connection.hpp"
 #include "tools/tool_move_track_center.hpp"
 #include "tools/tool_paste_placement.hpp"
+#include "tools/tool_paste_part.hpp"
 
 namespace horizon {
 
@@ -467,6 +468,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::PASTE_PLACEMENT:
         return std::make_unique<ToolPastePlacement>(this, tool_id);
+
+    case ToolID::PASTE_PART:
+        return std::make_unique<ToolPastePart>(this, tool_id);
 
     default:
         return nullptr;
