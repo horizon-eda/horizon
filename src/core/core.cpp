@@ -83,6 +83,7 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
         Logger::log_critical("exception thrown in tool constructor of "
                                      + action_catalog.at({ActionID::TOOL, tool_id}).name,
                              Logger::Domain::CORE, e.what());
+        tool.reset();
         return ToolResponse::end();
     }
     if (tool) {
