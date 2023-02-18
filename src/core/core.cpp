@@ -61,10 +61,17 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
         tool = create_tool(tool_id);
 
         for (auto [tid, settings] : tool->get_all_settings()) {
-            auto j = s_signal_load_tool_settings.emit(tid);
-            if (j != nullptr)
-                settings->load_from_json(j);
-            tool->apply_settings();
+            try {
+                auto j = s_signal_load_tool_settings.emit(tid);
+                if (j != nullptr)
+                    settings->load_from_json(j);
+                tool->apply_settings();
+            }
+            catch (const std::exception &e) {
+                Logger::log_warning("exception in loading tool setting " + action_catalog.at({ActionID::TOOL, tid}).name
+                                            + " for tool " + action_catalog.at({ActionID::TOOL, tool_id}).name,
+                                    Logger::Domain::CORE, e.what());
+            }
         }
 
         tool->set_imp_interface(imp);
