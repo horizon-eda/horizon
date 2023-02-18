@@ -1,6 +1,6 @@
 #include "log_view.hpp"
-#include <iostream>
 #include <iomanip>
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 LogView::LogView() : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0)
@@ -112,7 +112,7 @@ LogView::LogView() : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0)
         tree_view->append_column(*tvc);
     }
     tree_view->append_column("Message", list_columns.message);
-    tree_view->append_column("Detail", list_columns.detail);
+    tree_view_append_column_ellipsis(tree_view, "Detail", list_columns.detail, Pango::ELLIPSIZE_END);
 
     sc->add(*tree_view);
     pack_start(*sc, true, true, 0);
