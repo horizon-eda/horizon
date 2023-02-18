@@ -56,7 +56,7 @@ LIBS=(
 	libgit2.dll\
 	libidn2-0.dll\
 	libssh2-1.dll\
-	libunistring-2.dll\
+	libunistring-5.dll\
 	libTKBO.dll\
 	libTKBRep.dll\
 	libTKCAF.dll\
