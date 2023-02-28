@@ -596,6 +596,13 @@ PoolBrowser::~PoolBrowser() = default;
 void PoolBrowser::sort_by_mtime()
 {
     sort_controller->set_sort(mtime_column, SortController::Sort::DESC);
+    {
+        auto b = treeview->get_model()->children().begin();
+        auto e = treeview->get_model()->children().end();
+        if (b != e) {
+            treeview->scroll_to_row(treeview->get_model()->get_path(b));
+        }
+    }
 }
 
 } // namespace horizon
