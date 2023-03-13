@@ -106,6 +106,8 @@ private:
     TopTools_ListOfShape &cutouts;
     void img_hole(const class Hole &hole) override
     {
+        if (hole.diameter == 0)
+            return;
         Placement tr = transform;
         tr.accumulate(hole.placement);
         if (hole.shape == Hole::Shape::ROUND) {
