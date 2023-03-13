@@ -721,17 +721,19 @@ void ROUTER::CommitRouting()
 void ROUTER::StopRouting()
 {
     // Update the ratsnest with new changes
+    std::vector<int> nets;
 
     if( m_placer )
     {
-        std::vector<int> nets;
         m_placer->GetModifiedNets( nets );
-
-        // Update the ratsnest with new changes
-        for( int n : nets )
-            m_iface->UpdateNet( n );
     }
-
+    if( m_dragger )
+    {
+        nets = m_dragger->CurrentNets();
+    }
+    // Update the ratsnest with new changes
+    for( int n : nets )
+        m_iface->UpdateNet( n );
     if( !RoutingInProgress() )
         return;
 
