@@ -37,6 +37,38 @@
 		"display_mode": "fill",
 		"visible": true
 	},
+	"-1": {
+		"display_mode": "fill",
+		"visible": true
+	},
+	"-2": {
+		"display_mode": "fill",
+		"visible": true
+	},
+	"-3": {
+		"display_mode": "fill",
+		"visible": true
+	},
+	"-4": {
+		"display_mode": "fill",
+		"visible": true
+	},
+	"-5": {
+		"display_mode": "fill",
+		"visible": true
+	},
+	"-6": {
+		"display_mode": "fill",
+		"visible": true
+	},
+	"-7": {
+		"display_mode": "fill",
+		"visible": true
+	},
+	"-8": {
+		"display_mode": "fill",
+		"visible": true
+	},
 	"10": {
 		"display_mode": "outline",
 		"visible": true

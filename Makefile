@@ -899,6 +899,7 @@ SRC_TESTS = \
 	src/util/text_data.cpp \
 	src/canvas/hershey_fonts.cpp \
 	src/tests/tool_lut.cpp\
+	src/tests/layer_display_default.cpp\
 	src/imp/action_catalog.cpp\
 	src/imp/action.cpp\
 
