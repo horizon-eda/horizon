@@ -7,15 +7,18 @@ on:
 jobs:
   docker-python:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
     steps:
     - name: login to docker
-      run: echo ${{ secrets.DOCKER_TOKEN }} | docker login -u carrotindustries --password-stdin
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
     - uses: actions/checkout@v2
       with:
         path: src
     - name: build docker image
-      run: docker build . -f src/Dockerfile-python --network=host -t horizoneda/horizon:latest
+      run: docker build . -f src/Dockerfile-python --network=host -t ghcr.io/horizon-eda/horizon:latest
     - name: test docker image
-      run: docker run horizoneda/horizon:latest python3 -c 'import horizon'
+      run: docker run ghcr.io/horizon-eda/horizon:latest python3 -c 'import horizon'
     - name: publish docker image
-      run: docker push horizoneda/horizon:latest
+      run: docker push ghcr.io/horizon-eda/horizon:latest

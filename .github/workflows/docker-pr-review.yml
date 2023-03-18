@@ -7,6 +7,9 @@ on:
 jobs:
   docker-pr-review:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
     steps:
     - name: set tag
       run: |
@@ -18,13 +21,13 @@ jobs:
     - name: print tag
       run: echo ${{env.docker_tag}}
     - name: login to docker
-      run: echo ${{ secrets.DOCKER_TOKEN }} | docker login -u carrotindustries --password-stdin
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
     - uses: actions/checkout@v2
       with:
         path: src
     - name: build docker image
-      run: docker build . -f src/Dockerfile-pr-review --network=host -t horizoneda/horizon-pr-review:${{env.docker_tag}}
+      run: docker build . -f src/Dockerfile-pr-review --network=host -t ghcr.io/horizon-eda/horizon-pr-review:${{env.docker_tag}}
     - name: test docker image
-      run: docker run horizoneda/horizon-pr-review:${{env.docker_tag}}
+      run: docker run ghcr.io/horizon-eda/horizon-pr-review:${{env.docker_tag}}
     - name: publish docker image
-      run: docker push horizoneda/horizon-pr-review:${{env.docker_tag}}
+      run: docker push ghcr.io/horizon-eda/horizon-pr-review:${{env.docker_tag}}
