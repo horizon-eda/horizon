@@ -24,7 +24,7 @@ TrackGraph::Node &TrackGraph::get_or_create_node(const Track::Connection &conn)
     else {
         auto &n = nodes[key];
         if (conn.is_junc())
-            n.keep = conn.junc->needs_via;
+            n.keep = conn.junc->required_span.is_multilayer();
         else if (conn.is_pad())
             n.keep = true;
 

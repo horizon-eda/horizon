@@ -13,7 +13,7 @@ public:
     uint64_t outline_width = 0;
 
     std::map<int, ODB::Features *> layer_features;
-    ODB::Features *drill_features = nullptr;
+    std::map<LayerRange, ODB::Features *> drill_features;
     ODB::EDAData *eda_data = nullptr;
 
     std::map<std::pair<UUID, UUID>, ODB::EDAData::SubnetToeprint *> pad_subnets;

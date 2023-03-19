@@ -4,13 +4,14 @@
 #include "nlohmann/json.hpp"
 #include "board/board_layers.hpp"
 #include "pool/ipool.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 
 Via::Via(const UUID &uu, const json &j, IPool &pool, Board *brd)
     : uuid(uu), pool_padstack(pool.get_padstack(j.at("padstack").get<std::string>())), padstack(*pool_padstack),
       parameter_set(parameter_set_from_json(j.at("parameter_set"))), from_rules(j.at("from_rules")),
-      locked(j.value("locked", false))
+      locked(j.value("locked", false)), span(BoardLayers::layer_range_through)
 {
     if (brd)
         junction = &brd->junctions.at(j.at("junction").get<std::string>());
@@ -23,9 +24,13 @@ Via::Via(const UUID &uu, const json &j, IPool &pool, Board *brd)
         else
             net_set.uuid = j.at("net_set").get<std::string>();
     }
+
+    if (j.count("span"))
+        span = LayerRange(j.at("span"));
 }
 
-Via::Via(const UUID &uu, std::shared_ptr<const Padstack> ps) : uuid(uu), pool_padstack(ps), padstack(*pool_padstack)
+Via::Via(const UUID &uu, std::shared_ptr<const Padstack> ps)
+    : uuid(uu), pool_padstack(ps), padstack(*pool_padstack), span(BoardLayers::layer_range_through)
 {
     parameter_set[ParameterID::VIA_DIAMETER] = .5_mm;
     parameter_set[ParameterID::HOLE_DIAMETER] = .2_mm;
@@ -35,7 +40,7 @@ Via::Via(const UUID &uu, std::shared_ptr<const Padstack> ps) : uuid(uu), pool_pa
 Via::Via(shallow_copy_t sh, const Via &other)
     : uuid(other.uuid), net_set(other.net_set), junction(other.junction), pool_padstack(other.pool_padstack),
       padstack(other.padstack.uuid), parameter_set(other.parameter_set), from_rules(other.from_rules),
-      locked(other.locked)
+      locked(other.locked), span(other.span)
 {
 }
 
@@ -45,7 +50,7 @@ void Via::expand(const Board &brd)
     ParameterSet ps_via = parameter_set;
     ps_via.emplace(ParameterID::VIA_SOLDER_MASK_EXPANSION, brd.rules.get_parameters().via_solder_mask_expansion);
     padstack.apply_parameter_set(ps_via);
-    padstack.expand_inner(brd.get_n_inner_layers());
+    padstack.expand_inner(brd.get_n_inner_layers(), span);
 }
 
 json Via::serialize() const
@@ -58,6 +63,8 @@ json Via::serialize() const
     j["locked"] = locked;
     if (net_set)
         j["net_set"] = (std::string)net_set->uuid;
+    if (span != BoardLayers::layer_range_through)
+        j["span"] = span.serialize();
     return j;
 }
 } // namespace horizon

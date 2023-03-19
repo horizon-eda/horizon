@@ -1,11 +1,19 @@
 #pragma once
 #include <algorithm>
+#include <optional>
+#include "nlohmann/json_fwd.hpp"
 
 namespace horizon {
+
+using json = nlohmann::json;
 
 // adapted from KiCad's LAYER_RANGE
 class LayerRange {
 public:
+    LayerRange(const json &j);
+
+    json serialize() const;
+
     LayerRange() : m_start(10000), m_end(10000){};
 
     LayerRange(int aStart, int aEnd)
@@ -73,6 +81,14 @@ public:
             m_end = aOther.m_end;
     }
 
+    std::optional<LayerRange> intersection(const LayerRange &other) const
+    {
+        if (overlaps(other))
+            return LayerRange{std::max(m_start, other.m_start), std::min(m_end, other.m_end)};
+        else
+            return {};
+    }
+
     bool operator==(const LayerRange &aOther) const
     {
         return (m_start == aOther.m_start) && (m_end == aOther.m_end);
@@ -86,6 +102,11 @@ public:
     bool operator<(const LayerRange &aOther) const
     {
         return std::make_pair(m_start, m_end) < std::make_pair(aOther.m_start, aOther.m_end);
+    }
+
+    bool operator>(const LayerRange &aOther) const
+    {
+        return std::make_pair(m_start, m_end) > std::make_pair(aOther.m_start, aOther.m_end);
     }
 
 private:

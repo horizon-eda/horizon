@@ -8,10 +8,16 @@
 #include <future>
 #include <thread>
 #include <atomic>
+#include <range/v3/view.hpp>
 
 namespace horizon {
 CanvasMesh::CanvasMesh() : ca(CanvasPatch::SimplifyOnUpdate::NO)
 {
+}
+
+bool CanvasMesh::layer_is_substrate(int layer)
+{
+    return (layer == BoardLayers::L_OUTLINE) || ((layer >= 10'000) && (layer < 11'000));
 }
 
 void CanvasMesh::update(const Board &b)
@@ -47,6 +53,7 @@ void CanvasMesh::Layer3D::copy_sizes_from(const Layer3D &other)
     offset = other.offset;
     thickness = other.thickness;
     explode_mul = other.explode_mul;
+    span = other.span;
 }
 
 void CanvasMesh::prepare_worker(std::atomic_size_t &layer_counter, std::function<void()> cb)
@@ -61,14 +68,16 @@ void CanvasMesh::prepare_worker(std::atomic_size_t &layer_counter, std::function
             prepare_soldermask(layer);
         }
         else if (layer == BoardLayers::TOP_SILKSCREEN) {
-            prepare_silkscreen(layer, BoardLayers::TOP_MASK);
+            prepare_silkscreen(layer);
         }
         else if (layer == BoardLayers::BOTTOM_SILKSCREEN) {
-            prepare_silkscreen(layer, BoardLayers::BOTTOM_MASK);
+            prepare_silkscreen(layer);
         }
-        else if (layer == 20000) {
+        else if (layer_is_pth_barrel(layer)) {
+            const auto span = layers.at(layer).span;
+            assert(span.is_multilayer());
             for (const auto &it : ca.get_patches()) {
-                if (it.first.layer == 10000 && it.first.type == PatchType::HOLE_PTH) {
+                if (it.first.layer == span && it.first.type == PatchType::HOLE_PTH) {
                     ClipperLib::ClipperOffset ofs;
                     ofs.AddPaths(it.second, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
                     ClipperLib::Paths res;
@@ -79,19 +88,9 @@ void CanvasMesh::prepare_worker(std::atomic_size_t &layer_counter, std::function
                 }
             }
         }
-        else if (layer >= 10000) {
-            // nop will be cloned from outline layer
-        }
+
         else {
-            prepare_layer(layer);
-            if (layer == BoardLayers::L_OUTLINE) {
-                for (auto l : layers_to_prepare) {
-                    if (l >= 10'000 && l < 11'000) {
-                        layers.at(l).tris = layers.at(layer).tris;
-                        layers.at(l).walls = layers.at(layer).walls;
-                    }
-                }
-            }
+            prepare_layer(layer); // regular layers
         }
         layers.at(layer).done = true;
         if (cb)
@@ -115,39 +114,63 @@ void CanvasMesh::prepare(const Board &brd)
     layers[layer].offset = 0;
     layers[layer].thickness = brd.stackup.at(0).thickness / 1e6;
     layers[layer].explode_mul = 1;
+    layers[layer].span = layer;
     layers_to_prepare.push_back(layer);
 
     layer = BoardLayers::BOTTOM_COPPER;
     layers[layer].offset = -board_thickness;
     layers[layer].thickness = +(brd.stackup.at(layer).thickness / 1e6);
     layers[layer].explode_mul = -2 * n_inner_layers - 1;
+    layers[layer].span = layer;
     layers_to_prepare.push_back(layer);
 
-    {
+    { // prepare inner copper layers
         float offset = -(brd.stackup.at(0).substrate_thickness / 1e6);
         for (int i = 0; i < n_inner_layers; i++) {
             layer = -i - 1;
             layers[layer].offset = offset;
             layers[layer].thickness = -(brd.stackup.at(layer).thickness / 1e6);
             layers[layer].explode_mul = -1 - 2 * i;
+            layers[layer].span = layer;
             offset -= brd.stackup.at(layer).thickness / 1e6 + brd.stackup.at(layer).substrate_thickness / 1e6;
             layers_to_prepare.push_back(layer);
         }
     }
 
+    // substrate under top copper or thrus
     layer = BoardLayers::L_OUTLINE;
     layers[layer].offset = 0;
     layers[layer].thickness = -(brd.stackup.at(0).substrate_thickness / 1e6);
     layers[layer].explode_mul = 0;
+    layers[layer].span = BoardLayers::layer_range_through;
     layers_to_prepare.push_back(layer);
 
+    // substrate under top copper
+    if (n_inner_layers) {
+        layer = 10'000;
+        layers[layer].offset = 0;
+        layers[layer].thickness = -(brd.stackup.at(0).substrate_thickness / 1e6);
+        layers[layer].explode_mul = 0;
+        layers[layer].span = {BoardLayers::TOP_COPPER, BoardLayers::IN1_COPPER};
+        layers_to_prepare.push_back(layer);
+    }
+
+    // substrate under inner layers
     float offset = -(brd.stackup.at(0).substrate_thickness / 1e6);
     for (int i = 0; i < n_inner_layers; i++) {
-        int l = 10000 + i;
+        int l = 10'000 + 1 + i;
         offset -= brd.stackup.at(-i - 1).thickness / 1e6;
         layers[l].offset = offset;
         layers[l].thickness = -(brd.stackup.at(-i - 1).substrate_thickness / 1e6);
         layers[l].explode_mul = -2 - 2 * i;
+        if (i == (n_inner_layers - 1)) {
+            // from last inner layer to bottom copper
+            layers[l].span = {-i - 1, BoardLayers::BOTTOM_COPPER};
+        }
+        else {
+            // from inner layer to next inner layer
+            layers[l].span = {-i - 1, -i - 2};
+        }
 
         offset -= brd.stackup.at(-i - 1).substrate_thickness / 1e6;
         layers_to_prepare.push_back(l);
@@ -158,6 +181,7 @@ void CanvasMesh::prepare(const Board &brd)
     layers[layer].thickness = 0.01;
     layers[layer].alpha = .8;
     layers[layer].explode_mul = 3;
+    layers[layer].span = layer;
     layers_to_prepare.push_back(layer);
 
     layer = BoardLayers::BOTTOM_MASK;
@@ -165,37 +189,50 @@ void CanvasMesh::prepare(const Board &brd)
     layers[layer].thickness = 0.035;
     layers[layer].alpha = .8;
     layers[layer].explode_mul = -2 * n_inner_layers - 3;
+    layers[layer].span = layer;
     layers_to_prepare.push_back(layer);
 
     layer = BoardLayers::TOP_SILKSCREEN;
     layers[layer].offset = brd.stackup.at(0).thickness / 1e6 + 1e-3;
     layers[layer].thickness = 0.035;
     layers[layer].explode_mul = 4;
+    layers[layer].span = layer;
     layers_to_prepare.push_back(layer);
 
     layer = BoardLayers::BOTTOM_SILKSCREEN;
     layers[layer].offset = -board_thickness - .1e-3;
     layers[layer].thickness = -0.035;
     layers[layer].explode_mul = -2 * n_inner_layers - 4;
+    layers[layer].span = layer;
     layers_to_prepare.push_back(layer);
 
     layer = BoardLayers::TOP_PASTE;
     layers[layer].offset = brd.stackup.at(0).thickness / 1e6 + 1e-3;
     layers[layer].thickness = 0.035;
     layers[layer].explode_mul = 2;
+    layers[layer].span = layer;
     layers_to_prepare.push_back(layer);
 
     layer = BoardLayers::BOTTOM_PASTE;
     layers[layer].offset = -board_thickness;
     layers[layer].thickness = -0.035;
     layers[layer].explode_mul = -2 * n_inner_layers - 2;
+    layers[layer].span = layer;
     layers_to_prepare.push_back(layer);
 
 
-    layer = 20000; // pth holes
-    layers[layer].offset = 0;
-    layers[layer].thickness = -board_thickness;
-    layers_to_prepare.push_back(layer);
+    auto pths = ca.get_patches() | ranges::views::keys | ranges::views::filter([](const auto &x) {
+                    return x.layer.is_multilayer() && x.type == PatchType::HOLE_PTH;
+                })
+                | ranges::views::transform([](const auto &x) { return x.layer; }) | ranges::to<std::set>();
+
+    for (const auto [i, span] : pths | ranges::views::enumerate) {
+        layer = 20000 + i; // pth holes
+        layers[layer].offset = 0;
+        layers[layer].thickness = -board_thickness;
+        layers[layer].span = span;
+        layers_to_prepare.push_back(layer);
+    }
 }
 
 void CanvasMesh::prepare_work(std::function<void()> cb)
@@ -238,8 +275,19 @@ void CanvasMesh::prepare_soldermask(int layer)
     }
 }
 
-void CanvasMesh::prepare_silkscreen(int layer, int soldermask_layer)
+void CanvasMesh::prepare_silkscreen(int layer)
 {
+    int soldermask_layer;
+    int copper_layer;
+    if (layer == BoardLayers::TOP_SILKSCREEN) {
+        soldermask_layer = BoardLayers::TOP_MASK;
+        copper_layer = BoardLayers::TOP_COPPER;
+    }
+    else {
+        assert(layer == BoardLayers::BOTTOM_SILKSCREEN);
+        soldermask_layer = BoardLayers::BOTTOM_MASK;
+        copper_layer = BoardLayers::BOTTOM_COPPER;
+    }
     ClipperLib::Paths result;
     {
 
@@ -256,7 +304,7 @@ void CanvasMesh::prepare_silkscreen(int layer, int soldermask_layer)
     {
         ClipperLib::Clipper cl;
         for (const auto &it : ca.get_patches()) {
-            if (it.first.layer == 10000
+            if (it.first.layer.overlaps(copper_layer)
                 && (it.first.type == PatchType::HOLE_NPTH || it.first.type == PatchType::HOLE_PTH)) {
                 cl.AddPaths(it.second, ClipperLib::ptSubject, true);
             }
@@ -288,6 +336,22 @@ void CanvasMesh::prepare_silkscreen(int layer, int soldermask_layer)
     }
 }
 
+static bool check_hole_overlap(int layer, const LayerRange &layer_span, const LayerRange &hole_span)
+{
+    if (layer == BoardLayers::L_OUTLINE) {
+        return hole_span == BoardLayers::layer_range_through;
+    }
+    else if (CanvasMesh::layer_is_substrate(layer)) {
+        // for there to be a hole in a substrate layer, the substrate must be within the hole's span
+        assert(layer_span.is_multilayer());
+        return hole_span.overlaps(layer_span.start()) && hole_span.overlaps(layer_span.end());
+    }
+    else {
+        assert(layer_span == layer);
+        return hole_span.overlaps(layer);
+    }
+}
+
 void CanvasMesh::prepare_layer(int layer)
 {
     ClipperLib::Paths result;
@@ -296,12 +360,13 @@ void CanvasMesh::prepare_layer(int layer)
 
         ClipperLib::Clipper cl;
         for (const auto &it : ca.get_patches()) {
-            if (it.first.layer == layer) {
+            const auto l = layer_is_substrate(layer) ? BoardLayers::L_OUTLINE : layer;
+            if (it.first.layer == l) {
                 cl.AddPaths(it.second, ClipperLib::ptSubject, true);
             }
         }
 
-        if (layer == BoardLayers::L_OUTLINE) {
+        if (layer_is_substrate(layer)) {
             pft = ClipperLib::pftEvenOdd;
         }
         cl.Execute(ClipperLib::ctUnion, result, pft);
@@ -312,7 +377,7 @@ void CanvasMesh::prepare_layer(int layer)
         ClipperLib::Clipper cl;
         cl.AddPaths(result, ClipperLib::ptSubject, true);
         for (const auto &it : ca.get_patches()) {
-            if (it.first.layer == 10000
+            if (check_hole_overlap(layer, layers.at(layer).span, it.first.layer)
                 && (it.first.type == PatchType::HOLE_NPTH || it.first.type == PatchType::HOLE_PTH)) {
                 cl.AddPaths(it.second, ClipperLib::ptClip, true);
             }

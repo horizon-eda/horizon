@@ -7,7 +7,6 @@
 namespace horizon::ODB {
 
 const char *endl = "\r\n";
-const char *drills_layer = "drills";
 
 std::ostream &operator<<(std::ostream &os, const Coordi &c)
 {
@@ -106,6 +105,11 @@ std::string get_layer_name(int id)
     else {
         return "layer_id_" + std::to_string(id);
     }
+}
+
+std::string get_drills_layer_name(const LayerRange &span)
+{
+    return "drills-" + get_layer_name(span.end()) + "-" + get_layer_name(span.start());
 }
 
 std::string make_symbol_circle(uint64_t diameter)

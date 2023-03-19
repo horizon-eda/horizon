@@ -50,6 +50,7 @@ SRC_COMMON = \
 	src/pool/padstack.cpp\
 	src/common/polygon.cpp\
 	src/util/polygon_arc_removal_proxy.cpp\
+	src/util/layer_range.cpp\
 	src/common/hole.cpp\
 	src/common/shape.cpp\
 	src/common/patch_type_names.cpp\

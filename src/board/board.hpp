@@ -184,6 +184,8 @@ public:
     Outline get_outline() const;
     Outline get_outline_and_errors() const;
 
+    std::set<LayerRange> get_drill_spans() const;
+
     std::string board_directory; // for resolving relative paths in included boards
 
 private:

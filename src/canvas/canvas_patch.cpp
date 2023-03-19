@@ -74,7 +74,7 @@ void CanvasPatch::img_hole(const Hole &hole)
         patch_type = PatchType::HOLE_PTH;
     }
     auto poly = hole.to_polygon().remove_arcs(64);
-    img_polygon(poly, true);
+    img_polygon(poly, true, hole.span);
     net = net_saved;
     patch_type = patch_type_saved;
 }
@@ -86,11 +86,16 @@ void CanvasPatch::append_polygon(const Polygon &poly)
 
 void CanvasPatch::img_polygon(const Polygon &ipoly, bool tr)
 {
-    if (!img_layer_is_visible(ipoly.layer))
+    img_polygon(ipoly, tr, ipoly.layer);
+}
+
+void CanvasPatch::img_polygon(const Polygon &ipoly, bool tr, const LayerRange &layer)
+{
+    if (!img_layer_is_visible(layer))
         return;
     auto poly = ipoly.remove_arcs(64);
     if (poly.usage == nullptr) { // regular patch
-        PatchKey patch_key{patch_type, poly.layer, net ? net->uuid : UUID()};
+        PatchKey patch_key{patch_type, layer, net ? net->uuid : UUID()};
         patches[patch_key];
 
         patches[patch_key].emplace_back();
@@ -113,7 +118,7 @@ void CanvasPatch::img_polygon(const Polygon &ipoly, bool tr)
         }
     }
     else if (auto plane = dynamic_cast<Plane *>(poly.usage.ptr)) {
-        PatchKey patch_key{PatchType::PLANE, poly.layer, plane->net ? plane->net->uuid : UUID()};
+        PatchKey patch_key{PatchType::PLANE, layer, plane->net ? plane->net->uuid : UUID()};
         patches[patch_key];
 
         for (const auto &frag : plane->fragments) {

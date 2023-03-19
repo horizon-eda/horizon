@@ -205,26 +205,28 @@ void CanvasODB::img_text(const Text *text)
 
 void CanvasODB::img_hole(const Hole &hole)
 {
+    auto &feats = *drill_features.at(hole.span);
     if (hole.shape == Hole::Shape::ROUND) {
-        auto &pad = drill_features->draw_circle(transform.transform(hole.placement.shift), hole.diameter);
+        auto &pad = feats.draw_circle(transform.transform(hole.placement.shift), hole.diameter);
         if (patch_type == PatchType::VIA) {
             if (object_refs_current.size()) {
                 const auto &ref = object_refs_current.back();
                 if (ref.type == ObjectType::VIA) {
                     auto &subnet = *via_subnets.at(ref.uuid);
-                    eda_data->add_feature_id(subnet, ODB::EDAData::FeatureID::Type::HOLE, ODB::drills_layer, pad.index);
+                    eda_data->add_feature_id(subnet, ODB::EDAData::FeatureID::Type::HOLE,
+                                             ODB::get_drills_layer_name(hole.span), pad.index);
                 }
             }
-            drill_features->add_attribute(pad, ODB::attribute::drill::VIA);
+            feats.add_attribute(pad, ODB::attribute::drill::VIA);
         }
         else if (hole.plated) {
-            drill_features->add_attribute(pad, ODB::attribute::drill::PLATED);
+            feats.add_attribute(pad, ODB::attribute::drill::PLATED);
             if (auto subnet_toep = get_subnet_toeprint())
-                eda_data->add_feature_id(*subnet_toep, ODB::EDAData::FeatureID::Type::COPPER, ODB::drills_layer,
-                                         pad.index);
+                eda_data->add_feature_id(*subnet_toep, ODB::EDAData::FeatureID::Type::COPPER,
+                                         ODB::get_drills_layer_name(hole.span), pad.index);
         }
         else {
-            drill_features->add_attribute(pad, ODB::attribute::drill::NON_PLATED);
+            feats.add_attribute(pad, ODB::attribute::drill::NON_PLATED);
         }
     }
     else if (hole.shape == Hole::Shape::SLOT) {
@@ -236,15 +238,15 @@ void CanvasODB::img_hole(const Hole &hole)
         double d = std::max(((int64_t)hole.length - (int64_t)hole.diameter) / 2, (int64_t)0);
         const auto dv = Coordd::euler(d, angle_to_rad(tr.get_angle())).to_coordi();
 
-        auto &line = drill_features->draw_line(tr.shift - dv, tr.shift + dv, hole.diameter);
+        auto &line = feats.draw_line(tr.shift - dv, tr.shift + dv, hole.diameter);
         if (hole.plated) {
-            drill_features->add_attribute(line, ODB::attribute::drill::PLATED);
+            feats.add_attribute(line, ODB::attribute::drill::PLATED);
             if (auto subnet_toep = get_subnet_toeprint())
-                eda_data->add_feature_id(*subnet_toep, ODB::EDAData::FeatureID::Type::HOLE, ODB::drills_layer,
-                                         line.index);
+                eda_data->add_feature_id(*subnet_toep, ODB::EDAData::FeatureID::Type::HOLE,
+                                         ODB::get_drills_layer_name(hole.span), line.index);
         }
         else {
-            drill_features->add_attribute(line, ODB::attribute::drill::NON_PLATED);
+            feats.add_attribute(line, ODB::attribute::drill::NON_PLATED);
         }
     }
 }

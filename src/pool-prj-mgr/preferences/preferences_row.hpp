@@ -67,6 +67,35 @@ private:
     Gtk::SpinButton *sp = nullptr;
 };
 
+template <typename T> class PreferencesRowEnum : public PreferencesRow {
+public:
+    PreferencesRowEnum(const std::string &title, const std::string &subtitle, Preferences &prefs, T &v,
+                       const std::vector<std::pair<T, std::string>> &names)
+        : PreferencesRow(title, subtitle, prefs), value(v)
+    {
+        combo = Gtk::manage(new Gtk::ComboBoxText);
+        for (const auto &[key, enum_value] : names) {
+            combo->append(std::to_string(static_cast<int>(key)), enum_value);
+        }
+        combo->set_valign(Gtk::ALIGN_CENTER);
+        combo->show();
+        pack_start(*combo, false, false, 0);
+    }
+
+    void bind()
+    {
+        combo->set_active_id(std::to_string(static_cast<int>(value)));
+        combo->signal_changed().connect([this] {
+            value = static_cast<T>(std::stoi(combo->get_active_id()));
+            preferences.signal_changed().emit();
+        });
+    }
+
+private:
+    T &value;
+    Gtk::ComboBoxText *combo = nullptr;
+};
+
 class PreferencesGroup : public Gtk::Box {
 public:
     PreferencesGroup(const std::string &title);

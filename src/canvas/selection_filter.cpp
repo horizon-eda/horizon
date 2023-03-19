@@ -17,8 +17,8 @@ bool SelectionFilter::can_select(const SelectableRef &sel) const
     if (object_filter.count(type)) {
         const auto &filter = object_filter.at(type);
         for (const auto [layer, enabled] : filter.layers) {
-            if (sel.layer.overlaps(layer))
-                return enabled;
+            if (sel.layer.overlaps(layer) && enabled)
+                return true;
         }
         return filter.other_layers;
     }

@@ -98,10 +98,10 @@ static void clearance_cu_worker_expand(const PatchesVector &patches, PatchesExpa
 
 inline bool check_clearance_copper_filter_patches(const CanvasPatch::PatchKey &key)
 {
-    if (key.type == PatchType::OTHER || key.type == PatchType::TEXT) {
+    if (key.type == PatchType::OTHER || key.type == PatchType::TEXT || key.type == PatchType::HOLE_NPTH) {
         return false;
     }
-    return BoardLayers::is_copper(key.layer) || (key.type == PatchType::HOLE_PTH && key.layer == 10000);
+    return BoardLayers::is_copper(key.layer);
 }
 
 
@@ -187,16 +187,9 @@ clearance_cu_worker_intersect(const PatchesVector &patches, const PatchesExpande
                     e.comment = patch_type_names.at(key1.type) + get_net_name(net1) + " near "
                                 + patch_type_names.at(key2.type) + get_net_name(net2);
 
-                    if (BoardLayers::is_copper(key1.layer) || BoardLayers::is_copper(key2.layer)) {
-                        const auto cu_layer = BoardLayers::is_copper(key1.layer) ? key1.layer : key2.layer;
-                        e.comment += " on layer " + brd.get_layers().at(cu_layer).name;
-                        e.layers.insert(cu_layer);
-                    }
-                    else { // pth
-                        e.layers.insert(BoardLayers::TOP_COPPER);
-                        e.layers.insert(BoardLayers::BOTTOM_COPPER);
-                    }
-
+                    const auto layer_isect = key1.layer.intersection(key2.layer).value();
+                    e.add_layer_range(brd, layer_isect);
+                    e.comment += " on layer " + brd.get_layer_name(layer_isect);
                     e.error_polygons = {ite};
                 }
             }
@@ -250,22 +243,20 @@ RulesCheckResult BoardRules::check_clearance_copper(const Board &brd, RulesCheck
 
     for (auto i = PatchesVector::index_type{0}; i < n_patches; i++) {
         auto &it = patches.at(i);
-        // If it_is_copper is false it must be PTH on layer 10000
-        const bool it_is_copper = BoardLayers::is_copper(it.key.layer);
-        const bool it_is_barrel = !it_is_copper;
         const Net *net_it = it.key.net ? &brd.block->nets.at(it.key.net) : nullptr;
         for (auto j = i + 1; j < n_patches; j++) {
             auto &other = patches.at(j);
 
             if (it.key.net != other.key.net) {
-                const bool other_is_copper = BoardLayers::is_copper(other.key.layer);
-                const bool other_is_barrel = !other_is_copper;
                 const Net *net_other = other.key.net ? &brd.block->nets.at(other.key.net) : nullptr;
 
-                if ((it_is_copper && it.key.layer == other.key.layer) || (it_is_barrel || other_is_barrel)) {
-                    const int layer = it_is_copper ? it.key.layer : other.key.layer;
-                    const auto clearance =
-                            get_clearance_copper(net_it, net_other, layer).get_clearance(it.key.type, other.key.type);
+                if (it.key.layer.overlaps(other.key.layer)) {
+                    const auto layer_isect = it.key.layer.intersection(other.key.layer).value();
+
+                    auto clearance = find_clearance(*this, &BoardRules::get_clearance_copper,
+                                                    brd.get_layers_for_range(layer_isect),
+                                                    std::forward_as_tuple(net_it, net_other),
+                                                    std::forward_as_tuple(it.key.type, other.key.type));
 
                     if (bbox_test_overlap(it.bbox, other.bbox, clearance)) {
                         patch_pairs.push_back({i, j, clearance});

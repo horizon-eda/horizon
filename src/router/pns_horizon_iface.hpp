@@ -153,7 +153,7 @@ private:
 
     std::pair<horizon::BoardPackage *, horizon::Pad *> find_pad(int layer, const horizon::Coord<int64_t> &c);
     horizon::BoardJunction *find_junction(int layer, const horizon::Coord<int64_t> &c);
-    std::set<horizon::BoardJunction *> find_junctions(const horizon::Coord<int64_t> &c);
+    std::set<horizon::BoardJunction *> find_junctions(const horizon::Via &via);
     std::set<horizon::BoardJunction *> junctions_maybe_erased;
 };
 } // namespace PNS

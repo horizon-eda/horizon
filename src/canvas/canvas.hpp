@@ -19,6 +19,7 @@
 #include "pool/unit.hpp"
 #include "util/vector_pair.hpp"
 #include "text_renderer.hpp"
+#include "show_via_span.hpp"
 
 namespace horizon {
 class Canvas {
@@ -72,6 +73,7 @@ public:
     bool show_all_junctions_in_schematic = false;
     bool show_text_in_tracks = false;
     bool show_text_in_vias = false;
+    ShowViaSpan show_via_span = ShowViaSpan::BLIND_BURIED;
 
     bool add_pad_bbox_targets = false;
 
@@ -198,7 +200,7 @@ protected:
     void draw_lock(const Coordf &center, float size, ColorP color = ColorP::FROM_LAYER, int layer = 10000,
                    bool tr = true);
 
-    virtual bool img_layer_is_visible(int layer) const
+    virtual bool img_layer_is_visible(const LayerRange &layer) const
     {
         return true;
     }

@@ -99,6 +99,10 @@ PropertyPanel::PropertyPanel(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
             e = new PropertyEditorScale(type, property, this);
             break;
 
+        case ObjectProperty::Type::LAYER_RANGE:
+            e = new PropertyEditorLayerRange(type, property, this);
+            break;
+
         default:
             e = new PropertyEditor(type, property, this);
         }

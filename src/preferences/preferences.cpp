@@ -35,6 +35,12 @@ static const LutEnumStr<Preferences::StockInfoProviderSel> stock_info_provider_l
         {"partinfo", Preferences::StockInfoProviderSel::PARTINFO},
         {"digikey", Preferences::StockInfoProviderSel::DIGIKEY}};
 
+static const LutEnumStr<ShowViaSpan> show_via_span_lut = {
+        {"none", ShowViaSpan::NONE},
+        {"blind_buried", ShowViaSpan::BLIND_BURIED},
+        {"all", ShowViaSpan::ALL},
+};
+
 #ifdef G_OS_WIN32
 static const bool capture_output_default = true;
 #else
@@ -197,6 +203,7 @@ json BoardPreferences::serialize() const
     j["highlight_on_top"] = highlight_on_top;
     j["show_text_in_tracks"] = show_text_in_tracks;
     j["show_text_in_vias"] = show_text_in_vias;
+    j["show_via_span"] = show_via_span_lut.lookup_reverse(show_via_span);
     j["move_using_router"] = move_using_router;
     return j;
 }
@@ -207,6 +214,7 @@ void BoardPreferences::load_from_json(const json &j)
     highlight_on_top = j.value("highlight_on_top", true);
     show_text_in_tracks = j.value("show_text_in_tracks", true);
     show_text_in_vias = j.value("show_text_in_vias", true);
+    show_via_span = show_via_span_lut.lookup(j.value("show_via_span", ""), ShowViaSpan::BLIND_BURIED);
     move_using_router = j.value("move_using_router", true);
 }
 

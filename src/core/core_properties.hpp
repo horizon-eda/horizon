@@ -1,12 +1,13 @@
 #pragma once
 #include "common/layer.hpp"
 #include "util/uuid.hpp"
+#include "util/layer_range.hpp"
 #include <stdint.h>
 
 namespace horizon {
 class PropertyValue {
 public:
-    enum class Type { INVALID, INT, BOOL, STRING, UUID, DOUBLE };
+    enum class Type { INVALID, INT, BOOL, STRING, UUID, DOUBLE, LAYER_RANGE };
     PropertyValue()
     {
     }
@@ -85,6 +86,19 @@ public:
     };
 
     UUID value;
+};
+
+class PropertyValueLayerRange : public PropertyValue {
+public:
+    PropertyValueLayerRange(const LayerRange &v = LayerRange()) : value(v)
+    {
+    }
+    Type get_type() const override
+    {
+        return Type::LAYER_RANGE;
+    };
+
+    LayerRange value;
 };
 
 class PropertyMeta {

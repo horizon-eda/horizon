@@ -192,12 +192,13 @@ RulesCheckResult PackageRules::check_clearance(const class Package &pkg) const
     std::map<int, ClipperLib::ClipperOffset> clippers_offset;
     std::set<int> layers;
     for (const auto &[key, paths] : ca.get_patches()) {
-        if (any_of(static_cast<BoardLayers::Layer>(key.layer),
-                   {BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER, BoardLayers::TOP_PACKAGE,
-                    BoardLayers::BOTTOM_PACKAGE})) {
-            clippers_offset[key.layer].AddPaths(paths, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
+        if (!key.layer.is_multilayer()
+            && any_of(static_cast<BoardLayers::Layer>(key.layer.start()),
+                      {BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER, BoardLayers::TOP_PACKAGE,
+                       BoardLayers::BOTTOM_PACKAGE})) {
+            clippers_offset[key.layer.start()].AddPaths(paths, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
         }
-        layers.insert(key.layer);
+        layers.insert(key.layer.start());
     }
     std::map<int, ClipperLib::Paths> paths;
     for (auto &[layer, cl] : clippers_offset) {

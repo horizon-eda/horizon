@@ -1,6 +1,7 @@
 #pragma once
 #include "canvas.hpp"
 #include "clipper/clipper.hpp"
+#include "util/layer_range.hpp"
 
 namespace horizon {
 class CanvasPatch : public Canvas {
@@ -8,7 +9,7 @@ public:
     class PatchKey {
     public:
         PatchType type;
-        int layer;
+        LayerRange layer;
         UUID net;
         bool operator<(const PatchKey &other) const
         {
@@ -47,6 +48,7 @@ private:
     PatchType patch_type = PatchType::OTHER;
     virtual void img_net(const Net *net) override;
     virtual void img_polygon(const Polygon &poly, bool tr) override;
+    virtual void img_polygon(const Polygon &poly, bool tr, const LayerRange &layer);
     virtual void img_hole(const class Hole &hole) override;
     virtual void img_patch_type(PatchType type) override;
 

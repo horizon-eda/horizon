@@ -286,4 +286,29 @@ protected:
     Gtk::Widget *create_editor() override;
 };
 
+class PropertyEditorLayerRange : public PropertyEditor {
+    using PropertyEditor::PropertyEditor;
+
+public:
+    void reload() override;
+    PropertyValue &get_value() override;
+    PropertyMeta &get_meta() override
+    {
+        return my_meta;
+    };
+
+protected:
+    Gtk::Widget *create_editor() override;
+
+private:
+    class LayerComboBox *combo_start = nullptr;
+    class LayerComboBox *combo_end = nullptr;
+    void changed();
+    PropertyValueLayerRange value;
+    PropertyMetaLayers my_meta;
+
+    void update();
+};
+
+
 } // namespace horizon
