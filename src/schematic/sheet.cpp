@@ -230,7 +230,7 @@ void Sheet::expand_symbol_without_net_lines(const UUID &sym_uuid, const Schemati
     }
 
     for (auto &it_text : schsym.texts) {
-        it_text->text_override = schsym.replace_text(it_text->text, &it_text->overridden, sch);
+        it_text->text_override = schsym.replace_text(it_text->text, &it_text->overridden, sch, inst_map);
     }
 }
 
