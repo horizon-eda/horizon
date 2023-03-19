@@ -1469,7 +1469,7 @@ std::string ImpBase::get_complete_display_name(const SelectableRef &sr)
     auto layers = core->get_layer_provider().get_layers();
     if (layers.count(sr.layer.start()) && layers.count(sr.layer.end())) {
         if (sr.layer.is_multilayer())
-            text += " (" + layers.at(sr.layer.start()).name + +" - " + layers.at(sr.layer.end()).name + ")";
+            text += " (" + layers.at(sr.layer.end()).name + +" - " + layers.at(sr.layer.start()).name + ")";
         else
             text += " (" + layers.at(sr.layer.start()).name + ")";
     }

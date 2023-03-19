@@ -1,6 +1,8 @@
 #include "rules.hpp"
 #include <assert.h>
 #include "nlohmann/json.hpp"
+#include "common/layer_provider.hpp"
+#include "util/layer_range.hpp"
 
 namespace horizon {
 
@@ -43,6 +45,12 @@ RulesCheckError::RulesCheckError(RulesCheckErrorLevel lev) : level(lev)
 
 RulesCheckError::RulesCheckError(RulesCheckErrorLevel lev, const std::string &c) : level(lev), comment(c)
 {
+}
+
+void RulesCheckError::add_layer_range(const LayerProvider &prv, const LayerRange &range)
+{
+    const auto r = prv.get_layers_for_range(range);
+    layers.insert(r.begin(), r.end());
 }
 
 json RulesCheckError::serialize() const

@@ -28,6 +28,8 @@ public:
     bool from_rules = true;
     bool locked = false;
 
+    LayerRange span;
+
     json serialize() const;
 };
 } // namespace horizon

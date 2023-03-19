@@ -120,7 +120,7 @@ void CanvasGerber::img_set_padstack(bool v)
 
 void CanvasGerber::img_hole(const Hole &hole)
 {
-    auto wr = exporter.get_drill_writer(hole.plated);
+    auto wr = exporter.get_drill_writer(hole.span, hole.plated);
     if (hole.shape == Hole::Shape::ROUND)
         wr->draw_hole(transform.transform(hole.placement.shift), hole.diameter);
     else if (hole.shape == Hole::Shape::SLOT) {

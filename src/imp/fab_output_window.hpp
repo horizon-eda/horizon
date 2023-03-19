@@ -11,6 +11,7 @@ namespace horizon {
 
 class FabOutputWindow : public Gtk::Window, public Changeable {
     friend class GerberLayerEditor;
+    friend class DrillEditor;
 
 public:
     FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class IDocumentBoard &c,
@@ -41,6 +42,9 @@ private:
     Gtk::Switch *zip_output_switch = nullptr;
     bool can_export = true;
     void update_export_button();
+
+    Gtk::Box *blind_buried_box = nullptr;
+    Gtk::ListBox *blind_buried_drills_box = nullptr;
 
     Gtk::Entry *odb_filename_entry = nullptr;
     Gtk::Button *odb_filename_button = nullptr;
@@ -86,11 +90,16 @@ private:
     DoneRevealerController odb_done_revealer_controller;
 
     Glib::RefPtr<Gtk::SizeGroup> sg_layer_name;
+    Glib::RefPtr<Gtk::SizeGroup> sg_drill_span_name;
 
     WindowStateStore state_store;
 
     void update_drill_visibility();
     void update_odb_visibility();
+
+    void update_blind_buried_drills();
+    void reload_drills();
+
     unsigned int n_layers = 0;
 };
 } // namespace horizon

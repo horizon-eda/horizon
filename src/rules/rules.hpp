@@ -30,6 +30,7 @@ public:
     bool has_location = false;
     ClipperLib::Paths error_polygons;
     std::set<int> layers;
+    void add_layer_range(const class LayerProvider &prv, const class LayerRange &range);
 
     json serialize() const;
 };

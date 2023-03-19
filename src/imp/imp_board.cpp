@@ -329,6 +329,7 @@ void ImpBoard::apply_preferences()
     canvas->set_highlight_on_top(preferences.board.highlight_on_top);
     canvas->show_text_in_tracks = preferences.board.show_text_in_tracks;
     canvas->show_text_in_vias = preferences.board.show_text_in_vias;
+    canvas->show_via_span = preferences.board.show_via_span;
     ImpLayer::apply_preferences();
     canvas_update_from_pp();
 }
@@ -1330,7 +1331,7 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpBoard::get_selection_filte
             {ObjectType::BOARD_PACKAGE, {layers_package, Flag::DEFAULT}},
             {ObjectType::TRACK, {layers_track, Flag::DEFAULT}},
             {ObjectType::BOARD_NET_TIE, {layers_track, Flag::DEFAULT}},
-            {ObjectType::VIA, {{}, Flag::WORK_LAYER_ONLY_ENABLED}},
+            {ObjectType::VIA, {layers_track, Flag::DEFAULT}},
             {ObjectType::BOARD_DECAL, {}},
             {ObjectType::POLYGON, {layers_polygon, Flag::HAS_OTHERS}},
             {ObjectType::TEXT, {layers_line, Flag::HAS_OTHERS}},

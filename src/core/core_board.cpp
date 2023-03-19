@@ -289,6 +289,10 @@ bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID
             return true;
         }
 
+        case ObjectProperty::ID::SPAN:
+            dynamic_cast<PropertyValueLayerRange &>(value).value = via->span;
+            return true;
+
         case ObjectProperty::ID::POSITION_X:
             dynamic_cast<PropertyValueInt &>(value).value = via->junction->position.x;
             return true;
@@ -551,6 +555,11 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
             via->locked = dynamic_cast<const PropertyValueBool &>(value).value;
             break;
 
+        case ObjectProperty::ID::SPAN:
+            via->span = dynamic_cast<const PropertyValueLayerRange &>(value).value;
+            via->expand(*brd);
+            break;
+
         case ObjectProperty::ID::POSITION_X:
             via->junction->position.x = dynamic_cast<const PropertyValueInt &>(value).value;
             return true;
@@ -700,6 +709,17 @@ bool CoreBoard::get_property_meta(ObjectType type, const UUID &uu, ObjectPropert
         switch (property) {
         case ObjectProperty::ID::WIDTH:
             meta.is_settable = !plane->from_rules;
+            return true;
+
+        default:
+            return false;
+        }
+    } break;
+
+    case ObjectType::VIA: {
+        switch (property) {
+        case ObjectProperty::ID::SPAN:
+            layers_to_meta(meta);
             return true;
 
         default:

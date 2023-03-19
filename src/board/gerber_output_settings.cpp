@@ -73,6 +73,12 @@ GerberOutputSettings::GerberOutputSettings(const json &j)
     if (j.count("drill_mode")) {
         drill_mode = mode_lut.lookup(j.at("drill_mode"));
     }
+    if (j.count("blind_buried_drills_filenames")) {
+        const auto &o = j.at("blind_buried_drills_filenames");
+        for (const auto &it : o) {
+            blind_buried_drills_filenames.emplace(it.at("span"), it.at("filename").get<std::string>());
+        }
+    }
 }
 
 void GerberOutputSettings::update_for_board(const Board &brd)
@@ -100,6 +106,36 @@ void GerberOutputSettings::update_for_board(const Board &brd)
     add_layer(BoardLayers::BOTTOM_PASTE);
 }
 
+static std::string layer_to_string_for_drill(int l)
+{
+    switch (l) {
+    case BoardLayers::TOP_COPPER:
+        return "top";
+    case BoardLayers::BOTTOM_COPPER:
+        return "bottom";
+    default:
+        if (l < BoardLayers::TOP_COPPER && l > BoardLayers::BOTTOM_COPPER) {
+            return "inner" + std::to_string(-l);
+        }
+    }
+    return "?";
+}
+
+static std::string span_to_string_for_drill(const LayerRange &r)
+{
+    return "-" + layer_to_string_for_drill(r.end()) + "-" + layer_to_string_for_drill(r.start()) + ".txt";
+}
+
+void GerberOutputSettings::update_blind_buried_drills_filenames(const Board &brd)
+{
+    auto spans = brd.get_drill_spans();
+    spans.erase(BoardLayers::layer_range_through);
+    map_erase_if(blind_buried_drills_filenames, [&spans](const auto &it) { return spans.count(it.first) == 0; });
+    for (auto &span : spans) {
+        blind_buried_drills_filenames.emplace(span, span_to_string_for_drill(span));
+    }
+}
+
 json GerberOutputSettings::serialize() const
 {
     json j;
@@ -113,6 +149,14 @@ json GerberOutputSettings::serialize() const
     for (const auto &it : layers) {
         j["layers"][std::to_string(it.first)] = it.second.serialize();
     }
+    if (blind_buried_drills_filenames.size()) {
+        auto o = json::array();
+        for (const auto &[span, filename] : blind_buried_drills_filenames) {
+            o.push_back({{"span", span.serialize()}, {"filename", filename}});
+        }
+        j["blind_buried_drills_filenames"] = o;
+    }
+
 
     return j;
 }

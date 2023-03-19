@@ -12,6 +12,7 @@
 #include "util/bbox_accumulator.hpp"
 #include "util/polygon_arc_removal_proxy.hpp"
 #include <filesystem>
+#include <range/v3/view.hpp>
 
 namespace horizon {
 
@@ -42,7 +43,7 @@ const LutEnumStr<Board::OutputFormat> Board::output_format_lut = {
         {"odb", Board::OutputFormat::ODB},
 };
 
-static const unsigned int app_version = 18;
+static const unsigned int app_version = 19;
 
 unsigned int Board::get_app_version()
 {
@@ -465,17 +466,23 @@ void Board::update_junction_connections()
         it.connected_vias.clear();
         it.connected_net_ties.clear();
         it.has_via = false;
-        it.needs_via = false;
+        it.required_span = {};
     }
     for (auto &[uu, it] : tracks) {
         for (const auto &it_ft : {it.from, it.to}) {
             if (it_ft.is_junc()) {
                 auto &ju = *it_ft.junc;
                 ju.connected_tracks.push_back(uu);
+                ju.required_span.merge(it.layer);
                 ju.layer.merge(it.layer);
-                if (ju.layer.is_multilayer())
-                    ju.needs_via = true;
             }
+        }
+    }
+    for (auto &[uu, it] : net_ties) {
+        for (auto &it_ft : {&it.from, &it.to}) {
+            (*it_ft)->connected_net_ties.push_back(uu);
+            (*it_ft)->required_span.merge(it.layer);
+            (*it_ft)->layer.merge(it.layer);
         }
     }
 
@@ -490,14 +497,8 @@ void Board::update_junction_connections()
     }
     for (auto &[uu, it] : vias) {
         it.junction->has_via = true;
-        it.junction->layer = LayerRange(BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER);
+        it.junction->layer = it.span;
         it.junction->connected_vias.push_back(uu);
-    }
-    for (auto &[uu, it] : net_ties) {
-        for (auto &it_ft : {&it.from, &it.to}) {
-            (*it_ft)->connected_net_ties.push_back(uu);
-            (*it_ft)->layer.merge(it.layer);
-        }
     }
 }
 
@@ -739,7 +740,7 @@ void Board::expand_some()
         ParameterSet ps_hole = it.second.parameter_set;
         ps_hole.emplace(ParameterID::HOLE_SOLDER_MASK_EXPANSION, params.hole_solder_mask_expansion);
         it.second.padstack.apply_parameter_set(ps_hole);
-        it.second.padstack.expand_inner(n_inner_layers);
+        it.second.padstack.expand_inner(n_inner_layers, BoardLayers::layer_range_through);
         if (it.second.padstack.type == Padstack::Type::HOLE && it.second.net == nullptr) {
             warnings.emplace_back(it.second.placement.shift, "PTH hole without net");
         }
@@ -753,9 +754,21 @@ void Board::expand_some()
         }
     }
 
-    for (const auto &it : junctions) {
-        if (it.second.needs_via && !it.second.has_via) {
-            warnings.emplace_back(it.second.position, "Junction needs via");
+    for (const auto &[uu, it] : junctions) {
+        if (it.required_span.is_multilayer() && !it.has_via) {
+            warnings.emplace_back(it.position, "Junction needs via");
+        }
+    }
+    for (const auto &[uu, it] : vias) {
+        // check that via's span is sufficient for required span
+
+        // merge required span and actual span
+        auto sp = it.junction->required_span;
+        sp.merge(it.span);
+
+        // if the resulting span is not the via's span it must have gotten extended by the required span
+        if (sp != it.span) {
+            warnings.emplace_back(it.junction->position, "Junction's via has insufficient span");
         }
     }
 
@@ -1484,6 +1497,15 @@ Board::Outline Board::get_outline() const
 Board::Outline Board::get_outline_and_errors() const
 {
     return get_outline(true);
+}
+
+std::set<LayerRange> Board::get_drill_spans() const
+{
+    // only vias can add non-through spans
+    auto spans = vias | ranges::views::values | ranges::views::transform([](const auto &x) { return x.span; })
+                 | ranges::to<std::set>();
+    spans.insert(BoardLayers::layer_range_through);
+    return spans;
 }
 
 } // namespace horizon

@@ -716,14 +716,14 @@ std::unique_ptr<PNS::VIA> PNS_HORIZON_IFACE::syncVia(const horizon::Via *via)
 {
     auto pos = via->junction->position;
     int net = PNS::ITEM::UnusedNet;
+    const auto &span = via->span;
     if (via->junction->net)
         net = get_net_code(via->junction->net->uuid);
-    std::unique_ptr<PNS::VIA> pvia(new PNS::VIA(VECTOR2I(pos.x, pos.y),
-                                                LAYER_RANGE(layer_to_router(horizon::BoardLayers::TOP_COPPER),
-                                                            layer_to_router(horizon::BoardLayers::BOTTOM_COPPER)),
-                                                via->parameter_set.at(horizon::ParameterID::VIA_DIAMETER),
-                                                via->parameter_set.at(horizon::ParameterID::HOLE_DIAMETER), net,
-                                                VIATYPE::THROUGH));
+    std::unique_ptr<PNS::VIA> pvia(new PNS::VIA(
+            VECTOR2I(pos.x, pos.y), LAYER_RANGE(layer_to_router(span.start()), layer_to_router(span.end())),
+            via->parameter_set.at(horizon::ParameterID::VIA_DIAMETER),
+            via->parameter_set.at(horizon::ParameterID::HOLE_DIAMETER), net,
+            span == horizon::BoardLayers::layer_range_through ? VIATYPE::THROUGH : VIATYPE::BLIND_BURIED));
 
     // via->SetParent( aVia );
     pvia->SetParent(get_parent(via));
@@ -940,19 +940,18 @@ std::pair<horizon::BoardPackage *, horizon::Pad *> PNS_HORIZON_IFACE::find_pad(i
 horizon::BoardJunction *PNS_HORIZON_IFACE::find_junction(int layer, const horizon::Coordi &c)
 {
     for (auto &it : board->junctions) {
-        if ((layer == 10000 || it.second.layer == layer || it.second.has_via) && it.second.position == c) {
+        if (it.second.layer.overlaps(layer) && it.second.position == c) {
             return &it.second;
         }
     }
     return nullptr;
 }
 
-std::set<horizon::BoardJunction *> PNS_HORIZON_IFACE::find_junctions(const horizon::Coordi &c)
+std::set<horizon::BoardJunction *> PNS_HORIZON_IFACE::find_junctions(const horizon::Via &via)
 {
     std::set<horizon::BoardJunction *> junctions;
-    const auto cu_layers = horizon::LayerRange(horizon::BoardLayers::TOP_COPPER, horizon::BoardLayers::BOTTOM_COPPER);
     for (auto &[uu, ju] : board->junctions) {
-        if (ju.net && ju.position == c && ju.layer.overlaps(cu_layers)) {
+        if (ju.net && ju.position == via.junction->position && ju.layer.overlaps(via.span)) {
             junctions.insert(&ju);
         }
     }
@@ -961,7 +960,7 @@ std::set<horizon::BoardJunction *> PNS_HORIZON_IFACE::find_junctions(const horiz
 
 void PNS_HORIZON_IFACE::AddItem(PNS::ITEM *aItem)
 {
-    // std::cout << "!!!iface add item" << std::endl;
+    // std::cout << "!!!iface add item " << aItem->KindStr() << std::endl;
     switch (aItem->Kind()) {
     case PNS::ITEM::SEGMENT_T:
     case PNS::ITEM::ARC_T: {
@@ -1038,11 +1037,17 @@ void PNS_HORIZON_IFACE::AddItem(PNS::ITEM *aItem)
                                 .first->second;
             via->parameter_set = ps;
 
-            horizon::Coordi c(pvia->Pos().x, pvia->Pos().y);
-            auto junctions = find_junctions(c);
+            horizon::BoardJunction temp_junction{horizon::UUID()};
+            temp_junction.position = {pvia->Pos().x, pvia->Pos().y};
+
+            via->junction = &temp_junction;
+            auto junctions = find_junctions(*via);
+            via->junction = nullptr;
+
             if (junctions.size()) {
                 auto new_junc = *junctions.begin();
                 via->junction = new_junc;
+                new_junc->layer.merge(via->span);
                 for (auto ju : junctions) {
                     if (ju == new_junc)
                         continue;
@@ -1053,6 +1058,7 @@ void PNS_HORIZON_IFACE::AddItem(PNS::ITEM *aItem)
                             for (auto &it_ft : {&track.from, &track.to}) {
                                 if (it_ft->junc == ju) {
                                     it_ft->connect(new_junc);
+                                    new_junc->connected_tracks.push_back(track_uu);
                                 }
                             }
                         }
@@ -1062,8 +1068,9 @@ void PNS_HORIZON_IFACE::AddItem(PNS::ITEM *aItem)
             else {
                 auto juu = horizon::UUID::random();
                 auto ju = &board->junctions.emplace(juu, juu).first->second;
-                ju->position = c;
+                ju->position = temp_junction.position;
                 ju->net = net;
+                ju->layer = via->span;
                 via->junction = ju;
             }
             via->junction->has_via = true;
@@ -1146,7 +1153,7 @@ void PNS_HORIZON_IFACE::UpdateItem(ITEM *aItem)
         via->junction->position.x = pvia->Pos().x;
         via->junction->position.y = pvia->Pos().y;
         // check if the via's position could merge junctions
-        auto junctions = find_junctions(via->junction->position);
+        auto junctions = find_junctions(*via);
         for (auto ju : junctions) {
             if (ju == via->junction)
                 continue;

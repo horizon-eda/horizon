@@ -3,6 +3,7 @@
 #include "common/lut.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "util/uuid.hpp"
+#include "util/layer_range.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -28,6 +29,9 @@ public:
     void update_for_board(const class Board &brd);
 
     std::map<int, GerberLayer> layers;
+    std::map<LayerRange, std::string> blind_buried_drills_filenames;
+
+    void update_blind_buried_drills_filenames(const Board &brd);
 
     enum class DrillMode { INDIVIDUAL, MERGED };
     DrillMode drill_mode = DrillMode::MERGED;

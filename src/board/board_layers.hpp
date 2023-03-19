@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "util/layer_range.hpp"
 
 namespace horizon {
 class BoardLayers {
@@ -34,9 +35,16 @@ public:
         BOTTOM_NOTES = -200
     };
 
+    static const LayerRange layer_range_through;
+
     static bool is_copper(int l)
     {
         return l <= TOP_COPPER && l >= BOTTOM_COPPER;
+    }
+
+    static bool is_copper(const LayerRange &l)
+    {
+        return is_copper(l.start()) || is_copper(l.end());
     }
 
     static bool is_silkscreen(int l)

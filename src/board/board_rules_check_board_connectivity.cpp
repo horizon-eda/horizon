@@ -26,11 +26,12 @@ static ClipperLib::IntRect get_path_bb(const ClipperLib::Path &path)
 }
 
 struct HoleInfo {
-    HoleInfo(const ClipperLib::Path &p) : path(p), bbox(get_path_bb(p))
+    HoleInfo(const ClipperLib::Path &p, const LayerRange &sp) : path(p), bbox(get_path_bb(p)), span(sp)
     {
     }
     const ClipperLib::Path path;
     const ClipperLib::IntRect bbox;
+    const LayerRange span;
     std::vector<struct Fragment *> connected_fragments;
 };
 
@@ -191,14 +192,14 @@ RulesCheckResult BoardRules::check_board_connectivity(const class Board &brd, Ru
                 continue;
             if (key.net == UUID())
                 continue;
-            if (BoardLayers::is_copper(key.layer)) {
-                auto &paths = net_patches[key.net].layer_paths[key.layer];
+            if (BoardLayers::is_copper(key.layer) && !key.layer.is_multilayer()) {
+                auto &paths = net_patches[key.net].layer_paths[key.layer.start()];
                 paths.insert(paths.end(), patch.begin(), patch.end());
             }
-            else if (key.type == PatchType::HOLE_PTH && key.layer == 10000) {
+            else if (key.type == PatchType::HOLE_PTH && key.layer.is_multilayer()) {
                 auto &holes = net_patches[key.net].pth_holes;
                 for (const auto &path : patch) {
-                    holes.emplace_back(path);
+                    holes.emplace_back(path, key.layer);
                 }
             }
         }
@@ -229,7 +230,7 @@ RulesCheckResult BoardRules::check_board_connectivity(const class Board &brd, Ru
     for (auto net : net_vec) {
         for (auto &frag : net->fragments) {
             for (auto &hole : net->pth_holes) {
-                if (bbox_test_overlap(frag.bbox, hole.bbox, 0)) {
+                if (hole.span.overlaps(frag.layer) && bbox_test_overlap(frag.bbox, hole.bbox, 0)) {
                     to_check.emplace_back(frag, hole);
                 }
             }

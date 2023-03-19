@@ -8,6 +8,7 @@
 #include "rules/rules_with_core.hpp"
 #include "rules/cache.hpp"
 #include "util/util.hpp"
+#include <range/v3/view.hpp>
 
 namespace horizon {
 
@@ -46,6 +47,41 @@ GerberLayerEditor *GerberLayerEditor::create(FabOutputWindow &pa, GerberOutputSe
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/org/horizon-eda/horizon/imp/fab_output.ui", "gerber_layer_editor");
     x->get_widget_derived("gerber_layer_editor", w, pa, la);
+    w->reference();
+    return w;
+}
+
+class DrillEditor : public Gtk::Box, public Changeable {
+public:
+    DrillEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, FabOutputWindow &pa,
+                const std::string &label, std::string &filename);
+    static DrillEditor *create(FabOutputWindow &pa, const std::string &label, std::string &filename);
+    FabOutputWindow &parent;
+
+private:
+    Gtk::Label *drill_span_label = nullptr;
+    Gtk::Entry *drill_filename_entry = nullptr;
+};
+
+DrillEditor::DrillEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, FabOutputWindow &pa,
+                         const std::string &label, std::string &filename)
+    : Gtk::Box(cobject), parent(pa)
+{
+    GET_WIDGET(drill_span_label);
+    GET_WIDGET(drill_filename_entry);
+    parent.sg_drill_span_name->add_widget(*drill_span_label);
+    drill_span_label->set_text(label);
+
+    bind_widget(drill_filename_entry, filename);
+    drill_filename_entry->signal_changed().connect([this] { s_signal_changed.emit(); });
+}
+
+DrillEditor *DrillEditor::create(FabOutputWindow &pa, const std::string &label, std::string &fn)
+{
+    DrillEditor *w;
+    Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
+    x->add_from_resource("/org/horizon-eda/horizon/imp/fab_output.ui", "drill_editor");
+    x->get_widget_derived("drill_editor", w, pa, label, fn);
     w->reference();
     return w;
 }
@@ -100,6 +136,8 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     GET_WIDGET(generate_button);
     GET_WIDGET(directory_button);
     GET_WIDGET(drill_mode_combo);
+    GET_WIDGET(blind_buried_box);
+    GET_WIDGET(blind_buried_drills_box);
     GET_WIDGET(log_textview);
     GET_WIDGET(zip_output_switch);
     GET_WIDGET(done_label);
@@ -160,6 +198,13 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     });
     update_drill_visibility();
 
+    {
+        Gtk::Button *blind_buried_update_button;
+        GET_WIDGET(blind_buried_update_button);
+        blind_buried_update_button->signal_clicked().connect(
+                sigc::mem_fun(*this, &FabOutputWindow::update_blind_buried_drills));
+    }
+
     generate_button->signal_clicked().connect(sigc::mem_fun(*this, &FabOutputWindow::generate));
 
     outline_width_sp = Gtk::manage(new SpinButtonDim());
@@ -174,6 +219,7 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     }
 
     sg_layer_name = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
+    sg_drill_span_name = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
 
     odb_export_filechooser_filename.attach(odb_filename_entry, odb_filename_button, this);
     odb_export_filechooser_filename.set_project_dir(project_dir);
@@ -217,6 +263,7 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     bind_widget(odb_job_name_entry, odb_settings.job_name, [this](std::string &) { s_signal_changed.emit(); });
 
     reload_layers();
+    reload_drills();
     update_export_button();
 }
 
@@ -226,6 +273,9 @@ void FabOutputWindow::reload_layers()
         return;
     else
         n_layers = settings.layers.size();
+
+
+    blind_buried_box->set_visible(brd.get_n_inner_layers());
 
     {
         auto children = gerber_layers_box->get_children();
@@ -252,6 +302,26 @@ void FabOutputWindow::reload_layers()
     }
 }
 
+void FabOutputWindow::reload_drills()
+{
+    {
+        auto children = blind_buried_drills_box->get_children();
+        for (auto ch : children)
+            delete ch;
+    }
+
+    for (auto &[span, filename] : settings.blind_buried_drills_filenames | ranges::views::reverse) {
+        auto ed = DrillEditor::create(*this, brd.get_layer_name(span), filename);
+        ed->signal_changed().connect([this] {
+            s_signal_changed.emit();
+            update_export_button();
+        });
+        blind_buried_drills_box->add(*ed);
+        ed->show();
+        ed->unreference();
+    }
+}
+
 void FabOutputWindow::update_drill_visibility()
 {
     if (settings.drill_mode == GerberOutputSettings::DrillMode::INDIVIDUAL) {
@@ -273,6 +343,12 @@ void FabOutputWindow::update_odb_visibility()
     odb_directory_label->set_visible(is_dir);
     odb_filename_box->set_visible(!is_dir);
     odb_filename_label->set_visible(!is_dir);
+}
+
+void FabOutputWindow::update_blind_buried_drills()
+{
+    settings.update_blind_buried_drills_filenames(brd);
+    reload_drills();
 }
 
 static void cb_nop(const std::string &)
@@ -368,6 +444,14 @@ void FabOutputWindow::update_export_button()
                         for (const auto &it : settings.layers) {
                             if (it.second.enabled && it.second.filename.size() == 0) {
                                 txt = brd.get_layers().at(it.first).name + " filename not set";
+                                break;
+                            }
+                        }
+                    }
+                    if (txt.size() == 0) {
+                        for (const auto &[span, filename] : settings.blind_buried_drills_filenames) {
+                            if (filename.size() == 0) {
+                                txt = brd.get_layer_name(span) + " drill filename not set";
                                 break;
                             }
                         }

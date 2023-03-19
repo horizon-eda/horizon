@@ -17,6 +17,8 @@ LayerComboBox::LayerComboBox() : Gtk::ComboBox()
     pack_start(*cr_text, true);
     add_attribute(cr_text->property_text(), list_columns.name);
     add_attribute(cr_color->property_color(), list_columns.color);
+    add_attribute(cr_text->property_sensitive(), list_columns.sensitive);
+    add_attribute(cr_color->property_sensitive(), list_columns.sensitive);
 }
 
 void LayerComboBox::set_active_layer(int layer)
@@ -56,6 +58,7 @@ void LayerComboBox::prepend(const Layer &layer)
     Gtk::TreeModel::Row row = *store->prepend();
     row[list_columns.layer] = layer.index;
     row[list_columns.name] = layer.name;
+    row[list_columns.sensitive] = true;
     auto &prefs = PreferencesProvider::get_prefs();
     const auto &colors = prefs.canvas_layer.appearance.layer_colors;
     Gdk::RGBA rgba;
@@ -66,6 +69,14 @@ void LayerComboBox::prepend(const Layer &layer)
         rgba.set_alpha(0);
     }
     row[list_columns.color] = rgba;
+}
+
+void LayerComboBox::set_layer_insensitive(int layer)
+{
+    for (auto it : store->children()) {
+        Gtk::TreeModel::Row row = *it;
+        row[list_columns.sensitive] = row[list_columns.layer] != layer;
+    }
 }
 
 } // namespace horizon
