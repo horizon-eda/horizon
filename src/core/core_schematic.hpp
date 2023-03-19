@@ -69,23 +69,21 @@ public:
     void add_sheet();
     void delete_sheet(const UUID &uu);
 
-    void set_sheet(const UUID &uu);
     const Sheet &get_canvas_data();
     const BlockSymbol &get_canvas_data_block_symbol();
     std::pair<Coordi, Coordi> get_bbox() override;
 
-    void set_block(const UUID &uu);
     const UUID &get_current_block_uuid() const;
     const UUID &get_top_block_uuid() const;
 
-    void set_block_symbol_mode();
+    void set_block_symbol_mode(const UUID &block);
     bool get_block_symbol_mode() const override;
 
     const BlocksSchematic &get_blocks() const;
     BlocksSchematic &get_blocks() override;
     bool current_block_is_top() const override;
 
-    void set_instance_path(const UUIDVec &path);
+    void set_instance_path(const UUID &sheet, const UUID &block, const UUIDVec &path);
     const UUIDVec &get_instance_path() const override;
     bool in_hierarchy() const override;
 

@@ -57,15 +57,13 @@ void ImpSchematic::handle_select_sheet(const UUID &sheet, const UUID &block, con
     auto highlights_saved = highlights;
     auto highlights_hierarchical_saved = highlights_hierarchical;
 
-    core_schematic.set_block(block);
     if (sheet) { // actual sheet
-        core_schematic.set_sheet(sheet);
-        core_schematic.set_instance_path(instance_path);
+        core_schematic.set_instance_path(sheet, block, instance_path);
         canvas->markers.set_sheet_filter(uuid_vec_append(instance_path, sheet));
         unplaced_box->set_title("Symbol");
     }
     else {
-        core_schematic.set_block_symbol_mode();
+        core_schematic.set_block_symbol_mode(block);
         unplaced_box->set_title("Port");
     }
     update_unplaced();

@@ -739,30 +739,14 @@ void CoreSchematic::delete_sheet(const UUID &uu)
     }
 }
 
-void CoreSchematic::set_sheet(const UUID &uu)
-{
-    auto sch = get_current_schematic();
-    if (tool_is_active())
-        return;
-    if (sch->sheets.count(uu) == 0)
-        return;
-    sheet_uuid = uu;
-}
-
-void CoreSchematic::set_block(const UUID &uu)
+void CoreSchematic::set_block_symbol_mode(const UUID &block)
 {
     if (tool_is_active())
         return;
-    if (blocks->blocks.count(uu) == 0)
+    if (blocks->blocks.count(block) == 0)
         return;
     instance_path.clear();
-    block_uuid = uu;
-}
-
-void CoreSchematic::set_block_symbol_mode()
-{
-    if (tool_is_active())
-        return;
+    block_uuid = block;
     sheet_uuid = UUID();
 }
 
@@ -796,20 +780,30 @@ bool CoreSchematic::current_block_is_top() const
     return block_uuid == blocks->top_block;
 }
 
-void CoreSchematic::set_instance_path(const UUIDVec &path)
+void CoreSchematic::set_instance_path(const UUID &sheet, const UUID &block, const UUIDVec &path)
 {
     if (tool_is_active())
         return;
-    if (path == instance_path)
-        return;
+
     if (path.size() && !get_top_block()->block_instance_mappings.count(path)) {
         Logger::log_critical("instance mapping not found", Logger::Domain::SCHEMATIC, uuid_vec_to_string(path));
         return;
     }
-    if (path.size() && get_top_block()->block_instance_mappings.at(path).block != block_uuid)
+    if (path.size() && get_top_block()->block_instance_mappings.at(path).block != block)
         return;
+
+    if (blocks->blocks.count(block) == 0)
+        return;
+
+    if (blocks->blocks.at(block).schematic.sheets.count(sheet) == 0)
+        return;
+
+    const bool need_expand = (instance_path != path) || !sheet_uuid;
+    block_uuid = block;
+    sheet_uuid = sheet;
     instance_path = path;
-    blocks->blocks.at(block_uuid).schematic.expand(false, this);
+    if (need_expand)
+        blocks->blocks.at(block_uuid).schematic.expand(false, this);
 }
 
 bool CoreSchematic::in_hierarchy() const
