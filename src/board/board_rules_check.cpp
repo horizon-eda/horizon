@@ -13,7 +13,6 @@
 #include "util/util.hpp"
 #include "board_rules_check_util.hpp"
 #include <iostream>
-#include "board_rules_check_util.hpp"
 
 namespace horizon {
 
@@ -363,13 +362,7 @@ RulesCheckResult BoardRules::check_clearance_copper_keepout(const Board &brd, Ru
     status_cb("Getting patches");
     auto rules = get_rules_sorted<RuleClearanceCopperKeepout>();
     auto &c = cache.get_cache<RulesCheckCacheBoardImage>();
-    std::set<int> layers;
     const auto &patches = c.get_canvas().get_patches();
-    for (const auto &it : patches) { // collect copper layers
-        if (brd.get_layers().count(it.first.layer) && brd.get_layers().at(it.first.layer).copper) {
-            layers.emplace(it.first.layer);
-        }
-    }
     auto keepout_contours = brd.get_keepout_contours();
     auto n_patches = patches.size();
     auto n_keepouts = keepout_contours.size();
@@ -390,7 +383,7 @@ RulesCheckResult BoardRules::check_clearance_copper_keepout(const Board &brd, Ru
                 status_cb(ss.str());
             }
             if (BoardLayers::is_copper(it.first.layer)
-                && (it.first.layer == keepout->polygon->layer || keepout->all_cu_layers)
+                && (it.first.layer.overlaps(keepout->polygon->layer) || keepout->all_cu_layers)
                 && keepout->patch_types_cu.count(it.first.type)) {
 
                 const Net *net = it.first.net ? &brd.block->nets.at(it.first.net) : nullptr;
@@ -434,9 +427,9 @@ RulesCheckResult BoardRules::check_clearance_copper_keepout(const Board &brd, Ru
                         }
                         e.location = acc.get();
                         e.comment = patch_type_names.at(it.first.type) + "(" + (net ? net->name : "") + ") on layer"
-                                    + brd.get_layers().at(it.first.layer).name + " near keepout";
+                                    + brd.get_layer_name(it.first.layer) + " near keepout";
                         e.error_polygons = {ite};
-                        e.layers.insert(it.first.layer);
+                        e.add_layer_range(brd, it.first.layer);
                     }
                 }
             }
@@ -454,77 +447,77 @@ RulesCheckResult BoardRules::check_clearance_same_net(const Board &brd, RulesChe
     status_cb("Getting patches");
     auto rules = get_rules_sorted<RuleClearanceSameNet>();
     auto &c = cache.get_cache<RulesCheckCacheBoardImage>();
-    std::set<int> layers;
     const auto &patches = c.get_canvas().get_patches();
-    for (const auto &it : patches) { // collect copper layers
-        if (brd.get_layers().count(it.first.layer) && brd.get_layers().at(it.first.layer).copper) {
-            layers.emplace(it.first.layer);
-        }
-    }
+
     if (r.check_cancelled(cancel))
         return r;
     status_cb("Building patch pairs");
 
     static const std::set<PatchType> patch_types = {PatchType::PAD, PatchType::PAD_TH, PatchType::VIA,
                                                     PatchType::HOLE_NPTH};
+    std::set<std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey>> patch_pairs;
 
-    for (const auto layer : layers) { // check each layer individually
-        // assemble a list of patch pairs we'll need to check
-        std::set<std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey>> patch_pairs;
-        for (const auto &it : patches) {
-            for (const auto &it_other : patches) {
-                if (layer == it.first.layer && it.first.layer == it_other.first.layer
-                    && patch_types.count(it.first.type) && patch_types.count(it_other.first.type)
-                    && it.first.type != it_other.first.type && it.first.net == it_other.first.net) {
-                    std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey> k = {it.first, it_other.first};
-                    auto k2 = k;
-                    std::swap(k2.first, k2.second);
-                    if (patch_pairs.count(k) == 0 && patch_pairs.count(k2) == 0) {
-                        patch_pairs.emplace(k);
-                    }
+
+    // assemble a list of patch pairs we'll need to check
+    for (const auto &it : patches) {
+        for (const auto &it_other : patches) {
+            if (it.first.layer.overlaps(it_other.first.layer) && patch_types.count(it.first.type)
+                && patch_types.count(it_other.first.type) && it.first.type != it_other.first.type
+                && it.first.net == it_other.first.net) {
+                std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey> k = {it.first, it_other.first};
+                auto k2 = k;
+                std::swap(k2.first, k2.second);
+                if (patch_pairs.count(k) == 0 && patch_pairs.count(k2) == 0) {
+                    patch_pairs.emplace(k);
                 }
             }
-            if (r.check_cancelled(cancel))
-                return r;
         }
+        if (r.check_cancelled(cancel))
+            return r;
+    }
 
-        for (const auto &[p1, p2] : patch_pairs) {
-            if (r.check_cancelled(cancel))
-                return r;
-            const Net *net = p1.net ? &brd.block->nets.at(p1.net) : nullptr;
-            const auto &rule = get_clearance_same_net(net, layer);
-            auto clearance = rule.get_clearance(p1.type, p2.type);
-            if (clearance >= 0) {
-                // expand p1 patch by clearance
-                ClipperLib::ClipperOffset ofs;
-                ofs.ArcTolerance = 10e3;
-                ofs.AddPaths(patches.at(p1), ClipperLib::jtRound, ClipperLib::etClosedPolygon);
-                ClipperLib::Paths paths_ofs;
-                ofs.Execute(paths_ofs, clearance);
+    for (const auto &[p1, p2] : patch_pairs) {
+        if (r.check_cancelled(cancel))
+            return r;
 
-                // intersect expanded and this patch
-                ClipperLib::Clipper clipper;
-                clipper.AddPaths(paths_ofs, ClipperLib::ptClip, true);
-                clipper.AddPaths(patches.at(p2), ClipperLib::ptSubject, true);
-                ClipperLib::Paths errors;
-                clipper.Execute(ClipperLib::ctIntersection, errors, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+        const Net *net = p1.net ? &brd.block->nets.at(p1.net) : nullptr;
 
-                // no intersection: no clearance violation
-                if (errors.size() > 0) {
-                    for (const auto &ite : errors) {
-                        r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
-                        auto &e = r.errors.back();
-                        e.has_location = true;
-                        Accumulator<Coordi> acc;
-                        for (const auto &ite2 : ite) {
-                            acc.accumulate({ite2.X, ite2.Y});
-                        }
-                        e.location = acc.get();
-                        e.comment = patch_type_names.at(p1.type) + " near " + patch_type_names.at(p2.type) + " "
-                                    + get_net_name(net) + " on layer " + brd.get_layers().at(layer).name;
-                        e.error_polygons = {ite};
-                        e.layers.insert(layer);
+        const auto layer_isect = p1.layer.intersection(p2.layer).value();
+
+        auto clearance =
+                find_clearance(*this, &BoardRules::get_clearance_same_net, brd.get_layers_for_range(layer_isect),
+                               std::forward_as_tuple(net), std::forward_as_tuple(p1.type, p2.type));
+
+        if (clearance >= 0) {
+            // expand p1 patch by clearance
+            ClipperLib::ClipperOffset ofs;
+            ofs.ArcTolerance = 10e3;
+            ofs.AddPaths(patches.at(p1), ClipperLib::jtRound, ClipperLib::etClosedPolygon);
+            ClipperLib::Paths paths_ofs;
+            ofs.Execute(paths_ofs, clearance);
+
+            // intersect expanded and this patch
+            ClipperLib::Clipper clipper;
+            clipper.AddPaths(paths_ofs, ClipperLib::ptClip, true);
+            clipper.AddPaths(patches.at(p2), ClipperLib::ptSubject, true);
+            ClipperLib::Paths errors;
+            clipper.Execute(ClipperLib::ctIntersection, errors, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+
+            // no intersection: no clearance violation
+            if (errors.size() > 0) {
+                for (const auto &ite : errors) {
+                    r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
+                    auto &e = r.errors.back();
+                    e.has_location = true;
+                    Accumulator<Coordi> acc;
+                    for (const auto &ite2 : ite) {
+                        acc.accumulate({ite2.X, ite2.Y});
                     }
+                    e.location = acc.get();
+                    e.comment = patch_type_names.at(p1.type) + " near " + patch_type_names.at(p2.type) + " "
+                                + get_net_name(net) + " on layer " + brd.get_layer_name(layer_isect);
+                    e.error_polygons = {ite};
+                    e.add_layer_range(brd, layer_isect);
                 }
             }
         }

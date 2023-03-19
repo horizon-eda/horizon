@@ -8,7 +8,7 @@ public:
     using Junction::Junction;
 
     uuid_ptr<class Net> net = nullptr;
-    bool needs_via = false;
+    LayerRange required_span;
     bool has_via = false;
     std::vector<UUID> connected_vias;
     std::vector<UUID> connected_tracks;

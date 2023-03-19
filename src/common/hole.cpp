@@ -1,6 +1,7 @@
 #include "hole.hpp"
 #include "lut.hpp"
 #include "nlohmann/json.hpp"
+#include "board/board_layers.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -10,12 +11,14 @@ static const LutEnumStr<Hole::Shape> shape_lut = {
         {"slot", Hole::Shape::SLOT},
 };
 
-
 Hole::Hole(const UUID &uu, const json &j)
     : uuid(uu), placement(j.at("placement")), diameter(j.at("diameter").get<uint64_t>()),
       length(j.at("length").get<uint64_t>()), parameter_class(j.value("parameter_class", "")),
-      plated(j.at("plated").get<bool>()), shape(shape_lut.lookup(j.value("shape", "round")))
+      plated(j.at("plated").get<bool>()), shape(shape_lut.lookup(j.value("shape", "round"))),
+      span(BoardLayers::layer_range_through)
 {
+    if (j.count("span"))
+        span = LayerRange(j.at("span"));
 }
 
 UUID Hole::get_uuid() const
@@ -81,7 +84,7 @@ std::pair<Coordi, Coordi> Hole::get_bbox() const
     return {Coordi(), Coordi()};
 }
 
-Hole::Hole(const UUID &uu) : uuid(uu)
+Hole::Hole(const UUID &uu) : uuid(uu), span(BoardLayers::layer_range_through)
 {
 }
 
@@ -94,6 +97,8 @@ json Hole::serialize() const
     j["shape"] = shape_lut.lookup_reverse(shape);
     j["plated"] = plated;
     j["parameter_class"] = parameter_class;
+    if (span != BoardLayers::layer_range_through)
+        j["span"] = span.serialize();
     return j;
 }
 } // namespace horizon

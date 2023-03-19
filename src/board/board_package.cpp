@@ -5,6 +5,7 @@
 #include "pool/ipool.hpp"
 #include "board.hpp"
 #include "util/util.hpp"
+#include "board_layers.hpp"
 
 namespace horizon {
 
@@ -138,7 +139,7 @@ bool BoardPackage::update_package(const Board &brd)
 
     placement.mirror = flip;
     for (auto &it2 : package.pads) {
-        it2.second.padstack.expand_inner(brd.get_n_inner_layers());
+        it2.second.padstack.expand_inner(brd.get_n_inner_layers(), BoardLayers::layer_range_through);
     }
 
     if (flip) {

@@ -30,8 +30,17 @@ public:
         float thickness = 0.035;
         float alpha = 1;
         float explode_mul = 0;
+        LayerRange span;
+
         std::atomic_bool done = false;
     };
+
+    static bool layer_is_pth_barrel(int layer)
+    {
+        return (layer >= 20'000) && (layer < 21'000);
+    }
+
+    static bool layer_is_substrate(int layer);
 
     std::map<int, Layer3D> &get_layers()
     {
@@ -61,7 +70,7 @@ private:
     void prepare_worker(std::atomic_size_t &layer_counter, std::function<void()> cb);
     void prepare_layer(int layer);
     void prepare_soldermask(int layer);
-    void prepare_silkscreen(int layer, int soldermask_layer);
+    void prepare_silkscreen(int layer);
     void add_path(int layer, const ClipperLib::Path &path);
 };
 } // namespace horizon

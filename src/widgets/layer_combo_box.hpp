@@ -11,6 +11,7 @@ public:
 
     void remove_all();
     void prepend(const class Layer &l);
+    void set_layer_insensitive(int layer);
 
 private:
     class ListColumns : public Gtk::TreeModelColumnRecord {
@@ -20,10 +21,12 @@ private:
             Gtk::TreeModelColumnRecord::add(layer);
             Gtk::TreeModelColumnRecord::add(name);
             Gtk::TreeModelColumnRecord::add(color);
+            Gtk::TreeModelColumnRecord::add(sensitive);
         }
         Gtk::TreeModelColumn<int> layer;
         Gtk::TreeModelColumn<Glib::ustring> name;
         Gtk::TreeModelColumn<Gdk::RGBA> color;
+        Gtk::TreeModelColumn<bool> sensitive;
     };
     ListColumns list_columns;
 

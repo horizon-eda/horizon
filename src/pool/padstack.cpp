@@ -335,50 +335,63 @@ static UUID get_layer_uuid(const UUID &ns, const UUID &uu, uint32_t index)
     return UUID::UUID5(ns, buf.data(), buf.size());
 }
 
-void Padstack::expand_inner(unsigned int n_inner)
+void Padstack::expand_inner(unsigned int n_inner, const LayerRange &span)
 {
-    if (n_inner == 0) {
-        for (auto it = shapes.begin(); it != shapes.end();) {
-            if (it->second.layer == -1) {
-                shapes.erase(it++);
-            }
-            else {
-                it++;
-            }
-        }
-        for (auto it = polygons.begin(); it != polygons.end();) {
-            if (it->second.layer == -1) {
-                polygons.erase(it++);
-            }
-            else {
-                it++;
-            }
+    for (auto &[uu, it] : holes) {
+        it.span = span;
+    }
+
+    static const std::vector<std::pair<int, int>> layers = {
+            {BoardLayers::TOP_COPPER, BoardLayers::TOP_MASK},
+            {BoardLayers::BOTTOM_COPPER, BoardLayers::BOTTOM_MASK},
+    };
+    for (const auto &it : layers) {
+        const auto layer_cu = it.first;
+        const auto layer_mask = it.second;
+        if (!span.overlaps(layer_cu)) {
+            map_erase_if(shapes, [layer_cu, layer_mask](const auto &el) {
+                return any_of(el.second.layer, {layer_cu, layer_mask});
+            });
+            map_erase_if(polygons, [layer_cu, layer_mask](const auto &el) {
+                return any_of(el.second.layer, {layer_cu, layer_mask});
+            });
         }
     }
     std::map<UUID, Polygon> new_polygons;
-    for (const auto &it : polygons) {
-        if (it.second.layer == -1) {
-            for (uint32_t i = 0; i < (n_inner - 1); i++) {
-                const auto uu = get_layer_uuid(UUID{"7ba04a7a-7644-4bdf-ba8d-6bc006fb6ae6"}, it.first, i);
-                auto &np = new_polygons.emplace(uu, it.second).first->second;
-                np.uuid = uu;
-                np.layer = -2 - i;
+    std::map<UUID, Shape> new_shapes;
+
+    for (int i = 0; i < (((int)n_inner) - 1); i++) {
+        for (const auto &it : polygons) {
+            if (it.second.layer == -1) {
+
+                const int layer = -2 - i;
+                if (span.overlaps(layer)) {
+                    const auto uu = get_layer_uuid(UUID{"7ba04a7a-7644-4bdf-ba8d-6bc006fb6ae6"}, it.first, i);
+                    auto &np = new_polygons.emplace(uu, it.second).first->second;
+                    np.uuid = uu;
+                    np.layer = layer;
+                }
+            }
+        }
+
+        for (const auto &it : shapes) {
+            if (it.second.layer == -1) {
+                const int layer = -2 - i;
+                if (span.overlaps(layer)) {
+                    const auto uu = get_layer_uuid(UUID{"81dca5e4-5215-4072-892e-9883265e90b2"}, it.first, i);
+                    auto &np = new_shapes.emplace(uu, it.second).first->second;
+                    np.uuid = uu;
+                    np.layer = layer;
+                }
             }
         }
     }
     polygons.insert(new_polygons.begin(), new_polygons.end());
-
-    std::map<UUID, Shape> new_shapes;
-    for (const auto &it : shapes) {
-        if (it.second.layer == -1) {
-            for (uint32_t i = 0; i < (n_inner - 1); i++) {
-                const auto uu = get_layer_uuid(UUID{"81dca5e4-5215-4072-892e-9883265e90b2"}, it.first, i);
-                auto &np = new_shapes.emplace(uu, it.second).first->second;
-                np.uuid = uu;
-                np.layer = -2 - i;
-            }
-        }
-    }
     shapes.insert(new_shapes.begin(), new_shapes.end());
+
+    if (n_inner == 0 || !span.overlaps((-1))) {
+        map_erase_if(shapes, [](const auto &it) { return it.second.layer == -1; });
+        map_erase_if(polygons, [](const auto &it) { return it.second.layer == -1; });
+    }
 }
 } // namespace horizon

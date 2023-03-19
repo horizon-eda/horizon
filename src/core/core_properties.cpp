@@ -48,6 +48,10 @@ bool Core::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
             dynamic_cast<PropertyValueString &>(value).value = hole->parameter_class;
             return true;
 
+        case ObjectProperty::ID::SPAN:
+            dynamic_cast<PropertyValueLayerRange &>(value).value = hole->span;
+            return true;
+
         case ObjectProperty::ID::POSITION_X:
         case ObjectProperty::ID::POSITION_Y:
         case ObjectProperty::ID::ANGLE:
@@ -266,6 +270,10 @@ bool Core::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
             hole->parameter_class = dynamic_cast<const PropertyValueString &>(value).value;
             break;
 
+        case ObjectProperty::ID::SPAN:
+            hole->span = dynamic_cast<const PropertyValueLayerRange &>(value).value;
+            break;
+
         case ObjectProperty::ID::POSITION_X:
         case ObjectProperty::ID::POSITION_Y:
         case ObjectProperty::ID::ANGLE:
@@ -443,6 +451,9 @@ bool Core::get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID
         switch (property) {
         case ObjectProperty::ID::LENGTH:
             meta.is_settable = get_hole(uu)->shape == Hole::Shape::SLOT;
+            return true;
+        case ObjectProperty::ID::SPAN:
+            layers_to_meta(meta);
             return true;
         default:
             return false;

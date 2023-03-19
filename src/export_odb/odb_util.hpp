@@ -3,10 +3,12 @@
 #include "util/placement.hpp"
 #include <ostream>
 
+namespace horizon {
+class LayerRange;
+}
 namespace horizon::ODB {
 
 extern const char *endl;
-extern const char *drills_layer;
 
 std::ostream &operator<<(std::ostream &os, const Coordi &c);
 
@@ -53,6 +55,7 @@ std::string utf8_to_ascii(const std::string &s);
 std::string make_legal_name(const std::string &n);
 std::string make_legal_entity_name(const std::string &s);
 std::string get_layer_name(int id);
+std::string get_drills_layer_name(const LayerRange &span);
 
 std::string make_symbol_circle(uint64_t diameter);
 std::string make_symbol_rect(uint64_t w, uint64_t h);

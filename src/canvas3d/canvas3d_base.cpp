@@ -34,7 +34,7 @@ const CanvasMesh::Layer3D &Canvas3DBase::get_layer(int layer) const
 
 Color Canvas3DBase::get_layer_color(int layer) const
 {
-    if (layer == 20000 || BoardLayers::is_copper(layer)) { // pth or cu
+    if (CanvasMesh::layer_is_pth_barrel(layer) || BoardLayers::is_copper(layer)) { // pth or cu
         if (use_layer_colors && appearance.layer_colors.count(layer)) {
             return appearance.layer_colors.at(layer);
         }
@@ -50,15 +50,17 @@ Color Canvas3DBase::get_layer_color(int layer) const
     if (layer == BoardLayers::TOP_SILKSCREEN || layer == BoardLayers::BOTTOM_SILKSCREEN)
         return silkscreen_color;
 
-    if (layer == BoardLayers::L_OUTLINE || layer >= 10000)
+    if (CanvasMesh::layer_is_substrate(layer))
         return substrate_color;
     return {1, 0, 0};
 }
 
 float Canvas3DBase::get_layer_offset(int layer) const
 {
-    if (layer == 20000)
-        return get_layer_offset(BoardLayers::TOP_COPPER);
+    if (CanvasMesh::layer_is_pth_barrel(layer)) {
+        const auto &span = get_layer(layer).span;
+        return get_layer_offset(span.end());
+    }
 
     else
         return get_layer(layer).offset + get_layer(layer).explode_mul * explode;
@@ -69,8 +71,9 @@ float Canvas3DBase::get_layer_thickness(int layer) const
     if (layer == BoardLayers::L_OUTLINE && explode == 0) {
         return get_layer(BoardLayers::BOTTOM_COPPER).offset + get_layer(BoardLayers::BOTTOM_COPPER).thickness;
     }
-    else if (layer == 20000) {
-        return -(get_layer_offset(BoardLayers::TOP_COPPER) - get_layer_offset(BoardLayers::BOTTOM_COPPER));
+    else if (CanvasMesh::layer_is_pth_barrel(layer)) {
+        const auto &span = get_layer(layer).span;
+        return -(get_layer_offset(span.end()) - get_layer_offset(span.start()));
     }
     else {
         return get_layer(layer).thickness;
@@ -79,8 +82,19 @@ float Canvas3DBase::get_layer_thickness(int layer) const
 
 bool Canvas3DBase::layer_is_visible(int layer) const
 {
-    if (layer == 20000) // pth holes
-        return show_copper;
+    if (CanvasMesh::layer_is_pth_barrel(layer)) {
+        if (!show_copper)
+            return false;
+        // pth holes
+        const auto &span = get_layer(layer).span;
+        if (span == BoardLayers::layer_range_through) {
+            // always show thru pths
+        }
+        else {
+            // only show non-thru pths if substrate is hidden or explode
+            return explode > 0 || !show_substrate;
+        }
+    }
 
     if (layer == BoardLayers::TOP_MASK || layer == BoardLayers::BOTTOM_MASK)
         return show_solder_mask;
@@ -91,18 +105,29 @@ bool Canvas3DBase::layer_is_visible(int layer) const
     if (layer == BoardLayers::TOP_SILKSCREEN || layer == BoardLayers::BOTTOM_SILKSCREEN)
         return show_silkscreen;
 
-    if (layer == BoardLayers::L_OUTLINE || layer >= 10000) {
+    if (CanvasMesh::layer_is_substrate(layer)) {
         if (show_substrate) {
-            if (layer == BoardLayers::L_OUTLINE)
-                return true;
+            if (brd->get_n_inner_layers()) {
+                // has inner layers and potentially blind/buried vias
+                if (explode > 0) {
+                    // show inner layers and hide L_OUTLINE
+                    return layer != BoardLayers::L_OUTLINE;
+                }
+                else {
+                    // not exploded, we only need to render L_OUTLINE
+                    return layer == BoardLayers::L_OUTLINE;
+                }
+            }
             else {
-                return explode > 0;
+                // has no inner layers
+                return true;
             }
         }
         else {
             return false;
         }
     }
+
 
     if (layer < BoardLayers::TOP_COPPER && layer > BoardLayers::BOTTOM_COPPER)
         return (show_substrate == false || explode > 0) && show_copper;

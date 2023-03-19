@@ -108,6 +108,10 @@ private:
     {
         if (hole.diameter == 0)
             return;
+
+        // we only care about through holes
+        if (hole.span != BoardLayers::layer_range_through)
+            return;
         Placement tr = transform;
         tr.accumulate(hole.placement);
         if (hole.shape == Hole::Shape::ROUND) {

@@ -90,4 +90,6 @@ const std::vector<int> &BoardLayers::get_layers()
 
 const unsigned int BoardLayers::max_inner_layers = 8;
 
+const LayerRange BoardLayers::layer_range_through{BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER};
+
 } // namespace horizon

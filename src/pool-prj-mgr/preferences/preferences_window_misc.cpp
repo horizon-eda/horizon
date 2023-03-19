@@ -71,6 +71,18 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
                                                         preferences, preferences.board.show_text_in_vias));
             gr->add_row(*r);
         }
+        {
+            static const std::vector<std::pair<ShowViaSpan, std::string>> items = {
+                    {ShowViaSpan::NONE, "None"},
+                    {ShowViaSpan::BLIND_BURIED, "Blind and buried only"},
+                    {ShowViaSpan::ALL, "All"},
+            };
+            auto r = Gtk::manage(new PreferencesRowEnum<ShowViaSpan>("Via span", "Shows via span overlaid on vias",
+                                                                     preferences, preferences.board.show_via_span,
+                                                                     items));
+            r->bind();
+            gr->add_row(*r);
+        }
     }
     {
         auto gr = Gtk::manage(new PreferencesGroup("Zoom & Pan"));

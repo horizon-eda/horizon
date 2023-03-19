@@ -10,6 +10,7 @@
 #include "util/util.hpp"
 #include "track_graph.hpp"
 #include "util/str_util.hpp"
+#include <range/v3/view.hpp>
 
 namespace horizon {
 
@@ -29,6 +30,19 @@ struct Context {
         layer.context = context;
         layer.type = type;
         canvas.layer_features.emplace(layer_n, &job.steps.at(step_name).layer_features.at(name));
+        return layer;
+    }
+
+    auto &add_drill_layer(const std::string &step_name, const LayerRange &span)
+    {
+        const auto name = ODB::get_drills_layer_name(span);
+
+        auto &layer = job.add_matrix_layer(name);
+        layer.context = ODB::Matrix::Layer::Context::BOARD;
+        layer.type = ODB::Matrix::Layer::Type::DRILL;
+        layer.span = {ODB::get_layer_name(span.end()), ODB::get_layer_name(span.start())};
+
+        canvas.drill_features.emplace(span, &job.steps.at(step_name).layer_features.at(name));
         return layer;
     }
 };
@@ -121,12 +135,11 @@ void export_odb(const Board &brd, const ODBOutputSettings &settings)
 
     // drills
     {
-        auto &layer = ctx.job.add_matrix_layer(ODB::drills_layer);
-        layer.context = ODB::Matrix::Layer::Context::BOARD;
-        layer.type = ODB::Matrix::Layer::Type::DRILL;
-        layer.span = {ODB::get_layer_name(BoardLayers::TOP_COPPER), ODB::get_layer_name(BoardLayers::BOTTOM_COPPER)};
+        auto spans = brd.get_drill_spans();
 
-        ctx.canvas.drill_features = &step.layer_features.at(ODB::drills_layer);
+        for (const auto &span : spans) {
+            ctx.add_drill_layer(step_name, span);
+        }
     }
     // rout
     // misc/doc

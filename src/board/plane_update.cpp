@@ -13,9 +13,9 @@ public:
     using CanvasPatch::CanvasPatch;
 
 protected:
-    bool img_layer_is_visible(int layer) const override
+    bool img_layer_is_visible(const LayerRange &layer) const override
     {
-        if (BoardLayers::is_copper(layer))
+        if (BoardLayers::is_copper(layer.start()) || BoardLayers::is_copper(layer.end()))
             return true;
 
         if (layer == BoardLayers::L_OUTLINE)
@@ -165,7 +165,7 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
         for (const auto &patch : ca->get_patches()) { // add cutouts
             if ((patch.first.layer == poly.layer && patch.first.net != plane->net->uuid && patch.second.size()
                  && patch.first.type != PatchType::OTHER && patch.first.type != PatchType::TEXT)
-                || ((patch.first.layer == 10000)
+                || ((patch.first.layer.overlaps(poly.layer))
                     && ((patch.first.type == PatchType::HOLE_NPTH)
                         || ((patch.first.type == PatchType::HOLE_PTH) && (patch.first.net != plane->net->uuid))))) {
                 if (cancel)
@@ -480,7 +480,7 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
         if (cancel)
             return;
         for (const auto &it : junctions) {
-            if (it.second.net == plane->net && (it.second.layer == plane->polygon->layer || it.second.has_via)
+            if (it.second.net == plane->net && (it.second.layer.overlaps(plane->polygon->layer) || it.second.has_via)
                 && frag.contains(it.second.position)) {
                 frag.orphan = false;
                 break;

@@ -421,4 +421,64 @@ Gtk::Widget *PropertyEditorScale::create_editor()
     return sp;
 }
 
+
+Gtk::Widget *PropertyEditorLayerRange::create_editor()
+{
+    combo_start = Gtk::manage(new LayerComboBox);
+    combo_end = Gtk::manage(new LayerComboBox);
+    auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
+    box->get_style_context()->add_class("linked");
+    box->pack_start(*combo_end, false, false, 0);
+    box->pack_start(*combo_start, false, false, 0);
+
+    connections.push_back(
+            combo_start->signal_changed().connect(sigc::mem_fun(*this, &PropertyEditorLayerRange::changed)));
+    connections.push_back(
+            combo_end->signal_changed().connect(sigc::mem_fun(*this, &PropertyEditorLayerRange::changed)));
+    return box;
+}
+
+void PropertyEditorLayerRange::reload()
+{
+    ScopedBlock block(connections);
+    combo_start->remove_all();
+    combo_end->remove_all();
+    for (const auto &it : my_meta.layers) {
+        if (it.second.copper) {
+            combo_start->prepend(it.second);
+            combo_end->prepend(it.second);
+        }
+    }
+    combo_start->set_active_layer(value.value.start());
+    combo_end->set_active_layer(value.value.end());
+    update();
+}
+
+void PropertyEditorLayerRange::changed()
+{
+    {
+        ScopedBlock block(connections);
+        update();
+    }
+    s_signal_changed.emit();
+}
+
+void PropertyEditorLayerRange::update()
+{
+    combo_start->set_layer_insensitive(combo_end->get_active_layer());
+    combo_end->set_layer_insensitive(combo_start->get_active_layer());
+    const LayerRange r{combo_start->get_active_layer(), combo_end->get_active_layer()};
+    combo_start->set_active_layer(r.start());
+    combo_end->set_active_layer(r.end());
+}
+
+PropertyValue &PropertyEditorLayerRange::get_value()
+{
+    value.value = {combo_start->get_active_layer(), combo_end->get_active_layer()};
+    // const auto active_layer = combo->get_active_layer();
+    // if (active_layer != 10000)
+    //     value.value = active_layer;
+    return value;
+}
+
 } // namespace horizon

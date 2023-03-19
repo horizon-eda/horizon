@@ -26,6 +26,25 @@ GerberExporter::GerberExporter(const Board &b, const GerberOutputSettings &s) : 
     else {
         drill_writer_npth = nullptr;
     }
+
+    for (const auto &[span, filename] : s.blind_buried_drills_filenames) {
+        drill_writers_blind_buried.emplace(span,
+                                           Glib::build_filename(settings.output_directory, settings.prefix + filename));
+    }
+}
+
+std::vector<ExcellonWriter *> GerberExporter::get_drill_writers()
+{
+    std::vector<ExcellonWriter *> drill_writers;
+    for (auto it : {drill_writer_npth.get(), drill_writer_pth.get()}) {
+        if (it)
+            drill_writers.push_back(it);
+    }
+    for (auto &[span, writer] : drill_writers_blind_buried) {
+        drill_writers.push_back(&writer);
+    }
+
+    return drill_writers;
 }
 
 void GerberExporter::generate()
@@ -45,14 +64,13 @@ void GerberExporter::generate()
         log << "Wrote layer " << brd.get_layers().at(it.first).name << " to gerber file " << it.second.get_filename()
             << std::endl;
     }
-    for (auto it : {drill_writer_npth.get(), drill_writer_pth.get()}) {
-        if (it) {
-            it->write_format();
-            it->write_header();
-            it->write_holes();
-            it->close();
-            log << "Wrote excellon drill file " << it->get_filename() << std::endl;
-        }
+    const auto drill_writers = get_drill_writers();
+    for (auto it : drill_writers) {
+        it->write_format();
+        it->write_header();
+        it->write_holes();
+        it->close();
+        log << "Wrote excellon drill file " << it->get_filename() << std::endl;
     }
 
     if (settings.zip_output) {
@@ -77,10 +95,9 @@ void GerberExporter::generate_zip()
         add_file(tree_writer, it.second.get_filename());
     }
 
-    for (auto it : {drill_writer_npth.get(), drill_writer_pth.get()}) {
-        if (it) {
-            add_file(tree_writer, it->get_filename());
-        }
+    const auto drill_writers = get_drill_writers();
+    for (auto it : drill_writers) {
+        add_file(tree_writer, it->get_filename());
     }
     log << "Added files to " << zip_file << std::endl;
 }
@@ -101,8 +118,13 @@ GerberWriter *GerberExporter::get_writer_for_layer(int l)
     return nullptr;
 }
 
-ExcellonWriter *GerberExporter::get_drill_writer(bool pth)
+ExcellonWriter *GerberExporter::get_drill_writer(const LayerRange &span, bool pth)
 {
+    if (span != BoardLayers::layer_range_through) {
+        if (!drill_writers_blind_buried.count(span))
+            throw std::runtime_error("no filename defined for span " + brd.get_layer_name(span));
+        return &drill_writers_blind_buried.at(span);
+    }
     if (settings.drill_mode == GerberOutputSettings::DrillMode::MERGED) {
         return drill_writer_pth.get();
     }

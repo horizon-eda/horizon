@@ -1116,7 +1116,7 @@ void Canvas::render(const Hole &hole, bool interactive)
     transform.accumulate(hole.placement);
     const int64_t r = hole.diameter / 2;
     const int64_t l = std::max((int64_t)hole.length / 2 - r, (int64_t)0);
-    const int layer = get_overlay_layer({BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER});
+    const int layer = get_overlay_layer(hole.span);
     if (hole.shape == Hole::Shape::ROUND) {
         draw_circle(Coordf(), r, co, layer);
         if (hole.plated) {
@@ -1126,7 +1126,7 @@ void Canvas::render(const Hole &hole, bool interactive)
         draw_line(Coordi(-x, -x), Coordi(x, x), co, layer);
         draw_line(Coordi(x, -x), Coordi(-x, x), co, layer);
         if (interactive)
-            selectables.append(hole.uuid, ObjectType::HOLE, Coordi(), Coordi(-r, -r), Coordi(r, r));
+            selectables.append(hole.uuid, ObjectType::HOLE, Coordi(), Coordi(-r, -r), Coordi(r, r), 0, hole.span);
     }
     else if (hole.shape == Hole::Shape::SLOT) {
         draw_circle(Coordi(-l, 0), r, co, layer);
@@ -1134,7 +1134,8 @@ void Canvas::render(const Hole &hole, bool interactive)
         draw_line(Coordi(-l, -r), Coordi(l, -r), co, layer);
         draw_line(Coordi(-l, r), Coordi(l, r), co, layer);
         if (interactive)
-            selectables.append(hole.uuid, ObjectType::HOLE, Coordi(), Coordi(-l - r, -r), Coordi(l + r, +r));
+            selectables.append(hole.uuid, ObjectType::HOLE, Coordi(), Coordi(-l - r, -r), Coordi(l + r, +r), 0,
+                               hole.span);
     }
     if (interactive)
         targets.emplace_back(hole.uuid, ObjectType::HOLE, hole.placement.shift);
@@ -1469,6 +1470,26 @@ void Canvas::render(const BoardPackage &pkg, bool interactive)
     transform_restore();
 }
 
+static std::string layer_to_string(int l)
+{
+    switch (l) {
+    case BoardLayers::TOP_COPPER:
+        return "T";
+    case BoardLayers::BOTTOM_COPPER:
+        return "B";
+    default:
+        if (l < BoardLayers::TOP_COPPER && l > BoardLayers::BOTTOM_COPPER) {
+            return "I" + std::to_string(-l);
+        }
+    }
+    return "?";
+}
+
+static std::string span_to_string(const LayerRange &r)
+{
+    return layer_to_string(r.end()) + ":" + layer_to_string(r.start());
+}
+
 void Canvas::render(const Via &via, bool interactive)
 {
     transform_save();
@@ -1486,11 +1507,15 @@ void Canvas::render(const Via &via, bool interactive)
         object_ref_push(ObjectType::VIA, via.uuid);
     render(via.padstack, false);
     if (via.locked) {
-        auto ol = get_overlay_layer(BoardLayers::TOP_COPPER);
+        auto ol = get_overlay_layer(via.span.end());
         draw_lock({0, 0}, 0.7 * std::min(std::abs(bb.second.x - bb.first.x), std::abs(bb.second.y - bb.first.y)),
                   ColorP::TEXT_OVERLAY, ol, true);
     }
-    if (show_text_in_vias && interactive && via.junction->net && via.junction->net->name.size()) {
+    const bool show_net = show_text_in_vias && via.junction->net && via.junction->net->name.size();
+    const bool show_span =
+            show_via_span == ShowViaSpan::ALL
+            || (via.span != BoardLayers::layer_range_through && show_via_span == ShowViaSpan::BLIND_BURIED);
+    if (interactive && (show_net || show_span)) {
         auto size = (bb.second.x - bb.first.x) * 1.2;
         set_lod_size(size);
         Placement p;
@@ -1502,8 +1527,17 @@ void Canvas::render(const Via &via, bool interactive)
             p.shift.x *= -1;
         }
         p.set_angle(0);
-        const auto ol = get_overlay_layer({BoardLayers::BOTTOM_COPPER, BoardLayers::TOP_COPPER}, true);
-        draw_bitmap_text_box(p, size, size, via.junction->net->name, ColorP::TEXT_OVERLAY, ol, TextBoxMode::FULL);
+        const auto ol = get_overlay_layer(via.span, true);
+        if (show_net && show_span) {
+            draw_bitmap_text_box(p, size, size, via.junction->net->name, ColorP::TEXT_OVERLAY, ol, TextBoxMode::UPPER);
+            draw_bitmap_text_box(p, size, size, span_to_string(via.span), ColorP::TEXT_OVERLAY, ol, TextBoxMode::LOWER);
+        }
+        else if (show_net && !show_span) {
+            draw_bitmap_text_box(p, size, size, via.junction->net->name, ColorP::TEXT_OVERLAY, ol, TextBoxMode::FULL);
+        }
+        else if (!show_net && show_span) {
+            draw_bitmap_text_box(p, size, size, span_to_string(via.span), ColorP::TEXT_OVERLAY, ol, TextBoxMode::FULL);
+        }
         set_lod_size(-1);
     }
 

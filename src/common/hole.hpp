@@ -32,6 +32,8 @@ public:
     enum class Shape { ROUND, SLOT };
     Shape shape = Shape::ROUND;
 
+    LayerRange span;
+
     Polygon to_polygon() const;
     std::pair<Coordi, Coordi> get_bbox() const;
 

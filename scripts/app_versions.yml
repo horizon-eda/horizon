@@ -18,6 +18,7 @@ versions:
     16: support relative paths for including boards
     17: save plane fragements to a separate file
     18: increase maximum number of inner layers to 8
+    19: add blind and buried vias
   schematic:
     1: add custom values on symbols
     2: add hierarchy

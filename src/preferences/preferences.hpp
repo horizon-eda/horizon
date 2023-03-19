@@ -1,6 +1,7 @@
 #pragma once
 #include "canvas/appearance.hpp"
 #include "canvas3d/spacenav_prefs.hpp"
+#include "canvas/show_via_span.hpp"
 #include "canvas/input_devices_prefs.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include <sigc++/sigc++.h>
@@ -37,6 +38,7 @@ public:
     bool highlight_on_top = true;
     bool show_text_in_tracks = true;
     bool show_text_in_vias = true;
+    ShowViaSpan show_via_span = ShowViaSpan::BLIND_BURIED;
     bool move_using_router = true;
 
     void load_from_json(const json &j);
