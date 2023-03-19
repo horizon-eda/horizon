@@ -47,8 +47,7 @@ ToolResponse ToolManageBuses::begin(const ToolArgs &args)
     bool r = false;
 
     if (tool_id == ToolID::MANAGE_BUSES) {
-        auto sch = doc.c->get_top_schematic();
-        r = imp->dialogs.manage_buses(*sch->block);
+        r = imp->dialogs.manage_buses(*doc.c->get_current_block());
     }
     else if (tool_id == ToolID::ANNOTATE) {
         auto sch = doc.c->get_top_schematic();
