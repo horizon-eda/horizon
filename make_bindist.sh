@@ -102,6 +102,8 @@ LIBS=(
 	libjbig-0.dll\
 	libLerc.dll\
 	libsharpyuv-0.dll\
+	libEGL.dll\
+	libGLESv2.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
 )
