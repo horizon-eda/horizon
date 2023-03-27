@@ -11,28 +11,9 @@
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
+#include "util/scoped_block.hpp"
 
 namespace horizon {
-
-class ScopedBlock {
-public:
-    ScopedBlock(std::deque<sigc::connection> &conns) : connections(conns)
-    {
-        for (auto &conn : connections) {
-            conn.block();
-        }
-    }
-
-    ~ScopedBlock()
-    {
-        for (auto &conn : connections) {
-            conn.unblock();
-        }
-    }
-
-private:
-    std::deque<sigc::connection> &connections;
-};
 
 PropertyEditor::PropertyEditor(ObjectType t, ObjectProperty::ID prop, class PropertyPanel *p)
     : Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 4), parent(p), property_id(prop), type(t),

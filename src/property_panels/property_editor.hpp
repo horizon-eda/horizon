@@ -63,7 +63,7 @@ protected:
 
     bool readonly = false;
 
-    std::deque<sigc::connection> connections;
+    std::vector<sigc::connection> connections;
 
 private:
 };
