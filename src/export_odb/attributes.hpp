@@ -7,8 +7,7 @@ namespace detail {
 std::string make_legal_string_attribute(const std::string &n);
 }
 
-template <typename T> struct attribute_name {
-};
+template <typename T> struct attribute_name {};
 
 enum class Type { FLOAT, BOOLEAN, TEXT };
 
@@ -48,28 +47,22 @@ template <typename T> struct text_attribute {
     using n = boolean_attribute<struct n##_t>;                                                                         \
     ATTR_NAME(n)
 
-template <typename T> struct is_feature : std::false_type {
-};
-template <typename T> struct is_net : std::false_type {
-};
-template <typename T> struct is_pkg : std::false_type {
-};
+template <typename T> struct is_feature : std::false_type {};
+template <typename T> struct is_net : std::false_type {};
+template <typename T> struct is_pkg : std::false_type {};
 
 template <class T> inline constexpr bool is_feature_v = is_feature<T>::value;
 template <class T> inline constexpr bool is_net_v = is_net<T>::value;
 template <class T> inline constexpr bool is_pkg_v = is_pkg<T>::value;
 
 #define ATTR_IS_FEATURE(a)                                                                                             \
-    template <> struct is_feature<a> : std::true_type {                                                                \
-    };
+    template <> struct is_feature<a> : std::true_type {};
 
 #define ATTR_IS_NET(a)                                                                                                 \
-    template <> struct is_net<a> : std::true_type {                                                                    \
-    };
+    template <> struct is_net<a> : std::true_type {};
 
 #define ATTR_IS_PKG(a)                                                                                                 \
-    template <> struct is_pkg<a> : std::true_type {                                                                    \
-    };
+    template <> struct is_pkg<a> : std::true_type {};
 
 enum class drill { PLATED, NON_PLATED, VIA };
 ATTR_NAME(drill)

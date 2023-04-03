@@ -3,6 +3,5 @@
 #include "iblock_schematic_provider.hpp"
 
 namespace horizon {
-class IBlockSymbolAndSchematicProvider : public IBlockSymbolProvider, public IBlockSchematicProvider {
-};
+class IBlockSymbolAndSchematicProvider : public IBlockSymbolProvider, public IBlockSchematicProvider {};
 } // namespace horizon

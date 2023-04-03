@@ -2,6 +2,5 @@
 #include "core/tool_data.hpp"
 
 namespace horizon {
-class ToolDataPoolUpdated : public ToolData {
-};
+class ToolDataPoolUpdated : public ToolData {};
 } // namespace horizon
