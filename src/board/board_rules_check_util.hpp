@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "clipper/clipper.hpp"
+#include <cstdint>
 
 namespace horizon {
 std::string get_net_name(const class Net *net);
