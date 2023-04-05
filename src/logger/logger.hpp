@@ -3,6 +3,7 @@
 #include <functional>
 #include <string>
 #include <tuple>
+#include <cstdint>
 
 namespace horizon {
 class Logger {
