@@ -131,6 +131,35 @@ jobs:
       if: ${{ matrix.target == 'build/horizon.so' }}
       run: python3 scripts/check_app_versions.py
 
+  build-opensuse:
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - all
+          - build/horizon.so
+    runs-on: ubuntu-latest
+    container: opensuse/tumbleweed
+    needs: stylecheck
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: zypper in -y git make gcc gcc-c++ pkg-config cppzmq-devel oce-devel gtkmm3-devel libgit2-devel libuuid-devel sqlite3-devel librsvg-devel cairomm-devel glm-devel boost-devel libcurl-devel libpodofo-devel binutils-gold libarchive-devel libspnav-devel python3
+
+    - name: Install python dependencies
+      if: ${{ matrix.target == 'build/horizon.so' }}
+      run: zypper in -y Mesa-devel python3-pycairo-devel python3-PyYAML
+    - name: Build
+      run: make -j2 ${{ matrix.target }}
+    - name: Check version
+      run: python3 check_version.py
+    - name: Test python module
+      if: ${{ matrix.target == 'build/horizon.so' }}
+      run: python3 -c 'import sys; sys.path.append("build"); import horizon'
+    - name: Check app versions
+      if: ${{ matrix.target == 'build/horizon.so' }}
+      run: python3 scripts/check_app_versions.py
+
   build-debug:
     runs-on: ubuntu-latest
     container: debian:buster
