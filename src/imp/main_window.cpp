@@ -133,6 +133,7 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
 
     GET_WIDGET(gl_container);
     canvas = Gtk::manage(new CanvasGL());
+    set_focus(*canvas);
     gl_container->add(*canvas);
     canvas->show();
 
