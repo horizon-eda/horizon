@@ -746,6 +746,11 @@ const RuleParameters &BoardRules::get_parameters() const
     return rule_parameters;
 }
 
+const RuleViaDefinitions &BoardRules::get_via_definitions() const
+{
+    return rule_via_definitions;
+}
+
 UUID BoardRules::get_via_padstack_uuid(const Net *net) const
 {
     auto rules = get_rules_sorted<RuleVia>();

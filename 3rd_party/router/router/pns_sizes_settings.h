@@ -48,6 +48,7 @@ public:
             m_viaType( VIATYPE::THROUGH ),
             m_viaDiameter( 600000 ),
             m_viaDrill( 250000 ),
+            m_viaDefinition( -1 ),
             m_diffPairWidth( 125000 ),
             m_diffPairGap( 180000 ),
             m_diffPairViaGap( 180000 ),
@@ -90,6 +91,9 @@ public:
 
     int ViaDrill() const { return m_viaDrill; }
     void SetViaDrill( int aDrill ) { m_viaDrill = aDrill; }
+    
+    int ViaDefinition() const { return m_viaDefinition; }
+    void SetViaDefinition( int aDef ) { m_viaDefinition = aDef; }
 
     std::optional<int> PairedLayer( int aLayerId )
     {
@@ -119,6 +123,7 @@ private:
     VIATYPE m_viaType;
     int     m_viaDiameter;
     int     m_viaDrill;
+    int     m_viaDefinition;
 
     int     m_diffPairWidth;
     int     m_diffPairGap;

@@ -56,6 +56,7 @@ public:
         m_viaType  = VIATYPE::THROUGH;
         m_isFree   = false;
         m_isVirtual = false;
+        m_definition = -1;
     }
 
     VIA( const VECTOR2I& aPos, const LAYER_RANGE& aLayers, int aDiameter, int aDrill,
@@ -72,6 +73,7 @@ public:
         m_viaType = aViaType;
         m_isFree = false;
         m_isVirtual = false;
+        m_definition = -1;
     }
 
     VIA( const VIA& aB ) :
@@ -89,6 +91,7 @@ public:
         m_viaType = aB.m_viaType;
         m_isFree = aB.m_isFree;
         m_isVirtual = aB.m_isVirtual;
+        m_definition = aB.m_definition;
     }
 
     static inline bool ClassOf( const ITEM* aItem )
@@ -149,6 +152,9 @@ public:
     {
         return 1;
     }
+    
+    int Definition() const { return m_definition; }
+    void SetDefinition( int aDef ) { m_definition = aDef; }
 
     OPT_BOX2I ChangedArea( const VIA* aOther ) const;
 
@@ -162,6 +168,7 @@ private:
     SHAPE_CIRCLE m_hole;
     VIATYPE      m_viaType;
     bool         m_isFree;
+    int          m_definition;
 
 };
 

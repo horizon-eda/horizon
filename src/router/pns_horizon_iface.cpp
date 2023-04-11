@@ -398,6 +398,28 @@ horizon::Net *PNS_HORIZON_IFACE::get_net_for_code(int code)
     return net_code_map_r.at(code);
 }
 
+horizon::UUID PNS_HORIZON_IFACE::get_via_definition_for_code(int code)
+{
+    if (code < 0)
+        return {};
+    if (code >= (int)via_definition_code_map_r.size())
+        return {};
+    return via_definition_code_map_r.at(code);
+}
+
+int PNS_HORIZON_IFACE::get_via_definition_code(const horizon::UUID &uu)
+{
+    if (via_definition_code_map.count(uu)) {
+        return via_definition_code_map.at(uu);
+    }
+    else {
+        via_definition_code_map_r.emplace_back(uu);
+        auto nc = via_definition_code_map_r.size() - 1;
+        via_definition_code_map.emplace(uu, nc);
+        return nc;
+    }
+}
+
 const PNS_HORIZON_PARENT_ITEM *PNS_HORIZON_IFACE::get_parent(const horizon::Track *track)
 {
     return get_or_create_parent(PNS_HORIZON_PARENT_ITEM(track));
@@ -849,12 +871,12 @@ void PNS_HORIZON_IFACE::DisplayItem(const PNS::ITEM *aItem, int aClearance, bool
         std::deque<horizon::Coordi> pts;
         pts.emplace_back(pos.x, pos.y);
         pts.emplace_back(pos.x + 10, pos.y);
-        int la = via_item->Layers().Start();
-        m_preview_items.insert(
-                canvas->add_line(pts, via_item->Diameter(), horizon::ColorP::LAYER_HIGHLIGHT, layer_from_router(la)));
-        la = via_item->Layers().End();
-        m_preview_items.insert(
-                canvas->add_line(pts, via_item->Diameter(), horizon::ColorP::LAYER_HIGHLIGHT, layer_from_router(la)));
+        const auto &via_layers = via_item->Layers();
+        auto layers = board->get_layers_for_range(
+                {layer_from_router(via_layers.Start()), layer_from_router(via_layers.End())});
+        for (const auto la : layers) {
+            m_preview_items.insert(canvas->add_line(pts, via_item->Diameter(), horizon::ColorP::LAYER_HIGHLIGHT, la));
+        }
     }
     else if (aItem->Kind() == PNS::ITEM::ARC_T) {
         auto arc_item = static_cast<const PNS::ARC *>(aItem);
@@ -1028,14 +1050,36 @@ void PNS_HORIZON_IFACE::AddItem(PNS::ITEM *aItem)
         PNS::VIA *pvia = static_cast<PNS::VIA *>(aItem);
         auto uu = horizon::UUID::random();
         auto net = get_net_for_code(pvia->Net());
-        auto padstack = pool->get_padstack(rules->get_via_padstack_uuid(net));
+        const horizon::ViaDefinition *vdef = nullptr;
+        if (auto def_uu = get_via_definition_for_code(pvia->Definition())) {
+            vdef = &rules->get_rule_t<horizon::RuleViaDefinitions>().via_definitions.at(def_uu);
+        }
+        horizon::UUID padstack_uuid;
+        if (vdef) {
+            padstack_uuid = vdef->padstack;
+        }
+        else {
+            padstack_uuid = rules->get_via_padstack_uuid(net);
+        }
+        auto padstack = pool->get_padstack(padstack_uuid);
         if (padstack) {
-            auto ps = rules->get_via_parameter_set(net);
+            horizon::ParameterSet ps;
+            if (vdef) {
+                ps = vdef->parameters;
+            }
+            else {
+                ps = rules->get_via_parameter_set(net);
+            }
             auto via = &board->vias
                                 .emplace(std::piecewise_construct, std::forward_as_tuple(uu),
                                          std::forward_as_tuple(uu, padstack))
                                 .first->second;
             via->parameter_set = ps;
+            if (vdef) {
+                via->span = vdef->span;
+                via->definition = vdef->uuid;
+                via->source = horizon::Via::Source::DEFINITION;
+            }
 
             horizon::BoardJunction temp_junction{horizon::UUID()};
             temp_junction.position = {pvia->Pos().x, pvia->Pos().y};

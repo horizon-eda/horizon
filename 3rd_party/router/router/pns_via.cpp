@@ -103,6 +103,7 @@ VIA* VIA::Clone() const
     v->m_parent = m_parent;
     v->m_isFree = m_isFree;
     v->m_isVirtual = m_isVirtual;
+    v->m_definition = m_definition;
 
     return v;
 }

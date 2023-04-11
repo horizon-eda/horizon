@@ -75,7 +75,9 @@ const VIA LINE_PLACER::makeVia( const VECTOR2I& aP )
     const LAYER_RANGE layers( m_sizes.ViaType() == VIATYPE::THROUGH ? F_Cu : m_sizes.GetLayerTop(),
                               m_sizes.ViaType() == VIATYPE::THROUGH ? B_Cu : m_sizes.GetLayerBottom() );
 
-    return VIA( aP, layers, m_sizes.ViaDiameter(), m_sizes.ViaDrill(), -1, m_sizes.ViaType() );
+    auto via = VIA( aP, layers, m_sizes.ViaDiameter(), m_sizes.ViaDrill(), -1, m_sizes.ViaType() );
+    via.SetDefinition( m_sizes.ViaDefinition() );
+    return via;
 }
 
 

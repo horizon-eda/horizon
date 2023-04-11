@@ -101,11 +101,13 @@ void ToolPlaceVia::update_tip()
             {InToolActionID::RMB},
             {InToolActionID::EDIT, "change net"},
     };
-    if (!via_definition) {
-        actions.push_back({InToolActionID::SELECT_VIA_DEFINITION, "select via definition"});
-    }
-    else {
-        actions.push_back({InToolActionID::SELECT_VIA_DEFINITION, "use via from rules"});
+    if (rules->get_rule_t<RuleViaDefinitions>().via_definitions.size()) {
+        if (!via_definition) {
+            actions.push_back({InToolActionID::SELECT_VIA_DEFINITION, "select via definition"});
+        }
+        else {
+            actions.push_back({InToolActionID::SELECT_VIA_DEFINITION, "use via from rules"});
+        }
     }
     imp->tool_bar_set_actions(actions);
 }
@@ -145,6 +147,9 @@ bool ToolPlaceVia::update_attached(const ToolArgs &args)
             return false;
 
         case InToolActionID::SELECT_VIA_DEFINITION:
+            if (!rules->get_rule_t<RuleViaDefinitions>().via_definitions.size())
+                return false;
+
             if (via) {
                 if (!via_definition) {
                     const auto &rule_via_defs = rules->get_rule_t<RuleViaDefinitions>();
