@@ -145,7 +145,7 @@ protected:
     void render(const class BoardPanel &panel);
     void render(const class Picture &pic, bool interactive = true);
     void render(const class Decal &decal, bool interactive = true);
-    void render(const class BoardDecal &decal);
+    void render(const class BoardDecal &decal, bool interactive = true);
     void render(const class BlockSymbol &sym, bool on_sheet = false);
     void render(const class BlockSymbolPort &port, bool interactive = true);
     void render(const class SchematicBlockSymbol &sym);

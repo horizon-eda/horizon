@@ -1674,7 +1674,7 @@ void Canvas::render(const Board &brd, bool interactive, PanelMode mode, OutlineM
         render(it.second, interactive);
     }
     for (const auto &it : brd.decals) {
-        render(it.second);
+        render(it.second, interactive);
     }
     for (const auto &it : brd.net_ties) {
         render(it.second, interactive);
@@ -1802,7 +1802,7 @@ void Canvas::render(const Picture &pic, bool interactive)
     }
 }
 
-void Canvas::render(const BoardDecal &decal)
+void Canvas::render(const BoardDecal &decal, bool interactive)
 {
     transform_save();
     transform.accumulate(decal.placement);
@@ -1810,7 +1810,8 @@ void Canvas::render(const BoardDecal &decal)
     if (decal.get_flip()) {
         transform.invert_angle();
     }
-    selectables.append(decal.uuid, ObjectType::BOARD_DECAL, {0, 0}, bb.first, bb.second, 0, decal.get_layers());
+    if (interactive)
+        selectables.append(decal.uuid, ObjectType::BOARD_DECAL, {0, 0}, bb.first, bb.second, 0, decal.get_layers());
     render(decal.get_decal(), false);
     transform_restore();
 }
