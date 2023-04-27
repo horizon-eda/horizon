@@ -18,7 +18,7 @@ jobs:
   stylecheck:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Install preliminary dependencies
       run: sudo apt-get update -y && sudo apt-get install curl gnupg apt-transport-https -y
     - name: Add clang 11.0 to apt sources
@@ -35,7 +35,7 @@ jobs:
     container: debian:bullseye
     needs: stylecheck
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Install dependencies
       run: apt-get update -y && apt-get install git build-essential libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libarchive-dev git libosmesa6-dev -y
     - name: Build
@@ -77,7 +77,7 @@ jobs:
     container: ${{ matrix.os.container }}
     needs: stylecheck
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: generate locales
       run: |
         apt-get update
@@ -113,7 +113,7 @@ jobs:
     container: archlinux:base-devel
     needs: stylecheck
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Install updates
       run: pacman -Syu --noconfirm
     - name: Install dependencies
@@ -145,7 +145,7 @@ jobs:
     container: opensuse/tumbleweed
     needs: stylecheck
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Install dependencies
       run: zypper in -y git make gcc gcc-c++ pkg-config cppzmq-devel oce-devel gtkmm3-devel libgit2-devel libuuid-devel sqlite3-devel librsvg-devel cairomm-devel glm-devel boost-devel libcurl-devel libpodofo-devel binutils-gold libarchive-devel libspnav-devel python3
 
@@ -168,7 +168,7 @@ jobs:
     container: debian:buster
     needs: stylecheck
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Install dependencies
       run: apt-get update -y && apt-get install git build-essential libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libarchive-dev git -y
     - name: Build
