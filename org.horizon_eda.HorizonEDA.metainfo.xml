@@ -52,6 +52,17 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+    <release version="2.4.90" date="2023-04-30">
+      <url>https://github.com/horizon-eda/horizon/releases/tag/v2.4.90</url>
+      <description>
+        <p>What's new</p>
+        <ul>
+          <li>Blind and buried vias</li>
+          <li>Improved undo and redo</li>
+          <li>Undo and redo in pool item editors</li>
+        </ul>
+      </description>
+    </release>
     <release version="2.4.0" date="2022-10-15">
       <url>https://github.com/horizon-eda/horizon/releases/tag/v2.4.0</url>
       <description>
