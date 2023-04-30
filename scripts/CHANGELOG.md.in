@@ -1,3 +1,114 @@
+# Version 2.5.0
+
+## New Features
+
+### Board Editor
+
+ - add support for blind and buried vias (57007a0131083e8a73581b1c2e050a689267d5e3, ba2553f07a375c07d3f32e8a809d80bb963e779a)
+
+### Editors
+
+ - add undo/redo that never forgets (f1c6797175ea586a6a9a38dd274613c867af51a3)
+
+### Pool Manager
+
+ - undo/redo for Unit, Entity and Part editors (74ba93db6b39a722e3e320ef647f692947d63025)
+
+## Enhancements
+
+### Project Manager
+
+ - set default via and frame in new project pools (7d05a8c8f378421550c8efd5a1a6372dd1971802)
+
+### Pool Manager
+
+ - scroll to top when sorting most recently modified first (2a51a8a28981f5a2af69dfa2371826c1af825b96)
+ - Add shortcuts in editors (f5a15466b889d2aedf0dd0994764b1617e1acfd7)
+
+### Schematic Editor
+
+ - new tool for pasting part (8e4761cb9e2e728c013c785d563f2a43895fca0c)
+ - support search in pin names window (b7030384ccd3b864d474129f2ff529c8c8b7b6c7)
+ - Increase bus sequence limits to 1000 (80168d3e1e8af1bb821e631949dee40837e061d2)
+
+
+### Board Editor
+
+ - support up to 8 inner layers (a94294e189dca24673bee109d2581f78982de719)
+ - action for selecting plane at cursor (f0a1b7cda6ab1a6f5a231467b51946c249675332)
+
+### Editors
+
+ - don't clear undo/redo history when reloading the pool (4dd2fec5197593607c3c5b8d701f4b8dc6895086)
+
+### Part Editor
+
+ - add context menu for editing linked items (a25bf9c96d97c1f3547978b29eb63ab34894b0f9)
+ - support creating base part from current part (b58e542cafdabdffac91bebf5a8bae6e2d998772)
+ - support changing base part (e290d6eea00ad60617d0e999c4ce7e69dd00bf05)
+ - improve visual stability of parametric editor (bbea90004da48c874dbea12e171232678d4b75b1)
+
+### Pool And Project Manager
+
+ - automatically add newly-added pools to recent list (c2962c48c96391bfe6a60500b55cc28c2e342857)
+ - add search for recent pools and projects (bf6bbbde478909d0a920c4a8ddf976f4f331794c)
+
+### Symbol Editor
+
+ - support changing pin name orientation while placing pin (71748b59acfb1120bb9b9da8625db070e451c117)
+
+## Bugfixes
+
+### Board Editor
+
+ - properly handle decals on panels (3f5e09d77f42846f540318c67197fcce7f1e9273)
+ - Gerber export: fix arcs in JLCPCB's gerber preview (c3bf67ec43b80c9b5f797aca694eb8e485c8509f)
+ - properly set visibility of inner layers when opening a board for the first time (7ca72524cc7c84bad110ad499b42f0585c94bda8)
+ - omit zero-diameter holes in STEP export to avoid error (602a87825e5018eaf0be896fc5929e1a3316c90f)
+ - update airwires after dragging track (a6cf447c8a42ce33ab942cc9653fa20367700df2)
+ - correctly export planes in panels (b29af1995a6dc095eb3afa0b4898acc5720dafff)
+ - fix gerber zip file genreation for non-ASCII paths (baeb9c7c94ec5a9a7fd540916e2b10429189fbb3)
+ - don't set zero track width on newly created inner layers (5c89a23d08642452c42fbc91fbb6ad2172e347d2)
+ - don't crash on on PTH-PTH clearance violation (b630cc5dc92f08c02e5102e280e61cb6e3ec3e37)
+ - properly export gerber for plane fragments in holes of enclosed planes (1c2c7134939a5ff9a1c1d875190c945cf7e37bf8)
+ - don't select vias in work layer only mode if work layer isn't in via layers (d0e5d405f0fb8585279cf46e3de1d5cdc465c857)
+ - don't start routing tracks by dragging if tracks aren't selectable (29b562343fc3d007caaebef9da0c63648889dc19)
+
+### Editors
+
+ - focus canvas when opening editor so that shortcuts work right away (4078fef4fdc77df1d504e4b4aade845ee6571b65)
+ - don't crash on exception in tool constructor (c4cc669d2363f3e61f83b1a69fb391367da76995)
+ - open preferences window in foreground (eee4fd232165da794958309ddc97c5993eb18988)
+
+### Schematic Editor
+
+ - correctly manage buses in hierarchy (611e3e72e67ce1fc386ca6fcb845f17e2a5e1f8e)
+ - properly handle switching to outside-of-hierarchy sheets (0658deacb848755e63addc3761ddbbe04e20f3e4)
+ - show correct symbol refdes in properties in hierachies (898de125d58d4f0f2b72c8f7d406aac6758ec1d9)
+ - properly set smashed reference designators in instances (56e43edcf2150447498d53452256b4b3c7ab0650)
+ - don't create one-member net without net line when clicking on starting pin (7d0d63d5655e8561dd1414859bd2e1ff62076c68)
+ - properly delete unused nets after assigning nets (c07b83402b5659a3cb3c3abf5b8a38f2205c6d52)
+ - reduce lag when switching sheets (efac86b06155c8c0eddfab9e0a88689574c21b56)
+
+### Part Browser
+
+ - fix resizing tags column (e6e1a98c7ab40f1152c3a26e7ebcd73706f08eaf)
+
+### Pool And Project Manager
+
+ - don't crash when oping a pool that includes unusable included pools (d29df7e12ec95248978b0eb8f3dbd956b5be9256)
+
+### Part Editor
+
+ - don't crash when changing parametric table in some circumstances (93341833b039b12152d2148e05b36b25f9c5708e)
+ - enable saving when toggling parametric N/A value (9a014ec3bf206551af538cae662014c82647c9cc)
+ - improve layout to make window less tall (ed26cf20c228ea7a692ab85c91be3a52df95bf1b)
+
+
+## For packagers
+
+ - Boost is no longer a dependency (60a4f9ece25233ae3a49ad0c03152ca9f98d8564)
+ 
 # Version 2.4.0
 
 ## New Features
