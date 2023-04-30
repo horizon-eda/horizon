@@ -9,10 +9,13 @@
 #include <algorithm>
 #include "widgets/pool_browser_button.hpp"
 #include "widgets/pool_browser_padstack.hpp"
+#include "widgets/layer_range_editor.hpp"
+#include "board/rule_via_definitions.hpp"
 
 namespace horizon {
 
-EditViaDialog::EditViaDialog(Gtk::Window *parent, std::set<Via *> &vias, IPool &pool, IPool &pool_caching)
+EditViaDialog::EditViaDialog(Gtk::Window *parent, std::set<Via *> &vias, IPool &pool, IPool &pool_caching,
+                             const LayerProvider &lprv, const RuleViaDefinitions &defs)
     : Gtk::Dialog("Edit via", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR)
 {
     set_default_size(400, 300);
@@ -34,13 +37,32 @@ EditViaDialog::EditViaDialog(Gtk::Window *parent, std::set<Via *> &vias, IPool &
     grid->set_margin_start(8);
     grid->set_margin_end(8);
     {
-        auto la = Gtk::manage(new Gtk::Label("Padstack"));
+        auto la = Gtk::manage(new Gtk::Label("Source"));
         la->get_style_context()->add_class("dim-label");
         la->set_halign(Gtk::ALIGN_END);
         grid->attach(*la, 0, 0, 1, 1);
     }
+    {
+        auto la = Gtk::manage(new Gtk::Label("Definition"));
+        la->get_style_context()->add_class("dim-label");
+        la->set_halign(Gtk::ALIGN_END);
+        grid->attach(*la, 0, 1, 1, 1);
+    }
+    {
+        auto la = Gtk::manage(new Gtk::Label("Padstack"));
+        la->get_style_context()->add_class("dim-label");
+        la->set_halign(Gtk::ALIGN_END);
+        grid->attach(*la, 0, 2, 1, 1);
+    }
+    {
+        auto la = Gtk::manage(new Gtk::Label("Span"));
+        la->get_style_context()->add_class("dim-label");
+        la->set_halign(Gtk::ALIGN_END);
+        grid->attach(*la, 0, 3, 1, 1);
+    }
 
-    auto padstack_apply_all_button = Gtk::manage(new Gtk::Button);
+
+    padstack_apply_all_button = Gtk::manage(new Gtk::Button);
     padstack_apply_all_button->set_image_from_icon_name("object-select-symbolic", Gtk::ICON_SIZE_BUTTON);
     padstack_apply_all_button->set_tooltip_text("Apply to all selected vias");
     padstack_apply_all_button->signal_clicked().connect([this, vias, &pool_caching] {
@@ -50,21 +72,41 @@ EditViaDialog::EditViaDialog(Gtk::Window *parent, std::set<Via *> &vias, IPool &
             }
         }
     });
-    grid->attach(*padstack_apply_all_button, 2, 0, 1, 1);
+    grid->attach(*padstack_apply_all_button, 2, 2, 1, 1);
 
-    auto rules_apply_all_button = Gtk::manage(new Gtk::Button);
+    rules_apply_all_button = Gtk::manage(new Gtk::Button);
     rules_apply_all_button->set_image_from_icon_name("object-select-symbolic", Gtk::ICON_SIZE_BUTTON);
     rules_apply_all_button->set_tooltip_text("Apply to all selected vias");
     rules_apply_all_button->signal_clicked().connect([this, vias] {
+        const auto src = static_cast<Via::Source>(std::stoi(source_combo->get_active_id()));
         for (auto &via : vias) {
-            if (cb_from_rules->get_active())
-                via->source = Via::Source::RULES;
-            else
-                via->source = Via::Source::LOCAL;
-            update_sensitive();
+            via->source = src;
         }
     });
-    grid->attach(*rules_apply_all_button, 2, 1, 1, 1);
+    grid->attach(*rules_apply_all_button, 2, 0, 1, 1);
+
+    definition_apply_all_button = Gtk::manage(new Gtk::Button);
+    definition_apply_all_button->set_image_from_icon_name("object-select-symbolic", Gtk::ICON_SIZE_BUTTON);
+    definition_apply_all_button->set_tooltip_text("Apply to all selected vias");
+    definition_apply_all_button->signal_clicked().connect([this, vias] {
+        const auto def = UUID(definition_combo->get_active_id());
+        for (auto &via : vias) {
+            via->definition = def;
+        }
+    });
+    grid->attach(*definition_apply_all_button, 2, 1, 1, 1);
+
+    span_apply_all_button = Gtk::manage(new Gtk::Button);
+    span_apply_all_button->set_image_from_icon_name("object-select-symbolic", Gtk::ICON_SIZE_BUTTON);
+    span_apply_all_button->set_tooltip_text("Apply to all selected vias");
+    span_apply_all_button->signal_clicked().connect([this, vias] {
+        const auto span = span_editor->get_layer_range();
+        for (auto &via : vias) {
+            if (via->source != Via::Source::DEFINITION)
+                via->span = span;
+        }
+    });
+    grid->attach(*span_apply_all_button, 2, 3, 1, 1);
 
     box->pack_start(*grid, false, false, 0);
 
@@ -82,7 +124,7 @@ EditViaDialog::EditViaDialog(Gtk::Window *parent, std::set<Via *> &vias, IPool &
         viamap.emplace(via->uuid, via);
     }
 
-    combo->signal_changed().connect([this, combo, viamap, box, grid, vias, &pool, &pool_caching] {
+    combo->signal_changed().connect([this, combo, viamap, box, grid, vias, &pool, &pool_caching, &lprv, &defs] {
         UUID uu(combo->get_active_id());
         auto via = viamap.at(uu);
         if (editor)
@@ -113,22 +155,49 @@ EditViaDialog::EditViaDialog(Gtk::Window *parent, std::set<Via *> &vias, IPool &
                 via->pool_padstack = pool_caching.get_padstack(button_vp->property_selected_uuid());
         });
         button_vp->set_hexpand(true);
-        grid->attach(*button_vp, 1, 0, 1, 1);
+        grid->attach(*button_vp, 1, 2, 1, 1);
         button_vp->show();
 
-        if (cb_from_rules)
-            delete cb_from_rules;
-        cb_from_rules = Gtk::manage(new Gtk::CheckButton("From rules"));
-        cb_from_rules->set_active(via->source == Via::Source::RULES);
-        cb_from_rules->signal_toggled().connect([this, via] {
-            if (cb_from_rules->get_active())
-                via->source = Via::Source::RULES;
-            else
-                via->source = Via::Source::LOCAL;
+        if (source_combo)
+            delete source_combo;
+        source_combo = Gtk::manage(new Gtk::ComboBoxText);
+        source_combo->append(std::to_string(static_cast<int>(Via::Source::LOCAL)), "Local");
+        source_combo->append(std::to_string(static_cast<int>(Via::Source::RULES)), "Rules");
+        source_combo->append(std::to_string(static_cast<int>(Via::Source::DEFINITION)), "Definition");
+        source_combo->set_active_id(std::to_string(static_cast<int>(via->source)));
+        source_combo->signal_changed().connect([this, via] {
+            via->source = static_cast<Via::Source>(std::stoi(source_combo->get_active_id()));
             update_sensitive();
         });
-        grid->attach(*cb_from_rules, 1, 1, 1, 1);
-        cb_from_rules->show();
+        grid->attach(*source_combo, 1, 0, 1, 1);
+        source_combo->show();
+
+        if (definition_combo)
+            delete definition_combo;
+        definition_combo = Gtk::manage(new Gtk::ComboBoxText);
+        definition_combo->append((std::string)UUID{}, "(None)");
+        for (const auto &[uu, def] : defs.via_definitions) {
+            definition_combo->append((std::string)uu, def.name);
+        }
+        definition_combo->set_active_id((std::string)via->definition);
+        definition_combo->signal_changed().connect(
+                [this, via] { via->definition = (std::string)definition_combo->get_active_id(); });
+        grid->attach(*definition_combo, 1, 1, 1, 1);
+        definition_combo->show();
+
+        if (span_editor)
+            delete span_editor;
+        span_editor = Gtk::manage(new LayerRangeEditor);
+        for (auto [li, layer] : lprv.get_layers()) {
+            if (layer.copper)
+                span_editor->add_layer(layer);
+        }
+        span_editor->set_layer_range(via->span);
+        span_editor->signal_changed().connect([this, via] { via->span = span_editor->get_layer_range(); });
+        grid->attach(*span_editor, 1, 3, 1, 1);
+        span_editor->set_hexpand(true);
+        span_editor->show();
+
 
         update_sensitive();
     });
@@ -145,8 +214,13 @@ EditViaDialog::EditViaDialog(Gtk::Window *parent, std::set<Via *> &vias, IPool &
 
 void EditViaDialog::update_sensitive()
 {
-    auto s = !cb_from_rules->get_active();
-    button_vp->set_sensitive(s);
-    editor->set_sensitive(s);
+    auto src = static_cast<Via::Source>(std::stoi(source_combo->get_active_id()));
+    button_vp->set_sensitive(src == Via::Source::LOCAL);
+    padstack_apply_all_button->set_sensitive(src == Via::Source::LOCAL);
+    editor->set_sensitive(src == Via::Source::LOCAL);
+    definition_combo->set_sensitive(src == Via::Source::DEFINITION);
+    definition_apply_all_button->set_sensitive(src == Via::Source::DEFINITION);
+    span_editor->set_sensitive(src != Via::Source::DEFINITION);
+    span_apply_all_button->set_sensitive(src != Via::Source::DEFINITION);
 }
 } // namespace horizon

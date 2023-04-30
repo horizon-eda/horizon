@@ -25,9 +25,11 @@ public:
 
     ParameterSet parameter_set;
 
-    enum class Source { LOCAL, RULES };
+    enum class Source { LOCAL, RULES, DEFINITION };
 
     Source source = Source::RULES;
+    UUID definition;
+
     bool locked = false;
 
     LayerRange span;

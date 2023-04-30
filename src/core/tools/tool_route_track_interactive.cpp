@@ -654,13 +654,6 @@ bool ToolWrapper::prepareInteractive()
     if (m_startItem) {
         auto netcode = m_startItem->Net();
         auto net = tool->iface->get_net_for_code(netcode);
-        auto vps = tool->rules->get_via_parameter_set(net);
-        if (vps.count(horizon::ParameterID::VIA_DIAMETER)) {
-            sizes.SetViaDiameter(vps.at(horizon::ParameterID::VIA_DIAMETER));
-        }
-        if (vps.count(horizon::ParameterID::HOLE_DIAMETER)) {
-            sizes.SetViaDrill(vps.at(horizon::ParameterID::HOLE_DIAMETER));
-        }
         if (net) {
             auto &highlights = tool->imp->get_highlights();
             highlights.clear();
@@ -953,6 +946,14 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                             net = iface->get_net_for_code(x);
                         }
                         layer = rules->get_layer_pair(net, layer);
+                        // clamp layer to via span
+                        {
+                            const auto defcode = router->Sizes().ViaDefinition();
+                            if (auto uu = iface->get_via_definition_for_code(defcode)) {
+                                const auto &span = rules->get_via_definitions().via_definitions.at(uu).span;
+                                layer = std::clamp(layer, span.start(), span.end());
+                            }
+                        }
                         router->SwitchLayer(PNS::PNS_HORIZON_IFACE::layer_to_router(layer));
                     }
 
@@ -984,11 +985,35 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
                     break;
 
-                case InToolActionID::TOGGLE_VIA:
+                case InToolActionID::TOGGLE_VIA: {
                     router->ToggleViaPlacement();
                     wrapper->updateEndItem(args);
                     router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
-                    break;
+                } break;
+
+                case InToolActionID::SELECT_VIA_DEFINITION: {
+                    const auto &rule_via_defs = rules->get_via_definitions();
+                    ViaDefinition via_def_from_rules{UUID{}};
+                    Net *net = nullptr;
+                    {
+                        auto nets = router->GetCurrentNets();
+                        if (nets.size()) {
+                            net = iface->get_net_for_code(nets.front());
+                        }
+                    }
+                    via_def_from_rules.padstack = rules->get_via_padstack_uuid(net);
+                    via_def_from_rules.parameters = rules->get_via_parameter_set(net);
+                    via_def_from_rules.span = BoardLayers::layer_range_through;
+                    if (auto def = imp->dialogs.select_via_definition(rule_via_defs, *board, via_def_from_rules,
+                                                                      doc.r->get_pool())) {
+                        via_definition_uuid = *def;
+                        update_via_settings();
+                        if (!router->IsPlacingVia())
+                            router->ToggleViaPlacement();
+                        wrapper->updateEndItem(args);
+                        router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
+                    }
+                } break;
 
                 case InToolActionID::DELETE_LAST_SEGMENT:
                     router->UndoLastSegment();
@@ -1098,6 +1123,38 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
     return ToolResponse();
 }
 
+void ToolRouteTrackInteractive::update_via_settings()
+{
+    auto nets = router->GetCurrentNets();
+    if (nets.size() < 1)
+        return;
+    auto sizes = router->Sizes();
+    auto net = iface->get_net_for_code(nets.front());
+    ParameterSet vps;
+    if (via_definition_uuid == UUID()) {
+        vps = rules->get_via_parameter_set(net);
+        sizes.SetViaDefinition(-1);
+        sizes.SetViaType(VIATYPE::THROUGH);
+    }
+    else {
+        auto via_def = rules->get_via_definitions().via_definitions.at(via_definition_uuid);
+        vps = via_def.parameters;
+        auto defcode = iface->get_via_definition_code(via_definition_uuid);
+        sizes.SetViaDefinition(defcode);
+        sizes.SetViaType(VIATYPE::BLIND_BURIED);
+        sizes.ClearLayerPairs();
+        sizes.AddLayerPair(PNS::PNS_HORIZON_IFACE::layer_to_router(via_def.span.start()),
+                           PNS::PNS_HORIZON_IFACE::layer_to_router(via_def.span.end()));
+    }
+    if (vps.count(horizon::ParameterID::VIA_DIAMETER)) {
+        sizes.SetViaDiameter(vps.at(horizon::ParameterID::VIA_DIAMETER));
+    }
+    if (vps.count(horizon::ParameterID::HOLE_DIAMETER)) {
+        sizes.SetViaDrill(vps.at(horizon::ParameterID::HOLE_DIAMETER));
+    }
+    router->UpdateSizes(sizes);
+}
+
 static std::string format_length(double l)
 {
     l /= 1e6;
@@ -1141,6 +1198,8 @@ void ToolRouteTrackInteractive::update_tip()
         if (tool_id != ToolID::ROUTE_DIFFPAIR_INTERACTIVE)
             actions.emplace_back(InToolActionID::DELETE_LAST_SEGMENT);
         actions.emplace_back(InToolActionID::TOGGLE_VIA);
+        if (rules->get_via_definitions().via_definitions.size())
+            actions.emplace_back(InToolActionID::SELECT_VIA_DEFINITION);
         actions.emplace_back(InToolActionID::ROUTER_SETTINGS);
         if (!settings_window_visible && tool_id != ToolID::ROUTE_DIFFPAIR_INTERACTIVE)
             actions.emplace_back(InToolActionID::TOGGLE_CORNER_STYLE);
@@ -1181,6 +1240,15 @@ void ToolRouteTrackInteractive::update_tip()
         ss << "  width " << format_length(sz.TrackWidth());
         if (!sz.TrackWidthIsExplicit()) {
             ss << " (default)";
+        }
+        if (router->IsPlacingVia()) {
+            const auto defcode = router->Sizes().ViaDefinition();
+            if (auto uu = iface->get_via_definition_for_code(defcode)) {
+                ss << " defined via: " << rules->get_via_definitions().via_definitions.at(uu).name;
+            }
+            else {
+                ss << " via from rules";
+            }
         }
     }
     else {

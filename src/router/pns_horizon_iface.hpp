@@ -106,6 +106,9 @@ public:
     horizon::Net *get_net_for_code(int code);
     int get_net_code(const horizon::UUID &uu);
 
+    horizon::UUID get_via_definition_for_code(int code);
+    int get_via_definition_code(const horizon::UUID &uu);
+
     const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::Track *track);
     const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::Via *via);
     const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::BoardHole *hole);
@@ -146,6 +149,9 @@ private:
     void syncKeepout(const horizon::KeepoutContour *keepout_contour, PNS::NODE *aWorld);
     std::map<horizon::UUID, int> net_code_map;
     std::vector<horizon::Net *> net_code_map_r;
+
+    std::map<horizon::UUID, int> via_definition_code_map;
+    std::vector<horizon::UUID> via_definition_code_map_r;
 
     int64_t override_routing_offset = -1;
 

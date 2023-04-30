@@ -17,6 +17,7 @@
 #include "rule_thermals.hpp"
 #include "rule_net_ties.hpp"
 #include "rule_board_connectivity.hpp"
+#include "rule_via_definitions.hpp"
 #include "rules/rules.hpp"
 #include "util/uuid.hpp"
 #include <atomic>
@@ -52,6 +53,7 @@ public:
     uint64_t get_max_clearance() const;
 
     const RuleParameters &get_parameters() const;
+    const RuleViaDefinitions &get_via_definitions() const;
 
     UUID get_via_padstack_uuid(const class Net *net) const;
     const ParameterSet &get_via_parameter_set(const class Net *net) const;
@@ -94,7 +96,7 @@ private:
     RulePreflightChecks rule_preflight_checks;
     RuleNetTies rule_net_ties;
     RuleBoardConnectivity rule_board_connectivity;
-
+    RuleViaDefinitions rule_via_definitions;
 
     RulesCheckResult check_track_width(const class Board &b) const;
     RulesCheckResult check_hole_size(const class Board &b) const;

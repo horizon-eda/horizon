@@ -5,6 +5,7 @@
 #include <iostream>
 #include "logger/logger.hpp"
 #include "pool/ipool.hpp"
+#include "board/board_layers.hpp"
 
 namespace horizon {
 
@@ -26,11 +27,7 @@ bool ToolPlaceVia::begin_attached()
             return false;
         }
         update_tip();
-        imp->tool_bar_set_actions({
-                {InToolActionID::LMB},
-                {InToolActionID::RMB},
-                {InToolActionID::EDIT, "change net"},
-        });
+
         return true;
     }
     else {
@@ -55,10 +52,30 @@ void ToolPlaceVia::create_attached()
                    ->vias.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, ps))
                    .first->second;
     via->junction = temp;
-    via->source = Via::Source::RULES;
     via->net_set = net;
     via->junction->net = net;
-    via->parameter_set = rules->get_via_parameter_set(net);
+    update_via();
+}
+
+void ToolPlaceVia::update_via()
+{
+    if (via_definition) {
+        via->source = Via::Source::DEFINITION;
+        via->definition = via_definition->uuid;
+        via->span = via_definition->span;
+        via->pool_padstack = doc.b->get_pool_caching().get_padstack(via_definition->padstack);
+        via->parameter_set = via_definition->parameters;
+    }
+    else {
+        via->source = Via::Source::RULES;
+        via->parameter_set = rules->get_via_parameter_set(net);
+        via->span = BoardLayers::layer_range_through;
+        auto ps = doc.b->get_pool_caching().get_padstack(rules->get_via_padstack_uuid(net));
+        if (!ps) {
+            throw std::runtime_error("padstack not found");
+        }
+        via->pool_padstack = ps;
+    }
     via->expand(*doc.b->get_board());
 }
 
@@ -71,7 +88,23 @@ void ToolPlaceVia::delete_attached()
 
 void ToolPlaceVia::update_tip()
 {
-    imp->tool_bar_set_tip(net->name);
+    std::string tip = net->name;
+    if (via_definition)
+        tip += " (from definition " + via_definition->name + ")";
+
+    else
+        tip += " (from rules)";
+
+    imp->tool_bar_set_tip(tip);
+    std::vector<ActionLabelInfo> actions = {
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+            {InToolActionID::EDIT, "change net"},
+    };
+    if (rules->get_rule_t<RuleViaDefinitions>().via_definitions.size()) {
+        actions.push_back({InToolActionID::SELECT_VIA_DEFINITION, "select via definition"});
+    }
+    imp->tool_bar_set_actions(actions);
 }
 
 void ToolPlaceVia::finish()
@@ -82,11 +115,12 @@ void ToolPlaceVia::finish()
 
 bool ToolPlaceVia::update_attached(const ToolArgs &args)
 {
+    auto &brd = *doc.b->get_board();
     if (args.type == ToolEventType::ACTION) {
         switch (args.action) {
         case InToolActionID::LMB:
             if (args.target.type == ObjectType::JUNCTION) {
-                auto j = &doc.b->get_board()->junctions.at(args.target.path.at(0));
+                auto j = &brd.junctions.at(args.target.path.at(0));
                 via->junction = j;
                 create_attached();
                 return true;
@@ -100,9 +134,33 @@ bool ToolPlaceVia::update_attached(const ToolArgs &args)
                     nets.insert(net->uuid);
                     via->net_set = net;
                     via->parameter_set = rules->get_via_parameter_set(net);
-                    via->expand(*doc.b->get_board());
+                    via->expand(brd);
                     update_tip();
                 }
+                return true;
+            }
+            return false;
+
+        case InToolActionID::SELECT_VIA_DEFINITION:
+            if (!rules->get_rule_t<RuleViaDefinitions>().via_definitions.size())
+                return false;
+
+            if (via) {
+                const auto &rule_via_defs = rules->get_rule_t<RuleViaDefinitions>();
+                ViaDefinition via_def_from_rules{UUID{}};
+                via_def_from_rules.padstack = rules->get_via_padstack_uuid(net);
+                via_def_from_rules.span = BoardLayers::layer_range_through;
+                via_def_from_rules.parameters = rules->get_via_parameter_set(net);
+                if (auto r = imp->dialogs.select_via_definition(rule_via_defs, brd, via_def_from_rules,
+                                                                doc.b->get_pool())) {
+                    if (*r)
+                        via_definition = &rule_via_defs.via_definitions.at(*r);
+                    else
+                        via_definition = nullptr;
+                }
+
+                update_via();
+                update_tip();
                 return true;
             }
             return false;

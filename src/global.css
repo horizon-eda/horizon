@@ -289,3 +289,53 @@ box.imp-instance-path-bar         > label {
   padding-left: 3px;
   padding-right: 3px;
 }
+
+.via-def-name {
+  border-bottom: 1px solid @borders;
+  padding: 5px;
+}
+
+.rule-via-definitions .radio {
+  background: @content_view_bg;
+  border-radius:0px;
+  -gtk-outline-radius: 0px;
+  border-top:0px;
+  border-bottom:0px;
+  padding: 0px;
+}
+
+.rule-via-definitions .radio:first-child {
+  border-left:0px;
+}
+
+.rule-via-definitions {
+  background: @content_view_bg;
+}
+
+.rule-via-definitions .radio:checked  {
+  background: @theme_selected_bg_color;
+  color:@theme_selected_fg_color;
+}
+
+.via-def-header label {
+  padding: 5px;
+}
+
+.via-def-header label:not(:last-child) {
+  border-bottom: 1px solid @borders;
+}
+
+.via-def-header {
+  background-color: @content_view_bg;
+  border-top: 1px solid @borders;
+  border-left: 1px solid @borders;
+  border-bottom: 1px solid @borders;
+}
+
+.via-def-layer {
+  padding: 0px 5px;
+}
+
+.via-def-layer-box .via-def-layer:not(:last-child) {
+  border-bottom: 1px solid @borders;
+}

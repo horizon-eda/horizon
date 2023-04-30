@@ -19,6 +19,8 @@ const std::map<RuleID, RD> rule_descriptions = {
 
         {RuleID::VIA, {"Vias", RD::IS_MULTI | RD::CAN_APPLY | RD::NEEDS_MATCH_ALL}},
 
+        {RuleID::VIA_DEFINITIONS, {"Via definitions", RD::CAN_APPLY}},
+
         {RuleID::CLEARANCE_COPPER_OTHER,
          {"Clearance Copper - Other", RD::IS_MULTI | RD::CAN_CHECK | RD::NEEDS_MATCH_ALL}},
 

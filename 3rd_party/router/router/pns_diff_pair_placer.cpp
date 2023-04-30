@@ -74,6 +74,7 @@ const VIA DIFF_PAIR_PLACER::makeVia( const VECTOR2I& aP, int aNet )
 
     VIA v( aP, layers, m_sizes.ViaDiameter(), m_sizes.ViaDrill(), -1, m_sizes.ViaType() );
     v.SetNet( aNet );
+    v.SetDefinition( m_sizes.ViaDefinition() );
 
     return v;
 }

@@ -65,6 +65,7 @@ public:
                 I::LENGTH_TUNING_SPACING_DEC,
                 I::POSTURE,
                 I::TOGGLE_VIA,
+                I::SELECT_VIA_DEFINITION,
                 I::ROUTER_SETTINGS,
                 I::ROUTER_MODE,
                 I::ENTER_WIDTH,
@@ -97,5 +98,8 @@ private:
     bool is_tune() const;
     bool settings_window_visible = false;
     void update_settings_window();
+    void update_via_settings();
+
+    UUID via_definition_uuid;
 };
 } // namespace horizon

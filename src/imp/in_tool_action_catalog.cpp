@@ -24,6 +24,9 @@ const std::map<InToolActionID, InToolActionCatalogItem> in_tool_action_catalog =
          {"decrease net label size", ToolID::NONE, InToolActionCatalogItem::FLAGS_DEFAULT}},
         {InToolActionID::FLIP_ARC, {"flip arc", ToolID::NONE, InToolActionCatalogItem::FLAGS_DEFAULT}},
 
+        {InToolActionID::SELECT_VIA_DEFINITION,
+         {"select via definition", ToolID::NONE, InToolActionCatalogItem::FLAGS_DEFAULT}},
+
         {InToolActionID::TOGGLE_ARC, {"toggle arc", ToolID::DRAW_POLYGON, InToolActionCatalogItem::FLAGS_DEFAULT}},
 
         {InToolActionID::DIMENSION_MODE,
@@ -129,6 +132,7 @@ const LutEnumStr<InToolActionID> in_tool_action_lut = {
         LUT_ITEM(TOGGLE_ARC),
         LUT_ITEM(DIMENSION_MODE),
         LUT_ITEM(PLACE_JUNCTION),
+        LUT_ITEM(SELECT_VIA_DEFINITION),
         LUT_ITEM(ARBITRARY_ANGLE_MODE),
         LUT_ITEM(TOGGLE_NET_LABEL),
         LUT_ITEM(POLYGON_DECORATION_POSITION),

@@ -33,6 +33,7 @@ enum class InToolActionID {
     NET_LABEL_SIZE_INC,
     NET_LABEL_SIZE_DEC,
     FLIP_ARC,
+    SELECT_VIA_DEFINITION,
 
     // draw polygon
     TOGGLE_ARC,

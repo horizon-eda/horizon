@@ -37,6 +37,8 @@ public:
     std::optional<UUID> select_decal(class IPool &pool);
     std::optional<UUID> select_block(const class BlocksSchematic &blocks);
     std::optional<UUID> map_net_tie(const std::set<class NetTie *> &net_ties);
+    std::optional<UUID> select_via_definition(const class RuleViaDefinitions &rules, const class LayerProvider &lprv,
+                                              const class ViaDefinition &via_def_from_rules, class IPool &pool);
 
     unsigned int ask_net_merge(class Net &net, class Net &into);
     bool manage_buses(class Block &b);
@@ -58,7 +60,8 @@ public:
     std::optional<std::string> ask_datum_string(const std::string &label, const std::string &def);
     std::optional<int> ask_datum_angle(const std::string &label, int def = 0);
     bool edit_shapes(std::set<class Shape *> shapes);
-    bool edit_via(std::set<class Via *> &vias, class IPool &pool, IPool &pool_caching);
+    bool edit_via(std::set<class Via *> &vias, class IPool &pool, IPool &pool_caching, const class LayerProvider &prv,
+                  const class RuleViaDefinitions &defs);
     bool edit_custom_value(class SchematicSymbol &sym);
     std::optional<std::string> ask_dxf_filename();
     std::optional<std::string> ask_kicad_package_filename();

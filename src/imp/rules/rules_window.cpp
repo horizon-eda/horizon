@@ -17,6 +17,7 @@
 #include "rule_editor_clearance_same_net.hpp"
 #include "rule_editor_shorted_pads.hpp"
 #include "rule_editor_thermals.hpp"
+#include "rule_editor_via_definitions.hpp"
 #include "rules/cache.hpp"
 #include "rules/rule_descr.hpp"
 #include "rules/rules.hpp"
@@ -802,6 +803,10 @@ RuleEditor *RulesWindow::create_editor(Rule &r)
 
     case RuleID::THERMALS:
         e = new RuleEditorThermals(r, core);
+        break;
+
+    case RuleID::VIA_DEFINITIONS:
+        e = new RuleEditorViaDefinitions(r, core);
         break;
 
     default:

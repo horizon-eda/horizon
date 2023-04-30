@@ -275,6 +275,10 @@ bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID
             dynamic_cast<PropertyValueBool &>(value).value = via->locked;
             return true;
 
+        case ObjectProperty::ID::VIA_DEFINITION:
+            dynamic_cast<PropertyValueUUID &>(value).value = via->definition;
+            return true;
+
         case ObjectProperty::ID::NAME: {
             std::string s;
             if (via->junction->net) {
@@ -555,6 +559,10 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
             via->locked = dynamic_cast<const PropertyValueBool &>(value).value;
             break;
 
+        case ObjectProperty::ID::VIA_DEFINITION:
+            via->definition = dynamic_cast<const PropertyValueUUID &>(value).value;
+            break;
+
         case ObjectProperty::ID::SPAN:
             via->span = dynamic_cast<const PropertyValueLayerRange &>(value).value;
             via->expand(*brd);
@@ -717,10 +725,24 @@ bool CoreBoard::get_property_meta(ObjectType type, const UUID &uu, ObjectPropert
     } break;
 
     case ObjectType::VIA: {
+        const auto &via = brd->vias.at(uu);
         switch (property) {
         case ObjectProperty::ID::SPAN:
             layers_to_meta(meta);
+            meta.is_settable = via.source != Via::Source::DEFINITION;
             return true;
+
+        case ObjectProperty::ID::VIA_DEFINITION: {
+            PropertyMetaNetClasses &m = dynamic_cast<PropertyMetaNetClasses &>(meta);
+
+            meta.is_settable = via.source == Via::Source::DEFINITION;
+            m.net_classes.clear();
+            m.net_classes.emplace(UUID(), "(None)");
+            for (const auto &[uu, def] : rules.get_rule_t<RuleViaDefinitions>().via_definitions) {
+                m.net_classes.emplace(uu, def.name);
+            }
+            return true;
+        }
 
         default:
             return false;

@@ -14,10 +14,7 @@ public:
     {
         using I = InToolActionID;
         return {
-                I::LMB,
-                I::CANCEL,
-                I::RMB,
-                I::EDIT,
+                I::LMB, I::CANCEL, I::RMB, I::EDIT, I::SELECT_VIA_DEFINITION,
         };
     }
 
@@ -33,9 +30,11 @@ protected:
     std::set<UUID> nets;
 
     std::forward_list<class Via *> vias_placed;
+    const class ViaDefinition *via_definition = nullptr;
 
 private:
     const class BoardRules *rules = nullptr;
     void update_tip();
+    void update_via();
 };
 } // namespace horizon
