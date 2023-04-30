@@ -144,6 +144,8 @@ std::string Project::create(const std::map<std::string, std::string> &meta, cons
         info.name = "Project pool";
         info.base_path = pool_directory;
         info.pools_included = {pool.uuid};
+        info.default_frame = pool.default_frame;
+        info.default_via = pool.default_via;
         info.save();
         ProjectPool::create_directories(pool_directory);
     }
