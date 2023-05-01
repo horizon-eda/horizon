@@ -70,6 +70,9 @@ jobs:
           - container: debian:bullseye
             cxx: g++
             cc: gcc
+          - container: debian:bookworm
+            cxx: g++
+            cc: gcc
         target:
           - all
           - build/horizon.so
