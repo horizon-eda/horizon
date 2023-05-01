@@ -102,6 +102,10 @@
  - improve layout to make window less tall (ed26cf20c228ea7a692ab85c91be3a52df95bf1b)
 
 
+## For packagers
+
+ - Boost is no longer a dependency (60a4f9ece25233ae3a49ad0c03152ca9f98d8564)
+ 
 # Version 2.4.0
 
 ## New Features
