@@ -189,13 +189,14 @@ void GerberWriter::write_arcs()
 {
     write_line("G75*");
     for (const auto &it : arcs) {
+        ofs << "D" << it.aperture << "*"
+            << "\r\n";
+
         if (it.flip)
             write_line("G02*");
         else
             write_line("G03*");
 
-        ofs << "D" << it.aperture << "*"
-            << "\r\n";
         ofs << it.from << "D02*"
             << "\r\n";
 
