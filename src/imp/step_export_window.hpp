@@ -24,6 +24,8 @@ private:
     Gtk::Button *filename_button = nullptr;
     Gtk::Button *export_button = nullptr;
     Gtk::Switch *include_3d_models_switch = nullptr;
+    Gtk::Box *min_dia_box = nullptr;
+    class SpinButtonDim *min_dia_spin_button = nullptr;
     Gtk::Entry *prefix_entry = nullptr;
 
     Gtk::TextView *log_textview = nullptr;

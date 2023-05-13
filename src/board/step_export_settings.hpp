@@ -18,5 +18,6 @@ public:
     std::string filename;
     std::string prefix;
     bool include_3d_models = true;
+    uint64_t min_diameter;
 };
 } // namespace horizon

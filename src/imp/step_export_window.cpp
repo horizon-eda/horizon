@@ -3,6 +3,7 @@
 #include "board/step_export_settings.hpp"
 #include "util/util.hpp"
 #include "util/gtk_util.hpp"
+#include "widgets/spin_button_dim.hpp"
 #include "document/idocument_board.hpp"
 #include <thread>
 
@@ -47,6 +48,16 @@ StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<G
     GET_WIDGET(prefix_entry);
     GET_WIDGET(log_textview);
     GET_WIDGET(include_3d_models_switch);
+    GET_WIDGET(min_dia_box);
+
+    auto width_chars = 10;
+    min_dia_spin_button = Gtk::manage(new SpinButtonDim());
+    min_dia_spin_button->set_width_chars(width_chars);
+    min_dia_spin_button->set_range(0.00_mm, 99_mm);
+    min_dia_spin_button->set_value(0.00_mm);
+    min_dia_spin_button->show();
+
+    min_dia_box->pack_start(*min_dia_spin_button, true, true, 0);
 
     export_button->signal_clicked().connect(sigc::mem_fun(*this, &StepExportWindow::generate));
 
@@ -60,9 +71,11 @@ StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<G
 
     bind_widget(include_3d_models_switch, settings.include_3d_models);
     bind_widget(prefix_entry, settings.prefix);
+    bind_widget(min_dia_spin_button, settings.min_diameter);
 
     include_3d_models_switch->property_active().signal_changed().connect([this] { s_signal_changed.emit(); });
     prefix_entry->signal_changed().connect([this] { s_signal_changed.emit(); });
+    min_dia_spin_button->signal_changed().connect([this] { s_signal_changed.emit(); });
 
     tag = log_textview->get_buffer()->create_tag();
     tag->property_font_features() = "tnum 1";
@@ -119,7 +132,7 @@ void StepExportWindow::export_thread(STEPExportSettings my_settings)
                     }
                     export_dispatcher.emit();
                 },
-                &core.get_colors(), my_settings.prefix);
+                &core.get_colors(), my_settings.prefix, my_settings.min_diameter);
     }
     catch (const std::exception &e) {
         {

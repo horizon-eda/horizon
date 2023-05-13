@@ -286,7 +286,8 @@ static PyObject *PyBoard_export_step(PyObject *pself, PyObject *args)
         horizon::STEPExportSettings settings(settings_json);
         horizon::export_step(
                 settings.filename, self->board->board, self->board->pool, settings.include_3d_models,
-                [py_callback](const std::string &s) { callback_wrapper(py_callback, s); }, nullptr, settings.prefix);
+                [py_callback](const std::string &s) { callback_wrapper(py_callback, s); }, nullptr, settings.prefix,
+                settings.min_diameter);
     }
     catch (const py_exception &e) {
         return NULL;
