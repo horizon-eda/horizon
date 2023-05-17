@@ -1,5 +1,6 @@
 #include "step_export_window.hpp"
 #include "export_step/export_step.hpp"
+#include "board/board.hpp"
 #include "board/step_export_settings.hpp"
 #include "util/util.hpp"
 #include "util/gtk_util.hpp"
@@ -49,6 +50,10 @@ StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<G
     GET_WIDGET(log_textview);
     GET_WIDGET(include_3d_models_switch);
     GET_WIDGET(min_dia_box);
+    GET_WIDGET(pkg_incl_button);
+    GET_WIDGET(pkg_excl_button);
+    GET_WIDGET(pkgs_included_tv);
+    GET_WIDGET(pkgs_excluded_tv);
 
     auto width_chars = 10;
     min_dia_spin_button = Gtk::manage(new SpinButtonDim());
@@ -77,6 +82,44 @@ StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<G
     prefix_entry->signal_changed().connect([this] { s_signal_changed.emit(); });
     min_dia_spin_button->signal_changed().connect([this] { s_signal_changed.emit(); });
 
+    pkgs_store = Gtk::ListStore::create(list_columns);
+    pkgs_fill();
+
+    pkgs_included = Gtk::TreeModelFilter::create(pkgs_store);
+    pkgs_included->set_visible_func([this](const Gtk::TreeModel::const_iterator &it) -> bool {
+        Gtk::TreeModel::Row row = *it;
+        const UUID &uuid = row[list_columns.uuid];
+        auto search = settings.pkgs_excluded.find(uuid);
+        return search == settings.pkgs_excluded.end();
+    });
+    auto pkgs_included_sort = Gtk::TreeModelSort::create(pkgs_included);
+    pkgs_included_tv->set_model(pkgs_included_sort);
+    pkgs_included_tv->append_column("Package", list_columns.pkg_name);
+    pkgs_included_tv->append_column("Count", list_columns.pkg_count);
+    pkgs_included_sort->set_sort_column(0, Gtk::SortType::SORT_ASCENDING);
+
+    pkgs_excluded = Gtk::TreeModelFilter::create(pkgs_store);
+    pkgs_excluded->set_visible_func([this](const Gtk::TreeModel::const_iterator &it) -> bool {
+        Gtk::TreeModel::Row row = *it;
+        const UUID &uuid = row[list_columns.uuid];
+        auto search = settings.pkgs_excluded.find(uuid);
+        return search != settings.pkgs_excluded.end();
+    });
+    auto pkgs_excluded_sort = Gtk::TreeModelSort::create(pkgs_excluded);
+    pkgs_excluded_tv->set_model(pkgs_excluded_sort);
+    pkgs_excluded_tv->append_column("Package", list_columns.pkg_name);
+    pkgs_excluded_tv->append_column("Count", list_columns.pkg_count);
+    pkgs_excluded_sort->set_sort_column(0, Gtk::SortType::SORT_ASCENDING);
+
+    pkg_incl_button->signal_clicked().connect([this] { pkg_incl_excl(true); });
+    pkg_excl_button->signal_clicked().connect([this] { pkg_incl_excl(false); });
+
+    pkgs_included_tv->get_selection()->signal_changed().connect(
+            sigc::mem_fun(*this, &StepExportWindow::update_pkg_incl_excl_sensitivity));
+    pkgs_excluded_tv->get_selection()->signal_changed().connect(
+            sigc::mem_fun(*this, &StepExportWindow::update_pkg_incl_excl_sensitivity));
+    update_pkg_incl_excl_sensitivity();
+
     tag = log_textview->get_buffer()->create_tag();
     tag->property_font_features() = "tnum 1";
     tag->property_font_features_set() = true;
@@ -102,6 +145,64 @@ StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<G
             set_is_busy(false);
     });
     update_export_button();
+}
+
+void StepExportWindow::pkgs_fill()
+{
+    auto brd = core.get_board();
+    struct pkg_info {
+        std::string name;
+        unsigned int count;
+
+        pkg_info(const std::string name_) : name(name_), count(0)
+        {
+        }
+    };
+    std::map<UUID, pkg_info> summary;
+
+    for (const auto &it : brd->packages) {
+        const auto pkg = it.second;
+        const auto sum_it = summary.try_emplace(pkg.package.uuid, pkg.package.name).first;
+        sum_it->second.count++;
+    }
+
+    for (const auto &it : summary) {
+        Gtk::TreeModel::Row row = *pkgs_store->append();
+        row[list_columns.pkg_name] = it.second.name;
+        row[list_columns.pkg_count] = it.second.count;
+        row[list_columns.uuid] = it.first;
+    }
+}
+
+void StepExportWindow::update_pkg_incl_excl_sensitivity()
+{
+    pkg_incl_button->set_sensitive(pkgs_excluded_tv->get_selection()->count_selected_rows());
+    pkg_excl_button->set_sensitive(pkgs_included_tv->get_selection()->count_selected_rows());
+}
+
+void StepExportWindow::pkg_incl_excl(bool incl)
+{
+    Gtk::TreeView *tv;
+    Glib::RefPtr<Gtk::TreeModel> model;
+
+    if (incl)
+        tv = pkgs_excluded_tv;
+    else
+        tv = pkgs_included_tv;
+
+    for (const auto &path : tv->get_selection()->get_selected_rows(model)) {
+        const auto &it = model->get_iter(path);
+        const auto &uuid = (*it)[list_columns.uuid];
+
+        if (incl)
+            settings.pkgs_excluded.erase(uuid);
+        else
+            settings.pkgs_excluded.emplace(uuid);
+    }
+
+    pkgs_excluded->refilter();
+    pkgs_included->refilter();
+    s_signal_changed.emit();
 }
 
 void StepExportWindow::generate()
@@ -132,7 +233,7 @@ void StepExportWindow::export_thread(STEPExportSettings my_settings)
                     }
                     export_dispatcher.emit();
                 },
-                &core.get_colors(), my_settings.prefix, my_settings.min_diameter);
+                &core.get_colors(), my_settings.prefix, my_settings.min_diameter, &my_settings.pkgs_excluded);
     }
     catch (const std::exception &e) {
         {
