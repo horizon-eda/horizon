@@ -12,6 +12,14 @@ namespace STEPImporter {
 class STEPImporter;
 }
 
+/* for projecting STEP models into package editor */
+enum class ProjectionMode {
+    /* standard top-down view / projection */
+    TOP_DOWN,
+    /* Z-mirrored / inverted bottom-up projection (NB: not a rotation) */
+    BOTTOM_UP,
+};
+
 class ImpPackage : public ImpLayer {
     class ImportCanvas3D;
     friend class ModelEditor;
@@ -67,7 +75,7 @@ private:
 
         ~ModelInfo();
     };
-    void project_model(const Package::Model &model);
+    void project_model(const Package::Model &model, ProjectionMode proj);
 
     std::map<std::string, ModelInfo> model_info;
     std::mutex model_info_mutex;
