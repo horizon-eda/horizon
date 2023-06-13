@@ -927,12 +927,14 @@ WARNFLAGS = -Wall -Wshadow
 PKG_CONFIG_LIBS := $(shell $(PKG_CONFIG) --cflags $(LIBS_ALL))
 CXXFLAGS += $(DEBUGFLAGS) $(DEFINES) $(OPTIMIZE) $(PKG_CONFIG_LIBS) -MP -MD -pthread $(WARNFLAGS) -std=c++17
 CFLAGS = $(filter-out -Wsuggest-override, $(filter-out -std=%,$(CXXFLAGS))) -std=c99
-LDFLAGS += -lm -lpthread -lstdc++
+LDFLAGS += -lm -lpthread -lstdc++ -L/usr/lib/podofo-0.9
 GLIB_COMPILE_RESOURCES := $(shell $(PKG_CONFIG) --variable=glib_compile_resources gio-2.0)
 
 ifeq ($(DEBUG),1)
 	CXXFLAGS += -DUUID_PTR_CHECK -DCONNECTION_CHECK
 endif
+
+CXXFLAGS += -I/usr/include/podofo-0.9
 
 ifeq ($(OS),Windows_NT)
 	WITH_SPNAV ?= 0
