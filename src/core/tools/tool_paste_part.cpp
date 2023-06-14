@@ -50,7 +50,7 @@ ToolResponse ToolPastePart::begin_paste(const json &j)
             imp->tool_bar_flash("Need exactly one component in clipboard");
             return ToolResponse::end();
         }
-        auto &comp_j = comps.items().begin().value();
+        auto comp_j = comps.items().begin().value();
         if (comp_j.count("part")) {
             const UUID part_uu = comp_j.at("part").get<std::string>();
             std::shared_ptr<const Part> part = nullptr;

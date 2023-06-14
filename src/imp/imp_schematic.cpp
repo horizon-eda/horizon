@@ -866,14 +866,14 @@ void ImpSchematic::construct()
             false);
 
     connect_action(ActionID::PUSH_INTO_BLOCK, [this](const auto &a) {
-        auto &x = sel_find_one(canvas->get_selection(), ObjectType::SCHEMATIC_BLOCK_SYMBOL);
+        auto x = sel_find_one(canvas->get_selection(), ObjectType::SCHEMATIC_BLOCK_SYMBOL);
         sheet_box->go_to_instance(
                 uuid_vec_append(core_schematic.get_instance_path(),
                                 core_schematic.get_sheet()->block_symbols.at(x.uuid).block_instance->uuid));
     });
 
     connect_action(ActionID::EDIT_BLOCK_SYMBOL, [this](const auto &a) {
-        auto &x = sel_find_one(canvas->get_selection(), ObjectType::SCHEMATIC_BLOCK_SYMBOL);
+        auto x = sel_find_one(canvas->get_selection(), ObjectType::SCHEMATIC_BLOCK_SYMBOL);
         sheet_box->go_to_block_symbol(core_schematic.get_sheet()->block_symbols.at(x.uuid).block_instance->block->uuid);
     });
 
