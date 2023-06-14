@@ -103,12 +103,12 @@ AddSequenceDialog::AddSequenceDialog(Gtk::Window *parent)
     int top = 0;
 
     w_start_index = Gtk::manage(new Gtk::SpinButton);
-    w_start_index->set_range(0, 128);
+    w_start_index->set_range(0, 1000);
     w_start_index->set_increments(1, 10);
     grid_attach_label_and_widget(grid, "First index", w_start_index, top);
 
     w_end_index = Gtk::manage(new Gtk::SpinButton);
-    w_end_index->set_range(0, 128);
+    w_end_index->set_range(0, 1000);
     w_end_index->set_increments(1, 10);
     w_end_index->set_value(7);
     grid_attach_label_and_widget(grid, "Last index", w_end_index, top);
