@@ -1,4 +1,4 @@
-# Version 2.4.90
+# Version 2.4.91
 
 ## New Features
 
@@ -29,6 +29,8 @@
 
  - new tool for pasting part ([8e4761c](https://github.com/horizon-eda/horizon/commit/8e4761cb9e2e728c013c785d563f2a43895fca0c))
  - support search in pin names window ([b703038](https://github.com/horizon-eda/horizon/commit/b7030384ccd3b864d474129f2ff529c8c8b7b6c7))
+ - Increase bus sequence limits to 1000 ([80168d3](https://github.com/horizon-eda/horizon/commit/80168d3e1e8af1bb821e631949dee40837e061d2))
+
 
 ### Board Editor
 
@@ -60,6 +62,7 @@
 ### Board Editor
 
  - properly handle decals on panels ([3f5e09d](https://github.com/horizon-eda/horizon/commit/3f5e09d77f42846f540318c67197fcce7f1e9273))
+ - Gerber export: fix arcs in JLCPCB's gerber preview ([c3bf67e](https://github.com/horizon-eda/horizon/commit/c3bf67ec43b80c9b5f797aca694eb8e485c8509f))
  - properly set visibility of inner layers when opening a board for the first time ([7ca7252](https://github.com/horizon-eda/horizon/commit/7ca72524cc7c84bad110ad499b42f0585c94bda8))
  - omit zero-diameter holes in STEP export to avoid error ([602a878](https://github.com/horizon-eda/horizon/commit/602a87825e5018eaf0be896fc5929e1a3316c90f))
  - update airwires after dragging track ([a6cf447](https://github.com/horizon-eda/horizon/commit/a6cf447c8a42ce33ab942cc9653fa20367700df2))
@@ -102,6 +105,10 @@
  - improve layout to make window less tall ([ed26cf2](https://github.com/horizon-eda/horizon/commit/ed26cf20c228ea7a692ab85c91be3a52df95bf1b))
 
 
+## For packagers
+
+ - Boost is no longer a dependency ([60a4f9e](https://github.com/horizon-eda/horizon/commit/60a4f9ece25233ae3a49ad0c03152ca9f98d8564))
+ 
 # Version 2.4.0
 
 ## New Features
