@@ -5,6 +5,8 @@
 #include <HLRBRep_Algo.hxx>
 #include <HLRBRep_HLRToShape.hxx>
 #include <gp_Ax2.hxx>
+#include <gp_Ax3.hxx>
+#include <gp_Trsf.hxx>
 #include <TopoDS_Iterator.hxx>
 #include <TopoDS_Edge.hxx>
 #include <BRepAdaptor_Curve.hxx>
@@ -139,7 +141,7 @@ static glm::dvec3 get_model_pos(const Package::Model &model)
     return {v4.x, v4.y, v4.z};
 }
 
-void ImpPackage::project_model(const Package::Model &model)
+void ImpPackage::project_model(const Package::Model &model, ProjectionMode proj)
 {
     std::lock_guard<std::mutex> lock(model_info_mutex);
     auto &importer = *model_info.at(model.filename).importer.get();
@@ -154,8 +156,29 @@ void ImpPackage::project_model(const Package::Model &model)
         const auto vx = transform_v(glm::dvec3(1, 0, 0), model);
         const auto v0 = get_model_pos(model);
 
-        gp_Ax2 transform(gp_Pnt(v0.x, v0.y, v0.z), gp_Dir(vn.x, vn.y, vn.z), gp_Dir(vx.x, vx.y, vx.z));
-        HLRAlgo_Projector projector(transform);
+        gp_Ax2 axis(gp_Pnt(v0.x, v0.y, v0.z), gp_Dir(vn.x, vn.y, vn.z), gp_Dir(vx.x, vx.y, vx.z));
+        gp_Trsf transform;
+
+        transform.SetTransformation(axis);
+        if (proj == ProjectionMode::BOTTOM_UP) {
+            /* flips handedness of projection, not possible in gp_Ax2 AFAICS */
+            gp_Trsf reverse;
+            reverse.SetValues(
+                    /* clang-format off */
+                    1.0,  0.0,  0.0,  0.0,
+                    0.0,  1.0,  0.0,  0.0,
+                    0.0,  0.0, -1.0,  0.0
+                    /* clang-format on */
+            );
+            transform.PreMultiply(reverse);
+        }
+
+        HLRAlgo_Projector projector(transform, Standard_False, 0);
+        /* reverse above can result in a scale factor of -1, which is ignored
+         * by default...  but the rest of the matrix is still applied...
+         */
+        projector.Scaled(Standard_True);
+
         brep_hlr->Projector(projector);
         brep_hlr->Update();
         brep_hlr->Hide();

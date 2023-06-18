@@ -187,8 +187,26 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu)
             box->pack_start(*place_button, false, false, 0);
         }
         {
-            auto project_button = Gtk::manage(new Gtk::Button("Project"));
-            project_button->signal_clicked().connect([this] { imp.project_model(model); });
+            auto project_button = Gtk::manage(new Gtk::MenuButton());
+            project_button->set_label("Project");
+            project_button->signal_clicked().connect(sigc::mem_fun(*this, &ModelEditor::make_current));
+            auto project_menu = Gtk::manage(new Gtk::Menu);
+            project_button->set_menu(*project_menu);
+
+            {
+                auto it = Gtk::manage(new Gtk::MenuItem("Bottom-up view"));
+                it->show();
+                project_menu->append(*it);
+                it->signal_activate().connect([this] { imp.project_model(model, ProjectionMode::BOTTOM_UP); });
+            }
+
+            {
+                auto it = Gtk::manage(new Gtk::MenuItem("Top-down view"));
+                it->show();
+                project_menu->append(*it);
+                it->signal_activate().connect([this] { imp.project_model(model, ProjectionMode::TOP_DOWN); });
+            }
+
             box->pack_start(*project_button, false, false, 0);
             widgets_insenstive_without_model.push_back(project_button);
         }
