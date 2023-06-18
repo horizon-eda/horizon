@@ -97,13 +97,15 @@ static TopoDS_Shape face_from_polyon(const Polygon &poly)
 
 class CanvasHole : public Canvas {
 public:
-    CanvasHole(TopTools_ListOfShape &cs) : cutouts(cs)
+    CanvasHole(TopTools_ListOfShape &cs, uint64_t mdia = 0) : cutouts(cs), min_diameter(mdia)
     {
         img_mode = true;
     }
 
 private:
     TopTools_ListOfShape &cutouts;
+    uint64_t min_diameter;
+
     void img_hole(const class Hole &hole) override
     {
         if (hole.diameter == 0)
@@ -115,6 +117,9 @@ private:
         Placement tr = transform;
         tr.accumulate(hole.placement);
         if (hole.shape == Hole::Shape::ROUND) {
+            if (hole.diameter < min_diameter)
+                return;
+
             auto ax = gp_Ax2(gp_Pnt(tr.shift.x / 1e6, tr.shift.y / 1e6, 0), gp_Dir(0, 0, 1));
             auto circ = gp_Circ(ax, hole.diameter / 2e6);
             auto edge = BRepBuilderAPI_MakeEdge(circ);
@@ -402,7 +407,7 @@ static bool getModelLabel(const std::string &aFileName, TDF_Label &aLabel, Handl
 
 void export_step(const std::string &filename, const Board &brd, class IPool &pool, bool include_models,
                  std::function<void(const std::string &)> progress_cb, const BoardColors *colors,
-                 const std::string &prefix)
+                 const std::string &prefix, uint64_t min_diameter)
 {
     try {
         auto app = XCAFApp_Application::GetApplication();
@@ -430,7 +435,7 @@ void export_step(const std::string &filename, const Board &brd, class IPool &poo
 
             progress_cb("Holes…");
             {
-                CanvasHole canvas_hole(cutouts);
+                CanvasHole canvas_hole(cutouts, min_diameter);
                 canvas_hole.update(brd);
             }
             for (const auto &hole : outline.holes) {
