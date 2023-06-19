@@ -2350,5 +2350,59 @@
             ]
         },
         "tool": "NONE"
+    },
+    {
+        "action": "SELECTION_MODIFIER_ACTION_TOGGLE",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "S",
+                        "mod": 0
+                    },
+                    {
+                        "key": "x",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "SELECTION_MODIFIER_ACTION_ADD",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "S",
+                        "mod": 0
+                    },
+                    {
+                        "key": "plus",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "SELECTION_MODIFIER_ACTION_REMOVE",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "S",
+                        "mod": 0
+                    },
+                    {
+                        "key": "minus",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
     }
 ]

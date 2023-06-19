@@ -133,6 +133,18 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Selection qualifier touch box", ActionGroup::SELECTION, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::SELECTION_MODIFIER_ACTION_TOGGLE, ToolID::NONE},
+         {"Selection modifier action toggle", ActionGroup::SELECTION, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::SELECTION_MODIFIER_ACTION_ADD, ToolID::NONE},
+         {"Selection modifier action add", ActionGroup::SELECTION, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::SELECTION_MODIFIER_ACTION_REMOVE, ToolID::NONE},
+         {"Selection modifier action remove", ActionGroup::SELECTION, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TO_BOARD, ToolID::NONE},
          {"Place on board", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_SPECIFIC}},
@@ -1185,6 +1197,9 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(SELECTION_QUALIFIER_INCLUDE_ORIGIN),
         ACTION_LUT_ITEM(SELECTION_QUALIFIER_TOUCH_BOX),
         ACTION_LUT_ITEM(SELECTION_QUALIFIER_INCLUDE_BOX),
+        ACTION_LUT_ITEM(SELECTION_MODIFIER_ACTION_TOGGLE),
+        ACTION_LUT_ITEM(SELECTION_MODIFIER_ACTION_ADD),
+        ACTION_LUT_ITEM(SELECTION_MODIFIER_ACTION_REMOVE),
         ACTION_LUT_ITEM(TO_BOARD),
         ACTION_LUT_ITEM(MOVE_TO_OTHER_SHEET),
         ACTION_LUT_ITEM(SHOW_IN_BROWSER),

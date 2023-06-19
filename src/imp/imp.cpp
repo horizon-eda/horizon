@@ -299,6 +299,20 @@ void ImpBase::update_selection_label()
         la += "auto";
         break;
     }
+
+    la += ", ";
+    switch (canvas->selection_modifier_action) {
+    case CanvasGL::SelectionModifierAction::TOGGLE:
+        la += "toggle";
+        break;
+    case CanvasGL::SelectionModifierAction::ADD:
+        la += "add";
+        break;
+    case CanvasGL::SelectionModifierAction::REMOVE:
+        la += "remove";
+        break;
+    }
+
     la += ")";
     main_window->selection_label->set_text(la);
 }
@@ -376,6 +390,8 @@ void ImpBase::run(int argc, char *argv[])
         Gtk::RadioButton *selection_tool_box_button, *selection_tool_lasso_button, *selection_tool_paint_button;
         Gtk::RadioButton *selection_qualifier_include_origin_button, *selection_qualifier_touch_box_button,
                 *selection_qualifier_include_box_button, *selection_qualifier_auto_button;
+        Gtk::RadioButton *selection_modifier_action_toggle_button, *selection_modifier_action_add_button,
+                *selection_modifier_action_remove_button;
         GET_WIDGET(selection_tool_box_button);
         GET_WIDGET(selection_tool_lasso_button);
         GET_WIDGET(selection_tool_paint_button);
@@ -383,6 +399,9 @@ void ImpBase::run(int argc, char *argv[])
         GET_WIDGET(selection_qualifier_touch_box_button);
         GET_WIDGET(selection_qualifier_include_box_button);
         GET_WIDGET(selection_qualifier_auto_button);
+        GET_WIDGET(selection_modifier_action_toggle_button);
+        GET_WIDGET(selection_modifier_action_add_button);
+        GET_WIDGET(selection_modifier_action_remove_button);
 
         Gtk::Box *selection_qualifier_box;
         GET_WIDGET(selection_qualifier_box);
@@ -411,6 +430,14 @@ void ImpBase::run(int argc, char *argv[])
                     auto qual = selection_qualifiers.at(v);
                     qual_map.at(qual)->set_active(true);
                 });
+
+        std::map<CanvasGL::SelectionModifierAction, Gtk::RadioButton *> mod_map = {
+                {CanvasGL::SelectionModifierAction::TOGGLE, selection_modifier_action_toggle_button},
+                {CanvasGL::SelectionModifierAction::ADD, selection_modifier_action_add_button},
+                {CanvasGL::SelectionModifierAction::REMOVE, selection_modifier_action_remove_button},
+        };
+        bind_widget<CanvasGL::SelectionModifierAction>(mod_map, canvas->selection_modifier_action,
+                                                       [this, mod_map](auto v) { this->update_selection_label(); });
 
         connect_action(ActionID::SELECTION_TOOL_BOX,
                        [selection_tool_box_button](const auto &a) { selection_tool_box_button->set_active(true); });
@@ -441,6 +468,19 @@ void ImpBase::run(int argc, char *argv[])
         connect_action(ActionID::SELECTION_QUALIFIER_TOUCH_BOX, [selection_qualifier_touch_box_button](const auto &a) {
             selection_qualifier_touch_box_button->set_active(true);
         });
+
+
+        connect_action(ActionID::SELECTION_MODIFIER_ACTION_TOGGLE,
+                       [selection_modifier_action_toggle_button](const auto &a) {
+                           selection_modifier_action_toggle_button->set_active(true);
+                       });
+        connect_action(ActionID::SELECTION_MODIFIER_ACTION_ADD, [selection_modifier_action_add_button](const auto &a) {
+            selection_modifier_action_add_button->set_active(true);
+        });
+        connect_action(ActionID::SELECTION_MODIFIER_ACTION_REMOVE,
+                       [selection_modifier_action_remove_button](const auto &a) {
+                           selection_modifier_action_remove_button->set_active(true);
+                       });
 
 
         update_selection_label();

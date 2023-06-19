@@ -45,6 +45,9 @@ public:
     enum class SelectionQualifier { INCLUDE_ORIGIN, INCLUDE_BOX, TOUCH_BOX, AUTO };
     SelectionQualifier selection_qualifier = SelectionQualifier::INCLUDE_ORIGIN;
 
+    enum class SelectionModifierAction { TOGGLE, ADD, REMOVE };
+    SelectionModifierAction selection_modifier_action = SelectionModifierAction::TOGGLE;
+
     enum class HighlightMode { HIGHLIGHT, DIM, SHADOW };
     void set_highlight_mode(HighlightMode mode);
     HighlightMode get_highlight_mode() const;

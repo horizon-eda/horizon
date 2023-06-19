@@ -263,10 +263,22 @@ void DragSelection::drag_end(GdkEventButton *button_event)
         if (active == 2) {
             for (auto &it : ca.selectables.items) {
                 if (it.get_flag(Selectable::Flag::PRELIGHT)) {
-                    if (mod)
-                        it.set_flag(Selectable::Flag::SELECTED, !it.get_flag(Selectable::Flag::SELECTED));
-                    else
+                    if (mod) {
+                        switch (ca.selection_modifier_action) {
+                        case CanvasGL::SelectionModifierAction::TOGGLE:
+                            it.set_flag(Selectable::Flag::SELECTED, !it.get_flag(Selectable::Flag::SELECTED));
+                            break;
+                        case CanvasGL::SelectionModifierAction::ADD:
+                            it.set_flag(Selectable::Flag::SELECTED, true);
+                            break;
+                        case CanvasGL::SelectionModifierAction::REMOVE:
+                            it.set_flag(Selectable::Flag::SELECTED, false);
+                            break;
+                        }
+                    }
+                    else {
                         it.set_flag(Selectable::Flag::SELECTED, true);
+                    }
                 }
                 else {
                     if (!mod)
@@ -368,11 +380,21 @@ void DragSelection::drag_end(GdkEventButton *button_event)
                 else if (sel_from_canvas.size() == 1) {
                     auto sel = *sel_from_canvas.begin();
                     if (mod) {
-                        if (selection.count(sel)) {
-                            selection.erase(sel);
-                        }
-                        else {
+                        switch (ca.selection_modifier_action) {
+                        case CanvasGL::SelectionModifierAction::TOGGLE:
+                            if (selection.count(sel)) {
+                                selection.erase(sel);
+                            }
+                            else {
+                                selection.insert(sel);
+                            }
+                            break;
+                        case CanvasGL::SelectionModifierAction::ADD:
                             selection.insert(sel);
+                            break;
+                        case CanvasGL::SelectionModifierAction::REMOVE:
+                            selection.erase(sel);
+                            break;
                         }
                         ca.set_selection(selection);
                     }
