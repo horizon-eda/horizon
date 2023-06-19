@@ -259,17 +259,17 @@ void DragSelection::drag_move(GdkEventMotion *motion_event)
 void DragSelection::drag_end(GdkEventButton *button_event)
 {
     if (button_event->button == 1) { // inside of grid and middle mouse button {
-        bool toggle = button_event->state & Gdk::CONTROL_MASK;
+        const bool mod = button_event->state & Gdk::CONTROL_MASK;
         if (active == 2) {
             for (auto &it : ca.selectables.items) {
                 if (it.get_flag(Selectable::Flag::PRELIGHT)) {
-                    if (toggle)
+                    if (mod)
                         it.set_flag(Selectable::Flag::SELECTED, !it.get_flag(Selectable::Flag::SELECTED));
                     else
                         it.set_flag(Selectable::Flag::SELECTED, true);
                 }
                 else {
-                    if (!toggle)
+                    if (!mod)
                         it.set_flag(Selectable::Flag::SELECTED, false);
                 }
                 it.set_flag(Selectable::Flag::PRELIGHT, false);
@@ -310,7 +310,7 @@ void DragSelection::drag_end(GdkEventButton *button_event)
                     for (const auto sr : sel_from_canvas) {
                         auto text = ca.s_signal_request_display_name.emit(sr);
                         Gtk::MenuItem *la = nullptr;
-                        if (toggle) {
+                        if (mod) {
                             auto l = Gtk::manage(new Gtk::CheckMenuItem(text));
                             l->set_active(selection.count(sr));
                             la = l;
@@ -318,9 +318,9 @@ void DragSelection::drag_end(GdkEventButton *button_event)
                         else {
                             la = Gtk::manage(new Gtk::MenuItem(text));
                         }
-                        la->signal_select().connect([this, selection, sr, toggle] {
+                        la->signal_select().connect([this, selection, sr, mod] {
                             auto sel = selection;
-                            if (toggle) {
+                            if (mod) {
                                 if (sel.count(sr)) {
                                     sel.erase(sr);
                                 }
@@ -333,17 +333,17 @@ void DragSelection::drag_end(GdkEventButton *button_event)
                                 ca.set_selection({sr}, false);
                             }
                         });
-                        la->signal_deselect().connect([this, selection, toggle] {
-                            if (toggle) {
+                        la->signal_deselect().connect([this, selection, mod] {
+                            if (mod) {
                                 ca.set_selection(selection, false);
                             }
                             else {
                                 ca.set_selection({}, false);
                             }
                         });
-                        la->signal_activate().connect([this, sr, selection, toggle] {
+                        la->signal_activate().connect([this, sr, selection, mod] {
                             auto sel = selection;
-                            if (toggle) {
+                            if (mod) {
                                 if (sel.count(sr)) {
                                     sel.erase(sr);
                                 }
@@ -367,7 +367,7 @@ void DragSelection::drag_end(GdkEventButton *button_event)
                 }
                 else if (sel_from_canvas.size() == 1) {
                     auto sel = *sel_from_canvas.begin();
-                    if (toggle) {
+                    if (mod) {
                         if (selection.count(sel)) {
                             selection.erase(sel);
                         }
@@ -381,7 +381,7 @@ void DragSelection::drag_end(GdkEventButton *button_event)
                     }
                 }
                 else if (sel_from_canvas.size() == 0) {
-                    if (toggle)
+                    if (mod)
                         ca.set_selection(selection);
                     else
                         ca.set_selection({});
