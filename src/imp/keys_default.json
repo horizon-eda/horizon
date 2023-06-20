@@ -2404,5 +2404,23 @@
             ]
         },
         "tool": "NONE"
+    },
+    {
+        "action": "SELECTION_STICKY",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "S",
+                        "mod": 0
+                    },
+                    {
+                        "key": "y",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
     }
 ]

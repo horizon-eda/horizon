@@ -313,6 +313,9 @@ void ImpBase::update_selection_label()
         break;
     }
 
+    if (canvas->selection_sticky)
+        la += ", sticky";
+
     la += ")";
     main_window->selection_label->set_text(la);
 }
@@ -392,6 +395,7 @@ void ImpBase::run(int argc, char *argv[])
                 *selection_qualifier_include_box_button, *selection_qualifier_auto_button;
         Gtk::RadioButton *selection_modifier_action_toggle_button, *selection_modifier_action_add_button,
                 *selection_modifier_action_remove_button;
+        Gtk::CheckButton *sticky_selection_checkbutton;
         GET_WIDGET(selection_tool_box_button);
         GET_WIDGET(selection_tool_lasso_button);
         GET_WIDGET(selection_tool_paint_button);
@@ -402,6 +406,7 @@ void ImpBase::run(int argc, char *argv[])
         GET_WIDGET(selection_modifier_action_toggle_button);
         GET_WIDGET(selection_modifier_action_add_button);
         GET_WIDGET(selection_modifier_action_remove_button);
+        GET_WIDGET(sticky_selection_checkbutton);
 
         Gtk::Box *selection_qualifier_box;
         GET_WIDGET(selection_qualifier_box);
@@ -438,6 +443,10 @@ void ImpBase::run(int argc, char *argv[])
         };
         bind_widget<CanvasGL::SelectionModifierAction>(mod_map, canvas->selection_modifier_action,
                                                        [this, mod_map](auto v) { this->update_selection_label(); });
+
+
+        bind_widget(sticky_selection_checkbutton, canvas->selection_sticky);
+        sticky_selection_checkbutton->signal_toggled().connect([this] { update_selection_label(); });
 
         connect_action(ActionID::SELECTION_TOOL_BOX,
                        [selection_tool_box_button](const auto &a) { selection_tool_box_button->set_active(true); });
@@ -481,6 +490,10 @@ void ImpBase::run(int argc, char *argv[])
                        [selection_modifier_action_remove_button](const auto &a) {
                            selection_modifier_action_remove_button->set_active(true);
                        });
+
+        connect_action(ActionID::SELECTION_STICKY, [sticky_selection_checkbutton](const auto &a) {
+            sticky_selection_checkbutton->set_active(!sticky_selection_checkbutton->get_active());
+        });
 
 
         update_selection_label();

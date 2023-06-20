@@ -259,7 +259,7 @@ void DragSelection::drag_move(GdkEventMotion *motion_event)
 void DragSelection::drag_end(GdkEventButton *button_event)
 {
     if (button_event->button == 1) { // inside of grid and middle mouse button {
-        const bool mod = button_event->state & Gdk::CONTROL_MASK;
+        const bool mod = (button_event->state & Gdk::CONTROL_MASK) || ca.selection_sticky;
         if (active == 2) {
             for (auto &it : ca.selectables.items) {
                 if (it.get_flag(Selectable::Flag::PRELIGHT)) {

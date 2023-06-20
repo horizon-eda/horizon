@@ -48,6 +48,8 @@ public:
     enum class SelectionModifierAction { TOGGLE, ADD, REMOVE };
     SelectionModifierAction selection_modifier_action = SelectionModifierAction::TOGGLE;
 
+    bool selection_sticky = false;
+
     enum class HighlightMode { HIGHLIGHT, DIM, SHADOW };
     void set_highlight_mode(HighlightMode mode);
     HighlightMode get_highlight_mode() const;
