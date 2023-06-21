@@ -268,6 +268,11 @@ protected:
     bool temp_mode = false;
     std::string suggested_filename;
 
+    void selection_load(const HistoryManager::HistoryItem &it);
+    bool selection_loading = false;
+
+    static void selection_push(HistoryManager &mgr, const std::set<SelectableRef> &selection);
+
 private:
     void fix_cursor_pos();
     Glib::RefPtr<Gio::FileMonitor> preferences_monitor;
@@ -359,6 +364,12 @@ private:
 
     Gtk::Button *undo_button = nullptr;
     Gtk::Button *redo_button = nullptr;
+
+    void selection_undo();
+    void selection_redo();
+
+    HistoryManager selection_history_manager;
+    virtual HistoryManager &get_selection_history_manager();
 
     unsigned int saved_version = 0;
 

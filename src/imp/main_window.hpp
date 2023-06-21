@@ -58,6 +58,9 @@ public:
     Gtk::Stack *hierarchy_stack = nullptr;
     Gtk::Label *out_of_hierarchy_label = nullptr;
 
+    Gtk::Button *undo_selection_button = nullptr;
+    Gtk::Button *redo_selection_button = nullptr;
+
     Glib::SignalProxy<bool, const Glib::ustring &> signal_activate_hud_link()
     {
         return hud_label->signal_activate_link();

@@ -18,7 +18,8 @@ public:
 
     const HistoryItem &undo();
     const HistoryItem &redo();
-    const HistoryItem &get_current();
+    const HistoryItem &get_current() const;
+    bool has_current() const;
 
     bool can_undo() const;
     bool can_redo() const;

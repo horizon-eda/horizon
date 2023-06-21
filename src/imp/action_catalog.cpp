@@ -149,6 +149,14 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Toggle sticky selection", ActionGroup::SELECTION, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::UNDO_SELECTION, ToolID::NONE},
+         {"Undo selection", ActionGroup::SELECTION, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::REDO_SELECTION, ToolID::NONE},
+         {"Redo selection", ActionGroup::SELECTION, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TO_BOARD, ToolID::NONE},
          {"Place on board", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_SPECIFIC}},
@@ -1205,6 +1213,8 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(SELECTION_MODIFIER_ACTION_ADD),
         ACTION_LUT_ITEM(SELECTION_MODIFIER_ACTION_REMOVE),
         ACTION_LUT_ITEM(SELECTION_STICKY),
+        ACTION_LUT_ITEM(UNDO_SELECTION),
+        ACTION_LUT_ITEM(REDO_SELECTION),
         ACTION_LUT_ITEM(TO_BOARD),
         ACTION_LUT_ITEM(MOVE_TO_OTHER_SHEET),
         ACTION_LUT_ITEM(SHOW_IN_BROWSER),

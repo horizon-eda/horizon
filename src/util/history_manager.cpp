@@ -94,9 +94,14 @@ const HistoryManager::HistoryItem &HistoryManager::redo()
     return get_current();
 }
 
-const HistoryManager::HistoryItem &HistoryManager::get_current()
+const HistoryManager::HistoryItem &HistoryManager::get_current() const
 {
     return *history_current;
+}
+
+bool HistoryManager::has_current() const
+{
+    return history_current.get();
 }
 
 void HistoryManager::push(std::unique_ptr<const HistoryItem> it)

@@ -2422,5 +2422,39 @@
             ]
         },
         "tool": "NONE"
+    },
+    {
+        "action": "UNDO_SELECTION",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "z",
+                        "mod": 8
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "REDO_SELECTION",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "Z",
+                        "mod": 8
+                    }
+                ],
+                [
+                    {
+                        "key": "y",
+                        "mod": 8
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
     }
 ]

@@ -39,6 +39,8 @@ protected:
 
     std::map<ObjectType, ImpBase::SelectionFilterInfo> get_selection_filter_info() const override;
 
+    void apply_preferences() override;
+
 private:
     void canvas_update() override;
     CoreSchematic core_schematic;
@@ -58,9 +60,12 @@ private:
     struct ViewInfo {
         float scale;
         Coordf offset;
-        std::set<SelectableRef> selection;
+        HistoryManager selection_history_manager;
     };
     std::map<std::pair<UUID, UUID>, ViewInfo> view_infos;
+    ViewInfo &get_view_info(const UUID &sheet, const UUID &block);
+    HistoryManager &get_selection_history_manager() override;
+
     class SheetBox *sheet_box;
     UUID current_sheet;
     void handle_selection_cross_probe() override;

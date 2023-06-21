@@ -85,6 +85,9 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     GET_WIDGET(undo_redo_hint_label);
     undo_redo_hint_frame->set_visible(false);
 
+    GET_WIDGET(undo_selection_button);
+    GET_WIDGET(redo_selection_button);
+
     set_version_info("");
 
     grid_options_button->signal_clicked().connect([this] {

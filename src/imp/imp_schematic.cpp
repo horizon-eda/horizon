@@ -28,6 +28,7 @@ ImpSchematic::ImpSchematic(const CoreSchematic::Filenames &filenames, const Pool
     core = &core_schematic;
     core_schematic.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpSchematic::handle_tool_change));
     core_schematic.signal_rebuilt().connect(sigc::mem_fun(*this, &ImpSchematic::handle_core_rebuilt));
+    current_sheet = core_schematic.get_sheet()->uuid;
 }
 
 void ImpSchematic::canvas_update()
@@ -43,6 +44,35 @@ void ImpSchematic::canvas_update()
     }
 }
 
+ImpSchematic::ViewInfo &ImpSchematic::get_view_info(const UUID &sheet, const UUID &block)
+{
+    const auto k = std::make_pair(sheet, block);
+    if (view_infos.count(k)) {
+        return view_infos.at(k);
+    }
+    else {
+        auto &info = view_infos[k];
+        {
+            auto [sc, offset] = canvas->get_scale_and_offset();
+            info.offset = offset;
+            info.scale = sc;
+        }
+        info.selection_history_manager.set_history_max(1000);
+        info.selection_history_manager.set_never_forgets(preferences.undo_redo.never_forgets);
+        info.selection_history_manager.signal_changed().connect([this] { update_action_sensitivity(); });
+        selection_push(info.selection_history_manager, {});
+        return info;
+    }
+}
+
+void ImpSchematic::apply_preferences()
+{
+    ImpBase::apply_preferences();
+    for (auto &[k, info] : view_infos) {
+        info.selection_history_manager.set_never_forgets(preferences.undo_redo.never_forgets);
+    }
+}
+
 void ImpSchematic::handle_select_sheet(const UUID &sheet, const UUID &block, const UUIDVec &instance_path)
 {
     if (sheet == current_sheet && block == core_schematic.get_current_block_uuid()
@@ -50,10 +80,12 @@ void ImpSchematic::handle_select_sheet(const UUID &sheet, const UUID &block, con
         return;
 
     {
+        auto &view_info = get_view_info(current_sheet, core_schematic.get_current_block_uuid());
         auto [sc, offset] = canvas->get_scale_and_offset();
-        view_infos[{current_sheet, core_schematic.get_current_block_uuid()}] =
-                ViewInfo{sc, offset, canvas->get_selection()};
+        view_info.offset = offset;
+        view_info.scale = sc;
     }
+
     auto highlights_saved = highlights;
     auto highlights_hierarchical_saved = highlights_hierarchical;
 
@@ -68,20 +100,30 @@ void ImpSchematic::handle_select_sheet(const UUID &sheet, const UUID &block, con
     }
     update_unplaced();
     canvas_update();
-    update_action_sensitivity();
     update_instance_path_bar();
 
 
     if (const auto k = std::make_pair(sheet, block); view_infos.count(k)) {
         const auto &inf = view_infos.at(k);
         canvas->set_scale_and_offset(inf.scale, inf.offset);
-        canvas->set_selection(inf.selection);
+        if (inf.selection_history_manager.has_current()) {
+            selection_load(inf.selection_history_manager.get_current());
+        }
+        else {
+            selection_loading = true;
+            canvas->set_selection({});
+            selection_loading = false;
+        }
     }
     else {
         auto bbox = canvas->get_bbox();
         canvas->zoom_to_bbox(bbox.first, bbox.second);
 
-        canvas->set_selection({});
+        {
+            selection_loading = true;
+            canvas->set_selection({});
+            selection_loading = false;
+        }
     }
 
     highlights = highlights_saved;
@@ -92,6 +134,12 @@ void ImpSchematic::handle_select_sheet(const UUID &sheet, const UUID &block, con
         b->set_visible(sheet);
     }
     current_sheet = sheet;
+    update_action_sensitivity();
+}
+
+HistoryManager &ImpSchematic::get_selection_history_manager()
+{
+    return get_view_info(current_sheet, core_schematic.get_current_block_uuid()).selection_history_manager;
 }
 
 static const UUID initial_path_for_bar = UUID("9b98ab12-3937-4c41-98b0-57994dbbfc59");

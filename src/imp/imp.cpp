@@ -620,6 +620,17 @@ void ImpBase::run(int argc, char *argv[])
         this->update_property_panels();
     });
 
+    connect_action_with_source(ActionID::UNDO_SELECTION, [this](const auto &a, auto src) {
+        if (src == ActionSource::KEY && preferences.undo_redo.show_hints)
+            main_window->set_undo_redo_hint("Undid selection");
+        selection_undo();
+    });
+    connect_action_with_source(ActionID::REDO_SELECTION, [this](const auto &a, auto src) {
+        if (src == ActionSource::KEY && preferences.undo_redo.show_hints)
+            main_window->set_undo_redo_hint("Redid selection");
+        selection_redo();
+    });
+
     connect_action(ActionID::RELOAD_POOL, [this](const auto &a) {
         core->reload_pool();
         this->canvas_update_from_pp();
@@ -775,11 +786,19 @@ void ImpBase::run(int argc, char *argv[])
         main_window->header->pack_start(*undo_redo_box);
     }
 
+    attach_action_button(*main_window->undo_selection_button, ActionID::UNDO_SELECTION);
+    attach_action_button(*main_window->redo_selection_button, ActionID::REDO_SELECTION);
+
+    selection_history_manager.set_history_max(1000);
+
     core->signal_can_undo_redo().connect([this] {
         undo_button->set_tooltip_text(append_if_not_empty("Undo", core->get_undo_comment()));
         redo_button->set_tooltip_text(append_if_not_empty("Redo", core->get_redo_comment()));
         update_action_sensitivity();
     });
+
+    selection_history_manager.signal_changed().connect([this] { update_action_sensitivity(); });
+
     canvas->signal_selection_changed().connect([this] {
         if (!core->tool_is_active()) {
             update_action_sensitivity();
@@ -1173,6 +1192,7 @@ void ImpBase::apply_preferences()
     main_window->tool_bar_set_vertical(preferences.tool_bar.vertical_layout);
     core->set_history_max(preferences.undo_redo.max_depth);
     core->set_history_never_forgets(preferences.undo_redo.never_forgets);
+    selection_history_manager.set_never_forgets(preferences.undo_redo.never_forgets);
     preferences_apply_appearance(preferences);
 }
 
@@ -1605,22 +1625,76 @@ void ImpBase::expand_selection_for_property_panel(std::set<SelectableRef> &sel_e
 {
 }
 
+class HistoryItemSelection : public HistoryManager::HistoryItem {
+public:
+    HistoryItemSelection(const std::set<SelectableRef> &sel) : HistoryItem(""), selection(sel)
+    {
+    }
+
+    std::set<SelectableRef> selection;
+};
+
+void ImpBase::selection_push(HistoryManager &mgr, const std::set<SelectableRef> &selection)
+{
+    mgr.push(std::make_unique<HistoryItemSelection>(selection));
+}
+
 void ImpBase::handle_selection_changed(void)
 {
     // std::cout << "Selection changed\n";
     // std::cout << "---" << std::endl;
+    auto selection = canvas->get_selection();
+    if (!selection_loading) {
+        bool push_selection = true;
+        auto &mgr = get_selection_history_manager();
+        if (mgr.has_current()) {
+            auto &it = dynamic_cast<const HistoryItemSelection &>(mgr.get_current());
+            if (it.selection == selection)
+                push_selection = false;
+        }
+        if (push_selection)
+            selection_push(mgr, selection);
+    }
     if (!core->tool_is_active()) {
         clear_highlights();
         update_highlights();
         update_property_panels();
     }
     if (sockets_connected) {
-        auto selection = canvas->get_selection();
         if (selection != last_canvas_selection) {
             handle_selection_cross_probe();
         }
         last_canvas_selection = selection;
     }
+}
+
+HistoryManager &ImpBase::get_selection_history_manager()
+{
+    return selection_history_manager;
+}
+
+void ImpBase::selection_load(const HistoryManager::HistoryItem &it)
+{
+    selection_loading = true;
+    auto &its = dynamic_cast<const HistoryItemSelection &>(it);
+    canvas->set_selection(its.selection, true);
+    selection_loading = false;
+}
+
+void ImpBase::selection_undo()
+{
+    auto &mgr = get_selection_history_manager();
+    if (!mgr.can_undo())
+        return;
+    selection_load(mgr.undo());
+}
+
+void ImpBase::selection_redo()
+{
+    auto &mgr = get_selection_history_manager();
+    if (!mgr.can_redo())
+        return;
+    selection_load(mgr.redo());
 }
 
 void ImpBase::update_property_panels()

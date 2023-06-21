@@ -190,6 +190,11 @@ void ImpBase::update_action_sensitivity()
     set_action_sensitive(ActionID::SAVE, !read_only && core->get_needs_save());
     set_action_sensitive(ActionID::UNDO, core->can_undo());
     set_action_sensitive(ActionID::REDO, core->can_redo());
+    {
+        auto &mgr = get_selection_history_manager();
+        set_action_sensitive(ActionID::UNDO_SELECTION, mgr.can_undo());
+        set_action_sensitive(ActionID::REDO_SELECTION, mgr.can_redo());
+    }
     auto sel = canvas->get_selection();
     set_action_sensitive(ActionID::COPY, sel.size() > 0);
     bool can_select_polygon = std::any_of(sel.begin(), sel.end(), [](const auto &x) {
