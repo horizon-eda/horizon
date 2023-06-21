@@ -165,6 +165,7 @@ protected:
     void goto_layer(int layer);
 
     Gtk::Button *create_action_button(ActionToolID action);
+    void attach_action_button(Gtk::Button &button, ActionToolID action);
 
     void set_action_sensitive(ActionID, bool v);
     bool get_action_sensitive(ActionID) const;

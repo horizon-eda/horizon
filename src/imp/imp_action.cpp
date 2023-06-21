@@ -211,13 +211,18 @@ Gtk::Button *ImpBase::create_action_button(ActionToolID action)
 {
     auto &catitem = action_catalog.at(action);
     auto button = Gtk::manage(new Gtk::Button(catitem.name));
-    button->signal_clicked().connect([this, action] { trigger_action(action); });
+    attach_action_button(*button, action);
+    return button;
+}
+
+void ImpBase::attach_action_button(Gtk::Button &button, ActionToolID action)
+{
+    button.signal_clicked().connect([this, action] { trigger_action(action); });
     if (action.is_action()) {
         signal_action_sensitive().connect(
-                [this, button, action] { button->set_sensitive(get_action_sensitive(action.action)); });
-        button->set_sensitive(get_action_sensitive(action.action));
+                [this, &button, action] { button.set_sensitive(get_action_sensitive(action.action)); });
+        button.set_sensitive(get_action_sensitive(action.action));
     }
-    return button;
 }
 
 bool ImpBase::trigger_action(ActionToolID action, ActionSource source)
