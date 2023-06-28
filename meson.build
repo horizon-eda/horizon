@@ -47,6 +47,10 @@ build_dependencies_pool_prj_mgr = [libm, gtk3, gtkmm, epoxy, curl, sqlite3, png,
 build_dependencies_imp = [libm, gtk3, gtkmm, epoxy, curl, sqlite3, png, uuid, zeromq, rsvg, podofo, libarchive, opencascade, spnav]
 build_dependencies_horizonmodule = [libm, gtkmm, sqlite3, png, uuid, py3cairo, podofo, libpython, osmesa, opencascade, libarchive]
 
+build_dependencies_pr_review = [libm, gtkmm, sqlite3, png, uuid, py3cairo, podofo, osmesa, opencascade, libgit2]
+build_dependencies_gen_pkg = [libm, gtkmm, sqlite3, png, uuid]
+build_dependencies_test = [libm, gtkmm, sqlite3, png, uuid]
+
 
 src_common = files(
     'src/util/uuid.cpp',
@@ -830,10 +834,39 @@ src_shared = files(
     'src/document/document_board.cpp',
 )
 
+src_pr_review = files(
+    'src/pr-review/pr-review.cpp',
+    'src/pr-review/canvas_cairo2.cpp',
+    'src/canvas/canvas_patch.cpp',
+    'src/package/package_rules_check.cpp',
+    'src/symbol/symbol_rules_check.cpp',
+    'src/import_step/step_importer.cpp',
+    'src/util/clipper_util.cpp',
+    'src/checks/check_util.cpp',
+    'src/checks/check_entity.cpp',
+    'src/checks/check_unit.cpp',
+    'src/checks/check_part.cpp',
+    'src/checks/check_item.cpp',
+)
 include_directories = [
   include_directories('src', '3rd_party'),
 ]
 
+src_gen_pkg = files(
+    'src/gen-pkg/gen-pkg.cpp',
+    'src/util/text_data.cpp',
+    'src/canvas/hershey_fonts.cpp'
+)
+
+src_tests = files(
+    '3rd_party/catch2/catch_amalgamated.cpp',
+    'src/util/text_data.cpp',
+    'src/canvas/hershey_fonts.cpp',
+    'src/tests/tool_lut.cpp',
+    'src/tests/layer_display_default.cpp',
+    'src/imp/action_catalog.cpp',
+    'src/imp/action.cpp',
+)
 
 prog_python = find_program('python3')
 
@@ -859,6 +892,39 @@ version_gen_cpp = custom_target(
     output : 'version_gen.cpp',
     input : ['make_version.py'],
     command : [prog_python, '@INPUT@', '@OUTPUT@'],
+)
+
+color_presets = [
+    'Ancient_technology.board',
+    'Ancient_technology.schematic',
+    'Blueprint.board',
+    'Blueprint.schematic',
+    'Boring_day.board',
+    'Boring_day.schematic',
+    'Bright.board',
+    'Bright.schematic',
+    'Nostalgia.board',
+    'Nostalgia.schematic',
+    'Peltier_cooler.board',
+    'Peltier_cooler.schematic',
+    'Rust.board',
+    'Rust.schematic',
+    'Solarized.schematic',
+    'Venetian_Funk.board',
+    'Venetian_Funk.schematic',
+]
+
+color_preset_files = files()
+foreach preset: color_presets
+    color_preset_files += 'src/preferences/color_presets/' / preset
+endforeach
+
+color_presets_json = custom_target(
+    'color_presets.json',
+    output : 'color_presets.json',
+    input : ['scripts/make_color_presets.py'] + color_preset_files,
+    capture: true,
+    command : [prog_python, '@INPUT@'],
 )
 
 clipper = static_library('clipper', files('3rd_party/clipper/clipper.cpp'))
@@ -981,6 +1047,7 @@ gnome = import('gnome')
 resources = gnome.compile_resources(
   'resources',
   'imp.gresource.xml',
+  dependencies: color_presets_json,
   c_name: 'horizon_resources',
   source_dir: 'src'
 )
@@ -992,7 +1059,8 @@ horizon_eda = executable('horizon-eda',
     link_with: [clipper, delaunator, polypartition, poly2tri, sexpr],
     include_directories: include_directories,
     cpp_args: cpp_args,
-    win_subsystem: 'windows'
+    win_subsystem: 'windows',
+    install: true
 )
 
 horizon_imp = executable('horizon-imp',
@@ -1001,8 +1069,29 @@ horizon_imp = executable('horizon-imp',
     link_with: [clipper, delaunator, polypartition, poly2tri, sexpr, dxflib, footag, router],
     include_directories: include_directories,
     cpp_args: cpp_args,
-    win_subsystem: 'windows'
+    win_subsystem: 'windows',
+    install: true
 )
+
+install_man('man/horizon-eda.1', 'man/horizon-imp.1')
+
+datadir = get_option('datadir')
+install_data('org.horizon_eda.HorizonEDA.desktop', install_dir:datadir / 'applications')
+install_data('org.horizon_eda.HorizonEDA.metainfo.xml', install_dir:datadir / 'metainfo ')
+icondir = datadir / 'icons/hicolor'
+
+icons = [
+    '16x16',
+    '32x32',
+    '64x64',
+    '256x256'
+]
+
+foreach icon: icons
+    install_data('src/icons/' / icon / 'apps/horizon-eda.png', install_dir: icondir / icon / 'apps')
+endforeach
+install_data('src/icons/scalable/apps/horizon-eda.svg', install_dir: icondir /  'scalable/apps')
+
 
 horizon_py = shared_module('horizon',
     [src_python, src_shared_3d, src_shared, src_pool_update, src_common,src_canvas,version_gen_cpp, src_export, src_board_rules_check],
@@ -1010,6 +1099,33 @@ horizon_py = shared_module('horizon',
     link_with: [clipper, delaunator, polypartition, poly2tri],
     include_directories: include_directories,
     cpp_args: cpp_args + ['-DOFFSCREEN=1'],
-    build_by_default: false
+    build_by_default: false,
+    name_prefix: ''
 )
-message(horizon_py.name())
+
+horizon_pr_review = executable('horizon-pr-review',
+    [src_pr_review, src_shared_3d, src_shared, src_pool_update, src_common,src_canvas,version_gen_cpp,  src_board_rules_check],
+    dependencies: build_dependencies_pr_review,
+    link_with: [clipper, delaunator, polypartition, poly2tri],
+    include_directories: include_directories,
+    cpp_args: cpp_args + ['-DOFFSCREEN=1'],
+    build_by_default: false,
+)
+
+horizon_gen_pkg = executable('horizon-gen-pkg',
+    [src_gen_pkg, src_common, version_gen_cpp],
+    dependencies: build_dependencies_gen_pkg,
+    link_with: [clipper, delaunator, polypartition, poly2tri],
+    include_directories: include_directories,
+    build_by_default: false,
+)
+
+horizon_tests = executable('horizon-tests',
+    [src_tests, src_common, version_gen_cpp, resources],
+    dependencies: build_dependencies_test,
+    link_with: [clipper, delaunator, polypartition, poly2tri],
+    include_directories: include_directories,
+    build_by_default: false,
+)
+
+test('tests', horizon_tests)

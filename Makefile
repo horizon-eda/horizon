@@ -1056,7 +1056,7 @@ METADIR = ${PREFIX}/share/metainfo/
 MANDIR = ${PREFIX}/share/man/man1
 INSTALL = /usr/bin/install
 
-src/preferences/color_presets.json: $(wildcard src/preferences/color_presets/*)
+src/color_presets.json: $(wildcard src/preferences/color_presets/*)
 	python3 scripts/make_color_presets.py $^ > $@
 
 $(BUILDDIR)/gen/resources.cpp: imp.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --generate-dependencies imp.gresource.xml |  while read line; do echo "src/$$line"; done)

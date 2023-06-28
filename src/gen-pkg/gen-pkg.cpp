@@ -327,7 +327,7 @@ static Package make_package_idc_254_vertical(unsigned int n_pads)
 Part make_part(const Package &pkg)
 {
     auto n_pads = pkg.pads.size();
-    const Entity *entity = nullptr;
+    std::shared_ptr<const Entity> entity = nullptr;
     {
         SQLite::Query q(pool->db, "SELECT uuid FROM entities WHERE name =?");
         q.bind(1, "Generic " + std::to_string(n_pads) + " pin connector");
@@ -337,7 +337,7 @@ Part make_part(const Package &pkg)
     }
     Part part(pkg.uuid);
     part.entity = entity;
-    part.package = &pkg;
+    part.package = std::make_shared<const Package>(pkg);
 
     auto &gate = entity->gates.begin()->second;
     auto unit = gate.unit;
