@@ -177,6 +177,7 @@ src_common = files(
     'src/schematic/sheet.cpp',
     'src/symbol/rule_symbol_checks.cpp',
     'src/symbol/symbol_rules.cpp',
+    'src/symbol/symbol_rules_check.cpp',
     'src/util/csv.cpp',
     'src/util/dependency_graph.cpp',
     'src/util/file_version.cpp',
@@ -216,7 +217,6 @@ src_common_ui = files(
     'src/preferences/preferences.cpp',
     'src/preferences/preferences_provider.cpp',
     'src/preferences/preferences_util.cpp',
-    'src/symbol/symbol_rules_check.cpp',
     'src/util/automatic_prefs.cpp',
     'src/util/sort_controller.cpp',
     'src/util/status_dispatcher.cpp',
@@ -677,7 +677,6 @@ src_pr_review = files(
     'src/pr-review/pr-review.cpp',
     'src/pr-review/canvas_cairo2.cpp',
     'src/canvas/canvas_patch.cpp',
-    'src/symbol/symbol_rules_check.cpp',
     'src/import_step/step_importer.cpp',
     'src/checks/check_util.cpp',
     'src/checks/check_entity.cpp',
@@ -685,8 +684,6 @@ src_pr_review = files(
     'src/checks/check_part.cpp',
     'src/checks/check_item.cpp',
 )
-
-
 
 src_gen_pkg = files(
     'src/gen-pkg/gen-pkg.cpp',
