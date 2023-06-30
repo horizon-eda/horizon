@@ -1,12 +1,13 @@
 project('horizon-eda', ['cpp', 'c'],
   version: '1.5.0',
-  meson_version: '>=0.56',
+  meson_version: '>=0.53',
   default_options: ['cpp_std=c++17', 'warning_level=1'],
 )
 
 cxx = meson.get_compiler('cpp')
 
 libm = cxx.find_library('m')
+pthread = cxx.find_library('pthread')
 gtk3 = dependency('gtk+-3.0', version: '>=3.22')
 gtkmm = dependency('gtkmm-3.0', version: '>=3.0.0')
 glibmm = dependency('glibmm-2.4')
@@ -21,11 +22,20 @@ curl = dependency('libcurl')
 rsvg = dependency('librsvg-2.0')
 libarchive = dependency('libarchive')
 #podofo=dependency('libpodofo', version: '<0.10.0', required: false)
-opencascade = dependency('OpenCASCADE', method : 'cmake')
+opencascade = dependency('OpenCASCADE', method : 'cmake', required:false)
+if not opencascade.found()
+    opencascade = dependency('OCE', method : 'cmake')
+endif
+
 spnav = dependency('spnav', required: false)
+if not spnav.found()
+    spnav = cxx.find_library('spnav', required:false)
+endif
+
 libpython = dependency('python3', required: false)
 py3cairo = dependency('py3cairo', required: false)
 osmesa = dependency('osmesa', required: false)
+glm = dependency('glm')
 
 cpp_args = ['-D_USE_MATH_DEFINES', '-DGLM_ENABLE_EXPERIMENTAL', '-DJSON_USE_IMPLICIT_CONVERSIONS=0']
 if spnav.found()
@@ -38,14 +48,20 @@ if get_option('debug')
 endif
 
 # pkg-config is useless for podofo :(
+podofo_lib =cxx.find_library('podofo', dirs: '/usr/lib/podofo-0.9/', required: false, has_headers:['/usr/include/podofo-0.9/podofo/podofo.h'] )
+if podofo_lib.found()
 podofo = declare_dependency (
-    dependencies: cxx.find_library('podofo', dirs: '/usr/lib/podofo-0.9/', required: true, header_include_directories: include_directories('/usr/include/podofo-0.9/')),
-include_directories: include_directories('/usr/include/podofo-0.9/')
+    dependencies: podofo_lib,
+include_directories: include_directories('/usr/include/podofo-0.9')
 )
-    
+else
+  podofo = dependency('libpodofo')
+endif
 
-build_dependencies_libhorizon = [libm, gtkmm, sqlite3, png, uuid]
-build_dependencies_libhorizonui = build_dependencies_libhorizon + [epoxy, zeromq, curl]
+
+
+build_dependencies_libhorizon = [libm, pthread, gtkmm, sqlite3, png, uuid]
+build_dependencies_libhorizonui = build_dependencies_libhorizon + [epoxy, zeromq, curl, glm]
 build_dependencies_gen_pkg =    build_dependencies_libhorizon
 build_dependencies_pr_review = build_dependencies_libhorizon + [py3cairo, podofo, osmesa, opencascade, libgit2]
 
@@ -768,7 +784,7 @@ subdir('3rd_party/footag')
 
 
 include_directories = [
-  include_directories('src', '3rd_party'),
+  include_directories('src', '3rd_party', '3rd_party/range-v3'),
 ]
 
 
@@ -865,7 +881,7 @@ horizon_eda = executable('horizon-eda',
     link_with: [clipper_nopic, delaunator, polypartition, poly2tri, sexpr, libhorizon, libhorizonui],
     include_directories: include_directories,
     cpp_args: cpp_args,
-    win_subsystem: 'windows',
+    gui_app: true, 
     install: true
 )
 
@@ -875,7 +891,7 @@ horizon_imp = executable('horizon-imp',
     link_with: [clipper_nopic, delaunator, polypartition, poly2tri, sexpr, dxflib, footag, router, libhorizon, libhorizonui],
     include_directories: include_directories,
     cpp_args: cpp_args,
-    win_subsystem: 'windows',
+    gui_app: true, 
     install: true
 )
 
