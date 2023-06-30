@@ -859,7 +859,7 @@ resources = gnome.compile_resources(
 )
 
 libhorizon = static_library('libhorizon',
-    [src_common,resources],
+    [src_common],
     dependencies: build_dependencies_libhorizon,
     include_directories: include_directories,
     cpp_args: cpp_args,
@@ -876,7 +876,7 @@ libhorizonui = static_library('libhorizonui',
 
 
 horizon_eda = executable('horizon-eda',
-    [src_pool_prj_mgr, src_pool_update],
+    [src_pool_prj_mgr, src_pool_update,resources],
     dependencies: build_dependencies_pool_prj_mgr,
     link_with: [clipper_nopic, delaunator, polypartition, poly2tri, sexpr, libhorizon, libhorizonui],
     include_directories: include_directories,
@@ -886,7 +886,7 @@ horizon_eda = executable('horizon-eda',
 )
 
 horizon_imp = executable('horizon-imp',
-    [src_imp, src_tools, src_canvas_3d, src_export, src_board_rules_check],
+    [src_imp, src_tools, src_canvas_3d, src_export, src_board_rules_check,resources],
     dependencies: build_dependencies_imp,
     link_with: [clipper_nopic, delaunator, polypartition, poly2tri, sexpr, dxflib, footag, router, libhorizon, libhorizonui],
     include_directories: include_directories,
@@ -916,7 +916,7 @@ install_data('src/icons/scalable/apps/horizon-eda.svg', install_dir: icondir /  
 
 
 horizon_py = shared_module('horizon',
-    [src_python, src_3d_export, src_canvas_3d, src_shared, src_pool_update, src_common,src_canvas,version_gen_cpp, src_export, src_board_rules_check],
+    [src_python, src_3d_export, src_canvas_3d, src_shared, src_pool_update, src_common,src_canvas,version_gen_cpp, src_export, src_board_rules_check, resources],
     dependencies: build_dependencies_horizonmodule,
     link_with: [clipper_pic, delaunator, polypartition, poly2tri],
     include_directories: include_directories,
@@ -926,7 +926,7 @@ horizon_py = shared_module('horizon',
 )
 
 horizon_pr_review = executable('horizon-pr-review',
-    [src_pr_review, src_3d_export, src_canvas_3d, src_pool_update, src_canvas],
+    [src_pr_review, src_3d_export, src_canvas_3d, src_pool_update, src_canvas, resources],
     dependencies: build_dependencies_pr_review,
     link_with: [clipper_nopic, delaunator, polypartition, poly2tri, libhorizon],
     include_directories: include_directories,
@@ -943,7 +943,7 @@ horizon_gen_pkg = executable('horizon-gen-pkg',
 )
 
 horizon_tests = executable('horizon-tests',
-    [src_tests],
+    [src_tests, resources],
     dependencies: build_dependencies_libhorizon,
     link_with: [clipper_nopic, libhorizon],
     include_directories: include_directories,
