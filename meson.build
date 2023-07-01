@@ -66,7 +66,7 @@ endif
 build_dependencies_libhorizon = [libm, pthread, gtkmm, sqlite3, png, uuid]
 build_dependencies_libhorizonui = build_dependencies_libhorizon + [epoxy, zeromq, curl, glm]
 build_dependencies_gen_pkg =    build_dependencies_libhorizon
-build_dependencies_pr_review = build_dependencies_libhorizon + [py3cairo, podofo, osmesa, opencascade, libgit2]
+build_dependencies_pr_review = build_dependencies_libhorizon + [podofo, osmesa, opencascade, libgit2]
 
 build_dependencies_pool_prj_mgr = build_dependencies_libhorizonui + [libgit2]
 build_dependencies_imp = build_dependencies_libhorizonui +[rsvg, podofo, libarchive, opencascade, spnav]
