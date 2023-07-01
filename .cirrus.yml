@@ -20,5 +20,5 @@ task:
     - clang --version
     - mkdir ../build
     - meson setup ../build --cmake-prefix-path=/usr/local/lib
-    - meson -C ../build compile
+    - meson compile -C ../build
 
