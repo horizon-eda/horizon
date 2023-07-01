@@ -37,9 +37,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
-      run: apt-get update -y && apt-get install git build-essential libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libarchive-dev git libosmesa6-dev -y
+      run: apt-get update -y && apt-get install git build-essential libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libarchive-dev git libosmesa6-dev cmake meson -y
     - name: Build
-      run: make -j2 build/horizon-pr-review
+      run: |
+        mkdir ../build
+        CXX=${{ matrix.os.cxx }} CC=${{ matrix.os.cc }} meson setup ../build
+        ninja -C ../build horizon-pr-review
 
   build:
     strategy:
@@ -69,7 +72,7 @@ jobs:
             cc: gcc
         target:
           - all
-          - horizon
+          - horizon.so
     runs-on: ubuntu-latest
     container: ${{ matrix.os.container }}
     needs: stylecheck
@@ -83,7 +86,7 @@ jobs:
     - name: Install dependencies
       run: apt-get install git build-essential ${{ matrix.os.cxx }} libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libarchive-dev git libspnav-dev meson cmake -y
     - name: Install python dependencies
-      if: ${{ matrix.target == 'horizon' }}
+      if: ${{ matrix.target == 'horizon.so' }}
       run: apt-get install python3-cairo-dev libosmesa6-dev python3-yaml -y
     - name: Build
       run: |
@@ -93,13 +96,13 @@ jobs:
     - name: Check version
       run: python3 check_version.py
     - name: Test python module
-      if: ${{ matrix.target == 'horizon' }}
+      if: ${{ matrix.target == 'horizon.so' }}
       run: python3 -c 'import sys; sys.path.append("../build"); import horizon'
     - name: Check app versions
-      if: ${{ matrix.target == 'horizon' }}
+      if: ${{ matrix.target == 'horizon.so' }}
       run: python3 scripts/check_app_versions.py
     - name: Build and run tests
-      if: ${{ matrix.target != 'horizon' }}
+      if: ${{ matrix.target != 'horizon.so' }}
       #run: make -j2 CXX=${{ matrix.os.cxx }} CC=${{ matrix.os.cc }} WARNFLAGS="-Wall -Wshadow -Wno-parentheses" test
       run: meson test -C ../build
 
@@ -109,7 +112,7 @@ jobs:
       matrix:
         target:
           - all
-          - horizon
+          - horizon.so
     runs-on: ubuntu-latest
     container: archlinux:base-devel
     needs: stylecheck
@@ -120,7 +123,7 @@ jobs:
     - name: Install dependencies
       run: pacman -Sy --needed --noconfirm zeromq cppzmq gtkmm3 cairomm librsvg sqlite3 libgit2 curl opencascade glm podofo-0.9 libarchive python libspnav cmake meson
     - name: Install python dependencies
-      if: ${{ matrix.target == 'horizon' }}
+      if: ${{ matrix.target == 'horizon.so' }}
       run: pacman -S --needed --noconfirm mesa python-cairo python-yaml
     - name: Build LD_PRELOAD kludge
       run: gcc -shared -fPIC -o close_range.so scripts/close_range.c
@@ -128,14 +131,14 @@ jobs:
       run: |
         mkdir ../build
         CXX=${{ matrix.os.cxx }} CC=${{ matrix.os.cc }} meson setup ../build
-        LD_PRELOAD=$PWD/close_range.so meson compile -C ../build ${{ matrix.target }}
+        LD_PRELOAD=$PWD/close_range.so ninja -C ../build ${{ matrix.target }}
     - name: Check version
       run: python3 check_version.py
     - name: Test python module
-      if: ${{ matrix.target == 'horizon' }}
+      if: ${{ matrix.target == 'horizon.so' }}
       run: python3 -c 'import sys; sys.path.append("build"); import horizon'
     - name: Check app versions
-      if: ${{ matrix.target == 'horizon' }}
+      if: ${{ matrix.target == 'horizon.so' }}
       run: python3 scripts/check_app_versions.py
 
   build-opensuse:
@@ -144,27 +147,30 @@ jobs:
       matrix:
         target:
           - all
-          - horizon
+          - horizon.so
     runs-on: ubuntu-latest
     container: opensuse/tumbleweed
     needs: stylecheck
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
-      run: zypper in -y git make gcc gcc-c++ pkg-config cppzmq-devel oce-devel gtkmm3-devel libgit2-devel libuuid-devel sqlite3-devel librsvg-devel cairomm-devel glm-devel boost-devel libcurl-devel libpodofo-devel binutils-gold libarchive-devel libspnav-devel python3
+      run: zypper in -y git make gcc gcc-c++ pkg-config cppzmq-devel oce-devel gtkmm3-devel libgit2-devel libuuid-devel sqlite3-devel librsvg-devel cairomm-devel glm-devel boost-devel libcurl-devel libpodofo-devel binutils-gold libarchive-devel libspnav-devel python3 meson cmake
 
     - name: Install python dependencies
-      if: ${{ matrix.target == 'build/horizon.so' }}
+      if: ${{ matrix.target == 'horizon.so' }}
       run: zypper in -y Mesa-devel python3-pycairo-devel python3-PyYAML
     - name: Build
-      run: make -j2 ${{ matrix.target }}
+      run: |
+        mkdir ../build
+        CXX=${{ matrix.os.cxx }} CC=${{ matrix.os.cc }} meson setup ../build
+        LD_PRELOAD=$PWD/close_range.so ninja -C ../build ${{ matrix.target }}
     - name: Check version
       run: python3 check_version.py
     - name: Test python module
-      if: ${{ matrix.target == 'build/horizon.so' }}
-      run: python3 -c 'import sys; sys.path.append("build"); import horizon'
+      if: ${{ matrix.target == 'horizon.so' }}
+      run: python3 -c 'import sys; sys.path.append("../build"); import horizon'
     - name: Check app versions
-      if: ${{ matrix.target == 'build/horizon.so' }}
+      if: ${{ matrix.target == 'horizon.so' }}
       run: python3 scripts/check_app_versions.py
 
   build-debug:
