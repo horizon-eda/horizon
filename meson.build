@@ -27,14 +27,17 @@ if not opencascade.found()
     opencascade = dependency('OCE', method : 'cmake')
 endif
 
+# on ubuntu 20.04, the link args are broken and are missing the -l for some reason??
+opencascade = declare_dependency(dependencies: opencascade.partial_dependency(compile_args: true, includes:true), link_args:['-lTKSTEP', '-lTKernel', '-lTKXCAF', '-lTKXSBase', '-lTKBRep', '-lTKCDF', '-lTKXDESTEP', '-lTKLCAF', '-lTKMath', '-lTKMesh', '-lTKTopAlgo', '-lTKPrim', '-lTKBO', '-lTKShHealing', '-lTKBRep', '-lTKG3d', '-lTKGeomBase', '-lTKHLR'])
+
 spnav = dependency('spnav', required: false)
 if not spnav.found()
     spnav = cxx.find_library('spnav', required:false)
 endif
 
-libpython = dependency('python3', required: false)
-py3cairo = dependency('py3cairo', required: false)
-osmesa = dependency('osmesa', required: false)
+libpython = dependency('python3', required: false, disabler:true)
+py3cairo = dependency('py3cairo', required: false, disabler:true)
+osmesa = dependency('osmesa', required: false, disabler:true)
 glm = dependency('glm')
 
 cpp_args = ['-D_USE_MATH_DEFINES', '-DGLM_ENABLE_EXPERIMENTAL', '-DJSON_USE_IMPLICIT_CONVERSIONS=0']
