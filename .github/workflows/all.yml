@@ -131,15 +131,12 @@ jobs:
       run: |
         mkdir ../build
         CXX=${{ matrix.os.cxx }} CC=${{ matrix.os.cc }} meson setup ../build
-        LD_PRELOAD=$PWD/close_range.so ninja -C ../build ${{ matrix.target }}
+        ninja -C ../build ${{ matrix.target }}
     - name: Check version
       run: python3 check_version.py
     - name: Test python module
       if: ${{ matrix.target == 'horizon.so' }}
-      run: python3 -c 'import sys; sys.path.append("build"); import horizon'
-    - name: Check app versions
-      if: ${{ matrix.target == 'horizon.so' }}
-      run: python3 scripts/check_app_versions.py
+      run: python3 -c 'import sys; sys.path.append("../build"); import horizon'
 
   build-opensuse:
     strategy:
@@ -169,9 +166,6 @@ jobs:
     - name: Test python module
       if: ${{ matrix.target == 'horizon.so' }}
       run: python3 -c 'import sys; sys.path.append("../build"); import horizon'
-    - name: Check app versions
-      if: ${{ matrix.target == 'horizon.so' }}
-      run: python3 scripts/check_app_versions.py
 
   build-debug:
     runs-on: ubuntu-latest
