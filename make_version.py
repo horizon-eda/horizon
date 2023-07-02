@@ -1,5 +1,6 @@
 import version as v
 import os
+import os.path
 import sys
 import subprocess
 from string import Template
@@ -15,12 +16,20 @@ const char *Version::commit_hash = "$commit_hash";
 }
 """
 
+
+meson_version = sys.argv[3]
+if meson_version != v.string :
+	print(f"Meson version mismatch ({meson_version} != {v.string})", file=sys.stderr)
+	exit(1)
+
+srcdir = sys.argv[2]
+
 gitversion = ""
 commit_hash = ""
-if os.path.isdir(".git"):
-	gitversion = subprocess.check_output(['git', 'log', '-1', '--pretty=format:%h %ci %s']).decode()
+if os.path.isdir(os.path.join(srcdir, ".git")):
+	gitversion = subprocess.check_output(['git', 'log', '-1', '--pretty=format:%h %ci %s'], cwd=srcdir).decode()
 	gitversion = gitversion.replace("\"", "\\\"")
-	commit_hash = subprocess.check_output(['git', 'log', '-1', '--pretty=format:%h']).decode()
+	commit_hash = subprocess.check_output(['git', 'log', '-1', '--pretty=format:%h'], cwd=srcdir).decode()
 
 outfile = sys.argv[1]
 with open(outfile, "w", encoding="utf-8") as fi:

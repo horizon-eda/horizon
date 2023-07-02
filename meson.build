@@ -1,5 +1,5 @@
 project('horizon-eda', ['cpp', 'c'],
-  version: '1.5.0',
+  version: '2.5.0',
   meson_version: '>=0.53',
   default_options: ['cpp_std=c++17', 'warning_level=1'],
 )
@@ -774,7 +774,8 @@ version_gen_cpp = custom_target(
     'version_gen.cpp',
     output : 'version_gen.cpp',
     input : ['make_version.py'],
-    command : [prog_python, '@INPUT@', '@OUTPUT@'],
+    depend_files: ['.git/HEAD', '.git/index'],
+    command : [prog_python, '@INPUT@', '@OUTPUT@', '@SOURCE_ROOT@', meson.project_version()],
 )
 src_common += version_gen_cpp
 
