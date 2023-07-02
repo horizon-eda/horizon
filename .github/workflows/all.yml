@@ -169,11 +169,14 @@ jobs:
 
   build-debug:
     runs-on: ubuntu-latest
-    container: debian:buster
+    container: debian:bookworm
     needs: stylecheck
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
       run: apt-get update -y && apt-get install git build-essential libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libarchive-dev git -y
     - name: Build
-      run: make DEBUG=1 LDFLAGS="-lstdc++fs -lpthread" WITH_SPNAV=0 -j2
+      run: make |
+        mkdir ../build
+        meson setup ../build --buildtype debug
+        meson compile -C ../build
