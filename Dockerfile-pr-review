@@ -4,7 +4,7 @@ RUN apt-get install -y build-essential libsqlite3-dev util-linux librsvg2-dev li
 COPY src /src
 WORKDIR /src
 RUN meson setup build --buildtype release
-RUN meson compile -C build
+RUN meson compile -C build horizon-pr-review
 RUN strip build/horizon-pr-review
 
 FROM debian:bookworm-slim
