@@ -61,9 +61,20 @@ else
   podofo = dependency('libpodofo')
 endif
 
+stdlibs = []
+is_libstdcpp = cxx.get_define('__GLIBCXX__', prefix: '#include <vector>') != ''
+if is_libstdcpp
+    message('using libstdc++')
+else
+    message('not using libstdc++')
+endif
+if is_libstdcpp
+    stdlibs += cxx.find_library('stdc++')
+    stdlibs += cxx.find_library('stdc++fs')
+endif
 
 
-build_dependencies_libhorizon = [libm, pthread, gtkmm, sqlite3, png, uuid]
+build_dependencies_libhorizon = [libm, pthread, gtkmm, sqlite3, png, uuid] + stdlibs
 build_dependencies_libhorizonui = build_dependencies_libhorizon + [epoxy, zeromq, curl, glm]
 build_dependencies_gen_pkg =    build_dependencies_libhorizon
 build_dependencies_pr_review = build_dependencies_libhorizon + [podofo, osmesa, opencascade, libgit2]
