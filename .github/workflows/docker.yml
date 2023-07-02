@@ -2,7 +2,7 @@ name: Build docker image
 
 on:
   push:
-    branches: [ docker ]
+    branches: [ docker, docker-dev ]
 
 jobs:
   docker-python:
@@ -11,14 +11,21 @@ jobs:
       packages: write
       contents: read
     steps:
+    - name: set tag
+      run: |
+        if [ "${{github.ref}}" = "refs/heads/docker" ] ; then
+          echo "docker_tag=latest" >> $GITHUB_ENV
+        else
+          echo "docker_tag=dev" >> $GITHUB_ENV
+        fi
     - name: login to docker
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
     - uses: actions/checkout@v3
       with:
         path: src
     - name: build docker image
-      run: docker build . -f src/Dockerfile-python --network=host -t ghcr.io/horizon-eda/horizon:latest
+      run: docker build . -f src/Dockerfile-python --network=host -t ghcr.io/horizon-eda/horizon:${{env.docker_tag}}
     - name: test docker image
-      run: docker run ghcr.io/horizon-eda/horizon:latest python3 -c 'import horizon'
+      run: docker run ghcr.io/horizon-eda/horizon:${{env.docker_tag}} python3 -c 'import horizon'
     - name: publish docker image
-      run: docker push ghcr.io/horizon-eda/horizon:latest
+      run: docker push ghcr.io/horizon-eda/horizon:${{env.docker_tag}}
