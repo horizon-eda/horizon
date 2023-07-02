@@ -9,7 +9,7 @@
 #include "image_3d_exporter_wrapper.hpp"
 #include "document/document_board.hpp"
 #include "rules/cache.hpp"
-#include <podofo/podofo.h>
+#include "util/podofo_inc.hpp"
 #include "blocks/blocks.hpp"
 #include "board/board.hpp"
 #include "project/project.hpp"

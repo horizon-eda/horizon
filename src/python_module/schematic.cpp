@@ -6,7 +6,7 @@
 #include "export_pdf/export_pdf.hpp"
 #include "export_bom/export_bom.hpp"
 #include "util.hpp"
-#include <podofo/podofo.h>
+#include "util/podofo_inc.hpp"
 
 SchematicWrapper::SchematicWrapper(const horizon::Project &prj)
     : pool(prj.pool_directory, false), blocks(horizon::BlocksSchematic::new_from_file(prj.blocks_filename, pool))

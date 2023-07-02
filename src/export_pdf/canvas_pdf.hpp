@@ -1,6 +1,6 @@
 #pragma once
 #include "canvas/canvas.hpp"
-#include <podofo/podofo.h>
+#include "util/podofo_inc.hpp"
 
 namespace horizon {
 

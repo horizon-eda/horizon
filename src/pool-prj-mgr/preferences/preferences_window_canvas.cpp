@@ -243,7 +243,7 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
     Gtk::Menu *color_preset_menu;
     GET_WIDGET(color_preset_menu);
 
-    color_presets = json_from_resource("/org/horizon-eda/horizon/preferences/color_presets.json");
+    color_presets = json_from_resource("/org/horizon-eda/horizon/color_presets.json");
 
     {
 

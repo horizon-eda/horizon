@@ -183,6 +183,6 @@
     <file>canvas3d/shaders/background-vertex.glsl</file>
     <file>canvas3d/shaders/background-fragment.glsl</file>
 
-    <file>preferences/color_presets.json</file>
+    <file>color_presets.json</file>
   </gresource>
 </gresources>
