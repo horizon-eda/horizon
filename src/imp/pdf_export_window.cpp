@@ -8,7 +8,7 @@
 #include "util/util.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "common/layer_provider.hpp"
-#include <podofo/podofo.h>
+#include "util/podofo_inc.hpp"
 #include "util/win32_undef.hpp"
 #include <thread>
 

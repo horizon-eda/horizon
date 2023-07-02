@@ -1,5 +1,5 @@
 #pragma once
-#include <podofo/podofo.h>
+#include "util/podofo_inc.hpp"
 #include "util/placement.hpp"
 
 namespace horizon {

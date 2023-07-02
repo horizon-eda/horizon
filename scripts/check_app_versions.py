@@ -1,6 +1,7 @@
 import sys
 import yaml
 sys.path.append("build")
+sys.path.append("../build")
 import horizon
 
 types = (
