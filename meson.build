@@ -770,11 +770,20 @@ help_texts_hpp = custom_target(
     command : [prog_python, '@INPUT0@', 'h', '@INPUT1@'],
 )
 
+fs = import('fs')
+has_git_dir = fs.is_dir('.git')
+if has_git_dir
+    message('including git commit')
+    version_deps = ['.git/HEAD', '.git/index']
+else
+    version_deps = []
+endif
+
 version_gen_cpp = custom_target(
     'version_gen.cpp',
     output : 'version_gen.cpp',
     input : ['make_version.py'],
-    depend_files: ['.git/HEAD', '.git/index'],
+    depend_files: version_deps,
     command : [prog_python, '@INPUT@', '@OUTPUT@', '@SOURCE_ROOT@', meson.project_version()],
 )
 src_common += version_gen_cpp
