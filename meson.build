@@ -73,8 +73,6 @@ else
   endif
 endif
 
-#podofo_minor = cxx.get_define('PODOFO_VERSION_MINOR', prefix: '#include "util/podofo_inc.hpp"', include_directories: include_directories('src'), dependencies:podofo)
-
 stdlibs = []
 is_libstdcpp = cxx.get_define('__GLIBCXX__', prefix: '#include <vector>') != ''
 if is_libstdcpp

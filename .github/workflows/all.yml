@@ -176,7 +176,7 @@ jobs:
     - name: Install dependencies
       run: apt-get update -y && apt-get install git build-essential libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libarchive-dev git -y
     - name: Build
-      run: make |
+      run: |
         mkdir ../build
         meson setup ../build --buildtype debug
         meson compile -C ../build
