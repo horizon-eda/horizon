@@ -44,7 +44,8 @@ py3cairo = dependency('py3cairo', required: false, disabler:true)
 osmesa = dependency('osmesa', required: false, disabler:true)
 glm = dependency('glm')
 
-cpp_args = ['-D_USE_MATH_DEFINES', '-DGLM_ENABLE_EXPERIMENTAL', '-DJSON_USE_IMPLICIT_CONVERSIONS=0']
+cpp_args_router = ['-D_USE_MATH_DEFINES']
+cpp_args = cpp_args_router + ['-DGLM_ENABLE_EXPERIMENTAL', '-DJSON_USE_IMPLICIT_CONVERSIONS=0', '-Wshadow']
 if spnav.found()
     cpp_args += '-DHAVE_SPNAV'
 endif
@@ -899,7 +900,7 @@ router = static_library('router',
     ),
     include_directories: [include_directories('3rd_party/router/include', '3rd_party/router/kimath/include', '3rd_party/clipper', '3rd_party', '3rd_party/rtree', '3rd_party/router', 'src')],
     dependencies: [gtkmm],
-	cpp_args: cpp_args
+	cpp_args: cpp_args_router
 )
 
 gnome = import('gnome')
