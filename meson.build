@@ -5,6 +5,7 @@ project('horizon-eda', ['cpp', 'c'],
 )
 
 cxx = meson.get_compiler('cpp')
+is_windows = target_machine.system() == 'windows'
 
 libm = cxx.find_library('m')
 pthread = cxx.find_library('pthread')
@@ -15,7 +16,6 @@ giomm = dependency('giomm-2.4')
 png = dependency('libpng')
 epoxy = dependency('epoxy')
 sqlite3 = dependency('sqlite3')
-uuid = dependency('uuid')
 libgit2 = dependency('libgit2')
 zeromq = dependency('libzmq')
 curl = dependency('libcurl')
@@ -32,9 +32,6 @@ if not cxx.links('int main(void) {return 0;}', dependencies: opencascade)
     # on ubuntu 20.04, the link args are broken and are missing the -l for some reason??
     opencascade = declare_dependency(dependencies: opencascade.partial_dependency(compile_args: true, includes:true), link_args:['-lTKSTEP', '-lTKernel', '-lTKXCAF', '-lTKXSBase', '-lTKBRep', '-lTKCDF', '-lTKXDESTEP', '-lTKLCAF', '-lTKMath', '-lTKMesh', '-lTKTopAlgo', '-lTKPrim', '-lTKBO', '-lTKShHealing', '-lTKBRep', '-lTKG3d', '-lTKGeomBase', '-lTKHLR'])
 endif
-
-
-
 
 
 spnav = dependency('spnav', required: false)
@@ -86,15 +83,24 @@ if is_libstdcpp
 endif
 
 
-build_dependencies_libhorizon = [libm, pthread, gtkmm, sqlite3, png, uuid] + stdlibs
+build_dependencies_libhorizon = [libm, pthread, gtkmm, sqlite3, png] + stdlibs
+build_dependencies_horizonmodule = [libm, gtkmm, sqlite3, png, py3cairo, podofo, libpython, osmesa, opencascade, libarchive]
+if not is_windows
+	uuid = dependency('uuid')
+	build_dependencies_libhorizon += uuid
+	build_dependencies_horizonmodule += uuid
+else
+	build_dependencies_libhorizon += [cxx.find_library('rpcrt4')]
+    cpp_args += '-D_USE_MATH_DEFINES'
+    cpp_args += '-DWIN32_UUID'
+endif
+
 build_dependencies_libhorizonui = build_dependencies_libhorizon + [epoxy, zeromq, curl, glm]
 build_dependencies_gen_pkg =    build_dependencies_libhorizon
 build_dependencies_pr_review = build_dependencies_libhorizon + [podofo, osmesa, opencascade, libgit2]
 
 build_dependencies_pool_prj_mgr = build_dependencies_libhorizonui + [libgit2]
 build_dependencies_imp = build_dependencies_libhorizonui +[rsvg, podofo, libarchive, opencascade, spnav]
-build_dependencies_horizonmodule = [libm, gtkmm, sqlite3, png, uuid, py3cairo, podofo, libpython, osmesa, opencascade, libarchive]
-
 
 
 src_common = files(
@@ -242,6 +248,10 @@ src_common = files(
     'src/util/version.cpp',
     'src/util/clipper_util.cpp',
 )
+
+if is_windows
+	src_common += 'src/util/uuid_win32.cpp'
+endif
 
 src_common_ui = files(
     'src/widgets/pool_browser.cpp',
@@ -799,6 +809,22 @@ color_presets_json = custom_target(
     command : [prog_python, '@INPUT@'],
 )
 
+if is_windows
+	windows = import('windows')
+	
+	horizon_eda_rc = custom_target(
+        'horizon-eda.rc',
+        output : 'horizon-eda.rc',
+        input : ['make_rc.py'],
+        depend_files: files('version.py'),
+        command : [prog_python,  '@INPUT@', '@OUTPUT@'],
+    )
+
+	rc_compiled =  windows.compile_resources(horizon_eda_rc, include_directories:include_directories('.'))
+else
+	rc_compiled = []
+endif
+
 
 subdir('3rd_party/clipper')
 subdir('3rd_party/delaunator')
@@ -872,7 +898,8 @@ router = static_library('router',
         '3rd_party/router/kimath/src/math/vector2.cpp',
     ),
     include_directories: [include_directories('3rd_party/router/include', '3rd_party/router/kimath/include', '3rd_party/clipper', '3rd_party', '3rd_party/rtree', '3rd_party/router', 'src')],
-    dependencies: [gtkmm]
+    dependencies: [gtkmm],
+	cpp_args: cpp_args
 )
 
 gnome = import('gnome')
@@ -902,7 +929,7 @@ libhorizonui = static_library('libhorizonui',
 
 
 horizon_eda = executable('horizon-eda',
-    [src_pool_prj_mgr, src_pool_update,resources],
+    [src_pool_prj_mgr, src_pool_update,resources, rc_compiled],
     dependencies: build_dependencies_pool_prj_mgr,
     link_with: [clipper_nopic, delaunator, polypartition, poly2tri, sexpr, libhorizon, libhorizonui],
     include_directories: include_directories,
