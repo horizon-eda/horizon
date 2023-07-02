@@ -5,7 +5,7 @@ RUN apt-get upgrade
 RUN apt-get install -y build-essential libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libarchive-dev git python3-cairo-dev libosmesa6-dev meson cmake
 WORKDIR /src
 RUN meson setup build --buildtype release
-RUN meson compile -C build horizon.so
+RUN meson compile -C build horizon
 RUN strip build/horizon.so
 
 FROM debian:bookworm-slim
