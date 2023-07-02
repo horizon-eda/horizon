@@ -45,7 +45,10 @@ osmesa = dependency('osmesa', required: false, disabler:true)
 glm = dependency('glm')
 
 cpp_args_router = ['-D_USE_MATH_DEFINES']
-cpp_args = cpp_args_router + ['-DGLM_ENABLE_EXPERIMENTAL', '-DJSON_USE_IMPLICIT_CONVERSIONS=0', '-Wshadow']
+if is_windows
+    cpp_args_router += '-DWIN32_UUID'
+endif
+cpp_args = cpp_args_router + ['-DGLM_ENABLE_EXPERIMENTAL', '-DJSON_USE_IMPLICIT_CONVERSIONS=0']
 if spnav.found()
     cpp_args += '-DHAVE_SPNAV'
 endif
@@ -92,8 +95,6 @@ if not is_windows
 	build_dependencies_horizonmodule += uuid
 else
 	build_dependencies_libhorizon += [cxx.find_library('rpcrt4')]
-    cpp_args += '-D_USE_MATH_DEFINES'
-    cpp_args += '-DWIN32_UUID'
 endif
 
 build_dependencies_libhorizonui = build_dependencies_libhorizon + [epoxy, zeromq, curl, glm]
