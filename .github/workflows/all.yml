@@ -160,7 +160,7 @@ jobs:
       run: |
         mkdir ../build
         CXX=${{ matrix.os.cxx }} CC=${{ matrix.os.cc }} meson setup ../build
-        LD_PRELOAD=$PWD/close_range.so ninja -C ../build ${{ matrix.target }}
+        ninja -C ../build ${{ matrix.target }}
     - name: Check version
       run: python3 check_version.py
     - name: Test python module

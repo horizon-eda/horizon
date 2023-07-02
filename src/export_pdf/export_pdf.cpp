@@ -1,6 +1,6 @@
 #include "export_pdf.hpp"
 #include "canvas_pdf.hpp"
-#include <podofo/podofo.h>
+#include "util/podofo_inc.hpp"
 #include "util/util.hpp"
 #include "schematic/schematic.hpp"
 #include "export_pdf_util.hpp"
