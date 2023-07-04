@@ -753,21 +753,11 @@ src_tests = files(
 
 prog_python = find_program('python3')
 
-help_texts_cpp = custom_target(
-    'help_texts.cpp',
-    output : 'help_texts.cpp',
+help_texts = custom_target(
+    'help_texts',
+    output : ['help_texts.hpp', 'help_texts.cpp'],
     input : ['scripts/make_help.py', 'src/help_texts.txt'],
-    capture: true,
-    command : [prog_python, '@INPUT0@', 'c', '@INPUT1@'],
-)
-
-
-help_texts_hpp = custom_target(
-    'help_texts.hpp',
-    output : 'help_texts.hpp',
-    input : ['scripts/make_help.py', 'src/help_texts.txt'],
-    capture: true,
-    command : [prog_python, '@INPUT0@', 'h', '@INPUT1@'],
+    command : [prog_python, '@INPUT@', '@OUTPUT@'],
 )
 
 fs = import('fs')
@@ -816,9 +806,8 @@ endforeach
 color_presets_json = custom_target(
     'color_presets.json',
     output : 'color_presets.json',
-    input : ['scripts/make_color_presets.py'] + color_preset_files,
-    capture: true,
-    command : [prog_python, '@INPUT@'],
+    input : color_preset_files,
+    command : [prog_python, files('scripts/make_color_presets.py'), '@OUTPUT@', '@INPUT@'],
 )
 
 if is_windows
@@ -933,7 +922,7 @@ libhorizon = static_library('libhorizon',
 )
 
 libhorizonui = static_library('libhorizonui',
-    [src_common_ui, src_canvas, src_canvas_gl, help_texts_cpp, help_texts_hpp],
+    [src_common_ui, src_canvas, src_canvas_gl, help_texts],
     dependencies: build_dependencies_libhorizonui,
     include_directories: include_directories,
     cpp_args: cpp_args,

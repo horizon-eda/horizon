@@ -1,6 +1,7 @@
 import sys
-mode = sys.argv[1]
-infile = sys.argv[2]
+infile = sys.argv[1]
+h_file = sys.argv[2]
+c_file = sys.argv[3]
 
 texts = {}
 text_current = None
@@ -14,20 +15,20 @@ for line in open(infile, "r", encoding="UTF-8") :
 
 texts = {k:v.strip() for k,v in texts.items()}
 
-if mode == 'h' :
-	print("#pragma once")
-	print("namespace horizon {")
-	print("class HelpTexts {")
-	print("public:")
+with open(h_file, "w") as fi:
+	print("#pragma once", file=fi)
+	print("namespace horizon {", file=fi)
+	print("class HelpTexts {", file=fi)
+	print("public:", file=fi)
 	for k in texts.keys() :
-		print("    static const char* %s;"%k)
-	print("};")
-	print("}")
+		print("    static const char* %s;"%k, file=fi)
+	print("};", file=fi)
+	print("}", file=fi)
 
-if mode == 'c' :
-	print('#include "help_texts.hpp"')
-	print("namespace horizon {")
+with open(c_file, "w") as fi:
+	print('#include "help_texts.hpp"', file=fi)
+	print("namespace horizon {", file=fi)
 	
 	for k,v in texts.items() :
-		print('const char* HelpTexts::%s = R"EOF(%s)EOF";'%(k,v))
-	print("}")
+		print('const char* HelpTexts::%s = R"EOF(%s)EOF";'%(k,v), file=fi)
+	print("}", file=fi)
