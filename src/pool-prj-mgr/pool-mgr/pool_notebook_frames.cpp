@@ -6,6 +6,7 @@
 #include "util/win32_undef.hpp"
 #include "widgets/preview_canvas.hpp"
 #include "util/gtk_util.hpp"
+#include "frame/frame.hpp"
 
 namespace horizon {
 void PoolNotebook::handle_edit_frame(const UUID &uu)

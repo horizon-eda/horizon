@@ -6,6 +6,8 @@
 #include "part.hpp"
 #include "symbol.hpp"
 #include "unit.hpp"
+#include "decal.hpp"
+#include "frame/frame.hpp"
 #include "pool_manager.hpp"
 #include "logger/logger.hpp"
 #include <glibmm/fileutils.h>

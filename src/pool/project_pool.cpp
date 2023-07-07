@@ -5,6 +5,7 @@
 #include "util/util.hpp"
 #include "nlohmann/json.hpp"
 #include "pool_manager.hpp"
+#include "package.hpp"
 #include <filesystem>
 
 namespace horizon {

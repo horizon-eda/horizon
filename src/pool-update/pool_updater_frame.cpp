@@ -2,6 +2,7 @@
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 #include "util/util.hpp"
+#include "frame/frame.hpp"
 
 namespace horizon {
 void PoolUpdater::update_frames(const std::string &directory, const std::string &prefix)
