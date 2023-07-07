@@ -77,6 +77,12 @@ void ImpBoard::update_highlights()
                     canvas->set_flags(ref, TriangleInfo::FLAG_HIGHLIGHT, 0);
                 }
             }
+            for (const auto &it_plane : core_board.get_board()->planes) {
+                if (it_plane.second.net.uuid == it.uuid) {
+                    ObjectRef ref(ObjectType::PLANE, it_plane.first);
+                    canvas->set_flags(ref, TriangleInfo::FLAG_HIGHLIGHT, 0);
+                }
+            }
             for (const auto &it_via : core_board.get_board()->vias) {
                 if (it_via.second.junction->net.uuid == it.uuid) {
                     ObjectRef ref(ObjectType::VIA, it_via.first);
@@ -291,7 +297,7 @@ void ImpBoard::update_action_sensitivity()
         set_action_sensitive(ActionID::OPEN_DATASHEET, sensitive);
     }
 
-    bool can_select_more = std::any_of(sel.begin(), sel.end(), [](const auto &x) {
+    const bool can_select_more = std::any_of(sel.begin(), sel.end(), [](const auto &x) {
         switch (x.type) {
         case ObjectType::TRACK:
         case ObjectType::JUNCTION:
@@ -303,8 +309,25 @@ void ImpBoard::update_action_sensitivity()
         }
     });
 
-    set_action_sensitive(ActionID::HIGHLIGHT_NET, can_select_more);
-    set_action_sensitive(ActionID::HIGHLIGHT_NET_CLASS, can_select_more);
+    const bool has_plane = std::any_of(sel.begin(), sel.end(), [this](const auto &x) {
+        switch (x.type) {
+        case ObjectType::POLYGON:
+        case ObjectType::POLYGON_ARC_CENTER:
+        case ObjectType::POLYGON_VERTEX:
+        case ObjectType::POLYGON_EDGE: {
+            const auto &poly = *core_board.get_polygon(x.uuid);
+            if (auto plane = dynamic_cast<const Plane *>(poly.usage.ptr))
+                return true;
+        } break;
+
+        default:
+            return false;
+        }
+        return false;
+    });
+
+    set_action_sensitive(ActionID::HIGHLIGHT_NET, can_select_more || has_plane);
+    set_action_sensitive(ActionID::HIGHLIGHT_NET_CLASS, can_select_more || has_plane);
     set_action_sensitive(ActionID::SELECT_MORE, can_select_more);
     set_action_sensitive(ActionID::SELECT_MORE_NO_VIA, can_select_more);
     set_action_sensitive(ActionID::FILTER_AIRWIRES, can_select_more || n_pkgs);
@@ -944,6 +967,14 @@ UUID ImpBoard::net_from_selectable(const SelectableRef &sr)
         auto &ju = board.junctions.at(sr.uuid);
         if (ju.net) {
             return ju.net->uuid;
+        }
+    } break;
+    case ObjectType::POLYGON_ARC_CENTER:
+    case ObjectType::POLYGON_EDGE:
+    case ObjectType::POLYGON_VERTEX: {
+        auto &poly = board.polygons.at(sr.uuid);
+        if (auto plane = dynamic_cast<const Plane *>(poly.usage.ptr)) {
+            return plane->net->uuid;
         }
     } break;
     default:;
