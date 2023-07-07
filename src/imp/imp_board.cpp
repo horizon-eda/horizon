@@ -1272,21 +1272,12 @@ ActionToolID ImpBoard::get_doubleclick_action(ObjectType type, const UUID &uu)
     case ObjectType::POLYGON_EDGE:
     case ObjectType::POLYGON_VERTEX: {
         auto poly = core_board.get_polygon(uu);
-        if (poly->usage) {
-            switch (poly->usage->get_type()) {
-            case PolygonUsage::Type::PLANE:
-                return ToolID::EDIT_PLANE;
-
-            case PolygonUsage::Type::KEEPOUT:
-                return ToolID::EDIT_KEEPOUT;
-
-            default:
-                return {ActionID::NONE, ToolID::NONE};
-            }
-        }
-        else {
+        if (poly->usage->is_type<Plane>())
+            return ToolID::EDIT_PLANE;
+        else if (poly->usage->is_type<Keepout>())
+            return ToolID::EDIT_KEEPOUT;
+        else
             return {ActionID::NONE, ToolID::NONE};
-        }
     } break;
     default:
         return {ActionID::NONE, ToolID::NONE};

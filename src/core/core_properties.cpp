@@ -175,16 +175,7 @@ bool Core::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
         case ObjectProperty::ID::USAGE: {
             std::string usage;
             if (poly->usage) {
-                auto ty = poly->usage->get_type();
-                if (ty == PolygonUsage::Type::PLANE) {
-                    usage = "Plane";
-                }
-                else if (ty == PolygonUsage::Type::KEEPOUT) {
-                    usage = "Keepout";
-                }
-                else {
-                    usage = "Invalid";
-                }
+                usage = object_descriptions.at(poly->usage->get_type()).name;
             }
             else {
                 usage = "None";

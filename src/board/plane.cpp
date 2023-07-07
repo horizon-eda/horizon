@@ -99,9 +99,9 @@ Plane::Plane(const UUID &uu) : uuid(uu)
 {
 }
 
-PolygonUsage::Type Plane::get_type() const
+ObjectType Plane::get_type() const
 {
-    return PolygonUsage::Type::PLANE;
+    return ObjectType::PLANE;
 }
 
 UUID Plane::get_uuid() const

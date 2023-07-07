@@ -17,7 +17,7 @@ public:
     bool exposed_cu_only = false;
     bool all_cu_layers = false;
 
-    Type get_type() const override;
+    ObjectType get_type() const override;
     UUID get_uuid() const override;
 
     json serialize() const;

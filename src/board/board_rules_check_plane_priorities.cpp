@@ -17,7 +17,7 @@ RulesCheckResult BoardRules::check_plane_priorities(const Board &brd) const
 
     std::map<int, std::vector<const Polygon *>> polys_by_layer;
     for (const auto &[uu, poly] : brd.polygons) {
-        if (poly.usage && poly.usage->get_type() == PolygonUsage::Type::PLANE) {
+        if (poly.usage->is_type<Plane>()) {
             polys_by_layer[poly.layer].push_back(&poly);
         }
     }

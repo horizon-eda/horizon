@@ -26,9 +26,9 @@ Keepout::Keepout(const UUID &uu) : uuid(uu)
     patch_types_cu.insert(PatchType::HOLE_PTH);
 }
 
-PolygonUsage::Type Keepout::get_type() const
+ObjectType Keepout::get_type() const
 {
-    return PolygonUsage::Type::KEEPOUT;
+    return ObjectType::KEEPOUT;
 }
 
 UUID Keepout::get_uuid() const
