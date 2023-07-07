@@ -46,7 +46,7 @@ bool ToolEditPlane::can_begin()
     case ToolID::EDIT_PLANE:
     case ToolID::UPDATE_PLANE:
     case ToolID::CLEAR_PLANE:
-        return poly->usage && poly->usage->get_type() == PolygonUsage::Type::PLANE;
+        return poly->usage->is_type<Plane>();
 
     default:
         return false;

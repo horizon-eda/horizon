@@ -46,7 +46,7 @@ bool ToolAddKeepout::can_begin()
 
     case ToolID::DELETE_KEEPOUT:
     case ToolID::EDIT_KEEPOUT:
-        return poly->usage && poly->usage->get_type() == PolygonUsage::Type::KEEPOUT;
+        return poly->usage->is_type<Keepout>();
 
     default:
         return false;

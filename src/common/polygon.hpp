@@ -12,9 +12,12 @@ using json = nlohmann::json;
 
 class PolygonUsage {
 public:
-    enum class Type { INVALID, PLANE, KEEPOUT };
-    virtual Type get_type() const = 0;
     virtual UUID get_uuid() const = 0;
+    virtual ObjectType get_type() const = 0;
+    template <typename T> bool is_type() const
+    {
+        return dynamic_cast<const T *>(this);
+    }
     virtual ~PolygonUsage(){};
 };
 

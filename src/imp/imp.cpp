@@ -1707,11 +1707,8 @@ void ImpBase::update_property_panels()
         case ObjectType::POLYGON_VERTEX: {
             sel_extra.emplace(it.uuid, ObjectType::POLYGON);
             auto poly = core->get_polygon(it.uuid);
-            if (poly->usage && poly->usage->get_type() == PolygonUsage::Type::PLANE) {
-                sel_extra.emplace(poly->usage->get_uuid(), ObjectType::PLANE);
-            }
-            if (poly->usage && poly->usage->get_type() == PolygonUsage::Type::KEEPOUT) {
-                sel_extra.emplace(poly->usage->get_uuid(), ObjectType::KEEPOUT);
+            if (poly->usage) {
+                sel_extra.emplace(poly->usage->get_uuid(), poly->usage->get_type());
             }
         } break;
         default:;
