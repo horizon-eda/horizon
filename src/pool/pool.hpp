@@ -2,10 +2,6 @@
 #include "common/common.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "util/uuid.hpp"
-#include "frame/frame.hpp"
-#include "package.hpp"
-#include "package/pad.hpp"
-#include "decal.hpp"
 #include <map>
 #include <set>
 #include "ipool.hpp"

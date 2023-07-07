@@ -4,6 +4,7 @@
 #include <giomm/file.h>
 #include "util/util.hpp"
 #include "nlohmann/json.hpp"
+#include "pool/package.hpp"
 
 namespace horizon {
 static void pkg_add_dir_to_graph(PoolUpdateGraph &graph, const std::string &directory, pool_update_cb_t status_cb)

@@ -23,6 +23,8 @@
 #include "util/fs_util.hpp"
 #include "util/gtk_util.hpp"
 #include "duplicate/duplicate_unit.hpp"
+#include "pool/decal.hpp"
+#include "frame/frame.hpp"
 #include "move_window.hpp"
 
 namespace horizon {

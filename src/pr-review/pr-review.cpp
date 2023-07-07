@@ -24,6 +24,7 @@
 #include "checks/check_util.hpp"
 #include "checks/check_item.hpp"
 #include "util/once.hpp"
+#include "frame/frame.hpp"
 #include <iostream>
 
 using namespace horizon;
