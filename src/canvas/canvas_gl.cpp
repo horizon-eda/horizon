@@ -10,6 +10,13 @@
 #include "bitmap_font_util.hpp"
 #include "preferences/preferences_util.hpp"
 
+#ifdef HAVE_WAYLAND
+#include <gdk/gdkwayland.h>
+#include "relative-pointer-unstable-v1-client-protocol.h"
+#include "pointer-constraints-unstable-v1-client-protocol.h"
+#endif
+
+
 namespace horizon {
 std::pair<float, Coordf> CanvasGL::get_scale_and_offset() const
 {

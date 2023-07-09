@@ -33,6 +33,11 @@ if not cxx.links('int main(void) {return 0;}', dependencies: opencascade)
     opencascade = declare_dependency(dependencies: opencascade.partial_dependency(compile_args: true, includes:true), link_args:['-lTKSTEP', '-lTKernel', '-lTKXCAF', '-lTKXSBase', '-lTKBRep', '-lTKCDF', '-lTKXDESTEP', '-lTKLCAF', '-lTKMath', '-lTKMesh', '-lTKTopAlgo', '-lTKPrim', '-lTKBO', '-lTKShHealing', '-lTKBRep', '-lTKG3d', '-lTKGeomBase', '-lTKHLR'])
 endif
 
+have_wayland = true
+
+if have_wayland
+    subdir('src/wayland-protos')
+endif
 
 spnav = dependency('spnav', required: false)
 if not spnav.found()
@@ -56,6 +61,10 @@ endif
 if get_option('debug')
     cpp_args += '-DUUID_PTR_CHECK'
     cpp_args += '-DCONNECTION_CHECK'
+endif
+
+if have_wayland
+    cpp_args += '-DHAVE_WAYLAND'
 endif
 
 # pkg-config is useless for podofo :(
@@ -449,6 +458,15 @@ src_canvas_gl = files(
     'src/canvas/picture_renderer.cpp',
     'src/util/warp_cursor.cpp',
 )
+
+if have_wayland
+    src_canvas_gl +=[
+        pointer_constraints_unstable_v1_protocol_c,
+        pointer_constraints_unstable_v1_client_protocol_h,
+        relative_pointer_unstable_v1_protocol_c,
+        relative_pointer_unstable_v1_client_protocol_h
+    ]
+endif
 
 subdir('src/core/tools')
 
