@@ -37,6 +37,7 @@ have_wayland = true
 
 if have_wayland
     subdir('src/wayland-protos')
+    wayland_client = dependency('wayland-client')
 endif
 
 spnav = dependency('spnav', required: false)
@@ -53,6 +54,11 @@ cpp_args_router = ['-D_USE_MATH_DEFINES']
 if is_windows
     cpp_args_router += '-DWIN32_UUID'
 endif
+
+if have_wayland
+    cpp_args_router += '-DHAVE_WAYLAND'
+endif
+
 cpp_args = cpp_args_router + ['-DGLM_ENABLE_EXPERIMENTAL', '-DJSON_USE_IMPLICIT_CONVERSIONS=0']
 if spnav.found()
     cpp_args += '-DHAVE_SPNAV'
@@ -61,10 +67,6 @@ endif
 if get_option('debug')
     cpp_args += '-DUUID_PTR_CHECK'
     cpp_args += '-DCONNECTION_CHECK'
-endif
-
-if have_wayland
-    cpp_args += '-DHAVE_WAYLAND'
 endif
 
 # pkg-config is useless for podofo :(
@@ -106,7 +108,7 @@ else
 	build_dependencies_libhorizon += [cxx.find_library('rpcrt4')]
 endif
 
-build_dependencies_libhorizonui = build_dependencies_libhorizon + [epoxy, zeromq, curl, glm]
+build_dependencies_libhorizonui = build_dependencies_libhorizon + [epoxy, zeromq, curl, glm, wayland_client]
 build_dependencies_gen_pkg =    build_dependencies_libhorizon
 build_dependencies_pr_review = build_dependencies_libhorizon + [podofo, osmesa, opencascade, libgit2]
 
@@ -449,6 +451,7 @@ src_canvas_gl = files(
     'src/canvas/selectables_renderer.cpp',
     'src/canvas/hover_prelight.cpp',
     'src/canvas/triangle_renderer.cpp',
+    'src/canvas/cursor_renderer.cpp',
     'src/canvas/selection_filter.cpp',
     'src/canvas/marker.cpp',
     'src/canvas/annotation.cpp',
@@ -458,15 +461,6 @@ src_canvas_gl = files(
     'src/canvas/picture_renderer.cpp',
     'src/util/warp_cursor.cpp',
 )
-
-if have_wayland
-    src_canvas_gl +=[
-        pointer_constraints_unstable_v1_protocol_c,
-        pointer_constraints_unstable_v1_client_protocol_h,
-        relative_pointer_unstable_v1_protocol_c,
-        relative_pointer_unstable_v1_client_protocol_h
-    ]
-endif
 
 subdir('src/core/tools')
 
@@ -858,64 +852,76 @@ include_directories = [
   include_directories('src', '3rd_party', '3rd_party/range-v3'),
 ]
 
+src_router = files(
+    '3rd_party/router/router/pns_router.cpp',
+    '3rd_party/router/router/pns_item.cpp',
+    '3rd_party/router/router/pns_node.cpp',
+    '3rd_party/router/router/pns_solid.cpp',
+    '3rd_party/router/router/pns_optimizer.cpp',
+    '3rd_party/router/router/pns_topology.cpp',
+    '3rd_party/router/router/pns_walkaround.cpp',
+    '3rd_party/router/router/pns_utils.cpp',
+    '3rd_party/router/router/pns_algo_base.cpp',
+    '3rd_party/router/router/pns_diff_pair_placer.cpp',
+    '3rd_party/router/router/pns_diff_pair.cpp',
+    '3rd_party/router/router/pns_dp_meander_placer.cpp',
+    '3rd_party/router/router/pns_dragger.cpp',
+    '3rd_party/router/router/pns_itemset.cpp',
+    '3rd_party/router/router/pns_line_placer.cpp',
+    '3rd_party/router/router/pns_line.cpp',
+    '3rd_party/router/router/pns_via.cpp',
+    '3rd_party/router/router/pns_logger.cpp',
+    '3rd_party/router/router/pns_meander_placer_base.cpp',
+    '3rd_party/router/router/pns_meander_placer.cpp',
+    '3rd_party/router/router/pns_meander_skew_placer.cpp',
+    '3rd_party/router/router/pns_meander.cpp',
+    '3rd_party/router/router/pns_shove.cpp',
+    '3rd_party/router/router/pns_index.cpp',
+    '3rd_party/router/router/time_limit.cpp',
+    '3rd_party/router/router/pns_routing_settings.cpp',
+    '3rd_party/router/router/pns_sizes_settings.cpp',
+    '3rd_party/router/router/pns_arc.cpp',
+    '3rd_party/router/router/pns_component_dragger.cpp',
+    '3rd_party/router/router/pns_mouse_trail_tracer.cpp',
+    '3rd_party/router/wx_compat.cpp',
+    'src/router/pns_horizon_iface.cpp',
+    'src/core/tools/tool_route_track_interactive.cpp',
+    '3rd_party/router/kimath/src/geometry/circle.cpp',
+    '3rd_party/router/kimath/src/geometry/direction_45.cpp',
+    '3rd_party/router/kimath/src/geometry/geometry_utils.cpp',
+    '3rd_party/router/kimath/src/geometry/seg.cpp',
+    '3rd_party/router/kimath/src/geometry/shape_arc.cpp',
+    '3rd_party/router/kimath/src/geometry/shape_collisions.cpp',
+    '3rd_party/router/kimath/src/geometry/shape_compound.cpp',
+    '3rd_party/router/kimath/src/geometry/shape.cpp',
+    '3rd_party/router/kimath/src/geometry/shape_file_io.cpp',
+    '3rd_party/router/kimath/src/geometry/shape_line_chain.cpp',
+    '3rd_party/router/kimath/src/geometry/shape_poly_set.cpp',
+    '3rd_party/router/kimath/src/geometry/shape_rect.cpp',
+    '3rd_party/router/kimath/src/geometry/shape_segment.cpp',
+    '3rd_party/router/kimath/src/math/util.cpp',
+    '3rd_party/router/kimath/src/md5_hash.cpp',
+    '3rd_party/router/color4d.cpp',
+    '3rd_party/router/kimath/src/trigo.cpp',
+    '3rd_party/router/base_units.cpp',
+    '3rd_party/router/clipper_kicad/clipper.cpp',
+    '3rd_party/router/kimath/src/math/vector2.cpp',
+)
+
+wayland_inc = []
+
+if have_wayland
+    wayland_inc = [pointer_constraints_unstable_v1_client_protocol_h, relative_pointer_unstable_v1_client_protocol_h]
+    src_canvas_gl += [
+        pointer_constraints_unstable_v1_protocol_c,
+        relative_pointer_unstable_v1_protocol_c,
+    ] + wayland_inc
+    src_router += wayland_inc
+endif
 
 
 router = static_library('router',
-    files(
-        '3rd_party/router/router/pns_router.cpp',
-        '3rd_party/router/router/pns_item.cpp',
-        '3rd_party/router/router/pns_node.cpp',
-        '3rd_party/router/router/pns_solid.cpp',
-        '3rd_party/router/router/pns_optimizer.cpp',
-        '3rd_party/router/router/pns_topology.cpp',
-        '3rd_party/router/router/pns_walkaround.cpp',
-        '3rd_party/router/router/pns_utils.cpp',
-        '3rd_party/router/router/pns_algo_base.cpp',
-        '3rd_party/router/router/pns_diff_pair_placer.cpp',
-        '3rd_party/router/router/pns_diff_pair.cpp',
-        '3rd_party/router/router/pns_dp_meander_placer.cpp',
-        '3rd_party/router/router/pns_dragger.cpp',
-        '3rd_party/router/router/pns_itemset.cpp',
-        '3rd_party/router/router/pns_line_placer.cpp',
-        '3rd_party/router/router/pns_line.cpp',
-        '3rd_party/router/router/pns_via.cpp',
-        '3rd_party/router/router/pns_logger.cpp',
-        '3rd_party/router/router/pns_meander_placer_base.cpp',
-        '3rd_party/router/router/pns_meander_placer.cpp',
-        '3rd_party/router/router/pns_meander_skew_placer.cpp',
-        '3rd_party/router/router/pns_meander.cpp',
-        '3rd_party/router/router/pns_shove.cpp',
-        '3rd_party/router/router/pns_index.cpp',
-        '3rd_party/router/router/time_limit.cpp',
-        '3rd_party/router/router/pns_routing_settings.cpp',
-        '3rd_party/router/router/pns_sizes_settings.cpp',
-        '3rd_party/router/router/pns_arc.cpp',
-        '3rd_party/router/router/pns_component_dragger.cpp',
-        '3rd_party/router/router/pns_mouse_trail_tracer.cpp',
-        '3rd_party/router/wx_compat.cpp',
-        'src/router/pns_horizon_iface.cpp',
-        'src/core/tools/tool_route_track_interactive.cpp',
-        '3rd_party/router/kimath/src/geometry/circle.cpp',
-        '3rd_party/router/kimath/src/geometry/direction_45.cpp',
-        '3rd_party/router/kimath/src/geometry/geometry_utils.cpp',
-        '3rd_party/router/kimath/src/geometry/seg.cpp',
-        '3rd_party/router/kimath/src/geometry/shape_arc.cpp',
-        '3rd_party/router/kimath/src/geometry/shape_collisions.cpp',
-        '3rd_party/router/kimath/src/geometry/shape_compound.cpp',
-        '3rd_party/router/kimath/src/geometry/shape.cpp',
-        '3rd_party/router/kimath/src/geometry/shape_file_io.cpp',
-        '3rd_party/router/kimath/src/geometry/shape_line_chain.cpp',
-        '3rd_party/router/kimath/src/geometry/shape_poly_set.cpp',
-        '3rd_party/router/kimath/src/geometry/shape_rect.cpp',
-        '3rd_party/router/kimath/src/geometry/shape_segment.cpp',
-        '3rd_party/router/kimath/src/math/util.cpp',
-        '3rd_party/router/kimath/src/md5_hash.cpp',
-        '3rd_party/router/color4d.cpp',
-        '3rd_party/router/kimath/src/trigo.cpp',
-        '3rd_party/router/base_units.cpp',
-        '3rd_party/router/clipper_kicad/clipper.cpp',
-        '3rd_party/router/kimath/src/math/vector2.cpp',
-    ),
+    src_router,
     include_directories: [include_directories('3rd_party/router/include', '3rd_party/router/kimath/include', '3rd_party/clipper', '3rd_party', '3rd_party/rtree', '3rd_party/router', 'src')],
     dependencies: [gtkmm],
 	cpp_args: cpp_args_router,
@@ -949,7 +955,7 @@ libhorizonui = static_library('libhorizonui',
 
 
 horizon_eda = executable('horizon-eda',
-    [src_pool_prj_mgr, src_pool_update,resources, rc_compiled],
+    [src_pool_prj_mgr, src_pool_update,resources, rc_compiled, wayland_inc],
     dependencies: build_dependencies_pool_prj_mgr,
     link_with: [clipper_nopic, delaunator_nopic, polypartition_nopic, poly2tri_nopic, sexpr, libhorizon, libhorizonui],
     include_directories: include_directories,
@@ -959,7 +965,7 @@ horizon_eda = executable('horizon-eda',
 )
 
 horizon_imp = executable('horizon-imp',
-    [src_imp, src_tools, src_canvas_3d, src_export, src_board_rules_check,resources],
+    [src_imp, src_tools, src_canvas_3d, src_export, src_board_rules_check,resources,wayland_inc],
     dependencies: build_dependencies_imp,
     link_with: [clipper_nopic, delaunator_nopic, polypartition_nopic, poly2tri_nopic, sexpr, dxflib, footag, router, libhorizon, libhorizonui],
     include_directories: include_directories,

@@ -10,14 +10,69 @@
 #include "bitmap_font_util.hpp"
 #include "preferences/preferences_util.hpp"
 
-#ifdef HAVE_WAYLAND
-#include <gdk/gdkwayland.h>
-#include "relative-pointer-unstable-v1-client-protocol.h"
-#include "pointer-constraints-unstable-v1-client-protocol.h"
-#endif
-
-
 namespace horizon {
+
+static void *gtk_wl_registry_bind(Gtk::Widget *widget, uint32_t name, const struct wl_interface *interface,
+                                  uint32_t version)
+{
+    auto gdk_display = widget->get_display()->gobj();
+    struct wl_display *display;
+    struct wl_registry *registry;
+
+    if (!GDK_IS_WAYLAND_DISPLAY(gdk_display)) {
+        return NULL;
+    }
+
+    display = gdk_wayland_display_get_wl_display(gdk_display);
+    registry = wl_display_get_registry(display);
+
+    return wl_registry_bind(registry, name, interface, version);
+}
+
+static void gtk_wl_registry_add_listener(Gtk::Widget *widget, const struct wl_registry_listener *listener)
+{
+    GdkDisplay *gdk_display = widget->get_display()->gobj();
+    struct wl_display *display;
+    struct wl_registry *registry;
+
+    if (!GDK_IS_WAYLAND_DISPLAY(gdk_display)) {
+        return;
+    }
+
+    display = gdk_wayland_display_get_wl_display(gdk_display);
+    registry = wl_display_get_registry(display);
+    wl_registry_add_listener(registry, listener, widget);
+    wl_display_roundtrip(display);
+}
+
+void CanvasGL::registry_handle_global(void *data, struct wl_registry *registry, uint32_t name, const char *interface,
+                                      uint32_t version)
+{
+    auto widget = dynamic_cast<CanvasGL *>(static_cast<Gtk::Widget *>(data));
+    std::cout << interface << " " << data << std::endl;
+
+    if (strcmp(interface, "zwp_relative_pointer_manager_v1") == 0) {
+        widget->relative_pointer_manager = static_cast<zwp_relative_pointer_manager_v1 *>(
+                gtk_wl_registry_bind(widget, name, &zwp_relative_pointer_manager_v1_interface, 1));
+        // g_object_set_data_full(G_OBJECT(widget), "zwp_relative_pointer_manager_v1", relative_pointer_manager,
+        //                       (GDestroyNotify)zwp_relative_pointer_manager_v1_destroy);
+    }
+    else if (strcmp(interface, "zwp_pointer_constraints_v1") == 0) {
+        widget->pointer_constraints = static_cast<zwp_pointer_constraints_v1 *>(
+                gtk_wl_registry_bind(widget, name, &zwp_pointer_constraints_v1_interface, 1));
+        // g_object_set_data_full(G_OBJECT(widget), "zwp_pointer_constraints_v1", pointer_constraints,
+        //                       (GDestroyNotify)zwp_pointer_constraints_v1_destroy);
+    }
+}
+
+void CanvasGL::registry_handle_global_remove(void *data, struct wl_registry *registry, uint32_t name)
+{
+}
+
+const struct wl_registry_listener CanvasGL::registry_listener = {CanvasGL::registry_handle_global,
+                                                                 CanvasGL::registry_handle_global_remove};
+
+
 std::pair<float, Coordf> CanvasGL::get_scale_and_offset() const
 {
     return std::make_pair(scale, offset);
@@ -42,8 +97,8 @@ void CanvasGL::set_scale_and_offset(float sc, Coordf ofs)
 CanvasGL::CanvasGL()
     : Glib::ObjectBase(typeid(CanvasGL)), Canvas::Canvas(), markers(*this), selection_filter(*this), grid(*this),
       drag_selection(*this), selectables_renderer(*this, selectables), triangle_renderer(*this, triangles),
-      marker_renderer(*this, markers), picture_renderer(*this), p_property_work_layer(*this, "work-layer"),
-      p_property_layer_opacity(*this, "layer-opacity")
+      marker_renderer(*this, markers), picture_renderer(*this), cursor_renderer(*this),
+      p_property_work_layer(*this, "work-layer"), p_property_layer_opacity(*this, "layer-opacity")
 {
     add_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::BUTTON_MOTION_MASK | Gdk::POINTER_MOTION_MASK
                | Gdk::SCROLL_MASK | Gdk::SMOOTH_SCROLL_MASK | Gdk::KEY_PRESS_MASK);
@@ -72,6 +127,8 @@ CanvasGL::CanvasGL()
     gesture_drag->signal_update().connect(sigc::mem_fun(*this, &CanvasGL::drag_gesture_update_cb));
     gesture_drag->set_propagation_phase(Gtk::PHASE_BUBBLE);
     gesture_drag->set_touch_only(true);
+
+    pan_cursor_pos.x = NAN;
 
     signal_query_tooltip().connect(
             [this](int x, int y, bool keyboard_tooltip, const Glib::RefPtr<Gtk::Tooltip> &tooltip) {
@@ -212,6 +269,8 @@ void CanvasGL::on_realize()
     GL_CHECK_ERROR
     picture_renderer.realize();
     GL_CHECK_ERROR
+    cursor_renderer.realize();
+    GL_CHECK_ERROR
 
     GLint fb;
     glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &fb); // save fb
@@ -239,6 +298,9 @@ void CanvasGL::on_realize()
     glBindFramebuffer(GL_FRAMEBUFFER, fb);
 
     GL_CHECK_ERROR
+
+    std::cout << this << std::endl;
+    gtk_wl_registry_add_listener(this, &registry_listener);
 }
 
 bool CanvasGL::on_render(const Glib::RefPtr<Gdk::GLContext> &context)
@@ -282,6 +344,9 @@ bool CanvasGL::on_render(const Glib::RefPtr<Gdk::GLContext> &context)
     GL_CHECK_ERROR
     grid.render_cursor(cursor_pos_grid);
     marker_renderer.render();
+    GL_CHECK_ERROR
+    if (!isnan(pan_cursor_pos.x))
+        cursor_renderer.render();
     glDisable(GL_BLEND);
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb);

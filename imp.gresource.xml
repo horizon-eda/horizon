@@ -167,6 +167,9 @@
     <file>canvas/shaders/picture-vertex.glsl</file>
     <file>canvas/shaders/picture-fragment.glsl</file>
 
+    <file>canvas/shaders/cursor-vertex.glsl</file>
+    <file>canvas/shaders/cursor-fragment.glsl</file>
+
     <file>canvas3d/shaders/cover-vertex.glsl</file>
     <file>canvas3d/shaders/cover-fragment.glsl</file>
 

@@ -12,9 +12,16 @@
 #include "annotation.hpp"
 #include "snap_filter.hpp"
 #include "picture_renderer.hpp"
+#include "cursor_renderer.hpp"
 #include "selection_filter.hpp"
 #include "input_devices_prefs.hpp"
 #include "util/scroll_direction.hpp"
+
+#ifdef HAVE_WAYLAND
+#include <gdk/gdkwayland.h>
+#include "relative-pointer-unstable-v1-client-protocol.h"
+#include "pointer-constraints-unstable-v1-client-protocol.h"
+#endif
 
 namespace horizon {
 class CanvasGL : public Canvas, public Gtk::GLArea {
@@ -26,6 +33,7 @@ class CanvasGL : public Canvas, public Gtk::GLArea {
     friend Markers;
     friend CanvasAnnotation;
     friend PictureRenderer;
+    friend CursorRenderer;
 
 public:
     CanvasGL();
@@ -257,6 +265,8 @@ private:
 
     PictureRenderer picture_renderer;
 
+    CursorRenderer cursor_renderer;
+
     enum class ZoomTo { CURSOR, CENTER };
 
     void pan_drag_begin(GdkEventButton *button_event);
@@ -327,6 +337,24 @@ private:
     bool can_set_scale() const;
 
     int last_grid_div = 1;
+
+    struct zwp_pointer_constraints_v1 *pointer_constraints = nullptr;
+    struct zwp_relative_pointer_v1 *relative_pointer = nullptr;
+    struct zwp_relative_pointer_manager_v1 *relative_pointer_manager = nullptr;
+    struct zwp_locked_pointer_v1_listener *locked_pointer_listener = nullptr;
+    struct zwp_locked_pointer_v1 *locked_pointer = nullptr;
+
+    static const struct wl_registry_listener registry_listener;
+    static const struct zwp_relative_pointer_v1_listener relative_pointer_listener;
+    static void handle_relative_motion(void *data, struct zwp_relative_pointer_v1 *zwp_relative_pointer_v1,
+                                       uint32_t utime_hi, uint32_t utime_lo, wl_fixed_t dx, wl_fixed_t dy,
+                                       wl_fixed_t dx_unaccel, wl_fixed_t dy_unaccel);
+    static void registry_handle_global(void *data, struct wl_registry *registry, uint32_t name, const char *interface,
+                                       uint32_t version);
+    static void registry_handle_global_remove(void *data, struct wl_registry *registry, uint32_t name);
+
+    Coordf pan_cursor_pos;
+    Coordf pan_cursor_pos_orig;
 
 protected:
     void on_size_allocate(Gtk::Allocation &alloc) override;
