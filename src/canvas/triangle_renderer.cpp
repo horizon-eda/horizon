@@ -146,7 +146,7 @@ void TriangleRenderer::realize()
 }
 
 
-class UBOBuffer {
+class UBOBufferTriangle {
 public:
     static constexpr size_t ubo_size = 23; //  keep in sync with ubo.glsl
     static_assert(static_cast<int>(ColorP::N_COLORS) == ubo_size, "ubo size mismatch");
@@ -225,7 +225,7 @@ void TriangleRenderer::render_layer_batch(int layer, HighlightMode highlight_mod
                                           bool use_stencil, bool stencil_mode)
 {
     const auto &ld = ca.get_layer_display(layer);
-    UBOBuffer buf;
+    UBOBufferTriangle buf;
 
     buf.alpha = ca.property_layer_opacity() / 100;
     gl_mat3_to_array(buf.screenmat, ca.screenmat);

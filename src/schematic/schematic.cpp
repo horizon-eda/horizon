@@ -1469,13 +1469,14 @@ template <bool c>
 using WalkCB =
         std::function<void(make_const_ref_t<c, Sheet>, unsigned int, make_const_ref_t<c, Schematic>, const UUIDVec &)>;
 
-template <bool c> struct WalkContext {
+template <bool c> struct WalkContextSchematic {
     WalkCB<c> cb;
     const Schematic &top;
 };
 
 template <bool c>
-static void walk_sheets_rec(make_const_ref_t<c, Schematic> sch, const UUIDVec &instance_path, WalkContext<c> &ctx)
+static void walk_sheets_rec(make_const_ref_t<c, Schematic> sch, const UUIDVec &instance_path,
+                            WalkContextSchematic<c> &ctx)
 {
     if (Block::instance_path_too_long(instance_path, __FUNCTION__))
         return;
@@ -1490,7 +1491,7 @@ static void walk_sheets_rec(make_const_ref_t<c, Schematic> sch, const UUIDVec &i
 
 template <bool c> static void walk_sheets(make_const_ref_t<c, Schematic> sch, WalkCB<c> cb)
 {
-    WalkContext<c> ctx{cb, sch};
+    WalkContextSchematic<c> ctx{cb, sch};
     walk_sheets_rec(sch, {}, ctx);
 }
 

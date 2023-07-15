@@ -671,14 +671,14 @@ void Block::update_non_top(Block &other) const
 
 template <bool c> using WalkCB = std::function<void(make_const_ref_t<c, Block>, const UUIDVec &)>;
 
-template <bool c> struct WalkContext {
+template <bool c> struct WalkContextBlock {
     WalkCB<c> cb;
     const Block &top;
     const bool inc_top;
 };
 
 template <bool c>
-static void walk_blocks_rec(make_const_ref_t<c, Block> block, const UUIDVec &instance_path, WalkContext<c> &ctx)
+static void walk_blocks_rec(make_const_ref_t<c, Block> block, const UUIDVec &instance_path, WalkContextBlock<c> &ctx)
 {
     if (Block::instance_path_too_long(instance_path, __FUNCTION__))
         return;
@@ -691,7 +691,7 @@ static void walk_blocks_rec(make_const_ref_t<c, Block> block, const UUIDVec &ins
 
 template <bool c> static void walk_blocks(make_const_ref_t<c, Block> top, WalkCB<c> cb, bool inc_top)
 {
-    WalkContext<c> ctx{cb, top, inc_top};
+    WalkContextBlock<c> ctx{cb, top, inc_top};
     walk_blocks_rec<c>(top, {}, ctx);
 }
 

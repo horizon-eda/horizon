@@ -61,7 +61,7 @@ SelectablesRenderer::SelectablesRenderer(const CanvasGL &c, const Selectables &s
 {
 }
 
-class UBOBuffer {
+class UBOBufferSelectables {
 public:
     std::array<float, 4> color_inner;
     std::array<float, 4> color_outer;
@@ -104,7 +104,7 @@ void SelectablesRenderer::realize()
 
 void SelectablesRenderer::render()
 {
-    UBOBuffer buf;
+    UBOBufferSelectables buf;
     gl_mat3_to_array(buf.screenmat, ca.screenmat);
     gl_mat3_to_array(buf.viewmat, ca.viewmat);
     buf.scale = ca.scale;
