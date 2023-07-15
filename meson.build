@@ -972,9 +972,9 @@ icons = [
 ]
 
 foreach icon: icons
-    install_data('src/icons/' / icon / 'apps/horizon-eda.png', install_dir: icondir / icon / 'apps')
+    install_data('src/icons/' / icon / 'apps/horizon-eda.png', install_dir: icondir / icon / 'apps', rename: 'org.horizon_eda.HorizonEDA.png')
 endforeach
-install_data('src/icons/scalable/apps/horizon-eda.svg', install_dir: icondir /  'scalable/apps')
+install_data('src/icons/scalable/apps/horizon-eda.svg', install_dir: icondir /  'scalable/apps', rename: 'org.horizon_eda.HorizonEDA.svg')
 
 
 horizon_py = shared_module('horizon',
