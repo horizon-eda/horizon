@@ -18,6 +18,7 @@ epoxy = dependency('epoxy')
 sqlite3 = dependency('sqlite3')
 libgit2 = dependency('libgit2')
 zeromq = dependency('libzmq')
+cppzmq = dependency('cppzmq', required:false)
 curl = dependency('libcurl')
 rsvg = dependency('librsvg-2.0')
 libarchive = dependency('libarchive')
@@ -37,6 +38,12 @@ endif
 spnav = dependency('spnav', required: false)
 if not spnav.found()
     spnav = cxx.find_library('spnav', required:false)
+endif
+
+if not cppzmq.found()
+    if not cxx.has_header('zmq.hpp')
+        error('cppzmq not found')
+    endif
 endif
 
 libpython = dependency('python3', required: false, disabler:true)
@@ -97,7 +104,7 @@ else
 	build_dependencies_libhorizon += [cxx.find_library('rpcrt4')]
 endif
 
-build_dependencies_libhorizonui = build_dependencies_libhorizon + [epoxy, zeromq, curl, glm]
+build_dependencies_libhorizonui = build_dependencies_libhorizon + [epoxy, zeromq, cppzmq, curl, glm]
 build_dependencies_gen_pkg =    build_dependencies_libhorizon
 build_dependencies_pr_review = build_dependencies_libhorizon + [podofo, osmesa, opencascade, libgit2]
 
