@@ -78,6 +78,9 @@ else
     cpp_args += '-DINC_PODOFO_WITHOUT_DIRECTORY'
   else
     podofo = dependency('libpodofo')
+    if podofo.version().contains('0.10.')
+        error('need podofo <0.10')
+    endif
   endif
 endif
 
