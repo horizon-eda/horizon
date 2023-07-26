@@ -1315,38 +1315,53 @@ ActionToolID ImpBoard::get_doubleclick_action(ObjectType type, const UUID &uu)
     }
 }
 
-
-static void append_bottom_layers(std::vector<int> &layers)
-{
-    std::vector<int> bottoms;
-    bottoms.reserve(layers.size());
-    for (auto it = layers.rbegin(); it != layers.rend(); it++) {
-        if (*it >= 0 && *it != BoardLayers::L_OUTLINE && *it != BoardLayers::OUTLINE_NOTES)
-            bottoms.push_back(-100 - *it);
-    }
-    layers.insert(layers.end(), bottoms.begin(), bottoms.end());
-}
-
 std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpBoard::get_selection_filter_info() const
 {
-    std::vector<int> inner_layers;
-    for (unsigned i = 0; i < core_board.get_board()->get_n_inner_layers(); i++) {
-        inner_layers.push_back(-i - 1);
-    }
-    std::vector<int> layers_line = {BoardLayers::OUTLINE_NOTES, BoardLayers::TOP_ASSEMBLY, BoardLayers::TOP_SILKSCREEN,
-                                    BoardLayers::TOP_MASK, BoardLayers::TOP_COPPER};
-    append_bottom_layers(layers_line);
+    const auto layers_sorted = core_board.get_board()->get_layers_sorted(LayerProvider::LayerSortOrder::TOP_TO_BOTTOM);
 
-    std::vector<int> layers_polygon = {BoardLayers::L_OUTLINE, BoardLayers::TOP_SILKSCREEN, BoardLayers::TOP_MASK,
-                                       BoardLayers::TOP_COPPER};
-    layers_polygon.insert(layers_polygon.end(), inner_layers.begin(), inner_layers.end());
-    append_bottom_layers(layers_polygon);
+    std::vector<int> layers_track;
+    std::vector<int> layers_line;
+    std::vector<int> layers_polygon;
+
+    for (const auto &layer : layers_sorted) {
+        if (layer.copper) {
+            layers_track.push_back(layer.index);
+            layers_polygon.push_back(layer.index);
+        }
+        switch (layer.index) {
+        case BoardLayers::OUTLINE_NOTES:
+            layers_line.push_back(layer.index);
+            break;
+
+        case BoardLayers::L_OUTLINE:
+            layers_line.push_back(layer.index);
+            break;
+
+        case BoardLayers::TOP_ASSEMBLY:
+        case BoardLayers::BOTTOM_ASSEMBLY:
+            layers_line.push_back(layer.index);
+            break;
+
+        case BoardLayers::TOP_SILKSCREEN:
+        case BoardLayers::BOTTOM_SILKSCREEN:
+            layers_line.push_back(layer.index);
+            layers_polygon.push_back(layer.index);
+            break;
+
+        case BoardLayers::TOP_MASK:
+        case BoardLayers::BOTTOM_MASK:
+            layers_line.push_back(layer.index);
+            layers_polygon.push_back(layer.index);
+            break;
+
+        case BoardLayers::TOP_COPPER:
+        case BoardLayers::BOTTOM_COPPER:
+            layers_line.push_back(layer.index);
+            break;
+        }
+    }
 
     std::vector<int> layers_package = {BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER};
-
-    std::vector<int> layers_track = {BoardLayers::TOP_COPPER};
-    layers_track.insert(layers_track.end(), inner_layers.begin(), inner_layers.end());
-    append_bottom_layers(layers_track);
 
     using Flag = ImpBase::SelectionFilterInfo::Flag;
     std::map<ObjectType, ImpBase::SelectionFilterInfo> r = {

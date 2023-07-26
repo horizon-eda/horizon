@@ -269,10 +269,11 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 
 void FabOutputWindow::reload_layers()
 {
-    if (n_layers == settings.layers.size())
+    auto &layers = brd.get_layers();
+    if (last_layers == layers)
         return;
     else
-        n_layers = settings.layers.size();
+        last_layers = layers;
 
 
     blind_buried_box->set_visible(brd.get_n_inner_layers());
@@ -287,8 +288,10 @@ void FabOutputWindow::reload_layers()
     for (auto &la : settings.layers) {
         layers_sorted.push_back(&la.second);
     }
-    std::sort(layers_sorted.begin(), layers_sorted.end(),
-              [](const auto a, const auto b) { return b->layer < a->layer; });
+
+    std::sort(layers_sorted.begin(), layers_sorted.end(), [this](const auto a, const auto b) {
+        return brd.get_layer_position(b->layer) < brd.get_layer_position(a->layer);
+    });
 
     for (auto la : layers_sorted) {
         auto ed = GerberLayerEditor::create(*this, *la);

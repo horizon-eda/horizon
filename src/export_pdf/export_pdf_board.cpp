@@ -62,7 +62,8 @@ void export_pdf(const class Board &brd, const class PDFExportSettings &settings,
             ca.set_layer_color(it.first, it.second.color);
         }
     }
-    std::sort(layers_sorted.begin(), layers_sorted.end());
+    std::sort(layers_sorted.begin(), layers_sorted.end(),
+              [&brd](const auto a, const auto b) { return brd.get_layer_position(a) < brd.get_layer_position(b); });
     if (settings.reverse_layers)
         std::reverse(layers_sorted.begin(), layers_sorted.end());
 

@@ -56,9 +56,10 @@ RuleMatchEditor *RuleEditor::create_rule_match_editor(const char *into, RuleMatc
 LayerComboBox *RuleEditor::create_layer_combo(int &layer, bool show_any)
 {
     auto layer_combo = Gtk::manage(new LayerComboBox);
-    for (const auto &it : core.get_layer_provider().get_layers()) {
-        if (it.second.copper)
-            layer_combo->prepend(it.second);
+    auto layers_sorted = core.get_layer_provider().get_layers_sorted(LayerProvider::LayerSortOrder::BOTTOM_TO_TOP);
+    for (const auto &it : layers_sorted) {
+        if (it.copper)
+            layer_combo->prepend(it);
     }
     if (show_any) {
         Layer layer_any(10000, "Any layer");

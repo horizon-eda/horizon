@@ -2,6 +2,7 @@
 #include <gtkmm.h>
 #include "common/common.hpp"
 #include "util/changeable.hpp"
+#include "common/layer.hpp"
 #include <set>
 namespace horizon {
 
@@ -46,5 +47,7 @@ private:
     int work_layer = 0;
     void update_filter();
     bool work_layer_only_before_force = false;
+
+    std::map<int, Layer> last_layers;
 };
 } // namespace horizon

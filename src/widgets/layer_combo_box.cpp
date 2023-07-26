@@ -62,8 +62,8 @@ void LayerComboBox::prepend(const Layer &layer)
     auto &prefs = PreferencesProvider::get_prefs();
     const auto &colors = prefs.canvas_layer.appearance.layer_colors;
     Gdk::RGBA rgba;
-    if (colors.count(layer.index) && layer.index != 10000) {
-        rgba = rgba_from_color(colors.at(layer.index));
+    if (colors.count(layer.color_layer) && layer.index != 10000) {
+        rgba = rgba_from_color(colors.at(layer.color_layer));
     }
     else {
         rgba.set_alpha(0);

@@ -71,6 +71,7 @@ public:
     {
         return false;
     };
+    LayerProvider &get_layer_provider() const;
 
 protected:
     MainWindow *main_window;

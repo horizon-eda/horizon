@@ -1249,22 +1249,10 @@ void ImpBase::add_hamburger_menu()
 void ImpBase::layer_up_down(bool up)
 {
     int wl = canvas->property_work_layer();
-    auto layers = core->get_layer_provider().get_layers();
-    std::vector<int> layer_indexes;
-    layer_indexes.reserve(layers.size());
-    std::transform(layers.begin(), layers.end(), std::back_inserter(layer_indexes),
-                   [](const auto &x) { return x.first; });
-
-    int idx = std::find(layer_indexes.begin(), layer_indexes.end(), wl) - layer_indexes.begin();
-    if (up) {
-        idx++;
-    }
-    else {
-        idx--;
-    }
-    if (idx >= 0 && idx < (int)layers.size()) {
-        canvas->property_work_layer() = layer_indexes.at(idx);
-    }
+    const auto next_layer = core->get_layer_provider().get_adjacent_layer(wl, up ? 1 : -1);
+    if (next_layer == wl)
+        return;
+    canvas->property_work_layer() = next_layer;
 }
 
 void ImpBase::goto_layer(int layer)
@@ -1851,6 +1839,11 @@ ActionToolID ImpBase::get_doubleclick_action(ObjectType type, const UUID &uu)
     default:
         return {};
     }
+}
+
+LayerProvider &ImpBase::get_layer_provider() const
+{
+    return core->get_layer_provider();
 }
 
 std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpBase::get_selection_filter_info() const

@@ -497,9 +497,7 @@ void Core::layers_to_meta(PropertyMeta &meta)
     PropertyMetaLayers &m = dynamic_cast<PropertyMetaLayers &>(meta);
     m.layers.clear();
     const auto &prv = get_layer_provider();
-    for (const auto &it : prv.get_layers()) {
-        m.layers.emplace(it.first, it.second);
-    }
+    m.layers = prv.get_layers_sorted(LayerProvider::LayerSortOrder::BOTTOM_TO_TOP);
     m.is_visible = prv.get_layers().size() > 1;
 }
 

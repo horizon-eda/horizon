@@ -40,6 +40,7 @@ public:
 private:
     class LayerProvider &lp;
     Appearance appearance;
+    void update_colors();
 
     Gtk::ListBox *lb = nullptr;
 

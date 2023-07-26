@@ -248,8 +248,8 @@ void PropertyEditorLayer::reload()
     ScopedBlock block(connections);
     combo->remove_all();
     for (const auto &it : my_meta.layers) {
-        if (!copper_only || it.second.copper)
-            combo->prepend(it.second);
+        if (!copper_only || it.copper)
+            combo->prepend(it);
     }
     combo->set_active_layer(value.value);
 }
@@ -444,9 +444,9 @@ void PropertyEditorLayerRange::reload()
     combo_start->remove_all();
     combo_end->remove_all();
     for (const auto &it : my_meta.layers) {
-        if (it.second.copper) {
-            combo_start->prepend(it.second);
-            combo_end->prepend(it.second);
+        if (it.copper) {
+            combo_start->prepend(it);
+            combo_end->prepend(it);
         }
     }
     combo_start->set_active_layer(value.value.start());

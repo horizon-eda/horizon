@@ -4,6 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "bitmap_font_util.hpp"
 #include <range/v3/view.hpp>
+#include "common/layer_provider.hpp"
 
 namespace horizon {
 
@@ -299,7 +300,7 @@ void TriangleRenderer::render_layer_batch(int layer, HighlightMode highlight_mod
                 if (ca.appearance.colors.count(k))
                     buf.colors[i] = apply_highlight(ca.appearance.colors.at(k), highlight_mode, layer);
             }
-            auto lc = ca.get_layer_color(layer);
+            auto lc = ca.get_layer_color(ca.layer_provider ? ca.layer_provider->get_color_layer(layer) : layer);
             buf.colors[static_cast<int>(ColorP::AIRWIRE_ROUTER)] =
                     gl_array_from_color(ca.appearance.colors.at(ColorP::AIRWIRE_ROUTER));
             buf.colors[static_cast<int>(ColorP::FROM_LAYER)] = apply_highlight(lc, highlight_mode, layer);
@@ -369,7 +370,15 @@ void TriangleRenderer::render()
         if (ca.get_layer_display(it.first).visible)
             layers.push_back(it.first);
     }
-    std::sort(layers.begin(), layers.end());
+
+    if (ca.layer_provider) {
+        std::sort(layers.begin(), layers.end(), [this](auto la, auto lb) {
+            return ca.layer_provider->get_layer_position(la) < ca.layer_provider->get_layer_position(lb);
+        });
+    }
+    else {
+        std::sort(layers.begin(), layers.end());
+    }
     if (ca.work_layer < 0) {
         std::reverse(layers.begin(), layers.end());
     }

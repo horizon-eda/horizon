@@ -54,6 +54,6 @@ private:
 
 
     void export_thread(PDFExportSettings settings);
-    unsigned int n_layers = 0;
+    std::map<int, class Layer> last_layers;
 };
 } // namespace horizon

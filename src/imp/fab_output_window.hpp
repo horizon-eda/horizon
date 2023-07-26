@@ -100,6 +100,6 @@ private:
     void update_blind_buried_drills();
     void reload_drills();
 
-    unsigned int n_layers = 0;
+    std::map<int, class Layer> last_layers;
 };
 } // namespace horizon

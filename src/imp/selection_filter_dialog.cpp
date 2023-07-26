@@ -4,6 +4,8 @@
 #include "canvas/selection_filter.hpp"
 #include "imp/imp.hpp"
 #include "board/board_layers.hpp"
+#include "common/layer_provider.hpp"
+#include "common/layer.hpp"
 
 namespace horizon {
 
@@ -355,7 +357,7 @@ void SelectionFilterDialog::connect_doubleclick(Gtk::CheckButton *cb)
 
 Gtk::CheckButton *SelectionFilterDialog::add_layer_button(ObjectType type, int layer, int index, bool active)
 {
-    auto cbl = Gtk::manage(new Gtk::CheckButton(BoardLayers::get_layer_name(layer)));
+    auto cbl = Gtk::manage(new Gtk::CheckButton(imp.get_layer_provider().get_layers().at(layer).name));
     cbl->property_margin() = 3;
     cbl->set_margin_start(sub_margin);
     checkbuttons[type].layer_buttons[layer] = cbl;
@@ -375,32 +377,30 @@ Gtk::CheckButton *SelectionFilterDialog::add_layer_button(ObjectType type, int l
 
 void SelectionFilterDialog::update_layers()
 {
+    auto &layers = imp.get_layer_provider().get_layers();
+    if (layers == last_layers)
+        return;
+    else
+        last_layers = layers;
+
     auto info = imp.get_selection_filter_info();
     for (auto &it_type : checkbuttons) {
-        std::set<int> layers_current;
-        std::set<int> layers_new;
-        std::transform(it_type.second.layer_buttons.begin(), it_type.second.layer_buttons.end(),
-                       std::inserter(layers_current, layers_current.begin()), [](auto &x) { return x.first; });
-        std::transform(info.at(it_type.first).layers.begin(), info.at(it_type.first).layers.end(),
-                       std::inserter(layers_new, layers_new.begin()), [](auto &x) { return x; });
-        if (layers_new != layers_current) {
-            std::map<int, bool> state;
-            for (auto &it : it_type.second.layer_buttons) {
-                state[it.first] = it.second->get_active();
-                delete it.second->get_parent();
-            }
-            it_type.second.layer_buttons.clear();
-            auto inf = info.at(it_type.first);
-            int index = dynamic_cast<Gtk::ListBoxRow *>(it_type.second.checkbutton->get_ancestor(GTK_TYPE_LIST_BOX_ROW))
-                                ->get_index();
-            for (auto layer : inf.layers) {
-                index++;
-                bool active = true;
-                if (state.count(layer))
-                    active = state.at(layer);
-                auto cb = add_layer_button(it_type.first, layer, index, active);
-                cb->get_parent()->set_visible(it_type.second.expanded);
-            }
+        std::map<int, bool> state;
+        for (auto &it : it_type.second.layer_buttons) {
+            state[it.first] = it.second->get_active();
+            delete it.second->get_parent();
+        }
+        it_type.second.layer_buttons.clear();
+        auto inf = info.at(it_type.first);
+        int index = dynamic_cast<Gtk::ListBoxRow *>(it_type.second.checkbutton->get_ancestor(GTK_TYPE_LIST_BOX_ROW))
+                            ->get_index();
+        for (auto layer : inf.layers) {
+            index++;
+            bool active = true;
+            if (state.count(layer))
+                active = state.at(layer);
+            auto cb = add_layer_button(it_type.first, layer, index, active);
+            cb->get_parent()->set_visible(it_type.second.expanded);
         }
     }
 }

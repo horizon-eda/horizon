@@ -122,6 +122,6 @@ public:
 class PropertyMetaLayers : public PropertyMeta {
 public:
     using PropertyMeta::PropertyMeta;
-    std::map<int, Layer> layers;
+    std::vector<Layer> layers;
 };
 } // namespace horizon

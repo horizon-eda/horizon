@@ -205,6 +205,7 @@ public:
     }
 
     void set_force_visible(bool v);
+    void set_name(const std::string &n);
 
 private:
     Gtk::Label *name_label = nullptr;
@@ -267,6 +268,11 @@ void LayerBoxRow::set_force_visible(bool v)
     update_image();
 }
 
+void LayerBoxRow::set_name(const std::string &n)
+{
+    name_label->set_text(n);
+}
+
 LayerBox::LayerBox(LayerProvider &lpr, bool show_title)
     : Glib::ObjectBase(typeid(LayerBox)), Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 2), lp(lpr),
       p_property_work_layer(*this, "work-layer"), p_property_layer_opacity(*this, "layer-opacity"),
@@ -289,10 +295,18 @@ LayerBox::LayerBox(LayerProvider &lpr, bool show_title)
 
     lb = Gtk::manage(new Gtk::ListBox);
     lb->set_selection_mode(Gtk::SELECTION_BROWSE);
-    lb->set_sort_func([](Gtk::ListBoxRow *a, Gtk::ListBoxRow *b) {
+    lb->set_sort_func([this](Gtk::ListBoxRow *a, Gtk::ListBoxRow *b) {
         auto ra = dynamic_cast<LayerBoxRow *>(a->get_child());
         auto rb = dynamic_cast<LayerBoxRow *>(b->get_child());
-        return rb->layer - ra->layer;
+        auto &layers = lp.get_layers();
+        const auto pa = layers.at(ra->layer).position;
+        const auto pb = layers.at(rb->layer).position;
+        if (pa < pb)
+            return 1;
+        else if (pa > pb)
+            return -1;
+        else
+            return 0;
     });
     lb->signal_row_selected().connect([this](Gtk::ListBoxRow *lrow) {
         if (lrow) {
@@ -409,7 +423,15 @@ void LayerBox::update()
             lr->show();
         }
     }
+    lb->invalidate_sort();
     update_work_layer();
+    update_colors();
+
+    for (auto ch : lb->get_children()) {
+        auto lrow = dynamic_cast<Gtk::ListBoxRow *>(ch);
+        auto row = dynamic_cast<LayerBoxRow *>(lrow->get_child());
+        row->set_name(layers.at(row->layer).name);
+    }
 }
 
 // clang-format off
@@ -497,14 +519,20 @@ void LayerBox::set_layer_display(int layer, const LayerDisplay &ld)
 void LayerBox::set_appearance(const Appearance &a)
 {
     appearance = a;
+    update_colors();
+}
+
+void LayerBox::update_colors()
+{
     auto layers = lb->get_children();
     for (auto ch : layers) {
         auto lrow = dynamic_cast<Gtk::ListBoxRow *>(ch);
         auto row = dynamic_cast<LayerBoxRow *>(lrow->get_child());
         if (appearance.layer_colors.count(row->layer)) {
-            const auto &c = appearance.layer_colors.at(row->layer);
+            const auto &c = appearance.layer_colors.at(lp.get_color_layer(row->layer));
             row->ld_button->set_color(c);
         }
     }
 }
+
 } // namespace horizon

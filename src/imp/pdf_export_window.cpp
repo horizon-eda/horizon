@@ -186,10 +186,11 @@ PDFExportWindow::PDFExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 
 void PDFExportWindow::reload_layers()
 {
-    if (n_layers == settings.layers.size())
+    auto &layers = core.get_layer_provider().get_layers();
+    if (last_layers == layers)
         return;
     else
-        n_layers = settings.layers.size();
+        last_layers = layers;
 
     {
         auto children = layers_box->get_children();
@@ -201,8 +202,10 @@ void PDFExportWindow::reload_layers()
     for (auto &la : settings.layers) {
         layers_sorted.push_back(&la.second);
     }
-    std::sort(layers_sorted.begin(), layers_sorted.end(),
-              [](const auto a, const auto b) { return b->layer < a->layer; });
+    std::sort(layers_sorted.begin(), layers_sorted.end(), [this](const auto a, const auto b) {
+        return core.get_layer_provider().get_layer_position(b->layer)
+               < core.get_layer_provider().get_layer_position(a->layer);
+    });
 
     for (auto la : layers_sorted) {
         auto ed = PDFLayerEditor::create(*this, *la);
