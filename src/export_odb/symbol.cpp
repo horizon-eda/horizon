@@ -4,9 +4,9 @@
 #include "export_util/tree_writer.hpp"
 
 namespace horizon::ODB {
-Symbol::Symbol(const Padstack &ps, int layer)
+Symbol::Symbol(const Padstack &ps, int layer, const LayerProvider &lprv)
 {
-    name = "_" + make_legal_entity_name(ps.name) + "_" + get_layer_name(layer);
+    name = "_" + make_legal_entity_name(ps.name) + "_" + get_layer_name(layer, lprv);
     for (const auto &[uu, shape] : ps.shapes) {
         if (layer == shape.layer)
             features.draw_shape(shape);

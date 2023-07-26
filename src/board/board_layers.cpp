@@ -67,20 +67,55 @@ std::string BoardLayers::get_layer_name(int l)
 
     case BOTTOM_NOTES:
         return "Bottom Notes";
+
+    case USER1:
+    case USER2:
+    case USER3:
+    case USER4:
+    case USER5:
+    case USER6:
+    case USER7:
+    case USER8:
+        return "User " + std::to_string(l - FIRST_USER_LAYER + 1);
     }
     return "Invalid layer " + std::to_string(l);
 }
 
 static const std::vector<int> layers = {
-        BoardLayers::TOP_NOTES,        BoardLayers::OUTLINE_NOTES,  BoardLayers::L_OUTLINE,
-        BoardLayers::TOP_COURTYARD,    BoardLayers::TOP_ASSEMBLY,   BoardLayers::TOP_PACKAGE,
-        BoardLayers::TOP_PASTE,        BoardLayers::TOP_SILKSCREEN, BoardLayers::TOP_MASK,
-        BoardLayers::TOP_COPPER,       BoardLayers::IN1_COPPER,     BoardLayers::IN2_COPPER,
-        BoardLayers::IN3_COPPER,       BoardLayers::IN4_COPPER,     BoardLayers::IN5_COPPER,
-        BoardLayers::IN6_COPPER,       BoardLayers::IN7_COPPER,     BoardLayers::IN8_COPPER,
-        BoardLayers::BOTTOM_COPPER,    BoardLayers::BOTTOM_MASK,    BoardLayers::BOTTOM_SILKSCREEN,
-        BoardLayers::BOTTOM_PASTE,     BoardLayers::BOTTOM_PACKAGE, BoardLayers::BOTTOM_ASSEMBLY,
-        BoardLayers::BOTTOM_COURTYARD, BoardLayers::BOTTOM_NOTES,
+        BoardLayers::TOP_NOTES,
+        BoardLayers::OUTLINE_NOTES,
+        BoardLayers::L_OUTLINE,
+        BoardLayers::TOP_COURTYARD,
+        BoardLayers::TOP_ASSEMBLY,
+        BoardLayers::TOP_PACKAGE,
+        BoardLayers::TOP_PASTE,
+        BoardLayers::TOP_SILKSCREEN,
+        BoardLayers::TOP_MASK,
+        BoardLayers::TOP_COPPER,
+        BoardLayers::IN1_COPPER,
+        BoardLayers::IN2_COPPER,
+        BoardLayers::IN3_COPPER,
+        BoardLayers::IN4_COPPER,
+        BoardLayers::IN5_COPPER,
+        BoardLayers::IN6_COPPER,
+        BoardLayers::IN7_COPPER,
+        BoardLayers::IN8_COPPER,
+        BoardLayers::BOTTOM_COPPER,
+        BoardLayers::BOTTOM_MASK,
+        BoardLayers::BOTTOM_SILKSCREEN,
+        BoardLayers::BOTTOM_PASTE,
+        BoardLayers::BOTTOM_PACKAGE,
+        BoardLayers::BOTTOM_ASSEMBLY,
+        BoardLayers::BOTTOM_COURTYARD,
+        BoardLayers::BOTTOM_NOTES,
+        BoardLayers::USER1,
+        BoardLayers::USER2,
+        BoardLayers::USER3,
+        BoardLayers::USER4,
+        BoardLayers::USER5,
+        BoardLayers::USER6,
+        BoardLayers::USER7,
+        BoardLayers::USER8,
 };
 
 const std::vector<int> &BoardLayers::get_layers()

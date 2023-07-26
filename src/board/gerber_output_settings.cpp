@@ -96,8 +96,9 @@ void GerberOutputSettings::update_for_board(const Board &brd)
     add_layer(BoardLayers::TOP_MASK);
     add_layer(BoardLayers::TOP_COPPER);
     for (const auto &la : layers_from_board) {
-        if (BoardLayers::is_copper(la.first) && la.first > BoardLayers::BOTTOM_COPPER
-            && la.first < BoardLayers::TOP_COPPER)
+        if ((BoardLayers::is_copper(la.first) && la.first > BoardLayers::BOTTOM_COPPER
+             && la.first < BoardLayers::TOP_COPPER)
+            || BoardLayers::is_user(la.first))
             add_layer(la.first);
     }
     add_layer(BoardLayers::BOTTOM_COPPER);

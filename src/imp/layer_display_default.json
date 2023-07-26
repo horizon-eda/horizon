@@ -104,6 +104,38 @@
 	"60": {
 		"display_mode": "outline",
 		"visible": true
+	},
+	"1000": {
+		"display_mode": "fill",
+		"visible": true
+	},
+	"1001": {
+		"display_mode": "fill",
+		"visible": true
+	},
+	"1002": {
+		"display_mode": "fill",
+		"visible": true
+	},
+	"1003": {
+		"display_mode": "fill",
+		"visible": true
+	},
+	"1004": {
+		"display_mode": "fill",
+		"visible": true
+	},
+	"1005": {
+		"display_mode": "fill",
+		"visible": true
+	},
+	"1006": {
+		"display_mode": "fill",
+		"visible": true
+	},
+	"1007": {
+		"display_mode": "fill",
+		"visible": true
 	}
 }
 }

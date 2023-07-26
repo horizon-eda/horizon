@@ -22,6 +22,7 @@ class Polygon;
 class Package;
 class Pad;
 class BoardPackage;
+class LayerProvider;
 } // namespace horizon
 
 namespace horizon::ODB {
@@ -70,6 +71,8 @@ public:
             ROUT,
             DOCUMENT,
             COMPONENT,
+            MASK,
+            CONDUCTIVE_PASTE,
         };
         Type type;
         struct Span {
@@ -77,6 +80,19 @@ public:
             std::string end;
         };
         std::optional<Span> span;
+
+        enum class Subtype {
+            COVERLAY,
+            COVERCOAT,
+            STIFFENER,
+            BEND_AREA,
+            FLEX_AREA,
+            RIGID_AREA,
+            PSA,
+            SILVER_MASK,
+            CARBON_MASK,
+        };
+        std::optional<Subtype> add_type;
 
         Polarity polarity = Polarity::POSITIVE;
     };
@@ -105,7 +121,7 @@ public:
     std::map<SymbolKey, Symbol> symbols;
     std::set<std::string> symbol_names;
 
-    std::string get_or_create_symbol(const Padstack &ps, int layer);
+    std::string get_or_create_symbol(const Padstack &ps, int layer, const LayerProvider &lprv);
 
     void write(TreeWriter &writer) const;
 };

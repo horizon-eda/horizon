@@ -16,35 +16,39 @@ namespace horizon {
 
 
 struct Context {
-    Context(const Board &brd) : canvas(job, brd)
+    Context(const Board &abrd) : canvas(job, abrd), brd(abrd)
     {
     }
     ODB::Job job;
     CanvasODB canvas;
 
     auto &add_layer(const std::string &step_name, int layer_n, ODB::Matrix::Layer::Context context,
-                    ODB::Matrix::Layer::Type type)
+                    ODB::Matrix::Layer::Type type, std::optional<ODB::Matrix::Layer::Subtype> add_type = std::nullopt)
     {
-        const auto name = ODB::get_layer_name(layer_n);
+        const auto name = ODB::get_layer_name(layer_n, brd);
         auto &layer = job.add_matrix_layer(name);
         layer.context = context;
         layer.type = type;
+        layer.add_type = add_type;
         canvas.layer_features.emplace(layer_n, &job.steps.at(step_name).layer_features.at(name));
         return layer;
     }
 
     auto &add_drill_layer(const std::string &step_name, const LayerRange &span)
     {
-        const auto name = ODB::get_drills_layer_name(span);
+        const auto name = ODB::get_drills_layer_name(span, brd);
 
         auto &layer = job.add_matrix_layer(name);
         layer.context = ODB::Matrix::Layer::Context::BOARD;
         layer.type = ODB::Matrix::Layer::Type::DRILL;
-        layer.span = {ODB::get_layer_name(span.end()), ODB::get_layer_name(span.start())};
+        layer.span = {ODB::get_layer_name(span.end(), brd), ODB::get_layer_name(span.start(), brd)};
 
         canvas.drill_features.emplace(span, &job.steps.at(step_name).layer_features.at(name));
         return layer;
     }
+
+private:
+    const Board &brd;
 };
 
 static std::string get_step_name(const Block &block)
@@ -100,30 +104,86 @@ void export_odb(const Board &brd, const ODBOutputSettings &settings)
         step.comp_top.emplace();
     }
 
-    // paste top
-    ctx.add_layer(step_name, BoardLayers::TOP_PASTE, OLayer::Context::BOARD, OLayer::Type::SOLDER_PASTE);
+    const auto layers_sorted = brd.get_layers_sorted(Board::LayerSortOrder::TOP_TO_BOTTOM);
+    for (const auto &layer : layers_sorted) {
+        bool add_layer = false;
+        auto type = OLayer::Type::DOCUMENT;
+        auto context = OLayer::Context::BOARD;
+        std::optional<OLayer::Subtype> add_type;
+        switch (layer.index) {
+        case BoardLayers::TOP_PASTE:
+        case BoardLayers::BOTTOM_PASTE:
+            add_layer = true;
+            type = OLayer::Type::SOLDER_PASTE;
+            break;
 
-    // silk top
-    ctx.add_layer(step_name, BoardLayers::TOP_SILKSCREEN, OLayer::Context::BOARD, OLayer::Type::SILK_SCREEN);
+        case BoardLayers::TOP_SILKSCREEN:
+        case BoardLayers::BOTTOM_SILKSCREEN:
+            add_layer = true;
+            type = OLayer::Type::SILK_SCREEN;
+            break;
 
-    // mask top
-    ctx.add_layer(step_name, BoardLayers::TOP_MASK, OLayer::Context::BOARD, OLayer::Type::SOLDER_MASK);
+        case BoardLayers::TOP_MASK:
+        case BoardLayers::BOTTOM_MASK:
+            add_layer = true;
+            type = OLayer::Type::SOLDER_MASK;
+            break;
 
-    // copper(signal) layers
-    ctx.add_layer(step_name, BoardLayers::TOP_COPPER, OLayer::Context::BOARD, OLayer::Type::SIGNAL);
-    for (unsigned int i = 0; i < brd.get_n_inner_layers(); i++) {
-        ctx.add_layer(step_name, -((int)i) - 1, OLayer::Context::BOARD, OLayer::Type::SIGNAL);
+        default:
+            if (BoardLayers::is_copper(layer.index)) {
+                add_layer = true;
+                type = OLayer::Type::SIGNAL;
+            }
+            else if (BoardLayers::is_user(layer.index)) {
+                add_layer = true;
+                switch (brd.get_user_layers().at(layer.index).type) {
+                case Board::UserLayer::Type::BEND_AREA:
+                    type = OLayer::Type::MASK;
+                    add_type = OLayer::Subtype::BEND_AREA;
+                    break;
+                case Board::UserLayer::Type::FLEX_AREA:
+                    type = OLayer::Type::MASK;
+                    add_type = OLayer::Subtype::FLEX_AREA;
+                    break;
+                case Board::UserLayer::Type::RIGID_AREA:
+                    type = OLayer::Type::MASK;
+                    add_type = OLayer::Subtype::RIGID_AREA;
+                    break;
+                case Board::UserLayer::Type::COVERCOAT:
+                    type = OLayer::Type::SOLDER_MASK;
+                    add_type = OLayer::Subtype::COVERCOAT;
+                    break;
+                case Board::UserLayer::Type::COVERLAY:
+                    type = OLayer::Type::SOLDER_MASK;
+                    add_type = OLayer::Subtype::COVERLAY;
+                    break;
+                case Board::UserLayer::Type::PSA:
+                    type = OLayer::Type::MASK;
+                    add_type = OLayer::Subtype::PSA;
+                    break;
+                case Board::UserLayer::Type::SILVER_MASK:
+                    type = OLayer::Type::CONDUCTIVE_PASTE;
+                    add_type = OLayer::Subtype::SILVER_MASK;
+                    break;
+                case Board::UserLayer::Type::CARBON_MASK:
+                    type = OLayer::Type::CONDUCTIVE_PASTE;
+                    add_type = OLayer::Subtype::CARBON_MASK;
+                    break;
+                case Board::UserLayer::Type::STIFFENER:
+                    type = OLayer::Type::MASK;
+                    add_type = OLayer::Subtype::STIFFENER;
+                    break;
+                case Board::UserLayer::Type::DOCUMENTATION:
+                    type = OLayer::Type::DOCUMENT;
+                    context = OLayer::Context::MISC;
+                    break;
+                }
+            }
+        }
+
+        if (add_layer)
+            ctx.add_layer(step_name, layer.index, context, type, add_type);
     }
-    ctx.add_layer(step_name, BoardLayers::BOTTOM_COPPER, OLayer::Context::BOARD, OLayer::Type::SIGNAL);
-
-    // mask bot
-    ctx.add_layer(step_name, BoardLayers::BOTTOM_MASK, OLayer::Context::BOARD, OLayer::Type::SOLDER_MASK);
-
-    // silk bot
-    ctx.add_layer(step_name, BoardLayers::BOTTOM_SILKSCREEN, OLayer::Context::BOARD, OLayer::Type::SILK_SCREEN);
-
-    // paste bot
-    ctx.add_layer(step_name, BoardLayers::BOTTOM_PASTE, OLayer::Context::BOARD, OLayer::Type::SOLDER_PASTE);
 
     // comp bot
     if (have_bottom_comp) {

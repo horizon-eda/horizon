@@ -43,7 +43,7 @@ const LutEnumStr<Board::OutputFormat> Board::output_format_lut = {
         {"odb", Board::OutputFormat::ODB},
 };
 
-static const unsigned int app_version = 20;
+static const unsigned int app_version = 21;
 
 unsigned int Board::get_app_version()
 {
@@ -60,6 +60,14 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool, const st
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             int l = std::stoi(it.key());
             stackup.emplace(std::piecewise_construct, std::forward_as_tuple(l), std::forward_as_tuple(l, it.value()));
+        }
+    }
+    if (j.count("user_layers")) {
+        const json &o = j["user_layers"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            int l = std::stoi(it.key());
+            user_layers.emplace(std::piecewise_construct, std::forward_as_tuple(l),
+                                std::forward_as_tuple(l, it.value()));
         }
     }
     set_n_inner_layers(n_inner_layers);
@@ -369,7 +377,7 @@ Board::Board(const Board &brd, CopyMode copy_mode)
       grid_settings(brd.grid_settings), airwires(brd.airwires), stackup(brd.stackup), colors(brd.colors),
       pdf_export_settings(brd.pdf_export_settings), step_export_settings(brd.step_export_settings),
       pnp_export_settings(brd.pnp_export_settings), version(brd.version), board_directory(brd.board_directory),
-      n_inner_layers(brd.n_inner_layers)
+      n_inner_layers(brd.n_inner_layers), user_layers(brd.user_layers)
 {
     if (copy_mode == CopyMode::DEEP) {
         packages = brd.packages;
@@ -510,6 +518,11 @@ unsigned int Board::get_n_inner_layers() const
 void Board::set_n_inner_layers(unsigned int n)
 {
     n_inner_layers = n;
+    update_layers();
+}
+
+void Board::update_layers()
+{
     layers.clear();
     layers = {{200, {200, "Top Notes"}},
               {BoardLayers::OUTLINE_NOTES, {BoardLayers::OUTLINE_NOTES, "Outline Notes"}},
@@ -539,10 +552,130 @@ void Board::set_n_inner_layers(unsigned int n)
         layers.emplace(std::make_pair(-j, Layer(-j, "Inner " + std::to_string(j), false, true)));
         stackup.emplace(-j, -j);
     }
+    for (const auto &[i, ul] : user_layers) {
+        auto &l = layers.emplace(std::piecewise_construct, std::forward_as_tuple(i), std::forward_as_tuple(i, ul.name))
+                          .first->second;
+        l.position = ul.position;
+        l.color_layer = ul.id_color;
+        stackup.emplace(i, i);
+    }
+    assign_user_layer_positions();
+
     map_erase_if(stackup, [this](const auto &x) { return layers.count(x.first) == 0; });
     gerber_output_settings.update_for_board(*this);
     odb_output_settings.update_for_board(*this);
     update_pdf_export_settings(pdf_export_settings);
+}
+
+unsigned int Board::count_available_user_layers() const
+{
+    return std::max(0, (int)BoardLayers::max_user_layers - (int)user_layers.size());
+}
+
+Board::UserLayer::UserLayer(int l)
+    : id(l), id_color(l), name("User Layer " + std::to_string(l - BoardLayers::FIRST_USER_LAYER)), position(l),
+      type(Type::DOCUMENTATION)
+{
+}
+
+static const LutEnumStr<Board::UserLayer::Type> user_layer_type_lut = {
+        {"documentation", Board::UserLayer::Type::DOCUMENTATION}, {"stiffener", Board::UserLayer::Type::STIFFENER},
+        {"bend_area", Board::UserLayer::Type::BEND_AREA},         {"flex_area", Board::UserLayer::Type::FLEX_AREA},
+        {"rigid_area", Board::UserLayer::Type::RIGID_AREA},       {"carbon_mask", Board::UserLayer::Type::CARBON_MASK},
+        {"silver_mask", Board::UserLayer::Type::SILVER_MASK},     {"covercoat", Board::UserLayer::Type::COVERCOAT},
+        {"coverlay", Board::UserLayer::Type::COVERLAY},           {"psa", Board::UserLayer::Type::PSA},
+};
+
+Board::UserLayer::UserLayer(int l, const json &j)
+    : id(l), id_color(j.value("id_color", l)), name(j.at("name").get<std::string>()),
+      position(j.at("position").get<double>()), type(user_layer_type_lut.lookup(j.at("type")))
+{
+}
+
+json Board::UserLayer::serialize() const
+{
+    json j;
+    j["name"] = name;
+    j["position"] = position;
+    j["id_color"] = id_color;
+    j["type"] = user_layer_type_lut.lookup_reverse(type);
+    return j;
+}
+
+int Board::add_user_layer(int other_layer, UserLayerOrder order)
+{
+    if (count_available_user_layers() < 1)
+        throw std::runtime_error("no more user layers available");
+    int user_layer;
+    for (user_layer = BoardLayers::FIRST_USER_LAYER; user_layer <= BoardLayers::LAST_USER_LAYER; user_layer++) {
+        if (user_layers.count(user_layer) == 0)
+            break;
+    }
+    if (user_layers.count(user_layer))
+        throw std::runtime_error("no more user layers available");
+
+
+    auto &ul = user_layers.emplace(user_layer, user_layer).first->second;
+    const double offset = 1.0 / (2 * BoardLayers::max_user_layers);
+    const auto other_pos = layers.at(other_layer).position;
+    ul.position = other_pos + offset * static_cast<int>(order);
+
+
+    update_layers();
+    return user_layer;
+}
+
+void Board::delete_user_layer(int layer)
+{
+    user_layers.erase(layer);
+    update_layers();
+}
+
+void Board::assign_user_layer_positions()
+{
+    const auto layers_sorted = get_layers_sorted(LayerSortOrder::BOTTOM_TO_TOP);
+    const double step = 1.0 / BoardLayers::max_user_layers;
+    double pos = BoardLayers::BOTTOM_NOTES - 1;
+    for (const auto &it : layers_sorted) {
+        if (BoardLayers::is_user(it.index)) {
+            pos += step;
+            layers.at(it.index).position = pos;
+            user_layers.at(it.index).position = pos;
+        }
+        else {
+            layers.at(it.index).position = it.index;
+            pos = it.index;
+        }
+    }
+}
+
+void Board::set_user_layer_name(int user_layer, const std::string &name)
+{
+    user_layers.at(user_layer).name = name;
+    update_layers();
+}
+
+void Board::set_user_layer_type(int user_layer, UserLayer::Type type)
+{
+    user_layers.at(user_layer).type = type;
+}
+
+void Board::set_user_layer_color(int user_layer, int color_layer)
+{
+    user_layers.at(user_layer).id_color = color_layer;
+}
+
+void Board::move_user_layer(int user_layer, int other_layer, UserLayerOrder pos)
+{
+    const double offset = 1.0 / (2 * BoardLayers::max_user_layers) * static_cast<int>(pos);
+    user_layers.at(user_layer).position = layers.at(other_layer).position + offset;
+    update_layers();
+}
+
+
+const std::map<int, Board::UserLayer> &Board::get_user_layers() const
+{
+    return user_layers;
 }
 
 void Board::update_pdf_export_settings(PDFExportSettings &settings)
@@ -573,9 +706,10 @@ void Board::update_pdf_export_settings(PDFExportSettings &settings)
     add_layer(BoardLayers::TOP_PACKAGE, false);
     add_layer(BoardLayers::TOP_COPPER, false);
     for (const auto &la : layers_from_board) {
-        if (BoardLayers::is_copper(la.first) && la.first > BoardLayers::BOTTOM_COPPER
-            && la.first < BoardLayers::TOP_COPPER)
-            add_layer(la.first, false);
+        if ((BoardLayers::is_copper(la.first) && la.first > BoardLayers::BOTTOM_COPPER
+             && la.first < BoardLayers::TOP_COPPER)
+            || BoardLayers::is_user(la.first))
+            add_layer(la.first, BoardLayers::is_user(la.first));
     }
     add_layer(BoardLayers::BOTTOM_COPPER, false);
     add_layer(BoardLayers::BOTTOM_MASK, false);
@@ -1212,6 +1346,12 @@ json Board::serialize() const
         j["net_ties"] = json::object();
         for (const auto &it : net_ties) {
             j["net_ties"][(std::string)it.first] = it.second.serialize();
+        }
+    }
+    if (user_layers.size()) {
+        j["user_layers"] = json::object();
+        for (const auto &it : user_layers) {
+            j["user_layers"][std::to_string(it.first)] = it.second.serialize();
         }
     }
     return j;

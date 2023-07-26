@@ -59,7 +59,7 @@ void CanvasODB::img_polygon(const Polygon &ipoly, bool tr)
             for (const auto &frag : plane->fragments) {
                 auto &surf = feats->add_surface();
                 eda_data->add_feature_id(*subnet, ODB::EDAData::FeatureID::Type::COPPER,
-                                         ODB::get_layer_name(plane->polygon->layer), surf.index);
+                                         ODB::get_layer_name(plane->polygon->layer, brd), surf.index);
 
                 Once is_outline;
                 for (const auto &path : frag.paths) {
@@ -105,7 +105,7 @@ void CanvasODB::img_line(const Coordi &p0, const Coordi &p1, const uint64_t widt
             if (ref.type == ObjectType::TRACK) {
                 if (track_subnets.count(ref.uuid))
                     eda_data->add_feature_id(*track_subnets.at(ref.uuid), ODB::EDAData::FeatureID::Type::COPPER,
-                                             ODB::get_layer_name(layer), feat->index);
+                                             ODB::get_layer_name(layer, brd), feat->index);
             }
         }
         if (text_current) {
@@ -155,14 +155,14 @@ void CanvasODB::img_padstack(const Padstack &padstack)
     }
     for (const auto layer : layers) {
         if (auto feats = get_layer_features(layer)) {
-            auto sym = job.get_or_create_symbol(padstack, layer);
+            auto sym = job.get_or_create_symbol(padstack, layer, brd);
             auto &pad = feats->draw_pad(sym, transform);
             switch (patch_type) {
             case PatchType::VIA: {
                 feats->add_attribute(pad, ODB::attribute::pad_usage::VIA);
                 if (subnet_via) {
                     eda_data->add_feature_id(*subnet_via, ODB::EDAData::FeatureID::Type::COPPER,
-                                             ODB::get_layer_name(layer), pad.index);
+                                             ODB::get_layer_name(layer, brd), pad.index);
                 }
             } break;
 
@@ -172,14 +172,14 @@ void CanvasODB::img_padstack(const Padstack &padstack)
                     feats->add_attribute(pad, ODB::attribute::smd{});
                 if (subnet_toep)
                     eda_data->add_feature_id(*subnet_toep, ODB::EDAData::FeatureID::Type::COPPER,
-                                             ODB::get_layer_name(layer), pad.index);
+                                             ODB::get_layer_name(layer, brd), pad.index);
                 break;
 
             case PatchType::PAD_TH:
                 feats->add_attribute(pad, ODB::attribute::pad_usage::TOEPRINT);
                 if (subnet_toep)
                     eda_data->add_feature_id(*subnet_toep, ODB::EDAData::FeatureID::Type::COPPER,
-                                             ODB::get_layer_name(layer), pad.index);
+                                             ODB::get_layer_name(layer, brd), pad.index);
                 break;
 
             default:;
@@ -214,7 +214,7 @@ void CanvasODB::img_hole(const Hole &hole)
                 if (ref.type == ObjectType::VIA) {
                     auto &subnet = *via_subnets.at(ref.uuid);
                     eda_data->add_feature_id(subnet, ODB::EDAData::FeatureID::Type::HOLE,
-                                             ODB::get_drills_layer_name(hole.span), pad.index);
+                                             ODB::get_drills_layer_name(hole.span, brd), pad.index);
                 }
             }
             feats.add_attribute(pad, ODB::attribute::drill::VIA);
@@ -223,7 +223,7 @@ void CanvasODB::img_hole(const Hole &hole)
             feats.add_attribute(pad, ODB::attribute::drill::PLATED);
             if (auto subnet_toep = get_subnet_toeprint())
                 eda_data->add_feature_id(*subnet_toep, ODB::EDAData::FeatureID::Type::COPPER,
-                                         ODB::get_drills_layer_name(hole.span), pad.index);
+                                         ODB::get_drills_layer_name(hole.span, brd), pad.index);
         }
         else {
             feats.add_attribute(pad, ODB::attribute::drill::NON_PLATED);
@@ -243,7 +243,7 @@ void CanvasODB::img_hole(const Hole &hole)
             feats.add_attribute(line, ODB::attribute::drill::PLATED);
             if (auto subnet_toep = get_subnet_toeprint())
                 eda_data->add_feature_id(*subnet_toep, ODB::EDAData::FeatureID::Type::HOLE,
-                                         ODB::get_drills_layer_name(hole.span), line.index);
+                                         ODB::get_drills_layer_name(hole.span, brd), line.index);
         }
         else {
             feats.add_attribute(line, ODB::attribute::drill::NON_PLATED);

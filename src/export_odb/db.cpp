@@ -34,13 +34,21 @@ namespace horizon::ODB {
 MAKE_ENUM_TO_STRING(Polarity)
 #undef ITEMS
 
-#define ITEMS X(SIGNAL), X(SOLDER_MASK), X(SILK_SCREEN), X(SOLDER_PASTE), X(DRILL), X(DOCUMENT), X(ROUT), X(COMPONENT)
+#define ITEMS                                                                                                          \
+    X(SIGNAL), X(SOLDER_MASK), X(SILK_SCREEN), X(SOLDER_PASTE), X(DRILL), X(DOCUMENT), X(ROUT), X(COMPONENT), X(MASK), \
+            X(CONDUCTIVE_PASTE)
 MAKE_ENUM_TO_STRING(Matrix::Layer::Type)
 #undef ITEMS
 
 
 #define ITEMS X(MISC), X(BOARD)
 MAKE_ENUM_TO_STRING(Matrix::Layer::Context)
+#undef ITEMS
+
+#define ITEMS                                                                                                          \
+    X(COVERLAY), X(COVERCOAT), X(STIFFENER), X(BEND_AREA), X(FLEX_AREA), X(RIGID_AREA), X(PSA), X(SILVER_MASK),        \
+            X(CARBON_MASK)
+MAKE_ENUM_TO_STRING(Matrix::Layer::Subtype)
 #undef ITEMS
 
 
@@ -121,7 +129,7 @@ void Step::write(TreeWriter &writer) const
     }
 }
 
-std::string Job::get_or_create_symbol(const Padstack &ps, int layer)
+std::string Job::get_or_create_symbol(const Padstack &ps, int layer, const LayerProvider &lprv)
 {
     // try to use built-in symbol first
     {
@@ -153,9 +161,9 @@ std::string Job::get_or_create_symbol(const Padstack &ps, int layer)
         return symbols.at(key).name;
     }
     else {
-        auto &sym =
-                symbols.emplace(std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(ps, layer))
-                        .first->second;
+        auto &sym = symbols.emplace(std::piecewise_construct, std::forward_as_tuple(key),
+                                    std::forward_as_tuple(ps, layer, lprv))
+                            .first->second;
         if (symbol_names.count(sym.name)) {
             const std::string name_orig = sym.name;
             unsigned int i = 1;
@@ -213,6 +221,8 @@ void Matrix::write(std::ostream &ost) const
         writer.write_line("ROW", layer.row);
         writer.write_line_enum("CONTEXT", layer.context);
         writer.write_line_enum("TYPE", layer.type);
+        if (layer.add_type.has_value())
+            writer.write_line_enum("ADD_TYPE", layer.add_type.value());
         writer.write_line("NAME", layer.name);
         writer.write_line_enum("POLARITY", layer.polarity);
         if (layer.span) {

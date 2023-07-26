@@ -339,3 +339,6 @@ box.imp-instance-path-bar         > label {
 .via-def-layer-box .via-def-layer:not(:last-child) {
   border-bottom: 1px solid @borders;
 }
+
+
+.stackup-editor box.horizontal.linked > *:not(:last-child) {border-right: 0px;}

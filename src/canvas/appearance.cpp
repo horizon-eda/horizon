@@ -67,6 +67,15 @@ Appearance::Appearance()
     layer_colors[BoardLayers::BOTTOM_COURTYARD] = {.5, .5, .5};
 
     layer_colors[BoardLayers::BOTTOM_NOTES] = {1, 1, 1};
+    layer_colors[BoardLayers::USER1] = {.25, 1, 1};
+    layer_colors[BoardLayers::USER2] = {.25, 1, 1};
+    layer_colors[BoardLayers::USER3] = {.25, 1, 1};
+    layer_colors[BoardLayers::USER4] = {.25, 1, 1};
+    layer_colors[BoardLayers::USER5] = {.25, 1, 1};
+    layer_colors[BoardLayers::USER6] = {.25, 1, 1};
+    layer_colors[BoardLayers::USER7] = {.25, 1, 1};
+    layer_colors[BoardLayers::USER8] = {.25, 1, 1};
+
     layer_colors[10000] = {1, 1, 1};
 }
 } // namespace horizon

@@ -1328,6 +1328,10 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpBoard::get_selection_filte
             layers_track.push_back(layer.index);
             layers_polygon.push_back(layer.index);
         }
+        if (BoardLayers::is_user(layer.index)) {
+            layers_line.push_back(layer.index);
+            layers_polygon.push_back(layer.index);
+        }
         switch (layer.index) {
         case BoardLayers::OUTLINE_NOTES:
             layers_line.push_back(layer.index);

@@ -139,6 +139,42 @@ public:
     };
     std::map<int, StackupLayer> stackup;
 
+
+    class UserLayer {
+    public:
+        UserLayer(int l, const json &j);
+        UserLayer(int l);
+        json serialize() const;
+
+        int id;
+        int id_color;
+        std::string name;
+        double position;
+        enum class Type {
+            DOCUMENTATION,
+            STIFFENER,
+            COVERLAY,
+            COVERCOAT,
+            BEND_AREA,
+            FLEX_AREA,
+            RIGID_AREA,
+            PSA,
+            SILVER_MASK,
+            CARBON_MASK
+        };
+        Type type;
+    };
+    const std::map<int, UserLayer> &get_user_layers() const;
+
+    enum class UserLayerOrder : int { ABOVE = 1, BELOW = -1 };
+    int add_user_layer(int other_layer, UserLayerOrder pos);
+    void delete_user_layer(int user_layer);
+    unsigned int count_available_user_layers() const;
+    void move_user_layer(int user_layer, int other_layer, UserLayerOrder pos);
+    void set_user_layer_name(int user_layer, const std::string &name);
+    void set_user_layer_type(int user_layer, UserLayer::Type type);
+    void set_user_layer_color(int user_layer, int layer_color);
+
     BoardColors colors;
     PDFExportSettings pdf_export_settings;
     STEPExportSettings step_export_settings;
@@ -197,6 +233,10 @@ private:
     Board(const Board &brd, CopyMode copy_mode);
     void expand_packages();
     Outline get_outline(bool with_errors) const;
+
+    std::map<int, UserLayer> user_layers;
+    void update_layers();
+    void assign_user_layer_positions();
 };
 
 inline Board::ExpandFlags operator|(Board::ExpandFlags a, Board::ExpandFlags b)

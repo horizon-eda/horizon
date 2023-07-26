@@ -3,6 +3,7 @@
 #include <glibmm/ustring.h>
 #include <glibmm/convert.h>
 #include "board/board_layers.hpp"
+#include "common/layer_provider.hpp"
 
 namespace horizon::ODB {
 
@@ -67,7 +68,7 @@ std::string make_legal_entity_name(const std::string &s)
     return out;
 }
 
-std::string get_layer_name(int id)
+std::string get_layer_name(int id, const LayerProvider &lprv)
 {
     if (id == BoardLayers::TOP_COPPER) {
         return "signal_top";
@@ -102,14 +103,17 @@ std::string get_layer_name(int id)
     else if (id == BoardLayers::BOTTOM_ASSEMBLY) {
         return "assembly_bottom";
     }
+    else if (BoardLayers::is_user(id)) {
+        return make_legal_entity_name(lprv.get_layer_name(id));
+    }
     else {
         return "layer_id_" + std::to_string(id);
     }
 }
 
-std::string get_drills_layer_name(const LayerRange &span)
+std::string get_drills_layer_name(const LayerRange &span, const LayerProvider &lprv)
 {
-    return "drills-" + get_layer_name(span.end()) + "-" + get_layer_name(span.start());
+    return "drills-" + get_layer_name(span.end(), lprv) + "-" + get_layer_name(span.start(), lprv);
 }
 
 std::string make_symbol_circle(uint64_t diameter)

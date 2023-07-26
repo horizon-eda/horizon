@@ -7,6 +7,16 @@ namespace horizon {
 class BoardLayers {
 public:
     enum Layer {
+        LAST_USER_LAYER = 1007,
+        FIRST_USER_LAYER = 1000,
+        USER1 = FIRST_USER_LAYER + 0,
+        USER2 = FIRST_USER_LAYER + 1,
+        USER3 = FIRST_USER_LAYER + 2,
+        USER4 = FIRST_USER_LAYER + 3,
+        USER5 = FIRST_USER_LAYER + 4,
+        USER6 = FIRST_USER_LAYER + 5,
+        USER7 = FIRST_USER_LAYER + 6,
+        USER8 = FIRST_USER_LAYER + 7,
         TOP_NOTES = 200,
         OUTLINE_NOTES = 110,
         L_OUTLINE = 100,
@@ -35,6 +45,8 @@ public:
         BOTTOM_NOTES = -200
     };
 
+    static const unsigned int max_user_layers = LAST_USER_LAYER - FIRST_USER_LAYER + 1;
+
     static const LayerRange layer_range_through;
 
     static bool is_copper(int l)
@@ -50,6 +62,11 @@ public:
     static bool is_silkscreen(int l)
     {
         return l == TOP_SILKSCREEN || l == BOTTOM_SILKSCREEN;
+    }
+
+    static bool is_user(int l)
+    {
+        return l <= LAST_USER_LAYER && l >= FIRST_USER_LAYER;
     }
 
     static const unsigned int max_inner_layers;
