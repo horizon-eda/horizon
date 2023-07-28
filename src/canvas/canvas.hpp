@@ -20,6 +20,7 @@
 #include "util/vector_pair.hpp"
 #include "text_renderer.hpp"
 #include "show_via_span.hpp"
+#include "canvas_layer_provider.hpp"
 
 namespace horizon {
 class Canvas {
@@ -244,7 +245,7 @@ protected:
     std::vector<Target> targets;
     Target target_current;
 
-    const class LayerProvider *layer_provider = nullptr;
+    CanvasLayerProvider layer_provider;
     std::map<int, Color> layer_colors;
     Color get_layer_color(int layer) const;
     int work_layer = 0;

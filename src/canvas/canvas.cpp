@@ -201,7 +201,7 @@ void Canvas::add_triangle(int layer, const Coordf &p0, const Coordf &p1, const C
 void Canvas::update(const Symbol &sym, const Placement &tr, SymbolMode mode)
 {
     clear();
-    layer_provider = &sym;
+    layer_provider.update(sym);
     transform = tr;
     render(sym, mode);
     request_push();
@@ -210,7 +210,7 @@ void Canvas::update(const Symbol &sym, const Placement &tr, SymbolMode mode)
 void Canvas::update(const Sheet &sheet)
 {
     clear();
-    layer_provider = &sheet;
+    layer_provider.update(sheet);
     update_markers();
     render(sheet);
     request_push();
@@ -219,7 +219,7 @@ void Canvas::update(const Sheet &sheet)
 void Canvas::update(const Padstack &padstack, bool edit)
 {
     clear();
-    layer_provider = &padstack;
+    layer_provider.update(padstack);
     render(padstack, edit);
     request_push();
 }
@@ -227,7 +227,7 @@ void Canvas::update(const Padstack &padstack, bool edit)
 void Canvas::update(const Package &pkg, bool edit)
 {
     clear();
-    layer_provider = &pkg;
+    layer_provider.update(pkg);
     render(pkg, edit);
     request_push();
 }
@@ -235,14 +235,14 @@ void Canvas::update(const Package &pkg, bool edit)
 void Canvas::update(const Board &brd, PanelMode mode)
 {
     clear();
-    layer_provider = &brd;
+    layer_provider.update(brd);
     render(brd, true, mode);
     request_push();
 }
 void Canvas::update(const class Frame &fr, bool edit)
 {
     clear();
-    layer_provider = &fr;
+    layer_provider.update(fr);
     render(fr, !edit);
     request_push();
 }
@@ -250,7 +250,7 @@ void Canvas::update(const class Frame &fr, bool edit)
 void Canvas::update(const class Decal &dec, bool edit)
 {
     clear();
-    layer_provider = &dec;
+    layer_provider.update(dec);
     render(dec, edit);
     request_push();
 }
@@ -258,7 +258,7 @@ void Canvas::update(const class Decal &dec, bool edit)
 void Canvas::update(const class BlockSymbol &sym, bool edit)
 {
     clear();
-    layer_provider = &sym;
+    layer_provider.update(sym);
     render(sym, !edit);
     request_push();
 }

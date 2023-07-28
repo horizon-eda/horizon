@@ -778,7 +778,7 @@ void Canvas::render(const SchematicSymbol &sym)
 
 void Canvas::render(const Text &text, bool interactive, ColorP co)
 {
-    const bool rev = layer_provider->get_layers().at(text.layer).reverse;
+    const bool rev = layer_provider.get_layers().at(text.layer).reverse;
     img_patch_type(PatchType::TEXT);
     triangle_type_current = TriangleInfo::Type::TEXT;
     img_text(&text);

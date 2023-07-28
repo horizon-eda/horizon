@@ -313,6 +313,7 @@ src_common_ui = files(
 
 src_canvas = files(
     'src/canvas/canvas.cpp',
+    'src/canvas/canvas_layer_provider.cpp',
     'src/canvas/appearance.cpp',
     'src/canvas/render.cpp',
     'src/canvas/draw.cpp',
