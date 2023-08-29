@@ -573,6 +573,9 @@ bool CoreSchematic::get_property_meta(ObjectType type, const UUID &uu, ObjectPro
 
         case ObjectProperty::ID::NET_CLASS: {
             PropertyMetaNetClasses &m = dynamic_cast<PropertyMetaNetClasses &>(meta);
+            const auto &net = get_current_block()->nets.at(uu);
+            if (net.is_power)
+                meta.is_settable = current_block_is_top();
             m.net_classes.clear();
             for (const auto &it : get_current_block()->net_classes) {
                 m.net_classes.emplace(it.first, it.second.name);
