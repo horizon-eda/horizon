@@ -211,6 +211,19 @@ RulesCheckResult SymbolRules::check_symbol(const Symbol &sym) const
         }
     }
 
+    {
+        // Check unused junctions
+        for (const auto &[uu, junction] : sym.junctions) {
+            if (junction.connected_lines.size() == 0 && junction.connected_arcs.size() == 0) {
+                r.errors.emplace_back(RulesCheckErrorLevel::WARN);
+                auto &x = r.errors.back();
+                x.comment = "Junction has no connections";
+                x.has_location = true;
+                x.location = junction.position;
+            }
+        }
+    }
+
     r.update();
     return r;
 }
