@@ -921,7 +921,7 @@ resources = gnome.compile_resources(
   source_dir: 'src'
 )
 
-libhorizon = static_library('libhorizon',
+libhorizon = static_library('horizon',
     [src_common],
     dependencies: build_dependencies_libhorizon,
     include_directories: include_directories,
@@ -929,7 +929,7 @@ libhorizon = static_library('libhorizon',
     pic:false
 )
 
-libhorizonui = static_library('libhorizonui',
+libhorizonui = static_library('horizonui',
     [src_common_ui, src_canvas, src_canvas_gl, help_texts],
     dependencies: build_dependencies_libhorizonui,
     include_directories: include_directories,
