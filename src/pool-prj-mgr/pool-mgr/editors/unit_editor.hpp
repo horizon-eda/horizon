@@ -46,6 +46,9 @@ private:
     void sort();
     void handle_activate(class PinEditor *ed);
     void update_pin_count();
+    std::string guess_pin_name(const Pin *last_pin);
+    Pin *pin_at_index(int index);
+    int get_pin_index(const Pin *pin);
 
     SortHelper sort_helper;
     void load();
