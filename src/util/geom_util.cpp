@@ -181,4 +181,24 @@ Placement transform_text_placement_to_new_reference(Placement pl, Placement old_
     return out;
 }
 
+
+/**
+ * Determine original point that the arc rounded off. If the parameters are
+ * invalid or it cannot determine the proper value return false.
+ */
+bool revert_arc(Coordd &output, const Coordd &p0, const Coordd &p1, const Coordd &c)
+{
+    // The original center position is found by computing the intersection of
+    // lines defined by each arc point and their tangents. Tangents are of an
+    // arc perpendicular to vector to center.
+    const Coordd v0 = (p0 - c);
+    const Coordd v1 = (p1 - c);
+    double a = v0.cross(v1) > 0 ? M_PI / 2 : -M_PI / 2; // CW / CCW
+    const Coordd t0 = v0.rotate(a);
+    const Coordd t1 = v1.rotate(-a);
+    Segment<double> l0 = Segment<double>(p0, t0 + p0);
+    Segment<double> l1 = Segment<double>(p1, t1 + p1);
+    return l0.intersect(l1, output);
+}
+
 } // namespace horizon

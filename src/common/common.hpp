@@ -5,6 +5,7 @@
 #include <type_traits>
 #include <math.h>
 #include <array>
+#include <sstream>
 #include "lut.hpp"
 
 namespace horizon {
@@ -268,6 +269,13 @@ public:
     {
         return {x, y};
     }
+
+    std::string str() const
+    {
+        std::stringstream ss;
+        ss << "(" << x << ", " << y << ")";
+        return ss.str();
+    }
 };
 
 
@@ -332,5 +340,48 @@ struct shallow_copy_t {
 constexpr shallow_copy_t shallow_copy = shallow_copy_t();
 
 enum class CopyMode { DEEP, SHALLOW };
+
+
+template <typename T> class Segment {
+public:
+    Coord<T> from;
+    Coord<T> to;
+
+    Segment(Coord<T> a, Coord<T> b) : from(a), to(b)
+    {
+    }
+
+    bool intersect(const Segment<T> &other, Coord<T> &output) const
+    {
+        const T &x1 = from.x;
+        const T &y1 = from.y;
+        const T &x2 = to.x;
+        const T &y2 = to.y;
+        const T &x3 = other.from.x;
+        const T &y3 = other.from.y;
+        const T &x4 = other.to.x;
+        const T &y4 = other.to.y;
+
+        // See https://en.wikipedia.org/wiki/Line-line_intersection
+        double d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+        if (fabs(d) < 1e-6) {
+            return false; // Parallel or coincident
+        }
+        T a = (x1 * y2 - y1 * x2);
+        T b = (x3 * y4 - y3 * x4);
+        double x = (a * (x3 - x4) - (x1 - x2) * b) / d;
+        double y = (a * (y3 - y4) - (y1 - y2) * b) / d;
+        output.x = x;
+        output.y = y;
+        return true;
+    }
+
+    std::string str() const
+    {
+        std::stringstream ss;
+        ss << "Segment(from=" << from.str() << ", to=" << to.str() << ")";
+        return ss.str();
+    }
+};
 
 } // namespace horizon

@@ -11,7 +11,8 @@ namespace horizon {
 
 bool ToolRoundOffVertex::can_begin()
 {
-    return sel_count_type(selection, ObjectType::POLYGON_VERTEX) == 1;
+    return (sel_count_type(selection, ObjectType::POLYGON_VERTEX) == 1
+            || sel_count_type(selection, ObjectType::POLYGON_ARC_CENTER) == 1);
 }
 
 int ToolRoundOffVertex::wrap_index(int i) const
@@ -27,8 +28,10 @@ int ToolRoundOffVertex::wrap_index(int i) const
 ToolResponse ToolRoundOffVertex::begin(const ToolArgs &args)
 {
     int vertex_idx = 0;
+    editing = sel_has_type(selection, ObjectType::POLYGON_ARC_CENTER);
     {
-        auto x = sel_find_one(selection, ObjectType::POLYGON_VERTEX);
+        ObjectType type = editing ? ObjectType::POLYGON_ARC_CENTER : ObjectType::POLYGON_VERTEX;
+        auto x = sel_find_one(selection, type);
         poly = doc.r->get_polygon(x.uuid);
         vertex_idx = x.vertex;
     }
@@ -36,21 +39,38 @@ ToolResponse ToolRoundOffVertex::begin(const ToolArgs &args)
     auto v_next = wrap_index(vertex_idx + 1);
     auto v_prev = wrap_index(vertex_idx - 1);
 
-    if ((poly->vertices.at(vertex_idx).type == Polygon::Vertex::Type::ARC)
-        || (poly->vertices.at(v_prev).type == Polygon::Vertex::Type::ARC)) {
-        imp->tool_bar_flash("can't round off arc");
-        return ToolResponse::end();
+
+    if (editing) {
+        auto v_inserted = v_next; // Inserted vertex
+        v_next = wrap_index(vertex_idx + 2);
+
+        vxp = &poly->vertices.at(vertex_idx);
+        vxn = &poly->vertices.at(v_inserted);
+
+        if (!revert_arc(p0, vxp->position, vxn->position, vxp->arc_center)) {
+            imp->tool_bar_flash("can't undo arc");
+            return ToolResponse::end();
+        }
+    }
+    else {
+        if ((poly->vertices.at(vertex_idx).type == Polygon::Vertex::Type::ARC)
+            || (poly->vertices.at(v_prev).type == Polygon::Vertex::Type::ARC)) {
+            imp->tool_bar_flash("can't round off arc");
+            return ToolResponse::end();
+        }
+        p0 = poly->vertices.at(vertex_idx).position;
     }
 
     selection.clear();
 
-    p0 = poly->vertices.at(vertex_idx).position;
-    vn = (Coordd(poly->vertices.at(v_next).position) - p0).normalize();
-    vp = (Coordd(poly->vertices.at(v_prev).position) - p0).normalize();
+    Coordd p1 = poly->vertices.at(v_next).position;
+    Coordd p2 = poly->vertices.at(v_prev).position;
+
+    vn = (p1 - p0).normalize();
+    vp = (p2 - p0).normalize();
     vh = (vn + vp).normalize();
 
-    delta_max = std::min((poly->vertices.at(v_next).position - poly->vertices.at(vertex_idx).position).magd(),
-                         (poly->vertices.at(v_prev).position - poly->vertices.at(vertex_idx).position).magd());
+    delta_max = std::min((p1 - p0).mag(), (p2 - p0).mag());
     alpha = acos(vh.dot(vp));
     if (isnan(alpha) || (alpha > .99 * (M_PI / 2))) {
         imp->tool_bar_flash("can't round off collinear edges");
@@ -58,18 +78,20 @@ ToolResponse ToolRoundOffVertex::begin(const ToolArgs &args)
     }
     r_max = tan(alpha) * delta_max;
 
-    const bool rev = vn.cross(vp) < 0;
+    if (!editing) {
+        const bool rev = vn.cross(vp) < 0;
 
-    if (v_next == 0) {
-        poly->vertices.emplace_back(Coordi());
-        vxn = &poly->vertices.back();
+        if (v_next == 0) {
+            poly->vertices.emplace_back(Coordi());
+            vxn = &poly->vertices.back();
+        }
+        else {
+            vxn = &*poly->vertices.emplace(poly->vertices.begin() + v_next, Coordi());
+        }
+        vxp = &poly->vertices.at(vertex_idx);
+        vxp->type = Polygon::Vertex::Type::ARC;
+        vxp->arc_reverse = rev;
     }
-    else {
-        vxn = &*poly->vertices.emplace(poly->vertices.begin() + v_next, Coordi());
-    }
-    vxp = &poly->vertices.at(vertex_idx);
-    vxp->type = Polygon::Vertex::Type::ARC;
-    vxp->arc_reverse = rev;
 
     imp->set_snap_filter({{ObjectType::POLYGON, poly->uuid}});
 
@@ -122,7 +144,7 @@ ToolResponse ToolRoundOffVertex::update(const ToolArgs &args)
     else if (args.type == ToolEventType::ACTION) {
         switch (args.action) {
         case InToolActionID::LMB:
-            if (plane_finish())
+            if (commit())
                 return ToolResponse::commit();
             else
                 return ToolResponse::revert();
@@ -153,7 +175,7 @@ ToolResponse ToolRoundOffVertex::update(const ToolArgs &args)
             }
             else if (data->event == ToolDataWindow::Event::OK) {
                 imp->dialogs.close_nonmodal();
-                if (plane_finish())
+                if (commit())
                     return ToolResponse::commit();
                 else
                     return ToolResponse::revert();
@@ -162,4 +184,27 @@ ToolResponse ToolRoundOffVertex::update(const ToolArgs &args)
     }
     return ToolResponse();
 }
+
+bool ToolRoundOffVertex::commit()
+{
+    if (radius_current < 1) {
+        // Tiny radius, just ignore it
+        if (!editing)
+            return false; // Not a modification so just revert the action
+
+        // Undo change to original vertex
+        vxp->arc_center = Coordi();
+        vxp->arc_reverse = false;
+        vxp->position = p0.to_coordi();
+        vxp->type = Polygon::Vertex::Type::LINE;
+
+        // Remove inserted vertex
+        vxn->remove = true;
+        poly->vertices.erase(
+                std::remove_if(poly->vertices.begin(), poly->vertices.end(), [](const auto &x) { return x.remove; }),
+                poly->vertices.end());
+    }
+    return plane_finish();
+}
+
 } // namespace horizon

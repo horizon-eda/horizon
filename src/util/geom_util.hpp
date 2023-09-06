@@ -35,4 +35,6 @@ template <typename T> T c2pi(T x);
 Placement transform_package_placement_to_new_reference(Placement pl, Placement old_ref, Placement new_ref);
 Placement transform_text_placement_to_new_reference(Placement pl, Placement old_ref, Placement new_ref);
 
+bool revert_arc(Coordd &output, const Coordd &p0, const Coordd &p1, const Coordd &c);
+
 } // namespace horizon

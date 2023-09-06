@@ -37,9 +37,11 @@ private:
     double r_max = 0;
     double alpha = 0;
     double radius_current = 0;
+    bool editing = false;
 
     void update_poly(double r);
     void update_cursor(const Coordi &c);
     void update_tip();
+    bool commit();
 };
 } // namespace horizon
