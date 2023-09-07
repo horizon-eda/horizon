@@ -28,21 +28,47 @@ int ToolRoundOffVertex::wrap_index(int i) const
 ToolResponse ToolRoundOffVertex::begin(const ToolArgs &args)
 {
     int vertex_idx = 0;
-    editing = sel_has_type(selection, ObjectType::POLYGON_ARC_CENTER);
+    int v_inserted = 0;
+    bool selected_center = sel_has_type(selection, ObjectType::POLYGON_ARC_CENTER);
     {
-        ObjectType type = editing ? ObjectType::POLYGON_ARC_CENTER : ObjectType::POLYGON_VERTEX;
+        ObjectType type = selected_center ? ObjectType::POLYGON_ARC_CENTER : ObjectType::POLYGON_VERTEX;
         auto x = sel_find_one(selection, type);
         poly = doc.r->get_polygon(x.uuid);
         vertex_idx = x.vertex;
     }
-
     auto v_next = wrap_index(vertex_idx + 1);
     auto v_prev = wrap_index(vertex_idx - 1);
 
+    if (poly->vertices.at(vertex_idx).type == Polygon::Vertex::Type::ARC) {
+        // Selected center of existing arc or start vertex of arc
+        editing = true;
+        v_inserted = v_next;
+        v_next = wrap_index(v_inserted + 1);
+    }
+    else if (poly->vertices.at(v_prev).type == Polygon::Vertex::Type::ARC) {
+        // Selected second vertex of arc
+        // shift vertex_idx so it matches the case above
+        editing = true;
+        v_inserted = vertex_idx;
+        vertex_idx = v_prev;
+        v_next = wrap_index(v_inserted + 1);
+        v_prev = wrap_index(vertex_idx - 1);
+    }
+    else {
+        editing = false;
+    }
+
+    Coordd p1 = poly->vertices.at(v_next).position;
+    Coordd p2 = poly->vertices.at(v_prev).position;
 
     if (editing) {
-        auto v_inserted = v_next; // Inserted vertex
-        v_next = wrap_index(vertex_idx + 2);
+        // Update tool's p0, vxp, and vxn
+        if ((poly->vertices.at(vertex_idx).type != Polygon::Vertex::Type::ARC)
+            || (poly->vertices.at(v_inserted).type == Polygon::Vertex::Type::ARC)) {
+            // Should be an arc and non-arc vertex... something is wrong
+            imp->tool_bar_flash("can't round off arc");
+            return ToolResponse::end();
+        }
 
         vxp = &poly->vertices.at(vertex_idx);
         vxn = &poly->vertices.at(v_inserted);
@@ -53,34 +79,7 @@ ToolResponse ToolRoundOffVertex::begin(const ToolArgs &args)
         }
     }
     else {
-        if ((poly->vertices.at(vertex_idx).type == Polygon::Vertex::Type::ARC)
-            || (poly->vertices.at(v_prev).type == Polygon::Vertex::Type::ARC)) {
-            imp->tool_bar_flash("can't round off arc");
-            return ToolResponse::end();
-        }
-        p0 = poly->vertices.at(vertex_idx).position;
-    }
-
-    selection.clear();
-
-    Coordd p1 = poly->vertices.at(v_next).position;
-    Coordd p2 = poly->vertices.at(v_prev).position;
-
-    vn = (p1 - p0).normalize();
-    vp = (p2 - p0).normalize();
-    vh = (vn + vp).normalize();
-
-    delta_max = std::min((p1 - p0).mag(), (p2 - p0).mag());
-    alpha = acos(vh.dot(vp));
-    if (isnan(alpha) || (alpha > .99 * (M_PI / 2))) {
-        imp->tool_bar_flash("can't round off collinear edges");
-        return ToolResponse::end();
-    }
-    r_max = tan(alpha) * delta_max;
-
-    if (!editing) {
-        const bool rev = vn.cross(vp) < 0;
-
+        // Insert arc
         if (v_next == 0) {
             poly->vertices.emplace_back(Coordi());
             vxn = &poly->vertices.back();
@@ -90,8 +89,26 @@ ToolResponse ToolRoundOffVertex::begin(const ToolArgs &args)
         }
         vxp = &poly->vertices.at(vertex_idx);
         vxp->type = Polygon::Vertex::Type::ARC;
+        p0 = poly->vertices.at(vertex_idx).position;
+    }
+    selection.clear();
+
+    vn = (p1 - p0).normalize();
+    vp = (p2 - p0).normalize();
+    vh = (vn + vp).normalize();
+
+    if (!editing) {
+        const bool rev = vn.cross(vp) < 0;
         vxp->arc_reverse = rev;
     }
+
+    delta_max = std::min((p1 - p0).mag(), (p2 - p0).mag());
+    alpha = acos(vh.dot(vp));
+    if (isnan(alpha) || (alpha > .99 * (M_PI / 2))) {
+        imp->tool_bar_flash("can't round off collinear edges");
+        return ToolResponse::end();
+    }
+    r_max = tan(alpha) * delta_max;
 
     imp->set_snap_filter({{ObjectType::POLYGON, poly->uuid}});
 
