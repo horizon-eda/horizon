@@ -62,7 +62,7 @@ visit(Junction *node, Junction *from, const std::map<Junction *, std::set<Connec
             next = con->get_from();
         else // single junction
             return {};
-        if (next != from) {
+        if (next != from || (next == from && path.size() && path.back().second != con)) {
             if (std::count_if(path.begin(), path.end(), [next](const auto &a) { return a.first == next; })) {
                 while (path.size() && path.front().first != next) {
                     path.pop_front();
