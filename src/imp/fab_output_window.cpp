@@ -414,6 +414,9 @@ void FabOutputWindow::generate()
         catch (const std::exception &e) {
             odb_done_revealer_controller.show_error("Error: " + std::string(e.what()));
         }
+        catch (const Glib::Error &e) {
+            odb_done_revealer_controller.show_error("Error: " + e.what());
+        }
         catch (...) {
             odb_done_revealer_controller.show_error("unknown error");
         }
