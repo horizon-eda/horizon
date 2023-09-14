@@ -315,6 +315,8 @@ void ImpBoard::update_action_sensitivity()
         case ObjectType::POLYGON_ARC_CENTER:
         case ObjectType::POLYGON_VERTEX:
         case ObjectType::POLYGON_EDGE: {
+            if (!core_board.get_board()->polygons.count(x.uuid))
+                return false;
             const auto &poly = *core_board.get_polygon(x.uuid);
             if (auto plane = dynamic_cast<const Plane *>(poly.usage.ptr))
                 return true;
