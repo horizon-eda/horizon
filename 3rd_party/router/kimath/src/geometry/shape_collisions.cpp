@@ -501,9 +501,10 @@ static inline bool Collide( const SHAPE_ARC& aA, const SHAPE_RECT& aB, int aClea
 static inline bool Collide( const SHAPE_ARC& aA, const SHAPE_CIRCLE& aB, int aClearance,
                             int* aActual, VECTOR2I* aLocation, VECTOR2I* aMTV )
 {
-    wxASSERT_MSG( !aMTV, wxString::Format( wxT( "MTV not implemented for %s : %s collisions" ),
+    // https://gitlab.com/kicad/code/kicad/-/commit/df9cf0a0c39ed99527b0c04e3892e8dd7ed603e7
+    /* wxASSERT_MSG( !aMTV, wxString::Format( wxT( "MTV not implemented for %s : %s collisions" ),
                                            aA.TypeName(),
-                                           aB.TypeName() ) );
+                                           aB.TypeName() ) ); */
 
     const SHAPE_LINE_CHAIN lc( aA );
 
