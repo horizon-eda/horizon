@@ -83,7 +83,11 @@ Plane::Plane(const UUID &uu, const json &j, Board *brd)
 {
     if (brd) {
         net.update(brd->block->nets);
+        if (net == nullptr)
+            throw std::runtime_error("net " + static_cast<std::string>(net.uuid) + " not found");
         polygon.update(brd->polygons);
+        if (polygon == nullptr)
+            throw std::runtime_error("polygon " + static_cast<std::string>(polygon.uuid) + " not found");
     }
     if (j.count("settings")) {
         settings = PlaneSettings(j.at("settings"));
