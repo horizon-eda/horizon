@@ -27,7 +27,7 @@ private:
     PoDoFo::PdfPainter &painter;
     PoDoFo::PdfFont &font;
     const PDFExportSettings &settings;
-    const PoDoFo::PdfFontMetrics *metrics;
+    const PoDoFo::PdfFontMetrics &metrics;
     void img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, int layer, bool tr) override;
     void img_polygon(const class Polygon &poly, bool tr) override;
     void img_draw_text(const Coordf &p, float size, const std::string &rtext, int angle, bool flip, TextOrigin origin,
@@ -37,5 +37,6 @@ private:
     bool pdf_layer_visible(int l) const;
     void draw_polygon(const Polygon &ipoly, bool tr);
     Color get_pdf_layer_color(int layer) const;
+    PoDoFo::PdfPainterPath path;
 };
 } // namespace horizon

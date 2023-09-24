@@ -18,15 +18,13 @@ void export_pdf(const class Board &brd, const class PDFExportSettings &settings,
         cb = &cb_nop;
     cb("Initializing", 0);
 
-    PoDoFo::PdfStreamedDocument document(settings.output_filename.c_str());
+    PoDoFo::PdfMemDocument document;
     PoDoFo::PdfPainter painter;
     painter.SetPrecision(9);
-    auto info = document.GetInfo();
-    info->SetCreator("horizon EDA");
-    info->SetProducer("horizon EDA");
+    document.GetMetadata().SetCreator(PoDoFo::PdfString("Horizon EDA"));
+    document.GetMetadata().SetProducer(PoDoFo::PdfString("Horizon EDA"));
 
-
-    auto font = document.CreateFont("Helvetica");
+    auto font = document.GetFonts().SearchFont("Helvetica");
 
     PDFExportSettings my_settings(settings);
     my_settings.include_text = false; // need to work out text placement
@@ -38,19 +36,19 @@ void export_pdf(const class Board &brd, const class PDFExportSettings &settings,
     auto width = bbox.second.x - bbox.first.x + border_width * 2;
     auto height = bbox.second.y - bbox.first.y + border_width * 2;
 
-    auto page = document.CreatePage(PoDoFo::PdfRect(0, 0, to_pt(width), to_pt(height)));
-    painter.SetPage(page);
-    painter.SetLineCapStyle(PoDoFo::ePdfLineCapStyle_Round);
-    painter.SetFont(font);
-    painter.SetColor(0, 0, 0);
-    painter.SetTextRenderingMode(PoDoFo::ePdfTextRenderingMode_Invisible);
+    auto &page = document.GetPages().CreatePage(PoDoFo::Rect(0, 0, to_pt(width), to_pt(height)));
+    painter.SetCanvas(page);
+    painter.GraphicsState.SetLineCapStyle(PoDoFo::PdfLineCapStyle::Round);
+    painter.GraphicsState.SetFillColor(PoDoFo::PdfColor(0, 0, 0));
+    painter.TextState.SetFont(*font, 10);
+    painter.TextState.SetRenderingMode(PoDoFo::PdfTextRenderingMode::Invisible);
     if (settings.mirror) {
-        painter.SetTransformationMatrix(-1, 0, 0, 1, to_pt(bbox.second.x + border_width),
-                                        to_pt(-bbox.first.y + border_width));
+        painter.GraphicsState.SetCurrentMatrix(PoDoFo::Matrix::FromCoefficients(
+                -1, 0, 0, 1, to_pt(bbox.second.x + border_width), to_pt(-bbox.first.y + border_width)));
     }
     else {
-        painter.SetTransformationMatrix(1, 0, 0, 1, to_pt(-bbox.first.x + border_width),
-                                        to_pt(-bbox.first.y + border_width));
+        painter.GraphicsState.SetCurrentMatrix(PoDoFo::Matrix::FromCoefficients(
+                1, 0, 0, 1, to_pt(-bbox.first.x + border_width), to_pt(-bbox.first.y + border_width)));
     }
     ca.layer_filter = true;
     ca.use_layer_colors = true;
@@ -87,8 +85,8 @@ void export_pdf(const class Board &brd, const class PDFExportSettings &settings,
             render_picture(document, painter, pic);
     }
 
-    painter.FinishPage();
+    painter.FinishDrawing();
 
-    document.Close();
+    document.Save(settings.output_filename.c_str());
 }
 } // namespace horizon
