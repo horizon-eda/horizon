@@ -275,6 +275,7 @@ EDAData::Pin &EDAData::Package::add_pin(const horizon::Pad &pad)
         pin.type = Pin::Type::THROUGH_HOLE;
         pin.mtype = Pin::MountType::THROUGH_HOLE;
         pin.etype = Pin::ElectricalType::ELECTRICAL;
+        mtype = attribute::comp_mount_type::THMT;
         break;
 
     case Padstack::Type::TOP:
@@ -282,12 +283,15 @@ EDAData::Pin &EDAData::Package::add_pin(const horizon::Pad &pad)
         pin.type = Pin::Type::SURFACE;
         pin.mtype = Pin::MountType::SMT;
         pin.etype = Pin::ElectricalType::ELECTRICAL;
+        if (!mtype)
+            mtype = attribute::comp_mount_type::SMT;
         break;
 
     case Padstack::Type::MECHANICAL:
         pin.type = Pin::Type::THROUGH_HOLE;
         pin.mtype = Pin::MountType::THROUGH_HOLE;
         pin.etype = Pin::ElectricalType::MECHANICAL;
+        mtype = attribute::comp_mount_type::THMT;
         break;
 
     default:;
