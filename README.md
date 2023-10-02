@@ -7,6 +7,8 @@ of horizon's top features.
 
 Wanna chat about the project? Join #horizon-eda on libera.chat
 
+asdf
+
 ![collage](https://horizon-eda.org/screenshots/collage.png)
 
 # Features for users so far
