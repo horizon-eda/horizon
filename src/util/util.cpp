@@ -16,6 +16,10 @@
 #include "str_util.hpp"
 #include "placement.hpp"
 
+#ifdef __OpenBSD__
+char *argv0;
+#endif
+
 namespace horizon {
 
 std::ifstream make_ifstream(const std::string &filename_utf8, std::ios_base::openmode mode)
@@ -117,6 +121,48 @@ std::string get_exe_dir()
         throw std::runtime_error("can't find executable");
         return "";
     }
+}
+#elif defined(__OpenBSD__)
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+std::string get_exe_dir()
+{
+    char *path, *p, *p2, buf[PATH_MAX];
+    struct stat sb;
+    if (strchr(argv0, '/')) {
+        if (realpath(argv0, buf)) {
+            return Glib::path_get_dirname(buf);
+        }
+    }
+    else {
+        if (!(path = getenv("PATH"))) {
+            path = strdup("/usr/bin:/bin:/usr/sbin:/sbin:/usr/X11R6/bin:/usr/local/bin:/usr/local/sbin");
+        }
+        else {
+            path = strdup(path);
+        }
+        for (p = path; (p2 = strsep(&p, ":")) != NULL;) {
+            if (*p2 == '\0') {
+                getcwd(buf, sizeof(buf));
+            }
+            else {
+                strlcpy(buf, p2, sizeof(buf));
+            }
+            strlcat(buf, "/", sizeof(buf));
+            strlcat(buf, argv0, sizeof(buf));
+            if (!stat(buf, &sb) && (sb.st_mode & S_IXUSR)) {
+                free(path);
+                return Glib::path_get_dirname(buf);
+            }
+        }
+        free(path);
+    }
+    throw std::runtime_error("can't find executable");
+    return "";
 }
 #elif defined(__APPLE__)
 #include <mach-o/dyld.h>

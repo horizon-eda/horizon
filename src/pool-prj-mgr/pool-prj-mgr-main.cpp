@@ -11,6 +11,11 @@
 
 int main(int argc, char *argv[])
 {
+#ifdef __OpenBSD__
+    extern char *argv0;
+    argv0 = argv[0];
+#endif
+
 #ifdef G_OS_WIN32
     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX);
 #endif
