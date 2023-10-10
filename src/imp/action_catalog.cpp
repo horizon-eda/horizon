@@ -655,6 +655,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Swap nets", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::SWAP_PLACEMENT},
+         {"Swap placement", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TOOL, ToolID::LINE_LOOP_TO_POLYGON},
          {"Line loop to polygon", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
@@ -1417,6 +1421,7 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(MOVE_KEY_FINE_LEFT),
         TOOL_LUT_ITEM(MOVE_KEY_FINE_RIGHT),
         TOOL_LUT_ITEM(SWAP_NETS),
+        TOOL_LUT_ITEM(SWAP_PLACEMENT),
         TOOL_LUT_ITEM(LINE_LOOP_TO_POLYGON),
         TOOL_LUT_ITEM(LINES_TO_TRACKS),
         TOOL_LUT_ITEM(SCALE),

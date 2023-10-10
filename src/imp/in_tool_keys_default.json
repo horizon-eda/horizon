@@ -245,6 +245,14 @@
             }
         ]
     ],
+    "SWAP_PLACEMENT": [
+        [
+            {
+                "key": "s",
+                "mod": 0
+            }
+        ]
+    ],
     "ROTATE_CURSOR": [
         [
             {
