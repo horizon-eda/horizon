@@ -7,7 +7,7 @@ namespace horizon {
 RuleVia::RuleVia(const UUID &uu) : Rule(uu)
 {
     parameter_set[ParameterID::VIA_DIAMETER] = .5_mm;
-    parameter_set[ParameterID::HOLE_DIAMETER] = .2_mm;
+    parameter_set[ParameterID::HOLE_DIAMETER] = .3_mm;
 }
 
 RuleVia::RuleVia(const UUID &uu, const json &j, const RuleImportMap &import_map)
