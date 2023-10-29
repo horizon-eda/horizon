@@ -89,6 +89,7 @@ src_tools = files(
     'tool_resize_symbol.cpp',
     'tool_round_off_vertex.cpp',
     'tool_swap_gates.cpp',
+    'tool_swap_placement.cpp',
     'tool_place_picture.cpp',
     'tool_place_decal.cpp',
     'tool_drag_polygon_edge.cpp',
