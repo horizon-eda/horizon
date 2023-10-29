@@ -301,6 +301,7 @@ public:
         parent.sg_manufacturer->add_widget(*la_manufacturer);
 
         auto la_MPN = Gtk::manage(new Gtk::Label(part.get_MPN()));
+        la_MPN->set_selectable(true);
         la_MPN->set_xalign(0);
         la_MPN->show();
         pack_start(*la_MPN, false, false, 0);
