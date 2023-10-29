@@ -51,7 +51,7 @@ LIBS=(
 	liblzma-5.dll\
 	libtiff-6.dll\
 	libzmq.dll\
-	libsodium-23.dll\
+	libsodium-26.dll\
 	libcurl-4.dll\
 	libgit2-1.7.dll\
 	libidn2-0.dll\
@@ -96,14 +96,11 @@ LIBS=(
 	libzstd.dll\
 	liblz4.dll\
 	libb2-1.dll\
-	libssp-0.dll\
 	libdeflate.dll\
 	libwebp-7.dll\
 	libjbig-0.dll\
 	libLerc.dll\
 	libsharpyuv-0.dll\
-	libEGL.dll\
-	libGLESv2.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
 )
