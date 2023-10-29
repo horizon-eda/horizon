@@ -2,7 +2,6 @@
 #include "document/idocument_board.hpp"
 #include "board/board.hpp"
 #include <util/selection_util.hpp>
-#include <iostream>
 
 namespace horizon {
 
@@ -36,7 +35,6 @@ std::pair<BoardPackage *, BoardPackage *> ToolSwapPlacement::get_packages()
 
 ToolResponse ToolSwapPlacement::begin(const ToolArgs &args)
 {
-    std::cout << "tool swap placement\n";
     auto packages = get_packages();
     std::swap(packages.first->placement, packages.second->placement);
     return ToolResponse::commit();
