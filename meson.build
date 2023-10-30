@@ -4,6 +4,7 @@ project('horizon-eda', ['cpp', 'c'],
   default_options: ['cpp_std=c++17', 'warning_level=1'],
 )
 
+fs = import('fs')
 cxx = meson.get_compiler('cpp')
 is_windows = target_machine.system() == 'windows'
 
@@ -66,14 +67,27 @@ if get_option('debug')
 endif
 
 # pkg-config is useless for podofo :(
-podofo_lib =cxx.find_library('podofo', dirs: '/usr/lib/podofo-0.9/', required: false, has_headers:['/usr/include/podofo-0.9/podofo/podofo.h'] )
-if podofo_lib.found()
-podofo = declare_dependency (
-    dependencies: podofo_lib,
-include_directories: include_directories('/usr/include/podofo-0.9')
-)
+if fs.is_dir('/usr/include/podofo-0.9')
+  podofo_incdir = include_directories('/usr/include/podofo-0.9/', is_system: true)
+elif fs.is_dir('/usr/local/include/podofo-0.9')
+  podofo_incdir = include_directories('/usr/local/include/podofo-0.9/', is_system: true)
 else
-  podofo = dependency('libpodofo09', required:false)
+  podofo_incdir = include_directories()
+endif
+
+podofo_lib = cxx.find_library('podofo',
+  dirs: ['/usr/lib/podofo-0.9/', '/usr/local/lib/podofo-0.9/'],
+  required: false,
+  header_include_directories: podofo_incdir,
+  has_headers: 'podofo/podofo.h'
+)
+if podofo_lib.found()
+  podofo = declare_dependency (
+    dependencies: podofo_lib,
+    include_directories: podofo_incdir
+  )
+else
+  podofo = dependency('libpodofo09', required: false)
   if podofo.found()
     cpp_args += '-DINC_PODOFO_WITHOUT_DIRECTORY'
   else
@@ -768,7 +782,6 @@ help_texts = custom_target(
     command : [prog_python, '@INPUT@', '@OUTPUT@'],
 )
 
-fs = import('fs')
 has_git_dir = fs.is_dir('.git')
 if has_git_dir
     message('including git commit')
