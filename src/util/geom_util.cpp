@@ -188,7 +188,7 @@ Placement transform_text_placement_to_new_reference(Placement pl, Placement old_
  */
 bool revert_arc(Coordd &output, const Coordd &p0, const Coordd &p1, const Coordd &c)
 {
-    // The original center position is found by computing the intersection of
+    // The original point position is found by computing the intersection of
     // lines defined by each arc point and their tangents. Tangents are of an
     // arc perpendicular to vector to center.
     const Coordd v0 = (p0 - c);
