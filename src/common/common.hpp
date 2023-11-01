@@ -5,7 +5,6 @@
 #include <type_traits>
 #include <math.h>
 #include <array>
-#include <sstream>
 #include "lut.hpp"
 
 namespace horizon {
@@ -269,13 +268,6 @@ public:
     {
         return {x, y};
     }
-
-    std::string str() const
-    {
-        std::stringstream ss;
-        ss << "(" << x << ", " << y << ")";
-        return ss.str();
-    }
 };
 
 
@@ -374,13 +366,6 @@ public:
         output.x = x;
         output.y = y;
         return true;
-    }
-
-    std::string str() const
-    {
-        std::stringstream ss;
-        ss << "Segment(from=" << from.str() << ", to=" << to.str() << ")";
-        return ss.str();
     }
 };
 
