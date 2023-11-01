@@ -4,6 +4,7 @@
 #include "util/util.hpp"
 #include "board/board.hpp"
 #include "export_pdf_util.hpp"
+#include <filesystem>
 
 namespace horizon {
 
@@ -18,7 +19,7 @@ void export_pdf(const class Board &brd, const class PDFExportSettings &settings,
         cb = &cb_nop;
     cb("Initializing", 0);
 
-    PoDoFo::PdfStreamedDocument document(settings.output_filename.c_str());
+    PoDoFo::PdfStreamedDocument document(std::filesystem::u8path(settings.output_filename).c_str());
     PoDoFo::PdfPainter painter;
     painter.SetPrecision(9);
     auto info = document.GetInfo();

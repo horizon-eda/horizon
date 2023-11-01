@@ -7,6 +7,7 @@
 #include "schematic/iinstancce_mapping_provider.hpp"
 #include "util/bbox_accumulator.hpp"
 #include "pool/part.hpp"
+#include <filesystem>
 
 namespace horizon {
 
@@ -62,7 +63,7 @@ using Callback = std::function<void(std::string, double)>;
 class PDFExporter {
 public:
     PDFExporter(const class PDFExportSettings &settings, Callback callback)
-        : document(settings.output_filename.c_str()), font(document.CreateFont("Helvetica")),
+        : document(std::filesystem::u8path(settings.output_filename).c_str()), font(document.CreateFont("Helvetica")),
           canvas(painter, *font, settings), cb(callback)
     {
         canvas.use_layer_colors = false;
