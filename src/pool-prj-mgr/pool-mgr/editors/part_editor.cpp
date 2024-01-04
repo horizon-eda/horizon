@@ -472,9 +472,10 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
 
     {
         namespace rv = ranges::views;
-        const auto maxlen =
-                ranges::max(pool_parametric.get_tables() | rv::transform([](const auto &x) { return x.second.columns; })
-                            | rv::join | rv::transform([](const auto &x) { return x.display_name.size(); }));
+        const auto maxlen = ranges::max(ranges::views::concat(
+                ranges::views::single(0),
+                pool_parametric.get_tables() | rv::transform([](const auto &x) { return x.second.columns; }) | rv::join
+                        | rv::transform([](const auto &x) { return x.display_name.size(); })));
         Gtk::Label *la;
         x->get_widget("label_table", la);
         la->set_width_chars(maxlen);
