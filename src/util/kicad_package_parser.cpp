@@ -89,6 +89,8 @@ static auto get_string_or_symbol(const SEXPR::SEXPR *d)
 {
     if (d->IsString())
         return d->GetString();
+    else if (d->IsInteger())
+        return std::to_string(d->GetInteger());
     else
         return d->GetSymbol();
 }
@@ -156,7 +158,7 @@ void KiCadPackageParser::parse_pad(const SEXPR::SEXPR *data)
 
     Coordi pos;
     Coordi size;
-    int angle = 0;
+    double angle = 0;
     int drill = 0;
     int drill_length = 0;
     std::set<int> layers;
@@ -169,7 +171,7 @@ void KiCadPackageParser::parse_pad(const SEXPR::SEXPR *data)
             if (tag == "at") {
                 pos = get_coord(ch);
                 if (ch->GetNumberOfChildren() >= 4) {
-                    angle = ch->GetChild(3)->GetInteger();
+                    angle = ch->GetChild(3)->GetDouble();
                 }
             }
             else if (tag == "size") {
