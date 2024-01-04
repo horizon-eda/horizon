@@ -291,7 +291,7 @@ void Canvas3D::rotate_gesture_begin_cb(GdkEventSequence *seq)
 void Canvas3D::rotate_gesture_update_cb(GdkEventSequence *seq)
 {
     auto delta = gesture_rotate->get_angle_delta();
-    if (cam_elevation < 0)
+    if (gesture_rotate_cam_elevation_orig < 0)
         delta *= -1;
     set_cam_azimuth(gesture_rotate_cam_azimuth_orig + glm::degrees(delta));
     double cx, cy;
