@@ -45,7 +45,7 @@ void CanvasPDF::img_line(const Coordi &p0, const Coordi &p1, const uint64_t widt
     if (!pdf_layer_visible(layer))
         return;
 
-    auto w = std::max(width, settings.min_line_width);
+    auto w = std::max(width, std::max(settings.min_line_width, (uint64_t).001_mm));
     painter.GraphicsState.SetLineWidth(to_pt(w));
     Coordi rp0 = p0;
     Coordi rp1 = p1;
