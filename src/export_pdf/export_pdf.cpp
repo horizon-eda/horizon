@@ -7,6 +7,7 @@
 #include "schematic/iinstancce_mapping_provider.hpp"
 #include "util/bbox_accumulator.hpp"
 #include "pool/part.hpp"
+#include <giomm.h>
 
 namespace horizon {
 
@@ -53,16 +54,12 @@ private:
     UUIDVec instance_path;
 };
 
-#if PODOFO_VERSION_MAJOR != 0 || PODOFO_VERSION_MINOR != 9 || PODOFO_VERSION_PATCH != 5
-#define HAVE_OUTLINE
-#endif
-
 using Callback = std::function<void(std::string, double)>;
 
 class PDFExporter {
 public:
     PDFExporter(const class PDFExportSettings &settings, Callback callback)
-        : document(), font(*document.GetFonts().SearchFont("Helvetica")), canvas(painter, font, settings), cb(callback),
+        : document(), font(load_font()), canvas(painter, font, settings), cb(callback),
           filename(settings.output_filename.c_str())
     {
         canvas.use_layer_colors = false;
@@ -90,6 +87,14 @@ public:
 private:
     PoDoFo::PdfMemDocument document;
     PoDoFo::PdfPainter painter;
+    PoDoFo::PdfFont &load_font()
+    {
+        auto bytes = Gio::Resource::lookup_data_global("/org/horizon-eda/horizon/DejaVuSans.ttf");
+        gsize size;
+        auto data = bytes->get_data(size);
+        PoDoFo::bufferview buffer{reinterpret_cast<const char *>(data), size};
+        return document.GetFonts().GetOrCreateFontFromBuffer(buffer);
+    }
     PoDoFo::PdfFont &font;
     CanvasPDF canvas;
     Callback cb;

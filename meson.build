@@ -936,7 +936,7 @@ resources = gnome.compile_resources(
   'imp.gresource.xml',
   dependencies: color_presets_json,
   c_name: 'horizon_resources',
-  source_dir: 'src'
+  source_dir: ['src', '3rd_party']
 )
 
 libhorizon = static_library('libhorizon',
