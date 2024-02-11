@@ -118,7 +118,7 @@ jobs:
     - name: Install updates
       run: pacman -Syu --noconfirm
     - name: Install dependencies
-      run: pacman -Sy --needed --noconfirm zeromq cppzmq gtkmm3 cairomm librsvg sqlite3 libgit2 curl opencascade glm podofo-0.9 libarchive python libspnav cmake meson
+      run: pacman -Sy --needed --noconfirm zeromq cppzmq gtkmm3 cairomm librsvg sqlite3 libgit2 curl opencascade glm podofo libarchive python libspnav cmake meson
     - name: Install python dependencies
       if: ${{ matrix.target == 'horizon.so' }}
       run: pacman -S --needed --noconfirm mesa python-cairo python-yaml
