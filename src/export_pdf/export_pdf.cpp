@@ -80,7 +80,27 @@ public:
         document.GetMetadata().SetTitle(PoDoFo::PdfString(title));
         MyInstanceMappingProvider prv(sch);
 
-        export_schematic(sch, {}, prv);
+        outlines = &document.GetOrCreateOutlines();
+
+        export_schematic(sch, {}, prv, nullptr);
+
+        for (auto &[path, number, rect] : annotations) {
+            auto &page = document.GetPages().GetPageAt(number);
+            auto &annot = page.GetAnnotations().CreateAnnot<PoDoFo::PdfAnnotationLink>(rect);
+            annot.SetBorderStyle(0, 0, 0);
+            annot.SetDestination(first_pages.at(path));
+        }
+        for (auto &[url, number, rect] : datasheet_annotations) {
+            auto &page = document.GetPages().GetPageAt(number);
+            auto &annot = page.GetAnnotations().CreateAnnot<PoDoFo::PdfAnnotationLink>(rect);
+            annot.SetBorderStyle(0, 0, 0);
+
+            auto action = std::make_shared<PoDoFo::PdfAction>(document, PoDoFo::PdfActionType::URI);
+
+            action->SetURI(PoDoFo::PdfString(url));
+            annot.SetAction(action);
+        }
+
         document.Save(filename);
     }
 
@@ -96,11 +116,17 @@ private:
         return document.GetFonts().GetOrCreateFontFromBuffer(buffer);
     }
     PoDoFo::PdfFont &font;
+    PoDoFo::PdfOutlines *outlines = nullptr;
+    std::map<UUIDVec, std::shared_ptr<PoDoFo::PdfDestination>> first_pages;
+    std::vector<std::tuple<UUIDVec, unsigned int, PoDoFo::Rect>> annotations;
+    std::vector<std::tuple<std::string, unsigned int, PoDoFo::Rect>> datasheet_annotations;
+
     CanvasPDF canvas;
     Callback cb;
     std::basic_string_view<char> filename;
 
-    void export_schematic(const Schematic &sch, const UUIDVec &path, MyInstanceMappingProvider &prv)
+    void export_schematic(const Schematic &sch, const UUIDVec &path, MyInstanceMappingProvider &prv,
+                          PoDoFo::PdfOutlineItem *parent)
     {
         if (Block::instance_path_too_long(path, __FUNCTION__))
             return;
@@ -108,6 +134,8 @@ private:
         Schematic my_sch = sch;
         my_sch.expand(false, &prv);
         auto sheets = my_sch.get_sheets_sorted();
+        bool first = true;
+
         for (const auto sheet : sheets) {
 
             const auto idx = prv.get_sheet_index_for_path(sheet->uuid, path);
@@ -147,7 +175,67 @@ private:
                 }
             }
 
+            auto dest = std::make_shared<PoDoFo::PdfDestination>(page);
+            if (first) {
+                first_pages.emplace(path, dest);
+                first = false;
+            }
+
+            {
+                const auto &items = canvas.get_selectables().get_items();
+                const auto &items_ref = canvas.get_selectables().get_items_ref();
+                const auto n = items.size();
+                for (size_t i = 0; i < n; i++) {
+                    const auto &it = items.at(i);
+                    const auto &ir = items_ref.at(i);
+                    if (ir.type == ObjectType::SCHEMATIC_BLOCK_SYMBOL) {
+                        if (it.is_box()) {
+                            BBoxAccumulator<float> acc;
+                            for (const auto &c : it.get_corners()) {
+                                acc.accumulate(c);
+                            }
+                            const auto [a, b] = acc.get();
+                            PoDoFo::Rect rect(to_pt(a.x), to_pt(a.y), to_pt(b.x - a.x), to_pt(b.y - a.y));
+                            annotations.emplace_back(
+                                    uuid_vec_append(path, sheet->block_symbols.at(ir.uuid).block_instance->uuid),
+                                    page.GetPageNumber() - 1, rect);
+                        }
+                    }
+                    else if (ir.type == ObjectType::SCHEMATIC_SYMBOL) {
+                        if (it.is_box()) {
+                            const auto &sym = sheet->symbols.at(ir.uuid);
+                            if (sym.component->part && sym.component->part->get_datasheet().size()) {
+                                BBoxAccumulator<float> acc;
+
+                                for (const auto &c : it.get_corners()) {
+                                    acc.accumulate(c);
+                                }
+                                const auto [a, b] = acc.get();
+                                PoDoFo::Rect rect(to_pt(a.x), to_pt(a.y), to_pt(b.x - a.x), to_pt(b.y - a.y));
+                                datasheet_annotations.emplace_back(sym.component->part->get_datasheet(),
+                                                                   page.GetPageNumber() - 1, rect);
+                            }
+                        }
+                    }
+                }
+            }
+
             painter.FinishDrawing();
+
+            PoDoFo::PdfOutlineItem *sheet_node;
+            if (parent) {
+                sheet_node = parent->CreateChild(PoDoFo::PdfString(sheet->name), dest);
+            }
+            else {
+                sheet_node = outlines->CreateRoot(PoDoFo::PdfString(sheet->name));
+                sheet_node->SetDestination(dest);
+            }
+
+            for (auto sym : sheet->get_block_symbols_sorted()) {
+                auto sym_node = sheet_node->CreateChild(PoDoFo::PdfString(sym->block_instance->refdes), dest);
+                sym_node->SetTextFormat(PoDoFo::PdfOutlineFormat::Italic);
+                export_schematic(*sym->schematic, uuid_vec_append(path, sym->block_instance->uuid), prv, sym_node);
+            }
         }
     }
 };
