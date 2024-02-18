@@ -32,17 +32,18 @@ void main() {
 	
 	color_to_fragment = get_color(color_to_geom[0], color2_to_geom[0]);
 
-    a0 = p1.x;
-    a1 = p1.y;
+
 	
 	float border_width = min_line_width;
 	float r = p2.x + border_width/scale/2;
 	float h = r*2;
 	float z = 2;
 	
-	border_threshold = 1-border_width/(r*scale);
 	
 	for(int i = 0; i<3; i++) {
+		a0 = p1.x;
+		a1 = p1.y;
+		border_threshold = 1-border_width/(r*scale);
 		float phi = PI*(2./3)*i;
 		gl_Position = t(p0+p2r(phi, h));
 		round_pos_to_fragment = p2r(phi,z);

@@ -14,8 +14,10 @@ vec2 p2r(float phi, float l) {
 }
 
 void main() {
+  bool disc = false;
+
   if(length(round_pos_to_fragment)>1)
-    discard;
+    disc = true;
 
   float my_alpha = alpha;
   if(layer_mode == LAYER_MODE_FILL_ONLY) { //force alpha for fill only mode
@@ -30,7 +32,6 @@ void main() {
   if(my_a0 < 0)
     my_a0 += 2*PI;
 
-  bool disc = false;
 
   float len = length(round_pos_to_fragment);
   if(((len < (1-line_width+border_width)) || (len > (1-border_width))) && layer_mode != LAYER_MODE_FILL_ONLY) {
@@ -43,7 +44,7 @@ void main() {
   }
 
   if(len < (1-line_width)) {
-    discard;
+    disc = true;
   }
 
   if(my_a0 > a1) { //outside of arc
@@ -66,7 +67,7 @@ void main() {
       }
     }
     else if (!e0 && !e1){
-      discard;
+      disc = true;
     }
   }
 

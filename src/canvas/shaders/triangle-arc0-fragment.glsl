@@ -9,9 +9,6 @@ flat in float a0;
 flat in float a1;
 
 void main() {
-  if(length(round_pos_to_fragment)>1)
-    discard;
-
   float my_alpha = 1;
   if(layer_mode == LAYER_MODE_FILL_ONLY) { //force alpha for stencil mode
     my_alpha = alpha;
@@ -25,11 +22,8 @@ void main() {
   if(my_a0 < 0)
     my_a0 += 2*PI;
 
-  if(my_a0 > a1)
+  if(my_a0 > a1 || length(round_pos_to_fragment)>1 || length(round_pos_to_fragment) < border_threshold)
    discard;
 
-  if(length(round_pos_to_fragment) < border_threshold) {
-    discard;
-  }
   outputColor = vec4(color_to_fragment, my_alpha);
 }
