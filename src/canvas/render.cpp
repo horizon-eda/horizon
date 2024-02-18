@@ -1743,6 +1743,7 @@ void Canvas::render(const BoardPanel &panel)
 {
     if (!panel.included_board->is_valid()) {
         draw_error(panel.placement.shift, 2e5, "invalid board", false);
+        selectables.append(panel.uuid, ObjectType::BOARD_PANEL, panel.placement.shift);
         return;
     }
     transform_save();
