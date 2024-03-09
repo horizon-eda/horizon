@@ -12,6 +12,11 @@ PartsWindow::PartsWindow(const Board &brd) : Gtk::Window(), board(brd), state_st
     auto header = Gtk::manage(new Gtk::HeaderBar());
     header->set_show_close_button(true);
     header->set_title("Parts");
+    auto btn = Gtk::manage(new Gtk::Button("Reset"));
+    btn->set_tooltip_text("Reset placed components");
+    btn->signal_clicked().connect([this]() { reset_placed(); });
+    btn->show();
+    header->pack_start(*btn);
     set_titlebar(*header);
     header->show();
     if (!state_store.get_default_set())
@@ -44,6 +49,7 @@ PartsWindow::PartsWindow(const Board &brd) : Gtk::Window(), board(brd), state_st
     tree_view->get_column(1)->set_sort_column(list_columns.qty);
     tree_view->append_column("Value", list_columns.value);
     tree_view->append_column("MPN", list_columns.MPN);
+    tree_view->append_column("Package", list_columns.package);
     tree_view_append_column_ellipsis(tree_view, "Refdes", list_columns.refdes, Pango::ELLIPSIZE_END)
             ->set_sort_column(list_columns.refdes);
     store->set_sort_func(list_columns.refdes,
@@ -122,6 +128,7 @@ void PartsWindow::update()
         row[list_columns.placed] = parts_placed.count(part->uuid);
         row[list_columns.qty] = comps.size();
         row[list_columns.components] = comp_uuids;
+        row[list_columns.package] = part->package->name;
     }
 }
 
@@ -149,6 +156,14 @@ void PartsWindow::load_from_json(const json &j)
     for (auto &it : store->children()) {
         Gtk::TreeModel::Row row = *it;
         row[list_columns.placed] = parts_placed.count(row[list_columns.part]);
+    }
+}
+
+void PartsWindow::reset_placed()
+{
+    for (auto &it : store->children()) {
+        Gtk::TreeModel::Row row = *it;
+        row[list_columns.placed] = false;
     }
 }
 
