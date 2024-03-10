@@ -49,7 +49,8 @@ PartsWindow::PartsWindow(const Board &brd) : Gtk::Window(), board(brd), state_st
     tree_view->get_column(1)->set_sort_column(list_columns.qty);
     tree_view->append_column("Value", list_columns.value);
     tree_view->append_column("MPN", list_columns.MPN);
-    tree_view_append_column_ellipsis(tree_view, "Package", list_columns.package, Pango::ELLIPSIZE_END);
+    tree_view_append_column_ellipsis(tree_view, "Package", list_columns.package, Pango::ELLIPSIZE_END)
+            ->set_resizable(true);
     tree_view_append_column_ellipsis(tree_view, "Refdes", list_columns.refdes, Pango::ELLIPSIZE_END)
             ->set_sort_column(list_columns.refdes);
     store->set_sort_func(list_columns.refdes,
