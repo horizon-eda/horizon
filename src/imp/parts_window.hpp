@@ -21,7 +21,7 @@ public:
 
     json serialize() const;
     void load_from_json(const json &j);
-
+    void reset_placed();
 
 private:
     const Board &board;
@@ -30,6 +30,7 @@ private:
     public:
         ListColumns()
         {
+            Gtk::TreeModelColumnRecord::add(package);
             Gtk::TreeModelColumnRecord::add(MPN);
             Gtk::TreeModelColumnRecord::add(value);
             Gtk::TreeModelColumnRecord::add(refdes);
@@ -38,6 +39,7 @@ private:
             Gtk::TreeModelColumnRecord::add(placed);
             Gtk::TreeModelColumnRecord::add(part);
         }
+        Gtk::TreeModelColumn<Glib::ustring> package;
         Gtk::TreeModelColumn<Glib::ustring> MPN;
         Gtk::TreeModelColumn<Glib::ustring> value;
         Gtk::TreeModelColumn<Glib::ustring> refdes;
