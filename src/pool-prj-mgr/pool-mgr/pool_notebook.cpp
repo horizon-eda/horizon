@@ -26,6 +26,7 @@
 #include "pool/decal.hpp"
 #include "frame/frame.hpp"
 #include "move_window.hpp"
+#include <git2.h>
 
 namespace horizon {
 
@@ -310,19 +311,30 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         });
     }
 
-    if (Glib::file_test(Glib::build_filename(base_path, ".git"), Glib::FILE_TEST_IS_DIR)) {
-        git_box = PoolGitBox::create(*this);
-        git_box->show();
-        append_page(*git_box, "Git");
-        git_box->unreference();
+    {
+        autofree_ptr<git_repository> repo(git_repository_free);
+        if (git_repository_open_ext(&repo.ptr, base_path.c_str(), 0, nullptr) == 0) {
+            auto workdir = git_repository_workdir(repo);
+            if (workdir) {
+                std::string workdir_str{workdir};
+                if (workdir_str.back() == '/') {
+                    workdir_str = workdir_str.substr(0, workdir_str.size() - 1);
+                }
+                git_box = PoolGitBox::create(*this, workdir_str);
+                git_box->show();
+                append_page(*git_box, "Git");
+                git_box->unreference();
 
-        signal_switch_page().connect([this](Gtk::Widget *page, int page_num) {
-            if (page == git_box && !git_box->refreshed_once) {
-                git_box->refresh();
-                git_box->refreshed_once = true;
+                signal_switch_page().connect([this](Gtk::Widget *page, int page_num) {
+                    if (page == git_box && !git_box->refreshed_once) {
+                        git_box->refresh();
+                        git_box->refreshed_once = true;
+                    }
+                });
             }
-        });
+        }
     }
+
 
     construct_parametric();
 

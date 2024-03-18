@@ -12,6 +12,7 @@
 #include "preferences/preferences.hpp"
 #include "check_column.hpp"
 #include "checks/check_item.hpp"
+#include "util/fs_util.hpp"
 #include <iomanip>
 
 namespace horizon {
@@ -70,8 +71,9 @@ static const std::map<unsigned int, std::string> status_names = {{GIT_STATUS_CUR
                                                                  {GIT_STATUS_IGNORED, "Ignored"},
                                                                  {GIT_STATUS_CONFLICTED, "Conflicted"}};
 
-PoolGitBox::PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, PoolNotebook &nb)
-    : Gtk::Box(cobject), notebook(nb)
+PoolGitBox::PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, PoolNotebook &nb,
+                       const std::string &repo_path)
+    : Gtk::Box(cobject), notebook(nb), git_repo_path(repo_path)
 {
     x->get_widget("button_git_refresh", refresh_button);
     x->get_widget("label_git_info", info_label);
@@ -186,10 +188,13 @@ PoolGitBox::PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
 
 void PoolGitBox::diff_file_cb(const git_diff_delta *delta)
 {
-    q_diff->reset();
-    q_diff->bind(1, std::string(delta->new_file.path));
-    q_diff->bind(2, delta->status);
-    q_diff->step();
+    if (auto rel =
+                get_relative_filename(Glib::build_filename(git_repo_path, delta->new_file.path), notebook.base_path)) {
+        q_diff->reset();
+        q_diff->bind(1, rel.value());
+        q_diff->bind(2, delta->status);
+        q_diff->step();
+    }
 }
 
 int PoolGitBox::diff_file_cb_c(const git_diff_delta *delta, float progress, void *pl)
@@ -209,10 +214,12 @@ int PoolGitBox::status_cb_c(const char *path, unsigned int status_flags, void *p
 void PoolGitBox::status_cb(const char *path, unsigned int status_flags)
 {
     if (!(status_flags & GIT_STATUS_IGNORED)) {
-        q_status->reset();
-        q_status->bind(1, std::string(path));
-        q_status->bind(2, status_flags);
-        q_status->step();
+        if (auto rel = get_relative_filename(Glib::build_filename(git_repo_path, path), notebook.base_path)) {
+            q_status->reset();
+            q_status->bind(1, rel.value());
+            q_status->bind(2, status_flags);
+            q_status->step();
+        }
     }
 }
 
@@ -220,7 +227,7 @@ void PoolGitBox::refresh()
 {
     try {
         autofree_ptr<git_repository> repo(git_repository_free);
-        if (git_repository_open(&repo.ptr, notebook.base_path.c_str()) != 0) {
+        if (git_repository_open(&repo.ptr, git_repo_path.c_str()) != 0) {
             throw std::runtime_error("error opening repo");
         }
         autofree_ptr<git_reference> head(git_reference_free);
@@ -389,7 +396,7 @@ void PoolGitBox::handle_add_with_deps()
         q.bind(2, uu);
 
         autofree_ptr<git_repository> repo(git_repository_free);
-        if (git_repository_open(&repo.ptr, notebook.base_path.c_str()) != 0) {
+        if (git_repository_open(&repo.ptr, git_repo_path.c_str()) != 0) {
             throw std::runtime_error("error opening repo");
         }
 
@@ -399,13 +406,14 @@ void PoolGitBox::handle_add_with_deps()
         }
 
         while (q.step()) {
-            std::string filename = q.get<std::string>(0);
+            const std::string pool_filename = Glib::build_filename(notebook.base_path, q.get<std::string>(0));
+            const auto repo_filename = get_relative_filename(pool_filename, git_repo_path).value();
             int ignored = 0;
-            if (git_ignore_path_is_ignored(&ignored, repo, filename.c_str()) == 0) {
+            if (git_ignore_path_is_ignored(&ignored, repo, repo_filename.c_str()) == 0) {
                 if (ignored)
                     continue;
             }
-            if (git_index_add_bypath(index, filename.c_str()) != 0) {
+            if (git_index_add_bypath(index, repo_filename.c_str()) != 0) {
                 auto last_error = giterr_last();
                 std::string err_str = last_error->message;
                 throw std::runtime_error("add error: " + err_str);
@@ -466,7 +474,7 @@ void PoolGitBox::handle_pr()
     }
 
     autofree_ptr<git_repository> repo(git_repository_free);
-    if (git_repository_open(&repo.ptr, notebook.base_path.c_str()) != 0) {
+    if (git_repository_open(&repo.ptr, git_repo_path.c_str()) != 0) {
         throw std::runtime_error("error opening repo");
     }
 
@@ -654,7 +662,7 @@ static void remove_branch(git_repository *repo, const char *branch_name)
 void PoolGitBox::handle_back_to_master(bool delete_pr)
 {
     autofree_ptr<git_repository> repo(git_repository_free);
-    if (git_repository_open(&repo.ptr, notebook.base_path.c_str()) != 0) {
+    if (git_repository_open(&repo.ptr, git_repo_path.c_str()) != 0) {
         throw std::runtime_error("error opening repo");
     }
 
@@ -709,13 +717,13 @@ void PoolGitBox::handle_back_to_master(bool delete_pr)
 }
 
 
-PoolGitBox *PoolGitBox::create(PoolNotebook &nb)
+PoolGitBox *PoolGitBox::create(PoolNotebook &nb, const std::string &repo_path)
 {
     PoolGitBox *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     std::vector<Glib::ustring> widgets = {"box_git", "sg_git_header"};
     x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/window.ui", widgets);
-    x->get_widget_derived("box_git", w, nb);
+    x->get_widget_derived("box_git", w, nb, repo_path);
     w->reference();
     return w;
 }

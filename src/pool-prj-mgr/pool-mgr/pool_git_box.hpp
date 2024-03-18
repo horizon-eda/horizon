@@ -15,14 +15,16 @@ using json = nlohmann::json;
 
 class PoolGitBox : public Gtk::Box {
 public:
-    PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class PoolNotebook &nb);
-    static PoolGitBox *create(class PoolNotebook &nb);
+    PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class PoolNotebook &nb,
+               const std::string &repo_path);
+    static PoolGitBox *create(class PoolNotebook &nb, const std::string &repo_path);
 
     void refresh();
     bool refreshed_once = false;
 
 private:
     class PoolNotebook &notebook;
+    const std::string git_repo_path;
 
     Gtk::Button *refresh_button = nullptr;
     Gtk::Label *info_label = nullptr;
