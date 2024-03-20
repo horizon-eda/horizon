@@ -44,5 +44,6 @@ private:
     gint64 last_property_time;
 
     sigc::connection throttle_connection;
+    sigc::trackable trackable;
 };
 } // namespace horizon

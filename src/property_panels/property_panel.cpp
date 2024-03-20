@@ -107,8 +107,8 @@ PropertyPanel::PropertyPanel(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
             e = new PropertyEditor(type, property, this);
         }
 
-        e->signal_changed().connect(
-                [this, property, e] { handle_changed(property, e->get_value(), e->get_apply_all()); });
+        e->signal_changed().connect(sigc::track_obj(
+                [this, property, e] { handle_changed(property, e->get_value(), e->get_apply_all()); }, trackable));
         e->signal_activate().connect([this] { parent->s_signal_activate.emit(); });
         e->signal_apply_all().connect([this, property, e] {
             if (e->get_apply_all()) {
