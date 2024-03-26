@@ -349,7 +349,7 @@ static void parse_symbol(KiCadSymbol &sym, const SEXPR::SEXPR *ksym)
             const auto underscore_pos = subsym_info.find('_');
             const unsigned int unit = std::stoi(subsym_info.substr(0, underscore_pos));
             if (sym.parts.size() <= unit)
-                sym.parts.resize(unit);
+                sym.parts.resize(unit + 1);
             const auto style = std::stoi(subsym_info.substr(underscore_pos + 1));
             // we only care about style 1 and 0 (global to all styles)
             if (style <= 1) {
