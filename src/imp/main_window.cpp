@@ -387,4 +387,75 @@ MainWindow *MainWindow::create()
     x->get_widget_derived("mainWindow", w);
     return w;
 }
+
+static void *gtk_wl_registry_bind(Gtk::Widget *widget, uint32_t name, const struct wl_interface *interface,
+                                  uint32_t version)
+{
+    auto gdk_display = widget->get_display()->gobj();
+    struct wl_display *display;
+    struct wl_registry *registry;
+
+    if (!GDK_IS_WAYLAND_DISPLAY(gdk_display)) {
+        return NULL;
+    }
+
+    display = gdk_wayland_display_get_wl_display(gdk_display);
+    registry = wl_display_get_registry(display);
+
+    return wl_registry_bind(registry, name, interface, version);
+}
+
+static void gtk_wl_registry_add_listener(Gtk::Widget *widget, const struct wl_registry_listener *listener)
+{
+    GdkDisplay *gdk_display = widget->get_display()->gobj();
+    struct wl_display *display;
+    struct wl_registry *registry;
+
+    if (!GDK_IS_WAYLAND_DISPLAY(gdk_display)) {
+        return;
+    }
+
+    display = gdk_wayland_display_get_wl_display(gdk_display);
+    registry = wl_display_get_registry(display);
+    wl_registry_add_listener(registry, listener, widget);
+    wl_display_roundtrip(display);
+}
+
+void MainWindow::registry_handle_global(void *data, struct wl_registry *registry, uint32_t name, const char *interface,
+                                        uint32_t version)
+{
+    auto widget = dynamic_cast<MainWindow *>(static_cast<Gtk::Widget *>(data));
+    std::cout << interface << " " << data << std::endl;
+
+    if (strcmp(interface, "xdg_activation_v1") == 0) {
+        widget->xdg_activation =
+                static_cast<xdg_activation_v1 *>(gtk_wl_registry_bind(widget, name, &xdg_activation_v1_interface, 1));
+        // g_object_set_data_full(G_OBJECT(widget), "zwp_relative_pointer_manager_v1", relative_pointer_manager,
+        //                       (GDestroyNotify)zwp_relative_pointer_manager_v1_destroy);
+    }
+}
+
+void MainWindow::registry_handle_global_remove(void *data, struct wl_registry *registry, uint32_t name)
+{
+}
+
+
+const struct wl_registry_listener MainWindow::registry_listener = {MainWindow::registry_handle_global,
+                                                                   MainWindow::registry_handle_global_remove};
+
+
+void MainWindow::on_realize()
+{
+    Gtk::ApplicationWindow::on_realize();
+    gtk_wl_registry_add_listener(this, &registry_listener);
+}
+
+void MainWindow::activate_with_token(const std::string &token)
+{
+    if (!xdg_activation)
+        return;
+    std::cout << "activate " << token << std::endl;
+    xdg_activation_v1_activate(xdg_activation, token.c_str(), gdk_wayland_window_get_wl_surface(get_window()->gobj()));
+}
+
 } // namespace horizon

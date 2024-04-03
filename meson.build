@@ -24,6 +24,7 @@ rsvg = dependency('librsvg-2.0')
 libarchive = dependency('libarchive')
 #podofo=dependency('libpodofo', version: '<0.10.0', required: false)
 opencascade = dependency('OpenCASCADE', method : 'cmake', required:false)
+wayland_client = dependency('wayland-client', required: false)
 if not opencascade.found()
     opencascade = dependency('OCE', method : 'cmake')
 endif
@@ -34,6 +35,11 @@ if not cxx.links('int main(void) {return 0;}', dependencies: opencascade)
     opencascade = declare_dependency(dependencies: opencascade.partial_dependency(compile_args: true, includes:true), link_args:['-lTKSTEP', '-lTKernel', '-lTKXCAF', '-lTKXSBase', '-lTKBRep', '-lTKCDF', '-lTKXDESTEP', '-lTKLCAF', '-lTKMath', '-lTKMesh', '-lTKTopAlgo', '-lTKPrim', '-lTKBO', '-lTKShHealing', '-lTKBRep', '-lTKG3d', '-lTKGeomBase', '-lTKHLR'])
 endif
 
+have_wayland = wayland_client.found()
+
+if have_wayland
+    subdir('src/wayland-protos')
+endif
 
 spnav = dependency('spnav', required: false)
 if not spnav.found()
@@ -65,6 +71,11 @@ if get_option('debug')
     cpp_args += '-DCONNECTION_CHECK'
 endif
 
+if have_wayland
+    cpp_args += '-DHAVE_WAYLAND'
+endif
+
+# pkg-config is useless for podofo :(
 # pkg-config is useless for old podofo :(
 podofo_legacy = true
 podofo_lib =cxx.find_library('podofo', dirs: '/usr/lib/podofo-0.9/', required: false, has_headers:['/usr/include/podofo-0.9/podofo/podofo.h'] )
@@ -114,7 +125,7 @@ else
 	build_dependencies_libhorizon += [cxx.find_library('rpcrt4')]
 endif
 
-build_dependencies_libhorizonui = build_dependencies_libhorizon + [epoxy, zeromq, cppzmq, curl, glm]
+build_dependencies_libhorizonui = build_dependencies_libhorizon + [epoxy, zeromq, cppzmq, curl, glm, wayland_client]
 build_dependencies_gen_pkg =    build_dependencies_libhorizon
 build_dependencies_pr_review = build_dependencies_libhorizon + [podofo, osmesa, opencascade, libgit2]
 
@@ -666,6 +677,15 @@ src_imp = files(
     'src/widgets/unplaced_box.cpp',
     'src/widgets/warnings_box.cpp',
 )
+
+if have_wayland
+    src_wl = [
+        xdg_activation_v1_protocol_c,
+        xdg_activation_v1_client_protocol_h,
+    ]
+    src_pool_prj_mgr += src_wl
+    src_imp += src_wl
+endif
 
 src_export = files(
     'src/export_gerber/gerber_writer.cpp',

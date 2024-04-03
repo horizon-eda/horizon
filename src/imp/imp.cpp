@@ -1739,8 +1739,12 @@ bool ImpBase::handle_broadcast(const json &j)
 {
     const auto op = j.at("op").get<std::string>();
     guint32 timestamp = j.value("time", 0);
+    std::string token = j.value("token", "");
     if (op == "present") {
-        main_window->present(timestamp);
+        if (token.size())
+            main_window->activate_with_token(token);
+        else
+            main_window->present(timestamp);
         return true;
     }
     else if (op == "save") {

@@ -2,6 +2,11 @@
 #include "common/common.hpp"
 #include <gtkmm.h>
 
+#ifdef HAVE_WAYLAND
+#include <gdk/gdkwayland.h>
+#include "xdg-activation-v1-client-protocol.h"
+#endif
+
 namespace horizon {
 
 class MainWindow : public Gtk::ApplicationWindow {
@@ -91,6 +96,8 @@ public:
 
     void set_undo_redo_hint(const std::string &s);
 
+    void activate_with_token(const std::string &token);
+
     // virtual ~MainWindow();
 private:
     Gtk::EventBox *gl_container = nullptr;
@@ -141,5 +148,13 @@ private:
     Gtk::Frame *undo_redo_hint_frame = nullptr;
     Gtk::Label *undo_redo_hint_label = nullptr;
     sigc::connection undo_redo_hint_connection;
+
+    void on_realize() override;
+    static const struct wl_registry_listener registry_listener;
+    struct xdg_activation_v1 *xdg_activation = nullptr;
+
+    static void registry_handle_global(void *data, struct wl_registry *registry, uint32_t name, const char *interface,
+                                       uint32_t version);
+    static void registry_handle_global_remove(void *data, struct wl_registry *registry, uint32_t name);
 };
 } // namespace horizon

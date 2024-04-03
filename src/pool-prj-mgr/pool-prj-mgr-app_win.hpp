@@ -13,6 +13,11 @@
 #include "common/common.hpp"
 #include <thread>
 
+#ifdef HAVE_WAYLAND
+#include <gdk/gdkwayland.h>
+#include "xdg-activation-v1-client-protocol.h"
+#endif
+
 namespace horizon {
 using json = nlohmann::json;
 
@@ -238,6 +243,27 @@ private:
     void clear_recent_searches();
 
     void update_recent_placeholder(Gtk::Stack &stack, Gtk::ListBox &lb);
+
+    void on_realize() override;
+    static const struct wl_registry_listener registry_listener;
+    struct xdg_activation_v1 *xdg_activation = nullptr;
+
+    static void registry_handle_global(void *data, struct wl_registry *registry, uint32_t name, const char *interface,
+                                       uint32_t version);
+    static void registry_handle_global_remove(void *data, struct wl_registry *registry, uint32_t name);
+
+
+    static const struct wl_pointer_listener pointer_listener;
+    static void pointer_handle_button(void *data, struct wl_pointer *pointer, uint32_t serial, uint32_t time,
+                                      uint32_t button, uint32_t state);
+    static void pointer_handle_enter(void *data, struct wl_pointer *pointer, uint32_t serial,
+                                     struct wl_surface *surface, wl_fixed_t sx, wl_fixed_t sy);
+    static void pointer_handle_leave(void *data, struct wl_pointer *pointer, uint32_t serial,
+                                     struct wl_surface *surface);
+    static void pointer_handle_frame(void *data, struct wl_pointer *pointer);
+    static void pointer_handle_motion(void *data, struct wl_pointer *pointer, uint32_t time, wl_fixed_t sx,
+                                      wl_fixed_t sy);
+    uint32_t last_serial;
 
 public:
     zmq::context_t &zctx;

@@ -40,6 +40,7 @@
 #endif
 #include "util/win32_undef.hpp"
 
+
 namespace horizon {
 namespace fs = std::filesystem;
 PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject,
@@ -1499,6 +1500,17 @@ std::string PoolProjectManagerAppWindow::get_pool_base_path() const
         throw std::runtime_error("can't locate pool");
 }
 
+static void token_done(gpointer data, struct xdg_activation_token_v1 *provider, const char *token)
+{
+    auto token_out = reinterpret_cast<std::string *>(data);
+
+    *token_out = token;
+}
+
+static const struct xdg_activation_token_v1_listener token_listener = {
+        token_done,
+};
+
 PoolProjectManagerAppWindow::SpawnResult PoolProjectManagerAppWindow::spawn(PoolProjectManagerProcess::Type type,
                                                                             const std::vector<std::string> &args,
                                                                             SpawnFlags flags)
@@ -1568,9 +1580,43 @@ PoolProjectManagerAppWindow::SpawnResult PoolProjectManagerAppWindow::spawn(Pool
     else { // present imp
         auto proc = find_process(args.at(0));
         if (proc->proc) {
+            std::string token_str;
+
+            {
+                struct xdg_activation_token_v1 *token;
+                struct wl_event_queue *event_queue;
+
+                GdkDisplay *gdk_display = get_display()->gobj();
+                struct wl_display *display;
+
+                if (GDK_IS_WAYLAND_DISPLAY(gdk_display)) {
+                    display = gdk_wayland_display_get_wl_display(gdk_display);
+
+                    event_queue = wl_display_create_queue(display);
+
+                    token = xdg_activation_v1_get_activation_token(xdg_activation);
+                    wl_proxy_set_queue((struct wl_proxy *)token, event_queue);
+
+                    xdg_activation_token_v1_add_listener(token, &token_listener, &token_str);
+                    xdg_activation_token_v1_set_serial(
+                            token, last_serial,
+                            gdk_wayland_seat_get_wl_seat(get_window()->get_display()->get_default_seat()->gobj()));
+                    xdg_activation_token_v1_set_surface(token, gdk_wayland_window_get_wl_surface(get_window()->gobj()));
+                    xdg_activation_token_v1_commit(token);
+
+                    while (token_str.empty())
+                        wl_display_dispatch_queue(display, event_queue);
+
+                    xdg_activation_token_v1_destroy(token);
+                    wl_event_queue_destroy(event_queue);
+                    std::cout << "got token " << token_str << std::endl;
+                }
+            }
+
+
             auto pid = proc->proc->get_pid();
             allow_set_foreground_window(pid);
-            app.send_json(pid, {{"op", "present"}, {"time", gtk_get_current_event_time()}});
+            app.send_json(pid, {{"op", "present"}, {"time", gtk_get_current_event_time()}, {"token", token_str}});
         }
         else {
             proc->win->present();
@@ -1862,5 +1908,115 @@ void PoolProjectManagerAppWindow::clear_recent_searches()
     recent_pools_search_entry->set_text("");
     recent_projects_search_entry->set_text("");
 }
+
+
+static void *gtk_wl_registry_bind(Gtk::Widget *widget, uint32_t name, const struct wl_interface *interface,
+                                  uint32_t version)
+{
+    auto gdk_display = widget->get_display()->gobj();
+    struct wl_display *display;
+    struct wl_registry *registry;
+
+    if (!GDK_IS_WAYLAND_DISPLAY(gdk_display)) {
+        return NULL;
+    }
+
+    display = gdk_wayland_display_get_wl_display(gdk_display);
+    registry = wl_display_get_registry(display);
+
+    return wl_registry_bind(registry, name, interface, version);
+}
+
+static void gtk_wl_registry_add_listener(Gtk::Widget *widget, const struct wl_registry_listener *listener)
+{
+    GdkDisplay *gdk_display = widget->get_display()->gobj();
+    struct wl_display *display;
+    struct wl_registry *registry;
+
+    if (!GDK_IS_WAYLAND_DISPLAY(gdk_display)) {
+        return;
+    }
+
+    display = gdk_wayland_display_get_wl_display(gdk_display);
+    registry = wl_display_get_registry(display);
+    wl_registry_add_listener(registry, listener, widget);
+    wl_display_roundtrip(display);
+}
+
+void PoolProjectManagerAppWindow::registry_handle_global(void *data, struct wl_registry *registry, uint32_t name,
+                                                         const char *interface, uint32_t version)
+{
+    auto widget = dynamic_cast<PoolProjectManagerAppWindow *>(static_cast<Gtk::Widget *>(data));
+    std::cout << interface << " " << data << std::endl;
+
+    if (strcmp(interface, "xdg_activation_v1") == 0) {
+        widget->xdg_activation =
+                static_cast<xdg_activation_v1 *>(gtk_wl_registry_bind(widget, name, &xdg_activation_v1_interface, 1));
+        // g_object_set_data_full(G_OBJECT(widget), "zwp_relative_pointer_manager_v1", relative_pointer_manager,
+        //                       (GDestroyNotify)zwp_relative_pointer_manager_v1_destroy);
+    }
+}
+
+void PoolProjectManagerAppWindow::registry_handle_global_remove(void *data, struct wl_registry *registry, uint32_t name)
+{
+}
+
+
+const struct wl_registry_listener PoolProjectManagerAppWindow::registry_listener = {
+        PoolProjectManagerAppWindow::registry_handle_global,
+        PoolProjectManagerAppWindow::registry_handle_global_remove};
+
+void PoolProjectManagerAppWindow::on_realize()
+{
+    Gtk::ApplicationWindow::on_realize();
+    gtk_wl_registry_add_listener(this, &registry_listener);
+    wl_pointer_add_listener(
+            wl_seat_get_pointer(gdk_wayland_seat_get_wl_seat(get_display()->get_default_seat()->gobj())),
+            &pointer_listener, this);
+}
+
+void PoolProjectManagerAppWindow::pointer_handle_button(void *data, struct wl_pointer *pointer, uint32_t serial,
+                                                        uint32_t time, uint32_t button, uint32_t state)
+{
+    std::cout << "button serial " << serial << std::endl;
+    auto self = reinterpret_cast<PoolProjectManagerAppWindow *>(data);
+    self->last_serial = serial;
+}
+
+void PoolProjectManagerAppWindow::pointer_handle_enter(void *data, struct wl_pointer *pointer, uint32_t serial,
+                                                       struct wl_surface *surface, wl_fixed_t sx, wl_fixed_t sy)
+{
+    std::cout << "enter serial " << serial << std::endl;
+    auto self = reinterpret_cast<PoolProjectManagerAppWindow *>(data);
+    self->last_serial = serial;
+}
+void PoolProjectManagerAppWindow::pointer_handle_leave(void *data, struct wl_pointer *pointer, uint32_t serial,
+                                                       struct wl_surface *surface)
+{
+    std::cout << "leave serial " << serial << std::endl;
+    auto self = reinterpret_cast<PoolProjectManagerAppWindow *>(data);
+    self->last_serial = serial;
+}
+
+void PoolProjectManagerAppWindow::pointer_handle_frame(void *data, struct wl_pointer *pointer)
+{
+}
+void PoolProjectManagerAppWindow::pointer_handle_motion(void *data, struct wl_pointer *pointer, uint32_t time,
+                                                        wl_fixed_t sx, wl_fixed_t sy)
+{
+    std::cout << "motion" << std::endl;
+}
+
+const struct wl_pointer_listener PoolProjectManagerAppWindow::pointer_listener = {
+        PoolProjectManagerAppWindow::pointer_handle_enter,
+        PoolProjectManagerAppWindow::pointer_handle_leave,
+        PoolProjectManagerAppWindow::pointer_handle_motion,
+        PoolProjectManagerAppWindow::pointer_handle_button,
+        NULL,
+        PoolProjectManagerAppWindow::pointer_handle_frame,
+        NULL,
+        NULL,
+        NULL,
+};
 
 } // namespace horizon
