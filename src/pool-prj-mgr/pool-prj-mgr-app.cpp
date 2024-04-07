@@ -19,6 +19,7 @@
 #include "pools_window/pools_window.hpp"
 #include "util/stock_info_provider.hpp"
 #include "pool/pool_manager.hpp"
+#include "util/gtk_util.hpp"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>
@@ -201,7 +202,7 @@ void PoolProjectManagerApplication::on_startup()
     signal_shutdown().connect(sigc::mem_fun(*this, &PoolProjectManagerApplication::on_shutdown));
 }
 
-PreferencesWindow *PoolProjectManagerApplication::show_preferences_window(guint32 timestamp)
+PreferencesWindow *PoolProjectManagerApplication::show_preferences_window(guint32 timestamp, const std::string &token)
 {
     if (!preferences_window) {
         preferences_window = new PreferencesWindow(preferences);
@@ -212,11 +213,11 @@ PreferencesWindow *PoolProjectManagerApplication::show_preferences_window(guint3
             preferences.save();
         });
     }
-    preferences_window->present(timestamp);
+    activate_window(preferences_window, timestamp, token);
     return preferences_window;
 }
 
-PoolsWindow *PoolProjectManagerApplication::show_pools_window(guint32 timestamp)
+PoolsWindow *PoolProjectManagerApplication::show_pools_window(guint32 timestamp, const std::string &token)
 {
     if (!pools_window) {
         pools_window = PoolsWindow::create(*this);
@@ -226,13 +227,13 @@ PoolsWindow *PoolProjectManagerApplication::show_pools_window(guint32 timestamp)
             pools_window = nullptr;
         });
     }
-    pools_window->present(timestamp);
+    activate_window(pools_window, timestamp, token);
     return pools_window;
 }
 
-LogWindow *PoolProjectManagerApplication::show_log_window(guint32 timestamp)
+LogWindow *PoolProjectManagerApplication::show_log_window(guint32 timestamp, const std::string &token)
 {
-    log_window->present(timestamp);
+    activate_window(log_window, timestamp, token);
     return log_window;
 }
 
@@ -272,7 +273,8 @@ bool PoolProjectManagerApplication::present_existing_window(const std::string &p
 }
 
 PoolProjectManagerAppWindow &PoolProjectManagerApplication::open_pool_or_project(const std::string &pool_json,
-                                                                                 guint32 timestamp)
+                                                                                 guint32 timestamp,
+                                                                                 const std::string &token)
 {
     PoolProjectManagerAppWindow *appwindow = nullptr;
     for (auto ws : get_windows()) {
@@ -285,7 +287,7 @@ PoolProjectManagerAppWindow &PoolProjectManagerApplication::open_pool_or_project
     if (!appwindow)
         appwindow = create_appwindow();
     appwindow->open_pool(pool_json);
-    appwindow->present(timestamp);
+    activate_window(appwindow, timestamp, token);
     return *appwindow;
 }
 

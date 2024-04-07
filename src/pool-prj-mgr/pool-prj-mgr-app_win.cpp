@@ -487,19 +487,20 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
 {
     const auto op = j.at("op").get<std::string>();
     guint32 timestamp = j.value("time", 0);
+    std::string token = j.value("token", "");
     if (op == "part-placed") {
         UUID part = j.at("part").get<std::string>();
         part_browser_window->placed_part(part);
     }
     else if (op == "show-browser") {
         part_browser_window->set_entity({}, "");
-        part_browser_window->present(timestamp);
+        activate_window(part_browser_window, timestamp, token);
         part_browser_window->focus_search();
     }
     else if (op == "show-browser-assign") {
         const UUID entity_uuid = j.at("entity").get<std::string>();
         part_browser_window->set_entity(entity_uuid, j.at("hint").get<std::string>());
-        part_browser_window->present(timestamp);
+        activate_window(part_browser_window, timestamp, token);
         part_browser_window->focus_search();
     }
     else if (op == "schematic-select") {
@@ -534,13 +535,14 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             json tx;
             tx["op"] = "place";
             tx["time"] = timestamp;
+            tx["token"] = token;
             tx["components"] = j.at("selection");
             app.send_json(pid, tx);
         }
     }
     else if (op == "show-in-browser") {
         part_browser_window->go_to_part(UUID(j.at("part").get<std::string>()));
-        part_browser_window->present(timestamp);
+        activate_window(part_browser_window, timestamp, token);
     }
     else if (op == "has-board") {
         return find_board_process() != nullptr;
@@ -566,6 +568,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             json tx;
             tx["op"] = "reload-netlist";
             tx["time"] = timestamp;
+            tx["token"] = token;
             app.send_json(pid, tx);
         }
     }
@@ -575,6 +578,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             json tx;
             tx["op"] = "present";
             tx["time"] = timestamp;
+            tx["token"] = token;
             app.send_json(pid, tx);
         }
         else {
@@ -587,6 +591,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             json tx;
             tx["op"] = "present";
             tx["time"] = timestamp;
+            tx["token"] = token;
             app.send_json(pid, tx);
         }
         else {
@@ -661,7 +666,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
         }
     }
     else if (op == "preferences") {
-        auto win = app.show_preferences_window(timestamp);
+        auto win = app.show_preferences_window(timestamp, token);
         if (j.count("page"))
             win->show_page(j.at("page").get<std::string>());
     }
@@ -677,7 +682,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             pool_path = pool2->base_path;
         }
         if (pool_path.size()) {
-            auto &win = app.open_pool_or_project(Glib::build_filename(pool_path, "pool.json"), timestamp);
+            auto &win = app.open_pool_or_project(Glib::build_filename(pool_path, "pool.json"), timestamp, token);
             win.pool_notebook_go_to(type, uu);
         }
     }
@@ -688,6 +693,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             tx["op"] = "backannotate";
             tx["connections"] = j.at("connections");
             tx["time"] = timestamp;
+            tx["token"] = token;
             app.send_json(pid, tx);
         }
     }
@@ -706,11 +712,11 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
         }
     }
     else if (op == "focus") {
-        present(timestamp);
+        activate_window(this, timestamp, token);
     }
     else if (op == "open-project") {
         const auto &filename = j.at("filename").get<std::string>();
-        app.open_pool_or_project(filename, timestamp);
+        app.open_pool_or_project(filename, timestamp, token);
     }
     else if (op == "update-pool") {
         const auto filenames = j.at("filenames").get<std::vector<std::string>>();
@@ -1251,6 +1257,7 @@ gboolean PoolProjectManagerAppWindow::part_browser_key_pressed(GtkEventControlle
         json tx;
         tx["op"] = "present";
         tx["time"] = gtk_get_current_event_time();
+        tx["token"] = get_activation_token(self->part_browser_window);
         self->app.send_json(pid, tx);
     }
 
@@ -1469,7 +1476,11 @@ void PoolProjectManagerAppWindow::handle_place_part(const UUID &uu)
     if (auto proc = find_top_schematic_process()) {
         auto pid = proc->proc->get_pid();
         allow_set_foreground_window(pid);
-        app.send_json(pid, {{"op", "place-part"}, {"part", (std::string)uu}, {"time", gtk_get_current_event_time()}});
+        auto token = get_activation_token(part_browser_window);
+        app.send_json(pid, {{"op", "place-part"},
+                            {"part", (std::string)uu},
+                            {"time", gtk_get_current_event_time()},
+                            {"token", token}});
     }
 }
 
@@ -1478,7 +1489,11 @@ void PoolProjectManagerAppWindow::handle_assign_part(const UUID &uu)
     if (auto proc = find_top_schematic_process()) {
         auto pid = proc->proc->get_pid();
         allow_set_foreground_window(pid);
-        app.send_json(pid, {{"op", "assign-part"}, {"part", (std::string)uu}, {"time", gtk_get_current_event_time()}});
+        auto token = get_activation_token(part_browser_window);
+        app.send_json(pid, {{"op", "assign-part"},
+                            {"part", (std::string)uu},
+                            {"time", gtk_get_current_event_time()},
+                            {"token", token}});
     }
 }
 
@@ -1570,7 +1585,8 @@ PoolProjectManagerAppWindow::SpawnResult PoolProjectManagerAppWindow::spawn(Pool
         if (proc->proc) {
             auto pid = proc->proc->get_pid();
             allow_set_foreground_window(pid);
-            app.send_json(pid, {{"op", "present"}, {"time", gtk_get_current_event_time()}});
+            auto token = get_activation_token(this);
+            app.send_json(pid, {{"op", "present"}, {"time", gtk_get_current_event_time()}, {"token", token}});
         }
         else {
             proc->win->present();

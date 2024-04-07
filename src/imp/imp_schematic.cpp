@@ -418,15 +418,16 @@ bool ImpSchematic::handle_broadcast(const json &j)
     if (!ImpBase::handle_broadcast(j)) {
         const auto op = j.at("op").get<std::string>();
         guint32 timestamp = j.value("time", 0);
+        std::string token = j.value("token", "");
         if (op == "place-part") {
-            main_window->present(timestamp);
+            activate_window(main_window, timestamp, token);
             if (force_end_tool()) {
                 auto data = std::make_unique<ToolAddPart::ToolDataAddPart>(j.at("part").get<std::string>());
                 tool_begin(ToolID::ADD_PART, false, {}, std::move(data));
             }
         }
         else if (op == "assign-part" && !core->tool_is_active()) {
-            main_window->present(timestamp);
+            activate_window(main_window, timestamp, token);
             if (force_end_tool()) {
                 auto data = std::make_unique<ToolAddPart::ToolDataAddPart>(j.at("part").get<std::string>());
                 tool_begin(ToolID::ASSIGN_PART, false, {}, std::move(data));
@@ -466,13 +467,13 @@ bool ImpSchematic::handle_broadcast(const json &j)
                     data->connections.push_back(item);
             }
             if (data->connections.size()) {
-                main_window->present(timestamp);
+                activate_window(main_window, timestamp, token);
                 if (force_end_tool())
                     tool_begin(ToolID::BACKANNOTATE_CONNECTION_LINES, true, {}, std::move(data));
             }
         }
         else if (op == "edit-meta") {
-            main_window->present(timestamp);
+            activate_window(main_window, timestamp, token);
             if (force_end_tool())
                 tool_begin(ToolID::EDIT_PROJECT_PROPERTIES);
         }

@@ -9,6 +9,10 @@
 #include <gdk/gdkwin32.h>
 #endif
 
+#ifdef GDK_WINDOWING_WAYLAND
+#include <gdk/gdkwayland.h>
+#endif
+
 namespace horizon {
 void bind_widget(Gtk::Switch *sw, bool &v)
 {
@@ -456,6 +460,32 @@ void listbox_ensure_row_visible_new(Gtk::ListBox *box, Gtk::ListBoxRow *row)
         listbox_ensure_row_visible(box, row);
         conn->disconnect();
     });
+}
+
+std::string get_activation_token(Gtk::Window *win)
+{
+#ifdef GDK_WINDOWING_WAYLAND
+    auto dpy = win->get_display();
+    if (!GDK_IS_WAYLAND_DISPLAY(dpy->gobj()))
+        return "";
+    auto appinfo =
+            Gio::AppInfo::create_from_commandline("horizon-eda", "", Gio::AppInfoCreateFlags::APP_INFO_CREATE_NONE);
+    std::vector<Glib::RefPtr<Gio::File>> files;
+    return dpy->get_app_launch_context()->get_startup_notify_id(appinfo, files);
+#else
+    return "";
+#endif
+}
+
+void activate_window(Gtk::Window *win, guint32 timestamp, const std::string &token)
+{
+    if (token.size()) {
+        if (!win->is_visible())
+            win->present();
+        win->set_startup_id(token);
+    }
+    else
+        win->present(timestamp);
 }
 
 } // namespace horizon

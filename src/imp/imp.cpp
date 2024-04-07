@@ -157,8 +157,10 @@ json ImpBase::send_json(const json &j)
     }
     if (!sockets_connected)
         return nullptr;
-
-    std::string s = j.dump();
+    json j2 = j;
+    if (!j2.contains("token"))
+        j2["token"] = get_activation_token(main_window);
+    std::string s = j2.dump();
     const std::string op = j.value("op", "unknown");
     zmq::message_t msg(UUID::size + s.size() + 1);
     auto m = (char *)msg.data();
@@ -1739,8 +1741,9 @@ bool ImpBase::handle_broadcast(const json &j)
 {
     const auto op = j.at("op").get<std::string>();
     guint32 timestamp = j.value("time", 0);
+    std::string token = j.value("token", "");
     if (op == "present") {
-        main_window->present(timestamp);
+        activate_window(main_window, timestamp, token);
         return true;
     }
     else if (op == "save") {

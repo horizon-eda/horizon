@@ -25,6 +25,7 @@
 #include "parts_window.hpp"
 #include "actions.hpp"
 #include "in_tool_action.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 ImpBoard::ImpBoard(const CoreBoard::Filenames &filenames, const PoolParams &pool_params)
@@ -149,6 +150,7 @@ bool ImpBoard::handle_broadcast(const json &j)
     if (!ImpBase::handle_broadcast(j)) {
         const auto op = j.at("op").get<std::string>();
         guint32 timestamp = j.value("time", 0);
+        std::string token = j.value("token", "");
         if (op == "highlight" && cross_probing_enabled && !core->tool_is_active()) {
             highlights.clear();
             const json &o = j["objects"];
@@ -172,7 +174,7 @@ bool ImpBoard::handle_broadcast(const json &j)
             update_highlights();
         }
         else if (op == "place") {
-            main_window->present(timestamp);
+            activate_window(main_window, timestamp, token);
             if (force_end_tool()) {
                 std::set<SelectableRef> components;
                 const json &o = j["components"];
@@ -187,7 +189,7 @@ bool ImpBoard::handle_broadcast(const json &j)
             }
         }
         else if (op == "reload-netlist") {
-            main_window->present(timestamp);
+            activate_window(main_window, timestamp, token);
             if (force_end_tool())
                 trigger_action(ActionID::RELOAD_NETLIST);
         }
