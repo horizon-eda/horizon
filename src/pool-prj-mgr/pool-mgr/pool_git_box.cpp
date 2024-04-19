@@ -631,7 +631,11 @@ void PoolGitBox::handle_pr()
             git_signature_default(&signature.ptr, repo);
 
             git_oid new_commit_oid;
+#if (LIBGIT2_VER_MAJOR == 1) && (LIBGIT2_VER_MINOR == 8)
+            std::array<git_commit *, 2> parents;
+#else
             std::array<const git_commit *, 2> parents;
+#endif
             parents.at(0) = master_commit;
             parents.at(1) = pr_commit;
             if (git_commit_create(&new_commit_oid, repo, "HEAD", signature, signature, NULL,
