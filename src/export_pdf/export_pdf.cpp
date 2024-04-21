@@ -59,7 +59,7 @@ using Callback = std::function<void(std::string, double)>;
 class PDFExporter {
 public:
     PDFExporter(const class PDFExportSettings &settings, Callback callback)
-        : document(), font(load_font()), canvas(painter, font, settings), cb(callback),
+        : document(), font(load_font(document)), canvas(painter, font, settings), cb(callback),
           filename(settings.output_filename.c_str())
     {
         canvas.use_layer_colors = false;
@@ -107,14 +107,6 @@ public:
 private:
     PoDoFo::PdfMemDocument document;
     PoDoFo::PdfPainter painter;
-    PoDoFo::PdfFont &load_font()
-    {
-        auto bytes = Gio::Resource::lookup_data_global("/org/horizon-eda/horizon/DejaVuSans.ttf");
-        gsize size;
-        auto data = bytes->get_data(size);
-        PoDoFo::bufferview buffer{reinterpret_cast<const char *>(data), size};
-        return document.GetFonts().GetOrCreateFontFromBuffer(buffer);
-    }
     PoDoFo::PdfFont &font;
     PoDoFo::PdfOutlines *outlines = nullptr;
     std::map<UUIDVec, std::shared_ptr<PoDoFo::PdfDestination>> first_pages;

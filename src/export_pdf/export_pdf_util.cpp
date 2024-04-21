@@ -1,6 +1,7 @@
 #include "canvas_pdf.hpp"
 #include "common/picture.hpp"
 #include "export_pdf_util.hpp"
+#include <giomm.h>
 
 namespace horizon {
 
@@ -23,4 +24,15 @@ void render_picture(PoDoFo::PdfDocument &doc, PoDoFo::PdfPainter &painter, const
     painter.DrawImage(*img, to_pt(p.x), to_pt(p.y), sz, sz);
     painter.Restore();
 }
+
+
+PoDoFo::PdfFont &load_font(PoDoFo::PdfDocument &document)
+{
+    auto bytes = Gio::Resource::lookup_data_global("/org/horizon-eda/horizon/DejaVuSans.ttf");
+    gsize size;
+    auto data = bytes->get_data(size);
+    PoDoFo::bufferview buffer{reinterpret_cast<const char *>(data), size};
+    return document.GetFonts().GetOrCreateFontFromBuffer(buffer);
+}
+
 } // namespace horizon
