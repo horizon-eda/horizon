@@ -24,11 +24,11 @@ void export_pdf(const class Board &brd, const class PDFExportSettings &settings,
     document.GetMetadata().SetCreator(PoDoFo::PdfString("Horizon EDA"));
     document.GetMetadata().SetProducer(PoDoFo::PdfString("Horizon EDA"));
 
-    auto font = document.GetFonts().SearchFont("Helvetica");
+    auto &font = load_font(document);
 
     PDFExportSettings my_settings(settings);
     my_settings.include_text = false; // need to work out text placement
-    CanvasPDF ca(painter, *font, my_settings);
+    CanvasPDF ca(painter, font, my_settings);
 
     cb("Exporting Board", 0);
     int64_t border_width = 1_mm;
@@ -40,7 +40,7 @@ void export_pdf(const class Board &brd, const class PDFExportSettings &settings,
     painter.SetCanvas(page);
     painter.GraphicsState.SetLineCapStyle(PoDoFo::PdfLineCapStyle::Round);
     painter.GraphicsState.SetFillColor(PoDoFo::PdfColor(0, 0, 0));
-    painter.TextState.SetFont(*font, 10);
+    painter.TextState.SetFont(font, 10);
     painter.TextState.SetRenderingMode(PoDoFo::PdfTextRenderingMode::Invisible);
     if (settings.mirror) {
         painter.GraphicsState.SetCurrentMatrix(PoDoFo::Matrix::FromCoefficients(
