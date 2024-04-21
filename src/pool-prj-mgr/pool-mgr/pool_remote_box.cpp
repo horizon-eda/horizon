@@ -1137,8 +1137,11 @@ void PoolRemoteBox::create_pr_thread()
 
             autofree_ptr<git_commit> parent_commit(git_commit_free);
             git_commit_lookup(&parent_commit.ptr, repo, &parent_oid);
+#if (LIBGIT2_VER_MAJOR == 1) && (LIBGIT2_VER_MINOR == 8)
+            git_commit *parent_commit_p = parent_commit.ptr;
+#else
             const git_commit *parent_commit_p = parent_commit.ptr;
-
+#endif
 
             autofree_ptr<git_signature> signature(git_signature_free);
             if (git_signature_default(&signature.ptr, repo) != 0) {
@@ -1284,7 +1287,11 @@ void PoolRemoteBox::update_pr_thread()
                 throw std::runtime_error("error getting default signature");
             }
 
+#if (LIBGIT2_VER_MAJOR == 1) && (LIBGIT2_VER_MINOR == 8)
+            git_commit *parent_commit_p = latest_commit.ptr;
+#else
             const git_commit *parent_commit_p = latest_commit.ptr;
+#endif
 
             git_oid new_commit_oid;
             if (git_commit_create(&new_commit_oid, repo, NULL, signature, signature, "UTF-8", pr_title.c_str(), tree, 1,
