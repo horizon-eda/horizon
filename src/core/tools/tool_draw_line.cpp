@@ -69,7 +69,9 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
     else if (args.type == ToolEventType::ACTION) {
         switch (args.action) {
         case InToolActionID::LMB:
-            if (args.target.type == ObjectType::JUNCTION && restrict_mode == RestrictMode::ARB) {
+            if (args.target.type == ObjectType::JUNCTION
+                && (temp_line == nullptr
+                    || get_coord_restrict(temp_line->from->position, args.coords) == args.coords)) {
                 if (temp_line != nullptr) {
                     temp_line->to = doc.r->get_junction(args.target.path.at(0));
                 }
