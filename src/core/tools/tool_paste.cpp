@@ -631,6 +631,8 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
                               .first->second;
             x->to.junc = &brd->junctions.at(junction_xlat.at(x->to.junc.uuid));
             x->from.junc = &brd->junctions.at(junction_xlat.at(x->from.junc.uuid));
+            if (x->is_arc())
+                transform(x->center.value());
             fix_layer(x->layer);
             struct ConnInfo {
                 ConnInfo(const std::string &w, Track::Connection &c) : where(w), conn(c)
