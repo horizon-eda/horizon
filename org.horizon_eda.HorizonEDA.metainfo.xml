@@ -43,7 +43,6 @@
   <requires>
     <control>pointing</control>
     <control>keyboard</control>
-    <display_length compare="ge">medium</display_length>
   </requires>
 
   <provides>
