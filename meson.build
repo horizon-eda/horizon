@@ -100,7 +100,7 @@ else
 endif
 if is_libstdcpp
     stdlibs += cxx.find_library('stdc++')
-    stdlibs += cxx.find_library('stdc++fs')
+    stdlibs += cxx.find_library('stdc++fs', required:false)
 endif
 
 
