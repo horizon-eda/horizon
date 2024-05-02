@@ -1,5 +1,5 @@
 project('horizon-eda', ['cpp', 'c'],
-  version: '2.5.90',
+  version: '2.5.91',
   meson_version: '>=0.53',
   default_options: ['cpp_std=c++17', 'warning_level=1'],
 )
