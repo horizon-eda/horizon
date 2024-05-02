@@ -55,7 +55,10 @@ jobs:
           - container: ubuntu:jammy
             cxx: g++
             cc: gcc
-          - container: ubuntu:lunar
+          - container: ubuntu:mantic
+            cxx: g++
+            cc: gcc
+          - container: ubuntu:noble
             cxx: g++
             cc: gcc
           - container: debian:bullseye
@@ -81,7 +84,13 @@ jobs:
         apt-get install -y locales
         locale-gen ${{ env.LANG }}
     - name: Install dependencies
-      run: apt-get install git build-essential ${{ matrix.os.cxx }} libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libarchive-dev git libspnav-dev meson cmake -y
+      run: apt-get install git build-essential ${{ matrix.os.cxx }} libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev libpodofo-dev python3-dev libarchive-dev git libspnav-dev meson cmake -y
+    - name: Install opencascade
+      run: apt-get install liboce-ocaf-dev -y
+      if: ${{ matrix.os.container != 'ubuntu:noble' }}
+    - name: Install opencascade
+      run: apt-get install libocct-ocaf-dev libocct-data-exchange-dev -y
+      if: ${{ matrix.os.container == 'ubuntu:noble' }}
     - name: Install python dependencies
       if: ${{ matrix.target == 'horizon.so' }}
       run: apt-get install python3-cairo-dev libosmesa6-dev python3-yaml -y
