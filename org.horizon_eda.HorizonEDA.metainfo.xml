@@ -52,6 +52,17 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+    <release version="2.5.90" date="2023-05-02">
+      <url>https://github.com/horizon-eda/horizon/releases/tag/v2.5.90</url>
+      <description>
+        <p>What's new</p>
+        <ul>
+          <li>User layers for flex PCBs</li>
+          <li>Undo/redo selection</li>
+          <li>More selection options</li>
+        </ul>
+      </description>
+    </release>
     <release version="2.5.0" date="2023-06-18">
       <url>https://github.com/horizon-eda/horizon/releases/tag/v2.5.0</url>
       <description>
