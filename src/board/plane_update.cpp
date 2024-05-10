@@ -480,7 +480,7 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
         if (cancel)
             return;
         for (const auto &it : junctions) {
-            if (it.second.net == plane->net && (it.second.layer.overlaps(plane->polygon->layer) || it.second.has_via)
+            if (it.second.net == plane->net && it.second.layer.overlaps(plane->polygon->layer)
                 && frag.contains(it.second.position)) {
                 frag.orphan = false;
                 break;
