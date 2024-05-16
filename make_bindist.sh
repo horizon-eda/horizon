@@ -122,6 +122,9 @@ rm $DISTDIR/lib/gdk-pixbuf-*/*/loaders/*.a
 mkdir -p $DISTDIR/share/glib-2.0/schemas
 cp /mingw64/share/glib-2.0/schemas/gschemas.compiled $DISTDIR/share/glib-2.0/schemas
 
+cp -r /mingw64/lib/engines-3 $DISTDIR/lib
+cp -r /mingw64/lib/ossl-modules $DISTDIR/lib
+
 git log -10 | unix2dos > dist/log.txt
 if [ "$1" != "-n" ]; then
 	cd dist

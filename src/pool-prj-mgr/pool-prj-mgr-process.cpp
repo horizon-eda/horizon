@@ -32,6 +32,9 @@ PoolProjectManagerProcess::PoolProjectManagerProcess(const UUID &uu, PoolProject
             env.push_back(it + "=" + Glib::getenv(it));
         }
         auto exe_dir = get_exe_dir();
+#ifdef G_OS_WIN32
+        env.push_back("OPENSSL_MODULES=" + Glib::build_filename(exe_dir, "lib/ossl-modules"));
+#endif
         auto imp_exe = Glib::build_filename(exe_dir, "horizon-imp");
         argv.push_back(imp_exe);
         switch (type) {
