@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 DISTDIR=dist/horizon
+BINDIR=dist/horizon/bin
 rm -rf dist
-mkdir -p $DISTDIR
-cp build/horizon-{eda,imp}.exe $DISTDIR
-strip $DISTDIR/horizon-*
+mkdir -p $BINDIR
+cp build/horizon-{eda,imp}.exe $BINDIR
+strip $BINDIR/horizon-*
 LIBS=(
 	libstdc++-6.dll\
 	libgcc_s_seh-1.dll\
@@ -101,12 +102,14 @@ LIBS=(
 	libjbig-0.dll\
 	libLerc.dll\
 	libsharpyuv-0.dll\
+	libssl-3-x64.dll\
+	libnghttp2-14.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
 )
 for LIB in "${LIBS[@]}"
 do
-   cp /mingw64/bin/$LIB $DISTDIR
+   cp /mingw64/bin/$LIB $BINDIR
 done
 
 mkdir -p $DISTDIR/share/icons
@@ -121,6 +124,10 @@ rm $DISTDIR/lib/gdk-pixbuf-*/*/loaders/*.a
 
 mkdir -p $DISTDIR/share/glib-2.0/schemas
 cp /mingw64/share/glib-2.0/schemas/gschemas.compiled $DISTDIR/share/glib-2.0/schemas
+
+mkdir -p $DISTDIR/lib
+cp -r /mingw64/lib/engines-3 $DISTDIR/lib
+cp -r /mingw64/lib/ossl-modules $DISTDIR/lib
 
 git log -10 | unix2dos > dist/log.txt
 if [ "$1" != "-n" ]; then
