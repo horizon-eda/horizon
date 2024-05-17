@@ -2,13 +2,18 @@ import version as v
 import xml.etree.ElementTree as ET
 tree = ET.parse('org.horizon_eda.HorizonEDA.metainfo.xml')
 root = tree.getroot()
-version_from_xml = root.find("releases").find("release").attrib["version"]
+release = root.find("releases").find("release")
+version_from_xml = release.attrib["version"]
 
 rc = 0
 if version_from_xml == v.string :
 	print("Version okay")
 else:
 	print("Version mismatch %s != %s"%(v.string, version_from_xml))
+	rc = 1
+
+if release.find("url").text != f"https://github.com/horizon-eda/horizon/releases/tag/{v.string}":
+	print("URL mismatch")
 	rc = 1
 
 #Check changelog versions

@@ -1,3 +1,59 @@
+# Version 2.6.0
+
+## New Features
+
+### Board Editor
+
+ - add user layers ([d3039e1](https://github.com/horizon-eda/horizon/commit/d3039e130710a62ab0dda4f58b1f8ed7de99e0b8))
+
+### Editors
+
+ - add undo/redo selection ([a61938d](https://github.com/horizon-eda/horizon/commit/a61938d6e8bc79f3482aed37720f4a10944c02ea))
+ 
+## Enhancements
+
+### Editors
+
+ - draw line tool: connect to junctions in non-arbitrary restrict modes ([d0da4e8](https://github.com/horizon-eda/horizon/commit/d0da4e878ad05e81ffb97f24e0988ff65c28e380))
+ - add sticky selection option ([d1ef847](https://github.com/horizon-eda/horizon/commit/d1ef8470276291823a11574c4e66bdd4c8c508f7))
+ - make selection modifier action configurable ([d54da98](https://github.com/horizon-eda/horizon/commit/d54da9803740de2f8882c564b850f9b6766e7f6c))
+
+### Pool Manager
+
+ - support git integration even if the pool isn't at the root of the repo ([4a96f0c](https://github.com/horizon-eda/horizon/commit/4a96f0cf133b5cb096e060e90350fe90e9fff938))
+
+### Board Editor
+
+ - add reset button and package column to parts window ([8a262c9](https://github.com/horizon-eda/horizon/commit/8a262c902129359c67374108a2200edcb7a8c17e))
+ - highlighting a net also highlights planes ([31c757d](https://github.com/horizon-eda/horizon/commit/31c757ddc7e9d9127eb8a079c58ec7635bc82947))
+
+## Bugfixes
+
+### Kicad Symbol Import
+
+ - properly handle single-unit symbols ([ee08688](https://github.com/horizon-eda/horizon/commit/ee0868807336c394af6ecf7fe3f83346557db981))
+
+### Schematic Editor
+
+ - don't throw an exception when changing sheets while string property has focus ([7f66c86](https://github.com/horizon-eda/horizon/commit/7f66c869b79299961078761cfdefb4e82664103a))
+ - disallow changing power net netclasses in non-top blocks ([5c1a25a](https://github.com/horizon-eda/horizon/commit/5c1a25ad7b3975729192e2e9f18acb0101ee510a))
+
+### Board Editor
+
+ - keep invalid board panels selectable ([79704c7](https://github.com/horizon-eda/horizon/commit/79704c7bad3e25e77cb0589ed22f31bc04c1c218))
+ - line loop to polygon: properly handle paths with only two vertices ([d2631ab](https://github.com/horizon-eda/horizon/commit/d2631abcc2f3d4a96e736e6dea705a9a3e905a5a))
+ - don't crash when opening a board with missing plane nets ([7085323](https://github.com/horizon-eda/horizon/commit/70853236ac233df229bd28160c6f02acc4382440))
+ - router: don't crash when walking around arcs ([49973c6](https://github.com/horizon-eda/horizon/commit/49973c6ed1fb68b48dffa9645e5aa515d8596af1))
+ - ODB++ export: don't crash if libc doesn't support transliteration ([4af3f8d](https://github.com/horizon-eda/horizon/commit/4af3f8da78f51c5437ea801062e8877ba49d0c46))
+
+### Part Editor
+
+ - don't crash if there are no parametric tables and columns ([a0e3a82](https://github.com/horizon-eda/horizon/commit/a0e3a82bcc5454c61023d2d4f82eb75a03f3ea65))
+
+### Package Editor
+
+ - properly import KiCad packages with digit-only names and decimal angles ([9ae80a7](https://github.com/horizon-eda/horizon/commit/9ae80a744775c76f84561941aff6b5cdb3e3a259))
+
 # Version 2.5.0
 
 ## New Features
