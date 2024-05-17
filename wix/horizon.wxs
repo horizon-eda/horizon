@@ -19,7 +19,7 @@
 				<Shortcut Id="ApplicationStartMenuShortcut"
 						  Name="$(var.FullProductName)"
 						  Description="Horizon EDA Application"
-						  Target="[INSTALLDIR]horizon-eda.exe"
+						  Target="[INSTALLDIR]\bin\horizon-eda.exe"
 						  WorkingDirectory="INSTALLDIR"/>
 				<RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
 				<RegistryValue Root="HKCU" Key="Software\horizon-eda.org\horizon" Name="startmenu_installed" Type="integer" Value="1" KeyPath="yes"/>
@@ -28,7 +28,7 @@
 
 		<DirectoryRef Id="DesktopFolder">
 			<Component Id="DesktopShortcut" Guid="12177fc9-8bad-429c-94dc-793d162a3c0d" Win64='$(var.Win64)'>
-				<Shortcut Id="DesktopShortcut" Directory="DesktopFolder" Target="[INSTALLDIR]horizon-eda.exe" Name="$(var.FullProductName)" WorkingDirectory='INSTALLDIR' />
+				<Shortcut Id="DesktopShortcut" Directory="DesktopFolder" Target="[INSTALLDIR]\bin\horizon-eda.exe" Name="$(var.FullProductName)" WorkingDirectory='INSTALLDIR' />
 				<RemoveFolder Id="DesktopFolder" On="uninstall"/>
 				<RegistryValue Root="HKCU" Key="Software\horizon-eda.org\horizon" Name="desktop_installed" Type="integer" Value="1" KeyPath="yes"/>
 			</Component>
