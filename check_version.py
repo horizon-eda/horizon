@@ -12,7 +12,7 @@ else:
 	print("Version mismatch %s != %s"%(v.string, version_from_xml))
 	rc = 1
 
-if release.find("url").text != f"https://github.com/horizon-eda/horizon/releases/tag/{v.string}":
+if release.find("url").text != f"https://github.com/horizon-eda/horizon/releases/tag/v{v.string}":
 	print("URL mismatch")
 	rc = 1
 
