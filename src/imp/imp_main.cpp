@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
     auto pool_base_path = Glib::getenv("HORIZON_POOL");
     horizon::setup_locale();
 
-    horizon::create_config_dir();
+    horizon::create_cache_and_config_dir();
 
     std::unique_ptr<horizon::ImpBase> imp = nullptr;
     if (mode_sch) {

@@ -34,7 +34,7 @@ PyMODINIT_FUNC PyInit_horizon(void)
     Gio::init();
     horizon::PoolManager::init();
     horizon::setup_locale();
-    horizon::create_config_dir();
+    horizon::create_cache_and_config_dir();
 
     if (PyType_Ready(&ProjectType) < 0)
         return NULL;
