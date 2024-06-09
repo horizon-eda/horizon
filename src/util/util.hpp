@@ -52,7 +52,7 @@ bool endswith(const std::string &haystack, const std::string &needle);
 
 int strcmp_natural(const std::string &a, const std::string &b);
 int strcmp_natural(const char *a, const char *b);
-void create_config_dir();
+void create_cache_and_config_dir();
 std::string get_config_dir();
 
 void replace_backslash(std::string &path);

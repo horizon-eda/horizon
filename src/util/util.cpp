@@ -2,7 +2,9 @@
 #include <fstream>
 #include <giomm.h>
 #include <glibmm/miscutils.h>
+#include <glib/gfileutils.h>
 #include <glib/gstdio.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #ifdef G_OS_WIN32
 #include <windows.h>
@@ -215,11 +217,12 @@ std::string get_config_dir()
     return Glib::build_filename(Glib::get_user_config_dir(), "horizon");
 }
 
-void create_config_dir()
+void create_cache_and_config_dir()
 {
+    auto cache_dir = Glib::get_user_cache_dir();
+    g_mkdir_with_parents(cache_dir.c_str(), S_IRWXU);
     auto config_dir = get_config_dir();
-    if (!Glib::file_test(config_dir, Glib::FILE_TEST_EXISTS))
-        Gio::File::create_for_path(config_dir)->make_directory_with_parents();
+    g_mkdir_with_parents(config_dir.c_str(), S_IRWXU);
 }
 
 void replace_backslash(std::string &path)

@@ -1170,7 +1170,7 @@ int main(int c_argc, char *c_argv[])
     Gio::init();
     PoolManager::init();
     git_libgit2_init();
-    create_config_dir();
+    create_cache_and_config_dir();
 
     Reviewer rev;
     return rev.main(c_argc, c_argv);

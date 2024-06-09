@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     gtk_disable_setlocale();
     auto application = horizon::PoolProjectManagerApplication::create();
     horizon::setup_locale();
-    horizon::create_config_dir();
+    horizon::create_cache_and_config_dir();
     horizon::PoolManager::init();
     horizon::AutomaticPreferences::get();
     horizon::StockInfoProvider::init_db();
