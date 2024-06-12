@@ -407,7 +407,7 @@ static bool getModelLabel(const std::string &aFileName, TDF_Label &aLabel, Handl
 
 void export_step(const std::string &filename, const Board &brd, class IPool &pool, bool include_models,
                  std::function<void(const std::string &)> progress_cb, const BoardColors *colors,
-                 const std::string &prefix, uint64_t min_diameter)
+                 const std::string &prefix, uint64_t min_diameter, std::set<UUID> *pkgs_excluded)
 {
     try {
         auto app = XCAFApp_Application::GetApplication();
@@ -501,6 +501,9 @@ void export_step(const std::string &filename, const Board &brd, class IPool &poo
             pkgs.reserve(brd.packages.size());
             for (const auto &[uuid, package] : brd.packages) {
                 if (package.component && package.component->nopopulate) {
+                    continue;
+                }
+                if (pkgs_excluded && (pkgs_excluded->find(package.package.uuid) != pkgs_excluded->end())) {
                     continue;
                 }
                 pkgs.push_back(&package);
