@@ -31,7 +31,11 @@ endif
 if not cxx.links('int main(void) {return 0;}', dependencies: opencascade)
     message('opencascade link args are broken, replacing')
     # on ubuntu 20.04, the link args are broken and are missing the -l for some reason??
-    opencascade = declare_dependency(dependencies: opencascade.partial_dependency(compile_args: true, includes:true), link_args:['-lTKSTEP', '-lTKernel', '-lTKXCAF', '-lTKXSBase', '-lTKBRep', '-lTKCDF', '-lTKXDESTEP', '-lTKLCAF', '-lTKMath', '-lTKMesh', '-lTKTopAlgo', '-lTKPrim', '-lTKBO', '-lTKShHealing', '-lTKBRep', '-lTKG3d', '-lTKGeomBase', '-lTKHLR'])
+    if opencascade.version() >= '7.8.0'
+        opencascade = declare_dependency(dependencies: opencascade.partial_dependency(compile_args: true, includes:true), link_args:['-lTKDESTEP', '-lTKernel', '-lTKXCAF', '-lTKXSBase', '-lTKBRep', '-lTKCDF', '-lTKXSDRAWSTEP', '-lTKLCAF', '-lTKMath', '-lTKMesh', '-lTKTopAlgo', '-lTKPrim', '-lTKBO', '-lTKShHealing', '-lTKBRep', '-lTKG3d', '-lTKGeomBase', '-lTKHLR'])
+    else
+        opencascade = declare_dependency(dependencies: opencascade.partial_dependency(compile_args: true, includes:true), link_args:['-lTKSTEP', '-lTKernel', '-lTKXCAF', '-lTKXSBase', '-lTKBRep', '-lTKCDF', '-lTKXDESTEP', '-lTKLCAF', '-lTKMath', '-lTKMesh', '-lTKTopAlgo', '-lTKPrim', '-lTKBO', '-lTKShHealing', '-lTKBRep', '-lTKG3d', '-lTKGeomBase', '-lTKHLR'])
+    endif
 endif
 
 
