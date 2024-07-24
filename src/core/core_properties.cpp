@@ -25,43 +25,7 @@ namespace horizon {
 bool Core::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, PropertyValue &value)
 {
     switch (type) {
-    case ObjectType::HOLE: {
-        auto hole = get_hole(uu);
-        switch (property) {
-        case ObjectProperty::ID::PLATED:
-            dynamic_cast<PropertyValueBool &>(value).value = hole->plated;
-            return true;
 
-        case ObjectProperty::ID::DIAMETER:
-            dynamic_cast<PropertyValueInt &>(value).value = hole->diameter;
-            return true;
-
-        case ObjectProperty::ID::LENGTH:
-            dynamic_cast<PropertyValueInt &>(value).value = hole->length;
-            return true;
-
-        case ObjectProperty::ID::SHAPE:
-            dynamic_cast<PropertyValueInt &>(value).value = static_cast<int>(hole->shape);
-            return true;
-
-        case ObjectProperty::ID::PARAMETER_CLASS:
-            dynamic_cast<PropertyValueString &>(value).value = hole->parameter_class;
-            return true;
-
-        case ObjectProperty::ID::SPAN:
-            dynamic_cast<PropertyValueLayerRange &>(value).value = hole->span;
-            return true;
-
-        case ObjectProperty::ID::POSITION_X:
-        case ObjectProperty::ID::POSITION_Y:
-        case ObjectProperty::ID::ANGLE:
-            get_placement(hole->placement, value, property);
-            return true;
-
-        default:
-            return false;
-        }
-    } break;
 
     case ObjectType::LINE: {
         auto line = get_line(uu);
@@ -236,46 +200,6 @@ bool Core::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
 bool Core::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, const PropertyValue &value)
 {
     switch (type) {
-    case ObjectType::HOLE: {
-        auto hole = get_hole(uu);
-        switch (property) {
-        case ObjectProperty::ID::PLATED:
-            hole->plated = dynamic_cast<const PropertyValueBool &>(value).value;
-            break;
-
-        case ObjectProperty::ID::DIAMETER:
-            hole->diameter = dynamic_cast<const PropertyValueInt &>(value).value;
-            break;
-
-        case ObjectProperty::ID::LENGTH:
-            if (hole->shape != Hole::Shape::SLOT)
-                return false;
-            hole->length = dynamic_cast<const PropertyValueInt &>(value).value;
-            break;
-
-        case ObjectProperty::ID::SHAPE:
-            hole->shape = static_cast<Hole::Shape>(dynamic_cast<const PropertyValueInt &>(value).value);
-            break;
-
-        case ObjectProperty::ID::PARAMETER_CLASS:
-            hole->parameter_class = dynamic_cast<const PropertyValueString &>(value).value;
-            break;
-
-        case ObjectProperty::ID::SPAN:
-            hole->span = dynamic_cast<const PropertyValueLayerRange &>(value).value;
-            break;
-
-        case ObjectProperty::ID::POSITION_X:
-        case ObjectProperty::ID::POSITION_Y:
-        case ObjectProperty::ID::ANGLE:
-            set_placement(hole->placement, value, property);
-            break;
-
-        default:
-            return false;
-        }
-    } break;
-
     case ObjectType::LINE: {
         auto line = get_line(uu);
         switch (property) {
@@ -438,18 +362,6 @@ bool Core::get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID
 {
     meta.is_settable = true;
     switch (type) {
-    case ObjectType::HOLE:
-        switch (property) {
-        case ObjectProperty::ID::LENGTH:
-            meta.is_settable = get_hole(uu)->shape == Hole::Shape::SLOT;
-            return true;
-        case ObjectProperty::ID::SPAN:
-            layers_to_meta(meta);
-            return true;
-        default:
-            return false;
-        }
-        break;
     case ObjectType::TEXT:
         switch (property) {
         case ObjectProperty::ID::LAYER:

@@ -89,10 +89,6 @@ std::map<UUID, Picture> *CorePackage::get_picture_map()
 {
     return &package.pictures;
 }
-std::map<UUID, Hole> *CorePackage::get_hole_map()
-{
-    return nullptr;
-}
 
 std::pair<Coordi, Coordi> CorePackage::get_bbox()
 {

@@ -42,7 +42,6 @@ public:
 
 private:
     std::map<UUID, Polygon> *get_polygon_map() override;
-    std::map<UUID, Hole> *get_hole_map() override;
 
     Padstack padstack;
     std::string m_filename;

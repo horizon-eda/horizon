@@ -46,7 +46,7 @@ void ToolHelperMove::move_do(const Coordi &delta)
             doc.r->get_junction(it.uuid)->position += delta;
             break;
         case ObjectType::HOLE:
-            doc.r->get_hole(it.uuid)->placement.shift += delta;
+            doc.a->get_padstack().holes.at(it.uuid).placement.shift += delta;
             break;
         case ObjectType::SYMBOL_PIN:
             doc.y->get_symbol_pin(it.uuid).position += delta;
@@ -342,7 +342,7 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
         } break;
 
         case ObjectType::HOLE: {
-            Hole *hole = doc.r->get_hole(it.uuid);
+            Hole *hole = &doc.a->get_padstack().holes.at(it.uuid);
             transform(hole->placement.shift, center, rotate);
             if (rotate) {
                 hole->placement.inc_angle_deg(-90);

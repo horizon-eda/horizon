@@ -260,7 +260,7 @@ Coordi ToolMove::get_selection_center()
             accu.accumulate(doc.r->get_junction(it.uuid)->position);
             break;
         case ObjectType::HOLE:
-            accu.accumulate(doc.r->get_hole(it.uuid)->placement.shift);
+            accu.accumulate(doc.a->get_padstack().holes.at(it.uuid).placement.shift);
             break;
         case ObjectType::BOARD_HOLE:
             accu.accumulate(doc.b->get_board()->holes.at(it.uuid).placement.shift);

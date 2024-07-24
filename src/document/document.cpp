@@ -130,25 +130,6 @@ void Document::delete_polygon(const UUID &uu)
     map->erase(uu);
 }
 
-Hole *Document::insert_hole(const UUID &uu)
-{
-    auto map = get_hole_map();
-    auto x = map->emplace(std::make_pair(uu, uu));
-    return &(x.first->second);
-}
-
-Hole *Document::get_hole(const UUID &uu)
-{
-    auto map = get_hole_map();
-    return &map->at(uu);
-}
-
-void Document::delete_hole(const UUID &uu)
-{
-    auto map = get_hole_map();
-    map->erase(uu);
-}
-
 Dimension *Document::insert_dimension(const UUID &uu)
 {
     auto map = get_dimension_map();
@@ -226,9 +207,6 @@ std::string Document::get_display_name(ObjectType type, const UUID &uu, const UU
 std::string Document::get_display_name(ObjectType type, const UUID &uu)
 {
     switch (type) {
-    case ObjectType::HOLE:
-        return get_hole(uu)->shape == Hole::Shape::ROUND ? "Round" : "Slot";
-
     case ObjectType::TEXT:
         return get_text(uu)->text;
 

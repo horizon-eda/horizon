@@ -317,9 +317,12 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
         const json &o = j["holes"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
-            auto x = doc.r->insert_hole(u);
-            *x = Hole(u, it.value());
-            transform(x->placement, ObjectType::HOLE);
+            auto &x = doc.a->get_padstack()
+                              .holes
+                              .emplace(std::piecewise_construct, std::forward_as_tuple(u),
+                                       std::forward_as_tuple(u, it.value()))
+                              .first->second;
+            transform(x.placement, ObjectType::HOLE);
             selection.emplace(u, ObjectType::HOLE);
         }
     }

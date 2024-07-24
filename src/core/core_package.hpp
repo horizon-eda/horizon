@@ -61,7 +61,6 @@ private:
     std::map<UUID, Arc> *get_arc_map() override;
     std::map<UUID, Text> *get_text_map() override;
     std::map<UUID, Polygon> *get_polygon_map() override;
-    std::map<UUID, Hole> *get_hole_map() override;
     std::map<UUID, Keepout> *get_keepout_map() override;
     std::map<UUID, Dimension> *get_dimension_map() override;
     std::map<UUID, Picture> *get_picture_map() override;

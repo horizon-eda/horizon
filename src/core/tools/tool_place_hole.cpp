@@ -9,7 +9,7 @@ namespace horizon {
 
 bool ToolPlaceHole::can_begin()
 {
-    return doc.r->has_object_type(ObjectType::HOLE);
+    return doc.a;
 }
 
 ToolResponse ToolPlaceHole::begin(const ToolArgs &args)
@@ -27,7 +27,8 @@ ToolResponse ToolPlaceHole::begin(const ToolArgs &args)
 
 void ToolPlaceHole::create_hole(const Coordi &c)
 {
-    temp = doc.r->insert_hole(UUID::random());
+    const auto uu = UUID::random();
+    temp = &doc.a->get_padstack().holes.emplace(uu, uu).first->second;
     temp->placement.shift = c;
     if (tool_id == ToolID::PLACE_HOLE_SLOT) {
         temp->shape = Hole::Shape::SLOT;
@@ -49,7 +50,7 @@ ToolResponse ToolPlaceHole::update(const ToolArgs &args)
 
         case InToolActionID::RMB:
         case InToolActionID::CANCEL:
-            doc.r->delete_hole(temp->uuid);
+            doc.a->get_padstack().holes.erase(temp->uuid);
             temp = 0;
             selection.clear();
             for (auto it : holes_placed) {

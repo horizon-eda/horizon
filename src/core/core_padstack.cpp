@@ -36,6 +36,43 @@ bool CorePadstack::get_property(ObjectType type, const UUID &uu, ObjectProperty:
     if (Core::get_property(type, uu, property, value))
         return true;
     switch (type) {
+    case ObjectType::HOLE: {
+        auto hole = &padstack.holes.at(uu);
+        switch (property) {
+        case ObjectProperty::ID::PLATED:
+            dynamic_cast<PropertyValueBool &>(value).value = hole->plated;
+            return true;
+
+        case ObjectProperty::ID::DIAMETER:
+            dynamic_cast<PropertyValueInt &>(value).value = hole->diameter;
+            return true;
+
+        case ObjectProperty::ID::LENGTH:
+            dynamic_cast<PropertyValueInt &>(value).value = hole->length;
+            return true;
+
+        case ObjectProperty::ID::SHAPE:
+            dynamic_cast<PropertyValueInt &>(value).value = static_cast<int>(hole->shape);
+            return true;
+
+        case ObjectProperty::ID::PARAMETER_CLASS:
+            dynamic_cast<PropertyValueString &>(value).value = hole->parameter_class;
+            return true;
+
+        case ObjectProperty::ID::SPAN:
+            dynamic_cast<PropertyValueLayerRange &>(value).value = hole->span;
+            return true;
+
+        case ObjectProperty::ID::POSITION_X:
+        case ObjectProperty::ID::POSITION_Y:
+        case ObjectProperty::ID::ANGLE:
+            get_placement(hole->placement, value, property);
+            return true;
+
+        default:
+            return false;
+        }
+    } break;
     case ObjectType::SHAPE: {
         auto shape = &padstack.shapes.at(uu);
         switch (property) {
@@ -88,6 +125,46 @@ bool CorePadstack::set_property(ObjectType type, const UUID &uu, ObjectProperty:
     if (Core::set_property(type, uu, property, value))
         return true;
     switch (type) {
+    case ObjectType::HOLE: {
+        auto hole = &padstack.holes.at(uu);
+        switch (property) {
+        case ObjectProperty::ID::PLATED:
+            hole->plated = dynamic_cast<const PropertyValueBool &>(value).value;
+            break;
+
+        case ObjectProperty::ID::DIAMETER:
+            hole->diameter = dynamic_cast<const PropertyValueInt &>(value).value;
+            break;
+
+        case ObjectProperty::ID::LENGTH:
+            if (hole->shape != Hole::Shape::SLOT)
+                return false;
+            hole->length = dynamic_cast<const PropertyValueInt &>(value).value;
+            break;
+
+        case ObjectProperty::ID::SHAPE:
+            hole->shape = static_cast<Hole::Shape>(dynamic_cast<const PropertyValueInt &>(value).value);
+            break;
+
+        case ObjectProperty::ID::PARAMETER_CLASS:
+            hole->parameter_class = dynamic_cast<const PropertyValueString &>(value).value;
+            break;
+
+        case ObjectProperty::ID::SPAN:
+            hole->span = dynamic_cast<const PropertyValueLayerRange &>(value).value;
+            break;
+
+        case ObjectProperty::ID::POSITION_X:
+        case ObjectProperty::ID::POSITION_Y:
+        case ObjectProperty::ID::ANGLE:
+            set_placement(hole->placement, value, property);
+            break;
+
+        default:
+            return false;
+        }
+    } break;
+
     case ObjectType::SHAPE: {
         auto shape = &padstack.shapes.at(uu);
         switch (property) {
@@ -146,6 +223,20 @@ bool CorePadstack::get_property_meta(ObjectType type, const UUID &uu, ObjectProp
     if (Core::get_property_meta(type, uu, property, meta))
         return true;
     switch (type) {
+    case ObjectType::HOLE: {
+        auto hole = &padstack.holes.at(uu);
+        switch (property) {
+        case ObjectProperty::ID::LENGTH:
+            meta.is_settable = hole->shape == Hole::Shape::SLOT;
+            return true;
+        case ObjectProperty::ID::SPAN:
+            layers_to_meta(meta);
+            return true;
+        default:
+            return false;
+        }
+    } break;
+
     case ObjectType::SHAPE: {
         auto shape = &padstack.shapes.at(uu);
         switch (property) {
@@ -176,6 +267,9 @@ bool CorePadstack::get_property_meta(ObjectType type, const UUID &uu, ObjectProp
 std::string CorePadstack::get_display_name(ObjectType type, const UUID &uu)
 {
     switch (type) {
+    case ObjectType::HOLE:
+        return padstack.holes.at(uu).shape == Hole::Shape::ROUND ? "Round" : "Slot";
+
     case ObjectType::SHAPE: {
         auto form = padstack.shapes.at(uu).form;
         switch (form) {
@@ -206,10 +300,6 @@ LayerProvider &CorePadstack::get_layer_provider()
 std::map<UUID, Polygon> *CorePadstack::get_polygon_map()
 {
     return &padstack.polygons;
-}
-std::map<UUID, Hole> *CorePadstack::get_hole_map()
-{
-    return &padstack.holes;
 }
 
 void CorePadstack::rebuild_internal(bool from_undo, const std::string &comment)

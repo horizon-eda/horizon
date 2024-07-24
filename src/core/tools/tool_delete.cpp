@@ -252,7 +252,7 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
             doc.r->delete_junction(it.uuid);
             break;
         case ObjectType::HOLE:
-            doc.r->delete_hole(it.uuid);
+            doc.a->get_padstack().holes.erase(it.uuid);
             break;
         case ObjectType::PAD:
             doc.k->get_package().pads.erase(it.uuid);

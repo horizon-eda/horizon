@@ -24,10 +24,6 @@ public:
     class Polygon *get_polygon(const UUID &uu) override;
     void delete_polygon(const UUID &uu) override;
 
-    class Hole *insert_hole(const UUID &uu) override;
-    class Hole *get_hole(const UUID &uu) override;
-    void delete_hole(const UUID &uu) override;
-
     class Dimension *insert_dimension(const UUID &uu) override;
     class Dimension *get_dimension(const UUID &uu) override;
     void delete_dimension(const UUID &uu) override;
@@ -65,10 +61,6 @@ protected:
         return nullptr;
     }
     virtual std::map<UUID, Polygon> *get_polygon_map()
-    {
-        return nullptr;
-    }
-    virtual std::map<UUID, Hole> *get_hole_map()
     {
         return nullptr;
     }

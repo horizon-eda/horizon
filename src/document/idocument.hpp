@@ -26,10 +26,6 @@ public:
     virtual class Polygon *get_polygon(const UUID &uu) = 0;
     virtual void delete_polygon(const UUID &uu) = 0;
 
-    virtual class Hole *insert_hole(const UUID &uu) = 0;
-    virtual class Hole *get_hole(const UUID &uu) = 0;
-    virtual void delete_hole(const UUID &uu) = 0;
-
     virtual class Dimension *insert_dimension(const UUID &uu) = 0;
     virtual class Dimension *get_dimension(const UUID &uu) = 0;
     virtual void delete_dimension(const UUID &uu) = 0;
