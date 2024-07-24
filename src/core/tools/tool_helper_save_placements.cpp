@@ -1,6 +1,7 @@
 #include "tool_helper_save_placements.hpp"
 #include "document/idocument_board.hpp"
 #include "document/idocument_package.hpp"
+#include "document/idocument_padstack.hpp"
 #include "board/board.hpp"
 #include "pool/package.hpp"
 #include "util/text_renderer.hpp"
@@ -24,6 +25,8 @@ bool ToolHelperSavePlacements::type_is_supported(ObjectType type)
     case ObjectType::BOARD_DECAL:
     case ObjectType::PICTURE:
     case ObjectType::PAD:
+    case ObjectType::HOLE:
+    case ObjectType::SHAPE:
         return true;
 
     default:
@@ -89,6 +92,16 @@ void ToolHelperSavePlacements::save_placements()
                     std::piecewise_construct, std::forward_as_tuple(it),
                     std::forward_as_tuple(pad.placement, pad.placement.transform_bb(pad.padstack.get_bbox())));
         } break;
+        case ObjectType::HOLE: {
+            const auto &hole = doc.a->get_padstack().holes.at(it.uuid);
+            placements.emplace(std::piecewise_construct, std::forward_as_tuple(it),
+                               std::forward_as_tuple(hole.placement, hole.placement.transform_bb(hole.get_bbox())));
+        } break;
+        case ObjectType::SHAPE: {
+            const auto &shape = doc.a->get_padstack().shapes.at(it.uuid);
+            placements.emplace(std::piecewise_construct, std::forward_as_tuple(it),
+                               std::forward_as_tuple(shape.placement, shape.placement.transform_bb(shape.get_bbox())));
+        } break;
         default:;
         }
     }
@@ -121,6 +134,12 @@ void ToolHelperSavePlacements::apply_placements(Callback fn)
             break;
         case ObjectType::PAD:
             doc.k->get_package().pads.at(sel.uuid).placement = fn(sel, it);
+            break;
+        case ObjectType::HOLE:
+            doc.a->get_padstack().holes.at(sel.uuid).placement = fn(sel, it);
+            break;
+        case ObjectType::SHAPE:
+            doc.a->get_padstack().shapes.at(sel.uuid).placement = fn(sel, it);
             break;
         default:;
         }
