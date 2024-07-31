@@ -25,6 +25,27 @@
 
 using json = nlohmann::json;
 
+#define EXPECT_FILENAME_ARG(name, i)                                                                                   \
+    if (filenames.size() <= i || !Glib::file_test(filenames.at(i), Glib::FILE_TEST_EXISTS)) {                          \
+        g_warning("%s filename argument at %i missing or does not exist", name, static_cast<int>(i));                  \
+    }
+
+#define EXPECT_DIR_ARG(name, i)                                                                                        \
+    if (filenames.size() <= i || filenames.at(i).size() == 0) {                                                        \
+        g_warning("%s directory argument at %i missing", name, static_cast<int>(i));                                   \
+    }
+
+#define EXPECT_POOL_ENV()                                                                                              \
+    if (pool_base_path.length() <= 0) {                                                                                \
+        g_warning("HORIZON_POOL dir env var is not set");                                                              \
+    }                                                                                                                  \
+    else if (!Glib::file_test(pool_base_path, Glib::FILE_TEST_EXISTS)) {                                               \
+        g_warning("HORIZON_POOL dir does not exist");                                                                  \
+    }                                                                                                                  \
+    else if (!Glib::file_test(Glib::build_filename(pool_base_path, "pool.json"), Glib::FILE_TEST_EXISTS)) {            \
+        g_warning("HORIZON_POOL dir does not contain pool.json");                                                      \
+    }
+
 int main(int argc, char *argv[])
 {
 #ifdef G_OS_WIN32
@@ -38,6 +59,7 @@ int main(int argc, char *argv[])
 
     Glib::OptionContext options;
     options.set_summary("horizon interactive manipulator");
+    options.set_description("The 'HORIZON_POOL' env var should be set directory of the pool being used.");
     options.set_help_enabled();
 
     Glib::OptionGroup group("imp", "imp");
@@ -123,41 +145,59 @@ int main(int argc, char *argv[])
     horizon::setup_locale();
 
     horizon::create_cache_and_config_dir();
-
     std::unique_ptr<horizon::ImpBase> imp = nullptr;
     if (mode_sch) {
+        EXPECT_FILENAME_ARG("blocks", 0)
+        EXPECT_DIR_ARG("pictures", 1)
+        EXPECT_POOL_ENV()
         imp.reset(new horizon::ImpSchematic(filenames, {pool_base_path}));
     }
     else if (mode_symbol) {
+        EXPECT_FILENAME_ARG("symbol", 0)
+        EXPECT_POOL_ENV()
         imp.reset(new horizon::ImpSymbol(filenames.at(0), pool_base_path, temp_mode));
         if (filenames.size() > 1)
             imp->set_suggested_filename(filenames.at(1));
     }
     else if (mode_padstack) {
+        EXPECT_FILENAME_ARG("padstack", 0)
+        EXPECT_POOL_ENV()
         imp.reset(new horizon::ImpPadstack(filenames.at(0), pool_base_path, temp_mode));
         if (filenames.size() > 1)
             imp->set_suggested_filename(filenames.at(1));
     }
     else if (mode_package) {
+        EXPECT_FILENAME_ARG("package", 0)
+        EXPECT_POOL_ENV()
         imp.reset(new horizon::ImpPackage(filenames.at(0), pool_base_path, temp_mode));
         if (filenames.size() > 1)
             imp->set_suggested_filename(filenames.at(1));
     }
     else if (mode_board) {
+        EXPECT_FILENAME_ARG("board", 0)
+        EXPECT_FILENAME_ARG("planes", 1)
+        EXPECT_FILENAME_ARG("blocks", 2)
+        EXPECT_DIR_ARG("pictures", 3)
+        EXPECT_POOL_ENV()
         imp.reset(new horizon::ImpBoard(filenames, {pool_base_path}));
     }
     else if (mode_frame) {
+        EXPECT_FILENAME_ARG("frame", 0)
+        EXPECT_POOL_ENV()
         imp.reset(new horizon::ImpFrame(filenames.at(0), pool_base_path, temp_mode));
         if (filenames.size() > 1)
             imp->set_suggested_filename(filenames.at(1));
     }
     else if (mode_decal) {
+        EXPECT_FILENAME_ARG("decal", 0)
+        EXPECT_POOL_ENV()
         imp.reset(new horizon::ImpDecal(filenames.at(0), pool_base_path, temp_mode));
         if (filenames.size() > 1)
             imp->set_suggested_filename(filenames.at(1));
     }
     else {
         std::cout << "wrong invocation" << std::endl;
+        std::cout << options.get_help().c_str();
         return 1;
     }
     imp->set_read_only(read_only);
@@ -167,3 +207,7 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
+#undef EXPECT_FILENAME_ARG
+#undef EXPECT_DIR_ARG
+#undef EXPECT_POOL_ENV
