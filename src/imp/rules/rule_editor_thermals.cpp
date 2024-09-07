@@ -170,7 +170,7 @@ void RuleEditorThermals::populate()
             b2->join_group(*b1);
             box->pack_start(*b2, true, true, 0);
 
-            auto b3 = Gtk::manage(new Gtk::RadioButton("Thermal rlief"));
+            auto b3 = Gtk::manage(new Gtk::RadioButton("Thermal relief"));
             b3->set_mode(false);
             b3->join_group(*b1);
             box->pack_start(*b3, true, true, 0);
