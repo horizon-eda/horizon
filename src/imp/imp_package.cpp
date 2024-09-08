@@ -188,8 +188,26 @@ void ImpPackage::construct()
     footprint_generator_window = FootprintGeneratorWindow::create(main_window, core_package);
     footprint_generator_window->signal_generated().connect(sigc::mem_fun(*this, &ImpBase::canvas_update_from_pp));
 
+    auto editor = new ParameterSetEditor(&core_package.parameter_set, false);
+    editor->signal_create_extra_widget().connect([this, editor](ParameterID id) {
+        auto w = Gtk::manage(new Gtk::CheckButton("Fixed"));
+        w->set_tooltip_text("Fixed parameters cannot be changed by board rules");
+        w->set_active(core_package.parameters_fixed.count(id));
+        w->signal_toggled().connect([this, id, w, editor] {
+            if (w->get_active()) {
+                core_package.parameters_fixed.insert(id);
+            }
+            else {
+                core_package.parameters_fixed.erase(id);
+            }
+            editor->signal_changed().emit();
+        });
+        return w;
+    });
+    editor->signal_remove_extra_widget().connect([this](ParameterID id) { core_package.parameters_fixed.erase(id); });
+
     parameter_window =
-            new ParameterWindow(main_window, &core_package.parameter_program_code, &core_package.parameter_set);
+            new ParameterWindow(main_window, &core_package.parameter_program_code, &core_package.parameter_set, editor);
     parameter_window->signal_changed().connect([this] { core_package.set_needs_save(); });
     {
         auto button = Gtk::manage(new Gtk::Button("Parameters…"));
@@ -650,6 +668,18 @@ bool ImpPackage::set_filename()
         core_package.set_filename(Glib::build_filename(filename, "package.json"));
     });
     return success;
+}
+
+unsigned int ImpPackage::get_required_version() const
+{
+    if (core_package.parameters_fixed.size() || std::any_of(package.pads.cbegin(), package.pads.cend(), [](auto &it) {
+            return it.second.parameters_fixed.size() != 0;
+        })) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
 }
 
 } // namespace horizon

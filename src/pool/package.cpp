@@ -118,7 +118,7 @@ int Package::Model::get_rotation(unsigned int ax) const
     }
 }
 
-static const unsigned int app_version = 0;
+static const unsigned int app_version = 1;
 
 unsigned int Package::get_app_version()
 {
@@ -211,6 +211,12 @@ Package::Package(const UUID &uu, const json &j, IPool &pool)
     if (j.count("parameter_set")) {
         parameter_set = parameter_set_from_json(j.at("parameter_set"));
     }
+    if (j.count("parameters_fixed")) {
+        const json &o = j["parameters_fixed"];
+        for (const auto &value : o) {
+            parameters_fixed.insert(parameter_id_from_string(value.get<std::string>()));
+        }
+    }
     if (j.count("alternate_for")) {
         alternate_for = pool.get_package(UUID(j.at("alternate_for").get<std::string>()));
     }
@@ -263,8 +269,9 @@ Package::Package(const Package &pkg)
     : uuid(pkg.uuid), name(pkg.name), manufacturer(pkg.manufacturer), tags(pkg.tags), junctions(pkg.junctions),
       lines(pkg.lines), arcs(pkg.arcs), texts(pkg.texts), pads(pkg.pads), polygons(pkg.polygons),
       keepouts(pkg.keepouts), dimensions(pkg.dimensions), pictures(pkg.pictures), parameter_set(pkg.parameter_set),
-      parameter_program(pkg.parameter_program), grid_settings(pkg.grid_settings), models(pkg.models),
-      default_model(pkg.default_model), alternate_for(pkg.alternate_for), version(pkg.version), warnings(pkg.warnings)
+      parameters_fixed(pkg.parameters_fixed), parameter_program(pkg.parameter_program),
+      grid_settings(pkg.grid_settings), models(pkg.models), default_model(pkg.default_model),
+      alternate_for(pkg.alternate_for), version(pkg.version), warnings(pkg.warnings)
 {
     update_refs();
 }
@@ -285,6 +292,7 @@ void Package::operator=(Package const &pkg)
     dimensions = pkg.dimensions;
     pictures = pkg.pictures;
     parameter_set = pkg.parameter_set;
+    parameters_fixed = pkg.parameters_fixed;
     parameter_program = pkg.parameter_program;
     grid_settings = pkg.grid_settings;
     models = pkg.models;
@@ -324,23 +332,12 @@ void Package::update_refs()
     parameter_program.pkg = this;
 }
 
-static void copy_param(ParameterSet &dest, const ParameterSet &src, ParameterID id)
-{
-    if (src.count(id))
-        dest[id] = src.at(id);
-}
-
-static void copy_param(ParameterSet &dest, const ParameterSet &src, const std::set<ParameterID> &ids)
-{
-    for (const auto id : ids) {
-        copy_param(dest, src, id);
-    }
-}
-
 std::optional<std::string> Package::apply_parameter_set(const ParameterSet &ps)
 {
     auto ps_this = parameter_set;
-    copy_param(ps_this, ps, ParameterID::COURTYARD_EXPANSION);
+    copy_param(ps_this, ps, parameters_fixed,
+               {ParameterID::COURTYARD_EXPANSION, ParameterID::SOLDER_MASK_EXPANSION,
+                ParameterID::PASTE_MASK_CONTRACTION, ParameterID::HOLE_SOLDER_MASK_EXPANSION});
     {
         auto r = parameter_program.run(ps_this);
         if (r.has_value()) {
@@ -350,7 +347,7 @@ std::optional<std::string> Package::apply_parameter_set(const ParameterSet &ps)
 
     for (auto &it : pads) {
         auto ps_pad = it.second.parameter_set;
-        copy_param(ps_pad, ps,
+        copy_param(ps_pad, ps_this, it.second.parameters_fixed,
                    {ParameterID::SOLDER_MASK_EXPANSION, ParameterID::PASTE_MASK_CONTRACTION,
                     ParameterID::HOLE_SOLDER_MASK_EXPANSION});
         if (auto r = it.second.padstack.apply_parameter_set(ps_pad)) {
@@ -439,7 +436,9 @@ const std::map<int, Layer> &Package::get_layers() const
 json Package::serialize() const
 {
     json j;
-    version.serialize(j);
+    if (const auto v = get_required_version()) {
+        j["version"] = v;
+    }
     j["uuid"] = (std::string)uuid;
     j["type"] = "package";
     j["name"] = name;
@@ -447,6 +446,9 @@ json Package::serialize() const
     j["tags"] = tags;
     j["parameter_program"] = parameter_program.get_code();
     j["parameter_set"] = parameter_set_serialize(parameter_set);
+    for (const auto &it : parameters_fixed) {
+        j["parameters_fixed"].push_back(parameter_id_to_string(it));
+    }
     if (alternate_for && alternate_for->uuid != uuid)
         j["alternate_for"] = (std::string)alternate_for->uuid;
     j["models"] = json::object();
@@ -566,6 +568,17 @@ std::vector<const Pad *> Package::get_pads_sorted() const
     std::sort(pads_sorted.begin(), pads_sorted.end(),
               [](const auto a, const auto b) { return strcmp_natural(a->name, b->name) < 0; });
     return pads_sorted;
+}
+
+unsigned int Package::get_required_version() const
+{
+    if (parameters_fixed.size()
+        || std::any_of(pads.cbegin(), pads.cend(), [](auto &it) { return it.second.parameters_fixed.size() != 0; })) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
 }
 
 } // namespace horizon
