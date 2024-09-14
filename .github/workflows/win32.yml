@@ -64,7 +64,7 @@ jobs:
       run: |
         RSYNC_PASSWORD=${{ secrets.RSYNC_PASSWORD }} rsync -avz --stats dist/*.zip rsync://horizon-eda@mirror-1.server.selfnet.de/horizon-eda/win64-ci/${{ env.artifact_name }}.zip
         echo "::notice title=Download this build::Get the zip archive from the selfnet mirror: https://mirror.selfnet.de/horizon-eda/win64-ci/${{ env.artifact_name }}.zip"
-    - uses: actions/upload-artifact@v2-preview
+    - uses: actions/upload-artifact@v4
       if: github.event_name == 'pull_request'
       with:
         name: ${{ env.artifact_name }}
@@ -75,7 +75,7 @@ jobs:
         $env:PATH += ";$($Env:WIX)\bin"
         cd wix
         .\install.bat
-    - uses: actions/upload-artifact@v2-preview
+    - uses: actions/upload-artifact@v4
       if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/win32-installer'
       with:
         name: horizon-win64-installer
