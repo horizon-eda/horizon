@@ -37,7 +37,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
-      run: apt-get update -y && apt-get install git build-essential libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libarchive-dev git libosmesa6-dev cmake meson -y
+      run: apt-get update -y && apt-get install git build-essential libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev libocct-data-exchange-dev libocct-draw-dev occt-misc libpodofo-dev python3-dev libarchive-dev git libosmesa6-dev cmake meson -y
     - name: Build
       run: |
         mkdir ../build
@@ -81,13 +81,7 @@ jobs:
         apt-get install -y locales
         locale-gen ${{ env.LANG }}
     - name: Install dependencies
-      run: apt-get install git build-essential ${{ matrix.os.cxx }} libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev libpodofo-dev python3-dev libarchive-dev git libspnav-dev meson cmake -y
-    - name: Install opencascade
-      run: apt-get install liboce-ocaf-dev -y
-      if: ${{ matrix.os.container != 'ubuntu:noble' }}
-    - name: Install opencascade
-      run: apt-get install libocct-ocaf-dev libocct-data-exchange-dev -y
-      if: ${{ matrix.os.container == 'ubuntu:noble' }}
+      run: apt-get install git build-essential ${{ matrix.os.cxx }} libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev libpodofo-dev python3-dev libarchive-dev git libspnav-dev meson cmake libocct-data-exchange-dev libocct-draw-dev occt-misc -y
     - name: Install python dependencies
       if: ${{ matrix.target == 'horizon.so' }}
       run: apt-get install python3-cairo-dev libosmesa6-dev python3-yaml -y
@@ -154,7 +148,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
-      run: zypper in -y git make gcc gcc-c++ pkg-config cppzmq-devel oce-devel gtkmm3-devel libgit2-devel libuuid-devel sqlite3-devel librsvg-devel cairomm-devel glm-devel boost-devel libcurl-devel libpodofo-devel binutils-gold libarchive-devel libspnav-devel python3 meson cmake
+      run: zypper in -y git make gcc gcc-c++ pkg-config cppzmq-devel occt-devel gtkmm3-devel libgit2-devel libuuid-devel sqlite3-devel librsvg-devel cairomm-devel glm-devel boost-devel libcurl-devel libpodofo-devel binutils-gold libarchive-devel libspnav-devel python3 meson cmake
 
     - name: Install python dependencies
       if: ${{ matrix.target == 'horizon.so' }}
@@ -177,7 +171,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
-      run: apt-get update -y && apt-get install git build-essential libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libarchive-dev git meson cmake -y
+      run: apt-get update -y && apt-get install git build-essential libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev libocct-data-exchange-dev libocct-draw-dev occt-misc libpodofo-dev python3-dev libarchive-dev git meson cmake -y
     - name: Build
       run: |
         mkdir ../build

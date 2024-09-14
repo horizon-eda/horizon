@@ -31,7 +31,7 @@ jobs:
           mingw-w64-x86_64-cppzmq
           mingw-w64-x86_64-glm
           mingw-w64-x86_64-libgit2-winhttp
-          mingw-w64-x86_64-oce
+          mingw-w64-x86_64-opencascade
           mingw-w64-x86_64-podofo
           mingw-w64-x86_64-libarchive
           mingw-w64-x86_64-curl-winssl
