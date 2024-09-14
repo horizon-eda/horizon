@@ -55,9 +55,6 @@ jobs:
           - container: ubuntu:jammy
             cxx: g++
             cc: gcc
-          - container: ubuntu:mantic
-            cxx: g++
-            cc: gcc
           - container: ubuntu:noble
             cxx: g++
             cc: gcc
