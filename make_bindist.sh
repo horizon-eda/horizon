@@ -83,6 +83,12 @@ LIBS=(
 	libTKXCAF.dll\
 	libTKXDESTEP.dll\
 	libTKXSBase.dll\
+	libTKIGES.dll\
+	libTKXDE.dll\
+	libTKVCAF.dll\
+	libTKBool.dll\
+	libtbb12.dll\
+	libtbbmalloc.dll\
 	libbrotlicommon.dll\
 	libbrotlidec.dll\
 	libfribidi-0.dll\
@@ -104,6 +110,7 @@ LIBS=(
 	libsharpyuv-0.dll\
 	libssl-3-x64.dll\
 	libnghttp2-14.dll\
+	libnghttp3-9.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
 )
