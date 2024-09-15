@@ -31,7 +31,6 @@ jobs:
           mingw-w64-x86_64-cppzmq
           mingw-w64-x86_64-glm
           mingw-w64-x86_64-libgit2-winhttp
-          mingw-w64-x86_64-opencascade
           mingw-w64-x86_64-podofo
           mingw-w64-x86_64-libarchive
           mingw-w64-x86_64-curl-winssl
@@ -44,6 +43,11 @@ jobs:
           git
           dos2unix
           rsync
+    - name: Install Opencascade lite
+      shell: msys2 {0}
+      run: |
+        wget https://github.com/carrotIndustries/mingw-opencascade-lite/releases/download/v7.7.2-2/mingw-w64-x86_64-opencascade-lite-7.7.2-2-any.pkg.tar.zst
+        pacman -U mingw-w64-x86_64-opencascade-lite-7.7.2-2-any.pkg.tar.zst --noconfirm
     - name: Build
       shell: msys2 {0}
       run: |
