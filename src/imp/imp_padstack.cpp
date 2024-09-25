@@ -29,14 +29,6 @@ void ImpPadstack::canvas_update()
     canvas->update(core_padstack.get_canvas_data());
 }
 
-class MyCheckButton : public Gtk::CheckButton, public Changeable {
-public:
-    MyCheckButton(const std::string &s) : Gtk::CheckButton(s)
-    {
-        signal_toggled().connect([this] { s_signal_changed.emit(); });
-    }
-};
-
 void ImpPadstack::construct()
 {
     ImpLayer::construct_layer_box();
@@ -79,7 +71,7 @@ void ImpPadstack::construct()
 
     auto editor = new ParameterSetEditor(&core_padstack.parameter_set, false); //, &core_padstack.parameters_required);
     editor->signal_create_extra_widget().connect([this](ParameterID id) {
-        auto w = Gtk::manage(new MyCheckButton("Required"));
+        auto w = Gtk::manage(new Gtk::CheckButton("Required"));
         w->set_tooltip_text("Parameter has to be set in pad");
         w->set_active(core_padstack.parameters_required.count(id));
         w->signal_toggled().connect([this, id, w] {
