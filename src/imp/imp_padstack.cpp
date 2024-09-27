@@ -70,17 +70,18 @@ void ImpPadstack::construct()
     });
 
     auto editor = new ParameterSetEditor(&core_padstack.parameter_set, false); //, &core_padstack.parameters_required);
-    editor->signal_create_extra_widget().connect([this](ParameterID id) {
+    editor->signal_create_extra_widget().connect([this, editor](ParameterID id) {
         auto w = Gtk::manage(new Gtk::CheckButton("Required"));
         w->set_tooltip_text("Parameter has to be set in pad");
         w->set_active(core_padstack.parameters_required.count(id));
-        w->signal_toggled().connect([this, id, w] {
+        w->signal_toggled().connect([this, id, w, editor] {
             if (w->get_active()) {
                 core_padstack.parameters_required.insert(id);
             }
             else {
                 core_padstack.parameters_required.erase(id);
             }
+            editor->signal_changed().emit();
         });
         return w;
     });
