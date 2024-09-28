@@ -1,7 +1,7 @@
 #version 330
 out vec4 outputColor;
-in vec2 x;
-in vec2 dim;
+smooth in vec2 x;
+flat in vec2 dim;
 uniform float scale;
 uniform int fill;
 uniform vec3 color;

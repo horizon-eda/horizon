@@ -1,8 +1,8 @@
 #version 330
 uniform mat3 screenmat;
 uniform mat3 viewmat;
-out vec2 x;
-out vec2 dim;
+smooth out vec2 x;
+flat out vec2 dim;
 uniform vec2 a,b;
 
 void main() {
