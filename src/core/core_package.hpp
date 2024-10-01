@@ -81,6 +81,7 @@ private:
 public:
     std::string parameter_program_code;
     ParameterSet parameter_set;
+    std::set<ParameterID> parameters_fixed;
 
     std::map<UUID, Package::Model> models;
     UUID default_model;

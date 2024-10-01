@@ -44,7 +44,11 @@ PadParameterSetWindow::PadParameterSetWindow(Gtk::Window *parent, class ImpInter
         for (auto &it : pads) {
             it->pool_padstack = ps;
             it->padstack = *ps;
-            it->padstack.apply_parameter_set(it->parameter_set);
+            auto ps_this = it->parameter_set;
+            copy_param(ps_this, pkg.parameter_set, it->parameters_fixed,
+                       {ParameterID::SOLDER_MASK_EXPANSION, ParameterID::PASTE_MASK_CONTRACTION,
+                        ParameterID::HOLE_SOLDER_MASK_EXPANSION});
+            it->padstack.apply_parameter_set(ps_this);
         }
         emit_event(ToolDataWindow::Event::UPDATE);
     });
@@ -79,6 +83,39 @@ void PadParameterSetWindow::load_pad()
         delete editor;
     editor = Gtk::manage(new ParameterSetEditor(&pad_current->parameter_set, false));
     editor->set_has_apply_all_toggle("Apply to all selected pads (Shift+Enter)");
+    editor->signal_create_extra_widget().connect([this](ParameterID id) {
+        auto w = Gtk::manage(new Gtk::CheckButton("Fixed"));
+        w->set_tooltip_text("Fixed pad parameters cannot be changed by package or board rules");
+        w->set_active(pad_current->parameters_fixed.count(id));
+        w->signal_toggled().connect([this, id, w] {
+            if (w->get_active()) {
+                pad_current->parameters_fixed.insert(id);
+            }
+            else {
+                pad_current->parameters_fixed.erase(id);
+            }
+            if (params_apply_all.count(id)) {
+                apply_all(id);
+                for (auto pad : pads) {
+                    auto ps_this = pad->parameter_set;
+                    copy_param(ps_this, pkg.parameter_set, pad->parameters_fixed,
+                               {ParameterID::SOLDER_MASK_EXPANSION, ParameterID::PASTE_MASK_CONTRACTION,
+                                ParameterID::HOLE_SOLDER_MASK_EXPANSION});
+                    pad->padstack.apply_parameter_set(ps_this);
+                }
+            }
+            else {
+                auto ps_current = pad_current->parameter_set;
+                copy_param(ps_current, pkg.parameter_set, pad_current->parameters_fixed,
+                           {ParameterID::SOLDER_MASK_EXPANSION, ParameterID::PASTE_MASK_CONTRACTION,
+                            ParameterID::HOLE_SOLDER_MASK_EXPANSION});
+                pad_current->padstack.apply_parameter_set(ps_current);
+            }
+            emit_event(ToolDataWindow::Event::UPDATE);
+        });
+        return w;
+    });
+    editor->signal_remove_extra_widget().connect([this](ParameterID id) { pad_current->parameters_fixed.erase(id); });
     editor->populate();
     editor->set_apply_all(params_apply_all);
     editor->signal_apply_all_toggled().connect([this](ParameterID id, bool enable) {
@@ -86,7 +123,11 @@ void PadParameterSetWindow::load_pad()
             params_apply_all.insert(id);
             apply_all(id);
             for (auto pad : pads) {
-                pad->padstack.apply_parameter_set(pad->parameter_set);
+                auto ps_this = pad->parameter_set;
+                copy_param(ps_this, pkg.parameter_set, pad->parameters_fixed,
+                           {ParameterID::SOLDER_MASK_EXPANSION, ParameterID::PASTE_MASK_CONTRACTION,
+                            ParameterID::HOLE_SOLDER_MASK_EXPANSION});
+                pad->padstack.apply_parameter_set(ps_this);
             }
             emit_event(ToolDataWindow::Event::UPDATE);
         }
@@ -100,7 +141,11 @@ void PadParameterSetWindow::load_pad()
             apply_all(id);
         }
         for (auto pad : pads) {
-            pad->padstack.apply_parameter_set(pad->parameter_set);
+            auto ps_this = pad->parameter_set;
+            copy_param(ps_this, pkg.parameter_set, pad->parameters_fixed,
+                       {ParameterID::SOLDER_MASK_EXPANSION, ParameterID::PASTE_MASK_CONTRACTION,
+                        ParameterID::HOLE_SOLDER_MASK_EXPANSION});
+            pad->padstack.apply_parameter_set(ps_this);
         }
         emit_event(ToolDataWindow::Event::UPDATE);
     });
@@ -118,7 +163,11 @@ void PadParameterSetWindow::load_pad()
         auto ps = pool.get_padstack(padstack_button->property_selected_uuid());
         pad_current->pool_padstack = ps;
         pad_current->padstack = *ps;
-        pad_current->padstack.apply_parameter_set(pad_current->parameter_set);
+        auto ps_current = pad_current->parameter_set;
+        copy_param(ps_current, pkg.parameter_set, pad_current->parameters_fixed,
+                   {ParameterID::SOLDER_MASK_EXPANSION, ParameterID::PASTE_MASK_CONTRACTION,
+                    ParameterID::HOLE_SOLDER_MASK_EXPANSION});
+        pad_current->padstack.apply_parameter_set(ps_current);
         emit_event(ToolDataWindow::Event::UPDATE);
     });
     box2->pack_start(*padstack_button, true, true, 0);
@@ -129,6 +178,12 @@ void PadParameterSetWindow::apply_all(ParameterID id)
 {
     for (auto it : pads) {
         it->parameter_set[id] = pad_current->parameter_set.at(id);
+        if (pad_current->parameters_fixed.count(id)) {
+            it->parameters_fixed.insert(id);
+        }
+        else {
+            it->parameters_fixed.erase(id);
+        }
     }
 }
 

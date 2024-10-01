@@ -19,6 +19,7 @@ public:
     Placement placement;
     std::string name;
     ParameterSet parameter_set;
+    std::set<ParameterID> parameters_fixed;
 
     uuid_ptr<class Net> net = nullptr;
     bool is_nc = false;

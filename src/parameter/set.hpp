@@ -1,6 +1,7 @@
 #pragma once
 #include "nlohmann/json_fwd.hpp"
 #include <map>
+#include <set>
 #include <string>
 
 namespace horizon {
@@ -31,4 +32,8 @@ ParameterSet parameter_set_from_json(const json &j);
 ParameterID parameter_id_from_string(const std::string &s);
 const std::string &parameter_id_to_string(ParameterID id);
 const std::string &parameter_id_to_name(ParameterID id);
+void copy_param(ParameterSet &dest, const ParameterSet &src, const std::set<ParameterID> &parameters_fixed,
+                ParameterID id);
+void copy_param(ParameterSet &dest, const ParameterSet &src, const std::set<ParameterID> &parameters_fixed,
+                const std::set<ParameterID> &ids);
 } // namespace horizon

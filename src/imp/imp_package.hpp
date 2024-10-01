@@ -55,6 +55,13 @@ protected:
 
     std::vector<std::string> get_view_hints() override;
 
+    unsigned int get_required_version() const override;
+
+    bool uses_dynamic_version() const override
+    {
+        return true;
+    }
+
 private:
     void canvas_update() override;
     CorePackage core_package;

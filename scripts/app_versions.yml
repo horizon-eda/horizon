@@ -30,6 +30,8 @@ versions:
     6: add net ties
     7: keep nets on unconnected labels
     8: add BOM export customisation
+  package:
+    1: package-defined solder mask & paste parameters override board parameters
   project:
     1: replace pool cache with project pool
     2: add hierarchy

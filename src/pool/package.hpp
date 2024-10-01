@@ -104,6 +104,7 @@ public:
     std::map<UUID, Picture> pictures;
 
     ParameterSet parameter_set;
+    std::set<ParameterID> parameters_fixed;
     MyParameterProgram parameter_program;
     PackageRules rules;
     GridSettings grid_settings;
@@ -125,6 +126,8 @@ public:
 
     std::vector<Pad *> get_pads_sorted();
     std::vector<const Pad *> get_pads_sorted() const;
+
+    unsigned int get_required_version() const;
 
 private:
     void update_refs();

@@ -66,4 +66,22 @@ ParameterSet parameter_set_from_json(const json &j)
     }
     return ps;
 }
+
+
+void copy_param(ParameterSet &dest, const ParameterSet &src, const std::set<ParameterID> &parameters_fixed,
+                ParameterID id)
+{
+    if (src.count(id) && !parameters_fixed.count(id)) {
+        dest[id] = src.at(id);
+    }
+}
+
+void copy_param(ParameterSet &dest, const ParameterSet &src, const std::set<ParameterID> &parameters_fixed,
+                const std::set<ParameterID> &ids)
+{
+    for (const auto id : ids) {
+        copy_param(dest, src, parameters_fixed, id);
+    }
+}
+
 } // namespace horizon
