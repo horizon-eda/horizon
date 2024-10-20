@@ -67,8 +67,7 @@ std::vector<std::string> ImpPackage::ask_3d_model_filenames()
                 replace_backslash(rel_path);
                 rel_names.push_back(rel_path);
             }
-            if (std::none_of(rel_names.cbegin(), rel_names.cend(),
-                             std::bind(std::string::empty, std::placeholders::_1))) {
+            if (std::none_of(rel_names.cbegin(), rel_names.cend(), [](const auto &s) { return s.empty(); })) {
                 return rel_names;
             }
             else {
