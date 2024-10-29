@@ -2,6 +2,7 @@
 #include <git2.h>
 #include "util/autofree_ptr.hpp"
 #include "util/gtk_util.hpp"
+#include "util/git_util.hpp"
 #include "pool_notebook.hpp"
 #include "util/str_util.hpp"
 #include "util/util.hpp"
@@ -631,11 +632,7 @@ void PoolGitBox::handle_pr()
             git_signature_default(&signature.ptr, repo);
 
             git_oid new_commit_oid;
-#if (LIBGIT2_VER_MAJOR == 1) && (LIBGIT2_VER_MINOR == 8) && (LIBGIT2_VER_REVISION < 2)
-            std::array<git_commit *, 2> parents;
-#else
-            std::array<const git_commit *, 2> parents;
-#endif
+            std::array<git_util::git_commit_maybe_const *, 2> parents;
             parents.at(0) = master_commit;
             parents.at(1) = pr_commit;
             if (git_commit_create(&new_commit_oid, repo, "HEAD", signature, signature, NULL,
