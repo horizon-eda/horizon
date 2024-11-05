@@ -13,9 +13,15 @@ public:
     void update(const std::map<UUIDPath<2>, std::string> &items);
     void set_title(const std::string &title);
     typedef sigc::signal<void, std::vector<UUIDPath<2>>> type_signal_place;
+    typedef sigc::signal<void, std::vector<UUIDPath<2>>> type_signal_selected;
     type_signal_place signal_place()
     {
         return s_signal_place;
+    }
+
+    type_signal_selected signal_selected()
+    {
+        return s_signal_selected;
     }
 
 private:
@@ -36,6 +42,7 @@ private:
     Gtk::ToolButton *button_place = nullptr;
 
     type_signal_place s_signal_place;
+    type_signal_selected s_signal_selected;
     void row_activated(const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *column);
 };
 } // namespace horizon

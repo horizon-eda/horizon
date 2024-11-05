@@ -28,8 +28,21 @@ UnplacedBox::UnplacedBox(const std::string &title) : Gtk::Box(Gtk::Orientation::
     view->set_rubber_banding(true);
     view->append_column(title, list_columns.text);
     view->get_column(0)->set_sort_column(list_columns.text);
-    view->get_selection()->signal_changed().connect(
-            [this] { button_place->set_sensitive(view->get_selection()->count_selected_rows()); });
+    view->get_selection()->signal_changed().connect([this] {
+        button_place->set_sensitive(view->get_selection()->count_selected_rows());
+        auto paths = view->get_selection()->get_selected_rows();
+        std::vector<UUIDPath<2>> uuids;
+        for (const auto &path : paths) {
+            auto it = store->get_iter(path);
+            if (it) {
+                Gtk::TreeModel::Row row = *it;
+                uuids.emplace_back(row[list_columns.uuid]);
+            }
+        }
+        if (uuids.size()) {
+            s_signal_selected.emit(uuids);
+        }
+    });
     view->show();
 
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());
@@ -83,6 +96,7 @@ void UnplacedBox::row_activated(const Gtk::TreeModel::Path &path, Gtk::TreeViewC
 
 void UnplacedBox::update(const std::map<UUIDPath<2>, std::string> &items)
 {
+    s_signal_selected.block();
     set_visible(items.size());
     std::set<UUIDPath<2>> items_available;
     {
@@ -106,6 +120,7 @@ void UnplacedBox::update(const std::map<UUIDPath<2>, std::string> &items)
             row[list_columns.uuid] = uu;
         }
     }
+    s_signal_selected.unblock();
 }
 
 void UnplacedBox::set_title(const std::string &title)

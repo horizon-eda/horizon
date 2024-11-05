@@ -791,6 +791,18 @@ void ImpBoard::construct()
         }
         this->tool_begin(ToolID::MAP_PACKAGE, true, components);
     });
+    unplaced_box->signal_selected().connect([this](const auto &items) {
+        json j;
+        j["op"] = "board-select";
+        j["selection"] = nullptr;
+        for (const auto &it : items) {
+            json k;
+            k["type"] = static_cast<int>(ObjectType::COMPONENT);
+            k["uuid"] = (std::string)it.at(0);
+            j["selection"].push_back(k);
+        }
+        send_json(j);
+    });
     core_board.signal_rebuilt().connect(sigc::mem_fun(*this, &ImpBoard::update_unplaced));
     update_unplaced();
     core_board.signal_tool_changed().connect(
