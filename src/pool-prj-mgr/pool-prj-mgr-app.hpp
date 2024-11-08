@@ -34,6 +34,11 @@ public:
 
     public:
         std::map<std::string, Glib::DateTime> recent_items;
+        struct RecentItemTitleCacheItem {
+            int64_t mtime;
+            std::string title;
+        };
+        std::map<std::string, RecentItemTitleCacheItem> recent_items_title_cache;
         std::deque<UUID> part_favorites;
         bool pool_doc_info_bar_dismissed = false;
         std::string project_author;

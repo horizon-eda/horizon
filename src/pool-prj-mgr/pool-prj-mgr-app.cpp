@@ -112,6 +112,14 @@ void PoolProjectManagerApplication::UserConfig::load(const std::string &filename
                 recent_items.emplace(fn, Glib::DateTime::create_now_local(v.get<int64_t>()));
         }
     }
+    if (j.count("recent_title_cache")) {
+        const json &o = j["recent_title_cache"];
+        for (const auto &[fn, v] : o.items()) {
+            const UserConfig::RecentItemTitleCacheItem it{v.at("mtime").get<int64_t>(),
+                                                          v.at("title").get<std::string>()};
+            recent_items_title_cache.emplace(fn, it);
+        }
+    }
 }
 
 void PoolProjectManagerApplication::UserConfig::save(const std::string &filename)
@@ -131,6 +139,10 @@ void PoolProjectManagerApplication::UserConfig::save(const std::string &filename
     j["project_base_path"] = project_base_path;
     j["pool_doc_info_bar_dismissed"] = pool_doc_info_bar_dismissed;
     j["project_pool"] = (std::string)project_pool;
+    for (const auto &[path, it] : recent_items_title_cache) {
+        const json o = {{"title", it.title}, {"mtime", it.mtime}};
+        j["recent_title_cache"][path] = o;
+    }
     save_json_to_file(filename, j);
 }
 
