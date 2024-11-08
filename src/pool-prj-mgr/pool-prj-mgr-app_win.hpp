@@ -156,6 +156,8 @@ private:
     void set_view_mode(ViewMode mode);
 
     void update_recent_items();
+    std::optional<std::string> peek_recent_name_from_path(const std::string &path);
+    std::optional<std::string> peek_recent_name(const std::string &path);
 
     void handle_open();
     void handle_close();

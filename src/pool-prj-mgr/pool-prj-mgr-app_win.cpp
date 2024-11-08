@@ -876,9 +876,41 @@ void PoolProjectManagerAppWindow::handle_create()
     }
 }
 
-static std::optional<std::string> peek_name(const std::string &path)
+std::optional<std::string> PoolProjectManagerAppWindow::peek_recent_name(const std::string &path)
 {
-    std::string name;
+    try {
+        const auto ppath = fs::u8path(path);
+        auto mtime = fs::last_write_time(ppath);
+        if (Glib::path_get_basename(path) != "pool.json") {
+            for (const auto &p : fs::directory_iterator(ppath.parent_path())) {
+                if (fs::is_regular_file(p) && endswith(p.path().u8string(), ".json"))
+                    mtime = std::max(mtime, fs::last_write_time(p));
+            }
+        }
+        const auto mtime_i = mtime.time_since_epoch().count();
+        if (app.user_config.recent_items_title_cache.count(path)) {
+            auto &it = app.user_config.recent_items_title_cache.at(path);
+            if (mtime_i <= it.mtime) // cache is okay
+                return it.title;
+        }
+        {
+            const auto name = peek_recent_name_from_path(path);
+            if (name) {
+                auto &it = app.user_config.recent_items_title_cache[path];
+                it.title = name.value();
+                it.mtime = mtime_i;
+                return it.title;
+            }
+            return {};
+        }
+    }
+    catch (...) {
+        return {};
+    }
+}
+
+std::optional<std::string> PoolProjectManagerAppWindow::peek_recent_name_from_path(const std::string &path)
+{
     try {
         if (Glib::path_get_basename(path) == "pool.json") {
             PoolInfo pool_info(Glib::path_get_dirname(path));
@@ -893,9 +925,8 @@ static std::optional<std::string> peek_name(const std::string &path)
         }
     }
     catch (...) {
-        name = "error opening!";
+        return {};
     }
-    return name;
 }
 
 static std::vector<std::pair<std::string, Glib::DateTime>>
@@ -925,7 +956,7 @@ void PoolProjectManagerAppWindow::update_recent_items()
     std::vector<std::pair<std::string, Glib::DateTime>> recent_items_sorted = recent_sort(app.user_config.recent_items);
     for (const auto &it : recent_items_sorted) {
         const std::string &path = it.first;
-        if (const auto name = peek_name(path)) {
+        if (const auto name = peek_recent_name(path)) {
             auto box = Gtk::manage(new RecentItemBox(*name, it.first, it.second));
             if (endswith(path, "pool.json"))
                 recent_pools_listbox->append(*box);
