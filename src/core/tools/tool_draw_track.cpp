@@ -74,7 +74,6 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
                             brd.airwires_expand = {ju.net->uuid};
                         else if (temp_junc->net)
                             brd.airwires_expand = {temp_junc->net->uuid};
-                        brd.junctions.erase(temp_junc->uuid);
                         temp_junc = nullptr;
                         return finish();
                     }
@@ -89,7 +88,6 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
                         // if (temp_junc->net && (temp_junc->net != pad.net)) {
                         if ((temp_junc->net == pad.net) || (temp_junc->net == nullptr)) {
                             temp_track->to.connect(&pkg, &pad);
-                            brd.junctions.erase(temp_junc->uuid);
                             temp_junc = nullptr;
                             brd.airwires_expand = {pad.net->uuid};
                             return finish();
