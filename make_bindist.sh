@@ -54,7 +54,7 @@ LIBS=(
 	libzmq.dll\
 	libsodium-26.dll\
 	libcurl-4.dll\
-	libgit2-1.7.dll\
+	libgit2-1.8.dll\
 	libidn2-0.dll\
 	libssh2-1.dll\
 	libunistring-5.dll\
@@ -109,8 +109,6 @@ LIBS=(
 	libLerc.dll\
 	libsharpyuv-0.dll\
 	libssl-3-x64.dll\
-	libnghttp2-14.dll\
-	libnghttp3-9.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
 )
