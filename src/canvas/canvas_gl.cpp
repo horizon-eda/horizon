@@ -258,7 +258,7 @@ bool CanvasGL::on_render(const Glib::RefPtr<Gdk::GLContext> &context)
     glClear(GL_COLOR_BUFFER_BIT);
     GL_CHECK_ERROR
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ONE);
     if (show_pictures)
         picture_renderer.render(false);
     GL_CHECK_ERROR
