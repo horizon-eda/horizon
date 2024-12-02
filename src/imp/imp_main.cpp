@@ -25,17 +25,19 @@
 
 using json = nlohmann::json;
 
-static void expect_filename_arg(const std::vector<std::string> &filenames, const char *name, size_t i)
+static void expect_filename_arg(const std::vector<std::string> &filenames, const char *name, size_t i,
+                                bool required = true)
 {
-    if (filenames.size() <= i || !Glib::file_test(filenames.at(i), Glib::FILE_TEST_EXISTS)) {
-        g_warning("%s filename argument at %i missing or does not exist", name, static_cast<int>(i));
+    if (filenames.size() <= i || (required && !Glib::file_test(filenames.at(i), Glib::FILE_TEST_EXISTS))) {
+        g_warning("%s filename argument %i is missing%s", name, static_cast<int>(i),
+                  required ? " or does not exist" : "");
     }
 }
 
 static void expect_dir_arg(const std::vector<std::string> &filenames, const char *name, size_t i)
 {
-    if (filenames.size() <= i || filenames.at(i).size() == 0) {
-        g_warning("%s directory argument at %i missing", name, static_cast<int>(i));
+    if (filenames.size() <= i || filenames.at(i).empty()) {
+        g_warning("%s directory argument %i is missing", name, static_cast<int>(i));
     }
 }
 
@@ -181,7 +183,7 @@ int main(int argc, char *argv[])
     }
     else if (mode_board) {
         expect_filename_arg(filenames, "board", 0);
-        expect_filename_arg(filenames, "planes", 1);
+        expect_filename_arg(filenames, "planes", 1, false);
         expect_filename_arg(filenames, "blocks", 2);
         expect_dir_arg(filenames, "pictures", 3);
         expect_pool_env(pool_base_path);
