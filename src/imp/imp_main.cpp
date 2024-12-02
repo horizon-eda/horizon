@@ -41,7 +41,7 @@ static void expect_dir_arg(const std::vector<std::string> &filenames, const char
 
 static void expect_pool_env(const std::string &pool_base_path)
 {
-    if (pool_base_path.length() <= 0) {
+    if (pool_base_path.empty()) {
         g_warning("HORIZON_POOL dir env var is not set");
     }
     else if (!Glib::file_test(pool_base_path, Glib::FILE_TEST_EXISTS)) {
