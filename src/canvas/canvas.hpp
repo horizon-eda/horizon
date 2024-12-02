@@ -7,6 +7,7 @@
 #include "triangle.hpp"
 #include "object_ref.hpp"
 #include "fragment_cache.hpp"
+#include "polygon_cache.hpp"
 #include "util/placement.hpp"
 #include "util/text_data.hpp"
 #include "color_palette.hpp"
@@ -259,6 +260,7 @@ protected:
     bool is_overlay_layer(int overlay_layer, int layer) const;
 
     FragmentCache fragment_cache;
+    PolygonCache polygon_cache;
 
 private:
     uint8_t lod_current = 0;

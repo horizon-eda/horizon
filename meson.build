@@ -331,6 +331,7 @@ src_canvas = files(
     'src/canvas/image.cpp',
     'src/canvas/selectables.cpp',
     'src/canvas/fragment_cache.cpp',
+    'src/canvas/polygon_cache.cpp',
     'src/util/text_renderer.cpp',
     'src/canvas/text_renderer.cpp',
     'src/canvas/layer_display.cpp',

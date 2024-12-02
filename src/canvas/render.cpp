@@ -33,6 +33,7 @@
 #include <ctime>
 #include <iostream>
 #include <sstream>
+#include <glibmm/checksum.h>
 
 namespace horizon {
 
@@ -922,11 +923,6 @@ void Canvas::render(const Warning &warn)
     draw_error(warn.position, 2e5, warn.text);
 }
 
-static const Coordf coordf_from_pt(const TPPLPoint &p)
-{
-    return Coordf(p.x, p.y);
-}
-
 void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
 {
     img_polygon(ipoly);
@@ -989,35 +985,22 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
                          TriangleInfo::FLAG_BUTT);
         }
         else {
-            TPPLPoly po;
-            po.Init(poly.vertices.size());
-            po.SetHole(false);
-            {
-                size_t i = 0;
-                for (auto &it : poly.vertices) {
-                    po[i].x = it.position.x;
-                    po[i].y = it.position.y;
-                    i++;
-                }
-            }
-            std::list<TPPLPoly> outpolys;
-            TPPLPartition part;
-            po.SetOrientation(TPPL_ORIENTATION_CCW);
-            part.Triangulate_EC(&po, &outpolys);
+            auto tris = polygon_cache.get_triangles(poly);
+
             if (is_keepout) {
                 assert(triangle_type_current == TriangleInfo::Type::NONE);
                 triangle_type_current = TriangleInfo::Type::KEEPOUT_FILL;
             }
-            for (auto &tri : outpolys) {
-                assert(tri.GetNumPoints() == 3);
-                Coordf p0 = transform.transform(coordf_from_pt(tri[0]));
-                Coordf p1 = transform.transform(coordf_from_pt(tri[1]));
-                Coordf p2 = transform.transform(coordf_from_pt(tri[2]));
+            for (auto &tri : tris) {
+                Coordf p0 = transform.transform(std::get<0>(tri));
+                Coordf p1 = transform.transform(std::get<1>(tri));
+                Coordf p2 = transform.transform(std::get<2>(tri));
                 add_triangle(poly.layer, p0, p1, p2, co);
             }
             if (is_keepout) {
                 triangle_type_current = TriangleInfo::Type::NONE;
             }
+
             for (size_t i = 0; i < poly.vertices.size(); i++) {
                 draw_line(poly.vertices[i].position, poly.vertices[(i + 1) % poly.vertices.size()].position, co,
                           poly.layer);
