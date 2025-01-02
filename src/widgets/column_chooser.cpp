@@ -90,8 +90,7 @@ void ColumnChooser::incl_excl_col(bool incl)
     else
         adapter.exclude_column(col);
 
-    columns_available->refilter();
-    update_cols_included();
+    update_from_adapter();
 
     if (incl) {
         for (const auto &it : columns_store_included->children()) {
@@ -145,6 +144,17 @@ void ColumnChooser::update_cols_included()
             }
         }
     }
+}
+
+void ColumnChooser::update_cols_available()
+{
+    columns_available->refilter();
+}
+
+void ColumnChooser::update_from_adapter()
+{
+    update_cols_available();
+    update_cols_included();
 }
 
 
