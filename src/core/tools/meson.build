@@ -114,4 +114,5 @@ src_tools = files(
     'tool_move_track_center.cpp',
     'tool_paste_placement.cpp',
     'tool_paste_part.cpp',
+    'tool_drag_round.cpp',
 )
