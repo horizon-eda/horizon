@@ -64,6 +64,8 @@ Components::Component &Step::add_component(const BoardPackage &bpkg)
     comp.comp_name = make_legal_name(bpkg.component->refdes);
     comp.part_name =
             make_legal_name(bpkg.component->part ? bpkg.component->part->get_MPN() : bpkg.component->entity->name);
+    if (pkg.mtype)
+        comps.add_attribute(comp, pkg.mtype.value());
 
     return comp;
 }

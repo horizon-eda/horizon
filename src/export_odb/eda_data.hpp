@@ -224,6 +224,8 @@ public:
         uint64_t pitch;
         int64_t xmin, ymin, xmax, ymax;
 
+        std::optional<attribute::comp_mount_type> mtype = std::nullopt;
+
         std::list<std::unique_ptr<Outline>> outline;
 
         Pin &add_pin(const horizon::Pad &pad);
