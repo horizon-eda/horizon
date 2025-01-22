@@ -54,7 +54,7 @@ LIBS=(
 	libzmq.dll\
 	libsodium-26.dll\
 	libcurl-4.dll\
-	libgit2-1.8.dll\
+	libgit2-1.9.dll\
 	libidn2-0.dll\
 	libssh2-1.dll\
 	libunistring-5.dll\
