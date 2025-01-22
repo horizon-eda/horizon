@@ -5,6 +5,9 @@
 #include "export_pnp/export_pnp.hpp"
 #include "widgets/help_button.hpp"
 #include "help_texts.hpp"
+#include "nlohmann/json.hpp"
+
+#include <iostream>
 
 namespace horizon {
 
@@ -27,6 +30,7 @@ PnPExportWindow::PnPExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     : Gtk::Window(cobject), board(brd), settings(s), state_store(this, "imp-pnp-export"), adapter(settings.columns)
 {
 
+    GET_WIDGET(pnp_header);
     GET_WIDGET(export_button);
     GET_WIDGET(directory_button);
     GET_WIDGET(directory_entry);
@@ -47,6 +51,23 @@ PnPExportWindow::PnPExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     GET_WIDGET(customize_grid);
 
     done_revealer_controller.attach(done_revealer, done_label, done_close_button);
+
+    {
+        auto hamburger_button = Gtk::manage(new Gtk::MenuButton);
+        hamburger_button->set_image_from_icon_name("open-menu-symbolic", Gtk::ICON_SIZE_BUTTON);
+
+        hamburger_menu = Gio::Menu::create();
+        hamburger_button->set_menu_model(hamburger_menu);
+        hamburger_button->show();
+        pnp_header->pack_end(*hamburger_button);
+
+        auto action_group = Gio::SimpleActionGroup::create();
+        insert_action_group("pnp_export", action_group);
+        action_group->add_action("save_settings", [this] { save_to_file(); });
+        action_group->add_action("load_settings", [this] { load_from_file(); });
+        hamburger_menu->append("Save Settings", "pnp_export.save_settings");
+        hamburger_menu->append("Load Settings", "pnp_export.load_settings");
+    }
 
     export_filechooser.attach(directory_entry, directory_button, this);
     export_filechooser.set_project_dir(project_dir);
@@ -108,6 +129,7 @@ PnPExportWindow::PnPExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
         int top = 3;
         for (const auto &[id, name] : pnp_column_names) {
             auto entry = Gtk::manage(new Gtk::Entry);
+            column_name_entries[id] = entry;
             entry->show();
             auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5));
             {
@@ -148,7 +170,6 @@ PnPExportWindow::PnPExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     {
 #define BIND_ENTRY(name_)                                                                                              \
     do {                                                                                                               \
-        Gtk::Entry *name_##_entry;                                                                                     \
         GET_WIDGET(name_##_entry);                                                                                     \
         bind_widget(name_##_entry, settings.name_, [this](std::string &) {                                             \
             s_signal_changed.emit();                                                                                   \
@@ -277,6 +298,61 @@ void PnPExportWindow::update_export_button()
         txt = "tool is active";
     }
     widget_set_insensitive_tooltip(*export_button, txt);
+}
+
+void PnPExportWindow::save_to_file()
+{
+    GtkFileChooserNative *native = gtk_file_chooser_native_new("Save Settings", GTK_WINDOW(gobj()),
+                                                               GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
+    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+    chooser->set_do_overwrite_confirmation(true);
+
+    std::string path;
+    auto success = run_native_filechooser_with_retry(chooser, "Error saving settings", [this, chooser, &path] {
+        path = append_dot_json(chooser->get_filename());
+    });
+    if (success) {
+        json j = settings.serialize();
+        save_json_to_file(path, j);
+        std::cout << "Saved settings to: " << path << std::endl;
+    }
+}
+
+void PnPExportWindow::load_from_file()
+{
+    GtkFileChooserNative *native = gtk_file_chooser_native_new("Save Settings", GTK_WINDOW(gobj()),
+                                                               GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
+
+    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+
+    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+        std::string path = chooser->get_filename();
+        json j = load_json_from_file(path);
+        auto new_settings = PnPExportSettings(j);
+        mode_combo->set_active_id(PnPExportSettings::mode_lut.lookup_reverse(new_settings.mode));
+        nopopulate_check->set_active(new_settings.include_nopopulate);
+        customize_check->set_active(new_settings.customize);
+
+        settings.columns = new_settings.columns;
+        column_chooser->update_from_adapter();
+        for (const auto &[id, name] : new_settings.column_names) {
+            column_name_entries[id]->set_text(name);
+        }
+
+#define SET_ENTRY(name_)                                                                                               \
+    do {                                                                                                               \
+        name_##_entry->set_text(new_settings.name_);                                                                   \
+    } while (0)
+
+        SET_ENTRY(filename_top);
+        SET_ENTRY(filename_bottom);
+        SET_ENTRY(filename_merged);
+        SET_ENTRY(position_format);
+        SET_ENTRY(top_side);
+        SET_ENTRY(bottom_side);
+        std::cout << "Loaded settings from: " << path << std::endl;
+    }
+#undef SET_ENTRY
 }
 
 PnPExportWindow *PnPExportWindow::create(Gtk::Window *p, const class Board &brd, class PnPExportSettings &settings,

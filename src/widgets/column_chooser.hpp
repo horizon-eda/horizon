@@ -19,6 +19,9 @@ public:
     ColumnChooser(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IAdapter &adap);
     static ColumnChooser *create(IAdapter &adap);
 
+    void update_cols_included();
+    void update_cols_available();
+    void update_from_adapter();
 
     template <typename T> class Adapter : public IAdapter {
     public:
@@ -106,6 +109,5 @@ private:
     void incl_excl_col(bool incl);
     void up_down_col(bool up);
     void update_incl_excl_sensitivity();
-    void update_cols_included();
 };
 } // namespace horizon

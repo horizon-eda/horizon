@@ -23,6 +23,8 @@ public:
     void generate();
     void update_preview();
     void update();
+    void save_to_file();
+    void load_from_file();
 
 private:
     const class Board &board;
@@ -30,6 +32,7 @@ private:
 
     ExportFileChooser export_filechooser;
 
+    Gtk::HeaderBar *pnp_header = nullptr;
     Gtk::Button *export_button = nullptr;
     Gtk::Label *done_label = nullptr;
     Gtk::Revealer *done_revealer = nullptr;
@@ -49,6 +52,14 @@ private:
     Gtk::CheckButton *customize_check = nullptr;
     Gtk::Revealer *customize_revealer = nullptr;
     Gtk::Grid *customize_grid = nullptr;
+
+    Gtk::Entry *position_format_entry = nullptr;
+    Gtk::Entry *top_side_entry = nullptr;
+    Gtk::Entry *bottom_side_entry = nullptr;
+
+    std::map<PnPColumn, Gtk::Entry *> column_name_entries;
+
+    Glib::RefPtr<Gio::Menu> hamburger_menu;
 
     bool can_export = true;
     void update_export_button();
