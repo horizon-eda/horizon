@@ -35,6 +35,10 @@ PnPExportSettings::PnPExportSettings(const json &j)
 PnPExportSettings::PnPExportSettings()
     : columns({PnPColumn::REFDES, PnPColumn::X, PnPColumn::Y, PnPColumn::ANGLE, PnPColumn::SIDE})
 {
+    top_side = "top";
+    bottom_side = "bottom";
+    position_format = "%.3m";
+    column_names = pnp_column_names;
 }
 
 const std::string &PnPExportSettings::get_column_name(PnPColumn col) const
