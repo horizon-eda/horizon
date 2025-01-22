@@ -157,6 +157,24 @@ PnPExportWindow::PnPExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
                 update_preview();
             });
         }
+
+        {
+            auto reset_button = Gtk::manage(new Gtk::Button("Reset to default"));
+            reset_button->set_tooltip_text("Reset position format, side and column names to default values");
+            reset_button->set_margin_top(10);
+
+            reset_button->signal_clicked().connect([this] {
+                for (const auto &[id, name] : pnp_column_names) {
+                    column_name_entries[id]->set_text(name);
+                }
+                const PnPExportSettings default_settings;
+                top_side_entry->set_text(default_settings.top_side);
+                bottom_side_entry->set_text(default_settings.bottom_side);
+                position_format_entry->set_text(default_settings.position_format);
+            });
+            customize_grid->attach(*reset_button, 0, top++, 2, 1);
+            reset_button->show();
+        }
     }
     customize_check->set_active(settings.customize);
     customize_revealer->set_reveal_child(settings.customize);
