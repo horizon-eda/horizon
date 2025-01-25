@@ -10,9 +10,17 @@
 
 namespace horizon {
 
+// one pt is 1/72 inch
+static constexpr double nm_to_pt_factor = 72. / (2.54_mm);
+
 double to_pt(double x_nm)
 {
-    return x_nm * .000002834645669291339;
+    return x_nm * nm_to_pt_factor;
+}
+
+static double from_pt(double x_pt)
+{
+    return x_pt / nm_to_pt_factor;
 }
 
 CanvasPDF::CanvasPDF(PoDoFo::PdfPainter &p, PoDoFo::PdfFont &f, const PDFExportSettings &s)
@@ -92,7 +100,7 @@ void CanvasPDF::img_draw_text(const Coordf &p, float size, const std::string &rt
     painter.TextState.SetFont(font, to_pt(size) * 1.6);
     while (std::getline(ss, line, '\n')) {
         line = TextData::trim(line);
-        int64_t line_width = font.GetStringLength(line.c_str(), painter.TextState);
+        const int64_t line_width = from_pt(font.GetStringLength(line.c_str(), painter.TextState));
 
         Placement tf;
         tf.shift.x = p.x;
