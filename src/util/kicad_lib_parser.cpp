@@ -272,7 +272,7 @@ static void parse_pin(KiCadSymbol::SPart::SPin &pin, const SEXPR::SEXPR *kpin)
             }
             else if (child->GetChild(0)->GetSymbol() == "at") {
                 pin.pos = get_coord(child);
-                auto angle = child->GetChild(3)->GetInteger();
+                int angle = child->GetChild(3)->GetDouble();
                 static const std::map<int, Orientation> omap = {
                         {0, Orientation::RIGHT},
                         {90, Orientation::UP},
