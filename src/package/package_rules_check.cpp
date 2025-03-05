@@ -218,7 +218,7 @@ RulesCheckResult PackageRules::check_clearance(const class Package &pkg) const
     };
 
     for (const auto [l_ex, l_silk] : check_pairs) {
-        if (layers.count(l_ex) && layers.count(l_silk)) {
+        if (layers.count(l_ex) && layers.count(l_silk) && paths.count(l_ex)) {
             ClipperLib::Clipper cl;
             cl.AddPaths(paths.at(l_ex), ClipperLib::ptClip, true);
             for (const auto &[key, p_paths] : ca.get_patches()) {
