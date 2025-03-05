@@ -86,6 +86,9 @@ void GerberOutputSettings::update_for_board(const Board &brd)
     auto layers_from_board = brd.get_layers();
     // remove layers not on board
     map_erase_if(layers, [layers_from_board](const auto &it) { return layers_from_board.count(it.first) == 0; });
+    map_erase_if(blind_buried_drills_filenames, [layers_from_board](const auto &it) {
+        return layers_from_board.count(it.first.start()) == 0 || layers_from_board.count(it.first.end()) == 0;
+    });
 
     // add new layers
     auto add_layer = [this](int l) { layers.emplace(l, l); };
