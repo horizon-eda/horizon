@@ -269,6 +269,18 @@ bool CoreSchematic::get_property(ObjectType type, const UUID &uu, ObjectProperty
         }
     } break;
 
+    case ObjectType::BUS_RIPPER: {
+        const auto &ripper = get_sheet()->bus_rippers.at(uu);
+        switch (property) {
+        case ObjectProperty::ID::TEXT_POSITION:
+            dynamic_cast<PropertyValueInt &>(value).value = static_cast<int>(ripper.text_position);
+            return true;
+
+        default:
+            return false;
+        }
+    } break;
+
     case ObjectType::COMPONENT: {
         const auto comp = &get_current_block()->components.at(uu);
         const auto inst = get_block_instance_mapping();
@@ -513,6 +525,19 @@ bool CoreSchematic::set_property(ObjectType type, const UUID &uu, ObjectProperty
         case ObjectProperty::ID::IS_PORT:
             label->show_port = dynamic_cast<const PropertyValueBool &>(value).value;
             break;
+
+        default:
+            return false;
+        }
+    } break;
+
+    case ObjectType::BUS_RIPPER: {
+        auto &ripper = get_sheet()->bus_rippers.at(uu);
+        switch (property) {
+        case ObjectProperty::ID::TEXT_POSITION:
+            ripper.text_position =
+                    static_cast<BusRipper::TextPosition>(dynamic_cast<const PropertyValueInt &>(value).value);
+            return true;
 
         default:
             return false;

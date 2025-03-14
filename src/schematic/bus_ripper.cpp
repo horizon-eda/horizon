@@ -5,9 +5,15 @@
 
 namespace horizon {
 
+static const LutEnumStr<BusRipper::TextPosition> text_position_lut = {
+        {"top", BusRipper::TextPosition::TOP},
+        {"bottom", BusRipper::TextPosition::BOTTOM},
+};
+
 BusRipper::BusRipper(const UUID &uu, const json &j)
-    : uuid(uu), junction(UUID(j.at("junction").get<std::string>())), bus(UUID(j.at("bus").get<std::string>())),
-      bus_member(UUID(j.at("bus_member").get<std::string>()))
+    : uuid(uu), junction(UUID(j.at("junction").get<std::string>())),
+      text_position(text_position_lut.lookup(j.value("text_position", ""), TextPosition::TOP)),
+      bus(UUID(j.at("bus").get<std::string>())), bus_member(UUID(j.at("bus_member").get<std::string>()))
 {
 
     if (j.count("orientation")) {
@@ -40,6 +46,7 @@ json BusRipper::serialize() const
     j["orientation"] = orientation_lut.lookup_reverse(orientation);
     j["bus"] = (std::string)bus->uuid;
     j["bus_member"] = (std::string)bus_member->uuid;
+    j["text_position"] = text_position_lut.lookup_reverse(text_position);
     return j;
 }
 

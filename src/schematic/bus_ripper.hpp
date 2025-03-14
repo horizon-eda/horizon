@@ -22,6 +22,9 @@ public:
 
     uuid_ptr<class SchematicJunction> junction;
     Orientation orientation = Orientation::UP;
+    enum class TextPosition { TOP, BOTTOM };
+    TextPosition text_position = TextPosition::TOP;
+
     void mirror();
     uuid_ptr<Bus> bus = nullptr;
     uuid_ptr<Bus::Member> bus_member = nullptr;

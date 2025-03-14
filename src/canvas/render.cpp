@@ -910,8 +910,15 @@ void Canvas::render(const BusRipper &ripper)
     default:
         angle = 0;
     }
-    const auto extents = draw_text(connector_pos + Coordi(0, 0.5_mm), 1.5_mm, ripper.bus_member->name, angle,
-                                   TextOrigin::BASELINE, c, 0, {});
+    auto text_origin = TextOrigin::BASELINE;
+    int64_t text_shift = 0.5_mm;
+    if (ripper.text_position == BusRipper::TextPosition::BOTTOM) {
+        text_origin = TextOrigin::BOTTOM;
+        text_shift = -0.5_mm;
+    }
+
+    const auto extents = draw_text(connector_pos + Coordi(0, text_shift), 1.5_mm, ripper.bus_member->name, angle,
+                                   text_origin, c, 0, {});
     targets.emplace_back(ripper.uuid, ObjectType::BUS_RIPPER, connector_pos);
     selectables.append(ripper.uuid, ObjectType::BUS_RIPPER, connector_pos, extents.first, extents.second);
 }

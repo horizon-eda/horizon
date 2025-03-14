@@ -2,6 +2,7 @@
 #include "hole.hpp"
 #include "dimension.hpp"
 #include "schematic/schematic_symbol.hpp"
+#include "schematic/bus_ripper.hpp"
 #include "shape.hpp"
 #include "pool/symbol.hpp"
 #include "board/via.hpp"
@@ -64,7 +65,19 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
         {ObjectType::LINE_NET, {"Net line", "Net lines", {}}},
         {ObjectType::BUS, {"Bus", "Buses", {}}},
         {ObjectType::BUS_LABEL, {"Bus label", "Bus labels", {}}},
-        {ObjectType::BUS_RIPPER, {"Bus ripper", "Bus rippers", {}}},
+        {ObjectType::BUS_RIPPER,
+         {"Bus ripper",
+          "Bus rippers",
+          {
+                  {ObjectProperty::ID::TEXT_POSITION,
+                   {ObjectProperty::Type::ENUM,
+                    "Text pos.",
+                    0,
+                    {
+                            {static_cast<int>(BusRipper::TextPosition::TOP), "Top"},
+                            {static_cast<int>(BusRipper::TextPosition::BOTTOM), "Bottom"},
+                    }}},
+          }}},
         {ObjectType::SCHEMATIC_SYMBOL,
          {"Symbol",
           "Symbols",
