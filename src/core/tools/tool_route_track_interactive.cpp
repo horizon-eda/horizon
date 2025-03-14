@@ -986,6 +986,7 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     break;
 
                 case InToolActionID::TOGGLE_VIA: {
+                    update_via_settings();
                     router->ToggleViaPlacement();
                     wrapper->updateEndItem(args);
                     router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
