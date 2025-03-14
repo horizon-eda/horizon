@@ -74,7 +74,7 @@ ToolResponse ToolMoveNetSegment::begin(const ToolArgs &args)
         return ToolResponse::end();
 
     if (tool_id == ToolID::MOVE_NET_SEGMENT_NEW) {
-        if (nsinfo.has_power_sym || nsinfo.net->is_bussed) {
+        if (nsinfo.has_power_sym || nsinfo.has_bus_ripper) {
             return ToolResponse::end();
         }
         Net *net = doc.c->get_current_schematic()->block->insert_net();
@@ -83,7 +83,7 @@ ToolResponse ToolMoveNetSegment::begin(const ToolArgs &args)
         return ToolResponse::commit();
     }
     if (tool_id == ToolID::MOVE_NET_SEGMENT) {
-        if (nsinfo.net->is_bussed) {
+        if (nsinfo.has_bus_ripper) {
             return ToolResponse::end();
         }
 
