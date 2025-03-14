@@ -574,14 +574,15 @@ void Canvas::render(const SymbolPin &pin, SymbolMode mode, ColorP co)
         c_pin = co;
     }
     img_auto_line = img_mode;
+    std::optional<std::pair<Coordf, Coordf>> name_extents;
     if (mode == SymbolMode::EDIT || pin.name_visible) {
         bool draw_in_line = pin.name_orientation == SymbolPin::NameOrientation::IN_LINE
                             || (pin.name_orientation == SymbolPin::NameOrientation::HORIZONTAL
                                 && (pin_orientation == Orientation::LEFT || pin_orientation == Orientation::RIGHT));
 
         if (draw_in_line) {
-            draw_text(p_name, 1.5_mm, pin.name, orientation_to_angle(name_orientation), TextOrigin::CENTER, c_name, 0,
-                      {});
+            name_extents = draw_text(p_name, 1.5_mm, pin.name, orientation_to_angle(name_orientation),
+                                     TextOrigin::CENTER, c_name, 0, {});
         }
         else { // draw perp
             Placement tr;
@@ -589,8 +590,8 @@ void Canvas::render(const SymbolPin &pin, SymbolMode mode, ColorP co)
             auto shift = tr.transform(Coordi(-1_mm, 0));
             TextRenderer::Options opts;
             opts.center = true;
-            draw_text(p_name + shift, 1.5_mm, pin.name, orientation_to_angle(name_orientation) + 16384,
-                      TextOrigin::CENTER, c_name, 0, opts);
+            name_extents = draw_text(p_name + shift, 1.5_mm, pin.name, orientation_to_angle(name_orientation) + 16384,
+                                     TextOrigin::CENTER, c_name, 0, opts);
         }
     }
     std::optional<std::pair<Coordf, Coordf>> pad_extents;
@@ -599,7 +600,11 @@ void Canvas::render(const SymbolPin &pin, SymbolMode mode, ColorP co)
                                 c_pad, 0, {});
     }
     if (interactive) {
-        if (pad_extents.has_value())
+        if (name_extents.has_value())
+            selectables.append(pin.uuid, ObjectType::SYMBOL_PIN, p0,
+                               Coordf::min(name_extents->first, Coordf::min(p0, p1)),
+                               Coordf::max(name_extents->second, Coordf::max(p0, p1)));
+        else if (pad_extents.has_value())
             selectables.append(pin.uuid, ObjectType::SYMBOL_PIN, p0,
                                Coordf::min(pad_extents->first, Coordf::min(p0, p1)),
                                Coordf::max(pad_extents->second, Coordf::max(p0, p1)));
