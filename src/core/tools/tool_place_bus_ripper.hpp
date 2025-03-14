@@ -17,6 +17,10 @@ public:
                 I::LMB, I::CANCEL, I::RMB, I::ROTATE, I::MIRROR, I::EDIT,
         };
     }
+    bool is_specific() override
+    {
+        return true;
+    }
 
 private:
     void create_attached() override;
@@ -27,6 +31,7 @@ private:
     class BusRipper *ri = nullptr;
     Orientation last_orientation = Orientation::RIGHT;
     Bus *bus = nullptr;
+    Bus *get_bus();
 
     std::vector<Bus::Member *> bus_members;
     size_t bus_member_current = 0;

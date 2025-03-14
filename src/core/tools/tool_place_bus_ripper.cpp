@@ -4,6 +4,7 @@
 #include "imp/imp_interface.hpp"
 #include "tool_helper_move.hpp"
 #include "util/util.hpp"
+#include "util/selection_util.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -13,46 +14,52 @@ ToolPlaceBusRipper::ToolPlaceBusRipper(IDocument *c, ToolID tid)
 {
 }
 
+Bus *ToolPlaceBusRipper::get_bus()
+{
+    auto sr = sel_find_exactly_one(selection, ObjectType::LINE_NET);
+    if (!sr)
+        return nullptr;
+    auto &net_line = doc.c->get_sheet()->net_lines.at(sr->uuid);
+    return net_line.bus;
+}
+
 bool ToolPlaceBusRipper::can_begin()
 {
-    return doc.c;
+    return doc.c && get_bus();
 }
 
 bool ToolPlaceBusRipper::begin_attached()
 {
-    if (auto r = imp->dialogs.select_bus(*doc.c->get_current_schematic()->block)) {
-        imp->tool_bar_set_actions({
-                {InToolActionID::LMB},
-                {InToolActionID::RMB},
-                {InToolActionID::ROTATE},
-                {InToolActionID::MIRROR},
-                {InToolActionID::EDIT, "select member"},
-        });
-        bus = &doc.c->get_current_schematic()->block->buses.at(*r);
-        std::map<const Bus::Member *, size_t> bus_rippers;
+    bus = get_bus();
+    if (!bus)
+        return false;
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+            {InToolActionID::ROTATE},
+            {InToolActionID::MIRROR},
+            {InToolActionID::EDIT, "select member"},
+    });
+    std::map<const Bus::Member *, size_t> bus_rippers;
 
-        for (auto &it : bus->members) {
-            bus_members.push_back(&it.second);
-            bus_rippers.emplace(&it.second, 0);
-        }
-        if (bus_members.size() == 0)
-            return false;
-        for (const auto &[sheet_uu, sheet] : doc.c->get_current_schematic()->sheets) {
-            for (const auto &[uu, rip] : sheet.bus_rippers) {
-                if (bus_rippers.count(rip.bus_member.ptr) && rip.bus == bus) {
-                    bus_rippers.at(rip.bus_member.ptr)++;
-                }
+    for (auto &it : bus->members) {
+        bus_members.push_back(&it.second);
+        bus_rippers.emplace(&it.second, 0);
+    }
+    if (bus_members.size() == 0)
+        return false;
+    for (const auto &[sheet_uu, sheet] : doc.c->get_current_schematic()->sheets) {
+        for (const auto &[uu, rip] : sheet.bus_rippers) {
+            if (bus_rippers.count(rip.bus_member.ptr) && rip.bus == bus) {
+                bus_rippers.at(rip.bus_member.ptr)++;
             }
         }
-        std::sort(bus_members.begin(), bus_members.end(),
-                  [](auto a, auto b) { return strcmp_natural(a->name, b->name) < 0; });
-        std::stable_sort(bus_members.begin(), bus_members.end(),
-                         [&bus_rippers](auto a, auto b) { return bus_rippers.at(a) < bus_rippers.at(b); });
-        return true;
     }
-    else {
-        return false;
-    }
+    std::sort(bus_members.begin(), bus_members.end(),
+              [](auto a, auto b) { return strcmp_natural(a->name, b->name) < 0; });
+    std::stable_sort(bus_members.begin(), bus_members.end(),
+                     [&bus_rippers](auto a, auto b) { return bus_rippers.at(a) < bus_rippers.at(b); });
+    return true;
 }
 
 void ToolPlaceBusRipper::create_attached()
