@@ -634,6 +634,12 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
                               .first->second;
             x->to.junc = &brd->junctions.at(junction_xlat.at(x->to.junc.uuid));
             x->from.junc = &brd->junctions.at(junction_xlat.at(x->from.junc.uuid));
+            for (BoardJunction *ju : {x->to.junc, x->from.junc}) {
+                if (ju->net) {
+                    brd->airwires_expand.insert(ju->net->uuid);
+                    brd->expand_flags |= Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES;
+                }
+            }
             if (x->is_arc())
                 transform(x->center.value());
             fix_layer(x->layer);
@@ -658,8 +664,8 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
                             auto &pad = bpkg->package.pads.at(conn.pad.uuid);
                             conn_info.conn.connect(bpkg, &pad);
                             if (pad.net)
-                                doc.b->get_board()->airwires_expand.insert(pad.net->uuid);
-                            doc.b->get_board()->expand_flags |= Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES;
+                                brd->airwires_expand.insert(pad.net->uuid);
+                            brd->expand_flags |= Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES;
                         }
                     }
                 }
