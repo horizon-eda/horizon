@@ -19,7 +19,7 @@ std::pair<Coordf, Coordf> TextRenderer::draw(const Coordf &p, float size, const 
         yshift = -21 / 2;
         break;
     case TextOrigin::BOTTOM:
-        yshift = 21 / 2;
+        yshift = -21;
         break;
     default:
         yshift = 0;
