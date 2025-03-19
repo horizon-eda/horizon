@@ -13,12 +13,23 @@ using json = nlohmann::json;
 
 class PoolCacheBox : public Gtk::Box, public PoolGotoProvider {
 public:
-    PoolCacheBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class PoolProjectManagerApplication *app,
-                 class PoolNotebook *nb, class IPool &pool);
-    static PoolCacheBox *create(class PoolProjectManagerApplication *app, class PoolNotebook *nb, class IPool &pool);
+    PoolCacheBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class IPool &pool);
+    static PoolCacheBox *create(class IPool &pool);
 
     bool refreshed_once = false;
     void refresh_status();
+
+    typedef sigc::signal<void, std::vector<std::string>> type_signal_pool_update;
+    type_signal_pool_update signal_pool_update()
+    {
+        return s_signal_pool_update;
+    }
+
+    typedef sigc::signal<void> type_signal_cleanup_cache;
+    type_signal_cleanup_cache signal_cleanup_cache()
+    {
+        return s_signal_cleanup_cache;
+    }
 
 private:
     class PoolProjectManagerApplication *app = nullptr;
@@ -53,5 +64,8 @@ private:
     TreeColumns tree_columns;
 
     Glib::RefPtr<Gtk::ListStore> item_store;
+
+    type_signal_pool_update s_signal_pool_update;
+    type_signal_cleanup_cache s_signal_cleanup_cache;
 };
 } // namespace horizon

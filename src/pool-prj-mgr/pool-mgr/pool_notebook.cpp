@@ -257,7 +257,24 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
     }
 
     if (pool.get_pool_info().is_project_pool()) {
-        cache_box = PoolCacheBox::create(&appwin.app, this, pool);
+        cache_box = PoolCacheBox::create(pool);
+        cache_box->signal_pool_update().connect(
+                [this](const std::vector<std::string> &filenames) { pool_update(filenames); });
+        cache_box->signal_cleanup_cache().connect([this] {
+            const auto project_path = Glib::path_get_dirname(pool.get_base_path());
+            for (auto win : appwin.app.get_windows()) {
+                if (auto w = dynamic_cast<PoolProjectManagerAppWindow *>(win)) {
+                    if (w->get_view_mode() == PoolProjectManagerAppWindow::ViewMode::PROJECT) {
+                        const auto win_path = Glib::path_get_dirname(w->get_filename());
+                        if (win_path == project_path) {
+                            if (w->cleanup_pool_cache(dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW))))
+                                pool_update();
+                            return;
+                        }
+                    }
+                }
+            }
+        });
         cache_box->signal_goto().connect(sigc::mem_fun(*this, &PoolNotebook::go_to));
         cache_box->show();
         append_page(*cache_box, "Cache");

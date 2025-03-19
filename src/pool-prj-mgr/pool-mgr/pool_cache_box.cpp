@@ -1,23 +1,17 @@
 #include "pool_cache_box.hpp"
-#include "pool_notebook.hpp"
 #include "pool/project_pool.hpp"
 #include "pool/pool_info.hpp"
 #include "pool/pool_cache_status.hpp"
-#include "util/sqlite.hpp"
 #include "widgets/cell_renderer_color_box.hpp"
 #include "common/object_descr.hpp"
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
-#include "pool/pool_manager.hpp"
-#include "../pool-prj-mgr-app.hpp"
-#include "../pool-prj-mgr-app_win.hpp"
 #include <iomanip>
 
 namespace horizon {
 
-PoolCacheBox::PoolCacheBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
-                           PoolProjectManagerApplication *aapp, PoolNotebook *nb, IPool &p)
-    : Gtk::Box(cobject), app(aapp), notebook(nb), pool(p)
+PoolCacheBox::PoolCacheBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IPool &p)
+    : Gtk::Box(cobject), pool(p)
 {
     x->get_widget("pool_item_view", pool_item_view);
     x->get_widget("stack", stack);
@@ -207,7 +201,7 @@ void PoolCacheBox::update_from_pool()
             }
         }
     }
-    notebook->pool_update(filenames);
+    s_signal_pool_update.emit(filenames);
 }
 
 void PoolCacheBox::refresh_list(const PoolCacheStatus &status)
@@ -255,27 +249,15 @@ void PoolCacheBox::refresh_list(const PoolCacheStatus &status)
 
 void PoolCacheBox::cleanup()
 {
-    const auto project_path = Glib::path_get_dirname(pool.get_base_path());
-    for (auto win : app->get_windows()) {
-        if (auto w = dynamic_cast<PoolProjectManagerAppWindow *>(win)) {
-            if (w->get_view_mode() == PoolProjectManagerAppWindow::ViewMode::PROJECT) {
-                const auto win_path = Glib::path_get_dirname(w->get_filename());
-                if (win_path == project_path) {
-                    if (w->cleanup_pool_cache(dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW))))
-                        notebook->pool_update();
-                    return;
-                }
-            }
-        }
-    }
+    s_signal_cleanup_cache.emit();
 }
 
-PoolCacheBox *PoolCacheBox::create(PoolProjectManagerApplication *app, PoolNotebook *nb, IPool &p)
+PoolCacheBox *PoolCacheBox::create(IPool &p)
 {
     PoolCacheBox *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/pool-mgr/pool_cache_box.ui");
-    x->get_widget_derived("box", w, app, nb, p);
+    x->get_widget_derived("box", w, p);
     w->reference();
     return w;
 }
