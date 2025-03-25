@@ -256,7 +256,7 @@ PoolCacheBox *PoolCacheBox::create(IPool &p)
 {
     PoolCacheBox *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/pool-mgr/pool_cache_box.ui");
+    x->add_from_resource("/org/horizon-eda/horizon/widgets/pool_cache_box.ui");
     x->get_widget_derived("box", w, p);
     w->reference();
     return w;

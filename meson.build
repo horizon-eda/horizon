@@ -319,6 +319,7 @@ src_common_ui = files(
     'src/widgets/color_box.cpp',
     'src/util/kicad_package_parser.cpp',
     'src/logger/log_dispatcher.cpp',
+    'src/widgets/pool_cache_box.cpp',
 )
 
 src_canvas = files(
@@ -367,7 +368,6 @@ src_pool_prj_mgr = files(
     'src/pool-prj-mgr/pool-mgr/part_wizard/gate_editor.cpp',
     'src/pool-prj-mgr/pool-mgr/part_wizard/pad_editor.cpp',
     'src/pool-prj-mgr/pool-mgr/part_wizard/part_wizard.cpp',
-    'src/pool-prj-mgr/pool-mgr/pool_cache_box.cpp',
     'src/pool-prj-mgr/pool-mgr/pool_git_box.cpp',
     'src/pool-prj-mgr/pool-mgr/pool_notebook.cpp',
     'src/pool-prj-mgr/pool-mgr/pool_notebook_decals.cpp',
