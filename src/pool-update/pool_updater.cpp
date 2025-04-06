@@ -302,18 +302,24 @@ void PoolUpdater::update_some(const std::vector<std::string> &filenames, std::se
     pool->db.execute("COMMIT");
     pool->db.execute("BEGIN TRANSACTION");
     for (const auto &part_uu : parts_updated) {
-        SQLite::Query q(pool->db,
-                        "WITH RECURSIVE where_used(typex, uuidx) AS ( SELECT 'part', "
-                        "? UNION "
-                        "SELECT type, uuid FROM dependencies, where_used "
-                        "WHERE dependencies.dep_type = where_used.typex "
-                        "AND dependencies.dep_uuid = where_used.uuidx) "
-                        "SELECT where_used.uuidx "
-                        "FROM where_used WHERE where_used.typex = 'part';");
+        SQLite::Query q(
+                pool->db,
+                "WITH RECURSIVE where_used(typex, uuidx) AS ( SELECT 'part', "
+                "? UNION "
+                "SELECT type, uuid FROM dependencies, where_used "
+                "WHERE dependencies.dep_type = where_used.typex "
+                "AND dependencies.dep_uuid = where_used.uuidx) "
+                "SELECT where_used.uuidx, parts.pool_uuid "
+                "FROM where_used LEFT JOIN parts ON (where_used.uuidx = parts.uuid) WHERE where_used.typex = 'part';");
         q.bind(1, part_uu);
         q.step();
         while (q.step()) {
             UUID uuid = q.get<std::string>(0);
+            pool_uuid = q.get<std::string>(1);
+            if (auto p = PoolManager::get().get_by_uuid(pool_uuid))
+                base_path = p->base_path;
+            else
+                throw std::runtime_error("pool for part not found");
             all_parts_updated.insert(uuid);
             auto filename = pool->get_filename(ObjectType::PART, uuid);
             update_part(filename);
