@@ -319,6 +319,7 @@ src_common_ui = files(
     'src/widgets/color_box.cpp',
     'src/util/kicad_package_parser.cpp',
     'src/logger/log_dispatcher.cpp',
+    'src/pool/pool_cache_status.cpp',
     'src/widgets/pool_cache_box.cpp',
 )
 
@@ -410,7 +411,6 @@ src_pool_prj_mgr = files(
     'src/pool-prj-mgr/prj-mgr/pool_cache_cleanup_dialog.cpp',
     'src/pool-prj-mgr/prj-mgr/prj-mgr_views.cpp',
     'src/pool-prj-mgr/welcome_window.cpp',
-    'src/pool/pool_cache_status.cpp',
     'src/util/editor_process.cpp',
     'src/util/github_client.cpp',
     'src/util/kicad_lib_parser.cpp',
@@ -620,6 +620,7 @@ src_imp = files(
     'src/imp/tool_popover.cpp',
     'src/imp/tuning_window.cpp',
     'src/imp/view_angle_window.cpp',
+    'src/imp/pool_cache_dialog.cpp',
     'src/import_dxf/dxf_importer.cpp',
     'src/import_step/step_importer.cpp',
     'src/property_panels/property_editor.cpp',

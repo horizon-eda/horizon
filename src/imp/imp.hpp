@@ -274,6 +274,8 @@ protected:
 
     static void selection_push(HistoryManager &mgr, const std::set<SelectableRef> &selection);
 
+    bool handle_pool_cache_update(const json &j);
+
 private:
     void fix_cursor_pos();
     Glib::RefPtr<Gio::FileMonitor> preferences_monitor;
@@ -288,6 +290,7 @@ private:
 
     void handle_file_changed(const Glib::RefPtr<Gio::File> &file1, const Glib::RefPtr<Gio::File> &file2,
                              Gio::FileMonitorEvent ev);
+    std::chrono::time_point<std::chrono::system_clock> last_pool_reload_time;
 
     void create_context_menu(Gtk::Menu *parent, const std::set<SelectableRef> &sel);
     Gtk::MenuItem *create_context_menu_item(ActionToolID act);
@@ -378,5 +381,9 @@ private:
 
     Gtk::Button *save_button = nullptr;
     virtual bool set_filename();
+
+    std::set<std::string> modified_pool_items;
+    sigc::connection pool_items_modified_connection;
+    bool pool_reload_pending = false;
 };
 } // namespace horizon

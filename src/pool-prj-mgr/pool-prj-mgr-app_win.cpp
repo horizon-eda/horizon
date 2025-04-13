@@ -246,7 +246,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     app.signal_pool_items_edited().connect(
             sigc::track_obj([this](const auto &filenames) { pool_update(filenames); }, *this));
     app.signal_pool_updated().connect(sigc::track_obj(
-            [this](const auto &path) {
+            [this](const auto &path, const std::vector<std::string> &filenames) {
                 if (part_browser_window)
                     part_browser_window->pool_updated(path);
                 if (project && project->pool_directory == path)
@@ -255,6 +255,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
                     json j;
                     j["op"] = "pool-updated";
                     j["path"] = path;
+                    j["filenames"] = filenames;
                     app.send_json(0, j);
                 }
             },
@@ -353,7 +354,7 @@ void PoolProjectManagerAppWindow::pool_updated(bool success)
     }
     set_pool_updating(false, success);
     if (success) {
-        app.signal_pool_updated().emit(get_pool_base_path());
+        app.signal_pool_updated().emit(get_pool_base_path(), pool_update_filenames);
     }
 }
 
@@ -1162,7 +1163,7 @@ bool PoolProjectManagerAppWindow::check_schema_update(const std::string &base_pa
         info_bar_show(info_bar_installation_uuid_mismatch);
 
     if (r != CheckSchemaUpdateResult::NO_UPDATE) {
-        app.signal_pool_updated().emit(base_path);
+        app.signal_pool_updated().emit(base_path, {});
         return true;
     }
     return false;

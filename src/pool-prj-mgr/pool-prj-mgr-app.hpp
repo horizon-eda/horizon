@@ -64,7 +64,7 @@ public:
         return s_signal_pool_items_edited;
     }
 
-    typedef sigc::signal<void, std::string> type_signal_pool_updated;
+    typedef sigc::signal<void, std::string, std::vector<std::string>> type_signal_pool_updated;
     type_signal_pool_updated signal_pool_updated()
     {
         return s_signal_pool_updated;

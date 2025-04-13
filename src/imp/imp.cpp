@@ -38,6 +38,8 @@
 #include "widgets/msd_tuning_window.hpp"
 #include "pool/pool_manager.hpp"
 #include "core/tools/tool_data_pool_updated.hpp"
+#include "pool/pool_cache_status.hpp"
+#include "pool_cache_dialog.hpp"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>
@@ -634,6 +636,7 @@ void ImpBase::run(int argc, char *argv[])
     });
 
     connect_action(ActionID::RELOAD_POOL, [this](const auto &a) {
+        pool_reload_pending = false;
         core->reload_pool();
         this->canvas_update_from_pp();
     });
@@ -1805,6 +1808,12 @@ void ImpBase::set_monitor_items(const ItemSet &items)
 void ImpBase::handle_file_changed(const Glib::RefPtr<Gio::File> &file1, const Glib::RefPtr<Gio::File> &file2,
                                   Gio::FileMonitorEvent ev)
 {
+    if (pool_reload_pending)
+        return;
+    const auto now = decltype(last_pool_reload_time)::clock::now();
+    const auto delta = std::chrono::duration_cast<std::chrono::seconds>(now - last_pool_reload_time).count();
+    if (delta < 2)
+        return;
     main_window->show_nonmodal(
             "Pool has changed", "Reload pool", [this] { trigger_action(ActionID::RELOAD_POOL); }, "");
 }
@@ -2075,6 +2084,52 @@ bool ImpBase::set_filename()
 void ImpBase::set_suggested_filename(const std::string &s)
 {
     suggested_filename = s;
+}
+
+bool ImpBase::handle_pool_cache_update(const json &j)
+{
+    const auto filenames = j.at("filenames").get<std::vector<std::string>>();
+    const auto path = j.at("path").get<std::string>();
+    if (path == pool->get_base_path()) {
+        if (pool_reload_pending) {
+            pool_reload_pending = false;
+            trigger_action(ActionID::RELOAD_POOL);
+            last_pool_reload_time = std::chrono::system_clock::now();
+            return true;
+        }
+
+        modified_pool_items.insert(filenames.begin(), filenames.end());
+        pool_items_modified_connection.disconnect();
+        pool_items_modified_connection = Glib::signal_timeout().connect_seconds(
+                [this] {
+                    auto status = PoolCacheStatus::from_project_pool(*pool);
+                    bool have_items = false;
+                    for (const auto &it : status.items) {
+                        if (it.state == PoolCacheStatus::Item::State::OUT_OF_DATE
+                            && modified_pool_items.count(it.filename_pool))
+                            have_items = true;
+                    }
+                    if (!have_items)
+                        return false;
+                    main_window->show_nonmodal("Pool items have changed", "Update cache", [this] {
+                        PoolCacheDialog dia{main_window, *pool, modified_pool_items};
+                        if (dia.run() == Gtk::ResponseType::RESPONSE_OK) {
+                            modified_pool_items.clear();
+                            auto filenames_updated = dia.get_filenames();
+                            {
+                                json j;
+                                j["op"] = "update-pool";
+                                j["filenames"] = filenames_updated;
+                                send_json(j);
+                                pool_reload_pending = true;
+                            }
+                        }
+                    });
+                    return false;
+                },
+                1);
+    }
+    return true;
 }
 
 } // namespace horizon

@@ -477,6 +477,9 @@ bool ImpSchematic::handle_broadcast(const json &j)
             if (force_end_tool())
                 tool_begin(ToolID::EDIT_PROJECT_PROPERTIES);
         }
+        else if (op == "pool-updated") {
+            return handle_pool_cache_update(j);
+        }
     }
     return true;
 }

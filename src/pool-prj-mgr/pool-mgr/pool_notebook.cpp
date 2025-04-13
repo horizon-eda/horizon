@@ -12,7 +12,7 @@
 #include "pool_git_box.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app.hpp"
 #include "pool_settings_box.hpp"
-#include "pool_cache_box.hpp"
+#include "widgets/pool_cache_box.hpp"
 #include "pool/pool_manager.hpp"
 #include "part_wizard/part_wizard.hpp"
 #include "widgets/part_preview.hpp"
@@ -257,7 +257,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
     }
 
     if (pool.get_pool_info().is_project_pool()) {
-        cache_box = PoolCacheBox::create(pool);
+        cache_box = PoolCacheBox::create_for_pool_notebook(pool);
         cache_box->signal_pool_update().connect(
                 [this](const std::vector<std::string> &filenames) { pool_update(filenames); });
         cache_box->signal_cleanup_cache().connect([this] {
@@ -360,7 +360,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
     }
 
     appwin.app.signal_pool_updated().connect(sigc::track_obj(
-            [this](const std::string &p) {
+            [this](const std::string &p, const std::vector<std::string> &filenames) {
                 for (const auto &[it_path, it_uu] : pool.get_actually_included_pools(true)) {
                     if (it_path == p) {
                         pool_updated();
@@ -385,8 +385,7 @@ void PoolNotebook::add_context_menu(PoolBrowser *br)
         return get_pool_uuids(ty, uu).pool == pool.get_pool_info().uuid;
     };
 
-    br->add_context_menu_item(
-            "Delete", [this, ty](const UUID &uu) { handle_delete(ty, uu); }, this_pool_lambda);
+    br->add_context_menu_item("Delete", [this, ty](const UUID &uu) { handle_delete(ty, uu); }, this_pool_lambda);
     br->add_context_menu_item(
             "Move/rename", [this, ty](const UUID &uu) { handle_move_rename(ty, uu); }, this_pool_lambda);
     br->add_context_menu_item("Copy path", [this, ty](const UUID &uu) { handle_copy_path(ty, uu); });

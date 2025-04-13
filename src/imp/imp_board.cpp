@@ -205,6 +205,9 @@ bool ImpBoard::handle_broadcast(const json &j)
                     },
                     500);
         }
+        else if (op == "pool-updated") {
+            return handle_pool_cache_update(j);
+        }
     }
     return true;
 }

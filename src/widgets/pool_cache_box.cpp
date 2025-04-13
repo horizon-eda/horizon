@@ -10,8 +10,9 @@
 
 namespace horizon {
 
-PoolCacheBox::PoolCacheBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IPool &p)
-    : Gtk::Box(cobject), pool(p)
+PoolCacheBox::PoolCacheBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IPool &p, Mode m,
+                           const std::set<std::string> &items_mod)
+    : Gtk::Box(cobject), mode(m), pool(p), items_modified(items_mod)
 {
     x->get_widget("pool_item_view", pool_item_view);
     x->get_widget("stack", stack);
@@ -50,15 +51,33 @@ PoolCacheBox::PoolCacheBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
                               });
 
     {
-        auto cr = Gtk::manage(new Gtk::CellRendererText());
-        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Type", *cr));
-        tvc->set_cell_data_func(*cr, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
-            Gtk::TreeModel::Row row = *it;
-            auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
-            mcr->property_text() = object_descriptions.at(row[tree_columns.type]).name;
-        });
+
+        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Type"));
+        Gtk::CellRendererToggle *cr_toggle = nullptr;
+        if (mode == Mode::IMP) {
+            cr_toggle = Gtk::manage(new Gtk::CellRendererToggle());
+            cr_toggle->signal_toggled().connect([this](const Glib::ustring &path) {
+                auto it = item_store->get_iter(path);
+                if (it) {
+                    Gtk::TreeModel::Row row = *it;
+                    row[tree_columns.checked] = !row[tree_columns.checked];
+                }
+            });
+            tvc->pack_start(*cr_toggle);
+        }
+        {
+            auto cr = Gtk::manage(new Gtk::CellRendererText());
+            tvc->pack_start(*cr);
+            tvc->set_cell_data_func(*cr, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
+                Gtk::TreeModel::Row row = *it;
+                auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
+                mcr->property_text() = object_descriptions.at(row[tree_columns.type]).name;
+            });
+        }
         tvc->set_sort_column(tree_columns.type);
-        pool_item_view->append_column(*tvc);
+        auto col = pool_item_view->get_column(pool_item_view->append_column(*tvc) - 1);
+        if (cr_toggle)
+            col->add_attribute(cr_toggle->property_active(), tree_columns.checked);
     }
 
     {
@@ -133,6 +152,18 @@ PoolCacheBox::PoolCacheBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
                         s_signal_goto.emit(item.type, item.uuid);
                 }
             });
+
+    if (mode == Mode::IMP) {
+        refresh_status();
+        Gtk::Box *top_box;
+        Gtk::Separator *separator;
+        x->get_widget("top_box", top_box);
+        x->get_widget("separator", separator);
+        top_box->hide();
+        top_box->set_no_show_all();
+        separator->hide();
+        separator->set_no_show_all();
+    }
 }
 
 void PoolCacheBox::refresh_status()
@@ -178,30 +209,51 @@ void PoolCacheBox::selection_changed()
 }
 void PoolCacheBox::update_from_pool()
 {
-    auto rows = pool_item_view->get_selection()->get_selected_rows();
     std::vector<std::string> filenames;
+    auto rows = pool_item_view->get_selection()->get_selected_rows();
+
     for (const auto &path : rows) {
         Gtk::TreeModel::Row row = *item_store->get_iter(path);
         const auto &item = row.get_value(tree_columns.item);
-        const auto state = item.state;
-        const auto type = item.type;
-        if (state == PoolCacheStatus::Item::State::OUT_OF_DATE) {
-            if (type == ObjectType::PACKAGE) {
-                json j = load_json_from_file(item.filename_pool);
-                ProjectPool::patch_package(j, item.pool_uuid);
-                save_json_to_file(item.filename_cached, j);
-            }
-            else {
-                auto dst = Gio::File::create_for_path(item.filename_cached);
-                auto src = Gio::File::create_for_path(item.filename_pool);
-                src->copy(dst, Gio::FILE_COPY_OVERWRITE);
-            }
-            if (type != ObjectType::MODEL_3D) {
-                filenames.push_back(item.filename_cached);
-            }
+        update_item(item, filenames);
+    }
+
+
+    s_signal_pool_update.emit(filenames);
+}
+
+std::vector<std::string> PoolCacheBox::update_checked()
+{
+    std::vector<std::string> filenames;
+
+    for (auto &row : item_store->children()) {
+        if (row.get_value(tree_columns.checked)) {
+            const auto &item = row.get_value(tree_columns.item);
+            update_item(item, filenames);
         }
     }
-    s_signal_pool_update.emit(filenames);
+    return filenames;
+}
+
+void PoolCacheBox::update_item(const PoolCacheStatus::Item &item, std::vector<std::string> &filenames)
+{
+    const auto state = item.state;
+    const auto type = item.type;
+    if (state == PoolCacheStatus::Item::State::OUT_OF_DATE) {
+        if (type == ObjectType::PACKAGE) {
+            json j = load_json_from_file(item.filename_pool);
+            ProjectPool::patch_package(j, item.pool_uuid);
+            save_json_to_file(item.filename_cached, j);
+        }
+        else {
+            auto dst = Gio::File::create_for_path(item.filename_cached);
+            auto src = Gio::File::create_for_path(item.filename_pool);
+            src->copy(dst, Gio::FILE_COPY_OVERWRITE);
+        }
+        if (type != ObjectType::MODEL_3D) {
+            filenames.push_back(item.filename_cached);
+        }
+    }
 }
 
 void PoolCacheBox::refresh_list(const PoolCacheStatus &status)
@@ -218,11 +270,14 @@ void PoolCacheBox::refresh_list(const PoolCacheStatus &status)
     item_store->freeze_notify();
     item_store->clear();
     for (const auto &it : status.items) {
+        if (mode == Mode::IMP && it.state != PoolCacheStatus::Item::State::OUT_OF_DATE)
+            continue;
         Gtk::TreeModel::Row row = *item_store->append();
         row[tree_columns.name] = it.name;
         row[tree_columns.type] = it.type;
         row[tree_columns.state] = it.state;
         row[tree_columns.item] = it;
+        row[tree_columns.checked] = items_modified.count(it.filename_pool);
     }
     item_store->thaw_notify();
     for (const auto &it : item_store->children()) {
@@ -252,14 +307,24 @@ void PoolCacheBox::cleanup()
     s_signal_cleanup_cache.emit();
 }
 
-PoolCacheBox *PoolCacheBox::create(IPool &p)
+PoolCacheBox *PoolCacheBox::create(IPool &p, Mode mode, const std::set<std::string> &items_modified)
 {
     PoolCacheBox *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/org/horizon-eda/horizon/widgets/pool_cache_box.ui");
-    x->get_widget_derived("box", w, p);
+    x->get_widget_derived("box", w, p, mode, items_modified);
     w->reference();
     return w;
+}
+
+PoolCacheBox *PoolCacheBox::create_for_imp(IPool &p, const std::set<std::string> &items_modified)
+{
+    return create(p, Mode::IMP, items_modified);
+}
+
+PoolCacheBox *PoolCacheBox::create_for_pool_notebook(IPool &p)
+{
+    return create(p, Mode::POOL_NOTEBOOK, {});
 }
 
 } // namespace horizon

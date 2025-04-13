@@ -233,7 +233,8 @@ PoolsWindow::PoolsWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         refresh_available_button->signal_clicked().connect([this] { update_index(); });
     }
 
-    app.signal_pool_updated().connect(sigc::track_obj([this](const std::string &p) { update(); }, *this));
+    app.signal_pool_updated().connect(sigc::track_obj(
+            [this](const std::string &p, const std::vector<std::string> &filenames) { update(); }, *this));
 }
 
 void PoolsWindow::check_for_updates()
