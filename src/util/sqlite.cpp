@@ -39,6 +39,11 @@ Database::Database(const std::string &filename, int flags, int timeout_ms)
     }
 }
 
+void Database::set_timeout_ms(int timeout)
+{
+    sqlite3_busy_timeout(db, timeout);
+}
+
 void Database::execute(const std::string &query)
 {
     execute(query.c_str());

@@ -78,6 +78,7 @@ public:
     void execute(const std::string &query);
     void execute(const char *query);
     int get_user_version();
+    void set_timeout_ms(int timeout);
 
 private:
     sqlite3 *db = nullptr;
