@@ -28,7 +28,8 @@ PoolCacheStatus PoolCacheStatus::from_project_pool(class IPool &pool)
     for (auto &[bp, uu] : included_pools) {
         if (!other_pools.count(uu)) {
             if (auto other_pool_info = PoolManager::get().get_by_uuid(uu)) {
-                other_pools.emplace(uu, other_pool_info->base_path);
+                auto &pool = other_pools.emplace(uu, other_pool_info->base_path).first->second;
+                pool.get_db().set_timeout_ms(2000);
             }
         }
     }
