@@ -63,7 +63,7 @@ BlocksSchematic::BlockItemSchematic::BlockItemSchematic(const BlockItemInfo &inf
                                                         IPool &pool, BlocksSchematic &blocks)
     : BlockItem(inf, base_path, pool, blocks),
       symbol(symbol_filename.size() ? BlockSymbol::new_from_file(
-                     (fs::u8path(base_path) / fs::u8path(symbol_filename)).u8string(), block)
+                                              (fs::u8path(base_path) / fs::u8path(symbol_filename)).u8string(), block)
                                     : BlockSymbol(UUID(), block)),
       schematic(Schematic::new_from_file((fs::u8path(base_path) / fs::u8path(schematic_filename)).u8string(), block,
                                          pool, blocks))

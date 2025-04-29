@@ -1449,7 +1449,7 @@ static ClipperLib::Path polygon_to_path(const Polygon &ipoly)
 }
 
 struct PolyInfo {
-    PolyInfo(const Polygon &p) : polygon(p), path(polygon_to_path(polygon)){};
+    PolyInfo(const Polygon &p) : polygon(p), path(polygon_to_path(polygon)) {};
     Polygon polygon;
     const ClipperLib::Path path;
     bool encloses_all_others = true;

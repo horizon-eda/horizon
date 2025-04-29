@@ -20,7 +20,7 @@ auto find_clearance(const class BoardRules &rules, Tfn fn, const std::set<int> &
 
     return ranges::min(layers | ranges::views::transform([&rules, fn, &args_get_clearance, &args_get_rule](int layer) {
                            auto &rule = std::apply(
-                                   [&rules, fn, layer ](auto &&...args) -> const auto & {
+                                   [&rules, fn, layer](auto &&...args) -> const auto & {
                                        return std::invoke(fn, rules, args..., layer);
                                    },
                                    args_get_rule);

@@ -12,7 +12,7 @@ public:
     virtual void construct();
     void set_can_apply_all(bool v);
 
-    virtual void reload(){};
+    virtual void reload() {};
     virtual PropertyValue &get_value()
     {
         return dummy;

@@ -32,7 +32,7 @@ public:
     };
 
     ActionCatalogItem(const std::string &n, ActionGroup gr, int av, int fl = FLAGS_DEFAULT)
-        : name(n), group(gr), flags(static_cast<Flags>(fl)), availability(static_cast<Availability>(av)){};
+        : name(n), group(gr), flags(static_cast<Flags>(fl)), availability(static_cast<Availability>(av)) {};
 
     const std::string name;
     ActionGroup group;

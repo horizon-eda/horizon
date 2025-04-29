@@ -12,8 +12,8 @@ public:
     unsigned int vertex = 0;
     LayerRange layer = 10000;
     Target(const UUIDPath<2> &uu, ObjectType ot, const Coordi &pi, unsigned int v = 0, LayerRange l = 10000)
-        : path(uu), type(ot), p(pi), vertex(v), layer(l){};
-    Target() : type(ObjectType::INVALID){};
+        : path(uu), type(ot), p(pi), vertex(v), layer(l) {};
+    Target() : type(ObjectType::INVALID) {};
     bool is_valid() const
     {
         return type != ObjectType::INVALID;

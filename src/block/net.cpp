@@ -40,7 +40,7 @@ Net::Net(const UUID &uu, const json &j)
     }
 }
 
-Net::Net(const UUID &uu) : uuid(uu){};
+Net::Net(const UUID &uu) : uuid(uu) {};
 
 UUID Net::get_uuid() const
 {

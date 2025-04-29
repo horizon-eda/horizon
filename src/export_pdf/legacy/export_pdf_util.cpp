@@ -14,7 +14,7 @@ void render_picture(PoDoFo::PdfDocument &doc, PoDoFo::PdfPainter &painter, const
         std::vector<char> picdata;
         picdata.reserve(pic.data->width * pic.data->height * 3);
         for (const auto x : pic.data->data) {
-            picdata.push_back((x)&0xff);
+            picdata.push_back((x) & 0xff);
             picdata.push_back((x >> 8) & 0xff);
             picdata.push_back((x >> 16) & 0xff);
         }

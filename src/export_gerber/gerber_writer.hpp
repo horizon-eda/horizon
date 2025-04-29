@@ -57,7 +57,7 @@ private:
 
     class Region {
     public:
-        Region(const ClipperLib::Path &p, bool d = true, int prio = 0) : path(p), dark(d), priority(prio){};
+        Region(const ClipperLib::Path &p, bool d = true, int prio = 0) : path(p), dark(d), priority(prio) {};
         ClipperLib::Path path;
         bool dark;
         int priority;
@@ -80,14 +80,14 @@ private:
 
         class PrimitiveCircle : public Primitive {
         public:
-            PrimitiveCircle() : Primitive(Code::CIRCLE){};
+            PrimitiveCircle() : Primitive(Code::CIRCLE) {};
             int64_t diameter = 0;
             Coordi center;
         };
 
         class PrimitiveCenterLine : public Primitive {
         public:
-            PrimitiveCenterLine() : Primitive(Code::CENTER_LINE){};
+            PrimitiveCenterLine() : Primitive(Code::CENTER_LINE) {};
             int64_t width = 0;
             int64_t height = 0;
             int angle = 0;
@@ -95,7 +95,7 @@ private:
         };
         class PrimitiveOutline : public Primitive {
         public:
-            PrimitiveOutline() : Primitive(Code::OUTLINE){};
+            PrimitiveOutline() : Primitive(Code::OUTLINE) {};
             std::vector<Coordi> vertices;
         };
 

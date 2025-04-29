@@ -187,9 +187,8 @@ PoolProjectManagerViewProject::PoolProjectManagerViewProject(const Glib::RefPtr<
         else {
             open_top_schematic();
             if (auto proc2 = win.find_top_schematic_process()) {
-                proc2->signal_ready().connect([this, proc2] {
-                    win.app.send_json(proc2->proc->get_pid(), {{"op", "edit-meta"}});
-                });
+                proc2->signal_ready().connect(
+                        [this, proc2] { win.app.send_json(proc2->proc->get_pid(), {{"op", "edit-meta"}}); });
             }
         }
     });

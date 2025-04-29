@@ -13,8 +13,8 @@ class Database;
 
 class WindowState {
 public:
-    WindowState(int ax, int ay, int aw, int ah, bool m = false) : x(ax), y(ay), width(aw), height(ah), maximized(m){};
-    WindowState(){};
+    WindowState(int ax, int ay, int aw, int ah, bool m = false) : x(ax), y(ay), width(aw), height(ah), maximized(m) {};
+    WindowState() {};
     int x = 0;
     int y = 0;
     int width = 1024;

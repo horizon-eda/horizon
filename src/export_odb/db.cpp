@@ -25,10 +25,7 @@ namespace horizon::ODB {
         return items.at(value);                                                                                        \
     }
 
-#define X(a)                                                                                                           \
-    {                                                                                                                  \
-        N::a, #a                                                                                                       \
-    }
+#define X(a) {N::a, #a}
 
 #define ITEMS X(POSITIVE), X(NEGATIVE)
 MAKE_ENUM_TO_STRING(Polarity)

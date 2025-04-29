@@ -14,7 +14,7 @@ public:
 
     json serialize() const;
 
-    LayerRange() : m_start(10000), m_end(10000){};
+    LayerRange() : m_start(10000), m_end(10000) {};
 
     LayerRange(int aStart, int aEnd)
     {

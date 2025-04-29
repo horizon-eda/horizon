@@ -23,7 +23,7 @@ public:
     unsigned int get_required_version() const override;
     ObjectType get_type() const override;
 
-    virtual ~PartEditor(){};
+    virtual ~PartEditor() {};
 
 private:
     Part part;

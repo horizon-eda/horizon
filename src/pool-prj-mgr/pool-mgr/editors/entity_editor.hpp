@@ -23,7 +23,7 @@ public:
     const FileVersion &get_version() const override;
     ObjectType get_type() const override;
 
-    virtual ~EntityEditor(){};
+    virtual ~EntityEditor() {};
 
 private:
     class Entity entity;

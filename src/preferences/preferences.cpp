@@ -68,10 +68,7 @@ std::string Preferences::get_preferences_filename()
     return Glib::build_filename(get_config_dir(), "prefs.json");
 }
 
-#define COLORP_LUT_ITEM(x)                                                                                             \
-    {                                                                                                                  \
-#x, ColorP::x                                                                                                  \
-    }
+#define COLORP_LUT_ITEM(x) {#x, ColorP::x}
 
 static const LutEnumStr<ColorP> colorp_lut = {
         COLORP_LUT_ITEM(FROM_LAYER),

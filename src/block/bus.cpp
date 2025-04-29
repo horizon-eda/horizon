@@ -37,7 +37,7 @@ Bus::Bus(const UUID &uu, const json &j, Block &block) : uuid(uu), name(j.at("nam
     }
 }
 
-Bus::Bus(const UUID &uu) : uuid(uu){};
+Bus::Bus(const UUID &uu) : uuid(uu) {};
 
 void Bus::update_refs(Block &block)
 {

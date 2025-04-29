@@ -8,7 +8,7 @@ public:
     UUID uu;
     ObjectType type;
     int vertex = 0;
-    SnapFilter(ObjectType ot, const UUID &u, int v = -1) : uu(u), type(ot), vertex(v){};
+    SnapFilter(ObjectType ot, const UUID &u, int v = -1) : uu(u), type(ot), vertex(v) {};
     bool operator<(const SnapFilter &other) const
     {
         if (type < other.type) {

@@ -21,7 +21,7 @@ public:
     void set_show_path(bool v);
     void add_context_menu_item(const std::string &label, std::function<void(UUID)> cb,
                                std::function<bool(UUID)> cb_sensitive = nullptr);
-    virtual void add_copy_name_context_menu_item(){};
+    virtual void add_copy_name_context_menu_item() {};
     virtual void search() = 0;
     void search_once();
     void clear_search_once();

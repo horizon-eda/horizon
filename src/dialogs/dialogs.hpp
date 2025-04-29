@@ -15,7 +15,7 @@ class Window;
 namespace horizon {
 class Dialogs {
 public:
-    Dialogs(){};
+    Dialogs() {};
     void set_parent(Gtk::Window *w);
     void set_interface(class ImpInterface *intf);
 

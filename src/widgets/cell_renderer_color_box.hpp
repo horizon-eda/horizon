@@ -6,7 +6,7 @@ namespace horizon {
 class CellRendererColorBox : public Gtk::CellRenderer {
 public:
     CellRendererColorBox();
-    virtual ~CellRendererColorBox(){};
+    virtual ~CellRendererColorBox() {};
 
     typedef Glib::Property<Gdk::RGBA> type_property_color;
     Glib::PropertyProxy<Gdk::RGBA> property_color()

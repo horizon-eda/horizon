@@ -18,7 +18,7 @@ public:
     {
         return dynamic_cast<const T *>(this);
     }
-    virtual ~PolygonUsage(){};
+    virtual ~PolygonUsage() {};
 };
 
 /**

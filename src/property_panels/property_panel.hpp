@@ -18,7 +18,7 @@ public:
     class PropertyPanels *parent;
     void reload();
 
-    virtual ~PropertyPanel(){};
+    virtual ~PropertyPanel() {};
 
 private:
     ObjectType type;
