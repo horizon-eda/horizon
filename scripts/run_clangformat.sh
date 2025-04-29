@@ -8,20 +8,20 @@
 # corrections are inserted in-place.
 
 # Find clang-format, in priority order, unless overridden by user.
-CLANG_FORMAT=${CLANG_FORMAT:-$(command -v clang-format-15)}
-CLANG_FORMAT=${CLANG_FORMAT:-$(command -v clang-format-15.0)}
-CLANG_FORMAT=${CLANG_FORMAT:-$(command -v clang-format-150)}
+CLANG_FORMAT=${CLANG_FORMAT:-$(command -v clang-format-19)}
+CLANG_FORMAT=${CLANG_FORMAT:-$(command -v clang-format-19.0)}
+CLANG_FORMAT=${CLANG_FORMAT:-$(command -v clang-format-190)}
 CLANG_FORMAT=${CLANG_FORMAT:-$(command -v clang-format)}
 
 if [ ! -z $CLANG_FORMAT ]; then
     CLANG_FORMAT_VERSION="$(${CLANG_FORMAT} -version | cut -d " " -f 4 | cut -d "." -f 1)"
 
     # Check version
-    if [ "$CLANG_FORMAT_VERSION" = "15" ]; then
+    if [ "$CLANG_FORMAT_VERSION" = "19" ]; then
     # clang-format major version is 15.0
 	CLANG_BIN=$CLANG_FORMAT
     else
-        echo "clang-format version 15 required. The following was found:"
+        echo "clang-format version 19 required. The following was found:"
         $CLANG_FORMAT -version
         exit -1
     fi
@@ -35,3 +35,4 @@ echo "Using clang-format command: ${CLANG_BIN}"
 # Search using the binary found
 find ./src \( -iname *.h -o -iname *.cpp -o -iname *.hpp -o -iname *.cc -o -iname *.c \) ! -iname bitmap_font_*.c ! -iname hershey_fonts.cpp | xargs $CLANG_BIN -style=file -i
 exit $?
+
