@@ -58,6 +58,9 @@ jobs:
           - container: ubuntu:noble
             cxx: g++
             cc: gcc
+          - container: ubuntu:plucky
+            cxx: g++
+            cc: gcc
           - container: debian:bullseye
             cxx: g++
             cc: gcc
@@ -65,6 +68,9 @@ jobs:
             cxx: clang
             cc: clang
           - container: debian:bookworm
+            cxx: g++
+            cc: gcc
+          - container: debian:trixie
             cxx: g++
             cc: gcc
         target:
@@ -100,7 +106,6 @@ jobs:
       run: python3 scripts/check_app_versions.py
     - name: Build and run tests
       if: ${{ matrix.target != 'horizon.so' }}
-      #run: make -j2 CXX=${{ matrix.os.cxx }} CC=${{ matrix.os.cc }} WARNFLAGS="-Wall -Wshadow -Wno-parentheses" test
       run: meson test -C ../build
 
   build-arch:
