@@ -1,3 +1,71 @@
+# Version 2.6.90
+
+## New Features
+
+### Editors
+
+ - make it easier to update the project pool cache from schematic and board editor (afaea53834e56d95f024dec94b168d8b8c9cc3ab)
+
+### Board Editor
+
+ - Add save and load for PnP export (40bd7309f90be258b9e1748d9bcd7d051f539182)
+
+### Package Editor
+
+ - Allow packages to fix parameters (596ac13f776536d5cc24b78fce991c01c18a110d)
+
+## Enhancements
+
+### Symbol Editor
+
+ - make pins selectable at their name (22e640cb004b04c9b7da463f8ac50beb8a8e29ee)
+
+### Schematic Editor
+
+ - select net line to place bus ripper (3547c81335072c35479113681653dd1a6a425338)
+
+### Board Editor
+
+ - add pick&place customisation reset button (6a0a9963d209a20702b116f4d53d2d806b8c71bd)
+ - improve rendering performance of polygon pads (250ee069b953d8c9f54954b0644d2b8fdff9a364)
+ - highlight selected component from unplaced list in schematic (11297b818bb0dab816774c56b2106567f508c8a1)
+
+### Project Manager
+
+ - improve performance of recently-used lists (dd613010d89e2f2c2437a657f186528a0b10f3a3)
+
+## Bugfixes
+
+### Pool Manager
+
+ - correctly handle derived parts in partial pool update (3eb2708dcac899a5d0fa13b9269952e021c5871d)
+ - properly import kicad symbols using double angles (bfbe5b12b6441390e1ce3a517a05a6d496be4509)
+
+### Board Editor
+
+ - properly assign nets when pasting vias that have a set net (65d99ecce1916ab6d8c1ac7211a28da9c4097ca8)
+ - show via preview in correct size (9b181c12b5994e85dc094564e52a75dd319dc868)
+ - don't crash when deleting an inner layer for which a blind/buried drill export entry exists (500497593ccf7daa578c7d59f967c74748cacdef)
+ - use sensible defaults for pick&place customisation (only applies to new projects) (f7fc2ebf82c4f8711b1500ccd872d59253ce39a0)
+ - Draw Track Tool: fix crash when drawing arc tracks connected to pads (977ddc08307887ee4192ac2fc8746253dc99ebf7)
+
+### Schematic Editor
+
+ - allow reassigning bussed net segments (44495f45cb3387b8d99cf8cd8be97b0d5fce83ea)
+
+### Package Editor
+
+ - don't fail clearance check if there is no copper layer at all (87c4e9cb90483de242546fe3f0cef3b096bfa2c1)
+
+### Editor
+
+ - PDF export: correctly render backwards text (90bf26e2117b4140af30eec3654a8f3cc633b993)
+ - prevent window from becoming transparent in transparent objects (1e41cde0ddd0e445db17434350e103e2c8101809)
+
+### Padstack Editor
+
+ - set needs save when toggling required in parameter editor (b979731880c390a91e9d5fb182b96a21010632a8)
+
 # Version 2.6.0
 
 ## New Features
