@@ -114,7 +114,6 @@ jobs:
       matrix:
         target:
           - all
-          - horizon.so
     runs-on: ubuntu-latest
     container: archlinux:base-devel
     needs: stylecheck
@@ -124,9 +123,6 @@ jobs:
       run: pacman -Syu --noconfirm
     - name: Install dependencies
       run: pacman -Sy --needed --noconfirm zeromq cppzmq gtkmm3 cairomm librsvg sqlite3 libgit2 curl opencascade glm podofo libarchive python libspnav cmake meson
-    - name: Install python dependencies
-      if: ${{ matrix.target == 'horizon.so' }}
-      run: pacman -S --needed --noconfirm mesa python-cairo python-yaml
     - name: Build LD_PRELOAD kludge
       run: gcc -shared -fPIC -o close_range.so scripts/close_range.c
     - name: Build
@@ -136,9 +132,6 @@ jobs:
         ninja -C ../build ${{ matrix.target }}
     - name: Check version
       run: python3 check_version.py
-    - name: Test python module
-      if: ${{ matrix.target == 'horizon.so' }}
-      run: python3 -c 'import sys; sys.path.append("../build"); import horizon'
 
   build-opensuse:
     strategy:
