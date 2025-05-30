@@ -50,6 +50,8 @@ void ImpBoard::canvas_update()
 void ImpBoard::update_airwire_annotation()
 {
     airwire_annotation->clear();
+    const auto work_layer = canvas->property_work_layer().get_value();
+    const auto work_layer_only = layer_box->property_layer_mode() != CanvasGL::LayerMode::AS_IS;
     for (const auto &[net, airwires] : core_board.get_board()->airwires) {
         if (!airwire_filter_window->airwire_is_visible(net))
             continue;
@@ -60,6 +62,12 @@ void ImpBoard::update_airwire_annotation()
         if (core_board.tool_is_active() && !highlight && highlights.size())
             continue;
         for (const auto &airwire : airwires) {
+            const auto layers = airwire.get_layers();
+            if (work_layer_only && !layers.overlaps(work_layer))
+                continue;
+            if (!canvas->layer_is_visible(layers))
+                continue;
+
             airwire_annotation->draw_line(airwire.from.get_position(), airwire.to.get_position(), ColorP::AIRWIRE, 0,
                                           highlight, color2);
         }
@@ -887,6 +895,10 @@ void ImpBoard::construct()
 
         airwire_filter_window->set_only(nets);
     });
+
+    layer_box->property_layer_mode().signal_changed().connect([this] { update_airwire_annotation(); });
+    canvas->property_work_layer().signal_changed().connect([this] { update_airwire_annotation(); });
+    layer_box->signal_set_layer_display().connect([this](auto, auto) { update_airwire_annotation(); });
 
     connect_action(ActionID::OPEN_DATASHEET, [this](const auto &a) {
         const auto x = sel_find_exactly_one(canvas->get_selection(), ObjectType::BOARD_PACKAGE);
