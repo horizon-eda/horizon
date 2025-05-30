@@ -303,6 +303,8 @@ void TriangleRenderer::render_layer_batch(int layer, HighlightMode highlight_mod
             auto lc = ca.get_layer_color(ca.layer_provider.get_color_layer(layer));
             buf.colors[static_cast<int>(ColorP::AIRWIRE_ROUTER)] =
                     gl_array_from_color(ca.appearance.colors.at(ColorP::AIRWIRE_ROUTER));
+            buf.colors[static_cast<int>(ColorP::AIRWIRE)] =
+                    gl_array_from_color(ca.appearance.colors.at(ColorP::AIRWIRE));
             buf.colors[static_cast<int>(ColorP::FROM_LAYER)] = apply_highlight(lc, highlight_mode, layer);
             buf.colors[static_cast<int>(ColorP::LAYER_HIGHLIGHT)] = apply_highlight(lc, highlight_mode, layer);
             buf.colors[static_cast<int>(ColorP::LAYER_HIGHLIGHT_LIGHTEN)] =

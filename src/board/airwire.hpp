@@ -10,5 +10,6 @@ public:
     Track::Connection from;
     Track::Connection to;
     void update_refs(class Board &brd);
+    LayerRange get_layers() const;
 };
 } // namespace horizon
