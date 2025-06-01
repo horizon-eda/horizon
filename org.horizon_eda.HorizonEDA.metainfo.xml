@@ -52,6 +52,17 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+    <release version="2.7.0" date="2025-06-01">
+      <url>https://github.com/horizon-eda/horizon/releases/tag/v2.7.0</url>
+      <description>
+        <p>What's new</p>
+        <ul>
+          <li>Simplified project pool update</li>
+          <li>Save/load pick&amp;place export settings</li>
+          <li>Allow packages to fix parameters</li>
+        </ul>
+      </description>
+    </release>
     <release version="2.6.0" date="2024-05-18">
       <url>https://github.com/horizon-eda/horizon/releases/tag/v2.6.0</url>
       <description>
