@@ -52,8 +52,8 @@
   <content_rating type="oars-1.0" />
 
   <releases>
-    <release version="2.6.90" date="2025-05-14">
-      <url>https://github.com/horizon-eda/horizon/releases/tag/v2.6.90</url>
+    <release version="2.6.91" date="2025-06-01">
+      <url>https://github.com/horizon-eda/horizon/releases/tag/v2.6.91</url>
       <description>
         <p>What's new</p>
         <ul>
