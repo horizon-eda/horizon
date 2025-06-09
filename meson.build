@@ -48,7 +48,6 @@ endif
 
 libpython = dependency('python3', required: false, disabler:true)
 py3cairo = dependency('py3cairo', required: false, disabler:true)
-osmesa = dependency('osmesa', required: false, disabler:true)
 glm = dependency('glm')
 
 cpp_args_router = ['-D_USE_MATH_DEFINES']
@@ -105,7 +104,7 @@ endif
 
 
 build_dependencies_libhorizon = [libm, pthread, gtkmm, sqlite3, png] + stdlibs
-build_dependencies_horizonmodule = [libm, gtkmm, sqlite3, png, py3cairo, podofo, libpython, osmesa, opencascade, libarchive]
+build_dependencies_horizonmodule = [libm, gtkmm, sqlite3, png, py3cairo, podofo, libpython, epoxy, opencascade, libarchive]
 if not is_windows
 	uuid = dependency('uuid')
 	build_dependencies_libhorizon += uuid
@@ -116,7 +115,7 @@ endif
 
 build_dependencies_libhorizonui = build_dependencies_libhorizon + [epoxy, zeromq, cppzmq, curl, glm]
 build_dependencies_gen_pkg =    build_dependencies_libhorizon
-build_dependencies_pr_review = build_dependencies_libhorizon + [podofo, osmesa, opencascade, libgit2]
+build_dependencies_pr_review = build_dependencies_libhorizon + [podofo, epoxy, opencascade, libgit2]
 
 build_dependencies_pool_prj_mgr = build_dependencies_libhorizonui + [libgit2]
 build_dependencies_imp = build_dependencies_libhorizonui +[rsvg, podofo, libarchive, opencascade, spnav]
@@ -1002,7 +1001,7 @@ horizon_py = shared_module('horizon',
     dependencies: build_dependencies_horizonmodule,
     link_with: [clipper_pic, delaunator_pic, polypartition_pic, poly2tri_pic],
     include_directories: include_directories,
-    cpp_args: cpp_args + ['-DOFFSCREEN=1'],
+    cpp_args: cpp_args,
     build_by_default: false,
     name_prefix: ''
 )
@@ -1012,7 +1011,7 @@ horizon_pr_review = executable('horizon-pr-review',
     dependencies: build_dependencies_pr_review,
     link_with: [clipper_nopic, delaunator_nopic, polypartition_nopic, poly2tri_nopic, libhorizon],
     include_directories: include_directories,
-    cpp_args: cpp_args + ['-DOFFSCREEN=1'],
+    cpp_args: cpp_args,
     build_by_default: false,
 )
 

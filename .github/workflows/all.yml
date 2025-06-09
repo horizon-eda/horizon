@@ -37,7 +37,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
-      run: apt-get update -y && apt-get install git build-essential libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev libocct-data-exchange-dev libocct-draw-dev occt-misc libpodofo-dev python3-dev libarchive-dev git libosmesa6-dev cmake meson -y
+      run: apt-get update -y && apt-get install git build-essential libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev libocct-data-exchange-dev libocct-draw-dev occt-misc libpodofo-dev python3-dev libarchive-dev git cmake meson -y
     - name: Build
       run: |
         mkdir ../build
@@ -90,7 +90,7 @@ jobs:
       run: apt-get install git build-essential ${{ matrix.os.cxx }} libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev libpodofo-dev python3-dev libarchive-dev git libspnav-dev meson cmake libocct-data-exchange-dev libocct-draw-dev occt-misc -y
     - name: Install python dependencies
       if: ${{ matrix.target == 'horizon.so' }}
-      run: apt-get install python3-cairo-dev libosmesa6-dev python3-yaml -y
+      run: apt-get install python3-cairo-dev python3-yaml -y
     - name: Build
       run: |
         mkdir ../build
