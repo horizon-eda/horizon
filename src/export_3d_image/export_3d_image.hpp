@@ -25,8 +25,9 @@ public:
 
 private:
     class IPool &pool;
-    void *ctx = nullptr; // to get around including osmesa here
-    std::vector<unsigned char> buffer;
+    void *egl = nullptr;  // to get around including epoxy here
+    void *dpy = nullptr;  // to get around including epoxy here
+    void *surf = nullptr; // to get around including epoxy here
     void check_ctx();
     bool render_background = false;
 };

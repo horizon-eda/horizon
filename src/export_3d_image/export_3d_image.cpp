@@ -1,7 +1,7 @@
 #include "export_3d_image.hpp"
 #include "canvas3d/canvas3d_base.hpp"
-#include "GL/osmesa.h"
 #include <cairomm/cairomm.h>
+#include <epoxy/egl.h>
 
 namespace horizon {
 
@@ -11,28 +11,59 @@ Image3DExporter::Image3DExporter(const class Board &abrd, class IPool &apool, un
     width = awidth;
     height = aheight;
 
-    {
-        std::vector<int> attribs;
-        attribs.push_back(OSMESA_DEPTH_BITS);
-        attribs.push_back(16);
+    // based on
+    // https://code.videolan.org/videolan/libplacebo/-/blob/00a1009a78434bbc43a1efc54f5915dd466706a4/src/tests/opengl_surfaceless.c#L98
+    const char *extstr = eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
+    if (!extstr || !strstr(extstr, "EGL_MESA_platform_surfaceless"))
+        throw std::runtime_error("no EGL_MESA_platform_surfaceless");
 
-        attribs.push_back(OSMESA_PROFILE);
-        attribs.push_back(OSMESA_CORE_PROFILE);
+    dpy = eglGetPlatformDisplayEXT(EGL_PLATFORM_SURFACELESS_MESA, (void *)EGL_DEFAULT_DISPLAY, NULL);
+    if (!dpy)
+        throw std::runtime_error("no dpy");
 
-        attribs.push_back(OSMESA_CONTEXT_MAJOR_VERSION);
-        attribs.push_back(3);
+    EGLint major, minor;
+    if (!eglInitialize(dpy, &major, &minor))
+        throw std::runtime_error("error in eglInitialize");
 
-        attribs.push_back(0);
-        attribs.push_back(0);
-        ctx = OSMesaCreateContextAttribs(attribs.data(), NULL);
-    }
-    if (!ctx) {
-        throw std::runtime_error("couldn't create context");
-    }
-    buffer.resize(width * height * 4);
-    if (!OSMesaMakeCurrent(static_cast<OSMesaContext>(ctx), buffer.data(), GL_UNSIGNED_BYTE, width, height)) {
-        throw std::runtime_error("couldn't make current");
-    }
+    // clang-format off
+    const int cfg_attribs[] = {
+            EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
+            EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
+            EGL_ALPHA_SIZE, 8,
+            EGL_NONE
+    };
+    // clang-format on
+
+    EGLConfig config = 0;
+    EGLint num_configs = 0;
+    bool ok = eglChooseConfig(dpy, cfg_attribs, &config, 1, &num_configs);
+    if (!ok || !num_configs)
+        throw std::runtime_error("error in eglChooseConfig");
+
+    if (!eglBindAPI(EGL_OPENGL_API))
+        throw std::runtime_error("error in eglBindAPI");
+
+    // clang-format off
+    const int egl_attribs[] = {
+        EGL_CONTEXT_MAJOR_VERSION, 4,
+        EGL_CONTEXT_MINOR_VERSION, 6,
+        EGL_CONTEXT_OPENGL_PROFILE_MASK, EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT,
+        EGL_NONE
+    };
+    // clang-format on
+
+    egl = eglCreateContext(dpy, config, EGL_NO_CONTEXT, egl_attribs);
+    if (!egl)
+        throw std::runtime_error("no context");
+
+
+    const EGLint pbuffer_attribs[] = {EGL_WIDTH, width, EGL_HEIGHT, height, EGL_NONE};
+
+    surf = eglCreatePbufferSurface(dpy, config, pbuffer_attribs);
+
+    if (!eglMakeCurrent(dpy, surf, surf, egl))
+        throw std::runtime_error("error in eglMakeCurrent");
+
     a_realize();
 
     brd = &abrd;
@@ -43,7 +74,7 @@ Image3DExporter::Image3DExporter(const class Board &abrd, class IPool &apool, un
 
 void Image3DExporter::check_ctx()
 {
-    if (ctx != OSMesaGetCurrentContext()) {
+    if (egl != eglGetCurrentContext()) {
         throw std::runtime_error("lost context");
     }
 }
@@ -68,7 +99,10 @@ Cairo::RefPtr<Cairo::Surface> Image3DExporter::render_to_surface()
     render(render_background ? RenderBackground::YES : RenderBackground::NO);
     glFinish();
 
-    auto buf = buffer.data();
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    std::vector<uint8_t> buf(width * height * 4);
+    glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buf.data());
+
     unsigned int iwidth = width;
     unsigned int iheight = height;
     auto surf = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, iwidth, iheight);
@@ -90,6 +124,8 @@ Cairo::RefPtr<Cairo::Surface> Image3DExporter::render_to_surface()
 
 Image3DExporter::~Image3DExporter()
 {
-    OSMesaDestroyContext(static_cast<OSMesaContext>(ctx));
+    eglDestroySurface(dpy, surf);
+    eglDestroyContext(dpy, egl);
+    eglTerminate(dpy);
 }
 } // namespace horizon
