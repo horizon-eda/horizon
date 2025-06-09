@@ -74,18 +74,15 @@ LIBS=(
 	libTKPrim.dll\
 	libTKService.dll\
 	libTKShHealing.dll\
-	libTKSTEP.dll\
-	libTKSTEP209.dll\
-	libTKSTEPAttr.dll\
-	libTKSTEPBase.dll\
 	libTKTopAlgo.dll\
 	libTKV3d.dll\
 	libTKXCAF.dll\
-	libTKXDESTEP.dll\
 	libTKXSBase.dll\
-	libTKIGES.dll\
-	libTKXDE.dll\
 	libTKVCAF.dll\
+	libTKDEIGES.dll\
+	libTKDESTEP.dll\
+	libTKDESTL.dll\
+	libTKDE.dll\
 	libTKBool.dll\
 	libtbb12.dll\
 	libtbbmalloc.dll\
