@@ -1,9 +1,9 @@
 #pragma once
 #include "util/uuid.hpp"
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include "common/common.hpp"
 #include "util/uuid_ptr.hpp"
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include <set>
 
 namespace horizon {

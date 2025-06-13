@@ -1,6 +1,6 @@
 #include "net_tie.hpp"
 #include "block.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 NetTie::NetTie(const UUID &uu) : uuid(uu)

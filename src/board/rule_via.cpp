@@ -1,7 +1,7 @@
 #include "rule_via.hpp"
 #include "util/util.hpp"
 #include <sstream>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 RuleVia::RuleVia(const UUID &uu) : Rule(uu)

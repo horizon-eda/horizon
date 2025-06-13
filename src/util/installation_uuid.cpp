@@ -1,7 +1,7 @@
 #include "installation_uuid.hpp"
 #include "util/util.hpp"
 #include <filesystem>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace fs = std::filesystem;
 using json = nlohmann::json;

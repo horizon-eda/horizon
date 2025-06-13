@@ -5,7 +5,7 @@
 #include "util/util.hpp"
 #include <git2.h>
 #include <curl/curl.h>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "close_utils.hpp"
 #include "pool/pool_manager.hpp"
 #include "preferences/preferences_window.hpp"

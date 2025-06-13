@@ -6,7 +6,7 @@
 #include "util/sqlite.hpp"
 #include "pool/ipool.hpp"
 #include "core/tool_id.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 std::shared_ptr<const Symbol> ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool *auto_selected,

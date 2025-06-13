@@ -4,7 +4,7 @@
 #include "util/uuid.hpp"
 #include <zmq.hpp>
 #include "util/win32_undef.hpp"
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include "util/editor_process.hpp"
 #include "util/window_state_store.hpp"
 #include "pool-prj-mgr-process.hpp"

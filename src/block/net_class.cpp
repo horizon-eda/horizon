@@ -1,6 +1,6 @@
 #include "net_class.hpp"
 #include "common/common.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 NetClass::NetClass(const UUID &uu, const json &j) : uuid(uu), name(j.at("name").get<std::string>())

@@ -1,5 +1,5 @@
 #include "clipboard_handler.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "core/clipboard/clipboard.hpp"
 namespace horizon {
 using json = nlohmann::json;

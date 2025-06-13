@@ -3,7 +3,7 @@
 #include "pool/part.hpp"
 #include "util/util.hpp"
 #include <algorithm>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include <giomm/file.h>
 #include <glibmm/fileutils.h>
 #include "pool/ipool.hpp"

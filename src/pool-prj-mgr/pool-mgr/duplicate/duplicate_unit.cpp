@@ -7,7 +7,7 @@
 #include "util/gtk_util.hpp"
 #include "widgets/location_entry.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 

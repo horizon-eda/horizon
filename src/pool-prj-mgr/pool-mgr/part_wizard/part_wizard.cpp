@@ -8,7 +8,7 @@
 #include "util/str_util.hpp"
 #include "util/gtk_util.hpp"
 #include "util/pool_completion.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "util/csv.hpp"
 #include "widgets/tag_entry.hpp"

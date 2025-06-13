@@ -4,7 +4,7 @@
 #include <mutex>
 #include "util/uuid.hpp"
 #include "common/common.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "pool/pool_info.hpp"
 #include "util/changeable.hpp"
 #include <git2.h>

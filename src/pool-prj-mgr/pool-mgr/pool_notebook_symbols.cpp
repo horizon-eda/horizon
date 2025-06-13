@@ -4,7 +4,7 @@
 #include "dialogs/pool_browser_dialog.hpp"
 #include "widgets/pool_browser_symbol.hpp"
 #include "widgets/symbol_preview.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "util/gtk_util.hpp"
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "util/uuid.hpp"
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include "block/block_instance.hpp"
 #include "block_symbol/block_symbol.hpp"
 #include "util/uuid_ptr.hpp"

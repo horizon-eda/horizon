@@ -12,7 +12,7 @@
 #include "pool/ipool.hpp"
 #include "util/util.hpp"
 #include "checks/check_entity.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 

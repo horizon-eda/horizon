@@ -3,7 +3,7 @@
 #include <gtkmm.h>
 #include "util/uuid.hpp"
 #include "util/window_state_store.hpp"
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 
 namespace horizon {
 using json = nlohmann::json;

@@ -1,5 +1,5 @@
 #include "util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 static PyObject *json_module = nullptr;
 static PyObject *json_loads = nullptr;

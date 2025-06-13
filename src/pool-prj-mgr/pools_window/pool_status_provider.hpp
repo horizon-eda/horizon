@@ -2,7 +2,7 @@
 #include <string>
 #include "util/uuid.hpp"
 #include "common/common.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "util/changeable.hpp"
 #include <glibmm/dispatcher.h>
 #include <filesystem>

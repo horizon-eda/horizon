@@ -8,7 +8,7 @@
 #include "schematic/schematic_rules.hpp"
 #include "package/package_rules.hpp"
 #include "symbol/symbol_rules.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 RulesCheckResult rules_check(Rules &r, RuleID id, class IDocument &c, RulesCheckCache &cache,

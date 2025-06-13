@@ -5,7 +5,7 @@
 #include <set>
 #include "entity.hpp"
 #include "package.hpp"
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include "util/file_version.hpp"
 #include "util/item_set.hpp"
 

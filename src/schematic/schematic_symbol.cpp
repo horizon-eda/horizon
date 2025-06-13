@@ -1,7 +1,7 @@
 #include "schematic_symbol.hpp"
 #include "pool/part.hpp"
 #include "common/lut.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "schematic.hpp"
 #include "pool/ipool.hpp"
 #include "util/util.hpp"

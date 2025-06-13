@@ -3,7 +3,7 @@
 #include "board_package.hpp"
 #include "common/common.hpp"
 #include "board_junction.hpp"
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include "util/uuid.hpp"
 #include "util/uuid_ptr.hpp"
 #include <optional>

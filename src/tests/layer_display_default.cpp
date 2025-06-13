@@ -1,7 +1,7 @@
 #include "catch2/catch_amalgamated.hpp"
 #include "board/board_layers.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 TEST_CASE("Check that all inner layers exist")
 {

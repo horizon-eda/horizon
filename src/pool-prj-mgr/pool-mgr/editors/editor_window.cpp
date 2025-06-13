@@ -9,7 +9,7 @@
 #include "util/str_util.hpp"
 #include "util/gtk_util.hpp"
 #include "pool/ipool.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "widgets/color_box.hpp"
 #include "checks/check_entity.hpp"
 #include "checks/check_unit.hpp"

@@ -1,6 +1,6 @@
 #include "pool_notebook.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "widgets/pool_browser_frame.hpp"
 #include "util/win32_undef.hpp"

@@ -1,7 +1,7 @@
 #pragma once
 #include "bus.hpp"
 #include "component.hpp"
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include "net.hpp"
 #include "net_class.hpp"
 #include "util/uuid.hpp"

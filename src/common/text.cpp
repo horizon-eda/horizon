@@ -1,6 +1,6 @@
 #include "text.hpp"
 #include "lut.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 static const LutEnumStr<TextOrigin> origin_lut = {

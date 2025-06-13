@@ -16,6 +16,7 @@ giomm = dependency('giomm-2.4')
 png = dependency('libpng')
 epoxy = dependency('epoxy')
 sqlite3 = dependency('sqlite3')
+nlohmann = dependency('nlohmann_json')
 libgit2 = dependency('libgit2')
 zeromq = dependency('libzmq')
 cppzmq = dependency('cppzmq', required:false)
@@ -103,8 +104,8 @@ if is_libstdcpp
 endif
 
 
-build_dependencies_libhorizon = [libm, pthread, gtkmm, sqlite3, png] + stdlibs
-build_dependencies_horizonmodule = [libm, gtkmm, sqlite3, png, py3cairo, podofo, libpython, epoxy, opencascade, libarchive]
+build_dependencies_libhorizon = [libm, pthread, gtkmm, sqlite3, nlohmann, png] + stdlibs
+build_dependencies_horizonmodule = [libm, gtkmm, sqlite3, nlohmann, png, py3cairo, podofo, libpython, epoxy, opencascade, libarchive]
 if not is_windows
 	uuid = dependency('uuid')
 	build_dependencies_libhorizon += uuid

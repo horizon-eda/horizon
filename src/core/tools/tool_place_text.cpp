@@ -1,7 +1,7 @@
 #include "tool_place_text.hpp"
 #include "imp/imp_interface.hpp"
 #include <iostream>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "common/text.hpp"
 #include "document/idocument.hpp"
 #include "document/idocument_board.hpp"

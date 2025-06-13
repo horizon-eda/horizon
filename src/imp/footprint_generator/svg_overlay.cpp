@@ -1,6 +1,6 @@
 #include "svg_overlay.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 #if LIBRSVG_CHECK_VERSION(2, 48, 0)
 #define HAVE_SET_STYLESHEET

@@ -10,7 +10,7 @@
 #include "common/text.hpp"
 #include "common/keepout.hpp"
 #include "common/dimension.hpp"
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include "package/package_rules.hpp"
 #include "package/pad.hpp"
 #include "util/uuid.hpp"

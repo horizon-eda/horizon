@@ -1,6 +1,6 @@
 #include "3d_image_exporter.hpp"
 #include "image_3d_exporter_wrapper.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "util.hpp"
 #define PYCAIRO_NO_IMPORT
 #include <py3cairo.h>

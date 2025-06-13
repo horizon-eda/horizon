@@ -1,5 +1,5 @@
 #include "board_rules_import.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 BoardRulesImportInfo::BoardRulesImportInfo(const json &j)

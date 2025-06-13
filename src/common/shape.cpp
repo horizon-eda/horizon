@@ -1,6 +1,6 @@
 #include "shape.hpp"
 #include "lut.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 static const LutEnumStr<Shape::Form> form_lut = {

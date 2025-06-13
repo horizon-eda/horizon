@@ -6,7 +6,7 @@
 #include "util/util.hpp"
 #include "util/geom_util.hpp"
 #include "canvas/canvas_gl.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 

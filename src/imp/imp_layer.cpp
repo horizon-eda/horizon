@@ -3,7 +3,7 @@
 #include "widgets/layer_box.hpp"
 #include "util/util.hpp"
 #include "util/geom_util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "util/gtk_util.hpp"
 #include "view_angle_window.hpp"
 #include "widgets/spin_button_angle.hpp"

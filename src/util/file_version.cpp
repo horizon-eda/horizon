@@ -1,5 +1,5 @@
 #include "file_version.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "logger/logger.hpp"
 #include "common/object_descr.hpp"
 #include "util/uuid.hpp"
