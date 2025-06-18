@@ -50,10 +50,12 @@ template <typename T> struct text_attribute {
 template <typename T> struct is_feature : std::false_type {};
 template <typename T> struct is_net : std::false_type {};
 template <typename T> struct is_pkg : std::false_type {};
+template <typename T> struct is_comp : std::false_type {};
 
 template <class T> inline constexpr bool is_feature_v = is_feature<T>::value;
 template <class T> inline constexpr bool is_net_v = is_net<T>::value;
 template <class T> inline constexpr bool is_pkg_v = is_pkg<T>::value;
+template <class T> inline constexpr bool is_comp_v = is_comp<T>::value;
 
 #define ATTR_IS_FEATURE(a)                                                                                             \
     template <> struct is_feature<a> : std::true_type {};
@@ -63,6 +65,9 @@ template <class T> inline constexpr bool is_pkg_v = is_pkg<T>::value;
 
 #define ATTR_IS_PKG(a)                                                                                                 \
     template <> struct is_pkg<a> : std::true_type {};
+
+#define ATTR_IS_COMP(a)                                                                                                \
+    template <> struct is_comp<a> : std::true_type {};
 
 enum class drill { PLATED, NON_PLATED, VIA };
 ATTR_NAME(drill)
@@ -74,6 +79,10 @@ ATTR_NAME(primary_side)
 enum class pad_usage { TOEPRINT, VIA, G_FIDUCIAL, L_FIDUCIAL, TOOLING_HOLE };
 ATTR_NAME(pad_usage)
 ATTR_IS_FEATURE(pad_usage)
+
+enum class comp_mount_type { OTHER, SMT, THMT, PRESSFIT };
+ATTR_NAME(comp_mount_type)
+ATTR_IS_COMP(comp_mount_type)
 
 MAKE_FLOAT_ATTR(drc_max_height, 3)
 ATTR_IS_FEATURE(drc_max_height)

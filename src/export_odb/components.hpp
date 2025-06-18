@@ -24,6 +24,8 @@ public:
 
     class Component : public RecordWithAttributes {
     public:
+        template <typename T> using check_type = attribute::is_comp<T>;
+
         Component(unsigned int i, unsigned int r) : index(i), pkg_ref(r)
         {
         }
