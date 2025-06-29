@@ -808,6 +808,20 @@ void Schematic::expand_connectivity(bool careful)
                 }
             }
         }
+        for (auto &[uu_line, line] : sheet.lines) {
+            const auto msg = "Graphic line connected to junction with net/bus";
+            if (!line.from->only_lines_arcs_connected())
+                sheet.warnings.emplace_back(line.from->position, msg);
+            if (!line.to->only_lines_arcs_connected())
+                sheet.warnings.emplace_back(line.to->position, msg);
+        }
+        for (auto &[uu, arc] : sheet.arcs) {
+            const auto msg = "Arc connected to junction with net/bus";
+            if (!arc.from->only_lines_arcs_connected())
+                sheet.warnings.emplace_back(arc.from->position, msg);
+            if (!arc.to->only_lines_arcs_connected())
+                sheet.warnings.emplace_back(arc.to->position, msg);
+        }
         for (const auto &[uu_sym, sym] : sheet.block_symbols) {
             for (const auto &[uu_port, port] : sym.symbol.ports) {
                 if (port.net) {
