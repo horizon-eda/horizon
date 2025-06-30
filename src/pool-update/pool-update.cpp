@@ -1,5 +1,5 @@
 #include "pool-update.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "pool/pool_manager.hpp"
 #include "pool_updater.hpp"
 #include "pool/pool_info.hpp"

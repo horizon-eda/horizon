@@ -4,7 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include "document/idocument.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 

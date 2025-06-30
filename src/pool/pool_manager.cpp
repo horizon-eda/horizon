@@ -3,7 +3,7 @@
 #include <glibmm/miscutils.h>
 #include <giomm/file.h>
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include <filesystem>
 #include "util/fs_util.hpp"
 

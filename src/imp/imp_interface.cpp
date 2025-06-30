@@ -4,7 +4,7 @@
 #include "imp_layer.hpp"
 #include "widgets/layer_box.hpp"
 #include "pool/part.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "util/util.hpp"
 
 namespace horizon {

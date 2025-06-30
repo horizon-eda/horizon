@@ -2,7 +2,7 @@
 #include "imp/imp_interface.hpp"
 #include "pool/part.hpp"
 #include <algorithm>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "document/idocument.hpp"
 
 namespace horizon {

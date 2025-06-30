@@ -1,6 +1,6 @@
 #include "pool/package.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "pool/pool.hpp"
 #include "board/board_layers.hpp"
 #include "pool/part.hpp"

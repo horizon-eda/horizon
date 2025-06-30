@@ -2,7 +2,7 @@
 #include "board/board_layers.hpp"
 #include "core_properties.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include <giomm/file.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>

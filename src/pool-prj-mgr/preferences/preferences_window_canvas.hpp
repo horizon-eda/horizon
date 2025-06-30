@@ -1,7 +1,7 @@
 #pragma once
 #include <gtkmm.h>
 #include "preferences/preferences.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 using json = nlohmann::json;

@@ -2,7 +2,7 @@
 #include "canvas/canvas_gl.hpp"
 #include "main_window.hpp"
 #include "widgets/spin_button_dim.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "util/gtk_util.hpp"
 
 namespace horizon {

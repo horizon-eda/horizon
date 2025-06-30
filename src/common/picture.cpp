@@ -1,5 +1,5 @@
 #include "picture.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include <cairomm/cairomm.h>
 #include <glib.h>
 

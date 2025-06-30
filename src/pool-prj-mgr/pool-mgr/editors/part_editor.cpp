@@ -14,7 +14,7 @@
 #include "pool/ipool.hpp"
 #include <range/v3/view.hpp>
 #include "util/range_util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "checks/check_part.hpp"
 
 namespace horizon {

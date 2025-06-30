@@ -1,5 +1,5 @@
 #pragma once
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include <map>
 #include <set>
 #include <string>

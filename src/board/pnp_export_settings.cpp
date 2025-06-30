@@ -1,5 +1,5 @@
 #include "pnp_export_settings.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 

@@ -3,7 +3,7 @@
 #include <glibmm/fileutils.h>
 #include <giomm/file.h>
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "pool_manager.hpp"
 #include "package.hpp"
 #include <filesystem>

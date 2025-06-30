@@ -3,7 +3,7 @@
 #include "board_layers.hpp"
 #include "board_package.hpp"
 #include "common/lut.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "util/geom_util.hpp"
 
 namespace horizon {

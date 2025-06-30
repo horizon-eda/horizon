@@ -1,7 +1,7 @@
 #pragma once
 #include "frame/frame.hpp"
 #include "core.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "document/idocument_frame.hpp"
 
 namespace horizon {

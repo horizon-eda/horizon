@@ -36,7 +36,6 @@ See the [the docs](https://docs.horizon-eda.org/en/latest/installation.html).
 
 | Directory in `3rd_party` | Project                   | Version                                  | URL                                                                     | License      |
 |--------------------------|---------------------------|------------------------------------------|-------------------------------------------------------------------------|--------------|
-| nlohmann                 | JSON for Modern C++       | 3.10.3                                   | https://github.com/nlohmann/json/                                       | MIT          |
 | clipper                  | Clipper                   | 6.4.2                                    | http://www.angusj.com/delphi/clipper.php                                | Boost        |
 | polypartition            | polypartition             | 7bdffb428b2b19ad1c43aa44c714dcc104177e84 | https://github.com/ivanfratric/polypartition/                           | MIT          |
 | poly2tri                 | poly2tri                  | d949f3cd6f85b20728af0bdc454b090226068c73 | https://github.com/jhasse/poly2tri                                      | 3-Clause BSD |
@@ -47,7 +46,6 @@ See the [the docs](https://docs.horizon-eda.org/en/latest/installation.html).
 | router                   | KiCad router              | 6.0.4                                    | https://gitlab.com/kicad/code/kicad/-/tree/6.0.4/pcbnew/router          | GPLv3        |
 | sexpr                    | KiCad s-expression parser | 6.0.4                                    | https://gitlab.com/kicad/code/kicad/-/tree/6.0.4/libs/sexpr             | GPLv3        |
 | catch2                   | Catch2                    | 3.0.1                                    | https://github.com/catchorg/Catch2/releases/tag/v3.0.1                  | Boost        |
-| range-v3                 | range-v3                  | 0.12.0                                   | https://github.com/ericniebler/range-v3/releases/tag/0.12.0             | Boost        |
 
 
 - https://github.com/russdill/pybis

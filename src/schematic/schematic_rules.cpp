@@ -2,7 +2,7 @@
 #include "schematic.hpp"
 #include "util/util.hpp"
 #include "rules/cache.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 SchematicRules::SchematicRules()

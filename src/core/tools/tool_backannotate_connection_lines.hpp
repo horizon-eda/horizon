@@ -1,7 +1,7 @@
 #pragma once
 #include "core/tool.hpp"
 #include "util/uuid_path.hpp"
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 
 namespace horizon {
 using json = nlohmann::json;

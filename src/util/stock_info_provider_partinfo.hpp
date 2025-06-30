@@ -4,7 +4,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <thread>
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include "pool/pool.hpp"
 
 namespace horizon {

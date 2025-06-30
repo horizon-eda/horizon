@@ -2,7 +2,7 @@
 #include "block.hpp"
 #include "logger/logger.hpp"
 #include "pool/part.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "pool/ipool.hpp"
 #include "util/pin_direction_accumulator.hpp"
 

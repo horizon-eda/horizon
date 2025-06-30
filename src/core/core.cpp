@@ -2,7 +2,7 @@
 #include "common/dimension.hpp"
 #include "logger/logger.hpp"
 #include <memory>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "imp/action_catalog.hpp"
 #include "imp/actions.hpp"
 #include "util/util.hpp"

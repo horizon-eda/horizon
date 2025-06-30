@@ -17,7 +17,7 @@
 #include "dialogs/router_settings_window.hpp"
 #include <iostream>
 #include <iomanip>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "router/layer_ids.h"
 
 namespace horizon {

@@ -11,7 +11,7 @@
 #include <iostream>
 #endif
 #include <iomanip>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "alphanum/alphanum.hpp"
 #include <gdk/gdkkeysyms.h>
 #include "imp/in_tool_action.hpp"

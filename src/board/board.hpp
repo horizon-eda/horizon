@@ -13,7 +13,7 @@
 #include "common/pdf_export_settings.hpp"
 #include "gerber_output_settings.hpp"
 #include "odb_output_settings.hpp"
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include "plane.hpp"
 #include "track.hpp"
 #include "util/uuid.hpp"

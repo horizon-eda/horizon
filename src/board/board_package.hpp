@@ -1,6 +1,6 @@
 #pragma once
 #include "block/component.hpp"
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include "pool/package.hpp"
 #include "util/placement.hpp"
 #include "util/uuid.hpp"

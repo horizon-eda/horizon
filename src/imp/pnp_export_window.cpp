@@ -5,7 +5,7 @@
 #include "export_pnp/export_pnp.hpp"
 #include "widgets/help_button.hpp"
 #include "help_texts.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 #include <iostream>
 

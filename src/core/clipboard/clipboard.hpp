@@ -1,6 +1,6 @@
 #pragma once
 #include "canvas/selectables.hpp"
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 
 namespace horizon {
 using json = nlohmann::json;
