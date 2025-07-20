@@ -263,6 +263,14 @@ void PartPreview::handle_package_sel()
     if (combo_package->get_active_row_number() == -1)
         return;
 
-    canvas_package->load(ObjectType::PACKAGE, combo_package->get_active_key());
+    Package pkg = *pool.get_package(combo_package->get_active_key());
+    const auto n_gates = part->entity->gates.size();
+    for (const auto &[pad_uu, it] : part->pad_map) {
+        auto &pad = pkg.pads.at(pad_uu);
+        pad.secondary_text = it.pin->primary_name;
+        if (n_gates > 1)
+            pad.secondary_text = it.gate->name + "." + pad.secondary_text;
+    }
+    canvas_package->load(pkg, true);
 }
 } // namespace horizon
