@@ -102,6 +102,7 @@
 #include "tools/tool_move_track_center.hpp"
 #include "tools/tool_paste_placement.hpp"
 #include "tools/tool_paste_part.hpp"
+#include "tools/tool_drag_round.hpp"
 
 namespace horizon {
 
@@ -475,6 +476,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::PASTE_PART:
         return std::make_unique<ToolPastePart>(this, tool_id);
+
+    case ToolID::DRAG_ROUND:
+        return std::make_unique<ToolDragRound>(this, tool_id);
 
     default:
         return nullptr;
