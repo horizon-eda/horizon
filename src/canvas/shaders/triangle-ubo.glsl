@@ -10,6 +10,7 @@ layout (std140) uniform layer_setup
 	float min_line_width;
 	uint layer_mode;
 	uint stencil_mode;
+	uint force_aliased;
 };
 
 #define LAYER_MODE_OUTLINE (0U)

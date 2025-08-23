@@ -161,6 +161,7 @@ public:
     float min_line_width;
     unsigned int layer_mode;
     unsigned int stencil_mode;
+    unsigned int force_aliased;
 };
 
 static std::array<float, 4> operator+(const std::array<float, 4> &a, float b)
@@ -241,6 +242,7 @@ void TriangleRenderer::render_layer_batch(int layer, HighlightMode highlight_mod
     buf.offset[1] = ca.offset.y;
     buf.min_line_width = ca.appearance.min_line_width;
     buf.stencil_mode = stencil_mode;
+    buf.force_aliased = ca.appearance.min_line_width < 1.1 || ca.appearance.msaa < 1;
 
     for (const auto &[key, span] : batch) {
         bool skip = false;

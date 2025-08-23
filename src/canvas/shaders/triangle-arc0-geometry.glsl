@@ -34,7 +34,7 @@ void main() {
 
 
 	
-	float border_width = min_line_width;
+	float border_width = min_line_width* (force_aliased != 0u ? 1. : 1.5);
 	float r = p2.x + border_width/scale/2;
 	float h = r*2;
 	float z = 2;
