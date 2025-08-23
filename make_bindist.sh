@@ -49,6 +49,7 @@ LIBS=(
 	libjpeg-8.dll\
 	librsvg-2-2.dll\
 	libxml2-2.dll\
+	libxml2-16.dll\
 	liblzma-5.dll\
 	libtiff-6.dll\
 	libzmq.dll\
