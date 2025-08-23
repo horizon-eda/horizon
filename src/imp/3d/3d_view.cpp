@@ -156,6 +156,12 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     paste_switch->property_active().signal_changed().connect(
             [this, paste_switch] { canvas->set_show_solder_paste(paste_switch->get_active()); });
 
+    Gtk::Switch *height_restrictions_switch;
+    GET_WIDGET(height_restrictions_switch);
+    height_restrictions_switch->property_active().signal_changed().connect([this, height_restrictions_switch] {
+        canvas->set_show_height_restrictions(height_restrictions_switch->get_active());
+    });
+
     {
         Gtk::RadioButton *models_none_rb;
         GET_WIDGET(models_none_rb);

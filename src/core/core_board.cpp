@@ -404,6 +404,18 @@ bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID
         }
     } break;
 
+    case ObjectType::HEIGHT_RESTRICTION: {
+        const auto &hr = brd->height_restrictions.at(uu);
+        switch (property) {
+        case ObjectProperty::ID::HEIGHT:
+            dynamic_cast<PropertyValueInt &>(value).value = hr.height;
+            return true;
+
+        default:
+            return false;
+        }
+    } break;
+
     default:
         return false;
     }
@@ -632,6 +644,18 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
 
         case ObjectProperty::ID::SCALE:
             decal.set_scale(dynamic_cast<const PropertyValueDouble &>(value).value);
+            break;
+
+        default:
+            return false;
+        }
+    } break;
+
+    case ObjectType::HEIGHT_RESTRICTION: {
+        auto &hr = brd->height_restrictions.at(uu);
+        switch (property) {
+        case ObjectProperty::ID::HEIGHT:
+            hr.height = dynamic_cast<const PropertyValueInt &>(value).value;
             break;
 
         default:

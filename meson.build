@@ -163,6 +163,7 @@ src_common = files(
     'src/board/rule_hole_size.cpp',
     'src/board/rule_layer_pair.cpp',
     'src/board/rule_net_ties.cpp',
+    'src/board/rule_height_restrictions.cpp',
     'src/board/rule_parameters.cpp',
     'src/board/rule_plane.cpp',
     'src/board/rule_preflight_checks.cpp',
@@ -175,6 +176,7 @@ src_common = files(
     'src/board/track.cpp',
     'src/board/via.cpp',
     'src/board/via_definition.cpp',
+    'src/board/height_restriction.cpp',
     'src/canvas/hershey_fonts.cpp',
     'src/common/arc.cpp',
     'src/common/common.cpp',
@@ -713,6 +715,7 @@ src_board_rules_check = files(
     'src/board/board_rules_check_net_ties.cpp',
     'src/board/board_rules_check_plane_priorities.cpp',
     'src/board/board_rules_check_board_connectivity.cpp',
+    'src/board/board_rules_check_height_restrictions.cpp',
     'src/board/board_rules_check_util.cpp',
 )
 

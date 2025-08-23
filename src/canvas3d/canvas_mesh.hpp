@@ -31,6 +31,7 @@ public:
         float alpha = 1;
         float explode_mul = 0;
         LayerRange span;
+        const class HeightRestriction *height_restriction = nullptr;
 
         std::atomic_bool done = false;
     };
@@ -38,6 +39,11 @@ public:
     static bool layer_is_pth_barrel(int layer)
     {
         return (layer >= 20'000) && (layer < 21'000);
+    }
+
+    static bool layer_is_height_restriction(int layer)
+    {
+        return (layer >= 21'000) && (layer < 22'000);
     }
 
     static bool layer_is_substrate(int layer);
@@ -71,6 +77,7 @@ private:
     void prepare_layer(int layer);
     void prepare_soldermask(int layer);
     void prepare_silkscreen(int layer);
+    void prepare_height_restriction(int layer);
     void add_path(int layer, const ClipperLib::Path &path);
 };
 } // namespace horizon

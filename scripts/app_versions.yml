@@ -21,6 +21,7 @@ versions:
     19: add blind and buried vias
     20: add via definitions
     21: add user layers
+    22: add height restrictions
   schematic:
     1: add custom values on symbols
     2: add hierarchy
@@ -33,6 +34,7 @@ versions:
     9: add bus ripper label position
   package:
     1: package-defined solder mask & paste parameters override board parameters
+    2: add heights
   project:
     1: replace pool cache with project pool
     2: add hierarchy

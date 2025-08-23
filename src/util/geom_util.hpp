@@ -18,6 +18,7 @@ Coordd project_onto_perp_bisector(const Coordd &a, const Coordd &b, const Coordd
 
 std::string coord_to_string(const Coordf &c, bool delta = false);
 std::string dim_to_string(int64_t x, bool with_sign = true);
+std::string dim_to_string_nlz(int64_t x, bool with_sign = true);
 std::string angle_to_string(int angle, bool pos_only = true);
 int orientation_to_angle(Orientation o);
 int64_t round_multiple(int64_t x, int64_t mul);

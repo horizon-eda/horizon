@@ -30,6 +30,7 @@
 #include "util/file_version.hpp"
 #include "common/grid_settings.hpp"
 #include "board_net_tie.hpp"
+#include "height_restriction.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -114,6 +115,7 @@ public:
     std::map<UUID, Picture> pictures;
     std::map<UUID, BoardDecal> decals;
     std::map<UUID, BoardNetTie> net_ties;
+    std::map<UUID, HeightRestriction> height_restrictions;
 
     std::vector<Warning> warnings;
 
@@ -138,6 +140,8 @@ public:
         uint64_t substrate_thickness = .1_mm;
     };
     std::map<int, StackupLayer> stackup;
+
+    int64_t get_total_thickness() const;
 
 
     class UserLayer {

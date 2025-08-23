@@ -565,6 +565,9 @@ RulesCheckResult BoardRules::check(RuleID id, const Board &brd, RulesCheckCache 
     case RuleID::BOARD_CONNECTIVITY:
         return BoardRules::check_board_connectivity(brd, cache, status_cb, cancel);
 
+    case RuleID::HEIGHT_RESTRICTIONS:
+        return BoardRules::check_height_restrictions(brd, cache, status_cb, cancel);
+
     default:
         return RulesCheckResult();
     }

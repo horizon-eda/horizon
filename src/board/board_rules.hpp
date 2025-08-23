@@ -18,6 +18,7 @@
 #include "rule_net_ties.hpp"
 #include "rule_board_connectivity.hpp"
 #include "rule_via_definitions.hpp"
+#include "rule_height_restrictions.hpp"
 #include "rules/rules.hpp"
 #include "util/uuid.hpp"
 #include <atomic>
@@ -97,6 +98,7 @@ private:
     RuleNetTies rule_net_ties;
     RuleBoardConnectivity rule_board_connectivity;
     RuleViaDefinitions rule_via_definitions;
+    RuleHeightRestrictions rule_height_restrictions;
 
     RulesCheckResult check_track_width(const class Board &b) const;
     RulesCheckResult check_hole_size(const class Board &b) const;
@@ -118,6 +120,8 @@ private:
                                     const std::atomic_bool &cancel) const;
     RulesCheckResult check_board_connectivity(const class Board &b, RulesCheckCache &cache, check_status_cb_t status_cb,
                                               const std::atomic_bool &cancel) const;
+    RulesCheckResult check_height_restrictions(const class Board &b, RulesCheckCache &cache,
+                                               check_status_cb_t status_cb, const std::atomic_bool &cancel) const;
 
     json serialize_or_export(Rule::SerializeMode mode) const;
 };

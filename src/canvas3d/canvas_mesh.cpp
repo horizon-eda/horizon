@@ -5,6 +5,7 @@
 #include "logger/logger.hpp"
 #include "util/geom_util.hpp"
 #include "util/min_max_accumulator.hpp"
+#include "util/polygon_arc_removal_proxy.hpp"
 #include <future>
 #include <thread>
 #include <atomic>
@@ -87,6 +88,9 @@ void CanvasMesh::prepare_worker(std::atomic_size_t &layer_counter, std::function
                     }
                 }
             }
+        }
+        else if (layer_is_height_restriction(layer)) {
+            prepare_height_restriction(layer);
         }
 
         else {
@@ -233,6 +237,29 @@ void CanvasMesh::prepare(const Board &brd)
         layers[layer].span = span;
         layers_to_prepare.push_back(layer);
     }
+
+    layer = 21'000;
+    for (const auto &[uu, it] : brd.height_restrictions) {
+        const auto ly = it.polygon->layer;
+        const auto sh = layers.at(BoardLayers::TOP_COPPER).offset + layers.at(BoardLayers::TOP_COPPER).thickness;
+        if (ly == BoardLayers::TOP_PACKAGE) {
+            layers[layer].offset = it.height * 1e-6 + sh;
+            layers[layer].explode_mul = 5;
+        }
+        else if (ly == BoardLayers::BOTTOM_PACKAGE) {
+            layers[layer].offset = layers.at(BoardLayers::BOTTOM_COPPER).offset - it.height * 1e-6;
+            layers[layer].explode_mul = layers.at(BoardLayers::BOTTOM_COPPER).explode_mul - 4;
+        }
+        else
+            continue;
+        layers[layer].thickness = 0;
+        layers[layer].height_restriction = &it;
+        layers[layer].alpha = .5;
+
+
+        layers_to_prepare.push_back(layer);
+        layer++;
+    }
 }
 
 void CanvasMesh::prepare_work(std::function<void()> cb)
@@ -331,6 +358,32 @@ void CanvasMesh::prepare_silkscreen(int layer)
         cl.Execute(pt, -100); // .1um
     }
 
+    for (const auto node : pt.Childs) {
+        polynode_to_tris(node, layer);
+    }
+}
+void CanvasMesh::prepare_height_restriction(int layer)
+{
+
+    PolygonArcRemovalProxy prx(*layers[layer].height_restriction->polygon);
+    ClipperLib::Path path;
+
+    path.reserve(prx.get().vertices.size());
+
+    for (const auto &it : prx.get().vertices) {
+        path.emplace_back(it.position.x, it.position.y);
+    }
+
+    if (ClipperLib::Orientation(path)) {
+        std::reverse(path.begin(), path.end());
+    }
+
+    ClipperLib::PolyTree pt;
+    {
+        ClipperLib::ClipperOffset cl;
+        cl.AddPath(path, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
+        cl.Execute(pt, 100); // .1um
+    }
     for (const auto node : pt.Childs) {
         polynode_to_tris(node, layer);
     }

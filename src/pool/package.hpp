@@ -109,6 +109,9 @@ public:
     PackageRules rules;
     GridSettings grid_settings;
 
+    int64_t height_top;
+    int64_t height_bot;
+
     std::map<UUID, Model> models;
     UUID default_model;
     const Model *get_model(const UUID &uu = UUID()) const;

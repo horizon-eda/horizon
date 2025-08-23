@@ -63,6 +63,22 @@ std::string dim_to_string(int64_t x, bool with_sign)
     return ss.str();
 }
 
+std::string dim_to_string_nlz(int64_t x, bool with_sign)
+{
+    std::ostringstream ss;
+    ss.imbue(get_locale());
+    if (with_sign) {
+        if (x >= 0) {
+            ss << "+";
+        }
+        else {
+            ss << "−"; // this is U+2212 MINUS SIGN, has same width as +
+        }
+    }
+    ss << std::fixed << std::setprecision(3) << std::internal << std::abs(x / 1e6) << " mm"; // NBSP
+    return ss.str();
+}
+
 std::string angle_to_string(int x, bool pos_only)
 {
     x = wrap_angle(x);

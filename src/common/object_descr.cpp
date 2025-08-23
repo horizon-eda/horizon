@@ -399,5 +399,12 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                   {ObjectProperty::ID::WIDTH_FROM_RULES, {ObjectProperty::Type::BOOL, "Width from rules", 2}},
 
           }}},
+        {ObjectType::HEIGHT_RESTRICTION,
+         {"Height restriction",
+          "Height restrictions",
+          {
+                  {ObjectProperty::ID::HEIGHT, {ObjectProperty::Type::LENGTH, "Height", 0}},
+
+          }}},
 };
 } // namespace horizon

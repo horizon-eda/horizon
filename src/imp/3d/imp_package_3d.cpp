@@ -82,9 +82,45 @@ std::string ImpPackage::ask_3d_model_filename(const std::string &current_filenam
     return "";
 }
 
+void ImpPackage::update_fake_height_restrictions(int layer)
+{
+    const auto height = (layer == BoardLayers::TOP_PACKAGE ? sp_height_top : sp_height_bot)->get_value_as_int();
+    if (!height)
+        return;
+
+    const bool have_bottom_package = std::any_of(package.polygons.begin(), package.polygons.end(), [](const auto &it) {
+        return it.second.layer == BoardLayers::BOTTOM_PACKAGE;
+    });
+
+    for (const auto &[uu_pkgpoly, pkg_poly] : package.polygons) {
+        if (have_bottom_package) {
+            if (pkg_poly.layer != layer)
+                continue;
+        }
+        else {
+            if (pkg_poly.layer != BoardLayers::TOP_PACKAGE && pkg_poly.layer != BoardLayers::BOTTOM_PACKAGE)
+                continue;
+        }
+        const auto uu_poly = UUID::random();
+        const auto uu_hr = UUID::random();
+        auto &poly = fake_board.polygons.emplace(uu_poly, uu_poly).first->second;
+        poly.layer = layer;
+
+        poly.vertices = pkg_poly.vertices;
+
+        auto &hr = fake_board.height_restrictions.emplace(uu_hr, uu_hr).first->second;
+        hr.height = height + 0.001_mm;
+        if (layer == BoardLayers::BOTTOM_PACKAGE)
+            hr.height -= (1.6_mm + 0.035_mm * 3 + 0.001_mm);
+        hr.polygon = &poly;
+        poly.usage = &hr;
+    }
+}
+
 void ImpPackage::update_fake_board()
 {
     fake_board.polygons.clear();
+    fake_board.height_restrictions.clear();
     fake_board.set_n_inner_layers(1);
     fake_board.stackup.at(BoardLayers::TOP_COPPER).substrate_thickness = .8_mm;
     fake_board.stackup.at(BoardLayers::IN1_COPPER).substrate_thickness = .8_mm;
@@ -102,6 +138,8 @@ void ImpPackage::update_fake_board()
         poly.vertices.emplace_back(bb.second);
         poly.vertices.emplace_back(Coordi(bb.second.x, bb.first.y));
     }
+    update_fake_height_restrictions(BoardLayers::TOP_PACKAGE);
+    update_fake_height_restrictions(BoardLayers::BOTTOM_PACKAGE);
 
     fake_board.packages.clear();
     {
@@ -257,4 +295,5 @@ void ImpPackage::construct_3d()
         view_3d_window->present();
     });
 }
+
 } // namespace horizon

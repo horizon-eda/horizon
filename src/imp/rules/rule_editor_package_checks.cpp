@@ -40,6 +40,11 @@ static const char *text_board_connectivity =
         "• Connected by PTH holes such as vias or through-hole pins\n"
         "• Connected by shorted pads as specfied in the the shorted pads rule\n";
 
+static const char *text_height_restrictions =
+        "This rule checks the height of all packages in a height restriction polygon:\n"
+        "• Packages must have a height set\n"
+        "• Height must not exceed height restriction\n";
+
 void RuleEditorPackageChecks::populate()
 {
     Gtk::Label *editor = Gtk::manage(new Gtk::Label);
@@ -62,6 +67,10 @@ void RuleEditorPackageChecks::populate()
 
     case RuleID::BOARD_CONNECTIVITY:
         editor->set_text(text_board_connectivity);
+        break;
+
+    case RuleID::HEIGHT_RESTRICTIONS:
+        editor->set_text(text_height_restrictions);
         break;
 
     default:

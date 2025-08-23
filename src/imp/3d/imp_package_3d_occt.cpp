@@ -19,6 +19,8 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <BRep_Tool.hxx>
 #include "pool/pool_manager.hpp"
+#include "model_editor.hpp"
+#include "3d_view.hpp"
 
 namespace horizon {
 
@@ -193,6 +195,31 @@ void ImpPackage::project_model(const Package::Model &model, ProjectionMode proj)
     canvas_update_from_pp();
     main_window->present();
 }
+
+
+void ImpPackage::update_height_from_model(const Package::Model &model)
+{
+    std::lock_guard<std::mutex> lock(model_info_mutex);
+    auto mat = mat_from_model(model, 1e-6);
+    double ht = 0;
+    double hb = 0;
+
+    auto &importer = *model_info.at(model.filename).importer.get();
+
+    const auto result = importer.get_faces_and_points();
+    for (const auto &face : result.faces) {
+        for (const auto &v : face.vertices) {
+            const auto vt = mat * glm::dvec4(v.x, v.y, v.z, 1);
+            ht = std::max(ht, vt.z);
+            hb = std::min(hb, vt.z);
+        }
+    }
+
+    sp_height_top->set_value(ht * 1_mm);
+    sp_height_bot->set_value(-hb * 1_mm);
+    view_3d_window->update();
+}
+
 
 ImpPackage::ModelInfo::~ModelInfo()
 {

@@ -52,6 +52,7 @@ public:
     GET_SET_PICK(show_models, bool)
     GET_SET_PICK(show_dnp_models, bool)
     GET_SET_PICK(show_solder_paste, bool)
+    GET_SET_PICK(show_height_restrictions, bool)
     GET_SET_PICK(show_copper, bool)
     GET_SET_PICK(show_points, bool)
     GET_SET(use_layer_colors, bool)
@@ -121,6 +122,7 @@ protected:
     bool show_models = true;
     bool show_dnp_models = false;
     bool show_solder_paste = true;
+    bool show_height_restrictions = true;
     bool use_layer_colors = false;
     bool show_copper = true;
     bool show_points = false;

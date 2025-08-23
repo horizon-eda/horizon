@@ -118,7 +118,7 @@ int Package::Model::get_rotation(unsigned int ax) const
     }
 }
 
-static const unsigned int app_version = 1;
+static const unsigned int app_version = 2;
 
 unsigned int Package::get_app_version()
 {
@@ -127,7 +127,8 @@ unsigned int Package::get_app_version()
 
 Package::Package(const UUID &uu, const json &j, IPool &pool)
     : uuid(uu), name(j.at("name").get<std::string>()), manufacturer(j.value("manufacturer", "")),
-      parameter_program(this, j.value("parameter_program", "")), version(app_version, j)
+      parameter_program(this, j.value("parameter_program", "")), height_top(j.value("height_top", 0)),
+      height_bot(j.value("height_bot", 0)), version(app_version, j)
 {
     check_object_type(j, ObjectType::PACKAGE);
     version.check(ObjectType::PACKAGE, name, uuid);
@@ -270,8 +271,10 @@ Package::Package(const Package &pkg)
       lines(pkg.lines), arcs(pkg.arcs), texts(pkg.texts), pads(pkg.pads), polygons(pkg.polygons),
       keepouts(pkg.keepouts), dimensions(pkg.dimensions), pictures(pkg.pictures), parameter_set(pkg.parameter_set),
       parameters_fixed(pkg.parameters_fixed), parameter_program(pkg.parameter_program),
-      grid_settings(pkg.grid_settings), models(pkg.models), default_model(pkg.default_model),
-      alternate_for(pkg.alternate_for), version(pkg.version), warnings(pkg.warnings)
+      grid_settings(pkg.grid_settings), height_top(pkg.height_top), height_bot(pkg.height_bot),
+
+      models(pkg.models), default_model(pkg.default_model), alternate_for(pkg.alternate_for), version(pkg.version),
+      warnings(pkg.warnings)
 {
     update_refs();
 }
@@ -295,6 +298,8 @@ void Package::operator=(Package const &pkg)
     parameters_fixed = pkg.parameters_fixed;
     parameter_program = pkg.parameter_program;
     grid_settings = pkg.grid_settings;
+    height_top = pkg.height_top;
+    height_bot = pkg.height_bot;
     models = pkg.models;
     default_model = pkg.default_model;
     alternate_for = pkg.alternate_for;
@@ -496,6 +501,10 @@ json Package::serialize() const
     }
     j["rules"] = rules.serialize();
     j["grid_settings"] = grid_settings.serialize();
+    if (height_bot || height_top) {
+        j["height_top"] = height_top;
+        j["height_bot"] = height_bot;
+    }
     return j;
 }
 
@@ -572,8 +581,12 @@ std::vector<const Pad *> Package::get_pads_sorted() const
 
 unsigned int Package::get_required_version() const
 {
-    if (parameters_fixed.size()
-        || std::any_of(pads.cbegin(), pads.cend(), [](auto &it) { return it.second.parameters_fixed.size() != 0; })) {
+    if (height_bot || height_top) {
+        return 2;
+    }
+    else if (parameters_fixed.size() || std::any_of(pads.cbegin(), pads.cend(), [](auto &it) {
+                 return it.second.parameters_fixed.size() != 0;
+             })) {
         return 1;
     }
     else {

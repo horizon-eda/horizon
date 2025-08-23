@@ -52,6 +52,10 @@ Color Canvas3DBase::get_layer_color(int layer) const
 
     if (CanvasMesh::layer_is_substrate(layer))
         return substrate_color;
+
+    if (CanvasMesh::layer_is_height_restriction(layer))
+        return {1, 0, 0};
+
     return {1, 0, 0};
 }
 
@@ -95,6 +99,9 @@ bool Canvas3DBase::layer_is_visible(int layer) const
             return explode > 0 || !show_substrate;
         }
     }
+
+    if (CanvasMesh::layer_is_height_restriction(layer))
+        return show_height_restrictions;
 
     if (layer == BoardLayers::TOP_MASK || layer == BoardLayers::BOTTOM_MASK)
         return show_solder_mask;

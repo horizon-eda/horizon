@@ -31,6 +31,7 @@ enum class RuleID {
     THERMALS,
     NET_TIES,
     BOARD_CONNECTIVITY,
+    HEIGHT_RESTRICTIONS,
 };
 
 extern const LutEnumStr<RuleID> rule_id_lut;

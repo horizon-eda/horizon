@@ -1145,6 +1145,18 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::TOOL, ToolID::PASTE_PART},
          {"Paste part", ActionGroup::CLIPBOARD, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::ADD_HEIGHT_RESTRICTION},
+         {"Assign height restriction", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::DRAW_HEIGHT_RESTRICTION},
+         {"Draw height restriction", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::DELETE_HEIGHT_RESTRICTION},
+         {"Delete height restriction", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1478,5 +1490,8 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(PASTE_PLACEMENT),
         TOOL_LUT_ITEM(PASTE_RELATIVE),
         TOOL_LUT_ITEM(PASTE_PART),
+        TOOL_LUT_ITEM(ADD_HEIGHT_RESTRICTION),
+        TOOL_LUT_ITEM(DRAW_HEIGHT_RESTRICTION),
+        TOOL_LUT_ITEM(DELETE_HEIGHT_RESTRICTION),
 };
 } // namespace horizon

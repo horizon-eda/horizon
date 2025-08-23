@@ -34,7 +34,7 @@ ToolResponse ToolDrawPlane::commit()
         else
             return ToolResponse::revert();
     }
-    else {
+    else if (tool_id == ToolID::DRAW_PLANE) {
         auto uu = UUID::random();
         auto &brd = *doc.b->get_board();
         auto &plane = brd.planes.emplace(uu, uu).first->second;
@@ -43,6 +43,18 @@ ToolResponse ToolDrawPlane::commit()
 
         show_edit_plane_window(plane, brd);
         return ToolResponse();
+    }
+    else if (tool_id == ToolID::DRAW_HEIGHT_RESTRICTION) {
+        auto uu = UUID::random();
+        auto &brd = *doc.b->get_board();
+        auto &hr = brd.height_restrictions.emplace(uu, uu).first->second;
+        hr.polygon = temp;
+        temp->usage = &hr;
+
+        return ToolResponse::commit();
+    }
+    else {
+        return ToolResponse::end();
     }
     return ToolResponse::commit();
 }

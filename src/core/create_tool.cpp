@@ -102,6 +102,7 @@
 #include "tools/tool_move_track_center.hpp"
 #include "tools/tool_paste_placement.hpp"
 #include "tools/tool_paste_part.hpp"
+#include "tools/tool_add_height_restriction.hpp"
 
 namespace horizon {
 
@@ -420,6 +421,7 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::DRAW_PLANE:
     case ToolID::DRAW_KEEPOUT:
+    case ToolID::DRAW_HEIGHT_RESTRICTION:
         return std::make_unique<ToolDrawPlane>(this, tool_id);
 
     case ToolID::DRAG_POLYGON_EDGE:
@@ -475,6 +477,10 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::PASTE_PART:
         return std::make_unique<ToolPastePart>(this, tool_id);
+
+    case ToolID::ADD_HEIGHT_RESTRICTION:
+    case ToolID::DELETE_HEIGHT_RESTRICTION:
+        return std::make_unique<ToolAddHeightRestriction>(this, tool_id);
 
     default:
         return nullptr;

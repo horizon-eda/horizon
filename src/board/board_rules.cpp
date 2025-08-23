@@ -22,7 +22,7 @@ BoardRules::BoardRules(const BoardRules &other)
       rule_clearance_silkscreen_exposed_copper(other.rule_clearance_silkscreen_exposed_copper),
       rule_parameters(other.rule_parameters), rule_preflight_checks(other.rule_preflight_checks),
       rule_net_ties(other.rule_net_ties), rule_board_connectivity(other.rule_board_connectivity),
-      rule_via_definitions(other.rule_via_definitions)
+      rule_via_definitions(other.rule_via_definitions), rule_height_restrictions(other.rule_height_restrictions)
 {
     update_sorted();
 }
@@ -47,6 +47,7 @@ void BoardRules::operator=(const BoardRules &other)
     rule_net_ties = other.rule_net_ties;
     rule_board_connectivity = other.rule_board_connectivity;
     rule_via_definitions = other.rule_via_definitions;
+    rule_height_restrictions = other.rule_height_restrictions;
 
     update_sorted();
 }
@@ -184,6 +185,10 @@ void BoardRules::import_rules(const json &j, const RuleImportMap &import_map)
     if (j.count("via_definitions")) {
         const json &o = j["via_definitions"];
         rule_via_definitions = RuleViaDefinitions(o, import_map);
+    }
+    if (j.count("height_restrictions")) {
+        const json &o = j["height_restrictions"];
+        rule_height_restrictions = RuleHeightRestrictions(o);
     }
 }
 
@@ -338,6 +343,7 @@ json BoardRules::serialize_or_export(Rule::SerializeMode mode) const
     j["clearance_silkscreen_exposed_copper"] = rule_clearance_silkscreen_exposed_copper.serialize();
     j["parameters"] = rule_parameters.serialize();
     j["via_definitions"] = rule_via_definitions.serialize();
+    j["height_restrictions"] = rule_height_restrictions.serialize();
     return j;
 }
 
@@ -354,6 +360,7 @@ std::vector<RuleID> BoardRules::get_rule_ids() const
             RuleID::CLEARANCE_COPPER_KEEPOUT,
             RuleID::CLEARANCE_SAME_NET,
             RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER,
+            RuleID::HEIGHT_RESTRICTIONS,
 
             RuleID::TRACK_WIDTH,
             RuleID::HOLE_SIZE,
@@ -392,6 +399,9 @@ const Rule &BoardRules::get_rule(RuleID id) const
     }
     else if (id == RuleID::VIA_DEFINITIONS) {
         return rule_via_definitions;
+    }
+    else if (id == RuleID::HEIGHT_RESTRICTIONS) {
+        return rule_height_restrictions;
     }
     throw std::runtime_error("rule does not exist");
 }

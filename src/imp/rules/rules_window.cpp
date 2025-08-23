@@ -782,6 +782,7 @@ RuleEditor *RulesWindow::create_editor(Rule &r)
     case RuleID::SYMBOL_CHECKS:
     case RuleID::NET_TIES:
     case RuleID::BOARD_CONNECTIVITY:
+    case RuleID::HEIGHT_RESTRICTIONS:
         e = new RuleEditorPackageChecks(r, core);
         break;
 

@@ -51,5 +51,7 @@ const std::map<RuleID, RD> rule_descriptions = {
 
         {RuleID::BOARD_CONNECTIVITY, {"Connectivity", RD::CAN_CHECK}},
 
+        {RuleID::HEIGHT_RESTRICTIONS, {"Height restrictions", RD::CAN_CHECK}},
+
 };
 } // namespace horizon

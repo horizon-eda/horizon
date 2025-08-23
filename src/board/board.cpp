@@ -43,7 +43,7 @@ const LutEnumStr<Board::OutputFormat> Board::output_format_lut = {
         {"odb", Board::OutputFormat::ODB},
 };
 
-static const unsigned int app_version = 21;
+static const unsigned int app_version = 22;
 
 unsigned int Board::get_app_version()
 {
@@ -247,6 +247,14 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool, const st
             }
         }
     }
+    if (j.count("height_restrictions")) {
+        const json &o = j["height_restrictions"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            load_and_log(height_restrictions, ObjectType::HEIGHT_RESTRICTION,
+                         std::forward_as_tuple(u, it.value(), *this), Logger::Domain::BOARD);
+        }
+    }
     if (j.count("rules")) {
         try {
             rules.load_from_json(j.at("rules"));
@@ -372,12 +380,13 @@ Board::Board(const Board &brd, CopyMode copy_mode)
       junctions(brd.junctions), tracks(brd.tracks), texts(brd.texts), lines(brd.lines), arcs(brd.arcs),
       planes(brd.planes), keepouts(brd.keepouts), dimensions(brd.dimensions), connection_lines(brd.connection_lines),
       included_boards(brd.included_boards), board_panels(brd.board_panels), pictures(brd.pictures), decals(brd.decals),
-      net_ties(brd.net_ties), warnings(brd.warnings), output_format(brd.output_format), rules(brd.rules),
-      gerber_output_settings(brd.gerber_output_settings), odb_output_settings(brd.odb_output_settings),
-      grid_settings(brd.grid_settings), airwires(brd.airwires), stackup(brd.stackup), colors(brd.colors),
-      pdf_export_settings(brd.pdf_export_settings), step_export_settings(brd.step_export_settings),
-      pnp_export_settings(brd.pnp_export_settings), version(brd.version), board_directory(brd.board_directory),
-      n_inner_layers(brd.n_inner_layers), user_layers(brd.user_layers)
+      net_ties(brd.net_ties), height_restrictions(brd.height_restrictions), warnings(brd.warnings),
+      output_format(brd.output_format), rules(brd.rules), gerber_output_settings(brd.gerber_output_settings),
+      odb_output_settings(brd.odb_output_settings), grid_settings(brd.grid_settings), airwires(brd.airwires),
+      stackup(brd.stackup), colors(brd.colors), pdf_export_settings(brd.pdf_export_settings),
+      step_export_settings(brd.step_export_settings), pnp_export_settings(brd.pnp_export_settings),
+      version(brd.version), board_directory(brd.board_directory), n_inner_layers(brd.n_inner_layers),
+      user_layers(brd.user_layers)
 {
     if (copy_mode == CopyMode::DEEP) {
         packages = brd.packages;
@@ -462,6 +471,10 @@ void Board::update_refs()
     for (auto &it : net_ties) {
         it.second.net_tie.update(block->net_ties);
         it.second.update_refs(*this);
+    }
+    for (auto &it : height_restrictions) {
+        it.second.polygon.update(polygons);
+        it.second.polygon->usage = &it.second;
     }
 }
 
@@ -918,6 +931,9 @@ void Board::expand_some()
     for (auto &it : keepouts) {
         it.second.polygon->usage = &it.second;
     }
+    for (auto &it : height_restrictions) {
+        it.second.polygon->usage = &it.second;
+    }
 
     if (expand_flags & EXPAND_PROPAGATE_NETS) {
         propagate_nets();
@@ -1164,6 +1180,7 @@ void Board::delete_dependants()
     });
     map_erase_if(planes, [this](auto &it) { return polygons.count(it.second.polygon.uuid) == 0; });
     map_erase_if(keepouts, [this](auto &it) { return polygons.count(it.second.polygon.uuid) == 0; });
+    map_erase_if(height_restrictions, [this](auto &it) { return polygons.count(it.second.polygon.uuid) == 0; });
 }
 
 std::vector<KeepoutContour> Board::get_keepout_contours() const
@@ -1313,6 +1330,10 @@ json Board::serialize() const
     j["keepouts"] = json::object();
     for (const auto &it : keepouts) {
         j["keepouts"][(std::string)it.first] = it.second.serialize();
+    }
+    j["height_restrictions"] = json::object();
+    for (const auto &it : height_restrictions) {
+        j["height_restrictions"][(std::string)it.first] = it.second.serialize();
     }
     j["connection_lines"] = json::object();
     for (const auto &it : connection_lines) {
@@ -1647,5 +1668,17 @@ std::set<LayerRange> Board::get_drill_spans() const
     spans.insert(BoardLayers::layer_range_through);
     return spans;
 }
+
+int64_t Board::get_total_thickness() const
+{
+    int64_t total_thickness = 0;
+    for (const auto &it : stackup) {
+        if (it.second.layer != BoardLayers::BOTTOM_COPPER) {
+            total_thickness += it.second.substrate_thickness;
+        }
+    }
+    return total_thickness;
+}
+
 
 } // namespace horizon

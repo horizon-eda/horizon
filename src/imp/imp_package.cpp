@@ -305,6 +305,25 @@ void ImpPackage::construct()
     entry_tags->show();
     header_button->add_widget("Tags", entry_tags);
 
+    sp_height_top = Gtk::manage(new SpinButtonDim);
+    sp_height_top->set_range(0, 100_mm);
+    sp_height_top->set_value(package.height_top);
+    sp_height_top->signal_value_changed().connect([this] {
+        core_package.set_needs_save();
+        view_3d_window->set_needs_update();
+    });
+
+    header_button->add_widget("Top height", sp_height_top);
+
+    sp_height_bot = Gtk::manage(new SpinButtonDim);
+    sp_height_bot->set_range(0, 100_mm);
+    sp_height_bot->set_value(package.height_bot);
+    sp_height_bot->signal_value_changed().connect([this] {
+        core_package.set_needs_save();
+        view_3d_window->set_needs_update();
+    });
+    header_button->add_widget("Bottom height", sp_height_bot);
+
     browser_alt_button = Gtk::manage(new PoolBrowserButton(ObjectType::PACKAGE, *pool.get()));
     browser_alt_button->get_browser().set_show_none(true);
     header_button->add_widget("Alternate for", browser_alt_button);
@@ -373,6 +392,8 @@ void ImpPackage::construct()
         package.tags = entry_tags->get_tags();
         package.name = entry_name->get_text();
         package.manufacturer = entry_manufacturer->get_text();
+        package.height_top = sp_height_top->get_value_as_int();
+        package.height_bot = sp_height_bot->get_value_as_int();
         UUID alt_uuid = browser_alt_button->property_selected_uuid();
         if (alt_uuid) {
             package.alternate_for = pool->get_package(alt_uuid);
@@ -672,9 +693,12 @@ bool ImpPackage::set_filename()
 
 unsigned int ImpPackage::get_required_version() const
 {
-    if (core_package.parameters_fixed.size() || std::any_of(package.pads.cbegin(), package.pads.cend(), [](auto &it) {
-            return it.second.parameters_fixed.size() != 0;
-        })) {
+    if (sp_height_top->get_value_as_int() || sp_height_bot->get_value_as_int()) {
+        return 2;
+    }
+    else if (core_package.parameters_fixed.size()
+             || std::any_of(package.pads.cbegin(), package.pads.cend(),
+                            [](auto &it) { return it.second.parameters_fixed.size() != 0; })) {
         return 1;
     }
     else {
