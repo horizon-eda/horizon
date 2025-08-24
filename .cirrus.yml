@@ -8,7 +8,7 @@ task:
     - sed -i.bak -e 's,pkg+http://pkg.FreeBSD.org/\${ABI}/quarterly,pkg+http://pkg.FreeBSD.org/\${ABI}/latest,' /etc/pkg/FreeBSD.conf
     - pkg update -f
     - pkg upgrade -y
-    - pkg install -y git gmake pkgconf e2fsprogs-libuuid sqlite3 gtkmm30 cppzmq libgit2 glm opencascade podofo libarchive meson cmake
+    - pkg install -y git gmake pkgconf libuuid sqlite3 gtkmm30 cppzmq libgit2 glm opencascade podofo libarchive meson cmake
   script:
     - ls
     - clang --version
