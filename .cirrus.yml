@@ -1,9 +1,9 @@
 
 task:
   matrix:
-    - name: FreeBSD 14.2
+    - name: FreeBSD 14.3
       freebsd_instance:
-        image: freebsd-14-2-release-amd64-ufs
+        image: freebsd-14-3-release-amd64-ufs
   install_script:
     - sed -i.bak -e 's,pkg+http://pkg.FreeBSD.org/\${ABI}/quarterly,pkg+http://pkg.FreeBSD.org/\${ABI}/latest,' /etc/pkg/FreeBSD.conf
     - pkg update -f
