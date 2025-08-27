@@ -1,5 +1,5 @@
 #include "board.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "util.hpp"
 #include "export_gerber/gerber_export.hpp"
 #include "export_odb/odb_export.hpp"

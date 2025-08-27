@@ -1,7 +1,7 @@
 #include "block_instance.hpp"
 #include "block.hpp"
 #include "logger/logger.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "blocks/iblock_provider.hpp"
 
 namespace horizon {

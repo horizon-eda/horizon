@@ -5,7 +5,7 @@
 #include <giomm/file.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "logger/logger.hpp"
 #include "imp/in_tool_action_catalog.hpp"
 #include "core/tool_id.hpp"

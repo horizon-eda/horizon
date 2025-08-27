@@ -3,7 +3,7 @@
 #include <curl/curl.h>
 #include <glibmm/miscutils.h>
 #include <stdexcept>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon::HTTP {
 

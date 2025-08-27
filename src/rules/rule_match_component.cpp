@@ -5,7 +5,7 @@
 #include "block/net.hpp"
 #include "common/lut.hpp"
 #include <glibmm.h>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "rule.hpp"
 #include "util/util.hpp"
 

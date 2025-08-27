@@ -1,7 +1,7 @@
 #include "rule_via_definitions.hpp"
 #include "util/util.hpp"
 #include <sstream>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "logger/log_util.hpp"
 
 namespace horizon {

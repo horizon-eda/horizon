@@ -5,7 +5,7 @@
 #include "imp/imp_interface.hpp"
 #include "util/util.hpp"
 #include "tool_generate_silkscreen.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "pool/package.hpp"
 #include <sstream>
 #include <iomanip>

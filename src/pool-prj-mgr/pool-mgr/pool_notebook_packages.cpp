@@ -1,7 +1,7 @@
 #include "pool_notebook.hpp"
 #include "duplicate/duplicate_part.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "widgets/pool_browser_package.hpp"
 #include "pool_remote_box.hpp"

@@ -1,6 +1,6 @@
 #include "stock_info_provider_partinfo.hpp"
 #include <thread>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "preferences/preferences_provider.hpp"
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"

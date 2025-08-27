@@ -1,5 +1,5 @@
 #pragma once
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include "rule_package_checks.hpp"
 #include "rule_clearance_package.hpp"
 #include "rules/rules.hpp"

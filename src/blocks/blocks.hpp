@@ -1,5 +1,5 @@
 #pragma once
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include "block/block.hpp"
 #include "iblock_provider.hpp"
 #include "util/file_version.hpp"

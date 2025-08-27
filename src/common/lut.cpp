@@ -1,5 +1,5 @@
 #include "lut.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon::detail {
 

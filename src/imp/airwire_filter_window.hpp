@@ -4,7 +4,7 @@
 #include "util/changeable.hpp"
 #include "common/common.hpp"
 #include <set>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 using json = nlohmann::json;

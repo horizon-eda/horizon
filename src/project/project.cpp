@@ -7,7 +7,7 @@
 #include "block/block.hpp"
 #include "schematic/schematic.hpp"
 #include "board/board.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "pool/project_pool.hpp"
 #include "util/str_util.hpp"
 #include "blocks/blocks_schematic.hpp"

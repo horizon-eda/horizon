@@ -3,7 +3,7 @@
 #include "schematic/schematic.hpp"
 #include "imp/imp_interface.hpp"
 #include <gtkmm.h>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "pool/ipool.hpp"
 #include "pool/part.hpp"
 

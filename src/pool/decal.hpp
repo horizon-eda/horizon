@@ -5,7 +5,7 @@
 #include "common/line.hpp"
 #include "common/arc.hpp"
 #include "common/text.hpp"
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include "util/uuid.hpp"
 #include "common/object_provider.hpp"
 #include "util/file_version.hpp"

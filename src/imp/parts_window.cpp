@@ -3,7 +3,7 @@
 #include "pool/part.hpp"
 #include "util/util.hpp"
 #include "util/gtk_util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 PartsWindow::PartsWindow(const Board &brd) : Gtk::Window(), board(brd), state_store(this, "parts")

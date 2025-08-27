@@ -1,5 +1,5 @@
 #include "board_panel.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "board.hpp"
 
 namespace horizon {

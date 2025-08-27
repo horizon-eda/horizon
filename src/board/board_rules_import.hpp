@@ -1,5 +1,5 @@
 #pragma once
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "util/uuid.hpp"
 #include "rules/rules_import_export.hpp"
 

@@ -2,7 +2,7 @@
 #include "project/project.hpp"
 #include "block/block.hpp"
 #include "schematic/schematic.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "export_pdf/export_pdf.hpp"
 #include "export_bom/export_bom.hpp"
 #include "util.hpp"

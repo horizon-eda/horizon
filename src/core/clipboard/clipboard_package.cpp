@@ -1,7 +1,7 @@
 #include "clipboard_package.hpp"
 #include "document/idocument_package.hpp"
 #include "pool/package.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 void ClipboardPackage::serialize(json &j)

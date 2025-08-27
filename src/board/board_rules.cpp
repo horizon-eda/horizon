@@ -3,7 +3,7 @@
 #include "board.hpp"
 #include "rules/cache.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "board_rules_import.hpp"
 #include "pool/ipool.hpp"
 

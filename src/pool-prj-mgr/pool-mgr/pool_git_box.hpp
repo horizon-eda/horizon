@@ -4,7 +4,7 @@
 #include <mutex>
 #include "util/uuid.hpp"
 #include "common/common.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "util/sqlite.hpp"
 #include <git2.h>
 #include "util/sort_controller.hpp"

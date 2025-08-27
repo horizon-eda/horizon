@@ -4,7 +4,7 @@
 #include <set>
 #include <forward_list>
 #include <iostream>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "util/util.hpp"
 #include "logger/logger.hpp"
 #include "util/picture_load.hpp"
