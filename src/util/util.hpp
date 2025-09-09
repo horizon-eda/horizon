@@ -7,6 +7,8 @@
 #include <locale>
 #include <fstream>
 #include <optional>
+#include <set>
+#include <map>
 
 namespace horizon {
 using json = nlohmann::json;
@@ -30,13 +32,13 @@ template <typename T, typename U> std::vector<T> dynamic_cast_vector(const std::
     return out;
 }
 
-template <typename Map, typename F> static void map_erase_if(Map &m, F pred)
+template <typename Tk, typename Tv, typename F> static void map_erase_if(std::map<Tk, Tv> &m, F pred)
 {
-    for (typename Map::iterator i = m.begin(); (i = std::find_if(i, m.end(), pred)) != m.end(); m.erase(i++))
+    for (auto i = m.begin(); (i = std::find_if(i, m.end(), pred)) != m.end(); m.erase(i++))
         ;
 }
 
-template <typename Set, typename F> static void set_erase_if(Set &m, F pred)
+template <typename T, typename F> static void set_erase_if(std::set<T> &m, F pred)
 {
     for (auto it = m.begin(), last = m.end(); it != last;) {
         if (pred(*it)) {
