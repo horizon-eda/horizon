@@ -175,7 +175,10 @@ bool BoardPackage::update_package(const Board &brd)
 
 void BoardPackage::update_texts(const class Board &brd)
 {
-    map_erase_if(texts, [&brd](const auto &x) { return brd.texts.count(x.uuid) == 0; });
+    texts.erase(
+            std::remove_if(texts.begin(), texts.end(), [&brd](const auto &x) { return brd.texts.count(x.uuid) == 0; }),
+            texts.end());
+
 
     for (auto &it_text : package.texts) {
         it_text.second.text = replace_text(it_text.second.text);
