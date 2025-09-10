@@ -301,6 +301,22 @@ void Schematic::disconnect_symbol(Sheet *sheet, SchematicSymbol *sym)
     }
 }
 
+void Schematic::disconnect_net_line(Sheet &sheet, LineNet &line)
+{
+    assert(&sheet == &sheets.at(sheet.uuid));
+    assert(&line == &sheet.net_lines.at(line.uuid));
+    std::map<const SymbolPin *, SchematicJunction *> pin_junctions;
+    for (auto it_ft : {&line.to, &line.from}) {
+        if (it_ft->is_pin()) {
+            it_ft->symbol->component->connections.erase(UUIDPath<2>(it_ft->symbol->gate->uuid, it_ft->pin->uuid));
+            const auto uu = UUID::random();
+            auto &ju = sheet.junctions.emplace(uu, uu).first->second;
+            ju.position = it_ft->get_position();
+            it_ft->connect(&ju);
+        }
+    }
+}
+
 void Schematic::disconnect_block_symbol(Sheet *sheet, SchematicBlockSymbol *sym)
 {
     assert(sheet == &sheets.at(sheet->uuid));

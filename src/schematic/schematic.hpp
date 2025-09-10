@@ -64,6 +64,8 @@ public:
      */
     void disconnect_symbol(Sheet *sheet, SchematicSymbol *sym);
 
+    void disconnect_net_line(Sheet &sheet, LineNet &line);
+
     /**
      * Connects unconnected pins of sym to Nets specified by junctions
      * coincident with pins.
