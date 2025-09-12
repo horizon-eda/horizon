@@ -424,6 +424,17 @@ void View3DWindow::set_needs_update()
     update_button->set_sensitive(true);
 }
 
+void View3DWindow::update_debounced(bool clear)
+{
+    update_connection.disconnect();
+    update_connection = Glib::signal_timeout().connect(
+            [this, clear] {
+                update(clear);
+                return false;
+            },
+            500);
+}
+
 void View3DWindow::set_highlights(const std::set<UUID> &pkgs)
 {
     canvas->set_highlights(pkgs);

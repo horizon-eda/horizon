@@ -553,6 +553,7 @@ void Canvas3D::update(const Board &b)
 
 void Canvas3D::prepare_thread_worker()
 {
+    std::lock_guard guard{board_mutex};
     ca.prepare_only([this] { prepare_dispatcher.emit(); });
 }
 

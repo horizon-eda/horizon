@@ -206,12 +206,6 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu)
                 project_menu->append(*it);
                 it->signal_activate().connect([this] { imp.project_model(model, ProjectionMode::TOP_DOWN); });
             }
-            {
-                auto it = Gtk::manage(new Gtk::MenuItem("Set heights"));
-                it->show();
-                project_menu->append(*it);
-                it->signal_activate().connect([this] { imp.update_height_from_model(model); });
-            }
 
             box->pack_start(*project_button, false, false, 0);
             widgets_insenstive_without_model.push_back(project_button);
@@ -257,6 +251,7 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu)
         sp_angle.set(ax, sp);
     }
 
+
     for (auto sp : placement_spin_buttons) {
         auto conn = sp->signal_value_changed().connect([this, sp] {
             if (sp == sp_shift.x || sp == sp_shift.y || sp == sp_shift.z) {
@@ -298,6 +293,58 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu)
 
     placement_grid->show_all();
     pack_start(*placement_grid, false, false, 0);
+
+    {
+        auto box = Gtk::manage(new Gtk::Grid());
+        box->set_margin_top(5);
+        box->set_row_spacing(5);
+        box->set_column_spacing(5);
+
+        sp_height_top = Gtk::manage(new SpinButtonDim);
+        sp_height_top->set_range(0, 100_mm);
+        sp_height_top->set_value(model.height_top);
+        sp_height_top->signal_value_changed().connect([this] {
+            model.height_top = sp_height_top->get_value_as_int();
+            s_signal_changed.emit();
+            imp.view_3d_window->update_debounced();
+        });
+        {
+            auto la = Gtk::manage(new Gtk::Label("Top height"));
+            la->get_style_context()->add_class("dim-label");
+            la->set_xalign(0);
+            box->attach(*la, 0, 0, 1, 1);
+        }
+        box->attach(*sp_height_top, 0, 1, 1, 1);
+
+        sp_height_bot = Gtk::manage(new SpinButtonDim);
+        sp_height_bot->set_range(0, 100_mm);
+        sp_height_bot->set_value(model.height_bot);
+        sp_height_bot->signal_value_changed().connect([this] {
+            model.height_bot = sp_height_bot->get_value_as_int();
+            s_signal_changed.emit();
+            imp.view_3d_window->update_debounced();
+        });
+        {
+            auto la = Gtk::manage(new Gtk::Label("Bottom height"));
+            la->get_style_context()->add_class("dim-label");
+            la->set_xalign(0);
+            box->attach(*la, 1, 0, 1, 1);
+        }
+        box->attach(*sp_height_bot, 1, 1, 1, 1);
+
+        auto button = Gtk::manage(new Gtk::Button());
+        button->set_image_from_icon_name("action-generate-symbolic", Gtk::ICON_SIZE_BUTTON);
+        button->set_tooltip_text("Set heights from model");
+        button->signal_clicked().connect([this] {
+            const auto [ht, hb] = imp.get_height_from_model(model);
+            sp_height_top->set_value(ht);
+            sp_height_bot->set_value(hb);
+        });
+        box->attach(*button, 2, 1, 1, 1);
+
+        pack_start(*box, false, false, 0);
+        box->show_all();
+    }
 
     imp.update_model_editors();
 }

@@ -84,7 +84,11 @@ std::string ImpPackage::ask_3d_model_filename(const std::string &current_filenam
 
 void ImpPackage::update_fake_height_restrictions(int layer)
 {
-    const auto height = (layer == BoardLayers::TOP_PACKAGE ? sp_height_top : sp_height_bot)->get_value_as_int();
+    if (!core_package.models.count(current_model))
+        return;
+
+    const auto &model = core_package.models.at(current_model);
+    const auto height = (layer == BoardLayers::TOP_PACKAGE ? model.height_top : model.height_bot);
     if (!height)
         return;
 
@@ -119,6 +123,8 @@ void ImpPackage::update_fake_height_restrictions(int layer)
 
 void ImpPackage::update_fake_board()
 {
+    std::lock_guard guard{view_3d_window->get_canvas().board_mutex};
+
     fake_board.polygons.clear();
     fake_board.height_restrictions.clear();
     fake_board.set_n_inner_layers(1);

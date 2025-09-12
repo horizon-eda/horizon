@@ -15,6 +15,7 @@ public:
                  Mode mode, class Canvas3D *ca_custom);
     static View3DWindow *create(const class Board &b, class IPool &p, Mode mode, class Canvas3D *ca_custom = nullptr);
     void update(bool clear = false);
+    void update_debounced(bool clear = false);
     void set_needs_update();
     void set_highlights(const std::set<UUID> &pkgs);
     void add_widget(Gtk::Widget *w);
@@ -74,6 +75,8 @@ private:
     size_t layer_loading_n = 0;
 
     void update_loading();
+
+    sigc::connection update_connection;
 
     Gtk::ColorButton *background_top_color_button = nullptr;
     Gtk::ColorButton *background_bottom_color_button = nullptr;

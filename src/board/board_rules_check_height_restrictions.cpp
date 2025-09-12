@@ -60,7 +60,11 @@ RulesCheckResult BoardRules::check_height_restrictions(const class Board &b, Rul
             else if (poly.layer == BoardLayers::BOTTOM_PACKAGE)
                 ol.bot.push_back(path);
 
-            if (poly.layer == BoardLayers::TOP_PACKAGE && !have_bottom_package && pkg.package.height_bot)
+            int64_t height_bot = 0;
+            if (pkg.package.models.count(pkg.model))
+                height_bot = pkg.package.models.at(pkg.model).height_bot;
+
+            if (poly.layer == BoardLayers::TOP_PACKAGE && !have_bottom_package && height_bot)
                 ol.bot.push_back(path);
         }
 
@@ -96,9 +100,6 @@ RulesCheckResult BoardRules::check_height_restrictions(const class Board &b, Rul
             if (paths.empty())
                 continue;
             const auto &pkg = b.packages.at(uu_pkg);
-            const auto height = poly.layer == BoardLayers::TOP_PACKAGE
-                                        ? (pkg.package.height_top - (pkg.flip ? board_thickness : 0))
-                                        : (pkg.package.height_bot - (pkg.flip ? 0 : board_thickness));
             const std::string layer_name = poly.layer == BoardLayers::TOP_PACKAGE ? "top" : "bottom";
 
             ClipperLib::Clipper clipper;
@@ -107,6 +108,19 @@ RulesCheckResult BoardRules::check_height_restrictions(const class Board &b, Rul
             ClipperLib::Paths isect;
             clipper.Execute(ClipperLib::ctIntersection, isect, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
             if (!isect.empty()) { // overlap
+                if (!pkg.package.models.count(pkg.model)) {
+                    auto &err = r.errors.emplace_back(RulesCheckErrorLevel::WARN,
+                                                      "package " + pkg.component->refdes + " has no 3D model");
+                    err.has_location = true;
+                    err.location = pkg.placement.shift;
+                    err.layers = {poly.layer};
+                    continue;
+                }
+                const auto model = pkg.package.models.at(pkg.model);
+                const auto height = poly.layer == BoardLayers::TOP_PACKAGE
+                                            ? (model.height_top - (pkg.flip ? board_thickness : 0))
+                                            : (model.height_bot - (pkg.flip ? 0 : board_thickness));
+
                 if (height == 0) {
                     auto &err = r.errors.emplace_back(RulesCheckErrorLevel::WARN, "package " + pkg.component->refdes
                                                                                           + " has no " + layer_name

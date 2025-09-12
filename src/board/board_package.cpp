@@ -169,7 +169,10 @@ bool BoardPackage::update_package(const Board &brd)
                 brd.flip_package_layer(it3.second.layer);
             }
         }
-        std::swap(package.height_bot, package.height_top);
+
+        for (auto &[uu, model] : package.models) {
+            std::swap(model.height_bot, model.height_top);
+        }
     }
     return ret;
 }

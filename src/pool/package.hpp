@@ -63,6 +63,9 @@ public:
         void set_rotation(unsigned int ax, int angle);
         int get_rotation(unsigned int ax) const;
 
+        int64_t height_top = 0;
+        int64_t height_bot = 0;
+
         static const UUID legacy_model_uuid;
 
         json serialize() const;
@@ -109,12 +112,10 @@ public:
     PackageRules rules;
     GridSettings grid_settings;
 
-    int64_t height_top;
-    int64_t height_bot;
-
     std::map<UUID, Model> models;
     UUID default_model;
     const Model *get_model(const UUID &uu = UUID()) const;
+    std::string get_model_name(const UUID &uu) const;
 
     std::shared_ptr<const class Package> alternate_for = nullptr;
 

@@ -1,11 +1,13 @@
 #include "ipool.hpp"
 #include "package.hpp"
 #include "util/util.hpp"
+#include "util/geom_util.hpp"
 #include "nlohmann/json.hpp"
 #include "board/board_layers.hpp"
 #include "util/picture_load.hpp"
 #include "common/junction_util.hpp"
 #include "util/bbox_accumulator.hpp"
+#include <glibmm/miscutils.h>
 
 namespace horizon {
 
@@ -25,7 +27,8 @@ Package::Model::Model(const UUID &uu, const std::string &fn) : uuid(uu), filenam
 }
 Package::Model::Model(const UUID &uu, const json &j)
     : uuid(uu), filename(j.at("filename").get<std::string>()), x(j.at("x")), y(j.at("y")), z(j.at("z")),
-      roll(j.at("roll")), pitch(j.at("pitch")), yaw(j.at("yaw"))
+      roll(j.at("roll")), pitch(j.at("pitch")), yaw(j.at("yaw")), height_top(j.value("height_top", 0)),
+      height_bot(j.value("height_bot", 0))
 {
 }
 
@@ -39,6 +42,10 @@ json Package::Model::serialize() const
     j["roll"] = roll;
     j["pitch"] = pitch;
     j["yaw"] = yaw;
+    if (height_bot || height_top) {
+        j["height_top"] = height_top;
+        j["height_bot"] = height_bot;
+    }
 
     return j;
 }
@@ -127,8 +134,7 @@ unsigned int Package::get_app_version()
 
 Package::Package(const UUID &uu, const json &j, IPool &pool)
     : uuid(uu), name(j.at("name").get<std::string>()), manufacturer(j.value("manufacturer", "")),
-      parameter_program(this, j.value("parameter_program", "")), height_top(j.value("height_top", 0)),
-      height_bot(j.value("height_bot", 0)), version(app_version, j)
+      parameter_program(this, j.value("parameter_program", "")), version(app_version, j)
 {
     check_object_type(j, ObjectType::PACKAGE);
     version.check(ObjectType::PACKAGE, name, uuid);
@@ -271,10 +277,8 @@ Package::Package(const Package &pkg)
       lines(pkg.lines), arcs(pkg.arcs), texts(pkg.texts), pads(pkg.pads), polygons(pkg.polygons),
       keepouts(pkg.keepouts), dimensions(pkg.dimensions), pictures(pkg.pictures), parameter_set(pkg.parameter_set),
       parameters_fixed(pkg.parameters_fixed), parameter_program(pkg.parameter_program),
-      grid_settings(pkg.grid_settings), height_top(pkg.height_top), height_bot(pkg.height_bot),
-
-      models(pkg.models), default_model(pkg.default_model), alternate_for(pkg.alternate_for), version(pkg.version),
-      warnings(pkg.warnings)
+      grid_settings(pkg.grid_settings), models(pkg.models), default_model(pkg.default_model),
+      alternate_for(pkg.alternate_for), version(pkg.version), warnings(pkg.warnings)
 {
     update_refs();
 }
@@ -298,8 +302,6 @@ void Package::operator=(Package const &pkg)
     parameters_fixed = pkg.parameters_fixed;
     parameter_program = pkg.parameter_program;
     grid_settings = pkg.grid_settings;
-    height_top = pkg.height_top;
-    height_bot = pkg.height_bot;
     models = pkg.models;
     default_model = pkg.default_model;
     alternate_for = pkg.alternate_for;
@@ -501,10 +503,7 @@ json Package::serialize() const
     }
     j["rules"] = rules.serialize();
     j["grid_settings"] = grid_settings.serialize();
-    if (height_bot || height_top) {
-        j["height_top"] = height_top;
-        j["height_bot"] = height_bot;
-    }
+
     return j;
 }
 
@@ -525,6 +524,25 @@ const Package::Model *Package::get_model(const UUID &uu) const
     else {
         return nullptr;
     }
+}
+
+std::string Package::get_model_name(const UUID &uu) const
+{
+    const auto &model = models.at(uu);
+    const auto filename = model.filename;
+    const auto name_is_unique = std::count_if(models.begin(), models.end(),
+                                              [filename](const auto &it) { return it.second.filename == filename; })
+                                == 1;
+    auto name = Glib::path_get_basename(filename);
+    if (name_is_unique)
+        return name;
+
+    std::string r = name + " (" + dim_to_string_nlz(model.height_top, false);
+    if (model.height_bot)
+        r += " / " + dim_to_string_nlz(model.height_bot, false);
+    r += ")";
+
+    return r;
 }
 
 int Package::get_max_pad_name() const
@@ -581,12 +599,13 @@ std::vector<const Pad *> Package::get_pads_sorted() const
 
 unsigned int Package::get_required_version() const
 {
-    if (height_bot || height_top) {
-        return 2;
+    for (const auto &[uu, model] : models) {
+        if (model.height_bot || model.height_top)
+            return 2;
     }
-    else if (parameters_fixed.size() || std::any_of(pads.cbegin(), pads.cend(), [](auto &it) {
-                 return it.second.parameters_fixed.size() != 0;
-             })) {
+
+    if (parameters_fixed.size()
+        || std::any_of(pads.cbegin(), pads.cend(), [](auto &it) { return it.second.parameters_fixed.size() != 0; })) {
         return 1;
     }
     else {

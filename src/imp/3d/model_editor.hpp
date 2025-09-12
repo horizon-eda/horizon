@@ -30,6 +30,10 @@ private:
 
     XYZContainer<class SpinButtonDim *> sp_shift;
     XYZContainer<class SpinButtonAngle *> sp_angle;
+    SpinButtonDim *sp_height_top = nullptr;
+    SpinButtonDim *sp_height_bot = nullptr;
+
+    void update_height_from_model();
 
     std::vector<sigc::connection> sp_connections;
 };

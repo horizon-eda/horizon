@@ -1091,7 +1091,7 @@ void PartEditor::populate_models()
 {
     w_model_combo->remove_all();
     for (const auto &it : part.package->models) {
-        w_model_combo->append((std::string)it.first, Glib::path_get_basename(it.second.filename));
+        w_model_combo->append((std::string)it.first, part.package->get_model_name(it.first));
     }
 }
 

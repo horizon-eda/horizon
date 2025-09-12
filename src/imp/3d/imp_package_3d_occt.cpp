@@ -196,8 +196,7 @@ void ImpPackage::project_model(const Package::Model &model, ProjectionMode proj)
     main_window->present();
 }
 
-
-void ImpPackage::update_height_from_model(const Package::Model &model)
+std::pair<int64_t, int64_t> ImpPackage::get_height_from_model(const Package::Model &model)
 {
     std::lock_guard<std::mutex> lock(model_info_mutex);
     auto mat = mat_from_model(model, 1e-6);
@@ -215,9 +214,7 @@ void ImpPackage::update_height_from_model(const Package::Model &model)
         }
     }
 
-    sp_height_top->set_value(ht * 1_mm);
-    sp_height_bot->set_value(-hb * 1_mm);
-    view_3d_window->update();
+    return {ht * 1_mm, -hb * 1_mm};
 }
 
 

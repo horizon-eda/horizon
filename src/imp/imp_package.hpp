@@ -84,7 +84,7 @@ private:
         ~ModelInfo();
     };
     void project_model(const Package::Model &model, ProjectionMode proj);
-    void update_height_from_model(const Package::Model &model);
+    std::pair<int64_t, int64_t> get_height_from_model(const Package::Model &model);
 
     std::map<std::string, ModelInfo> model_info;
     std::mutex model_info_mutex;
@@ -108,8 +108,6 @@ private:
 
     class HeaderButton *header_button = nullptr;
     Gtk::Entry *entry_name = nullptr;
-    SpinButtonDim *sp_height_top = nullptr;
-    SpinButtonDim *sp_height_bot = nullptr;
     class PoolBrowserButton *browser_alt_button = nullptr;
     void check_alt_pkg();
 

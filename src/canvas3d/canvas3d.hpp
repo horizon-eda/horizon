@@ -89,6 +89,8 @@ public:
 
     ~Canvas3D();
 
+    std::mutex board_mutex;
+
 private:
     bool needs_push = false;
     bool needs_view_all = false;
