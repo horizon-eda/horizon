@@ -1,5 +1,5 @@
 #include "placement.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "util/geom_util.hpp"
 
 namespace horizon {

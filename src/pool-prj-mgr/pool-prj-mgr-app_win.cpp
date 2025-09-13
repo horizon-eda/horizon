@@ -11,7 +11,7 @@
 #include "util/pool_check_schema_update.hpp"
 #include "util/gtk_util.hpp"
 #include "widgets/recent_item_box.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "pool-mgr/editors/editor_window.hpp"
 #include "prj-mgr/part_browser/part_browser_window.hpp"
 #include "prj-mgr/pool_cache_cleanup_dialog.hpp"

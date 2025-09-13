@@ -1,6 +1,6 @@
 #pragma once
 #include <Python.h>
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 
 using json = nlohmann::json;
 

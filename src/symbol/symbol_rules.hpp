@@ -1,5 +1,5 @@
 #pragma once
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include "rule_symbol_checks.hpp"
 #include "rules/rules.hpp"
 #include "util/uuid.hpp"

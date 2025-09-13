@@ -16,6 +16,7 @@ giomm = dependency('giomm-2.4')
 png = dependency('libpng')
 epoxy = dependency('epoxy')
 sqlite3 = dependency('sqlite3')
+nlohmann = dependency('nlohmann_json')
 libgit2 = dependency('libgit2')
 zeromq = dependency('libzmq')
 cppzmq = dependency('cppzmq', required:false)
@@ -23,6 +24,7 @@ curl = dependency('libcurl')
 rsvg = dependency('librsvg-2.0')
 libarchive = dependency('libarchive')
 #podofo=dependency('libpodofo', version: '<0.10.0', required: false)
+rangev3 = dependency('range-v3', method: 'cmake')
 opencascade = dependency('OpenCASCADE', method : 'cmake', required:false)
 if not opencascade.found()
     opencascade = dependency('OCE', method : 'cmake')
@@ -103,8 +105,8 @@ if is_libstdcpp
 endif
 
 
-build_dependencies_libhorizon = [libm, pthread, gtkmm, sqlite3, png] + stdlibs
-build_dependencies_horizonmodule = [libm, gtkmm, sqlite3, png, py3cairo, podofo, libpython, epoxy, opencascade, libarchive]
+build_dependencies_libhorizon = [libm, pthread, gtkmm, sqlite3, nlohmann, rangev3, png] + stdlibs
+build_dependencies_horizonmodule = [libm, gtkmm, sqlite3, nlohmann, rangev3, png, py3cairo, podofo, libpython, epoxy, opencascade, libarchive]
 if not is_windows
 	uuid = dependency('uuid')
 	build_dependencies_libhorizon += uuid
@@ -866,7 +868,7 @@ subdir('3rd_party/footag')
 
 
 include_directories = [
-  include_directories('src', '3rd_party', '3rd_party/range-v3'),
+  include_directories('src', '3rd_party'),
 ]
 
 

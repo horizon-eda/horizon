@@ -1,7 +1,7 @@
 #include "clipboard_schematic.hpp"
 #include "document/idocument_schematic.hpp"
 #include "schematic/sheet.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "util/util.hpp"
 #include "pool/entity.hpp"
 #include "pool/ipool.hpp"

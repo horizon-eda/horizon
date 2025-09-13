@@ -1,5 +1,5 @@
 #include "grid_settings.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "common/lut.hpp"
 
 namespace horizon {

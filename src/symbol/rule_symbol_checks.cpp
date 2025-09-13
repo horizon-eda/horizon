@@ -1,7 +1,7 @@
 #include "rule_symbol_checks.hpp"
 #include "util/util.hpp"
 #include <sstream>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 RuleSymbolChecks::RuleSymbolChecks() : Rule()

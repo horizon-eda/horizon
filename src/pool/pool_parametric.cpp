@@ -1,5 +1,5 @@
 #include "pool_parametric.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 #include <iomanip>

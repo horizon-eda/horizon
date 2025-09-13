@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include "util/uuid.hpp"
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include <vector>
 #include "util/file_version.hpp"
 

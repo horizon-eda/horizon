@@ -2,7 +2,7 @@
 #include "preferences/preferences.hpp"
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "core/tool_id.hpp"
 #include "action_editor.hpp"
 #include "imp/in_tool_action_catalog.hpp"

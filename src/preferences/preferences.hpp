@@ -3,7 +3,7 @@
 #include "canvas3d/spacenav_prefs.hpp"
 #include "canvas/show_via_span.hpp"
 #include "canvas/input_devices_prefs.hpp"
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include <sigc++/sigc++.h>
 #include <string>
 #include "imp/action_catalog.hpp"

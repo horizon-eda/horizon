@@ -10,7 +10,7 @@
 #include "widgets/spin_button_dim.hpp"
 #include "widgets/warnings_box.hpp"
 #include "action.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "search/searcher.hpp"
 #include <zmq.hpp>
 #include "util/item_set.hpp"

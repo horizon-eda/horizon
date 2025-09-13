@@ -1,7 +1,7 @@
 #include "schematic_net_tie.hpp"
 #include "sheet.hpp"
 #include "block/block.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 

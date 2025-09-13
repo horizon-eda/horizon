@@ -1,5 +1,5 @@
 #include "bom_export_settings.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "pool/ipool.hpp"
 #include "pool/part.hpp"
 

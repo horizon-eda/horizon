@@ -2,7 +2,7 @@
 #include "board/board_layers.hpp"
 #include "common/lut.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "util/bbox_accumulator.hpp"
 
 namespace horizon {

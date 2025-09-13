@@ -1,6 +1,6 @@
 #include "hole.hpp"
 #include "lut.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "board/board_layers.hpp"
 
 namespace horizon {

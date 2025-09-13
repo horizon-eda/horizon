@@ -4,7 +4,7 @@
 #include "imp/imp_interface.hpp"
 #include "util/selection_util.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include <gtkmm.h>
 #include "util/range_util.hpp"
 #include "util/pasted_package.hpp"

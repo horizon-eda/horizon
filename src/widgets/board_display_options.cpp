@@ -3,7 +3,7 @@
 #include "board/board_layers.hpp"
 #include <set>
 #include <iostream>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 

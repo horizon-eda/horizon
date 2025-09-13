@@ -1,6 +1,6 @@
 #include "set.hpp"
 #include "common/lut.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 static const LutEnumStr<ParameterID> parameter_id_lut = {

@@ -1,7 +1,7 @@
 #include "object_provider.hpp"
 #include "line.hpp"
 #include "lut.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 

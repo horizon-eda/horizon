@@ -3,7 +3,7 @@
 #include "pool-prj-mgr/pool-prj-mgr-app.hpp"
 #include "project/project.hpp"
 #include "pool/pool_manager.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "part_browser/part_browser_window.hpp"
 #include "widgets/project_meta_editor.hpp"
 #include "blocks/blocks.hpp"

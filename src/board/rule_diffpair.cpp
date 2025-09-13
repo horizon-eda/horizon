@@ -2,7 +2,7 @@
 #include "block/block.hpp"
 #include "util/util.hpp"
 #include <sstream>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 RuleDiffpair::RuleDiffpair(const UUID &uu) : Rule(uu)

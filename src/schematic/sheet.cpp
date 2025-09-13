@@ -5,7 +5,7 @@
 #include "logger/logger.hpp"
 #include "logger/log_util.hpp"
 #include "common/object_descr.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "common/junction_util.hpp"
 
 namespace horizon {

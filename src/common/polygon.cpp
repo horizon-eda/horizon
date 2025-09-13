@@ -1,6 +1,6 @@
 #include "polygon.hpp"
 #include "lut.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "util/geom_util.hpp"
 #include "util/bbox_accumulator.hpp"
 #include "util/polygon_arc_removal_proxy.hpp"

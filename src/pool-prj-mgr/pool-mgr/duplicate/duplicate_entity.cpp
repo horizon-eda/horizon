@@ -8,7 +8,7 @@
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
 #include "widgets/location_entry.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 DuplicateEntityWidget::DuplicateEntityWidget(Pool &p, const UUID &entity_uuid, Gtk::Box *ubox, bool optional)

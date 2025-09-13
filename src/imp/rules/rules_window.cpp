@@ -25,7 +25,7 @@
 #include "util/util.hpp"
 #include "core/core.hpp"
 #include "util/gtk_util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "import.hpp"
 #include "export.hpp"
 #include "rules/cache.hpp"

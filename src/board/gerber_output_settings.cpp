@@ -2,7 +2,7 @@
 #include "board.hpp"
 #include "board_layers.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 

@@ -1,6 +1,6 @@
 #include "core_decal.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include <giomm/file.h>
 #include <glibmm/fileutils.h>
 

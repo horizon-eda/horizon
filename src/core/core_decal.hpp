@@ -1,7 +1,7 @@
 #pragma once
 #include "pool/decal.hpp"
 #include "core.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "document/idocument_decal.hpp"
 
 namespace horizon {

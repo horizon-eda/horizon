@@ -1,7 +1,7 @@
 #include "pools_window.hpp"
 #include "common/lut.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "pool/pool_manager.hpp"
 #include "pool_download_window.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app.hpp"
