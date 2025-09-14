@@ -1,3 +1,11 @@
+# Version 2.7.1
+
+## Bugfixes
+
+## Board Editor
+
+- don't crash when deleting smashed silkscreen text ([bb764f5](https://github.com/horizon-eda/horizon/commit/bb764f53dc4046fdbdc286f668b3525300f1d891))
+
 # Version 2.7.0
 
 ## New Features
