@@ -1149,6 +1149,10 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
                 s += "Layer: ";
                 s += core_board.get_layer_provider().get_layers().at(poly->layer).name + "\n";
             }
+            else if (auto hr = dynamic_cast<const HeightRestriction *>(poly->usage.ptr)) {
+                s += "\n\n<b>Height restriction</b>\n";
+                s += "Height: " + dim_to_string_nlz(hr->height, false) + "\n";
+            }
         }
     }
     trim(s);
