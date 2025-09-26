@@ -1,5 +1,5 @@
 #include "tool_settings_rectangle_mode.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 

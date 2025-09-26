@@ -9,7 +9,7 @@
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
 #include "widgets/location_entry.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "util/pool_completion.hpp"
 
 namespace horizon {

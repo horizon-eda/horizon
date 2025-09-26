@@ -1,5 +1,5 @@
 #include "pasted_package.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 PastedPackage::PastedPackage(const UUID &uu, const json &j)

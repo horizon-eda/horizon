@@ -2,7 +2,7 @@
 #include <gtkmm.h>
 #include "common/common.hpp"
 #include "util/uuid.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "pool_status_provider.hpp"
 
 namespace horizon {

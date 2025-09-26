@@ -1,5 +1,5 @@
 #include "pool_index.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "common/common.hpp"
 
 namespace horizon {

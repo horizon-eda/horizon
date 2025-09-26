@@ -1,7 +1,7 @@
 #include "symbol_rules.hpp"
 #include "pool/symbol.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 SymbolRules::SymbolRules()

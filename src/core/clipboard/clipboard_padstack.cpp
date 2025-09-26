@@ -1,7 +1,7 @@
 #include "clipboard_padstack.hpp"
 #include "document/idocument_padstack.hpp"
 #include "pool/padstack.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 void ClipboardPadstack::serialize(json &j)

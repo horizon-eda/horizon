@@ -1,6 +1,6 @@
 #include "rules.hpp"
 #include <assert.h>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "common/layer_provider.hpp"
 #include "util/layer_range.hpp"
 

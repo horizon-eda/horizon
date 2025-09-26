@@ -1,7 +1,7 @@
 #include "frame.hpp"
 #include "common/lut.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include <algorithm>
 #include <iostream>
 

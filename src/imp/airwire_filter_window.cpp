@@ -4,7 +4,7 @@
 #include "util/gtk_util.hpp"
 #include "util/str_util.hpp"
 #include "widgets/cell_renderer_color_box.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 AirwireFilterWindow *AirwireFilterWindow::create(Gtk::Window *p, const class Board &b)

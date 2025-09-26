@@ -1,6 +1,6 @@
 #include "core_package.hpp"
 #include "core_properties.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "logger/logger.hpp"
 #include "util/util.hpp"
 #include <giomm/file.h>

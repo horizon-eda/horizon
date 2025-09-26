@@ -3,7 +3,7 @@
 #include "common/line.hpp"
 #include "common/lut.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "block/block.hpp"
 #include "util/picture_load.hpp"
 #include <algorithm>

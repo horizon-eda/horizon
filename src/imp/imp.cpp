@@ -25,7 +25,7 @@
 #include <gtkmm.h>
 #include <iomanip>
 #include <functional>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "core/tool_id.hpp"
 #include "actions.hpp"
 #include "preferences/preferences_util.hpp"

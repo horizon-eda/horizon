@@ -1,7 +1,7 @@
 #include "pool_notebook.hpp"
 #include "util/util.hpp"
 #include "create_part_dialog.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "widgets/pool_browser_part.hpp"
 #include "widgets/part_preview.hpp"

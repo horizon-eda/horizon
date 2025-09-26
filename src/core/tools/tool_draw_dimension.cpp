@@ -5,7 +5,7 @@
 #include <algorithm>
 #include "document/idocument.hpp"
 #include <sstream>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "dialogs/enter_datum_window.hpp"
 
 namespace horizon {

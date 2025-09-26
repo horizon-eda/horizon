@@ -1,7 +1,7 @@
 #include "clipboard_board.hpp"
 #include "document/idocument_board.hpp"
 #include "board/board.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 

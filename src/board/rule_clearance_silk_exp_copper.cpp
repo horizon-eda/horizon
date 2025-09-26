@@ -1,7 +1,7 @@
 #include "rule_clearance_silk_exp_copper.hpp"
 #include "util/util.hpp"
 #include <sstream>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 RuleClearanceSilkscreenExposedCopper::RuleClearanceSilkscreenExposedCopper() : Rule()

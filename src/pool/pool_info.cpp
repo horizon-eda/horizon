@@ -1,7 +1,7 @@
 #include "pool_info.hpp"
 #include "util/util.hpp"
 #include <glibmm/miscutils.h>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "logger/logger.hpp"
 #include "pool/pool.hpp"
 #include "util/installation_uuid.hpp"

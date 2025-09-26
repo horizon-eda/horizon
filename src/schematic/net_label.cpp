@@ -1,7 +1,7 @@
 #include "net_label.hpp"
 #include "common/lut.hpp"
 #include "sheet.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 NetLabel::NetLabel(const UUID &uu, const json &j, Sheet *sheet)

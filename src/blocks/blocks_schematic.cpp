@@ -1,6 +1,6 @@
 #include "blocks_schematic.hpp"
 #include <filesystem>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "logger/log_util.hpp"
 #include "util/util.hpp"
 #include "dependency_graph.hpp"

@@ -1,7 +1,7 @@
 #pragma once
 #include "rules.hpp"
 #include "rules_import_export.hpp"
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include <memory>
 #include <atomic>
 

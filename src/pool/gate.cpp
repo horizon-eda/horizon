@@ -1,6 +1,6 @@
 #include "gate.hpp"
 #include "ipool.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 

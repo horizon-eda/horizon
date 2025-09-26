@@ -2,7 +2,7 @@
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "pool/padstack.hpp"
 
 namespace horizon {

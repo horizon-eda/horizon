@@ -5,7 +5,7 @@
 #include "board/board_package.hpp"
 #include "common/lut.hpp"
 #include <glibmm.h>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 static const LutEnumStr<RuleMatchKeepout::Mode> mode_lut = {

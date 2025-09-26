@@ -1,6 +1,6 @@
 #include "schematic_block_symbol.hpp"
 #include "common/lut.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "schematic.hpp"
 #include "blocks/iblock_symbol_and_schematic_provider.hpp"
 

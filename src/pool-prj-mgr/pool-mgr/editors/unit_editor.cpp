@@ -9,7 +9,7 @@
 #include "widgets/help_button.hpp"
 #include "help_texts.hpp"
 #include "widgets/pin_names_editor.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "checks/check_unit.hpp"
 
 namespace horizon {

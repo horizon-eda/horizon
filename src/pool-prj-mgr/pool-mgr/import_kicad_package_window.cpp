@@ -8,7 +8,7 @@
 #include "pool/pool.hpp"
 #include "util/str_util.hpp"
 #include "widgets/log_view.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 ImportKiCadPackageWindow *ImportKiCadPackageWindow::create(PoolProjectManagerAppWindow &aw)

@@ -2,7 +2,7 @@
 #include "common/common.hpp"
 #include "util/uuid.hpp"
 #include "pool_cache_status.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include <list>
 
 namespace horizon {

@@ -1,6 +1,6 @@
 #include "rule_clearance_package.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 RuleClearancePackage::RuleClearancePackage() : Rule()

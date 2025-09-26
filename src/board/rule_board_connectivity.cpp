@@ -1,6 +1,6 @@
 #include "rule_board_connectivity.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 RuleBoardConnectivity::RuleBoardConnectivity() : Rule()

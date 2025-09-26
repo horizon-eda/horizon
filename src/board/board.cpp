@@ -6,7 +6,7 @@
 #include "util/util.hpp"
 #include "util/picture_load.hpp"
 #include <list>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "pool/ipool.hpp"
 #include "common/junction_util.hpp"
 #include "util/bbox_accumulator.hpp"

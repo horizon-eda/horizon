@@ -5,7 +5,7 @@
 #include "util/gtk_util.hpp"
 #include "widgets/pool_browser_package.hpp"
 #include "widgets/preview_canvas.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "gate_editor.hpp"
 #include "widgets/location_entry.hpp"

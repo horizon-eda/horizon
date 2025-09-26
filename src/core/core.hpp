@@ -1,7 +1,7 @@
 #pragma once
 #include "canvas/selectables.hpp"
 #include "common/object_descr.hpp"
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include <gdk/gdkkeysyms.h>
 #include <deque>
 #include <memory>

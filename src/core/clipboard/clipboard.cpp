@@ -3,7 +3,7 @@
 #include "clipboard_package.hpp"
 #include "clipboard_schematic.hpp"
 #include "clipboard_board.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "common/line.hpp"
 #include "common/polygon.hpp"
 #include "common/arc.hpp"

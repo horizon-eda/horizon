@@ -1,7 +1,7 @@
 #include "rule_hole_size.hpp"
 #include "util/util.hpp"
 #include <sstream>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 RuleHoleSize::RuleHoleSize(const UUID &uu) : Rule(uu)

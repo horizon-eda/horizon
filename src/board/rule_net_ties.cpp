@@ -1,6 +1,6 @@
 #include "rule_net_ties.hpp"
 #include "util/util.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 RuleNetTies::RuleNetTies() : Rule()

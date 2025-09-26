@@ -1,5 +1,5 @@
 #pragma once
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include "pool/decal.hpp"
 #include "util/placement.hpp"
 #include "util/uuid.hpp"

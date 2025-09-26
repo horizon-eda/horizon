@@ -17,7 +17,7 @@
 #include "part_wizard/part_wizard.hpp"
 #include "widgets/part_preview.hpp"
 #include <thread>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "widgets/where_used_box.hpp"
 #include "util/win32_undef.hpp"
 #include "util/fs_util.hpp"

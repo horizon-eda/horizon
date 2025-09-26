@@ -2,7 +2,7 @@
 #include "core_properties.hpp"
 #include <algorithm>
 #include <fstream>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "util/util.hpp"
 #include <giomm/file.h>
 #include <glibmm/fileutils.h>

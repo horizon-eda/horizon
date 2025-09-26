@@ -1,6 +1,6 @@
 #pragma once
 #include <gtkmm.h>
-#include "nlohmann/json_fwd.hpp"
+#include <nlohmann/json_fwd.hpp>
 #include "common/common.hpp"
 #include "common/grid_settings.hpp"
 

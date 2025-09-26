@@ -1,7 +1,7 @@
 #include "rule_connectivity.hpp"
 #include "util/util.hpp"
 #include <sstream>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace horizon {
 RuleConnectivity::RuleConnectivity() : Rule()
