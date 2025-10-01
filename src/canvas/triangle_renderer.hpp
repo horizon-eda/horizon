@@ -85,7 +85,7 @@ private:
     void render_layer_batch(int layer, HighlightMode highlight_mode, bool ignore_flip, const Batch &batch,
                             bool use_stencil, bool stencil_mode);
     void render_annotations(bool top);
-    std::array<float, 4> apply_highlight(const class Color &color, HighlightMode mode, int layer) const;
+    std::array<float, 4> apply_highlight(const class Color &color, ColorP colorp, HighlightMode mode, int layer) const;
     int stencil = 0;
 
     std::array<std::vector<unsigned int>, BatchKey::hash_max + 1> type_indices;

@@ -179,7 +179,8 @@ static std::array<float, 4> operator*(const std::array<float, 4> &a, float b)
     return {a.at(0) * b, a.at(1) * b, a.at(2) * b, a.at(3)};
 }
 
-std::array<float, 4> TriangleRenderer::apply_highlight(const Color &icolor, HighlightMode mode, int layer) const
+std::array<float, 4> TriangleRenderer::apply_highlight(const Color &icolor, ColorP colorp, HighlightMode mode,
+                                                       int layer) const
 {
     const std::array<float, 4> color = gl_array_from_color(icolor);
     if (layer >= 20000 && layer < 30000) { // is annotation
@@ -187,7 +188,7 @@ std::array<float, 4> TriangleRenderer::apply_highlight(const Color &icolor, High
             return color;
     }
     if (ca.layer_mode == CanvasGL::LayerMode::SHADOW_OTHER) {
-        if (layer == ca.work_layer || ca.is_overlay_layer(layer, ca.work_layer)) {
+        if (layer == ca.work_layer || ca.is_overlay_layer(layer, ca.work_layer) || colorp == ColorP::AIRWIRE) {
             // it's okay continue as usual
         }
         else {
@@ -300,19 +301,19 @@ void TriangleRenderer::render_layer_batch(int layer, HighlightMode highlight_mod
             for (size_t i = 0; i < buf.colors.size(); i++) {
                 auto k = static_cast<ColorP>(i);
                 if (ca.appearance.colors.count(k))
-                    buf.colors[i] = apply_highlight(ca.appearance.colors.at(k), highlight_mode, layer);
+                    buf.colors[i] = apply_highlight(ca.appearance.colors.at(k), k, highlight_mode, layer);
             }
             auto lc = ca.get_layer_color(ca.layer_provider.get_color_layer(layer));
             buf.colors[static_cast<int>(ColorP::AIRWIRE_ROUTER)] =
                     gl_array_from_color(ca.appearance.colors.at(ColorP::AIRWIRE_ROUTER));
-            buf.colors[static_cast<int>(ColorP::AIRWIRE)] =
-                    gl_array_from_color(ca.appearance.colors.at(ColorP::AIRWIRE));
-            buf.colors[static_cast<int>(ColorP::FROM_LAYER)] = apply_highlight(lc, highlight_mode, layer);
-            buf.colors[static_cast<int>(ColorP::LAYER_HIGHLIGHT)] = apply_highlight(lc, highlight_mode, layer);
+            buf.colors[static_cast<int>(ColorP::FROM_LAYER)] =
+                    apply_highlight(lc, ColorP::FROM_LAYER, highlight_mode, layer);
+            buf.colors[static_cast<int>(ColorP::LAYER_HIGHLIGHT)] =
+                    apply_highlight(lc, ColorP::FROM_LAYER, highlight_mode, layer);
             buf.colors[static_cast<int>(ColorP::LAYER_HIGHLIGHT_LIGHTEN)] =
                     gl_array_from_color(lc) + ca.appearance.highlight_lighten;
             for (size_t i = 0; i < std::min(buf.colors2.size(), ca.colors2.size()); i++) {
-                buf.colors2[i] = apply_highlight(ca.colors2[i].to_color(), highlight_mode, layer);
+                buf.colors2[i] = apply_highlight(ca.colors2[i].to_color(), ColorP::FROM_LAYER, highlight_mode, layer);
             }
 
             if (ld.mode == LayerDisplay::Mode::FILL_ONLY || (key.stencil && use_stencil))
