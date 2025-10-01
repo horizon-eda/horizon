@@ -5,8 +5,6 @@
 
 namespace horizon {
 
-#define CONVERSION_CONSTANT 0.002834645669291339
-
 void render_picture(PoDoFo::PdfDocument &doc, PoDoFo::PdfPainter &painter, const Picture &pic, const Placement &tr)
 {
     auto img = doc.CreateImage();
@@ -20,7 +18,34 @@ void render_picture(PoDoFo::PdfDocument &doc, PoDoFo::PdfPainter &painter, const
     const int64_t w = pic.data->width * pic.px_size;
     const int64_t h = pic.data->height * pic.px_size;
     const auto p = Coordd(w, h) / -2;
-    const double sz = pic.px_size / (1e3 / CONVERSION_CONSTANT);
+    const double sz = to_pt(pic.px_size);
+    {
+        std::vector<char> picdata;
+        picdata.reserve(pic.data->width * pic.data->height * 3);
+        for (const auto x : pic.data->data) {
+            picdata.push_back((x) & 0xff);
+            picdata.push_back((x >> 8) & 0xff);
+            picdata.push_back((x >> 16) & 0xff);
+        }
+        img->SetData(PoDoFo::bufferview{picdata.data(), picdata.size()}, pic.data->width, pic.data->height,
+                     PoDoFo::PdfPixelFormat::RGB24, pic.data->width * 3);
+    }
+
+    {
+        auto img_mask = doc.CreateImage();
+
+        std::vector<char> picdata;
+        picdata.reserve(pic.data->width * pic.data->height);
+        for (const auto x : pic.data->data) {
+            picdata.push_back(((x >> 24) & 0xff) * pic.opacity);
+        }
+
+        img_mask->SetData(PoDoFo::bufferview{picdata.data(), picdata.size()}, pic.data->width, pic.data->height,
+                          PoDoFo::PdfPixelFormat::Grayscale, pic.data->width);
+        img->SetSoftMask(*img_mask);
+    }
+
+
     painter.DrawImage(*img, to_pt(p.x), to_pt(p.y), sz, sz);
     painter.Restore();
 }
