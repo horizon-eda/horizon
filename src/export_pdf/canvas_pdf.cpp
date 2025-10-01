@@ -11,7 +11,7 @@
 namespace horizon {
 
 // one pt is 1/72 inch
-static constexpr double nm_to_pt_factor = 72. / (2.54_mm);
+static constexpr double nm_to_pt_factor = 72. / (25.4_mm);
 
 double to_pt(double x_nm)
 {
