@@ -305,7 +305,7 @@ void CanvasPDF::draw_polygon(const Polygon &ipoly, bool tr)
                 c = transform.transform(c);
                 end = transform.transform(end);
             }
-            pdf_arc(path, p, c, end, it->arc_reverse);
+            pdf_arc(path, p, c, end, it->arc_reverse ^ transform.mirror);
         }
         first = false;
     }
