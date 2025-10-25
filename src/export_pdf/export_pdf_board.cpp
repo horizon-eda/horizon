@@ -2,6 +2,7 @@
 #include "canvas_pdf.hpp"
 #include "util/podofo_inc.hpp"
 #include "util/util.hpp"
+#include "util/bbox_accumulator.hpp"
 #include "board/board.hpp"
 #include "export_pdf_util.hpp"
 
@@ -32,7 +33,15 @@ void export_pdf(const class Board &brd, const class PDFExportSettings &settings,
 
     cb("Exporting Board", 0);
     int64_t border_width = 1_mm;
-    auto bbox = brd.get_bbox();
+    BBoxAccumulator<int64_t> acc;
+    acc.accumulate(brd.get_bbox());
+    if (settings.layers.at(PDFExportSettings::DIMENSIONS_LAYER).enabled) {
+        for (const auto &[uu, dim] : brd.dimensions) {
+            acc.accumulate(dim.get_bbox());
+        }
+    }
+
+    const auto bbox = acc.get();
     auto width = bbox.second.x - bbox.first.x + border_width * 2;
     auto height = bbox.second.y - bbox.first.y + border_width * 2;
 

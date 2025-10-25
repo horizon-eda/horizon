@@ -696,7 +696,7 @@ void Board::update_pdf_export_settings(PDFExportSettings &settings)
     auto layers_from_board = get_layers();
     // remove layers not on board
     map_erase_if(settings.layers, [&layers_from_board](const auto &it) {
-        return it.first != PDFExportSettings::HOLES_LAYER && layers_from_board.count(it.first) == 0;
+        return !PDFExportSettings::is_special_layer(it.first) && layers_from_board.count(it.first) == 0;
     });
 
     // add new layers
@@ -708,6 +708,7 @@ void Board::update_pdf_export_settings(PDFExportSettings &settings)
 
     // add holes layer
     add_layer(PDFExportSettings::HOLES_LAYER, false);
+    add_layer(PDFExportSettings::DIMENSIONS_LAYER, false);
 
     add_layer(BoardLayers::OUTLINE_NOTES);
     add_layer(BoardLayers::L_OUTLINE);

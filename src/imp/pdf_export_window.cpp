@@ -31,6 +31,18 @@ private:
     PDFExportSettings::Layer &layer;
 };
 
+static std::string get_layer_name(int layer, const LayerProvider &prv)
+{
+    switch (layer) {
+    case PDFExportSettings::HOLES_LAYER:
+        return "Holes";
+    case PDFExportSettings::DIMENSIONS_LAYER:
+        return "Dimensions";
+    default:
+        return prv.get_layers().at(layer).name;
+    }
+}
+
 PDFLayerEditor::PDFLayerEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, PDFExportWindow &pa,
                                PDFExportSettings::Layer &la)
     : Gtk::Box(cobject), parent(pa), layer(la)
@@ -41,9 +53,7 @@ PDFLayerEditor::PDFLayerEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::
     x->get_widget("layer_color", layer_color);
     parent.sg_layer_name->add_widget(*layer_checkbutton);
 
-    auto name = layer.layer == PDFExportSettings::HOLES_LAYER
-                        ? "Holes"
-                        : parent.core.get_layer_provider().get_layers().at(layer.layer).name;
+    const auto name = get_layer_name(layer.layer, parent.core.get_layer_provider());
     layer_checkbutton->set_label(name);
     bind_widget(layer_checkbutton, layer.enabled);
     layer_checkbutton->signal_toggled().connect([this] { s_signal_changed.emit(); });
@@ -53,7 +63,13 @@ PDFLayerEditor::PDFLayerEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::
                 {PDFExportSettings::Layer::Mode::OUTLINE, layer_outline}};
         bind_widget<PDFExportSettings::Layer::Mode>(widgets, layer.mode,
                                                     [this](auto mode) { s_signal_changed.emit(); });
+        if (layer.layer == PDFExportSettings::DIMENSIONS_LAYER) {
+            for (auto &[x, w] : widgets) {
+                w->set_visible(false);
+            }
+        }
     }
+
     bind_widget(layer_color, layer.color, [this](auto color) { s_signal_changed.emit(); });
 }
 

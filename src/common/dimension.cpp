@@ -1,6 +1,8 @@
 #include "dimension.hpp"
 #include "lut.hpp"
 #include "nlohmann/json.hpp"
+#include "util/bbox_accumulator.hpp"
+#include "util/geom_util.hpp"
 
 namespace horizon {
 
@@ -65,4 +67,37 @@ int64_t Dimension::get_length() const
         return 0;
     }
 }
+
+std::pair<Coordi, Coordi> Dimension::get_bbox() const
+{
+    BBoxAccumulator<int64_t> acc;
+    acc.accumulate(p0);
+    acc.accumulate(p1);
+    auto wn = get_normalized_offset();
+    acc.accumulate(p0 + (wn * (label_distance + sgn(label_distance) * (double)label_size / 2.)).to_coordi());
+    acc.accumulate(p1 + (wn * (label_distance + sgn(label_distance) * (double)label_size / 2.)).to_coordi());
+    return acc.get();
+}
+
+Coordd Dimension::get_normalized_offset() const
+{
+    Coordd p0x = p0;
+    Coordd p1x = p1;
+    if (mode == Dimension::Mode::HORIZONTAL) {
+        p1x = Coordd(p1x.x, p0x.y);
+    }
+    else if (mode == Dimension::Mode::VERTICAL) {
+        p1x = Coordd(p0x.x, p1x.y);
+    }
+    const Coordd v = p1x - p0x;
+    Coordd w = Coordd(-v.y, v.x);
+    if (mode == Mode::HORIZONTAL) {
+        w.y = std::abs(w.y);
+    }
+    else if (mode == Mode::VERTICAL) {
+        w.x = std::abs(w.x);
+    }
+    return w.normalize();
+}
+
 } // namespace horizon

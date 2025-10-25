@@ -236,6 +236,7 @@ protected:
     }
     bool img_mode = false;
     bool img_auto_line = false;
+    bool img_draw_dimensions = false;
 
     Placement transform;
     void transform_save();

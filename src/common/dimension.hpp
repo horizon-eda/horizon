@@ -22,6 +22,8 @@ public:
 
     int64_t project(const Coordi &c) const;
     int64_t get_length() const;
+    std::pair<Coordi, Coordi> get_bbox() const;
+    Coordd get_normalized_offset() const;
 
     json serialize() const;
 };

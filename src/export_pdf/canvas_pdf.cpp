@@ -27,6 +27,7 @@ CanvasPDF::CanvasPDF(PoDoFo::PdfPainter &p, PoDoFo::PdfFont &f, const PDFExportS
     : Canvas::Canvas(), painter(p), font(f), settings(s), metrics(font.GetMetrics())
 {
     img_mode = true;
+    img_draw_dimensions = s.layers.at(PDFExportSettings::DIMENSIONS_LAYER).enabled;
     Appearance apperarance;
     layer_colors = apperarance.layer_colors;
     path.Reset();
@@ -50,6 +51,8 @@ Color CanvasPDF::get_pdf_layer_color(int layer) const
 
 void CanvasPDF::img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, int layer, bool tr)
 {
+    if (triangle_type_current == TriangleInfo::Type::DIMENSION)
+        layer = PDFExportSettings::DIMENSIONS_LAYER;
     if (!pdf_layer_visible(layer))
         return;
 
@@ -70,6 +73,8 @@ void CanvasPDF::img_draw_text(const Coordf &p, float size, const std::string &rt
                               TextOrigin origin, int layer, uint64_t width, TextData::Font tfont, bool center,
                               bool mirror)
 {
+    if (triangle_type_current == TriangleInfo::Type::DIMENSION)
+        layer = PDFExportSettings::DIMENSIONS_LAYER;
     if (!settings.include_text)
         return;
     if (!pdf_layer_visible(layer))

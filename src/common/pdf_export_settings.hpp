@@ -24,7 +24,8 @@ public:
     bool set_holes_size = false;
     uint64_t holes_diameter = 0;
 
-    enum { HOLES_LAYER = 10000 };
+    enum { HOLES_LAYER = 10'000, DIMENSIONS_LAYER = 10'001 };
+    static bool is_special_layer(int layer);
 
     class Layer {
     public:

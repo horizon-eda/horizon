@@ -50,6 +50,17 @@ PDFExportSettings::PDFExportSettings()
 {
 }
 
+bool PDFExportSettings::is_special_layer(int layer)
+{
+    switch (layer) {
+    case HOLES_LAYER:
+    case DIMENSIONS_LAYER:
+        return true;
+    default:
+        return false;
+    }
+}
+
 json PDFExportSettings::serialize_schematic() const
 {
     json j;

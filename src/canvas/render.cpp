@@ -1571,9 +1571,10 @@ void Canvas::render(const BoardHole &hole, bool interactive)
 
 void Canvas::render(const class Dimension &dim)
 {
-    if (img_mode)
+    if (img_mode && !img_draw_dimensions)
         return;
 
+    img_auto_line = img_mode;
     triangle_type_current = TriangleInfo::Type::DIMENSION;
     Coordd p0 = dim.p0;
     Coordd p1 = dim.p1;
@@ -1587,14 +1588,7 @@ void Canvas::render(const class Dimension &dim)
 
     const Coordd v = p1 - p0;
     const auto vn = v.normalize();
-    Coordd w = Coordd(-v.y, v.x);
-    if (dim.mode == Dimension::Mode::HORIZONTAL) {
-        w.y = std::abs(w.y);
-    }
-    else if (dim.mode == Dimension::Mode::VERTICAL) {
-        w.x = std::abs(w.x);
-    }
-    const auto wn = w.normalize();
+    const auto wn = dim.get_normalized_offset();
 
     ColorP co = ColorP::DIMENSION;
 
@@ -1667,6 +1661,7 @@ void Canvas::render(const class Dimension &dim)
     targets.emplace_back(dim.uuid, ObjectType::DIMENSION, dim.p0, 0);
     targets.emplace_back(dim.uuid, ObjectType::DIMENSION, dim.p1, 1);
     triangle_type_current = TriangleInfo::Type::NONE;
+    img_auto_line = false;
 }
 
 void Canvas::render(const Board &brd, bool interactive, PanelMode mode, OutlineMode outline_mode)
