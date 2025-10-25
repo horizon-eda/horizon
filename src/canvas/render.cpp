@@ -1574,6 +1574,7 @@ void Canvas::render(const class Dimension &dim)
     if (img_mode)
         return;
 
+    triangle_type_current = TriangleInfo::Type::DIMENSION;
     Coordd p0 = dim.p0;
     Coordd p1 = dim.p1;
 
@@ -1665,6 +1666,7 @@ void Canvas::render(const class Dimension &dim)
 
     targets.emplace_back(dim.uuid, ObjectType::DIMENSION, dim.p0, 0);
     targets.emplace_back(dim.uuid, ObjectType::DIMENSION, dim.p1, 1);
+    triangle_type_current = TriangleInfo::Type::NONE;
 }
 
 void Canvas::render(const Board &brd, bool interactive, PanelMode mode, OutlineMode outline_mode)

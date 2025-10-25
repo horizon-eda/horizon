@@ -9,6 +9,11 @@ bool SelectionFilter::can_select(const SelectableRef &sel) const
         return false;
     if (sel.type == ObjectType::PICTURE && !ca.show_pictures)
         return false;
+    if (sel.type == ObjectType::DIMENSION) {
+        const auto &ld = ca.get_layer_display(10'000);
+        if (!ld.type_is_visible(TriangleInfo::Type::DIMENSION))
+            return false;
+    }
     ObjectType type = sel.type;
     if (type == ObjectType::POLYGON_ARC_CENTER || sel.type == ObjectType::POLYGON_EDGE
         || sel.type == ObjectType::POLYGON_VERTEX)

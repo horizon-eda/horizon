@@ -1095,6 +1095,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
           ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD | ActionCatalogItem::AVAILABLE_IN_PACKAGE,
           ActionCatalogItem::FLAGS_IN_TOOL}},
 
+        {{ActionID::TOGGLE_DIMENSIONS, ToolID::NONE},
+         {"Toggle dimensions", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
+          ActionCatalogItem::FLAGS_IN_TOOL}},
+
         {{ActionID::VIEW_ACTUAL_SIZE, ToolID::NONE},
          {"View at actual size", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_IN_TOOL}},
@@ -1309,6 +1313,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(TOGGLE_JUNCTIONS_AND_HIDDEN_NAMES),
         ACTION_LUT_ITEM(MSD_TUNING_WINDOW),
         ACTION_LUT_ITEM(TOGGLE_PICTURES),
+        ACTION_LUT_ITEM(TOGGLE_DIMENSIONS),
         ACTION_LUT_ITEM(VIEW_ACTUAL_SIZE),
         ACTION_LUT_ITEM(OPEN_DATASHEET),
         ACTION_LUT_ITEM(SYMBOL_TEXT_PLACEMENT),

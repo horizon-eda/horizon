@@ -26,7 +26,9 @@ public:
 
 class TriangleInfo {
 public:
-    enum class Type : uint8_t { NONE, TEXT, GRAPHICS, PLANE_FILL, KEEPOUT_FILL, PAD };
+    enum class Type : uint8_t { NONE, TEXT, GRAPHICS, PLANE_FILL, KEEPOUT_FILL, PAD, DIMENSION, LAST_ONE };
+    static_assert(static_cast<int>(Type::LAST_ONE) < 32); // used in uint32_t bit mask
+
 
     TriangleInfo(Type ty, uint8_t flg) : type(ty), flags(flg)
     {

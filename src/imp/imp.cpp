@@ -585,6 +585,25 @@ void ImpBase::run(int argc, char *argv[])
         });
     }
 
+    if (core->has_object_type(ObjectType::DIMENSION)) {
+        show_dimensions_action = main_window->add_action_bool("show_dimensions", true);
+        show_dimensions_action->signal_change_state().connect([this](const Glib::VariantBase &v) {
+            auto b = Glib::VariantBase::cast_dynamic<Glib::Variant<bool>>(v).get();
+            if (b != canvas->get_layer_display(10'000).type_is_visible(TriangleInfo::Type::DIMENSION)) {
+                trigger_action(ActionID::TOGGLE_DIMENSIONS);
+            }
+        });
+        connect_action(ActionID::TOGGLE_DIMENSIONS, [this](const auto &a) {
+            auto ld = canvas->get_layer_display(10'000);
+            ld.types_visible ^= (1 << (static_cast<int>(TriangleInfo::Type::DIMENSION)));
+            const auto visible = ld.type_is_visible(TriangleInfo::Type::DIMENSION);
+            canvas->set_layer_display(10'000, ld);
+            canvas->queue_draw();
+            g_simple_action_set_state(show_dimensions_action->gobj(), g_variant_new_boolean(visible));
+            update_view_hints();
+        });
+    }
+
     connect_action(ActionID::SELECTION_FILTER, [this](const auto &a) { selection_filter_dialog->present(); });
     connect_action(ActionID::SAVE, [this](const auto &a) {
         if (!read_only) {
@@ -900,6 +919,8 @@ void ImpBase::run(int argc, char *argv[])
     view_options_menu_append_action("Selection filter", "win.selection_filter");
     if (core->has_object_type(ObjectType::PICTURE))
         view_options_menu_append_action("Pictures", "win.show_pictures");
+    if (core->has_object_type(ObjectType::DIMENSION))
+        view_options_menu_append_action("Dimensions", "win.show_dimensions");
 
     imp_interface = std::make_unique<ImpInterface>(this);
 
@@ -1917,6 +1938,9 @@ std::vector<std::string> ImpBase::get_view_hints()
 
     if (!canvas->show_pictures)
         r.emplace_back("no pictures");
+
+    if (!canvas->get_layer_display(10'000).type_is_visible(TriangleInfo::Type::DIMENSION))
+        r.emplace_back("no dimensions");
     return r;
 }
 

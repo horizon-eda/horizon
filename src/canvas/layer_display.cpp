@@ -11,4 +11,11 @@ LayerDisplay::LayerDisplay() : types_visible(types_visible_default)
 LayerDisplay::LayerDisplay(bool vi, Mode mo) : visible(vi), mode(mo), types_visible(types_visible_default)
 {
 }
+
+bool LayerDisplay::type_is_visible(TriangleInfo::Type type) const
+{
+    return types_visible & (1 << static_cast<int>(type));
+}
+
+
 } // namespace horizon
