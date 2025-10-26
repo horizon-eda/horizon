@@ -273,10 +273,10 @@ void PDFExportWindow::export_thread(PDFExportSettings s)
             status_dispatcher.set_status(StatusDispatcher::Status::DONE, "Done", 1);
         }
     }
-    catch (const std::exception &e) {
+    catch (const PoDoFo::PdfError &e) {
         status_dispatcher.set_status(StatusDispatcher::Status::ERROR, e.what(), 0);
     }
-    catch (const PoDoFo::PdfError &e) {
+    catch (const std::exception &e) {
         status_dispatcher.set_status(StatusDispatcher::Status::ERROR, e.what(), 0);
     }
     catch (...) {
