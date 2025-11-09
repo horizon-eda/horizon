@@ -49,21 +49,26 @@ void PoolBrowserButton::update_label()
         label->set_text("(None)");
         return;
     }
-    switch (type) {
-    case ObjectType::PADSTACK:
-        label->set_text(pool.get_padstack(selected_uuid)->name);
-        break;
-    case ObjectType::PACKAGE:
-        label->set_text(pool.get_package(selected_uuid)->name);
-        break;
-    case ObjectType::FRAME:
-        label->set_text(pool.get_frame(selected_uuid)->name);
-        break;
-    case ObjectType::PART:
-        label->set_text(pool.get_part(selected_uuid)->get_MPN());
-        break;
-    default:
-        label->set_text("fixme");
+    try {
+        switch (type) {
+        case ObjectType::PADSTACK:
+            label->set_text(pool.get_padstack(selected_uuid)->name);
+            break;
+        case ObjectType::PACKAGE:
+            label->set_text(pool.get_package(selected_uuid)->name);
+            break;
+        case ObjectType::FRAME:
+            label->set_text(pool.get_frame(selected_uuid)->name);
+            break;
+        case ObjectType::PART:
+            label->set_text(pool.get_part(selected_uuid)->get_MPN());
+            break;
+        default:
+            label->set_text("fixme");
+        }
+    }
+    catch (const std::runtime_error &e) {
+        label->set_text("(Not found)");
     }
 }
 } // namespace horizon
