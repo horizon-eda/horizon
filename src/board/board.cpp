@@ -1100,6 +1100,8 @@ void Board::smash_package_silkscreen_graphics(BoardPackage *pkg)
             auto &new_arc = arcs.emplace(uu, uu).first->second;
             new_arc.from = get_junction(it.second.from);
             new_arc.to = get_junction(it.second.to);
+            if (pkg->flip)
+                new_arc.reverse();
             new_arc.center = get_junction(it.second.center);
             new_arc.width = it.second.width;
             new_arc.layer = it.second.layer;
