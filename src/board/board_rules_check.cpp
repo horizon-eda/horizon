@@ -285,6 +285,18 @@ RulesCheckResult BoardRules::check_preflight(const Board &brd) const
 
     for (const auto &it : brd.packages) {
         unplaced_components.erase(it.second.component);
+        const auto silkscreen_layer = it.second.flip ? BoardLayers::BOTTOM_SILKSCREEN : BoardLayers::TOP_SILKSCREEN;
+        for (const auto text : it.second.texts) {
+            if (text->layer != silkscreen_layer) {
+                r.errors.emplace_back(RulesCheckErrorLevel::WARN);
+                auto &e = r.errors.back();
+                e.has_location = true;
+                e.location = text->placement.shift;
+                e.layers = {text->layer};
+                e.comment = "Text for " + it.second.component->refdes + " should be on layer "
+                            + brd.get_layer_name(silkscreen_layer) + ", but is on " + brd.get_layer_name(text->layer);
+            }
+        }
     }
 
     for (const auto &it : unplaced_components) {
