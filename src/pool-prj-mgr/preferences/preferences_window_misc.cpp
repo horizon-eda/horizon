@@ -224,6 +224,17 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
         }
     }
     {
+        auto gr = Gtk::manage(new PreferencesGroup("Status Bar"));
+        box->pack_start(*gr, false, false, 0);
+        gr->show();
+        {
+            auto r = Gtk::manage(new PreferencesRowBool("Cursor position readout",
+                                                        "Hiding it reduces the minium width of the editor window.",
+                                                        preferences, preferences.status_bar.show_cursor_readout));
+            gr->add_row(*r);
+        }
+    }
+    {
         auto gr = Gtk::manage(new PreferencesGroup("Appearance (also applies to Pool/Project Manager)"));
         box->pack_start(*gr, false, false, 0);
         gr->show();

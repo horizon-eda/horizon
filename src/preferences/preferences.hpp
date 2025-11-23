@@ -138,6 +138,14 @@ public:
     json serialize() const;
 };
 
+class StatusBarPreferences {
+public:
+    bool show_cursor_readout = true;
+
+    void load_from_json(const json &j);
+    json serialize() const;
+};
+
 class AppearancePreferences {
 public:
     bool dark_theme = false;
@@ -194,6 +202,7 @@ public:
     UndoRedoPreferences undo_redo;
     AppearancePreferences appearance;
     ToolBarPreferences tool_bar;
+    StatusBarPreferences status_bar;
     SpacenavPreferences spacenav;
     InputDevicesPreferences input_devices;
 

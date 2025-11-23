@@ -1216,6 +1216,7 @@ void ImpBase::apply_preferences()
     }
     main_window->set_use_action_bar(preferences.action_bar.enable);
     main_window->tool_bar_set_vertical(preferences.tool_bar.vertical_layout);
+    main_window->cursor_label->set_visible(preferences.status_bar.show_cursor_readout);
     core->set_history_max(preferences.undo_redo.max_depth);
     core->set_history_never_forgets(preferences.undo_redo.never_forgets);
     selection_history_manager.set_never_forgets(preferences.undo_redo.never_forgets);

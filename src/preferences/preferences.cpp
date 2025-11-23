@@ -474,6 +474,18 @@ void ToolBarPreferences::load_from_json(const json &j)
     vertical_layout = j.value("vertical_layout", false);
 }
 
+json StatusBarPreferences::serialize() const
+{
+    json j;
+    j["show_cursor_readout"] = show_cursor_readout;
+    return j;
+}
+
+void StatusBarPreferences::load_from_json(const json &j)
+{
+    show_cursor_readout = j.value("show_cursor_readout", true);
+}
+
 json SpacenavPreferences::serialize() const
 {
     json j;
@@ -599,6 +611,7 @@ json Preferences::serialize() const
     j["undo_redo"] = undo_redo.serialize();
     j["appearance"] = appearance.serialize();
     j["tool_bar"] = tool_bar.serialize();
+    j["status_bar"] = status_bar.serialize();
     j["spacenav"] = spacenav.serialize();
     j["input_devices"] = input_devices.serialize();
     j["show_pull_request_tools"] = show_pull_request_tools;
@@ -650,6 +663,8 @@ void Preferences::load_from_json(const json &j)
         appearance.load_from_json(j.at("appearance"));
     if (j.count("tool_bar"))
         tool_bar.load_from_json(j.at("tool_bar"));
+    if (j.count("status_bar"))
+        status_bar.load_from_json(j.at("status_bar"));
     if (j.count("spacenav"))
         spacenav.load_from_json(j.at("spacenav"));
     if (j.count("input_devices"))
