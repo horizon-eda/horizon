@@ -6,6 +6,7 @@
 #include "common/junction.hpp"
 #include "common/arc.hpp"
 #include "common/line.hpp"
+#include "util/util.hpp"
 #include <deque>
 
 namespace horizon {
@@ -207,7 +208,8 @@ bool DXFImporter::import(const std::string &filename)
     adapter.shift = shift;
     adapter.width = width;
     DL_Dxf dxf;
-    if (!dxf.in(filename, &adapter)) {
+    auto stream = make_ifstream(filename);
+    if (!dxf.in(stream, &adapter)) {
         std::cout << "import error" << std::endl;
         return false;
     }
