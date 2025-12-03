@@ -1,3 +1,25 @@
+# Version 2.7.2
+
+## Bugfixes
+
+### Editor
+
+ - support importing DXF files with non-ASCII filenames on Windows ([726d856](https://github.com/horizon-eda/horizon/commit/726d856071037bc650463e482fe9882c0c3b9cf4))
+
+### Board Editor
+
+ - properly smash silkscreen arcs for packages on bottom side ([5ef382a](https://github.com/horizon-eda/horizon/commit/5ef382a94af59049a725205d3408bee951a369fe))
+ - properly export arcs in bottom packages ([87de222](https://github.com/horizon-eda/horizon/commit/87de2225fe2dfc037f7a72eb6543e18e3279e930))
+
+### Pool Manager
+
+ - don't crash if default via or frame are not found ([4e07ce9](https://github.com/horizon-eda/horizon/commit/4e07ce934745a0b4a2d72d4e26f1e0de4a850dce))
+
+### Editors
+
+ - export pictures in PDFs ([8eeed28](https://github.com/horizon-eda/horizon/commit/8eeed2818855757926ba9a555bb92196ed25c1cd))
+ - export PDFs at x1 scale instead of x10 ([03220cb](https://github.com/horizon-eda/horizon/commit/03220cbba7cb7020c3e61a71ba9db5e7fd20a396))
+
 # Version 2.7.1
 
 ## Bugfixes

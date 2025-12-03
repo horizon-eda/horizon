@@ -52,6 +52,23 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+    <release version="2.7.2" date="2025-12-05">
+      <url>https://github.com/horizon-eda/horizon/releases/tag/v2.7.2</url>
+      <description>
+        <p>What's new</p>
+        <ul>
+          <li>Simplified project pool update</li>
+          <li>Save/load pick&amp;place export settings</li>
+          <li>Allow packages to fix parameters</li>
+        </ul>
+        <p>Fixed Bugs</p>
+        <ul>
+          <li>PDFs are exported at the right scale</li>
+          <li>PDF export includes pictures</li>
+          <li>fix handling of arcs in bottom packages</li>
+        </ul>
+      </description>
+    </release>
     <release version="2.7.1" date="2025-09-14">
       <url>https://github.com/horizon-eda/horizon/releases/tag/v2.7.1</url>
       <description>
