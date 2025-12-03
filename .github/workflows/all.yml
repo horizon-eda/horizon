@@ -139,7 +139,6 @@ jobs:
       matrix:
         target:
           - all
-          - horizon.so
     runs-on: ubuntu-latest
     container: opensuse/tumbleweed
     needs: stylecheck
