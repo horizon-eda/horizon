@@ -153,7 +153,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
-      run: zypper in -y git make gcc gcc-c++ pkg-config cppzmq-devel occt-devel gtkmm3-devel libgit2-devel libuuid-devel sqlite3-devel librsvg-devel cairomm-devel glm-devel boost-devel libcurl-devel libpodofo-0_10-devel binutils libarchive-devel libspnav-devel python3 meson cmake
+      run: zypper in -y -t pattern devel_python3 && zypper in -y --allow-downgrade git make gcc gcc-c++ pkgconf-pkg-config cppzmq-devel occt-devel gtkmm3-devel libgit2-devel libuuid-devel sqlite3-devel librsvg-devel cairomm-devel glm-devel boost-devel libcurl-devel libpodofo-0_10-devel binutils libarchive-devel libspnav-devel meson cmake
 
     - name: Install python dependencies
       if: ${{ matrix.target == 'horizon.so' }}
