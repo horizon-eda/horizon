@@ -2,6 +2,7 @@
 #include "pool/part.hpp"
 #include "check_util.hpp"
 #include <glibmm/regex.h>
+#include <filesystem>
 
 namespace horizon {
 
@@ -53,6 +54,11 @@ RulesCheckResult check_part(const Part &part)
 
     if (needs_trim(part.get_datasheet())) {
         r.errors.emplace_back(RulesCheckErrorLevel::FAIL, "Description has trailing/leading whitespace");
+    }
+    auto ext = std::filesystem::path(part.get_datasheet()).extension().u8string();
+    std::transform(ext.begin(), ext.end(), ext.begin(), tolower);
+    if (ext == "." || (ext.find(".p") != std::string::npos && ext != ".pdf")) {
+        r.errors.emplace_back(RulesCheckErrorLevel::WARN, "Datasheet extension likely missing/mistyped");
     }
     if (auto d = check_datasheet(part.get_datasheet())) {
         r.errors.emplace_back(RulesCheckErrorLevel::WARN, "Discouraged datasheet domain " + *d);
