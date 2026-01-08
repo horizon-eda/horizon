@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
     Glib::OptionContext options;
     options.set_summary("horizon interactive manipulator");
-    options.set_description("The 'HORIZON_POOL' env var should be set directory of the pool being used.");
+    options.set_description("The 'HORIZON_POOL' env var should be set to the directory of the pool being used.");
     options.set_help_enabled();
 
     Glib::OptionGroup group("imp", "imp");
