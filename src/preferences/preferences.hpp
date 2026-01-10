@@ -45,6 +45,19 @@ public:
     json serialize() const;
 };
 
+class View3DPreferences {
+public:
+    bool use_ortho_projection = false;
+    Color solder_mask_color = Color(0, .5, 0);
+    Color silkscreen_color = Color(1, 1, 1);
+    Color substrate_color = Color(.2, .15, 0);
+    Color bg_top_color = Color(.2, .2, .4);
+    Color bg_bottom_color = Color(.59, .59, .66);
+
+    void load_from_json(const json &j);
+    json serialize() const;
+};
+
 class KeySequencesPreferences {
 public:
     std::map<ActionToolID, std::map<ActionCatalogItem::Availability, std::vector<KeySequence>>> keys;
@@ -187,6 +200,7 @@ public:
     CanvasPreferences canvas_layer;
     SchematicPreferences schematic;
     BoardPreferences board;
+    View3DPreferences view_3d;
     KeySequencesPreferences key_sequences;
     ZoomPreferences zoom;
     bool capture_output = false;

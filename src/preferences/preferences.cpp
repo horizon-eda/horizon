@@ -215,6 +215,33 @@ void BoardPreferences::load_from_json(const json &j)
     move_using_router = j.value("move_using_router", true);
 }
 
+json View3DPreferences::serialize() const
+{
+    json j;
+    j["use_ortho_projection"] = use_ortho_projection;
+    j["solder_mask_color"] = color_to_json(solder_mask_color);
+    j["silkscreen_color"] = color_to_json(silkscreen_color);
+    j["substrate_color"] = color_to_json(substrate_color);
+    j["bg_top_color"] = color_to_json(bg_top_color);
+    j["bg_bottom_color"] = color_to_json(bg_bottom_color);
+    return j;
+}
+
+void View3DPreferences::load_from_json(const json &j)
+{
+    use_ortho_projection = j.value("use_ortho_projection", false);
+    if (j.count("solder_mask_color"))
+        solder_mask_color = color_from_json(j.at("solder_mask_color"));
+    if (j.count("silkscreen_color"))
+        silkscreen_color = color_from_json(j.at("silkscreen_color"));
+    if (j.count("substrate_color"))
+        substrate_color = color_from_json(j.at("substrate_color"));
+    if (j.count("bg_top_color"))
+        bg_top_color = color_from_json(j.at("bg_top_color"));
+    if (j.count("bg_bottom_color"))
+        bg_bottom_color = color_from_json(j.at("bg_bottom_color"));
+}
+
 json ZoomPreferences::serialize() const
 {
     json j;
@@ -601,6 +628,7 @@ json Preferences::serialize() const
     j["key_sequences"] = key_sequences.serialize();
     j["in_tool_key_sequences"] = in_tool_key_sequences.serialize();
     j["board"] = board.serialize();
+    j["view_3d"] = view_3d.serialize();
     j["zoom"] = zoom.serialize();
     j["capture_output"] = capture_output;
     j["stock_info_provider"] = stock_info_provider_lut.lookup_reverse(stock_info_provider);
@@ -636,6 +664,8 @@ void Preferences::load_from_json(const json &j)
         schematic.load_from_json(j.at("schematic"));
     if (j.count("board"))
         board.load_from_json(j.at("board"));
+    if (j.count("view_3d"))
+        view_3d.load_from_json(j.at("view_3d"));
     if (j.count("zoom"))
         zoom.load_from_json(j.at("zoom"));
     if (j.count("key_sequences"))
