@@ -96,6 +96,14 @@ private:
     Gtk::ComboBoxText *combo = nullptr;
 };
 
+class PreferencesRowColorButton : public PreferencesRow {
+public:
+    PreferencesRowColorButton(const std::string &title, const std::string &subtitle, Preferences &prefs, Color &v);
+
+private:
+    Gtk::ColorButton *btn = nullptr;
+};
+
 class PreferencesGroup : public Gtk::Box {
 public:
     PreferencesGroup(const std::string &title);

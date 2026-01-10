@@ -84,6 +84,48 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
             gr->add_row(*r);
         }
     }
+
+    {
+        auto gr = Gtk::manage(new PreferencesGroup("3D View"));
+        box->pack_start(*gr, false, false, 0);
+        gr->show();
+        {
+
+            auto r = Gtk::manage(new PreferencesRowBoolButton("View projection", "Default view projection",
+                                                              "Orthographic", "Perspective", preferences,
+                                                              preferences.view_3d.use_ortho_projection));
+            gr->add_row(*r);
+        }
+        {
+            auto r = Gtk::manage(new PreferencesRowColorButton("Solder mask color", "Default solder mask color",
+                                                               preferences, preferences.view_3d.solder_mask_color));
+            gr->add_row(*r);
+        }
+        {
+            auto r = Gtk::manage(new PreferencesRowColorButton("Silkscreen color", "Default silkscreen color",
+                                                               preferences, preferences.view_3d.silkscreen_color));
+            gr->add_row(*r);
+        }
+        {
+            auto r = Gtk::manage(new PreferencesRowColorButton("Substrate color", "Default substrate color",
+                                                               preferences, preferences.view_3d.substrate_color));
+            gr->add_row(*r);
+        }
+
+        {
+            auto r =
+                    Gtk::manage(new PreferencesRowColorButton("Top background color", "Background gradient start color",
+                                                              preferences, preferences.view_3d.bg_top_color));
+            gr->add_row(*r);
+        }
+        {
+            auto r = Gtk::manage(new PreferencesRowColorButton("Bottom background color",
+                                                               "Background gradient end color", preferences,
+                                                               preferences.view_3d.bg_bottom_color));
+            gr->add_row(*r);
+        }
+    }
+
     {
         auto gr = Gtk::manage(new PreferencesGroup("Zoom & Pan"));
         box->pack_start(*gr, false, false, 0);
