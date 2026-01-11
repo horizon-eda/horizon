@@ -633,6 +633,7 @@ void View3DWindow::apply_preferences(const Preferences &prefs)
     canvas->set_background_top_color(prefs.view_3d.bg_top_color);
     set_color_button_color(background_bottom_color_button, prefs.view_3d.bg_bottom_color);
     canvas->set_background_bottom_color(prefs.view_3d.bg_bottom_color);
+    canvas->set_copper_color(prefs.view_3d.copper_color);
 
     spnav_buttons = prefs.spacenav.buttons;
     const auto av = ActionCatalogItem::AVAILABLE_IN_3D;
