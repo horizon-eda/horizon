@@ -107,6 +107,11 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
             gr->add_row(*r);
         }
         {
+            auto r = Gtk::manage(new PreferencesRowColorButton("Copper color", "Default copper color", preferences,
+                                                               preferences.view_3d.copper_color));
+            gr->add_row(*r);
+        }
+        {
             auto r = Gtk::manage(new PreferencesRowColorButton("Substrate color", "Default substrate color",
                                                                preferences, preferences.view_3d.substrate_color));
             gr->add_row(*r);

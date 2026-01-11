@@ -220,6 +220,7 @@ json View3DPreferences::serialize() const
     json j;
     j["use_ortho_projection"] = use_ortho_projection;
     j["solder_mask_color"] = color_to_json(solder_mask_color);
+    j["copper_color"] = color_to_json(copper_color);
     j["silkscreen_color"] = color_to_json(silkscreen_color);
     j["substrate_color"] = color_to_json(substrate_color);
     j["bg_top_color"] = color_to_json(bg_top_color);
@@ -232,6 +233,8 @@ void View3DPreferences::load_from_json(const json &j)
     use_ortho_projection = j.value("use_ortho_projection", false);
     if (j.count("solder_mask_color"))
         solder_mask_color = color_from_json(j.at("solder_mask_color"));
+    if (j.count("copper_color"))
+        copper_color = color_from_json(j.at("copper_color"));
     if (j.count("silkscreen_color"))
         silkscreen_color = color_from_json(j.at("silkscreen_color"));
     if (j.count("substrate_color"))
