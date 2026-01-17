@@ -25,6 +25,35 @@
 
 using json = nlohmann::json;
 
+static void expect_filename_arg(const std::vector<std::string> &filenames, const char *name, size_t i,
+                                bool required = true)
+{
+    if (filenames.size() <= i || (required && !Glib::file_test(filenames.at(i), Glib::FILE_TEST_EXISTS))) {
+        g_warning("%s filename argument %i is missing%s", name, static_cast<int>(i),
+                  required ? " or does not exist" : "");
+    }
+}
+
+static void expect_dir_arg(const std::vector<std::string> &filenames, const char *name, size_t i)
+{
+    if (filenames.size() <= i || filenames.at(i).empty()) {
+        g_warning("%s directory argument %i is missing", name, static_cast<int>(i));
+    }
+}
+
+static void expect_pool_env(const std::string &pool_base_path)
+{
+    if (pool_base_path.empty()) {
+        g_warning("HORIZON_POOL dir env var is not set");
+    }
+    else if (!Glib::file_test(pool_base_path, Glib::FILE_TEST_EXISTS)) {
+        g_warning("HORIZON_POOL dir does not exist");
+    }
+    else if (!Glib::file_test(Glib::build_filename(pool_base_path, "pool.json"), Glib::FILE_TEST_EXISTS)) {
+        g_warning("HORIZON_POOL dir does not contain pool.json");
+    }
+}
+
 int main(int argc, char *argv[])
 {
 #ifdef G_OS_WIN32
@@ -38,6 +67,7 @@ int main(int argc, char *argv[])
 
     Glib::OptionContext options;
     options.set_summary("horizon interactive manipulator");
+    options.set_description("The 'HORIZON_POOL' env var should be set to the directory of the pool being used.");
     options.set_help_enabled();
 
     Glib::OptionGroup group("imp", "imp");
@@ -123,41 +153,59 @@ int main(int argc, char *argv[])
     horizon::setup_locale();
 
     horizon::create_cache_and_config_dir();
-
     std::unique_ptr<horizon::ImpBase> imp = nullptr;
     if (mode_sch) {
+        expect_filename_arg(filenames, "blocks", 0);
+        expect_dir_arg(filenames, "pictures", 1);
+        expect_pool_env(pool_base_path);
         imp.reset(new horizon::ImpSchematic(filenames, {pool_base_path}));
     }
     else if (mode_symbol) {
+        expect_filename_arg(filenames, "symbol", 0);
+        expect_pool_env(pool_base_path);
         imp.reset(new horizon::ImpSymbol(filenames.at(0), pool_base_path, temp_mode));
         if (filenames.size() > 1)
             imp->set_suggested_filename(filenames.at(1));
     }
     else if (mode_padstack) {
+        expect_filename_arg(filenames, "padstack", 0);
+        expect_pool_env(pool_base_path);
         imp.reset(new horizon::ImpPadstack(filenames.at(0), pool_base_path, temp_mode));
         if (filenames.size() > 1)
             imp->set_suggested_filename(filenames.at(1));
     }
     else if (mode_package) {
+        expect_filename_arg(filenames, "package", 0);
+        expect_pool_env(pool_base_path);
         imp.reset(new horizon::ImpPackage(filenames.at(0), pool_base_path, temp_mode));
         if (filenames.size() > 1)
             imp->set_suggested_filename(filenames.at(1));
     }
     else if (mode_board) {
+        expect_filename_arg(filenames, "board", 0);
+        expect_filename_arg(filenames, "planes", 1, false);
+        expect_filename_arg(filenames, "blocks", 2);
+        expect_dir_arg(filenames, "pictures", 3);
+        expect_pool_env(pool_base_path);
         imp.reset(new horizon::ImpBoard(filenames, {pool_base_path}));
     }
     else if (mode_frame) {
+        expect_filename_arg(filenames, "frame", 0);
+        expect_pool_env(pool_base_path);
         imp.reset(new horizon::ImpFrame(filenames.at(0), pool_base_path, temp_mode));
         if (filenames.size() > 1)
             imp->set_suggested_filename(filenames.at(1));
     }
     else if (mode_decal) {
+        expect_filename_arg(filenames, "decal", 0);
+        expect_pool_env(pool_base_path);
         imp.reset(new horizon::ImpDecal(filenames.at(0), pool_base_path, temp_mode));
         if (filenames.size() > 1)
             imp->set_suggested_filename(filenames.at(1));
     }
     else {
         std::cout << "wrong invocation" << std::endl;
+        std::cout << options.get_help().c_str();
         return 1;
     }
     imp->set_read_only(read_only);
