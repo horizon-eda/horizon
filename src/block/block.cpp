@@ -818,6 +818,7 @@ static void visit_block_for_flatten(const Block &block, const UUIDVec &instance_
 {
     if (Block::instance_path_too_long(instance_path, __FUNCTION__))
         return;
+    std::vector<const Net *> dp_nets;
     for (const auto &[uu, net] : block.nets) {
         const auto v = uuid_vec_append(instance_path, uu);
         if (net.is_power) {
@@ -825,10 +826,14 @@ static void visit_block_for_flatten(const Block &block, const UUIDVec &instance_
         }
         else {
             const auto flat_uu = uuid_vec_flatten(v);
-            if (ctx.net_map.emplace(v, flat_uu).second) {
+            if (ctx.net_map.emplace(v, flat_uu).second) { // net wasn't yet added by a block connection
                 auto &flat_net = ctx.flat.nets.emplace(flat_uu, flat_uu).first->second;
                 flat_net.net_class = ctx.flat.net_class_default;
                 flat_net.name = ctx.top.instance_path_to_string(instance_path) + "/" + block.get_net_name(uu);
+
+                if (net.diffpair && net.diffpair_primary)
+                    dp_nets.push_back(&net);
+
                 if (ctx.flat.net_classes.count(net.net_class->uuid)) {
                     flat_net.net_class = &ctx.flat.net_classes.at(net.net_class->uuid);
                 }
@@ -836,6 +841,16 @@ static void visit_block_for_flatten(const Block &block, const UUIDVec &instance_
                     Logger::log_warning("net class not found in flattend netlist", Logger::Domain::BLOCK);
                 }
             }
+        }
+    }
+    for (const auto net : dp_nets) {
+        const auto v = uuid_vec_append(instance_path, net->uuid);
+        const auto dp_v = uuid_vec_append(instance_path, net->diffpair->uuid);
+        auto &flat_net = ctx.flat.nets.at(ctx.net_map.at(v));
+        if (ctx.net_map.count(dp_v)) {
+            auto &dp_flat = ctx.flat.nets.at(ctx.net_map.at(dp_v));
+            flat_net.diffpair_primary = true;
+            flat_net.diffpair = &dp_flat;
         }
     }
     for (const auto &[uu, comp] : block.components) {
@@ -901,6 +916,7 @@ Block Block::flatten() const
     for (const auto &net : ctx.nc_nets) {
         flat.nets.at(ctx.net_map.at(net)).is_nc = true;
     }
+    flat.update_diffpairs();
     return flat;
 }
 
