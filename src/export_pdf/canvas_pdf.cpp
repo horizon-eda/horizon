@@ -27,7 +27,8 @@ CanvasPDF::CanvasPDF(PoDoFo::PdfPainter &p, PoDoFo::PdfFont &f, const PDFExportS
     : Canvas::Canvas(), painter(p), font(f), settings(s), metrics(font.GetMetrics())
 {
     img_mode = true;
-    img_draw_dimensions = s.layers.at(PDFExportSettings::DIMENSIONS_LAYER).enabled;
+    if (s.layers.count(PDFExportSettings::DIMENSIONS_LAYER))
+        img_draw_dimensions = s.layers.at(PDFExportSettings::DIMENSIONS_LAYER).enabled;
     Appearance apperarance;
     layer_colors = apperarance.layer_colors;
     path.Reset();
