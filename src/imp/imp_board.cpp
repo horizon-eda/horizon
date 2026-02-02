@@ -1156,6 +1156,12 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
         }
     }
     trim(s);
+    if (auto it = sel_find_exactly_one(sel, ObjectType::VIA)) {
+        const auto &via = core_board.get_board()->vias.at(it->uuid);
+        s += "\n\n<b>Via</b>\n";
+        s += coord_to_string(via.junction->position);
+        sel_erase_type(sel, ObjectType::VIA);
+    }
 
     // Display the delta if two items of these types are selected
     for (const ObjectType type : {ObjectType::BOARD_PACKAGE, ObjectType::BOARD_HOLE, ObjectType::VIA}) {
