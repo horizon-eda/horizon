@@ -69,6 +69,16 @@ PreferencesRowBoolButton::PreferencesRowBoolButton(const std::string &title, con
     pack_start(*box, false, false, 0);
 }
 
+PreferencesRowColorButton::PreferencesRowColorButton(const std::string &title, const std::string &subtitle,
+                                                     Preferences &prefs, Color &v)
+    : PreferencesRow(title, subtitle, prefs)
+{
+    btn = Gtk::manage(new Gtk::ColorButton);
+    btn->set_valign(Gtk::ALIGN_CENTER);
+    btn->show();
+    pack_start(*btn, false, false, 0);
+    bind_widget(btn, v, [this](const Color &) { preferences.signal_changed().emit(); });
+}
 
 PreferencesGroup::PreferencesGroup(const std::string &title) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 8)
 {
