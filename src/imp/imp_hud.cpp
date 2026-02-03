@@ -129,20 +129,21 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
         }
     }
 
-    if (preferences.hud_debug) {
-        if (auto it = sel_find_exactly_one(sel, ObjectType::JUNCTION)) {
-            const auto ju = core->get_junction(it->uuid);
-            s += "\n\n<b>Junction:</b>\n";
+    if (auto it = sel_find_exactly_one(sel, ObjectType::JUNCTION)) {
+        const auto ju = core->get_junction(it->uuid);
+        s += "\n\n<b>Junction</b>\n";
+        if (preferences.hud_debug) {
             s += "Layers " + std::to_string(ju->layer.start()) + " — " + std::to_string(ju->layer.end()) + "\n";
             const Net *net = nullptr;
             if (auto ju_b = dynamic_cast<BoardJunction *>(ju))
                 net = ju_b->net;
             if (net)
-                s += "Net: " + core->get_top_block()->get_net_name(net->uuid);
+                s += "Net: " + core->get_top_block()->get_net_name(net->uuid) + "\n";
             else
-                s += "No net";
-            sel_erase_type(sel, ObjectType::JUNCTION);
+                s += "No net\n";
         }
+        s += coord_to_string(ju->position);
+        sel_erase_type(sel, ObjectType::JUNCTION);
     }
 
     // Display the delta if two items of these types are selected
