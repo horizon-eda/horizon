@@ -247,6 +247,7 @@ void Block::vacuum_nets()
     for (const auto &uu : nets_erase) {
         nets.erase(uu);
     }
+    update_diffpairs();
 }
 
 void Block::vacuum_group_tag_names()
