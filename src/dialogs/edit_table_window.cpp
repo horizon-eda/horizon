@@ -1,0 +1,176 @@
+#include "edit_table_window.hpp"
+
+#include "common/object_descr.hpp"
+#include "common/table.hpp"
+#include "util/gtk_util.hpp"
+#include "util/text_data.hpp"
+#include "widgets/text_editor.hpp"
+
+#include <cassert>
+
+namespace horizon {
+EditTableWindow::EditTableWindow(Window *parent, ImpInterface *intf, Table &tbl, bool use_ok)
+    : ToolWindow(parent, intf), table(tbl)
+{
+    set_title("Edit Table");
+    set_use_ok(use_ok);
+    set_default_size(600, 400);
+
+    auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10));
+    box->property_margin() = 20;
+
+    auto props_grid = Gtk::manage(new Gtk::Grid);
+    props_grid->set_row_spacing(10);
+    props_grid->set_column_spacing(10);
+
+    // lays out the properties widgets in a grid with ROWS_IN_PROPS_GRID rows
+    auto attach_props_widget = [props_grid](const std::string &label, Widget *w) {
+        static constexpr int ROWS_IN_PROPS_GRID = 3;
+        static int left = 0;
+        static int top = -1;
+
+        if (++top == ROWS_IN_PROPS_GRID) {
+            // add extra space between the properties columns
+            auto spacer = Gtk::manage(new Gtk::Label());
+            spacer->set_size_request(10, -1);
+            props_grid->attach(*spacer, left + 2, 0, 1, 1);
+
+            top = 0;
+            left += 3;
+        }
+
+        auto lbl = Gtk::manage(new Gtk::Label(label));
+        lbl->get_style_context()->add_class("dim-label");
+        lbl->set_xalign(1);
+        lbl->show();
+        props_grid->attach(*lbl, left, top, 1, 1);
+        w->set_hexpand(true);
+        w->show();
+        props_grid->attach(*w, left + 1, top, 1, 1);
+    };
+
+    sp_n_rows = Gtk::manage(new Gtk::SpinButton);
+    sp_n_rows->set_range(1, 100);
+    sp_n_rows->set_increments(1, 5);
+    sp_n_rows->set_value(table.n_rows);
+    sp_n_rows->signal_value_changed().connect([this] {
+        table.resize(sp_n_rows->get_value_as_int(), table.n_columns);
+        rebuild_cell_grid();
+        emit_event(ToolDataWindow::Event::UPDATE);
+    });
+    spinbutton_connect_activate(sp_n_rows, [this] { emit_event(ToolDataWindow::Event::OK); });
+    attach_props_widget("Rows", sp_n_rows);
+
+    sp_n_columns = Gtk::manage(new Gtk::SpinButton);
+    sp_n_columns->set_range(1, 100);
+    sp_n_columns->set_increments(1, 5);
+    sp_n_columns->set_value(table.n_columns);
+    sp_n_columns->signal_value_changed().connect([this] {
+        table.resize(table.n_rows, sp_n_columns->get_value_as_int());
+        rebuild_cell_grid();
+        emit_event(ToolDataWindow::Event::UPDATE);
+    });
+    spinbutton_connect_activate(sp_n_columns, [this] { emit_event(ToolDataWindow::Event::OK); });
+    attach_props_widget("Columns", sp_n_columns);
+
+    sp_padding = Gtk::manage(new SpinButtonDim);
+    sp_padding->set_range(0_mm, 100_mm);
+    sp_padding->set_value(table.padding);
+    sp_padding->set_increments(.01_mm, .001_mm);
+    sp_padding->signal_value_changed().connect([this] {
+        table.padding = sp_padding->get_value_as_int();
+        emit_event(ToolDataWindow::Event::UPDATE);
+    });
+    spinbutton_connect_activate(sp_padding, [this] { emit_event(ToolDataWindow::Event::OK); });
+    attach_props_widget("Padding", sp_padding);
+
+    sp_text_size = Gtk::manage(new SpinButtonDim);
+    sp_text_size->set_hexpand(true);
+    sp_text_size->set_range(.01_mm, 100_mm);
+    sp_text_size->set_value(table.text_size);
+    sp_text_size->signal_value_changed().connect([this] {
+        table.text_size = sp_text_size->get_value_as_int();
+        emit_event(ToolDataWindow::Event::UPDATE);
+    });
+    spinbutton_connect_activate(sp_text_size, [this] { emit_event(ToolDataWindow::Event::OK); });
+    attach_props_widget("Text size", sp_text_size);
+
+    sp_line_width = Gtk::manage(new SpinButtonDim);
+    sp_line_width->set_range(0_mm, 100_mm);
+    sp_line_width->set_value(table.line_width);
+    sp_line_width->set_increments(.01_mm, .001_mm);
+    sp_line_width->signal_value_changed().connect([this] {
+        table.line_width = sp_line_width->get_value_as_int();
+        emit_event(ToolDataWindow::Event::UPDATE);
+    });
+    spinbutton_connect_activate(sp_line_width, [this] { emit_event(ToolDataWindow::Event::OK); });
+    attach_props_widget("Line width", sp_line_width);
+
+    combo_font = Gtk::manage(new Gtk::ComboBoxText);
+    {
+        auto &items = object_descriptions.at(ObjectType::TEXT).properties.at(ObjectProperty::ID::FONT).enum_items;
+        for (const auto &[i, name] : items) {
+            combo_font->append(std::to_string(i), name);
+        }
+    }
+    combo_font->set_active_id(std::to_string(static_cast<int>(table.font)));
+    combo_font->signal_changed().connect([this] {
+        table.font = static_cast<TextData::Font>(std::stoi(combo_font->get_active_id()));
+        emit_event(ToolDataWindow::Event::UPDATE);
+    });
+    attach_props_widget("Font", combo_font);
+
+    box->pack_start(*props_grid, false, false);
+
+    auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+    box->pack_start(*sep, false, false);
+
+    auto section_label = Gtk::manage(new Gtk::Label("Cell contents"));
+    section_label->set_halign(Gtk::ALIGN_START);
+    box->pack_start(*section_label, false, false);
+
+    auto grid_container = Gtk::manage(new Gtk::ScrolledWindow);
+    grid_container->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    grid_container->set_vexpand(true);
+
+    cell_grid = Gtk::manage(new Gtk::Grid);
+    cell_grid->set_row_spacing(10);
+    cell_grid->set_column_spacing(10);
+    grid_container->add(*cell_grid);
+
+    box->pack_start(*grid_container, true, true);
+
+    rebuild_cell_grid();
+
+    box->show_all();
+    add(*box);
+}
+
+void EditTableWindow::focus_n_rows()
+{
+    sp_n_rows->grab_focus();
+}
+
+void EditTableWindow::rebuild_cell_grid()
+{
+    for (auto child : cell_grid->get_children()) {
+        cell_grid->remove(*child);
+    }
+
+    for (int r = 0; r < table.n_rows; r++) {
+        for (int c = 0; c < table.n_columns; c++) {
+            auto entry = Gtk::manage(new TextEditor(TextEditor::Lines::MULTI));
+            entry->set_text(table.get_cell(r, c), TextEditor::Select::NO);
+            entry->set_hexpand(true);
+            entry->signal_changed().connect([this, r, c, entry] {
+                table.set_cell(r, c, entry->get_text());
+                emit_event(ToolDataWindow::Event::UPDATE);
+            });
+            entry->signal_activate().connect([this] { emit_event(ToolDataWindow::Event::OK); });
+            cell_grid->attach(*entry, c, r, 1, 1);
+        }
+    }
+    cell_grid->show_all();
+}
+
+} // namespace horizon

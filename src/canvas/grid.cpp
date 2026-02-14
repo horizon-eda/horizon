@@ -70,7 +70,7 @@ void Grid::render()
 
     Coordf sp = spacing;
     Coordf sp_px = sp * ca.scale;
-    unsigned int newmul = 1;
+    uint64_t newmul = 1;
     while (sp_px.x < 20 || sp_px.y < 20) {
         newmul *= 2;
         sp = spacing * newmul;

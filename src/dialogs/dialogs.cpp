@@ -46,6 +46,7 @@
 #include "manage_ports.hpp"
 #include "select_block.hpp"
 #include "align_and_distribute_window.hpp"
+#include "edit_table_window.hpp"
 #include "edit_text_window.hpp"
 #include "plane_update.hpp"
 #include "util/automatic_prefs.hpp"
@@ -734,6 +735,19 @@ EditTextWindow *Dialogs::show_edit_text_window(class Text &text, bool use_ok)
         return win;
     }
     auto win = new EditTextWindow(parent, interface, text, use_ok);
+    window_nonmodal = win;
+    win->signal_hide().connect([this] { close_nonmodal(); });
+    win->present();
+    return win;
+}
+
+EditTableWindow *Dialogs::show_edit_table_window(class Table &table, bool use_ok)
+{
+    if (auto win = dynamic_cast<EditTableWindow *>(window_nonmodal)) {
+        win->present();
+        return win;
+    }
+    auto win = new EditTableWindow(parent, interface, table, use_ok);
     window_nonmodal = win;
     win->signal_hide().connect([this] { close_nonmodal(); });
     win->present();

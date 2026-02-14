@@ -406,5 +406,30 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                   {ObjectProperty::ID::HEIGHT, {ObjectProperty::Type::LENGTH, "Height", 0}},
 
           }}},
+        {ObjectType::TABLE,
+         {"Table",
+          "Tables",
+          {
+                  {ObjectProperty::ID::LAYER, {ObjectProperty::Type::LAYER, "Layer", 0}},
+                  {ObjectProperty::ID::POSITION_X, {ObjectProperty::Type::DIM, "Position X", 1}},
+                  {ObjectProperty::ID::POSITION_Y, {ObjectProperty::Type::DIM, "Position Y", 2}},
+                  {ObjectProperty::ID::ANGLE, {ObjectProperty::Type::ANGLE, "Angle", 3}},
+                  {ObjectProperty::ID::FONT,
+                   {ObjectProperty::Type::ENUM,
+                    "Font",
+                    9,
+                    {
+                            {static_cast<int>(TextData::Font::SIMPLEX), "Simplex"},
+                            {static_cast<int>(TextData::Font::DUPLEX), "Duplex"},
+                            {static_cast<int>(TextData::Font::TRIPLEX), "Triplex"},
+                            {static_cast<int>(TextData::Font::TRIPLEX_ITALIC), "Triplex Italic"},
+                            {static_cast<int>(TextData::Font::COMPLEX), "Complex"},
+                            {static_cast<int>(TextData::Font::COMPLEX_ITALIC), "Complex Italic"},
+                            {static_cast<int>(TextData::Font::SCRIPT_SIMPLEX), "Script Simplex"},
+                            {static_cast<int>(TextData::Font::SCRIPT_COMPLEX), "Script Complex"},
+                    }}},
+                  {ObjectProperty::ID::SIZE, {ObjectProperty::Type::DIM, "Text Size", 5}},
+                  {ObjectProperty::ID::WIDTH, {ObjectProperty::Type::DIM, "Line Width", 6}},
+          }}},
 };
 } // namespace horizon

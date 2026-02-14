@@ -5,6 +5,7 @@
 #include "common/hole.hpp"
 #include "common/polygon.hpp"
 #include "common/text.hpp"
+#include "common/table.hpp"
 #include "layer_display.hpp"
 #include "package/pad.hpp"
 #include "poly2tri/poly2tri.h"
@@ -798,6 +799,112 @@ void Canvas::render(const Text &text, bool interactive, ColorP co)
                            text.layer);
         targets.emplace_back(text.uuid, ObjectType::TEXT, transform.transform(text.placement.shift), 0, text.layer);
     }
+}
+
+void Canvas::render(const Table &table, bool interactive, ColorP co)
+{
+    transform_save();
+    transform.accumulate(table.placement);
+
+    TextRenderer::Options opts;
+    opts.width = table.line_width;
+    opts.font = table.font;
+
+    auto measure_text = [this, &table, &opts, co](const std::string &text) {
+        TextRenderer::Options measure_opts = opts;
+        measure_opts.draw = false;
+        auto [top_left, bottom_right] =
+                draw_text({0, 0}, table.text_size, text, 0, TextOrigin::BOTTOM, co, 0, measure_opts);
+        auto text_width = bottom_right.x - top_left.x;
+        auto text_height = bottom_right.y - top_left.y;
+        return std::make_pair(text_width + 2 * table.padding, text_height + 2 * table.padding);
+    };
+
+    int n_rows = table.n_rows;
+    int n_cols = table.n_columns;
+
+    std::vector<float> row_heights(n_rows);
+    std::vector<float> col_widths(n_cols);
+    float total_height = 0;
+    float total_width = 0;
+
+    // measure cell content and compute sizes
+    {
+        for (int r = 0; r < n_rows; ++r) {
+            for (int c = 0; c < n_cols; ++c) {
+                auto text = table.get_cell(r, c);
+                auto size = measure_text(text);
+                if (col_widths[c] < size.first)
+                    col_widths[c] = size.first;
+                if (row_heights[r] < size.second)
+                    row_heights[r] = size.second;
+            }
+        }
+
+        for (int r = 0; r < n_rows; ++r) {
+            total_height += row_heights[r];
+        }
+
+        for (int c = 0; c < n_cols; ++c) {
+            total_width += col_widths[c];
+        }
+    }
+
+    object_ref_push(ObjectType::TABLE, table.uuid);
+
+    img_auto_line = img_mode;
+
+    // draw outer border
+    {
+        draw_line({0, 0}, {total_width, 0}, co, table.layer, true, table.line_width);
+        draw_line({total_width, 0}, {total_width, -total_height}, co, table.layer, true, table.line_width);
+        draw_line({total_width, -total_height}, {0, -total_height}, co, table.layer, true, table.line_width);
+        draw_line({0, -total_height}, {0, 0}, co, table.layer, true, table.line_width);
+    }
+
+    // draw horizontal grid lines
+    {
+        float y = -row_heights[0];
+        for (int r = 1; r < n_rows; r++) {
+            draw_line({0, y}, {total_width, y}, co, table.layer, true, table.line_width);
+            y -= row_heights[r];
+        }
+    }
+
+    // draw vertical grid lines
+    {
+        float x = col_widths[0];
+        for (int c = 1; c < n_cols; c++) {
+            draw_line({x, 0}, {x, -total_height}, co, table.layer, true, table.line_width);
+            x += col_widths[c];
+        }
+    }
+
+    img_auto_line = false;
+
+    // cell contents
+    {
+        auto y = -static_cast<float>(table.padding);
+        for (int r = 0; r < n_rows; r++) {
+            auto x = static_cast<float>(table.padding);
+            for (int c = 0; c < n_cols; c++) {
+                auto pos = transform.transform(Coordf{x, y});
+                draw_text(pos, table.text_size, table.get_cell(r, c), transform.get_angle(), TextOrigin::BOTTOM, co,
+                          table.layer, opts);
+                x += col_widths[c];
+            }
+            y -= row_heights[r];
+        }
+    }
+
+    object_ref_pop();
+
+    if (interactive) {
+        selectables.append(table.uuid, ObjectType::TABLE, {0, 0}, {0, 0}, {total_width, -total_height}, 0, table.layer);
+        targets.emplace_back(table.uuid, ObjectType::TABLE, transform.transform(Coordi(0, 0)), 0, table.layer);
+    }
+
+    transform_restore();
 }
 
 template <typename T> static std::string join(const T &v, const std::string &delim)
@@ -1682,6 +1789,9 @@ void Canvas::render(const Board &brd, bool interactive, PanelMode mode, OutlineM
         render(it.second, interactive);
     }
     for (const auto &it : brd.texts) {
+        render(it.second, interactive);
+    }
+    for (const auto &it : brd.tables) {
         render(it.second, interactive);
     }
     for (const auto &it : brd.tracks) {

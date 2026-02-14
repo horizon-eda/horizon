@@ -459,6 +459,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Place power symbol", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::PLACE_TABLE},
+         {"Place table", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TOOL, ToolID::PLACE_TEXT},
          {"Place text", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
@@ -1067,6 +1071,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Toggle junctions and hidden names", ActionGroup::SYMBOL, ActionCatalogItem::AVAILABLE_IN_SYMBOL,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::EDIT_TABLE},
+         {"Edit table", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TOOL, ToolID::EDIT_TEXT},
          {"Edit text", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
@@ -1344,6 +1352,7 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(DRAW_NET),
         TOOL_LUT_ITEM(ADD_COMPONENT),
         TOOL_LUT_ITEM(PLACE_TEXT),
+        TOOL_LUT_ITEM(PLACE_TABLE),
         TOOL_LUT_ITEM(PLACE_NET_LABEL),
         TOOL_LUT_ITEM(DISCONNECT),
         TOOL_LUT_ITEM(BEND_LINE_NET),

@@ -72,6 +72,9 @@ void ToolHelperMove::move_do(const Coordi &delta)
         case ObjectType::TEXT:
             doc.r->get_text(it.uuid)->placement.shift += delta;
             break;
+        case ObjectType::TABLE:
+            doc.r->get_table(it.uuid)->placement.shift += delta;
+            break;
         case ObjectType::POLYGON_VERTEX:
             doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).position += delta;
             break;

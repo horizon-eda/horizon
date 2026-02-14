@@ -22,6 +22,10 @@ public:
     virtual class Text *get_text(const UUID &uu) = 0;
     virtual void delete_text(const UUID &uu) = 0;
 
+    virtual class Table *insert_table(const UUID &uu) = 0;
+    virtual class Table *get_table(const UUID &uu) = 0;
+    virtual void delete_table(const UUID &uu) = 0;
+
     virtual class Polygon *insert_polygon(const UUID &uu) = 0;
     virtual class Polygon *get_polygon(const UUID &uu) = 0;
     virtual void delete_polygon(const UUID &uu) = 0;

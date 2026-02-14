@@ -22,6 +22,7 @@ public:
 protected:
     std::map<UUID, Polygon> *get_polygon_map() override;
     std::map<UUID, Text> *get_text_map() override;
+    std::map<UUID, Table> *get_table_map() override;
     std::map<UUID, Line> *get_line_map() override;
     std::map<UUID, Dimension> *get_dimension_map() override;
     std::map<UUID, Arc> *get_arc_map() override;
