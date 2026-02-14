@@ -52,6 +52,13 @@ Sheet::Sheet(const UUID &uu, const json &j, Block &block, IPool &pool, IBlockSym
             load_and_log(texts, ObjectType::TEXT, std::forward_as_tuple(u, it.value()), Logger::Domain::SCHEMATIC);
         }
     }
+    if (j.count("tables")) {
+        const json &o = j["tables"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            load_and_log(tables, ObjectType::TABLE, std::forward_as_tuple(u, it.value()), Logger::Domain::SCHEMATIC);
+        }
+    }
     {
         const json &o = j["net_labels"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -827,6 +834,10 @@ json Sheet::serialize() const
     j["texts"] = json::object();
     for (const auto &it : texts) {
         j["texts"][(std::string)it.first] = it.second.serialize();
+    }
+    j["tables"] = json::object();
+    for (const auto &it : tables) {
+        j["tables"][(std::string)it.first] = it.second.serialize();
     }
     j["net_labels"] = json::object();
     for (const auto &it : net_labels) {

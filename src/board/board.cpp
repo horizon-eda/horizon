@@ -43,7 +43,7 @@ const LutEnumStr<Board::OutputFormat> Board::output_format_lut = {
         {"odb", Board::OutputFormat::ODB},
 };
 
-static const unsigned int app_version = 22;
+static const unsigned int app_version = 23;
 
 unsigned int Board::get_app_version()
 {
@@ -155,6 +155,13 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool, const st
             auto u = UUID(it.key());
             if (!texts_skip.count(u))
                 load_and_log(texts, ObjectType::TEXT, std::forward_as_tuple(u, it.value()), Logger::Domain::BOARD);
+        }
+    }
+    if (j.count("tables")) {
+        const json &o = j["tables"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            load_and_log(tables, ObjectType::TABLE, std::forward_as_tuple(u, it.value()), Logger::Domain::BOARD);
         }
     }
     if (j.count("lines")) {
@@ -377,16 +384,16 @@ const std::map<int, Layer> &Board::get_layers() const
 
 Board::Board(const Board &brd, CopyMode copy_mode)
     : layers(brd.layers), uuid(brd.uuid), block(brd.block), name(brd.name), polygons(brd.polygons), holes(brd.holes),
-      junctions(brd.junctions), tracks(brd.tracks), texts(brd.texts), lines(brd.lines), arcs(brd.arcs),
-      planes(brd.planes), keepouts(brd.keepouts), dimensions(brd.dimensions), connection_lines(brd.connection_lines),
-      included_boards(brd.included_boards), board_panels(brd.board_panels), pictures(brd.pictures), decals(brd.decals),
-      net_ties(brd.net_ties), height_restrictions(brd.height_restrictions), warnings(brd.warnings),
-      output_format(brd.output_format), rules(brd.rules), gerber_output_settings(brd.gerber_output_settings),
-      odb_output_settings(brd.odb_output_settings), grid_settings(brd.grid_settings), airwires(brd.airwires),
-      stackup(brd.stackup), colors(brd.colors), pdf_export_settings(brd.pdf_export_settings),
-      step_export_settings(brd.step_export_settings), pnp_export_settings(brd.pnp_export_settings),
-      version(brd.version), board_directory(brd.board_directory), n_inner_layers(brd.n_inner_layers),
-      user_layers(brd.user_layers)
+      junctions(brd.junctions), tracks(brd.tracks), texts(brd.texts), tables(brd.tables), lines(brd.lines),
+      arcs(brd.arcs), planes(brd.planes), keepouts(brd.keepouts), dimensions(brd.dimensions),
+      connection_lines(brd.connection_lines), included_boards(brd.included_boards), board_panels(brd.board_panels),
+      pictures(brd.pictures), decals(brd.decals), net_ties(brd.net_ties), height_restrictions(brd.height_restrictions),
+      warnings(brd.warnings), output_format(brd.output_format), rules(brd.rules),
+      gerber_output_settings(brd.gerber_output_settings), odb_output_settings(brd.odb_output_settings),
+      grid_settings(brd.grid_settings), airwires(brd.airwires), stackup(brd.stackup), colors(brd.colors),
+      pdf_export_settings(brd.pdf_export_settings), step_export_settings(brd.step_export_settings),
+      pnp_export_settings(brd.pnp_export_settings), version(brd.version), board_directory(brd.board_directory),
+      n_inner_layers(brd.n_inner_layers), user_layers(brd.user_layers)
 {
     if (copy_mode == CopyMode::DEEP) {
         packages = brd.packages;
@@ -1309,6 +1316,10 @@ json Board::serialize() const
     j["texts"] = json::object();
     for (const auto &it : texts) {
         j["texts"][(std::string)it.first] = it.second.serialize();
+    }
+    j["tables"] = json::object();
+    for (const auto &it : tables) {
+        j["tables"][(std::string)it.first] = it.second.serialize();
     }
     j["lines"] = json::object();
     for (const auto &it : lines) {

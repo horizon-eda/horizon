@@ -103,6 +103,8 @@
 #include "tools/tool_paste_placement.hpp"
 #include "tools/tool_paste_part.hpp"
 #include "tools/tool_add_height_restriction.hpp"
+#include "tools/tool_edit_table.hpp"
+#include "tools/tool_place_table.hpp"
 
 namespace horizon {
 
@@ -155,6 +157,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     case ToolID::PLACE_TEXT:
     case ToolID::ADD_TEXT:
         return std::make_unique<ToolPlaceText>(this, tool_id);
+
+    case ToolID::PLACE_TABLE:
+        return std::make_unique<ToolPlaceTable>(this, tool_id);
 
     case ToolID::PLACE_NET_LABEL:
         return std::make_unique<ToolPlaceNetLabel>(this, tool_id);
@@ -453,6 +458,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::MERGE_DUPLICATE_JUNCTIONS:
         return std::make_unique<ToolMergeDuplicateJunctions>(this, tool_id);
+
+    case ToolID::EDIT_TABLE:
+        return std::make_unique<ToolEditTable>(this, tool_id);
 
     case ToolID::EDIT_TEXT:
         return std::make_unique<ToolEditText>(this, tool_id);

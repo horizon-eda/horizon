@@ -31,6 +31,7 @@
 #include "common/grid_settings.hpp"
 #include "board_net_tie.hpp"
 #include "height_restriction.hpp"
+#include "common/table.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -104,6 +105,7 @@ public:
     std::map<UUID, Track> tracks;
     std::map<UUID, Via> vias;
     std::map<UUID, Text> texts;
+    std::map<UUID, Table> tables;
     std::map<UUID, Line> lines;
     std::map<UUID, Arc> arcs;
     std::map<UUID, Plane> planes;

@@ -238,6 +238,18 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
             selection.emplace(u, ObjectType::TEXT);
         }
     }
+    if (j.count("tables") && doc.r->has_object_type(ObjectType::TABLE)) {
+        const json &o = j["tables"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID::random();
+            text_xlat.emplace(it.key(), u);
+            auto x = doc.r->insert_table(u);
+            *x = Table(u, it.value());
+            transform(x->placement, ObjectType::TABLE);
+            fix_layer(x->layer);
+            selection.emplace(u, ObjectType::TABLE);
+        }
+    }
     if (j.count("dimensions") && doc.r->has_object_type(ObjectType::DIMENSION)) {
         const json &o = j["dimensions"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {

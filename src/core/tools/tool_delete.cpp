@@ -326,6 +326,9 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
         case ObjectType::TEXT:
             doc.r->delete_text(it.uuid);
             break;
+        case ObjectType::TABLE:
+            doc.r->delete_table(it.uuid);
+            break;
         case ObjectType::POLYGON_VERTEX: {
             Polygon *poly = doc.r->get_polygon(it.uuid);
             poly->vertices.at(it.vertex).remove = true;

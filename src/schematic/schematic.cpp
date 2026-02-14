@@ -50,7 +50,7 @@ json Schematic::Annotation::serialize() const
     return j;
 }
 
-static const unsigned int app_version = 9;
+static const unsigned int app_version = 10;
 
 unsigned int Schematic::get_app_version()
 {
