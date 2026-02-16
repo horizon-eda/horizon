@@ -23,6 +23,8 @@ ToolResponse ToolPlaceTable::begin(const ToolArgs &args)
     imp->tool_bar_set_actions({
             {InToolActionID::LMB},
             {InToolActionID::RMB},
+            {InToolActionID::MIRROR},
+            {InToolActionID::ROTATE},
     });
 
     auto dia = imp->dialogs.show_edit_table_window(*temp, false);
@@ -56,6 +58,10 @@ ToolResponse ToolPlaceTable::update(const ToolArgs &args)
         case InToolActionID::RMB:
         case InToolActionID::CANCEL:
             return finish();
+
+        case InToolActionID::ROTATE:
+            move_mirror_or_rotate(temp->placement.shift, args.action == InToolActionID::ROTATE);
+            break;
 
         default:;
         }

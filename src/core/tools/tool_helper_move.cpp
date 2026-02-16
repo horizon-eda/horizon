@@ -264,6 +264,22 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
             }
         } break;
 
+        case ObjectType::TABLE: {
+            Table *tbl = doc.r->get_table(it.uuid);
+            transform(tbl->placement.shift, center, rotate);
+            if (rotate) {
+                if (tbl->placement.mirror) {
+                    tbl->placement.inc_angle_deg(90);
+                }
+                else {
+                    tbl->placement.inc_angle_deg(-90);
+                }
+            }
+            else {
+                // mirroring is not supported
+            }
+        } break;
+
         case ObjectType::ARC:
             if (!rotate) {
                 doc.r->get_arc(it.uuid)->reverse();

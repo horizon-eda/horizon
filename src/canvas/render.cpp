@@ -803,6 +803,8 @@ void Canvas::render(const Text &text, bool interactive, ColorP co)
 
 void Canvas::render(const Table &table, bool interactive, ColorP co)
 {
+    const bool rev = layer_provider.get_layers().at(table.layer).reverse;
+
     transform_save();
     transform.accumulate(table.placement);
 
@@ -813,15 +815,15 @@ void Canvas::render(const Table &table, bool interactive, ColorP co)
     img_auto_line = img_mode;
 
     uint64_t line_width = table.get_line_width();
-    float total_width = layout.total_width;
-    float total_height = layout.total_height;
+    float total_width = rev ? -layout.total_width : layout.total_width;
+    float total_height = -layout.total_height;
 
     // draw outer border
     {
         draw_line({0, 0}, {total_width, 0}, co, table.layer, true, line_width);
-        draw_line({total_width, 0}, {total_width, -total_height}, co, table.layer, true, line_width);
-        draw_line({total_width, -total_height}, {0, -total_height}, co, table.layer, true, line_width);
-        draw_line({0, -total_height}, {0, 0}, co, table.layer, true, line_width);
+        draw_line({total_width, 0}, {total_width, total_height}, co, table.layer, true, line_width);
+        draw_line({total_width, total_height}, {0, total_height}, co, table.layer, true, line_width);
+        draw_line({0, total_height}, {0, 0}, co, table.layer, true, line_width);
     }
 
     // draw horizontal grid lines
@@ -835,10 +837,13 @@ void Canvas::render(const Table &table, bool interactive, ColorP co)
 
     // draw vertical grid lines
     {
-        float x = layout.col_widths[0];
+        float x = rev ? -layout.col_widths[0] : layout.col_widths[0];
         for (size_t c = 1; c < table.get_n_columns(); c++) {
-            draw_line({x, 0}, {x, -total_height}, co, table.layer, true, line_width);
-            x += layout.col_widths[c];
+            draw_line({x, 0}, {x, total_height}, co, table.layer, true, line_width);
+            if (rev)
+                x -= layout.col_widths[c];
+            else
+                x += layout.col_widths[c];
         }
     }
 
@@ -850,10 +855,14 @@ void Canvas::render(const Table &table, bool interactive, ColorP co)
         opts.width = line_width;
         opts.font = table.get_font();
         opts.allow_upside_down = true;
+        opts.flip = rev;
 
         auto &cells = table.get_cells();
         for (size_t idx = 0; idx < cells.size(); idx++) {
-            auto pos = transform.transform(layout.text_positions[idx]);
+            auto textpos = layout.text_positions[idx];
+            if (rev)
+                textpos.x *= -1;
+            auto pos = transform.transform(textpos);
             auto size = static_cast<float>(table.get_text_size());
             draw_text(pos, size, cells[idx], transform.get_angle(), TextOrigin::BASELINE, co, table.layer, opts);
         }
@@ -862,7 +871,7 @@ void Canvas::render(const Table &table, bool interactive, ColorP co)
     object_ref_pop();
 
     if (interactive) {
-        selectables.append(table.uuid, ObjectType::TABLE, {0, 0}, {0, 0}, {total_width, -total_height}, 0, table.layer);
+        selectables.append(table.uuid, ObjectType::TABLE, {0, 0}, {0, 0}, {total_width, total_height}, 0, table.layer);
         targets.emplace_back(table.uuid, ObjectType::TABLE, transform.transform(Coordi(0, 0)), 0, table.layer);
     }
 
