@@ -134,7 +134,8 @@ Table::Layout Table::compute_layout() const
         auto text_width = top_right.x - bottom_left.x + extra_space;
         auto text_height = top_right.y - bottom_left.y + extra_space;
         auto baseline_shift = bottom_left.y;
-        return std::make_tuple(text_width, text_height, baseline_shift);
+        auto left_bearing = bottom_left.x;
+        return std::make_tuple(text_width, text_height, baseline_shift, left_bearing);
     };
 
     Layout layout;
@@ -146,17 +147,20 @@ Table::Layout Table::compute_layout() const
     layout.total_width = 0;
 
     auto baseline_shifts = std::vector<float>(n_rows);
+    auto left_bearings = std::vector<float>(n_rows * n_columns);
 
+    size_t idx = 0;
     for (size_t r = 0; r < n_rows; ++r) {
         for (size_t c = 0; c < n_columns; ++c) {
             auto text = get_cell(r, c);
-            auto [width, height, baseline_shift] = measure_text(text);
+            auto [width, height, baseline_shift, left_bearing] = measure_text(text);
             if (width > layout.col_widths[c])
                 layout.col_widths[c] = width;
             if (height > layout.row_heights[r])
                 layout.row_heights[r] = height;
             if (baseline_shift < baseline_shifts[r])
                 baseline_shifts[r] = baseline_shift;
+            left_bearings[idx++] = left_bearing;
         }
     }
 
@@ -169,12 +173,12 @@ Table::Layout Table::compute_layout() const
     }
 
     auto y = static_cast<float>(padding);
-    size_t idx = 0;
+    idx = 0;
     for (size_t r = 0; r < n_rows; r++) {
         y -= layout.row_heights[r];
         auto x = static_cast<float>(padding);
         for (size_t c = 0; c < n_columns; c++) {
-            auto pos = Coordf{x + line_width, y + line_width / 2 - baseline_shifts[r]};
+            auto pos = Coordf{x + line_width / 2 - left_bearings[idx], y + line_width / 2 - baseline_shifts[r]};
             layout.text_positions[idx++] = pos;
             x += layout.col_widths[c];
         }
