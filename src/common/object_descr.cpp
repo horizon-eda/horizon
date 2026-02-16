@@ -428,8 +428,9 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                             {static_cast<int>(TextData::Font::SCRIPT_SIMPLEX), "Script Simplex"},
                             {static_cast<int>(TextData::Font::SCRIPT_COMPLEX), "Script Complex"},
                     }}},
-                  {ObjectProperty::ID::SIZE, {ObjectProperty::Type::DIM, "Text Size", 5}},
-                  {ObjectProperty::ID::WIDTH, {ObjectProperty::Type::DIM, "Line Width", 6}},
+                  {ObjectProperty::ID::SIZE, {ObjectProperty::Type::LENGTH, "Text Size", 5}},
+                  {ObjectProperty::ID::WIDTH, {ObjectProperty::Type::LENGTH, "Line Width", 6}},
+                  {ObjectProperty::ID::PADDING, {ObjectProperty::Type::LENGTH, "Cell Padding", 7}},
           }}},
 };
 } // namespace horizon

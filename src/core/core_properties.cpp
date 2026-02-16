@@ -138,6 +138,10 @@ bool Core::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
             dynamic_cast<PropertyValueInt &>(value).value = table->get_text_size();
             return true;
 
+        case ObjectProperty::ID::PADDING:
+            dynamic_cast<PropertyValueInt &>(value).value = table->get_padding();
+            return true;
+
         default:
             return false;
         }
@@ -339,6 +343,10 @@ bool Core::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
 
         case ObjectProperty::ID::SIZE:
             table->set_text_size(dynamic_cast<const PropertyValueInt &>(value).value);
+            break;
+
+        case ObjectProperty::ID::PADDING:
+            table->set_padding(dynamic_cast<const PropertyValueInt &>(value).value);
             break;
 
         default:
