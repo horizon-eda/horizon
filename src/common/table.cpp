@@ -31,21 +31,21 @@ Table::Table(const UUID &uu) : uuid(uu)
     resize(n_rows, n_columns);
 }
 
-std::string Table::get_cell(int row, int col) const
+std::string Table::get_cell(size_t row, size_t col) const
 {
     return get_cell(row * n_columns + col);
 }
 
-std::string Table::get_cell(int index) const
+std::string Table::get_cell(size_t index) const
 {
-    if (index < 0 || index >= cells.size())
+    if (index >= cells.size())
         return "?";
     return cells[index];
 }
 
-void Table::set_cell(int row, int col, const std::string &text)
+void Table::set_cell(size_t row, size_t col, const std::string &text)
 {
-    if (row < 0 || row >= n_rows || col < 0 || col >= n_columns)
+    if (row >= n_rows || col >= n_columns)
         return;
     cells[row * n_columns + col] = text;
     cached_layout.reset();
@@ -71,11 +71,11 @@ json Table::serialize() const
     return j;
 }
 
-void Table::resize(int rows, int cols)
+void Table::resize(size_t rows, size_t cols)
 {
     std::vector<std::string> new_cells(rows * cols);
-    for (unsigned int r = 0; r < std::min(rows, n_rows); r++) {
-        for (unsigned int c = 0; c < std::min(cols, n_columns); c++) {
+    for (size_t r = 0; r < std::min(rows, n_rows); r++) {
+        for (size_t c = 0; c < std::min(cols, n_columns); c++) {
             if (r * n_columns + c < cells.size()) {
                 new_cells[r * cols + c] = cells[r * n_columns + c];
             }
@@ -89,27 +89,27 @@ void Table::resize(int rows, int cols)
     cached_layout.reset();
 }
 
-void Table::set_text_size(int64_t size)
+void Table::set_text_size(int64_t val)
 {
-    this->text_size = size;
+    text_size = val;
     cached_layout.reset();
 }
 
-void Table::set_line_width(int64_t width)
+void Table::set_line_width(int64_t val)
 {
-    this->line_width = width;
+    line_width = val;
     cached_layout.reset();
 }
 
-void Table::set_padding(int64_t padding)
+void Table::set_padding(int64_t val)
 {
-    this->padding = padding;
+    padding = val;
     cached_layout.reset();
 }
 
-void Table::set_font(TextData::Font font)
+void Table::set_font(TextData::Font val)
 {
-    this->font = font;
+    font = val;
     cached_layout.reset();
 }
 
@@ -154,8 +154,8 @@ Table::Layout Table::compute_layout() const
 
     auto baseline_shifts = std::vector<float>(n_rows);
 
-    for (int r = 0; r < n_rows; ++r) {
-        for (int c = 0; c < n_columns; ++c) {
+    for (size_t r = 0; r < n_rows; ++r) {
+        for (size_t c = 0; c < n_columns; ++c) {
             auto text = get_cell(r, c);
             auto [width, height, baseline_shift] = measure_text(text);
             if (width > layout.col_widths[c])
@@ -167,20 +167,20 @@ Table::Layout Table::compute_layout() const
         }
     }
 
-    for (int r = 0; r < n_rows; ++r) {
+    for (size_t r = 0; r < n_rows; ++r) {
         layout.total_height += static_cast<int64_t>(layout.row_heights[r]);
     }
 
-    for (int c = 0; c < n_columns; ++c) {
+    for (size_t c = 0; c < n_columns; ++c) {
         layout.total_width += static_cast<int64_t>(layout.col_widths[c]);
     }
 
     auto y = static_cast<float>(padding);
-    int idx = 0;
-    for (int r = 0; r < n_rows; r++) {
+    size_t idx = 0;
+    for (size_t r = 0; r < n_rows; r++) {
         y -= layout.row_heights[r];
         auto x = static_cast<float>(padding);
-        for (int c = 0; c < n_columns; c++) {
+        for (size_t c = 0; c < n_columns; c++) {
             auto pos = Coordf{x + line_width, y + line_width / 2 - baseline_shifts[r]};
             layout.text_positions[idx++] = pos;
             x += layout.col_widths[c];

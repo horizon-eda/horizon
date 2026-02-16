@@ -831,7 +831,7 @@ void Canvas::render(const Table &table, bool interactive, ColorP co)
     {
         auto &row_heights = layout.row_heights;
         float y = -row_heights[0];
-        for (int r = 1; r < n_rows; r++) {
+        for (size_t r = 1; r < n_rows; r++) {
             draw_line({0, y}, {total_width, y}, co, table.layer, true, line_width);
             y -= row_heights[r];
         }
@@ -841,7 +841,7 @@ void Canvas::render(const Table &table, bool interactive, ColorP co)
     {
         auto &col_widths = layout.col_widths;
         float x = col_widths[0];
-        for (int c = 1; c < n_cols; c++) {
+        for (size_t c = 1; c < n_cols; c++) {
             draw_line({x, 0}, {x, -total_height}, co, table.layer, true, line_width);
             x += col_widths[c];
         }

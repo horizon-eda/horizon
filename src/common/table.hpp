@@ -24,20 +24,20 @@ public:
     Placement placement;
     int layer = 0;
 
-    std::string get_cell(int row, int col) const;
-    std::string get_cell(int index) const;
-    void set_cell(int row, int col, const std::string &text);
+    std::string get_cell(size_t row, size_t col) const;
+    std::string get_cell(size_t index) const;
+    void set_cell(size_t row, size_t col, const std::string &text);
 
     UUID get_uuid() const;
     json serialize() const;
-    void resize(int rows, int cols);
+    void resize(size_t rows, size_t cols);
 
-    int get_n_rows() const
+    size_t get_n_rows() const
     {
         return n_rows;
     }
 
-    int get_n_columns() const
+    size_t get_n_columns() const
     {
         return n_columns;
     }
@@ -62,20 +62,20 @@ public:
         return font;
     }
 
-    void set_text_size(int64_t size);
-    void set_line_width(int64_t width);
-    void set_padding(int64_t padding);
-    void set_font(TextData::Font font);
+    void set_text_size(int64_t val);
+    void set_line_width(int64_t val);
+    void set_padding(int64_t val);
+    void set_font(TextData::Font val);
 
     void assign_from(const Table &rhs);
 
-    const Layout& get_layout() const;
+    const Layout &get_layout() const;
 
 private:
     mutable std::optional<Layout> cached_layout;
 
-    int n_rows = 2;
-    int n_columns = 2;
+    size_t n_rows = 2;
+    size_t n_columns = 2;
     int64_t text_size = 1.5_mm;
     int64_t line_width = 0_mm;
     int64_t padding = 0.5_mm;

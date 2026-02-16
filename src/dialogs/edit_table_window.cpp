@@ -159,8 +159,8 @@ void EditTableWindow::rebuild_cell_grid()
         cell_grid->remove(*child);
     }
 
-    for (int r = 0; r < table.get_n_rows(); r++) {
-        for (int c = 0; c < table.get_n_columns(); c++) {
+    for (size_t r = 0; r < table.get_n_rows(); r++) {
+        for (size_t c = 0; c < table.get_n_columns(); c++) {
             auto entry = Gtk::manage(new TextEditor(TextEditor::Lines::MULTI));
             entry->set_text(table.get_cell(r, c), TextEditor::Select::NO);
             entry->set_hexpand(true);
