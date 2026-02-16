@@ -155,6 +155,20 @@ std::list<Searcher::SearchResult> SearcherSchematic::search(const Searcher::Sear
                 }
             }
         }
+        if (q.types.count(Type::TABLE)) {
+            for (const auto &[uu, table] : it.sheet.tables) {
+                for (auto &cell : table.get_cells()) {
+                    if (q.matches(cell)) {
+                        results.emplace_back(Type::TABLE, uu);
+                        auto &x = results.back();
+                        x.location = table.placement.shift;
+                        x.sheet = it.sheet.uuid;
+                        x.instance_path = it.instance_path;
+                        x.selectable = true;
+                    }
+                }
+            }
+        }
     };
     sort_search_results_schematic(results, q);
 
@@ -164,7 +178,7 @@ std::set<Searcher::Type> SearcherSchematic::get_types() const
 {
     return {
             Type::TEXT,       Type::SYMBOL_REFDES, Type::SYMBOL_MPN, Type::NET_LABEL,
-            Type::BUS_RIPPER, Type::POWER_SYMBOL,  Type::SYMBOL_PIN,
+            Type::BUS_RIPPER, Type::POWER_SYMBOL,  Type::SYMBOL_PIN, Type::TABLE,
     };
 }
 
@@ -191,6 +205,10 @@ std::string SearcherSchematic::get_display_name(const Searcher::SearchResult &r)
 
     case Type::TEXT:
         return sheet.texts.at(uu).text;
+
+    case Type::TABLE:
+        // FIXME: find more meaningful display text
+        return "Table";
 
     case Type::NET_LABEL: {
         auto &ju = *sheet.net_labels.at(uu).junction;

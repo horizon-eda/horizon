@@ -18,7 +18,8 @@ public:
         BUS_RIPPER,
         PAD,
         PACKAGE_REFDES,
-        PACKAGE_MPN
+        PACKAGE_MPN,
+        TABLE,
     };
 
     class TypeInfo {

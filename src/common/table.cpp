@@ -6,8 +6,6 @@
 
 #include <iostream>
 
-// TODO: searching
-
 namespace horizon {
 
 Table::Table(const UUID &uu, const json &j)
@@ -32,14 +30,10 @@ Table::Table(const UUID &uu) : uuid(uu)
 
 std::string Table::get_cell(size_t row, size_t col) const
 {
-    return get_cell(row * n_columns + col);
-}
-
-std::string Table::get_cell(size_t index) const
-{
-    if (index >= cells.size())
+    auto idx = row * n_columns + col;
+    if (idx >= cells.size())
         return "?";
-    return cells[index];
+    return cells[idx];
 }
 
 void Table::set_cell(size_t row, size_t col, const std::string &text)

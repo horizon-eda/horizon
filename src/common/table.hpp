@@ -25,7 +25,6 @@ public:
     int layer = 0;
 
     std::string get_cell(size_t row, size_t col) const;
-    std::string get_cell(size_t index) const;
     void set_cell(size_t row, size_t col, const std::string &text);
 
     UUID get_uuid() const;
@@ -70,6 +69,8 @@ public:
     void assign_from(const Table &rhs);
 
     const Layout &get_layout() const;
+
+    const std::vector<std::string>& get_cells() const { return cells;}
 
 private:
     mutable std::optional<Layout> cached_layout;

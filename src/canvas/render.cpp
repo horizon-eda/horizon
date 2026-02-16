@@ -854,10 +854,11 @@ void Canvas::render(const Table &table, bool interactive, ColorP co)
     opts.font = table.get_font();
 
     // cell contents
-    for (int idx = 0; idx < n_rows * n_cols; idx++) {
+    auto &cells = table.get_cells();
+    for (size_t idx = 0; idx < cells.size(); idx++) {
         auto pos = transform.transform(layout.text_positions[idx]);
-        draw_text(pos, table.get_text_size(), table.get_cell(idx), transform.get_angle(), TextOrigin::BASELINE, co,
-                  table.layer, opts);
+        draw_text(pos, table.get_text_size(), cells[idx], transform.get_angle(), TextOrigin::BASELINE, co, table.layer,
+                  opts);
     }
 
     object_ref_pop();
