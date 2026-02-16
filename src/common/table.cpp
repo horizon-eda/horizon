@@ -82,19 +82,19 @@ void Table::resize(size_t rows, size_t cols)
     cached_layout.reset();
 }
 
-void Table::set_text_size(int64_t val)
+void Table::set_text_size(uint64_t val)
 {
     text_size = val;
     cached_layout.reset();
 }
 
-void Table::set_line_width(int64_t val)
+void Table::set_line_width(uint64_t val)
 {
     line_width = val;
     cached_layout.reset();
 }
 
-void Table::set_padding(int64_t val)
+void Table::set_padding(uint64_t val)
 {
     padding = val;
     cached_layout.reset();
@@ -161,11 +161,11 @@ Table::Layout Table::compute_layout() const
     }
 
     for (size_t r = 0; r < n_rows; ++r) {
-        layout.total_height += static_cast<int64_t>(layout.row_heights[r]);
+        layout.total_height += layout.row_heights[r];
     }
 
     for (size_t c = 0; c < n_columns; ++c) {
-        layout.total_width += static_cast<int64_t>(layout.col_widths[c]);
+        layout.total_width += layout.col_widths[c];
     }
 
     auto y = static_cast<float>(padding);

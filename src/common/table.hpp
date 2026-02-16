@@ -9,8 +9,8 @@ namespace horizon {
 class Table {
 public:
     struct Layout {
-        int64_t total_width = 0.0;
-        int64_t total_height = 0.0;
+        float total_width = 0.0;
+        float total_height = 0.0;
 
         std::vector<float> row_heights;
         std::vector<float> col_widths;
@@ -41,17 +41,17 @@ public:
         return n_columns;
     }
 
-    int64_t get_text_size() const
+    uint64_t get_text_size() const
     {
         return text_size;
     }
 
-    int64_t get_line_width() const
+    uint64_t get_line_width() const
     {
         return line_width;
     }
 
-    int64_t get_padding() const
+    uint64_t get_padding() const
     {
         return padding;
     }
@@ -61,9 +61,9 @@ public:
         return font;
     }
 
-    void set_text_size(int64_t val);
-    void set_line_width(int64_t val);
-    void set_padding(int64_t val);
+    void set_text_size(uint64_t val);
+    void set_line_width(uint64_t val);
+    void set_padding(uint64_t val);
     void set_font(TextData::Font val);
 
     void assign_from(const Table &rhs);
@@ -77,9 +77,9 @@ private:
 
     size_t n_rows = 2;
     size_t n_columns = 2;
-    int64_t text_size = 1.5_mm;
-    int64_t line_width = 0_mm;
-    int64_t padding = 0.5_mm;
+    uint64_t text_size = 1.5_mm;
+    uint64_t line_width = 0_mm;
+    uint64_t padding = 0.5_mm;
     TextData::Font font = TextData::Font::SIMPLEX;
     std::vector<std::string> cells;
 
