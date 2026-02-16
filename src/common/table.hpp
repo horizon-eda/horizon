@@ -38,7 +38,7 @@ public:
 
     size_t get_n_columns() const
     {
-        return n_columns;
+        return n_cols;
     }
 
     uint64_t get_text_size() const
@@ -70,13 +70,16 @@ public:
 
     const Layout &get_layout() const;
 
-    const std::vector<std::string>& get_cells() const { return cells;}
+    const std::vector<std::string> &get_cells() const
+    {
+        return cells;
+    }
 
 private:
     mutable std::optional<Layout> cached_layout;
 
     size_t n_rows = 2;
-    size_t n_columns = 2;
+    size_t n_cols = 2;
     uint64_t text_size = 1.5_mm;
     uint64_t line_width = 0_mm;
     uint64_t padding = 0.5_mm;
