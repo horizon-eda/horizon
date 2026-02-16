@@ -8,6 +8,15 @@ namespace horizon {
 
 class Table {
 public:
+    struct Layout {
+        int64_t total_width = 0.0;
+        int64_t total_height = 0.0;
+
+        std::vector<float> row_heights;
+        std::vector<float> col_widths;
+        std::vector<Coordf> text_positions;
+    };
+
     Table(const UUID &uu, const nlohmann::json &j);
     Table(const UUID &uu);
 
@@ -16,16 +25,12 @@ public:
     int layer = 0;
 
     std::string get_cell(int row, int col) const;
+    std::string get_cell(int index) const;
     void set_cell(int row, int col, const std::string &text);
 
     UUID get_uuid() const;
     json serialize() const;
     void resize(int rows, int cols);
-    std::pair<Coordi, Coordi> get_bbox() const;
-
-    const std::vector<float> &get_row_heights() const;
-    const std::vector<float> &get_col_widths() const;
-    const std::vector<float> &get_baseline_shifts() const;
 
     int get_n_rows() const
     {
@@ -64,17 +69,10 @@ public:
 
     void assign_from(const Table &rhs);
 
-    void update_layout();
+    const Layout& get_layout() const;
 
 private:
-    bool layout_needs_update = false;
-
-    int64_t total_width = 0.0;
-    int64_t total_height = 0.0;
-
-    std::vector<float> row_heights;
-    std::vector<float> col_widths;
-    std::vector<float> baseline_shifts;
+    mutable std::optional<Layout> cached_layout;
 
     int n_rows = 2;
     int n_columns = 2;
@@ -83,5 +81,7 @@ private:
     int64_t padding = 0.5_mm;
     TextData::Font font = TextData::Font::SIMPLEX;
     std::vector<std::string> cells;
+
+    Layout compute_layout() const;
 };
 } // namespace horizon

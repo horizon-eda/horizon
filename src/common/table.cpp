@@ -4,6 +4,11 @@
 #include "util/text_renderer.hpp"
 #include "util/uuid.hpp"
 
+#include <iostream>
+
+// TODO: searching
+// TODO: copy & paste
+
 namespace horizon {
 
 Table::Table(const UUID &uu, const json &j)
@@ -19,7 +24,6 @@ Table::Table(const UUID &uu, const json &j)
             cells[i] = cells_json[i].get<std::string>();
         }
     }
-    layout_needs_update = true;
 }
 
 Table::Table(const UUID &uu) : uuid(uu)
@@ -29,9 +33,14 @@ Table::Table(const UUID &uu) : uuid(uu)
 
 std::string Table::get_cell(int row, int col) const
 {
-    if (row < 0 || row >= n_rows || col < 0 || col >= n_columns)
-        return "";
-    return cells[row * n_columns + col];
+    return get_cell(row * n_columns + col);
+}
+
+std::string Table::get_cell(int index) const
+{
+    if (index < 0 || index >= cells.size())
+        return "?";
+    return cells[index];
 }
 
 void Table::set_cell(int row, int col, const std::string &text)
@@ -39,7 +48,7 @@ void Table::set_cell(int row, int col, const std::string &text)
     if (row < 0 || row >= n_rows || col < 0 || col >= n_columns)
         return;
     cells[row * n_columns + col] = text;
-    layout_needs_update = true;
+    cached_layout.reset();
 }
 
 UUID Table::get_uuid() const
@@ -77,51 +86,31 @@ void Table::resize(int rows, int cols)
     n_rows = rows;
     n_columns = cols;
 
-    layout_needs_update = true;
-}
-
-std::pair<Coordi, Coordi> Table::get_bbox() const
-{
-    return {{0, 0}, {total_width, -total_height}};
-}
-
-const std::vector<float> &Table::get_row_heights() const
-{
-    return row_heights;
-}
-
-const std::vector<float> &Table::get_col_widths() const
-{
-    return col_widths;
-}
-
-const std::vector<float> &Table::get_baseline_shifts() const
-{
-    return baseline_shifts;
+    cached_layout.reset();
 }
 
 void Table::set_text_size(int64_t size)
 {
     this->text_size = size;
-    layout_needs_update = true;
+    cached_layout.reset();
 }
 
 void Table::set_line_width(int64_t width)
 {
     this->line_width = width;
-    layout_needs_update = true;
+    cached_layout.reset();
 }
 
 void Table::set_padding(int64_t padding)
 {
     this->padding = padding;
-    layout_needs_update = true;
+    cached_layout.reset();
 }
 
 void Table::set_font(TextData::Font font)
 {
     this->font = font;
-    layout_needs_update = true;
+    cached_layout.reset();
 }
 
 void Table::assign_from(const Table &rhs)
@@ -135,10 +124,9 @@ void Table::assign_from(const Table &rhs)
     cells = rhs.cells;
 }
 
-void Table::update_layout()
+Table::Layout Table::compute_layout() const
 {
-    if (!layout_needs_update)
-        return;
+    std::cout << "compute layout" << std::endl;
 
     TextRenderer tr;
     TextRenderer::Options opts;
@@ -156,35 +144,57 @@ void Table::update_layout()
         return std::make_tuple(text_width, text_height, baseline_shift);
     };
 
-    row_heights = std::vector<float>(n_rows);
-    col_widths = std::vector<float>(n_columns);
-    baseline_shifts = std::vector<float>(n_rows);
+    Layout layout;
+    layout.row_heights = std::vector<float>(n_rows);
+    layout.col_widths = std::vector<float>(n_columns);
+    layout.text_positions = std::vector<Coordf>(n_rows * n_columns);
 
-    total_height = 0;
-    total_width = 0;
+    layout.total_height = 0;
+    layout.total_width = 0;
+
+    auto baseline_shifts = std::vector<float>(n_rows);
 
     for (int r = 0; r < n_rows; ++r) {
         for (int c = 0; c < n_columns; ++c) {
             auto text = get_cell(r, c);
             auto [width, height, baseline_shift] = measure_text(text);
-            if (width > col_widths[c])
-                col_widths[c] = width;
-            if (height > row_heights[r])
-                row_heights[r] = height;
+            if (width > layout.col_widths[c])
+                layout.col_widths[c] = width;
+            if (height > layout.row_heights[r])
+                layout.row_heights[r] = height;
             if (baseline_shift < baseline_shifts[r])
                 baseline_shifts[r] = baseline_shift;
         }
     }
 
     for (int r = 0; r < n_rows; ++r) {
-        total_height += static_cast<int64_t>(row_heights[r]);
+        layout.total_height += static_cast<int64_t>(layout.row_heights[r]);
     }
 
     for (int c = 0; c < n_columns; ++c) {
-        total_width += static_cast<int64_t>(col_widths[c]);
+        layout.total_width += static_cast<int64_t>(layout.col_widths[c]);
     }
 
-    layout_needs_update = false;
+    auto y = static_cast<float>(padding);
+    int idx = 0;
+    for (int r = 0; r < n_rows; r++) {
+        y -= layout.row_heights[r];
+        auto x = static_cast<float>(padding);
+        for (int c = 0; c < n_columns; c++) {
+            auto pos = Coordf{x + line_width, y + line_width / 2 - baseline_shifts[r]};
+            layout.text_positions[idx++] = pos;
+            x += layout.col_widths[c];
+        }
+    }
+
+    return layout;
+}
+
+const Table::Layout &Table::get_layout() const
+{
+    if (!cached_layout.has_value())
+        cached_layout = compute_layout();
+    return *cached_layout;
 }
 
 } // namespace horizon
