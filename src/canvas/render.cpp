@@ -806,72 +806,38 @@ void Canvas::render(const Table &table, bool interactive, ColorP co)
     transform_save();
     transform.accumulate(table.placement);
 
-    TextRenderer::Options opts;
-    opts.width = table.line_width;
-    opts.font = table.font;
-
-    auto measure_text = [this, &table, &opts, co](const std::string &text) {
-        TextRenderer::Options measure_opts = opts;
-        measure_opts.draw = false;
-        auto [bottom_left, top_right] =
-                draw_text({0, 0}, table.text_size, text, 0, TextOrigin::BASELINE, co, 0, measure_opts);
-        auto extra_space = static_cast<float>(2 * table.padding + table.line_width);
-        auto text_width = top_right.x - bottom_left.x + extra_space;
-        auto text_height = top_right.y - bottom_left.y + extra_space;
-        auto baseline_shift = bottom_left.y;
-        return std::make_tuple(text_width, text_height, baseline_shift);
-    };
-
-    int n_rows = table.n_rows;
-    int n_cols = table.n_columns;
-
-    std::vector<float> row_heights(n_rows);
-    std::vector<float> col_widths(n_cols);
-    std::vector<float> baseline_shifts(n_rows);
-    float total_height = 0;
-    float total_width = 0;
-
-    // measure cell content and compute sizes
-    {
-        for (int r = 0; r < n_rows; ++r) {
-            for (int c = 0; c < n_cols; ++c) {
-                auto text = table.get_cell(r, c);
-                auto [width, height, baseline_shift] = measure_text(text);
-                if (width > col_widths[c])
-                    col_widths[c] = width;
-                if (height > row_heights[r])
-                    row_heights[r] = height;
-                if (baseline_shift < baseline_shifts[r])
-                    baseline_shifts[r] = baseline_shift;
-            }
-        }
-
-        for (int r = 0; r < n_rows; ++r) {
-            total_height += row_heights[r];
-        }
-
-        for (int c = 0; c < n_cols; ++c) {
-            total_width += col_widths[c];
-        }
-    }
-
     object_ref_push(ObjectType::TABLE, table.uuid);
+
+    const_cast<Table &>(table).update_layout();
+
+    auto bb = table.get_bbox();
+    float total_width = bb.second.x - bb.first.x;
+    float total_height = bb.second.y - bb.first.y;
+
+    auto n_rows = table.get_n_rows();
+    auto n_cols = table.get_n_columns();
+    auto line_width = table.get_line_width();
+    auto padding = table.get_padding();
+
+    auto &row_heights = table.get_row_heights();
+    auto &col_widths = table.get_col_widths();
+    auto &baseline_shifts = table.get_baseline_shifts();
 
     img_auto_line = img_mode;
 
     // draw outer border
     {
-        draw_line({0, 0}, {total_width, 0}, co, table.layer, true, table.line_width);
-        draw_line({total_width, 0}, {total_width, -total_height}, co, table.layer, true, table.line_width);
-        draw_line({total_width, -total_height}, {0, -total_height}, co, table.layer, true, table.line_width);
-        draw_line({0, -total_height}, {0, 0}, co, table.layer, true, table.line_width);
+        draw_line({0, 0}, {total_width, 0}, co, table.layer, true, line_width);
+        draw_line({total_width, 0}, {total_width, total_height}, co, table.layer, true, line_width);
+        draw_line({total_width, total_height}, {0, total_height}, co, table.layer, true, line_width);
+        draw_line({0, total_height}, {0, 0}, co, table.layer, true, line_width);
     }
 
     // draw horizontal grid lines
     {
         float y = -row_heights[0];
         for (int r = 1; r < n_rows; r++) {
-            draw_line({0, y}, {total_width, y}, co, table.layer, true, table.line_width);
+            draw_line({0, y}, {total_width, y}, co, table.layer, true, line_width);
             y -= row_heights[r];
         }
     }
@@ -880,24 +846,27 @@ void Canvas::render(const Table &table, bool interactive, ColorP co)
     {
         float x = col_widths[0];
         for (int c = 1; c < n_cols; c++) {
-            draw_line({x, 0}, {x, -total_height}, co, table.layer, true, table.line_width);
+            draw_line({x, 0}, {x, total_height}, co, table.layer, true, line_width);
             x += col_widths[c];
         }
     }
 
     img_auto_line = false;
 
+    TextRenderer::Options opts;
+    opts.width = line_width;
+    opts.font = table.get_font();
+
     // cell contents
     {
-        auto y = static_cast<float>(table.padding);
+        auto y = static_cast<float>(padding);
         for (int r = 0; r < n_rows; r++) {
             y -= row_heights[r];
-            auto x = static_cast<float>(table.padding);
+            auto x = static_cast<float>(padding);
             for (int c = 0; c < n_cols; c++) {
-                auto pos = transform.transform(
-                        Coordf{x + table.line_width, y + table.line_width / 2 - baseline_shifts[r]});
-                draw_text(pos, table.text_size, table.get_cell(r, c), transform.get_angle(), TextOrigin::BASELINE, co,
-                          table.layer, opts);
+                auto pos = transform.transform(Coordf{x + line_width, y + line_width / 2 - baseline_shifts[r]});
+                draw_text(pos, table.get_text_size(), table.get_cell(r, c), transform.get_angle(), TextOrigin::BASELINE,
+                          co, table.layer, opts);
                 x += col_widths[c];
             }
         }
@@ -906,7 +875,7 @@ void Canvas::render(const Table &table, bool interactive, ColorP co)
     object_ref_pop();
 
     if (interactive) {
-        selectables.append(table.uuid, ObjectType::TABLE, {0, 0}, {0, 0}, {total_width, -total_height}, 0, table.layer);
+        selectables.append(table.uuid, ObjectType::TABLE, {0, 0}, bb.first, bb.second, 0, table.layer);
         targets.emplace_back(table.uuid, ObjectType::TABLE, transform.transform(Coordi(0, 0)), 0, table.layer);
     }
 

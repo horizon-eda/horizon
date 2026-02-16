@@ -52,9 +52,9 @@ EditTableWindow::EditTableWindow(Window *parent, ImpInterface *intf, Table &tbl,
     sp_n_rows = Gtk::manage(new Gtk::SpinButton);
     sp_n_rows->set_range(1, 100);
     sp_n_rows->set_increments(1, 5);
-    sp_n_rows->set_value(table.n_rows);
+    sp_n_rows->set_value(table.get_n_rows());
     sp_n_rows->signal_value_changed().connect([this] {
-        table.resize(sp_n_rows->get_value_as_int(), table.n_columns);
+        table.resize(sp_n_rows->get_value_as_int(), table.get_n_columns());
         rebuild_cell_grid();
         emit_event(ToolDataWindow::Event::UPDATE);
     });
@@ -64,9 +64,9 @@ EditTableWindow::EditTableWindow(Window *parent, ImpInterface *intf, Table &tbl,
     sp_n_columns = Gtk::manage(new Gtk::SpinButton);
     sp_n_columns->set_range(1, 100);
     sp_n_columns->set_increments(1, 5);
-    sp_n_columns->set_value(table.n_columns);
+    sp_n_columns->set_value(table.get_n_columns());
     sp_n_columns->signal_value_changed().connect([this] {
-        table.resize(table.n_rows, sp_n_columns->get_value_as_int());
+        table.resize(table.get_n_rows(), sp_n_columns->get_value_as_int());
         rebuild_cell_grid();
         emit_event(ToolDataWindow::Event::UPDATE);
     });
@@ -75,10 +75,10 @@ EditTableWindow::EditTableWindow(Window *parent, ImpInterface *intf, Table &tbl,
 
     sp_padding = Gtk::manage(new SpinButtonDim);
     sp_padding->set_range(0_mm, 100_mm);
-    sp_padding->set_value(table.padding);
+    sp_padding->set_value(table.get_padding());
     sp_padding->set_increments(.01_mm, .001_mm);
     sp_padding->signal_value_changed().connect([this] {
-        table.padding = sp_padding->get_value_as_int();
+        table.set_padding(sp_padding->get_value_as_int());
         emit_event(ToolDataWindow::Event::UPDATE);
     });
     spinbutton_connect_activate(sp_padding, [this] { emit_event(ToolDataWindow::Event::OK); });
@@ -87,9 +87,9 @@ EditTableWindow::EditTableWindow(Window *parent, ImpInterface *intf, Table &tbl,
     sp_text_size = Gtk::manage(new SpinButtonDim);
     sp_text_size->set_hexpand(true);
     sp_text_size->set_range(.01_mm, 100_mm);
-    sp_text_size->set_value(table.text_size);
+    sp_text_size->set_value(table.get_text_size());
     sp_text_size->signal_value_changed().connect([this] {
-        table.text_size = sp_text_size->get_value_as_int();
+        table.set_text_size(sp_text_size->get_value_as_int());
         emit_event(ToolDataWindow::Event::UPDATE);
     });
     spinbutton_connect_activate(sp_text_size, [this] { emit_event(ToolDataWindow::Event::OK); });
@@ -97,10 +97,10 @@ EditTableWindow::EditTableWindow(Window *parent, ImpInterface *intf, Table &tbl,
 
     sp_line_width = Gtk::manage(new SpinButtonDim);
     sp_line_width->set_range(0_mm, 100_mm);
-    sp_line_width->set_value(table.line_width);
+    sp_line_width->set_value(table.get_line_width());
     sp_line_width->set_increments(.01_mm, .001_mm);
     sp_line_width->signal_value_changed().connect([this] {
-        table.line_width = sp_line_width->get_value_as_int();
+        table.set_line_width(sp_line_width->get_value_as_int());
         emit_event(ToolDataWindow::Event::UPDATE);
     });
     spinbutton_connect_activate(sp_line_width, [this] { emit_event(ToolDataWindow::Event::OK); });
@@ -113,9 +113,9 @@ EditTableWindow::EditTableWindow(Window *parent, ImpInterface *intf, Table &tbl,
             combo_font->append(std::to_string(i), name);
         }
     }
-    combo_font->set_active_id(std::to_string(static_cast<int>(table.font)));
+    combo_font->set_active_id(std::to_string(static_cast<int>(table.get_font())));
     combo_font->signal_changed().connect([this] {
-        table.font = static_cast<TextData::Font>(std::stoi(combo_font->get_active_id()));
+        table.set_font(static_cast<TextData::Font>(std::stoi(combo_font->get_active_id())));
         emit_event(ToolDataWindow::Event::UPDATE);
     });
     attach_props_widget("Font", combo_font);
@@ -153,12 +153,14 @@ void EditTableWindow::focus_n_rows()
 
 void EditTableWindow::rebuild_cell_grid()
 {
+    assert(cell_grid != nullptr);
+
     for (auto child : cell_grid->get_children()) {
         cell_grid->remove(*child);
     }
 
-    for (int r = 0; r < table.n_rows; r++) {
-        for (int c = 0; c < table.n_columns; c++) {
+    for (int r = 0; r < table.get_n_rows(); r++) {
+        for (int c = 0; c < table.get_n_columns(); c++) {
             auto entry = Gtk::manage(new TextEditor(TextEditor::Lines::MULTI));
             entry->set_text(table.get_cell(r, c), TextEditor::Select::NO);
             entry->set_hexpand(true);

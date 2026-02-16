@@ -127,15 +127,15 @@ bool Core::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
             return true;
 
         case ObjectProperty::ID::FONT:
-            dynamic_cast<PropertyValueInt &>(value).value = static_cast<int>(table->font);
+            dynamic_cast<PropertyValueInt &>(value).value = static_cast<int>(table->get_font());
             return true;
 
         case ObjectProperty::ID::WIDTH:
-            dynamic_cast<PropertyValueInt &>(value).value = table->line_width;
+            dynamic_cast<PropertyValueInt &>(value).value = table->get_line_width();
             return true;
 
         case ObjectProperty::ID::SIZE:
-            dynamic_cast<PropertyValueInt &>(value).value = table->text_size;
+            dynamic_cast<PropertyValueInt &>(value).value = table->get_text_size();
             return true;
 
         default:
@@ -330,15 +330,15 @@ bool Core::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
             break;
 
         case ObjectProperty::ID::FONT:
-            table->font = static_cast<TextData::Font>(dynamic_cast<const PropertyValueInt &>(value).value);
+            table->set_font(static_cast<TextData::Font>(dynamic_cast<const PropertyValueInt &>(value).value));
             break;
 
         case ObjectProperty::ID::WIDTH:
-            table->line_width = dynamic_cast<const PropertyValueInt &>(value).value;
+            table->set_line_width(dynamic_cast<const PropertyValueInt &>(value).value);
             break;
 
         case ObjectProperty::ID::SIZE:
-            table->text_size = dynamic_cast<const PropertyValueInt &>(value).value;
+            table->set_text_size(dynamic_cast<const PropertyValueInt &>(value).value);
             break;
 
         default:

@@ -48,15 +48,9 @@ ToolResponse ToolPlaceTable::update(const ToolArgs &args)
 
             temp->placement = old_table->placement;
             temp->placement.shift = args.coords;
-
             temp->layer = old_table->layer;
-            temp->n_rows = old_table->n_rows;
-            temp->n_columns = old_table->n_columns;
-            temp->text_size = old_table->text_size;
-            temp->line_width = old_table->line_width;
-            temp->padding = old_table->padding;
-            temp->font = old_table->font;
-            temp->cells = old_table->cells;
+
+            temp->assign_from(*old_table);
 
             selection = {{temp->uuid, ObjectType::TABLE}};
         } break;
