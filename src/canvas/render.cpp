@@ -864,7 +864,8 @@ void Canvas::render(const Table &table, bool interactive, ColorP co)
                 textpos.x *= -1;
             auto pos = transform.transform(textpos);
             auto size = static_cast<float>(table.get_text_size());
-            draw_text(pos, size, cells[idx], transform.get_angle(), TextOrigin::BASELINE, co, table.layer, opts);
+            int angle = rev ? -transform.get_angle() : transform.get_angle();
+            draw_text(pos, size, cells[idx], angle, TextOrigin::BASELINE, co, table.layer, opts);
         }
     }
 
