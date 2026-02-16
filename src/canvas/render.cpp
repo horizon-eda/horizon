@@ -813,11 +813,13 @@ void Canvas::render(const Table &table, bool interactive, ColorP co)
     auto measure_text = [this, &table, &opts, co](const std::string &text) {
         TextRenderer::Options measure_opts = opts;
         measure_opts.draw = false;
-        auto [top_left, bottom_right] =
-                draw_text({0, 0}, table.text_size, text, 0, TextOrigin::BOTTOM, co, 0, measure_opts);
-        auto text_width = bottom_right.x - top_left.x;
-        auto text_height = bottom_right.y - top_left.y;
-        return std::make_pair(text_width + 2 * table.padding, text_height + 2 * table.padding);
+        auto [bottom_left, top_right] =
+                draw_text({0, 0}, table.text_size, text, 0, TextOrigin::BASELINE, co, 0, measure_opts);
+        auto extra_space = static_cast<float>(2 * table.padding + table.line_width);
+        auto text_width = top_right.x - bottom_left.x + extra_space;
+        auto text_height = top_right.y - bottom_left.y + extra_space;
+        auto baseline_shift = bottom_left.y;
+        return std::make_tuple(text_width, text_height, baseline_shift);
     };
 
     int n_rows = table.n_rows;
@@ -825,6 +827,7 @@ void Canvas::render(const Table &table, bool interactive, ColorP co)
 
     std::vector<float> row_heights(n_rows);
     std::vector<float> col_widths(n_cols);
+    std::vector<float> baseline_shifts(n_rows);
     float total_height = 0;
     float total_width = 0;
 
@@ -833,11 +836,13 @@ void Canvas::render(const Table &table, bool interactive, ColorP co)
         for (int r = 0; r < n_rows; ++r) {
             for (int c = 0; c < n_cols; ++c) {
                 auto text = table.get_cell(r, c);
-                auto size = measure_text(text);
-                if (col_widths[c] < size.first)
-                    col_widths[c] = size.first;
-                if (row_heights[r] < size.second)
-                    row_heights[r] = size.second;
+                auto [width, height, baseline_shift] = measure_text(text);
+                if (width > col_widths[c])
+                    col_widths[c] = width;
+                if (height > row_heights[r])
+                    row_heights[r] = height;
+                if (baseline_shift < baseline_shifts[r])
+                    baseline_shifts[r] = baseline_shift;
             }
         }
 
@@ -884,16 +889,17 @@ void Canvas::render(const Table &table, bool interactive, ColorP co)
 
     // cell contents
     {
-        auto y = -static_cast<float>(table.padding);
+        auto y = static_cast<float>(table.padding);
         for (int r = 0; r < n_rows; r++) {
+            y -= row_heights[r];
             auto x = static_cast<float>(table.padding);
             for (int c = 0; c < n_cols; c++) {
-                auto pos = transform.transform(Coordf{x, y});
-                draw_text(pos, table.text_size, table.get_cell(r, c), transform.get_angle(), TextOrigin::BOTTOM, co,
+                auto pos = transform.transform(
+                        Coordf{x + table.line_width, y + table.line_width / 2 - baseline_shifts[r]});
+                draw_text(pos, table.text_size, table.get_cell(r, c), transform.get_angle(), TextOrigin::BASELINE, co,
                           table.layer, opts);
                 x += col_widths[c];
             }
-            y -= row_heights[r];
         }
     }
 

@@ -1,6 +1,7 @@
 #include "table.hpp"
 
 #include "nlohmann/json.hpp"
+#include "util/text_renderer.hpp"
 #include "util/uuid.hpp"
 
 namespace horizon {
