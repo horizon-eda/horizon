@@ -149,6 +149,12 @@ std::map<UUID, Text> *CoreSchematic::get_text_map()
     else
         return &get_sheet()->texts;
 }
+
+std::map<UUID, Table> *CoreSchematic::get_table_map()
+{
+    return &get_sheet()->tables;
+}
+
 std::map<UUID, Picture> *CoreSchematic::get_picture_map()
 {
     if (get_block_symbol_mode())
@@ -184,6 +190,7 @@ bool CoreSchematic::has_object_type(ObjectType ty) const
         case ObjectType::LINE_NET:
         case ObjectType::POWER_SYMBOL:
         case ObjectType::TEXT:
+        case ObjectType::TABLE:
         case ObjectType::LINE:
         case ObjectType::ARC:
         case ObjectType::PICTURE:
@@ -738,6 +745,10 @@ std::string CoreSchematic::get_display_name(ObjectType type, const UUID &uu, con
             return get_current_schematic()->sheets.at(sh).texts.at(uu).text;
         else
             return Core::get_display_name(type, uu);
+
+    case ObjectType::TABLE:
+        // FIXME: find a way to provide something more meaningful
+        return "Table";
 
     case ObjectType::BLOCK_SYMBOL_PORT:
         return get_block_symbol().ports.at(uu).name;

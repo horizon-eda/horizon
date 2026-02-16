@@ -1321,6 +1321,9 @@ void Canvas::render(const Sheet &sheet)
         if (!it.second.from_smash)
             render(it.second);
     }
+    for (const auto &it : sheet.tables) {
+        render(it.second);
+    }
     for (const auto &it : sheet.net_labels) {
         render(it.second);
     }

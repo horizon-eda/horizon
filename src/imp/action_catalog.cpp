@@ -460,7 +460,7 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::PLACE_TABLE},
-         {"Place table", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+         {"Place table", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::PLACE_TEXT},
