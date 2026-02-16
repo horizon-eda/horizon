@@ -852,6 +852,7 @@ void Canvas::render(const Table &table, bool interactive, ColorP co)
     TextRenderer::Options opts;
     opts.width = line_width;
     opts.font = table.get_font();
+    opts.allow_upside_down = true;
 
     // cell contents
     auto &cells = table.get_cells();
