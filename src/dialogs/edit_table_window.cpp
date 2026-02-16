@@ -23,11 +23,12 @@ EditTableWindow::EditTableWindow(Window *parent, ImpInterface *intf, Table &tbl,
     props_grid->set_row_spacing(10);
     props_grid->set_column_spacing(10);
 
+    int left = 0;
+    int top = -1;
+
     // lays out the properties widgets in a grid with ROWS_IN_PROPS_GRID rows
-    auto attach_props_widget = [props_grid](const std::string &label, Widget *w) {
+    auto attach_props_widget = [props_grid, &left, &top](const std::string &label, Widget *w) {
         static constexpr int ROWS_IN_PROPS_GRID = 3;
-        static int left = 0;
-        static int top = -1;
 
         if (++top == ROWS_IN_PROPS_GRID) {
             // add extra space between the properties columns
