@@ -7,7 +7,6 @@
 #include <iostream>
 
 // TODO: searching
-// TODO: copy & paste
 
 namespace horizon {
 
