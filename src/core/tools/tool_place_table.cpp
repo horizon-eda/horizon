@@ -23,7 +23,6 @@ ToolResponse ToolPlaceTable::begin(const ToolArgs &args)
     imp->tool_bar_set_actions({
             {InToolActionID::LMB},
             {InToolActionID::RMB},
-            {InToolActionID::MIRROR},
             {InToolActionID::ROTATE},
     });
 
