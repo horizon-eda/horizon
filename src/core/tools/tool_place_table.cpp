@@ -81,11 +81,6 @@ ToolResponse ToolPlaceTable::update(const ToolArgs &args)
             if (data->event == ToolDataWindow::Event::OK || data->event == ToolDataWindow::Event::CLOSE) {
                 if (data->event == ToolDataWindow::Event::OK)
                     imp->dialogs.close_nonmodal();
-            }
-            else if (data->event == ToolDataWindow::Event::UPDATE) {
-                // settings.layers[temp->layer].width = temp->width;
-                // settings.layers[temp->layer].size = temp->size;
-                // settings.font = temp->font;
                 if (temp->is_empty())
                     return finish();
             }
@@ -97,7 +92,7 @@ ToolResponse ToolPlaceTable::update(const ToolArgs &args)
 bool ToolPlaceTable::can_begin()
 {
     if (tool_id == ToolID::PLACE_TABLE)
-        return doc.r->has_object_type((ObjectType::TABLE));
+        return doc.r->has_object_type(ObjectType::TABLE);
     return false;
 }
 
