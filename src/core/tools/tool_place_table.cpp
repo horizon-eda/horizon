@@ -41,17 +41,18 @@ ToolResponse ToolPlaceTable::update(const ToolArgs &args)
     else if (args.type == ToolEventType::ACTION) {
         switch (args.action) {
         case InToolActionID::LMB: {
-            auto old_table = temp;
-            temp = doc.r->insert_table(UUID::random());
-            imp->set_snap_filter({{ObjectType::TABLE, temp->uuid}});
+            if (imp->dialogs.get_nonmodal() == nullptr) {
+                auto old_table = temp;
+                temp = doc.r->insert_table(UUID::random());
+                imp->set_snap_filter({{ObjectType::TABLE, temp->uuid}});
 
-            temp->placement = old_table->placement;
-            temp->placement.shift = args.coords;
-            temp->layer = old_table->layer;
+                temp->layer = old_table->layer;
+                temp->placement = old_table->placement;
+                temp->placement.shift = args.coords;
+                temp->assign_from(*old_table);
 
-            temp->assign_from(*old_table);
-
-            selection = {{temp->uuid, ObjectType::TABLE}};
+                selection = {{temp->uuid, ObjectType::TABLE}};
+            }
         } break;
 
         case InToolActionID::RMB:
