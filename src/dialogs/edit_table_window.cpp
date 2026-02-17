@@ -31,20 +31,19 @@ EditTableWindow::EditTableWindow(Window *parent, ImpInterface *intf, Table &tbl,
         static constexpr int ROWS_IN_PROPS_GRID = 3;
 
         if (++top == ROWS_IN_PROPS_GRID) {
-            // add extra space between the properties columns
-            auto spacer = Gtk::manage(new Gtk::Label());
-            spacer->set_size_request(10, -1);
-            props_grid->attach(*spacer, left + 2, 0, 1, 1);
-
             top = 0;
-            left += 3;
+            left += 2;
         }
 
         auto lbl = Gtk::manage(new Gtk::Label(label));
         lbl->get_style_context()->add_class("dim-label");
         lbl->set_xalign(1);
+        // add extra space between the property groups
+        if (left > 0)
+            lbl->set_margin_start(10);
         lbl->show();
         props_grid->attach(*lbl, left, top, 1, 1);
+
         w->set_hexpand(true);
         w->show();
         props_grid->attach(*w, left + 1, top, 1, 1);
