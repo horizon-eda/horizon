@@ -42,6 +42,7 @@ ToolResponse ToolPlaceTable::update(const ToolArgs &args)
         switch (args.action) {
         case InToolActionID::LMB: {
             if (imp->dialogs.get_nonmodal() == nullptr) {
+                tables_placed.push_front(temp);
                 auto old_table = temp;
                 temp = doc.r->insert_table(UUID::random());
                 imp->set_snap_filter({{ObjectType::TABLE, temp->uuid}});
@@ -98,6 +99,9 @@ ToolResponse ToolPlaceTable::finish()
 {
     doc.r->delete_table(temp->uuid);
     selection.clear();
+    for (auto it : tables_placed) {
+        selection.emplace(it->uuid, ObjectType::TABLE);
+    }
     return ToolResponse::commit();
 }
 

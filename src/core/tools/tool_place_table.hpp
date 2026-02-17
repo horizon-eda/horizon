@@ -1,6 +1,7 @@
 #pragma once
 #include "tool_helper_move.hpp"
 
+#include <forward_list>
 #include <iostream>
 #include <ostream>
 
@@ -27,6 +28,7 @@ public:
 
 private:
     class Table *temp = nullptr;
+    std::forward_list<Table *> tables_placed;
     ToolResponse finish();
 };
 
