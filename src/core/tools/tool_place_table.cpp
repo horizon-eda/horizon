@@ -79,6 +79,8 @@ ToolResponse ToolPlaceTable::update(const ToolArgs &args)
                 // settings.layers[temp->layer].width = temp->width;
                 // settings.layers[temp->layer].size = temp->size;
                 // settings.font = temp->font;
+                if (temp->is_empty())
+                    return finish();
             }
         }
     }

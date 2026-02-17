@@ -75,6 +75,8 @@ public:
         return cells;
     }
 
+    bool is_empty() const;
+
 private:
     mutable std::optional<Layout> cached_layout;
 

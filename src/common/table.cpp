@@ -192,4 +192,9 @@ const Table::Layout &Table::get_layout() const
     return *cached_layout;
 }
 
+bool Table::is_empty() const
+{
+    return std::all_of(cells.begin(), cells.end(), [](const auto &cell) { return cell.empty(); });
+}
+
 } // namespace horizon
