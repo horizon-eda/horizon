@@ -24,6 +24,7 @@ ToolResponse ToolPlaceTable::begin(const ToolArgs &args)
             {InToolActionID::LMB},
             {InToolActionID::RMB},
             {InToolActionID::ROTATE},
+            {InToolActionID::EDIT, "change table"},
     });
 
     auto dia = imp->dialogs.show_edit_table_window(*temp, false);
@@ -59,6 +60,11 @@ ToolResponse ToolPlaceTable::update(const ToolArgs &args)
         case InToolActionID::RMB:
         case InToolActionID::CANCEL:
             return finish();
+
+        case InToolActionID::EDIT: {
+            auto dia = imp->dialogs.show_edit_table_window(*temp, false);
+            dia->focus_n_rows();
+        } break;
 
         case InToolActionID::ROTATE:
             move_mirror_or_rotate(temp->placement.shift, args.action == InToolActionID::ROTATE);
