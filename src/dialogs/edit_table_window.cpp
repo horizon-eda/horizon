@@ -125,10 +125,6 @@ EditTableWindow::EditTableWindow(Window *parent, ImpInterface *intf, Table &tbl,
     auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
     box->pack_start(*sep, false, false);
 
-    auto section_label = Gtk::manage(new Gtk::Label("Cell contents"));
-    section_label->set_halign(Gtk::ALIGN_START);
-    box->pack_start(*section_label, false, false);
-
     auto grid_container = Gtk::manage(new Gtk::ScrolledWindow);
     grid_container->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
     grid_container->set_vexpand(true);
