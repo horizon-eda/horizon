@@ -17,9 +17,11 @@ EditTableWindow::EditTableWindow(Window *parent, ImpInterface *intf, Table &tbl,
     set_default_size(600, 400);
 
     auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10));
-    box->property_margin() = 20;
 
     auto props_grid = Gtk::manage(new Gtk::Grid);
+    props_grid->set_margin_left(20);
+    props_grid->set_margin_right(20);
+    props_grid->set_margin_top(20);
     props_grid->set_row_spacing(10);
     props_grid->set_column_spacing(10);
 
@@ -130,6 +132,8 @@ EditTableWindow::EditTableWindow(Window *parent, ImpInterface *intf, Table &tbl,
     grid_container->set_vexpand(true);
 
     cell_grid = Gtk::manage(new Gtk::Grid);
+    cell_grid->set_margin_left(20);
+    cell_grid->set_margin_right(20);
     cell_grid->set_row_spacing(10);
     cell_grid->set_column_spacing(10);
     grid_container->add(*cell_grid);
