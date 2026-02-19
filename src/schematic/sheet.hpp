@@ -6,6 +6,7 @@
 #include "schematic_symbol.hpp"
 #include "line_net.hpp"
 #include "common/text.hpp"
+#include "common/table.hpp"
 #include "net_label.hpp"
 #include "bus_label.hpp"
 #include "bus_ripper.hpp"
@@ -51,6 +52,7 @@ public:
     std::map<UUID, SchematicSymbol> symbols;
     std::map<UUID, class LineNet> net_lines;
     std::map<UUID, class Text> texts;
+    std::map<UUID, class Table> tables;
     std::map<UUID, NetLabel> net_labels;
     std::map<UUID, PowerSymbol> power_symbols;
     std::map<UUID, BusLabel> bus_labels;

@@ -3,6 +3,7 @@
 #include "common/line.hpp"
 #include "common/arc.hpp"
 #include "common/text.hpp"
+#include "common/table.hpp"
 #include "common/hole.hpp"
 #include "common/dimension.hpp"
 #include "common/keepout.hpp"
@@ -108,6 +109,25 @@ Text *Document::get_text(const UUID &uu)
 void Document::delete_text(const UUID &uu)
 {
     auto map = get_text_map();
+    map->erase(uu);
+}
+
+class Table *Document::insert_table(const UUID &uu)
+{
+    auto map = get_table_map();
+    auto x = map->emplace(std::make_pair(uu, uu));
+    return &(x.first->second);
+}
+
+class Table *Document::get_table(const UUID &uu)
+{
+    auto map = get_table_map();
+    return &map->at(uu);
+}
+
+void Document::delete_table(const UUID &uu)
+{
+    auto map = get_table_map();
     map->erase(uu);
 }
 

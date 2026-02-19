@@ -71,6 +71,7 @@ enum class ObjectType {
     SCHEMATIC_NET_TIE,
     BOARD_NET_TIE,
     HEIGHT_RESTRICTION,
+    TABLE,
 };
 enum class PatchType { OTHER, TRACK, PAD, PAD_TH, VIA, PLANE, HOLE_PTH, HOLE_NPTH, BOARD_EDGE, TEXT, NET_TIE, N_TYPES };
 

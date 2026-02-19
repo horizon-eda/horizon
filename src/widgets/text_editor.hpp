@@ -6,10 +6,12 @@ namespace horizon {
 class TextEditor : public Gtk::Stack, public Changeable {
 public:
     enum class Lines { MULTI, SINGLE };
-    TextEditor(Lines mode = Lines::SINGLE);
+    enum class ShowHints { YES, NO };
+    TextEditor(Lines mode = Lines::SINGLE, ShowHints show_hint = ShowHints::YES);
     enum class Select { YES, NO };
     void set_text(const std::string &text, Select select);
     std::string get_text() const;
+    bool is_multi_line() const;
 
     type_signal_changed signal_activate()
     {

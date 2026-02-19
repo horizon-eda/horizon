@@ -22,6 +22,7 @@ versions:
     20: add via definitions
     21: add user layers
     22: add height restrictions
+    23: add tables
   schematic:
     1: add custom values on symbols
     2: add hierarchy
@@ -32,6 +33,7 @@ versions:
     7: keep nets on unconnected labels
     8: add BOM export customisation
     9: add bus ripper label position
+    10: add tables
   package:
     1: package-defined solder mask & paste parameters override board parameters
     2: add heights

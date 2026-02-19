@@ -176,5 +176,7 @@ enum class ToolID {
     ADD_HEIGHT_RESTRICTION,
     DRAW_HEIGHT_RESTRICTION,
     DELETE_HEIGHT_RESTRICTION,
+    PLACE_TABLE,
+    EDIT_TABLE,
 };
 } // namespace horizon

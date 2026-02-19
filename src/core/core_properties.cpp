@@ -6,6 +6,7 @@
 #include "common/picture.hpp"
 #include "common/arc.hpp"
 #include "common/text.hpp"
+#include "common/table.hpp"
 #include "common/line.hpp"
 #include "common/keepout.hpp"
 #include "core.hpp"
@@ -108,6 +109,44 @@ bool Core::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
             return false;
         }
     } break;
+
+    case ObjectType::TABLE: {
+        auto table = get_table(uu);
+        switch (property) {
+        case ObjectProperty::ID::LAYER:
+            dynamic_cast<PropertyValueInt &>(value).value = table->layer;
+            return true;
+
+        case ObjectProperty::ID::POSITION_X:
+        case ObjectProperty::ID::POSITION_Y:
+            get_placement(table->placement, value, property);
+            return true;
+
+        case ObjectProperty::ID::ANGLE:
+            dynamic_cast<PropertyValueInt &>(value).value = table->placement.get_angle();
+            return true;
+
+        case ObjectProperty::ID::FONT:
+            dynamic_cast<PropertyValueInt &>(value).value = static_cast<int>(table->get_font());
+            return true;
+
+        case ObjectProperty::ID::WIDTH:
+            dynamic_cast<PropertyValueInt &>(value).value = table->get_line_width();
+            return true;
+
+        case ObjectProperty::ID::SIZE:
+            dynamic_cast<PropertyValueInt &>(value).value = table->get_text_size();
+            return true;
+
+        case ObjectProperty::ID::PADDING:
+            dynamic_cast<PropertyValueInt &>(value).value = table->get_padding();
+            return true;
+
+        default:
+            return false;
+        }
+    } break;
+
 
     case ObjectType::DIMENSION: {
         auto dim = get_dimension(uu);
@@ -278,6 +317,43 @@ bool Core::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
         }
     } break;
 
+    case ObjectType::TABLE: {
+        auto table = get_table(uu);
+        switch (property) {
+        case ObjectProperty::ID::LAYER:
+            table->layer = dynamic_cast<const PropertyValueInt &>(value).value;
+            break;
+
+        case ObjectProperty::ID::POSITION_X:
+        case ObjectProperty::ID::POSITION_Y:
+            set_placement(table->placement, value, property);
+            break;
+
+        case ObjectProperty::ID::ANGLE:
+            table->placement.set_angle(dynamic_cast<const PropertyValueInt &>(value).value);
+            break;
+
+        case ObjectProperty::ID::FONT:
+            table->set_font(static_cast<TextData::Font>(dynamic_cast<const PropertyValueInt &>(value).value));
+            break;
+
+        case ObjectProperty::ID::WIDTH:
+            table->set_line_width(dynamic_cast<const PropertyValueInt &>(value).value);
+            break;
+
+        case ObjectProperty::ID::SIZE:
+            table->set_text_size(dynamic_cast<const PropertyValueInt &>(value).value);
+            break;
+
+        case ObjectProperty::ID::PADDING:
+            table->set_padding(dynamic_cast<const PropertyValueInt &>(value).value);
+            break;
+
+        default:
+            return false;
+        }
+    } break;
+
     case ObjectType::DIMENSION: {
         auto dim = get_dimension(uu);
         switch (property) {
@@ -363,6 +439,15 @@ bool Core::get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID
     meta.is_settable = true;
     switch (type) {
     case ObjectType::TEXT:
+        switch (property) {
+        case ObjectProperty::ID::LAYER:
+            layers_to_meta(meta);
+            return true;
+        default:
+            return false;
+        }
+        break;
+    case ObjectType::TABLE:
         switch (property) {
         case ObjectProperty::ID::LAYER:
             layers_to_meta(meta);

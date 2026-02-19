@@ -14,6 +14,7 @@
 #include "document/idocument_schematic.hpp"
 #include "document/idocument_board.hpp"
 #include "common/dimension.hpp"
+#include "common/table.hpp"
 
 namespace horizon {
 
@@ -80,6 +81,7 @@ json ClipboardBase::serialize_junction(const class Junction &ju)
 void ClipboardBase::serialize(json &j)
 {
     j["texts"] = json::object();
+    j["tables"] = json::object();
     j["junctions"] = json::object();
     j["lines"] = json::object();
     j["arcs"] = json::object();
@@ -90,6 +92,10 @@ void ClipboardBase::serialize(json &j)
         switch (it.type) {
         case ObjectType::TEXT:
             j["texts"][(std::string)it.uuid] = get_doc().get_text(it.uuid)->serialize();
+            break;
+
+        case ObjectType::TABLE:
+            j["tables"][(std::string)it.uuid] = get_doc().get_table(it.uuid)->serialize();
             break;
 
         case ObjectType::JUNCTION:

@@ -20,6 +20,10 @@ public:
     class Text *get_text(const UUID &uu) override;
     void delete_text(const UUID &uu) override;
 
+    class Table *insert_table(const UUID &uu) override;
+    class Table *get_table(const UUID &uu) override;
+    void delete_table(const UUID &uu) override;
+
     class Polygon *insert_polygon(const UUID &uu) override;
     class Polygon *get_polygon(const UUID &uu) override;
     void delete_polygon(const UUID &uu) override;
@@ -57,6 +61,10 @@ protected:
         return nullptr;
     }
     virtual std::map<UUID, Text> *get_text_map()
+    {
+        return nullptr;
+    }
+    virtual std::map<UUID, Table> *get_table_map()
     {
         return nullptr;
     }
