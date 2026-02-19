@@ -177,19 +177,42 @@ EditTableWindow::EditTableWindow(Window *parent, ImpInterface *intf, Table &tbl,
         box->pack_start(*sep, false, false);
     }
 
+    // we want the hint label to be initially hidden
+    box->show_all();
+
     // hint label
     {
-        auto la = Gtk::manage(new Gtk::Label("Press Shift+Enter to switch to multi-line mode"));
+        static auto SINGLE_LINE_HINT = "Press Shift+Enter to switch to multi-line mode";
+        static auto MULTI_LINE_HINT = "Press Shift+Enter to apply changes";
+
+        auto la = Gtk::manage(new Gtk::Label());
         la->get_style_context()->add_class("dim-label");
-        la->set_margin_top(10);
-        la->set_margin_bottom(10);
+        la->set_margin_top(5);
+        la->set_margin_bottom(5);
         make_label_small(la);
         box->pack_start(*la, false, false, 0);
+
+        // make the label text adapt to the state of the currently active TextEditor (if any)
+        cell_grid->signal_set_focus_child().connect([la](Widget *w) {
+            auto text_editor = dynamic_cast<TextEditor *>(w);
+            if (text_editor != nullptr) {
+                if (text_editor->is_multi_line()) {
+                    la->set_text(MULTI_LINE_HINT);
+                    la->show();
+                }
+                else {
+                    la->set_text(SINGLE_LINE_HINT);
+                    la->show();
+                }
+            }
+            else {
+                la->set_text("");
+                la->hide();
+            }
+        });
     }
 
     rebuild_cell_grid();
-
-    box->show_all();
     add(*box);
 }
 
