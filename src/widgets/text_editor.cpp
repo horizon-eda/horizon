@@ -114,4 +114,9 @@ std::string TextEditor::get_text() const
         return view->get_buffer()->get_text();
 }
 
+bool TextEditor::is_multi_line() const
+{
+    return get_visible_child_name() == "view";
+}
+
 } // namespace horizon

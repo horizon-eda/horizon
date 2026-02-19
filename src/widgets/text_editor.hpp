@@ -11,6 +11,7 @@ public:
     enum class Select { YES, NO };
     void set_text(const std::string &text, Select select);
     std::string get_text() const;
+    bool is_multi_line() const;
 
     type_signal_changed signal_activate()
     {
