@@ -27,6 +27,10 @@ std::map<UUID, Text> *DocumentBoard::get_text_map()
 {
     return &get_board()->texts;
 }
+std::map<UUID, Table> *DocumentBoard::get_table_map()
+{
+    return &get_board()->tables;
+}
 std::map<UUID, Line> *DocumentBoard::get_line_map()
 {
     return &get_board()->lines;
@@ -59,6 +63,7 @@ bool DocumentBoard::has_object_type(ObjectType ty) const
     case ObjectType::POLYGON_VERTEX:
     case ObjectType::POLYGON_ARC_CENTER:
     case ObjectType::TEXT:
+    case ObjectType::TABLE:
     case ObjectType::LINE:
     case ObjectType::ARC:
     case ObjectType::BOARD_PACKAGE:

@@ -3,7 +3,7 @@
 
 namespace horizon {
 
-TextEditor::TextEditor(Lines mode)
+TextEditor::TextEditor(Lines mode, ShowHints show_hints)
 {
     entry = Gtk::manage(new Gtk::Entry());
     entry->signal_activate().connect([this] { s_signal_activate.emit(); });
@@ -62,7 +62,7 @@ TextEditor::TextEditor(Lines mode)
     {
         auto lbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 2));
         lbox->pack_start(*entry, true, true, 0);
-        if (mode == Lines::MULTI) {
+        if (mode == Lines::MULTI && show_hints == ShowHints::YES) {
             auto la = Gtk::manage(new Gtk::Label("Press Shift+Enter to insert a line break"));
             la->get_style_context()->add_class("dim-label");
             la->set_xalign(0);
@@ -75,11 +75,13 @@ TextEditor::TextEditor(Lines mode)
     {
         auto lbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 2));
         lbox->pack_start(*sc, true, true, 0);
-        auto la = Gtk::manage(new Gtk::Label("Press Shift+Enter to finish editing"));
-        la->get_style_context()->add_class("dim-label");
-        la->set_xalign(0);
-        make_label_small(la);
-        lbox->pack_start(*la, false, false, 0);
+        if (show_hints == ShowHints::YES) {
+            auto la = Gtk::manage(new Gtk::Label("Press Shift+Enter to finish editing"));
+            la->get_style_context()->add_class("dim-label");
+            la->set_xalign(0);
+            make_label_small(la);
+            lbox->pack_start(*la, false, false, 0);
+        }
         add(*lbox, "view");
         lbox->show_all();
     }
@@ -110,6 +112,11 @@ std::string TextEditor::get_text() const
         return entry->get_text();
     else
         return view->get_buffer()->get_text();
+}
+
+bool TextEditor::is_multi_line() const
+{
+    return get_visible_child_name() == "view";
 }
 
 } // namespace horizon

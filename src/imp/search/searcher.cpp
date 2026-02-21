@@ -11,6 +11,7 @@ const std::map<Searcher::Type, Searcher::TypeInfo> &Searcher::get_type_info()
     static const std::map<Searcher::Type, Searcher::TypeInfo> type_info = {
             {Searcher::Type::SYMBOL_PIN, {ObjectType::SYMBOL_PIN}},
             {Searcher::Type::TEXT, {ObjectType::TEXT}},
+            {Searcher::Type::TABLE, {ObjectType::TABLE}},
             {Searcher::Type::SYMBOL_REFDES, {"Symbol ref. designator", ObjectType::SCHEMATIC_SYMBOL}},
             {Searcher::Type::SYMBOL_MPN, {"Symbol MPN", ObjectType::SCHEMATIC_SYMBOL}},
             {Searcher::Type::NET_LABEL, {ObjectType::NET_LABEL}},

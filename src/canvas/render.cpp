@@ -5,6 +5,7 @@
 #include "common/hole.hpp"
 #include "common/polygon.hpp"
 #include "common/text.hpp"
+#include "common/table.hpp"
 #include "layer_display.hpp"
 #include "package/pad.hpp"
 #include "poly2tri/poly2tri.h"
@@ -800,6 +801,84 @@ void Canvas::render(const Text &text, bool interactive, ColorP co)
     }
 }
 
+void Canvas::render(const Table &table, bool interactive, ColorP co)
+{
+    const bool rev = layer_provider.get_layers().at(table.layer).reverse;
+
+    transform_save();
+    transform.accumulate(table.placement);
+
+    object_ref_push(ObjectType::TABLE, table.uuid);
+
+    auto &layout = table.get_layout();
+
+    img_auto_line = img_mode;
+
+    uint64_t line_width = table.get_line_width();
+    float total_width = rev ? -layout.total_width : layout.total_width;
+    float total_height = -layout.total_height;
+
+    // draw outer border
+    {
+        draw_line({0, 0}, {total_width, 0}, co, table.layer, true, line_width);
+        draw_line({total_width, 0}, {total_width, total_height}, co, table.layer, true, line_width);
+        draw_line({total_width, total_height}, {0, total_height}, co, table.layer, true, line_width);
+        draw_line({0, total_height}, {0, 0}, co, table.layer, true, line_width);
+    }
+
+    // draw horizontal grid lines
+    {
+        float y = -layout.row_heights[0];
+        for (size_t r = 1; r < table.get_n_rows(); r++) {
+            draw_line({0, y}, {total_width, y}, co, table.layer, true, line_width);
+            y -= layout.row_heights[r];
+        }
+    }
+
+    // draw vertical grid lines
+    {
+        float x = rev ? -layout.col_widths[0] : layout.col_widths[0];
+        for (size_t c = 1; c < table.get_n_columns(); c++) {
+            draw_line({x, 0}, {x, total_height}, co, table.layer, true, line_width);
+            if (rev)
+                x -= layout.col_widths[c];
+            else
+                x += layout.col_widths[c];
+        }
+    }
+
+    img_auto_line = false;
+
+    // draw cell contents
+    {
+        TextRenderer::Options opts;
+        opts.width = line_width;
+        opts.font = table.get_font();
+        opts.allow_upside_down = true;
+        opts.flip = rev;
+
+        auto &cells = table.get_cells();
+        for (size_t idx = 0; idx < cells.size(); idx++) {
+            auto textpos = layout.text_positions[idx];
+            if (rev)
+                textpos.x *= -1;
+            auto pos = transform.transform(textpos);
+            auto size = static_cast<float>(table.get_text_size());
+            int angle = rev ? -transform.get_angle() : transform.get_angle();
+            draw_text(pos, size, cells[idx], angle, TextOrigin::BASELINE, co, table.layer, opts);
+        }
+    }
+
+    object_ref_pop();
+
+    if (interactive) {
+        selectables.append(table.uuid, ObjectType::TABLE, {0, 0}, {0, 0}, {total_width, total_height}, 0, table.layer);
+        targets.emplace_back(table.uuid, ObjectType::TABLE, transform.transform(Coordi(0, 0)), 0, table.layer);
+    }
+
+    transform_restore();
+}
+
 template <typename T> static std::string join(const T &v, const std::string &delim)
 {
     std::ostringstream s;
@@ -1213,6 +1292,9 @@ void Canvas::render(const Sheet &sheet)
     for (const auto &it : sheet.texts) {
         if (!it.second.from_smash)
             render(it.second);
+    }
+    for (const auto &it : sheet.tables) {
+        render(it.second);
     }
     for (const auto &it : sheet.net_labels) {
         render(it.second);
@@ -1682,6 +1764,9 @@ void Canvas::render(const Board &brd, bool interactive, PanelMode mode, OutlineM
         render(it.second, interactive);
     }
     for (const auto &it : brd.texts) {
+        render(it.second, interactive);
+    }
+    for (const auto &it : brd.tables) {
         render(it.second, interactive);
     }
     for (const auto &it : brd.tracks) {

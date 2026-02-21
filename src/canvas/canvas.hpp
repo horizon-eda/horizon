@@ -128,6 +128,7 @@ protected:
     void render(const class PowerSymbol &sym);
     void render(const class BusRipper &ripper);
     void render(const class Text &text, bool interactive = true, ColorP co = ColorP::FROM_LAYER);
+    void render(const class Table &table, bool interactive = true, ColorP co = ColorP::FROM_LAYER);
     void render(const class Padstack &padstack, bool interactive = true);
     void render(const class Polygon &polygon, bool interactive = true, ColorP co = ColorP::FROM_LAYER);
     void render(const class Shape &shape, bool interactive = true);
