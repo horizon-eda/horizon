@@ -616,24 +616,12 @@ void View3DWindow::apply_preferences(const Preferences &prefs)
     canvas->set_appearance(prefs.canvas_layer.appearance);
     canvas->spacenav_prefs = prefs.spacenav.prefs;
     canvas->input_devices_prefs = prefs.input_devices.prefs;
-
     if (prefs.view_3d.use_ortho_projection)
         proj_ortho_rb->set_active(true);
     else
         proj_persp_rb->set_active(true);
-    canvas->set_projection(prefs.view_3d.use_ortho_projection ? Canvas3D::Projection::ORTHO
-                                                              : Canvas3D::Projection::PERSP);
-    set_color_button_color(solder_mask_color_button, prefs.view_3d.solder_mask_color);
-    canvas->set_solder_mask_color(prefs.view_3d.solder_mask_color);
-    set_color_button_color(silkscreen_color_button, prefs.view_3d.silkscreen_color);
-    canvas->set_silkscreen_color(prefs.view_3d.silkscreen_color);
-    set_color_button_color(substrate_color_button, prefs.view_3d.substrate_color);
-    canvas->set_substrate_color(prefs.view_3d.substrate_color);
-    set_color_button_color(background_top_color_button, prefs.view_3d.bg_top_color);
-    canvas->set_background_top_color(prefs.view_3d.bg_top_color);
-    set_color_button_color(background_bottom_color_button, prefs.view_3d.bg_bottom_color);
-    canvas->set_background_bottom_color(prefs.view_3d.bg_bottom_color);
     canvas->set_copper_color(prefs.view_3d.copper_color);
+    background_color_preset_combo->set_active_id(prefs.view_3d.background_color_preset);
 
     spnav_buttons = prefs.spacenav.buttons;
     const auto av = ActionCatalogItem::AVAILABLE_IN_3D;

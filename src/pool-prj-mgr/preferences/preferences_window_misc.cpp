@@ -97,36 +97,17 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
             gr->add_row(*r);
         }
         {
-            auto r = Gtk::manage(new PreferencesRowColorButton("Solder mask color", "Default solder mask color",
-                                                               preferences, preferences.view_3d.solder_mask_color));
-            gr->add_row(*r);
-        }
-        {
-            auto r = Gtk::manage(new PreferencesRowColorButton("Silkscreen color", "Default silkscreen color",
-                                                               preferences, preferences.view_3d.silkscreen_color));
-            gr->add_row(*r);
-        }
-        {
             auto r = Gtk::manage(new PreferencesRowColorButton("Copper color", "Default copper color", preferences,
                                                                preferences.view_3d.copper_color));
             gr->add_row(*r);
         }
         {
-            auto r = Gtk::manage(new PreferencesRowColorButton("Substrate color", "Default substrate color",
-                                                               preferences, preferences.view_3d.substrate_color));
-            gr->add_row(*r);
-        }
-
-        {
-            auto r =
-                    Gtk::manage(new PreferencesRowColorButton("Top background color", "Background gradient start color",
-                                                              preferences, preferences.view_3d.bg_top_color));
-            gr->add_row(*r);
-        }
-        {
-            auto r = Gtk::manage(new PreferencesRowColorButton("Bottom background color",
-                                                               "Background gradient end color", preferences,
-                                                               preferences.view_3d.bg_bottom_color));
+            static const std::vector<std::string> items = {"Default",        "Sunset 1",   "Sunset 2",  "White",
+                                                           "Black",          "Grey",       "Honey Dew", "80s Sunset",
+                                                           "Deep Sea Space", "Dark Skies", "Friday"};
+            auto r = Gtk::manage(new PreferencesRowComboBox("Background color preset", "Default background color",
+                                                            preferences, preferences.view_3d.background_color_preset,
+                                                            items));
             gr->add_row(*r);
         }
     }

@@ -14,13 +14,6 @@
 #endif
 
 namespace horizon {
-void set_color_button_color(Gtk::ColorButton *color_button, const class Color &v)
-{
-    Gdk::Color c;
-    c.set_rgb_p(v.r, v.g, v.b);
-    color_button->set_color(c);
-}
-
 void bind_widget(Gtk::Switch *sw, bool &v)
 {
     sw->set_active(v);

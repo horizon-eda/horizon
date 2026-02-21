@@ -2,8 +2,6 @@
 #include <gtkmm.h>
 #include <stdint.h>
 namespace horizon {
-void set_color_button_color(Gtk::ColorButton *color_button, const class Color &v);
-
 void bind_widget(class SpinButtonDim *sp, int64_t &v);
 void bind_widget(class SpinButtonDim *sp, uint64_t &v);
 
