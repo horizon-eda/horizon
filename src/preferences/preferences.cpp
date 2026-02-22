@@ -215,6 +215,24 @@ void BoardPreferences::load_from_json(const json &j)
     move_using_router = j.value("move_using_router", true);
 }
 
+json View3DPreferences::serialize() const
+{
+    json j;
+    j["use_ortho_projection"] = use_ortho_projection;
+    j["copper_color"] = color_to_json(copper_color);
+    j["background_color_preset"] = background_color_preset;
+    return j;
+}
+
+void View3DPreferences::load_from_json(const json &j)
+{
+    use_ortho_projection = j.value("use_ortho_projection", false);
+    if (j.count("copper_color"))
+        copper_color = color_from_json(j.at("copper_color"));
+    if (j.count("background_color_preset"))
+        background_color_preset = j.value("background_color_preset", "Default");
+}
+
 json ZoomPreferences::serialize() const
 {
     json j;
@@ -601,6 +619,7 @@ json Preferences::serialize() const
     j["key_sequences"] = key_sequences.serialize();
     j["in_tool_key_sequences"] = in_tool_key_sequences.serialize();
     j["board"] = board.serialize();
+    j["view_3d"] = view_3d.serialize();
     j["zoom"] = zoom.serialize();
     j["capture_output"] = capture_output;
     j["stock_info_provider"] = stock_info_provider_lut.lookup_reverse(stock_info_provider);
@@ -636,6 +655,8 @@ void Preferences::load_from_json(const json &j)
         schematic.load_from_json(j.at("schematic"));
     if (j.count("board"))
         board.load_from_json(j.at("board"));
+    if (j.count("view_3d"))
+        view_3d.load_from_json(j.at("view_3d"));
     if (j.count("zoom"))
         zoom.load_from_json(j.at("zoom"));
     if (j.count("key_sequences"))

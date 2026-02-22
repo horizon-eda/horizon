@@ -616,6 +616,13 @@ void View3DWindow::apply_preferences(const Preferences &prefs)
     canvas->set_appearance(prefs.canvas_layer.appearance);
     canvas->spacenav_prefs = prefs.spacenav.prefs;
     canvas->input_devices_prefs = prefs.input_devices.prefs;
+    if (prefs.view_3d.use_ortho_projection)
+        proj_ortho_rb->set_active(true);
+    else
+        proj_persp_rb->set_active(true);
+    canvas->set_copper_color(prefs.view_3d.copper_color);
+    background_color_preset_combo->set_active_id(prefs.view_3d.background_color_preset);
+
     spnav_buttons = prefs.spacenav.buttons;
     const auto av = ActionCatalogItem::AVAILABLE_IN_3D;
     for (auto &it : action_connections) {

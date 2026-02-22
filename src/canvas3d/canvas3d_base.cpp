@@ -38,7 +38,7 @@ Color Canvas3DBase::get_layer_color(int layer) const
         if (use_layer_colors && appearance.layer_colors.count(layer)) {
             return appearance.layer_colors.at(layer);
         }
-        return {1, .8, 0};
+        return copper_color;
     }
 
     if (layer == BoardLayers::TOP_MASK || layer == BoardLayers::BOTTOM_MASK)
