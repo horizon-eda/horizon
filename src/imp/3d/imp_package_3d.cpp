@@ -42,7 +42,48 @@ void ImpPackage::update_points()
     }
 }
 
-std::string ImpPackage::ask_3d_model_filename(const std::string &current_filename)
+std::vector<std::string> ImpPackage::ask_3d_model_filenames()
+{
+    GtkFileChooserNative *native = gtk_file_chooser_native_new("Open", GTK_WINDOW(view_3d_window->gobj()),
+                                                               GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
+    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+    auto filter = Gtk::FileFilter::create();
+    filter->set_name("STEP models");
+    filter->add_pattern("*.step");
+    filter->add_pattern("*.STEP");
+    filter->add_pattern("*.stp");
+    filter->add_pattern("*.STP");
+    chooser->add_filter(filter);
+    chooser->set_select_multiple(true);
+    chooser->set_current_folder(pool->get_base_path());
+
+    while (1) {
+        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+            auto base_path = Gio::File::create_for_path(pool->get_base_path());
+            std::vector<std::string> rel_names;
+
+            for (const auto &file : chooser->get_files()) {
+                std::string rel_path = base_path->get_relative_path(file);
+                replace_backslash(rel_path);
+                rel_names.push_back(rel_path);
+            }
+            if (std::none_of(rel_names.cbegin(), rel_names.cend(), [](const auto &s) { return s.empty(); })) {
+                return rel_names;
+            }
+            else {
+                Gtk::MessageDialog md(*view_3d_window, "All models have to be in the pool directory",
+                                      false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+                md.run();
+            }
+        }
+        else {
+            return {};
+        }
+    }
+    return {};
+}
+
+std::string ImpPackage::ask_replace_3d_model_filename(const std::string &current_filename)
 {
     GtkFileChooserNative *native = gtk_file_chooser_native_new("Open", GTK_WINDOW(view_3d_window->gobj()),
                                                                GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
@@ -55,7 +96,8 @@ std::string ImpPackage::ask_3d_model_filename(const std::string &current_filenam
     filter->add_pattern("*.STP");
     chooser->add_filter(filter);
     if (current_filename.size()) {
-        chooser->set_filename(Glib::build_filename(pool->get_base_path(), current_filename));
+        chooser->set_current_folder(
+                Glib::path_get_dirname(Glib::build_filename(pool->get_base_path(), current_filename)));
     }
     else {
         chooser->set_current_folder(pool->get_base_path());
@@ -202,10 +244,17 @@ void ImpPackage::construct_3d()
         });
         box->pack_end(*button_reload, false, false, 0);
 
-        auto button_add = Gtk::manage(new Gtk::Button("Add model"));
+        auto button_add = Gtk::manage(new Gtk::Button("Add models…"));
         button_add->signal_clicked().connect([this] {
-            auto mfn = ask_3d_model_filename();
-            if (mfn.size()) {
+            auto new_mfns = ask_3d_model_filenames();
+            std::set<std::string> current_mfns;
+            for (const auto &[_, model] : core_package.models) {
+                current_mfns.insert(model.filename);
+            }
+            for (const auto &mfn : new_mfns) {
+                if (current_mfns.count(mfn)) {
+                    continue;
+                }
                 auto uu = UUID::random();
                 if (core_package.models.size() == 0) { // first
                     core_package.default_model = uu;

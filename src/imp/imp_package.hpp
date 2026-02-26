@@ -95,7 +95,8 @@ private:
 
     Glib::RefPtr<Gio::SimpleAction> snap_to_pad_bbox_action;
 
-    std::string ask_3d_model_filename(const std::string &current_filename = "");
+    std::vector<std::string> ask_3d_model_filenames();
+    std::string ask_replace_3d_model_filename(const std::string &current_filename);
     void construct_3d();
     void update_model_editors();
     void reload_model_editor();
