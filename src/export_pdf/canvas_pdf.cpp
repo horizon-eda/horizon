@@ -66,7 +66,11 @@ void CanvasPDF::img_line(const Coordi &p0, const Coordi &p1, const uint64_t widt
         rp1 = transform.transform(p1);
     }
     auto color = get_pdf_layer_color(layer);
+#if PODOFO_VERSION_MAJOR >= 1
+    painter.GraphicsState.SetStrokingColor(PoDoFo::PdfColor(color.r, color.g, color.b));
+#else
     painter.GraphicsState.SetStrokeColor(PoDoFo::PdfColor(color.r, color.g, color.b));
+#endif
     painter.DrawLine(to_pt(rp0.x), to_pt(rp0.y), to_pt(rp1.x), to_pt(rp1.y));
 }
 
@@ -144,8 +148,13 @@ void CanvasPDF::img_draw_text(const Coordf &p, float size, const std::string &rt
         Coordi p0(xshift, yshift);
         Coordi pt = tf.transform(p0);
 
+#if PODOFO_VERSION_MAJOR >= 1
+        painter.GraphicsState.ConcatenateTransformationMatrix(
+                PoDoFo::Matrix(cos(fangle), sin(fangle), -sin(fangle), cos(fangle), to_pt(pt.x), to_pt(pt.y)));
+#else
         painter.GraphicsState.SetCurrentMatrix(PoDoFo::Matrix::FromCoefficients(cos(fangle), sin(fangle), -sin(fangle),
                                                                                 cos(fangle), to_pt(pt.x), to_pt(pt.y)));
+#endif
         painter.DrawText(line.c_str(), 0, to_pt(size) / -2);
         painter.Restore();
 
@@ -160,8 +169,13 @@ void CanvasPDF::img_polygon(const Polygon &ipoly, bool tr)
         return;
 
     auto color = get_pdf_layer_color(ipoly.layer);
+#if PODOFO_VERSION_MAJOR >= 1
+    painter.GraphicsState.SetNonStrokingColor(PoDoFo::PdfColor(color.r, color.g, color.b));
+    painter.GraphicsState.SetStrokingColor(PoDoFo::PdfColor(color.r, color.g, color.b));
+#else
     painter.GraphicsState.SetFillColor(PoDoFo::PdfColor(color.r, color.g, color.b));
     painter.GraphicsState.SetStrokeColor(PoDoFo::PdfColor(color.r, color.g, color.b));
+#endif
     painter.GraphicsState.SetLineWidth(to_pt(settings.min_line_width));
     if (ipoly.usage == nullptr) { // regular patch
         draw_polygon(ipoly, tr);
@@ -201,8 +215,13 @@ void CanvasPDF::img_hole(const Hole &hole)
         return;
 
     auto color = get_pdf_layer_color(PDFExportSettings::HOLES_LAYER);
+#if PODOFO_VERSION_MAJOR >= 1
+    painter.GraphicsState.SetNonStrokingColor(PoDoFo::PdfColor(color.r, color.g, color.b));
+    painter.GraphicsState.SetStrokingColor(PoDoFo::PdfColor(color.r, color.g, color.b));
+#else
     painter.GraphicsState.SetFillColor(PoDoFo::PdfColor(color.r, color.g, color.b));
     painter.GraphicsState.SetStrokeColor(PoDoFo::PdfColor(color.r, color.g, color.b));
+#endif
     painter.GraphicsState.SetLineWidth(to_pt(settings.min_line_width));
 
     auto hole2 = hole;
