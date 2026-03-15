@@ -80,6 +80,9 @@ else
     podofo = dependency('libpodofo')
     if podofo.version() == 'unknown' or podofo.version() < '0.10.0'
       podofo_legacy = true
+    elif podofo.version() < '1.0.0'
+      podofo_legacy = false
+      cpp_args += '-DPODOFO_IS_0_10'
     else
       podofo_legacy = false
     endif
@@ -843,7 +846,7 @@ color_presets_json = custom_target(
 
 if is_windows
 	windows = import('windows')
-	
+
 	horizon_eda_rc = custom_target(
         'horizon-eda.rc',
         output : 'horizon-eda.rc',
@@ -967,7 +970,7 @@ horizon_eda = executable('horizon-eda',
     link_with: [clipper_nopic, delaunator_nopic, polypartition_nopic, poly2tri_nopic, sexpr, libhorizon, libhorizonui],
     include_directories: include_directories,
     cpp_args: cpp_args,
-    gui_app: true, 
+    gui_app: true,
     install: true
 )
 
@@ -977,7 +980,7 @@ horizon_imp = executable('horizon-imp',
     link_with: [clipper_nopic, delaunator_nopic, polypartition_nopic, poly2tri_nopic, sexpr, dxflib, footag, router, libhorizon, libhorizonui],
     include_directories: include_directories,
     cpp_args: cpp_args,
-    gui_app: true, 
+    gui_app: true,
     install: true
 )
 

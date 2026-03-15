@@ -13,8 +13,13 @@ void render_picture(PoDoFo::PdfDocument &doc, PoDoFo::PdfPainter &painter, const
 
     painter.Save();
     const auto fangle = pl.get_angle_rad();
+#ifndef PODOFO_IS_0_10
+    painter.GraphicsState.ConcatenateTransformationMatrix(PoDoFo::Matrix(
+            cos(fangle), sin(fangle), -sin(fangle), cos(fangle), to_pt((double)pl.shift.x), to_pt((double)pl.shift.y)));
+#else
     painter.GraphicsState.SetCurrentMatrix(PoDoFo::Matrix::FromCoefficients(
             cos(fangle), sin(fangle), -sin(fangle), cos(fangle), to_pt((double)pl.shift.x), to_pt((double)pl.shift.y)));
+#endif
     const int64_t w = pic.data->width * pic.px_size;
     const int64_t h = pic.data->height * pic.px_size;
     const auto p = Coordd(w, h) / -2;
