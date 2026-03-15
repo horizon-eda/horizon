@@ -622,6 +622,7 @@ src_imp = files(
     'src/imp/symbol_preview/symbol_preview_window.cpp',
     'src/imp/tool_popover.cpp',
     'src/imp/tuning_window.cpp',
+    'src/imp/resistor_ratio_window.cpp',
     'src/imp/view_angle_window.cpp',
     'src/imp/pool_cache_dialog.cpp',
     'src/import_dxf/dxf_importer.cpp',

@@ -342,3 +342,6 @@ box.imp-instance-path-bar         > label {
 
 
 .stackup-editor box.horizontal.linked > *:not(:last-child) {border-right: 0px;}
+
+
+.frac-num {border-bottom: 1px solid;}

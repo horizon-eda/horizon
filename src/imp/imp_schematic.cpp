@@ -18,6 +18,7 @@
 #include "core/tool_id.hpp"
 #include "actions.hpp"
 #include "widgets/action_button.hpp"
+#include "resistor_ratio_window.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -913,6 +914,28 @@ void ImpSchematic::construct()
                     }
                     return true;
                 }
+                else if (url.find("r:") == 0) {
+                    const auto r1uu = UUID(url.substr(2, 36));
+                    const auto r2uu = UUID(url.substr(2 + 37, 36));
+
+                    std::vector<ResistorRatioWindow::ResistorInfo> rs;
+                    for (const auto &uu : {r1uu, r2uu}) {
+                        auto &inf = rs.emplace_back();
+                        const auto &comp = core_schematic.get_current_block()->components.at(uu);
+                        inf.refdes = core_schematic.get_top_block()
+                                             ->get_component_info(comp, core_schematic.get_instance_path())
+                                             .refdes;
+                        inf.value_formatted = comp.part->parametric_formatted.at("value").value;
+                        inf.value = std::stod(comp.part->parametric.at("value"));
+                    }
+
+                    auto win = new ResistorRatioWindow(rs.at(0), rs.at(1));
+                    win->set_transient_for(*main_window);
+                    win->present();
+                    win->signal_hide().connect([win] { delete win; });
+
+                    return true;
+                }
                 return false;
             },
             false);
@@ -1156,6 +1179,32 @@ UUID ImpSchematic::net_from_selectable(const SelectableRef &sr)
     return UUID();
 }
 
+static std::string ratio_to_string(double ratio)
+{
+    std::ostringstream ss;
+    ss.imbue(get_locale());
+
+    ss << std::fixed << std::setprecision(5) << std::internal << ratio;
+    return ss.str();
+}
+
+static std::optional<double> resistor_value_from_component(const Component &comp)
+{
+    auto &param = comp.part->parametric;
+    if (param.count("table") && param.at("table") == "resistors") {
+        if (param.count("value")) {
+            try {
+                return std::stod(param.at("value"));
+            }
+            catch (const std::invalid_argument &) {
+                // don't care
+            }
+        }
+    }
+
+    return {};
+}
+
 std::string ImpSchematic::get_hud_text(std::set<SelectableRef> &sel)
 {
     std::string s;
@@ -1166,6 +1215,41 @@ std::string ImpSchematic::get_hud_text(std::set<SelectableRef> &sel)
              + "</b>\n";
         s += get_hud_text_for_component(&comp);
         sel_erase_type(sel, ObjectType::SCHEMATIC_SYMBOL);
+    }
+    if (sel_count_type(sel, ObjectType::SCHEMATIC_SYMBOL) == 2) {
+        std::vector<const SchematicSymbol *> syms;
+        for (const auto &it : sel) {
+            if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
+                syms.push_back(&core_schematic.get_sheet()->symbols.at(it.uuid));
+            }
+        }
+        std::sort(syms.begin(), syms.end(),
+                  [](const auto &a, const auto &b) { return a->placement.shift.y > b->placement.shift.y; });
+        std::vector<double> values;
+        for (auto sym : syms) {
+            if (auto v = resistor_value_from_component(*sym->component))
+                values.push_back(*v);
+        }
+        if (values.size() == 2) {
+            auto &r1c = *syms.at(0)->component;
+            auto &r2c = *syms.at(1)->component;
+            const auto r1 = values.at(0);
+            const auto r2 = values.at(1);
+            const auto r1r =
+                    core_schematic.get_top_block()->get_component_info(r1c, core_schematic.get_instance_path()).refdes;
+            const auto r2r =
+                    core_schematic.get_top_block()->get_component_info(r2c, core_schematic.get_instance_path()).refdes;
+
+            // clang-format off
+            s += "<b><a href=\"r:" + (std::string  ) r1c.uuid +"," + (std::string)r2c.uuid  + "\">Resistor ratio</a></b>\n"
+                 + r2r + "/(" + r1r + "+" + r2r + ") = " + ratio_to_string(r2 / (r1 + r2)) + "\n"
+                 + r1r + "/(" + r1r + "+" + r2r + ") = " + ratio_to_string(r1 / (r1 + r2)) + "\n"
+                 + r1r + "/" + r2r + " = " + ratio_to_string(r1 / r2) + "\n"
+                 + r2r + "/" + r1r + " = " + ratio_to_string(r2 / r1);
+
+            // clang-format on
+            sel_erase_type(sel, ObjectType::SCHEMATIC_SYMBOL);
+        }
     }
 
     if (auto it = sel_find_exactly_one(sel, ObjectType::TEXT)) {
