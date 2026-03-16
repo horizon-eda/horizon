@@ -149,8 +149,8 @@ void CanvasPDF::img_draw_text(const Coordf &p, float size, const std::string &rt
         Coordi pt = tf.transform(p0);
 
 #ifndef PODOFO_IS_0_10
-        painter.GraphicsState.ConcatenateTransformationMatrix(PoDoFo::Matrix(cos(fangle), sin(fangle), -sin(fangle),
-                                                                             cos(fangle), to_pt(pt.x), to_pt(pt.y)));
+        painter.GraphicsState.ConcatenateTransformationMatrix(
+                PoDoFo::Matrix(cos(fangle), sin(fangle), -sin(fangle), cos(fangle), to_pt(pt.x), to_pt(pt.y)));
 #else
         painter.GraphicsState.SetCurrentMatrix(PoDoFo::Matrix::FromCoefficients(cos(fangle), sin(fangle), -sin(fangle),
                                                                                 cos(fangle), to_pt(pt.x), to_pt(pt.y)));

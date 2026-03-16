@@ -57,12 +57,12 @@ void export_pdf(const class Board &brd, const class PDFExportSettings &settings,
     painter.TextState.SetRenderingMode(PoDoFo::PdfTextRenderingMode::Invisible);
 #ifndef PODOFO_IS_0_10
     if (settings.mirror) {
-        painter.GraphicsState.ConcatenateTransformationMatrix(PoDoFo::Matrix(
-                -1, 0, 0, 1, to_pt(bbox.second.x + border_width), to_pt(-bbox.first.y + border_width)));
+        painter.GraphicsState.ConcatenateTransformationMatrix(
+                PoDoFo::Matrix(-1, 0, 0, 1, to_pt(bbox.second.x + border_width), to_pt(-bbox.first.y + border_width)));
     }
     else {
-        painter.GraphicsState.ConcatenateTransformationMatrix(PoDoFo::Matrix(
-                1, 0, 0, 1, to_pt(-bbox.first.x + border_width), to_pt(-bbox.first.y + border_width)));
+        painter.GraphicsState.ConcatenateTransformationMatrix(
+                PoDoFo::Matrix(1, 0, 0, 1, to_pt(-bbox.first.x + border_width), to_pt(-bbox.first.y + border_width)));
     }
 #else
     if (settings.mirror) {
