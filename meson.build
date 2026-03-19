@@ -80,9 +80,6 @@ else
     podofo = dependency('libpodofo')
     if podofo.version() == 'unknown' or podofo.version() < '0.10.0'
       podofo_legacy = true
-    elif podofo.version() < '1.0.0'
-      podofo_legacy = false
-      cpp_args += '-DPODOFO_IS_0_10'
     else
       podofo_legacy = false
     endif

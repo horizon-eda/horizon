@@ -88,7 +88,7 @@ public:
             auto &page = document.GetPages().GetPageAt(number);
             auto &annot = page.GetAnnotations().CreateAnnot<PoDoFo::PdfAnnotationLink>(rect);
             annot.SetBorderStyle(0, 0, 0);
-#ifndef PODOFO_IS_0_10
+#if PODOFO_VERSION_MAJOR >= 1
             annot.SetDestination(*first_pages.at(path));
 #else
             annot.SetDestination(first_pages.at(path));
@@ -99,7 +99,7 @@ public:
             auto &annot = page.GetAnnotations().CreateAnnot<PoDoFo::PdfAnnotationLink>(rect);
             annot.SetBorderStyle(0, 0, 0);
 
-#ifndef PODOFO_IS_0_10
+#if PODOFO_VERSION_MAJOR >= 1
             auto action = document.CreateAction(PoDoFo::PdfActionType::URI);
             auto &uri_action = dynamic_cast<PoDoFo::PdfActionURI &>(*action);
             uri_action.SetURI(PoDoFo::PdfString(url));
@@ -150,7 +150,7 @@ private:
             painter.SetCanvas(page);
 
             painter.GraphicsState.SetLineCapStyle(PoDoFo::PdfLineCapStyle::Round);
-#ifndef PODOFO_IS_0_10
+#if PODOFO_VERSION_MAJOR >= 1
             painter.GraphicsState.SetNonStrokingColor(PoDoFo::PdfColor(0, 0, 0));
 #else
             painter.GraphicsState.SetFillColor(PoDoFo::PdfColor(0, 0, 0));
@@ -183,7 +183,7 @@ private:
                 }
             }
 
-#ifndef PODOFO_IS_0_10
+#if PODOFO_VERSION_MAJOR >= 1
             std::shared_ptr<PoDoFo::PdfDestination> dest = document.CreateDestination();
 #else
             auto dest = std::make_shared<PoDoFo::PdfDestination>(page);
@@ -235,7 +235,7 @@ private:
             painter.FinishDrawing();
 
             PoDoFo::PdfOutlineItem *sheet_node;
-#ifndef PODOFO_IS_0_10
+#if PODOFO_VERSION_MAJOR >= 1
             if (parent) {
                 sheet_node = &parent->CreateChild(PoDoFo::PdfString(sheet->name));
             }

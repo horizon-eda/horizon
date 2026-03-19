@@ -13,7 +13,7 @@ void render_picture(PoDoFo::PdfDocument &doc, PoDoFo::PdfPainter &painter, const
 
     painter.Save();
     const auto fangle = pl.get_angle_rad();
-#ifndef PODOFO_IS_0_10
+#if PODOFO_VERSION_MAJOR >= 1
     painter.GraphicsState.ConcatenateTransformationMatrix(PoDoFo::Matrix(
             cos(fangle), sin(fangle), -sin(fangle), cos(fangle), to_pt((double)pl.shift.x), to_pt((double)pl.shift.y)));
 #else
