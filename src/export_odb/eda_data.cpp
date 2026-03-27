@@ -5,6 +5,7 @@
 #include "pool/package.hpp"
 #include "board/board_layers.hpp"
 #include "util/util.hpp"
+#include "util/str_util.hpp"
 #include "odb_util.hpp"
 
 namespace horizon::ODB {
@@ -263,10 +264,20 @@ EDAData::Pin::Pin(unsigned int i, const std::string &n) : name(make_legal_name(n
 {
 }
 
+static std::string get_pad_name(const horizon::Pad &pad)
+{
+    auto name = pad.name;
+    horizon::trim(name);
+    if (name.empty())
+        return (std::string)pad.uuid;
+    else
+        return name;
+}
+
 EDAData::Pin &EDAData::Package::add_pin(const horizon::Pad &pad)
 {
     auto &pin = pins_map.emplace(std::piecewise_construct, std::forward_as_tuple(pad.uuid),
-                                 std::forward_as_tuple(pins.size(), pad.name))
+                                 std::forward_as_tuple(pins.size(), get_pad_name(pad)))
                         .first->second;
     pins.push_back(&pin);
     pin.center = pad.placement.shift;
