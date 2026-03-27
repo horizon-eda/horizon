@@ -84,6 +84,34 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
             gr->add_row(*r);
         }
     }
+
+    {
+        auto gr = Gtk::manage(new PreferencesGroup("3D View"));
+        box->pack_start(*gr, false, false, 0);
+        gr->show();
+        {
+
+            auto r = Gtk::manage(new PreferencesRowBoolButton("View projection", "Default view projection",
+                                                              "Orthographic", "Perspective", preferences,
+                                                              preferences.view_3d.use_ortho_projection));
+            gr->add_row(*r);
+        }
+        {
+            auto r = Gtk::manage(new PreferencesRowColorButton("Copper color", "Default copper color", preferences,
+                                                               preferences.view_3d.copper_color));
+            gr->add_row(*r);
+        }
+        {
+            static const std::vector<std::string> items = {"Default",        "Sunset 1",   "Sunset 2",  "White",
+                                                           "Black",          "Grey",       "Honey Dew", "80s Sunset",
+                                                           "Deep Sea Space", "Dark Skies", "Friday"};
+            auto r = Gtk::manage(new PreferencesRowComboBox("Background color preset", "Default background color",
+                                                            preferences, preferences.view_3d.background_color_preset,
+                                                            items));
+            gr->add_row(*r);
+        }
+    }
+
     {
         auto gr = Gtk::manage(new PreferencesGroup("Zoom & Pan"));
         box->pack_start(*gr, false, false, 0);

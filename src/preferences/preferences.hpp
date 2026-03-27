@@ -45,6 +45,16 @@ public:
     json serialize() const;
 };
 
+class View3DPreferences {
+public:
+    bool use_ortho_projection = false;
+    Color copper_color = {1, .8, 0};
+    std::string background_color_preset = "Default";
+
+    void load_from_json(const json &j);
+    json serialize() const;
+};
+
 class KeySequencesPreferences {
 public:
     std::map<ActionToolID, std::map<ActionCatalogItem::Availability, std::vector<KeySequence>>> keys;
@@ -187,6 +197,7 @@ public:
     CanvasPreferences canvas_layer;
     SchematicPreferences schematic;
     BoardPreferences board;
+    View3DPreferences view_3d;
     KeySequencesPreferences key_sequences;
     ZoomPreferences zoom;
     bool capture_output = false;

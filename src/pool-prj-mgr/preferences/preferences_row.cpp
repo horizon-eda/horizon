@@ -69,6 +69,36 @@ PreferencesRowBoolButton::PreferencesRowBoolButton(const std::string &title, con
     pack_start(*box, false, false, 0);
 }
 
+PreferencesRowColorButton::PreferencesRowColorButton(const std::string &title, const std::string &subtitle,
+                                                     Preferences &prefs, Color &v)
+    : PreferencesRow(title, subtitle, prefs)
+{
+    btn = Gtk::manage(new Gtk::ColorButton);
+    btn->set_valign(Gtk::ALIGN_CENTER);
+    btn->show();
+    pack_start(*btn, false, false, 0);
+    bind_widget(btn, v, [this](const Color &) { preferences.signal_changed().emit(); });
+}
+
+PreferencesRowComboBox::PreferencesRowComboBox(const std::string &title, const std::string &subtitle,
+                                               Preferences &prefs, std::string &v,
+                                               const std::vector<std::string> &names)
+    : PreferencesRow(title, subtitle, prefs), value(v)
+{
+    combo = Gtk::manage(new Gtk::ComboBoxText);
+    for (const auto &name : names) {
+        combo->append(name, name);
+    }
+    combo->set_valign(Gtk::ALIGN_CENTER);
+    combo->show();
+    pack_start(*combo, false, false, 0);
+    combo->set_active_id(value);
+    combo->signal_changed().connect([this] {
+        value = combo->get_active_id();
+        preferences.signal_changed().emit();
+    });
+}
+
 
 PreferencesGroup::PreferencesGroup(const std::string &title) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 8)
 {
