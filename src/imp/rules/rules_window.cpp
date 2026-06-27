@@ -460,7 +460,6 @@ bool RulesWindow::update_results()
             it.second.row[tree_columns.status] = it.second.status;
         }
     }
-    update_markers_and_error_polygons();
     if (my_run_store.size() == 0) {
         run_box->set_sensitive(true);
         apply_button->set_sensitive(true);
@@ -468,6 +467,7 @@ bool RulesWindow::update_results()
         stack_switcher->set_sensitive(true);
         hamburger_menu_button->set_sensitive(true);
         cancel_button->set_visible(false);
+        update_markers_and_error_polygons();
         if (queue_close)
             hide();
         return false;
