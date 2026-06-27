@@ -1,0 +1,34 @@
+name: FreeBSD CI
+
+on:
+  push:
+    branches:
+      - '*'
+      - '!win32-*'
+    tags: [ '*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build on FreeBSD
+    steps:
+    - uses: actions/checkout@v6
+    - name: Build on FreeBSD VM
+      id: build
+      uses: vmactions/freebsd-vm@v1
+      with:
+        usesh: true
+        prepare: |
+          pkg update -f
+          pkg upgrade -y
+          pkg install -y git gmake pkgconf libuuid sqlite3 gtkmm30 cppzmq libgit2 glm opencascade podofo libarchive meson cmake
+          ls
+          clang --version
+          git config --global --add safe.directory /home/runner/work/horizon/horizon
+        run: |
+          mkdir ../build
+          meson setup ../build --cmake-prefix-path=/usr/local/lib
+          meson compile -C ../build
+          rm -rf ../build
