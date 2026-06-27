@@ -6,6 +6,7 @@
 #include "step_export_window.hpp"
 #include "pool/part.hpp"
 #include "rules/rules_window.hpp"
+#include "util/once.hpp"
 #include "widgets/board_display_options.hpp"
 #include "widgets/layer_box.hpp"
 #include "tuning_window.hpp"
@@ -1031,26 +1032,34 @@ void ImpBoard::update_text_owners()
 
 void ImpBoard::update_text_owner_annotation()
 {
-    text_owner_annotation->clear();
+    Once needs_clear;
     auto sel = canvas->get_selection();
     const auto brd = core_board.get_board();
     for (const auto &it : sel) {
         if (it.type == ObjectType::TEXT) {
             if (brd->texts.count(it.uuid)) {
                 const auto &text = brd->texts.at(it.uuid);
-                if (text_owners.count(text.uuid))
+                if (text_owners.count(text.uuid)) {
+                    if (needs_clear())
+                        text_owner_annotation->clear();
+
                     text_owner_annotation->draw_line(text.placement.shift,
                                                      brd->packages.at(text_owners.at(text.uuid)).placement.shift,
                                                      ColorP::FROM_LAYER, 0);
+                }
             }
         }
         else if (it.type == ObjectType::BOARD_PACKAGE) {
             if (brd->packages.count(it.uuid)) {
                 const auto &pkg = brd->packages.at(it.uuid);
                 for (const auto &text : pkg.texts) {
-                    if (canvas->layer_is_visible(text->layer))
+                    if (canvas->layer_is_visible(text->layer)) {
+                        if (needs_clear())
+                            text_owner_annotation->clear();
+
                         text_owner_annotation->draw_line(text->placement.shift, pkg.placement.shift, ColorP::FROM_LAYER,
                                                          0);
+                    }
                 }
             }
         }
