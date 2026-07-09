@@ -237,6 +237,19 @@ void UnitEditor::handle_delete()
     update_pin_count();
 }
 
+// Return last pin number or -1
+static int find_pin_number(const std::string &s)
+{
+    Glib::ustring u(s);
+    Glib::MatchInfo ma;
+    const auto regex = Glib::Regex::create("^(\\D*)(\\d+)(\\D*)\\d*$");
+    if (regex->match(u, ma)) {
+        auto number_str = ma.fetch(2);
+        return std::stoi(number_str);
+    }
+    return -1;
+}
+
 static std::string inc_pin_name(const std::string &s, int inc = 1)
 {
     Glib::ustring u(s);
@@ -256,6 +269,60 @@ static std::string inc_pin_name(const std::string &s, int inc = 1)
     }
 }
 
+std::string UnitEditor::guess_pin_name(const Pin *last_pin)
+{
+    if (!last_pin) {
+        return "";
+    }
+    int inc = 1;
+    // Detect inc/dec
+    const int i = get_pin_index(last_pin);
+    if (i > 0) {
+        const Pin *second_last_pin = pin_at_index(i - 1);
+        if (second_last_pin) {
+            const int n2 = find_pin_number(second_last_pin->primary_name);
+            const int n1 = find_pin_number(last_pin->primary_name);
+            const int delta = n1 - n2;
+            // TODO: It could also check that the rest of the name matches
+            if (n1 > 0 && n2 >= 0 && delta == -1) {
+                inc = -1;
+            }
+        }
+    }
+    return inc_pin_name(last_pin->primary_name, inc);
+}
+
+Pin *UnitEditor::pin_at_index(int index)
+{
+    auto children = pins_listbox->get_children();
+    const size_t i = static_cast<size_t>(index);
+    if (index < 0 || i >= children.size()) {
+        return nullptr;
+    }
+    auto &ch = children.at(i);
+    auto row = dynamic_cast<Gtk::ListBoxRow *>(ch);
+    auto ed_row = dynamic_cast<PinEditor *>(row->get_child());
+    return ed_row->pin;
+}
+
+int UnitEditor::get_pin_index(const Pin *pin)
+{
+    int index = 0;
+    auto children = pins_listbox->get_children();
+    index = children.size();
+    int i = 0;
+    for (auto &ch : children) {
+        auto row = dynamic_cast<Gtk::ListBoxRow *>(ch);
+        auto ed_row = dynamic_cast<PinEditor *>(row->get_child());
+        if (ed_row->pin == pin) {
+            index = i;
+            break;
+        }
+        i++;
+    }
+    return index;
+}
+
 void UnitEditor::handle_add()
 {
     const Pin *pin_selected = nullptr;
@@ -269,26 +336,10 @@ void UnitEditor::handle_add()
     if (pin_selected) {
         pin->swap_group = pin_selected->swap_group;
         pin->direction = pin_selected->direction;
-        pin->primary_name = inc_pin_name(pin_selected->primary_name);
+        pin->primary_name = guess_pin_name(pin_selected);
         pin->names = pin_selected->names;
     }
-
-    int index = 0;
-    {
-        auto children = pins_listbox->get_children();
-        index = children.size();
-        int i = 0;
-        for (auto &ch : children) {
-            auto row = dynamic_cast<Gtk::ListBoxRow *>(ch);
-            auto ed_row = dynamic_cast<PinEditor *>(row->get_child());
-            if (ed_row->pin == pin_selected) {
-                index = i;
-                break;
-            }
-            i++;
-        }
-    }
-
+    int index = get_pin_index(pin_selected);
 
     auto ed = PinEditor::create(pin, this);
     ed->show_all();
