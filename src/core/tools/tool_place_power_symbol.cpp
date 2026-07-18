@@ -8,6 +8,11 @@
 
 namespace horizon {
 
+ToolPlacePowerSymbol::ToolPlacePowerSymbol(IDocument *c, ToolID tid)
+    : ToolBase(c, tid), ToolPlaceJunctionSchematic(c, tid), ToolHelperMerge(c, tid)
+{
+}
+
 bool ToolPlacePowerSymbol::can_begin()
 {
     return doc.c;

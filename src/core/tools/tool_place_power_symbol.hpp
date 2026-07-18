@@ -6,7 +6,7 @@ namespace horizon {
 
 class ToolPlacePowerSymbol : public ToolPlaceJunctionSchematic, public ToolHelperMerge {
 public:
-    using ToolPlaceJunctionSchematic::ToolPlaceJunctionSchematic;
+    ToolPlacePowerSymbol(IDocument *c, ToolID tid);
 
     ToolResponse begin(const ToolArgs &args) override;
 
