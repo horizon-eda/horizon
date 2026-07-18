@@ -1,11 +1,10 @@
 #pragma once
-#include "core/tool.hpp"
 #include "tool_place_junction_schematic.hpp"
-#include <forward_list>
+#include "tool_helper_merge.hpp"
 
 namespace horizon {
 
-class ToolPlacePowerSymbol : public ToolPlaceJunctionSchematic {
+class ToolPlacePowerSymbol : public ToolPlaceJunctionSchematic, public ToolHelperMerge {
 public:
     using ToolPlaceJunctionSchematic::ToolPlaceJunctionSchematic;
 
@@ -28,10 +27,6 @@ protected:
     bool update_attached(const ToolArgs &args) override;
     bool check_line(LineNet *li) override;
     class PowerSymbol *sym = nullptr;
-    std::forward_list<PowerSymbol *> symbols_placed;
     Net *net = nullptr;
-
-private:
-    bool do_merge(Net *other);
 };
 } // namespace horizon

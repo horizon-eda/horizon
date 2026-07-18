@@ -4,7 +4,6 @@
 #include "imp/imp_interface.hpp"
 #include "tool_helper_move.hpp"
 #include "core/tool_id.hpp"
-#include <iostream>
 #include "tool_data_from_place_power_symbol.hpp"
 
 namespace horizon {
@@ -88,35 +87,12 @@ void ToolPlacePowerSymbol::delete_attached()
     }
 }
 
-bool ToolPlacePowerSymbol::do_merge(Net *other)
-{
-    if (!other)
-        return true;
-    if (other->is_bussed)
-        return false; // can't merge with bussed net
-    if (other->is_port)
-        return false;
-    if (other->is_power && other != net) {
-        // junction is connected to other power net, can't merge
-        return false;
-    }
-    else if (!other->is_power && other != net) {
-        doc.c->get_current_schematic()->block->merge_nets(other, net);
-        imp->tool_bar_flash("merged net \"" + other->name + "\" into power net\"" + net->name + "\"");
-        return true;
-    }
-    else if (other->is_power && other == net) {
-        return true;
-    }
-    return false;
-}
-
 bool ToolPlacePowerSymbol::check_line(LineNet *li)
 {
     if (li->bus)
         return false;
 
-    return do_merge(li->net);
+    return !merge_nets(li->net, net);
 }
 
 bool ToolPlacePowerSymbol::update_attached(const ToolArgs &args)
@@ -128,13 +104,14 @@ bool ToolPlacePowerSymbol::update_attached(const ToolArgs &args)
                 SchematicJunction *j = &doc.c->get_sheet()->junctions.at(args.target.path.at(0));
                 if (j->bus)
                     return true;
-                bool merged = do_merge(j->net);
-                if (!merged) {
-                    return true;
+                if (j->net) {
+                    if (merge_nets(j->net, net))
+                        return true;
                 }
-                if (!j->net) {
+                else {
                     j->net = net;
                 }
+
                 sym->junction = j;
                 doc.c->get_current_schematic()->expand_connectivity(true);
                 create_attached();
