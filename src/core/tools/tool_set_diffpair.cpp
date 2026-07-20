@@ -78,7 +78,7 @@ ToolResponse ToolSetDiffpair::begin(const ToolArgs &args)
             net->diffpair->diffpair = nullptr;
             net->diffpair->diffpair_primary = false;
         }
-        return ToolResponse::end();
+        return ToolResponse::commit();
     }
 
     if (!nets.second) { // only one net
