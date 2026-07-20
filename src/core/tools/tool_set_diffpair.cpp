@@ -70,14 +70,13 @@ ToolResponse ToolSetDiffpair::begin(const ToolArgs &args)
 
     if (tool_id == ToolID::CLEAR_DIFFPAIR) {
         auto net = nets.first;
-        if (net->diffpair_primary) {
-            net->diffpair = nullptr;
-            net->diffpair_primary = false;
+        auto other_net = net->diffpair;
+        if (other_net) {
+            other_net->diffpair = nullptr;
+            other_net->diffpair_primary = false;
         }
-        else {
-            net->diffpair->diffpair = nullptr;
-            net->diffpair->diffpair_primary = false;
-        }
+        net->diffpair = nullptr;
+        net->diffpair_primary = false;
         return ToolResponse::end();
     }
 
