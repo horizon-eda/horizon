@@ -1190,6 +1190,8 @@ static std::string ratio_to_string(double ratio)
 
 static std::optional<double> resistor_value_from_component(const Component &comp)
 {
+    if (!comp.part)
+        return {};
     auto &param = comp.part->parametric;
     if (param.count("table") && param.at("table") == "resistors") {
         if (param.count("value")) {
