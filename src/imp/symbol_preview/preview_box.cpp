@@ -66,7 +66,8 @@ void SymbolPreviewBox::update(const Symbol &sym)
         if (it.second.text == "$VALUE")
             it.second.text += "\nGroup\nTag";
     }
-    canvas->update(symbol, p, Canvas::SymbolMode::SHEET);
+    canvas->set_transform(p);
+    canvas->update(symbol, Canvas::SymbolMode::SHEET);
 }
 
 void SymbolPreviewBox::zoom_to_fit()
