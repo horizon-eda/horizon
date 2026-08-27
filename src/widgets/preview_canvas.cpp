@@ -203,7 +203,7 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, b
 
     case ObjectType::PACKAGE: {
         Package pkg = *pool.get_package(uu);
-        load(pkg, false);
+        load(pkg, {}, false);
         pad = 1_mm;
     } break;
 
@@ -250,7 +250,7 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, b
     update_scale_deferred();
 }
 
-void PreviewCanvas::load(Package &pkg, bool fit)
+void PreviewCanvas::load(Package &pkg, const Placement &pl, bool fit)
 {
     for (const auto &la : pkg.get_layers()) {
         auto ld = LayerDisplay::Mode::OUTLINE;
@@ -261,6 +261,7 @@ void PreviewCanvas::load(Package &pkg, bool fit)
     canvas->set_layer_display(10000, LayerDisplay(true, LayerDisplay::Mode::OUTLINE));
     pkg.apply_parameter_set({});
     canvas->property_layer_opacity() = 75;
+    canvas->set_transform(pl);
     canvas->update(pkg, false);
 
     if (!fit) {
