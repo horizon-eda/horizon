@@ -170,7 +170,8 @@ void PreviewCanvas::load_symbol(const UUID &uu, const Placement &pl, bool fit, c
         }
     }
     sym.apply_placement(pl);
-    canvas->update(sym, pl, Canvas::SymbolMode::SHEET);
+    canvas->set_transform(pl);
+    canvas->update(sym, Canvas::SymbolMode::SHEET);
 
     if (!fit) {
         return;
@@ -195,7 +196,8 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, b
         Symbol sym = *pool.get_symbol(uu);
         sym.expand();
         sym.apply_placement(pl);
-        canvas->update(sym, pl, Canvas::SymbolMode::SHEET);
+        canvas->set_transform(pl);
+        canvas->update(sym, Canvas::SymbolMode::SHEET);
         pad = 1_mm;
     } break;
 

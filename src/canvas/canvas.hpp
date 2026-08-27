@@ -36,8 +36,9 @@ public:
     {
     }
     virtual void clear();
+    void set_transform(const Placement &p);
     enum class SymbolMode { SHEET, EDIT, EDIT_PREVIEW };
-    void update(const class Symbol &sym, const Placement &transform = Placement(), SymbolMode mode = SymbolMode::EDIT);
+    void update(const class Symbol &sym, SymbolMode mode = SymbolMode::EDIT);
     void update(const class Sheet &sheet);
     void update(const class Padstack &padstack, bool edit = true);
     void update(const class Package &pkg, bool edit = true);
