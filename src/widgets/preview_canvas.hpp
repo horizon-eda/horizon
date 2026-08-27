@@ -10,7 +10,7 @@ public:
     void load(ObjectType ty, const UUID &uu, const Placement &pl = Placement(), bool fit = true);
     void load_symbol(const UUID &uu, const Placement &pl = Placement(), bool fit = true, const UUID &uu_part = UUID(),
                      const UUID &uu_gate = UUID());
-    void load(class Package &pkg, bool fit = true);
+    void load(class Package &pkg, const Placement &pl = Placement(), bool fit = true);
     class CanvasGL &get_canvas();
     void set_has_scale(bool has_scale);
     void clear();

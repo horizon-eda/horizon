@@ -426,7 +426,7 @@ void FootagDisplay::calc_and_display(void)
 
 void FootagDisplay::display(void)
 {
-    canvas_package->load(ppkg, autofit->get_active());
+    canvas_package->load(ppkg, {}, autofit->get_active());
     for (const auto &la : ppkg.get_layers()) {
         auto ld = LayerDisplay::Mode::FILL_ONLY;
         auto visible = false;
