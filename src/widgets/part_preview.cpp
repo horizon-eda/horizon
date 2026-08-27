@@ -271,6 +271,6 @@ void PartPreview::handle_package_sel()
         if (n_gates > 1)
             pad.secondary_text = it.gate->name + "." + pad.secondary_text;
     }
-    canvas_package->load(pkg, true);
+    canvas_package->load(pkg, {}, true);
 }
 } // namespace horizon
