@@ -54,6 +54,9 @@ static void export_PnP(const std::string &filename, const std::vector<PnPRow> &p
         }
         ofs << "\r\n";
     }
+    ofs.close();
+    if (ofs.fail())
+        throw std::runtime_error("couldn't write PnP file " + filename);
 }
 
 void export_PnP(const Board &board, const PnPExportSettings &settings)
