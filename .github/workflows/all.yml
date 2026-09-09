@@ -32,7 +32,7 @@ jobs:
 
   build-pr-review:
     runs-on: ubuntu-latest
-    container: debian:bullseye
+    container: debian:trixie
     needs: stylecheck
     steps:
     - uses: actions/checkout@v3
@@ -58,18 +58,15 @@ jobs:
           - container: ubuntu:noble
             cxx: g++
             cc: gcc
-          - container: ubuntu:plucky
+          - container: ubuntu:resolute
             cxx: g++
             cc: gcc
-          - container: debian:bullseye
+          - container: debian:bookworm
             cxx: g++
             cc: gcc
           - container: debian:bookworm
             cxx: clang
             cc: clang
-          - container: debian:bookworm
-            cxx: g++
-            cc: gcc
           - container: debian:trixie
             cxx: g++
             cc: gcc
@@ -199,7 +196,7 @@ jobs:
 
   build-debug:
     runs-on: ubuntu-latest
-    container: debian:bookworm
+    container: debian:trixie
     needs: stylecheck
     steps:
     - uses: actions/checkout@v3
