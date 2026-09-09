@@ -50,13 +50,7 @@ std::ofstream make_ofstream(const std::string &filename_utf8, std::ios_base::ope
 
 void save_json_to_file(const std::string &filename, const json &j)
 {
-    auto ofs = make_ofstream(filename);
-    if (!ofs.is_open()) {
-        throw std::runtime_error("can't save json " + filename);
-        return;
-    }
-    ofs << std::setw(4) << j;
-    ofs.close();
+    Glib::file_set_contents(filename, j.dump(4));
 }
 
 json load_json_from_file(const std::string &filename)
