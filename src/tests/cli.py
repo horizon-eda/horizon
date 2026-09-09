@@ -18,6 +18,7 @@ fixture = str(Path(sys.argv[2]).resolve())
 
 def snapshot(directory):
     """Remember the project file contents so we can check that exporting leaves them alone"""
+    # Compare contents rather than timestamps, so rewriting a file with different data is caught
     return {
         str(path.relative_to(directory)): hashlib.sha256(path.read_bytes()).hexdigest()
         for path in directory.rglob("*")
@@ -29,6 +30,7 @@ with tempfile.TemporaryDirectory(prefix="horizon-cli-test-") as temporary:
     root = Path(temporary)
     project = root / "project with spaces"
     subprocess.run([fixture, str(project)], check=True)
+    # Remove display settings and use fresh config paths, so the test does not rely on the desktop session
     env = dict(os.environ)
     env.pop("DISPLAY", None)
     env.pop("WAYLAND_DISPLAY", None)
@@ -51,6 +53,7 @@ with tempfile.TemporaryDirectory(prefix="horizon-cli-test-") as temporary:
         path.write_text(json.dumps(value))
         return path
 
+    # Help and argument validation should work before any project is loaded
     prj = project / "test.hprj"
     assert "horizon-eda" in run("--version").stdout
     assert "schematic" in run("export", "--help").stdout
@@ -68,6 +71,8 @@ with tempfile.TemporaryDirectory(prefix="horizon-cli-test-") as temporary:
     run("export", "bom", prj, "--unknown", status=2)
     run("export", "bom", "missing.hprj", "-o", "missing.csv", status=1)
 
+    # The schematic should contain both top sheets, the child sheet and its embedded picture
+    # An uppercase extension should work too, and --quiet should leave both output streams empty
     pdf = root / "artifacts/schematic.PDF"
     result = run("export", "schematic", prj, "-o", pdf, "--quiet")
     assert not result.stdout and not result.stderr, result
@@ -76,11 +81,14 @@ with tempfile.TemporaryDirectory(prefix="horizon-cli-test-") as temporary:
     assert len(re.findall(rb"/Type\s*/Page\b", data)) == 3
     assert re.search(rb"/Subtype\s*/Image\b", data)
 
+    # Start with the saved BOM settings, which exclude R2
+    # Then include it through an override and check that both resistors end up in the same row
     bom = root / "artifacts/bom.csv"
     result = run("export", "bom", prj, "--output=artifacts/bom.csv", "--quiet")
     assert not result.stdout and not result.stderr, result
     rows = list(csv.reader(bom.open(newline="")))
     assert "TEST-10K" in rows[1] and "R1" in rows[1] and "R2" not in rows[1]
+    # Trying to overwrite without permission must leave the existing file alone
     old_bom = bom.read_bytes()
     run("export", "bom", prj, "-o", bom, status=1)
     assert bom.read_bytes() == old_bom
@@ -89,6 +97,7 @@ with tempfile.TemporaryDirectory(prefix="horizon-cli-test-") as temporary:
     rows = list(csv.reader(bom.open(newline="")))
     assert rows[1] == ["TEST-10K", "2"], rows
 
+    # Misspelled settings, wrong types and invalid column names should fail without producing output
     for invalid in ({"typo": True}, {"csv_settings": {"colums": []}},
                     {"include_nopopulate": "yes"}, {"csv_settings": {"columns": ["invalid"]}},
                     {"csv_settings": None}):
@@ -98,6 +107,7 @@ with tempfile.TemporaryDirectory(prefix="horizon-cli-test-") as temporary:
     invalid_json.write_text("{")
     run("export", "bom", prj, "-o", "invalid.csv", "--settings", invalid_json, status=2)
 
+    # Check for a complete Gerber file, filled copper, an outline and the mounting hole at 5 mm
     gerbers = root / "artifacts/gerbers"
     result = run("export", "gerber", prj, "--output-dir", gerbers, "--prefix", "ci", "--quiet")
     assert not result.stdout and not result.stderr, result
@@ -108,16 +118,19 @@ with tempfile.TemporaryDirectory(prefix="horizon-cli-test-") as temporary:
     old_gerbers = snapshot(gerbers)
     run("export", "gerber", prj, "--output-dir", gerbers, "--prefix", "ci", status=1)
     assert snapshot(gerbers) == old_gerbers
+    # The ZIP should include the layer files and the separate non-plated drill file
     run("export", "gerber", prj, "--output-dir", gerbers, "--prefix", "ci", "--overwrite",
         "--settings", settings({"zip_output": True, "drill_mode": "individual"}))
     assert (gerbers / "ci-npth.txt").exists()
     with zipfile.ZipFile(gerbers / "ci.zip") as archive:
         assert "ci.gtl" in archive.namelist() and "ci-npth.txt" in archive.namelist()
+    # Reject paths that escape the output directory and filenames that collide with another output
     run("export", "gerber", prj, "--output-dir", "bad-gerbers", "--prefix", "../escape", status=2)
     run("export", "gerber", prj, "--output-dir", "bad-gerbers", "--settings",
         settings({"drill_pth": ".gtl"}), status=2)
     assert not (root / "bad-gerbers").exists()
 
+    # The board PDF should have one page and accept partial overrides of its saved layer settings
     board_pdf = root / "artifacts/board.pdf"
     result = run("export", "board", prj, "-o", board_pdf, "--quiet")
     assert not result.stdout and not result.stderr, result
@@ -131,6 +144,8 @@ with tempfile.TemporaryDirectory(prefix="horizon-cli-test-") as temporary:
     run("export", "board", prj, "-o", "invalid.pdf", "--settings",
         settings({"layers": {"0": {"color": {"r": 2}}}}), status=2)
 
+    # Check the saved placement filename and coordinates first, then export both sides separately
+    # Including R2 also lets us check the custom label for the bottom side
     assembly = root / "artifacts/assembly"
     result = run("export", "pnp", prj, "--output-dir", assembly, "--quiet")
     assert not result.stdout and not result.stderr, result
@@ -150,6 +165,7 @@ with tempfile.TemporaryDirectory(prefix="horizon-cli-test-") as temporary:
     run("export", "pnp", prj, "--output-dir", "invalid-pnp", "--settings",
         settings({"customize": True, "position_format": "%s"}), status=2)
 
+    # Check the STEP file header and that the CLI prefix overrides the saved assembly prefix
     step = root / "artifacts/board.step"
     result = run("export", "step", prj, "-o", step, "--quiet", "--prefix", "ci_")
     assert not result.stdout and not result.stderr, result
@@ -159,6 +175,8 @@ with tempfile.TemporaryDirectory(prefix="horizon-cli-test-") as temporary:
     run("export", "step", prj, "-o", step, "--overwrite", "--settings",
         settings({"include_3d_models": False, "min_diameter": 1000000}))
 
+    # Export the same ODB++ job as a tar archive, a ZIP and a directory
+    # The matrix file should be present in each, under the saved job name
     odb = root / "artifacts/odb"
     result = run("export", "odb", prj, "--output-dir", odb, "--quiet")
     assert not result.stdout and not result.stderr, result
@@ -177,6 +195,7 @@ with tempfile.TemporaryDirectory(prefix="horizon-cli-test-") as temporary:
     assert snapshot(odb) == old_odb
     run("export", "odb", prj, "--output-dir", odb, "--overwrite", "--settings",
         settings({"format": "directory"}))
+    # An extra file in an old ODB++ job must not be carried into the new job, even with --overwrite
     stale_file = odb / "assembly/stale-layer"
     stale_file.write_text("keep this file")
     stale_odb = snapshot(odb)
@@ -186,16 +205,20 @@ with tempfile.TemporaryDirectory(prefix="horizon-cli-test-") as temporary:
     run("export", "odb", prj, "--output-dir", "invalid-odb", "--settings",
         settings({"format": "invalid"}), status=2)
 
+    # Output paths must not replace project inputs, write into the pool or follow an output symlink
     run("export", "bom", prj, "-o", project / "top_block.json", "--overwrite", status=1)
     run("export", "bom", prj, "-o", project / "pool/new.csv", status=1)
     if os.name != "nt":
         link = root / "linked.csv"
         link.symlink_to(bom)
         run("export", "bom", prj, "-o", link, "--overwrite", status=1)
+    # All exports so far should have left the project alone and needed no personal config or cache
     assert snapshot(project) == before
     assert not (root / "config").exists()
     assert not (root / "cache").exists()
 
+    # Now deliberately change the fixture to test model loading failures
+    # A missing model should fail STEP export, but exporting with models disabled should still work
     package_file = project / "pool/packages/test/package.json"
     package = json.loads(package_file.read_text())
     model_uuid = str(uuid.uuid4())
@@ -211,12 +234,15 @@ with tempfile.TemporaryDirectory(prefix="horizon-cli-test-") as temporary:
     model_file.write_text("invalid STEP data")
     run("export", "step", prj, "-o", "invalid-model.step", "--quiet", status=1)
     assert not (root / "invalid-model.step").exists()
+    # Reuse the board STEP file as a valid component model, so no external model file is needed
     model_file.write_bytes(step.read_bytes())
     with_models = snapshot(project)
     run("export", "step", prj, "-o", "with-models.step", "--quiet")
     assert "R1" in (root / "with-models.step").read_text()
     assert snapshot(project) == with_models
 
+    # Remove the outline to check that STEP and ODB++ fail without leaving output
+    # Restore it afterwards so the remaining tests still have a valid board
     board_file = project / "board.json"
     original_board = board_file.read_bytes()
     board = json.loads(original_board)
@@ -228,6 +254,7 @@ with tempfile.TemporaryDirectory(prefix="horizon-cli-test-") as temporary:
     assert not (root / "no-outline-odb").exists()
     board_file.write_bytes(original_board)
 
+    # Missing pictures and pool parts should fail the export rather than produce incomplete files
     for path in (project / "pictures").iterdir():
         path.unlink()
     run("export", "schematic", prj, "-o", "incomplete.pdf", "--quiet", status=1)

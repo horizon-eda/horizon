@@ -40,15 +40,15 @@ ExportPool::ExportPool(const std::string &directory, bool include_models)
     bool failed = false;
     std::string errors;
     {
-        PoolUpdater updater(destination.u8string(),
-                            [&failed, &errors](PoolUpdateStatus status, const std::string &filename,
-                                               const std::string &message) {
-                                if (status == PoolUpdateStatus::ERROR || status == PoolUpdateStatus::FILE_ERROR) {
-                                    failed = true;
-                                    errors += filename + ": " + message + "\n";
-                                }
-                            },
-                            true);
+        PoolUpdater updater(
+                destination.u8string(),
+                [&failed, &errors](PoolUpdateStatus status, const std::string &filename, const std::string &message) {
+                    if (status == PoolUpdateStatus::ERROR || status == PoolUpdateStatus::FILE_ERROR) {
+                        failed = true;
+                        errors += filename + ": " + message + "\n";
+                    }
+                },
+                true);
         updater.update();
     }
     if (failed)

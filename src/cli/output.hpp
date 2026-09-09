@@ -11,8 +11,7 @@ public:
     Output(const Project &project, const std::string &project_filename, bool overwrite);
     // Check and remember the output path, then return a temporary filename for the exporter to write to
     // The optional relative path keeps the directory layout when exporting a whole tree
-    std::string add_file(const std::filesystem::path &destination,
-                         const std::filesystem::path &relative = {});
+    std::string add_file(const std::filesystem::path &destination, const std::filesystem::path &relative = {});
     // Collect the files from a generated directory tree so they can be copied to the output directory
     // Empty files are allowed here, since ODB++ uses them for metadata
     void add_tree(const std::filesystem::path &destination);

@@ -69,8 +69,8 @@ Options parse_options(const std::vector<std::string> &args)
             if (key != "--output" && key != "--output-dir" && key != "--settings" && key != "--prefix")
                 throw UsageError("unknown option: " + key);
             const bool directory = uses_output_directory(options.exporter);
-            const bool prefix = options.exporter == Options::Exporter::GERBER
-                                || options.exporter == Options::Exporter::STEP;
+            const bool prefix =
+                    options.exporter == Options::Exporter::GERBER || options.exporter == Options::Exporter::STEP;
             if ((key == "--output" && directory) || (key == "--output-dir" && !directory)
                 || (key == "--prefix" && !prefix))
                 throw UsageError(key + " is not supported for " + command);

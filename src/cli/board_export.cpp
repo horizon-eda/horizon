@@ -37,8 +37,7 @@ static void update_planes(Board &board, const Options &options, const std::funct
 
 // Set up the Gerber export using the saved settings and any CLI overrides
 // Check all layer, drill and ZIP filenames first, since two outputs could otherwise overwrite each other
-static void export_gerber(Board &board, const Options &options, Output &output,
-                          const std::function<void()> &check_load)
+static void export_gerber(Board &board, const Options &options, Output &output, const std::function<void()> &check_load)
 {
     auto settings =
             parse_settings<GerberOutputSettings>(load_settings(options, board.gerber_output_settings.serialize()));
@@ -76,8 +75,8 @@ static void export_board_pdf(Board &board, const Options &options, Output &outpu
     auto defaults = board.pdf_export_settings;
     if (defaults.layers.empty()) {
         for (const auto &[layer, info] : board.get_layers()) {
-            defaults.layers.emplace(layer, PDFExportSettings::Layer(layer, Color(0, 0, 0),
-                                                                    PDFExportSettings::Layer::Mode::FILL, true));
+            defaults.layers.emplace(
+                    layer, PDFExportSettings::Layer(layer, Color(0, 0, 0), PDFExportSettings::Layer::Mode::FILL, true));
         }
     }
     auto settings = parse_settings<PDFExportSettings>(load_settings(options, defaults.serialize_board()));
@@ -85,8 +84,8 @@ static void export_board_pdf(Board &board, const Options &options, Output &outpu
     for (const auto &[layer, entry] : settings.layers) {
         if (!board.get_layers().count(layer) && !PDFExportSettings::is_special_layer(layer))
             throw UsageError("PDF layer is not on the board: " + std::to_string(layer));
-        if (entry.color.r < 0 || entry.color.r > 1 || entry.color.g < 0 || entry.color.g > 1
-            || entry.color.b < 0 || entry.color.b > 1)
+        if (entry.color.r < 0 || entry.color.r > 1 || entry.color.g < 0 || entry.color.g > 1 || entry.color.b < 0
+            || entry.color.b > 1)
             throw UsageError("PDF layer colors must be between 0 and 1");
         enabled |= entry.enabled;
     }
@@ -114,8 +113,8 @@ static void export_pnp(const Board &board, const Options &options, Output &outpu
     if (settings.customize) {
         const auto &format = settings.position_format;
         for (auto pos = format.find('%'); pos != std::string::npos; pos = format.find('%', pos + 4)) {
-            if (pos + 3 >= format.size() || format[pos + 1] != '.' || format[pos + 2] < '0'
-                || format[pos + 2] > '9' || std::string("muit").find(format[pos + 3]) == std::string::npos)
+            if (pos + 3 >= format.size() || format[pos + 1] != '.' || format[pos + 2] < '0' || format[pos + 2] > '9'
+                || std::string("muit").find(format[pos + 3]) == std::string::npos)
                 throw UsageError("invalid PnP position_format");
         }
     }
@@ -149,12 +148,13 @@ static void export_board_step(const Board &board, IPool &pool, const Options &op
         }
     }
     settings.filename = output.add_file(fs::u8path(options.output));
-    export_step(settings.filename, board, pool, settings.include_3d_models,
-                [&options](const std::string &message) {
-                    if (!options.quiet)
-                        std::cerr << message << "\n";
-                },
-                nullptr, settings.prefix, settings.min_diameter, true);
+    export_step(
+            settings.filename, board, pool, settings.include_3d_models,
+            [&options](const std::string &message) {
+                if (!options.quiet)
+                    std::cerr << message << "\n";
+            },
+            nullptr, settings.prefix, settings.min_diameter, true);
 }
 
 // Generate the ODB++ job in a temporary directory first
@@ -165,9 +165,8 @@ static void export_board_odb(Board &board, const Options &options, Output &outpu
     auto settings = parse_settings<ODBOutputSettings>(load_settings(options, board.odb_output_settings.serialize()));
     trim(settings.job_name);
     if (settings.job_name.empty())
-        settings.job_name = board.block->project_meta.count("project_name")
-                                    ? board.block->project_meta.at("project_name")
-                                    : "pcb";
+        settings.job_name =
+                board.block->project_meta.count("project_name") ? board.block->project_meta.at("project_name") : "pcb";
     settings.job_name = output_filename(ODB::make_legal_entity_name(settings.job_name));
     if (settings.format == ODBOutputSettings::Format::DIRECTORY) {
         settings.output_directory = output.get_directory().u8string();

@@ -34,8 +34,7 @@ int main(int argc, char *argv[])
             "  horizon-eda export COMMAND PROJECT [OPTIONS]\n"
             "\n"
             ""
-            "  --help                     Show help for export commands"
-    );
+            "  --help                     Show help for export commands");
     horizon::setup_locale();
     horizon::create_cache_and_config_dir();
     horizon::PoolManager::init();

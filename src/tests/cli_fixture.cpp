@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
     pool_info.uuid = UUID::random();
     project.create({{"project_name", "test"}, {"project_title", "CLI export fixture"}}, pool_info);
 
+    // Save the minimum pool items needed for a component, so the CLI can build its own pool index
     auto entity = std::make_shared<Entity>(UUID::random());
     entity->name = "Test resistor";
     entity->prefix = "R";
@@ -46,6 +47,8 @@ int main(int argc, char *argv[])
     BlocksSchematic blocks;
     auto &top = blocks.get_top_block_item();
     top.block.project_meta = {{"project_title", "CLI export fixture"}};
+    // Use the same part twice, with R2 marked as unpopulated
+    // This lets the BOM and placement tests check both including and excluding it
     for (const auto &refdes : {"R1", "R2"}) {
         const auto uuid = UUID::random();
         auto &component = top.block.components.emplace(uuid, uuid).first->second;
@@ -57,6 +60,7 @@ int main(int argc, char *argv[])
     top.block.bom_export_settings.output_filename = "saved-bom.csv";
     top.block.bom_export_settings.include_nopopulate = false;
     top.schematic.pdf_export_settings.output_filename = "saved-schematic.pdf";
+    // Two top-level sheets and the child sheet below should give us three pages in the schematic PDF
     const auto second_sheet = UUID::random();
     top.schematic.sheets.emplace(second_sheet, second_sheet).first->second.index = 2;
     for (auto &[uuid, sheet] : top.schematic.sheets) {
@@ -71,15 +75,19 @@ int main(int argc, char *argv[])
     const auto picture_uuid = UUID::random();
     auto &picture = child.symbol.pictures.emplace(picture_uuid, picture_uuid).first->second;
     picture.data_uuid = UUID::random();
+    // A single pixel is enough to check that pictures in child block symbols reach the PDF
+    // Save it separately so the tests can also check what happens when the picture file is missing
     picture.data = std::make_shared<PictureData>(picture.data_uuid, 1, 1, std::vector<uint32_t>{0xff0000ff});
     picture.px_size = 1_mm;
     pictures_save({&child.symbol.pictures}, (directory / "pictures").u8string(), "sym");
+    // Place an instance of the child block in the top schematic so export has to expand the hierarchy
     const auto instance_uuid = UUID::random();
-    auto &instance = top.block.block_instances.emplace(instance_uuid, BlockInstance(instance_uuid, child.block))
-                             .first->second;
+    auto &instance =
+            top.block.block_instances.emplace(instance_uuid, BlockInstance(instance_uuid, child.block)).first->second;
     instance.refdes = "X1";
     const auto symbol_uuid = UUID::random();
-    auto &symbol = top.schematic.sheets.begin()->second.block_symbols
+    auto &symbol = top.schematic.sheets.begin()
+                           ->second.block_symbols
                            .emplace(symbol_uuid, SchematicBlockSymbol(symbol_uuid, child.symbol, instance))
                            .first->second;
     symbol.schematic = &child.schematic;
@@ -90,6 +98,8 @@ int main(int argc, char *argv[])
     net.name = "GND";
     net.net_class = top.block.net_class_default;
     Board board(UUID::random(), top.block);
+    // Give the board a 20 mm square outline and a copper plane covering the same area
+    // The outline is needed for STEP and ODB++, and the plane lets us check the generated Gerber copper
     for (const auto layer : {BoardLayers::L_OUTLINE, BoardLayers::TOP_COPPER}) {
         const auto uuid = UUID::random();
         auto &polygon = board.polygons.emplace(uuid, uuid).first->second;
@@ -103,10 +113,12 @@ int main(int argc, char *argv[])
             plane.polygon = &polygon;
             plane.net = &net;
             plane.from_rules = false;
+            // There are no connected pads in this fixture, so keep the copper even though it is an isolated area
             plane.settings.keep_orphans = true;
             polygon.usage = &plane;
         }
     }
+    // Add a mounting hole at a known position so the drill output can be checked
     auto padstack = std::make_shared<Padstack>(UUID::random());
     padstack->name = "Test mounting hole";
     padstack->type = Padstack::Type::HOLE;
@@ -117,12 +129,16 @@ int main(int argc, char *argv[])
     const auto board_hole_uuid = UUID::random();
     auto &board_hole = board.holes.emplace(board_hole_uuid, BoardHole(board_hole_uuid, padstack)).first->second;
     board_hole.placement.shift = {5_mm, 5_mm};
+    // Put R1 on top and R2 on the bottom at known coordinates
+    // The placement tests can then check coordinates, side labels and separate files for each side
     for (auto &[uuid, component] : top.block.components) {
         const auto package_uuid = UUID::random();
         auto &placed = board.packages.emplace(package_uuid, BoardPackage(package_uuid, &component)).first->second;
         placed.placement.shift = {10_mm, 12_mm};
         placed.flip = component.refdes == "R2";
     }
+    // Save export settings just as the GUI would
+    // The tests check which values are reused and whether command-line paths and overrides take precedence
     board.pnp_export_settings.filename_merged = "saved-positions.csv";
     board.pnp_export_settings.filename_top = "saved-top.csv";
     board.pnp_export_settings.filename_bottom = "saved-bottom.csv";
@@ -135,6 +151,7 @@ int main(int argc, char *argv[])
     board.gerber_output_settings.output_directory = "saved-gerbers";
     board.gerber_output_settings.update_for_board(board);
 
+    // Write the project using the normal serializers so the tests exercise loading real project files
     save_json_to_file((directory / "blocks.json").u8string(), blocks.serialize());
     save_json_to_file((directory / top.block_filename).u8string(), top.block.serialize());
     save_json_to_file((directory / top.schematic_filename).u8string(), top.schematic.serialize());

@@ -14,14 +14,26 @@ static json get_schema(Options::Exporter exporter)
     case Options::Exporter::SCHEMATIC_PDF:
         return {{"output_filename", ""}, {"min_line_width", 0}};
     case Options::Exporter::BOARD_PDF:
-        return {{"output_filename", ""}, {"min_line_width", 0}, {"reverse_layers", false}, {"mirror", false},
-                {"set_holes_size", false}, {"holes_diameter", 0},
+        return {{"output_filename", ""},
+                {"min_line_width", 0},
+                {"reverse_layers", false},
+                {"mirror", false},
+                {"set_holes_size", false},
+                {"holes_diameter", 0},
                 {"layers",
                  {{"*", {{"color", {{"r", 0.0}, {"g", 0.0}, {"b", 0.0}}}, {"mode", ""}, {"enabled", false}}}}}};
     case Options::Exporter::PNP:
-        return {{"output_directory", ""}, {"filename_top", ""}, {"filename_bottom", ""}, {"filename_merged", ""},
-                {"mode", ""}, {"include_nopopulate", false}, {"customize", false}, {"position_format", ""},
-                {"top_side", ""}, {"bottom_side", ""}, {"columns", json::array({""})},
+        return {{"output_directory", ""},
+                {"filename_top", ""},
+                {"filename_bottom", ""},
+                {"filename_merged", ""},
+                {"mode", ""},
+                {"include_nopopulate", false},
+                {"customize", false},
+                {"position_format", ""},
+                {"top_side", ""},
+                {"bottom_side", ""},
+                {"columns", json::array({""})},
                 {"column_names", {{"*", ""}}}};
     case Options::Exporter::STEP:
         return {{"filename", ""}, {"prefix", ""}, {"include_3d_models", false}, {"min_diameter", 0}};
