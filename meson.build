@@ -779,6 +779,7 @@ src_gen_pkg = files(
 src_tests = files(
     '3rd_party/catch2/catch_amalgamated.cpp',
     'src/tests/tool_lut.cpp',
+    'src/tests/annotation.cpp',
     'src/tests/layer_display_default.cpp',
     'src/imp/action_catalog.cpp',
     'src/imp/action.cpp',
@@ -1032,7 +1033,7 @@ horizon_gen_pkg = executable('horizon-gen-pkg',
 horizon_tests = executable('horizon-tests',
     [src_tests, resources],
     dependencies: build_dependencies_libhorizon,
-    link_with: [clipper_nopic, libhorizon],
+    link_with: [clipper_nopic, libhorizon, libhorizonui],
     include_directories: include_directories,
     build_by_default: false,
 )
