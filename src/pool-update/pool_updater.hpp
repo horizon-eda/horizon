@@ -8,7 +8,7 @@
 namespace horizon {
 class PoolUpdater {
 public:
-    PoolUpdater(const std::string &bp, pool_update_cb_t status_cb, bool temporary = false);
+    PoolUpdater(const std::string &bp, pool_update_cb_t status_cb);
     void update();
     void update_some(const std::vector<std::string> &filenames, std::set<UUID> &all_parts_updated);
 

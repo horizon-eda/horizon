@@ -21,6 +21,7 @@ public:
     bool overwrite = false;
     bool quiet = false;
     bool help = false;
+    std::string help_text;
 };
 
 // Check whether this exporter takes --output-dir rather than a single output filename
@@ -28,6 +29,6 @@ bool uses_output_directory(Options::Exporter exporter);
 
 // Read and check the export arguments before loading a project or starting the GUI
 Options parse_options(const std::vector<std::string> &args);
-// Build the help text for either the command list or a particular exporter
-std::string export_help(const std::string &command = "");
+// Build the help text listing available exporters
+std::string export_help();
 } // namespace horizon::cli

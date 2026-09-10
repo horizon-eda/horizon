@@ -23,10 +23,10 @@ PoolManager &PoolManager::get()
     return *the_pool_manager;
 }
 
-void PoolManager::init(bool load_config)
+void PoolManager::init()
 {
     if (the_pool_manager == nullptr) {
-        the_pool_manager = new PoolManager(load_config);
+        the_pool_manager = new PoolManager();
     }
 }
 
@@ -52,11 +52,8 @@ bool PoolManager::reload()
     return false;
 }
 
-PoolManager::PoolManager(bool load_config)
+PoolManager::PoolManager()
 {
-    if (!load_config)
-        return;
-
     auto pool_prj_mgr_config = Glib::build_filename(get_config_dir(), "pool-project-manager.json");
     if (reload()) {
         // it's okay

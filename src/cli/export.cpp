@@ -1,7 +1,8 @@
 #include "export.hpp"
 #include "board_export.hpp"
 #include "output.hpp"
-#include "project_pool.hpp"
+#include "pool/project_pool.hpp"
+#include "pool-update/pool-update.hpp"
 #include "settings.hpp"
 #include "project/export_util.hpp"
 #include "blocks/blocks_schematic.hpp"
@@ -23,12 +24,26 @@ static void check_pictures(const std::map<UUID, Picture> &pictures)
     }
 }
 
+// Load the project with the standard pool and publish the export once all loading checks have passed
 void run_export(const Options &options, std::function<void()> check_load)
 {
     const auto project_filename = fs::absolute(fs::u8path(options.project)).u8string();
     const auto project = Project::new_from_file(project_filename);
-    ExportPool export_pool(project.pool_directory, options.exporter == Options::Exporter::STEP);
-    auto &pool = export_pool.get_pool();
+    // Use the same pool updater as the GUI so a fresh checkout does not need a committed pool.db
+    // Only the index is rebuilt here; ProjectPool is opened without fetching or caching external items
+    std::string errors;
+    pool_update(project.pool_directory,
+                [&errors, &project](PoolUpdateStatus status, const std::string &filename, const std::string &message) {
+                    // The updater reports unavailable included pools against the pool directory itself
+                    // Cached items can still provide everything needed, so let project loading check for missing items
+                    if (status == PoolUpdateStatus::FILE_ERROR && filename == project.pool_directory)
+                        return;
+                    if (status == PoolUpdateStatus::ERROR || status == PoolUpdateStatus::FILE_ERROR)
+                        errors += filename + ": " + message + "\n";
+                });
+    if (!errors.empty())
+        throw std::runtime_error("couldn't index the project pool:\n" + errors);
+    ProjectPool pool(project.pool_directory, false);
     Output output(project, project_filename, options.overwrite);
     if (options.exporter != Options::Exporter::SCHEMATIC_PDF && options.exporter != Options::Exporter::BOM) {
         run_board_export(options, project, pool, output, check_load);

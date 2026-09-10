@@ -17,12 +17,14 @@ fixture = str(Path(sys.argv[2]).resolve())
 
 
 def snapshot(directory):
-    """Remember the project file contents so we can check that exporting leaves them alone"""
-    # Compare contents rather than timestamps, so rewriting a file with different data is caught
+    """Remember design and pool item contents, excluding the index rebuilt by the normal pool updater"""
+    # Compare contents rather than timestamps, so changes to design files or pool items are caught
     return {
         str(path.relative_to(directory)): hashlib.sha256(path.read_bytes()).hexdigest()
         for path in directory.rglob("*")
-        if path.is_file()
+        if path.is_file() and path.relative_to(directory).as_posix() not in {
+            "pool/pool.db", "pool/pool.db-wal", "pool/pool.db-shm"
+        }
     }
 
 
@@ -55,10 +57,17 @@ with tempfile.TemporaryDirectory(prefix="horizon-cli-test-") as temporary:
 
     # Help and argument validation should work before any project is loaded
     prj = project / "test.hprj"
-    assert "horizon-eda" in run("--version").stdout
+    assert "horizon-cli" in run("--version").stdout
+    assert "Commands:" in run().stdout
+    assert "Commands:" in run("--help").stdout
+    run("unknown", status=2)
+    run("--unknown", status=2)
+    run("--version", "extra", status=2)
     assert "schematic" in run("export", "--help").stdout
     for command in ("schematic", "gerber", "bom", "board", "pnp", "step", "odb"):
-        assert "--settings" in run("export", command, "--help").stdout
+        help_text = run("export", command, "--help").stdout
+        assert "--settings" in help_text
+        assert f"horizon-cli export {command} [" in help_text
     for command in ("schematic", "board"):
         for filename in ("output.svg", "output", "output.pdf.png"):
             run("export", command, "missing.hprj", "-o", filename, status=2)
@@ -69,6 +78,9 @@ with tempfile.TemporaryDirectory(prefix="horizon-cli-test-") as temporary:
     run("export", "gerber", prj, "-o", "bad", status=2)
     run("export", "bom", prj, "-o", "a.csv", "--output", "b.csv", status=2)
     run("export", "bom", prj, "--unknown", status=2)
+    run("export", "bom", prj, "--output", status=2)
+    run("export", "bom", prj, prj, "-o", "bad.csv", status=2)
+    run("export", "step", prj, "-o", "bad.step", "--prefix", "a", "--prefix", "b", status=2)
     run("export", "bom", "missing.hprj", "-o", "missing.csv", status=1)
 
     # The schematic should contain both top sheets, the child sheet and its embedded picture
@@ -212,10 +224,32 @@ with tempfile.TemporaryDirectory(prefix="horizon-cli-test-") as temporary:
         link = root / "linked.csv"
         link.symlink_to(bom)
         run("export", "bom", prj, "-o", link, "--overwrite", status=1)
-    # All exports so far should have left the project alone and needed no personal config or cache
+    # All exports so far should have left design files and pool items alone while building the local index
     assert snapshot(project) == before
-    assert not (root / "config").exists()
-    assert not (root / "cache").exists()
+    assert (project / "pool/pool.db").is_file()
+
+    # An empty prefix should clear the saved STEP prefix
+    run("export", "step", prj, "-o", "empty-prefix.step", "--prefix=", "--quiet")
+    assert "saved_PCB" not in (root / "empty-prefix.step").read_text()
+    assert "PCB" in (root / "empty-prefix.step").read_text()
+
+    # The same items should load from the cache directories used by committed projects
+    part_file = project / "pool/parts/part.json"
+    cached_part = project / "pool/parts/cache/part.json"
+    part_file.rename(cached_part)
+    cached_snapshot = snapshot(project)
+    run("export", "bom", prj, "-o", "cached.csv", "--quiet")
+    assert "TEST-10K" in (root / "cached.csv").read_text()
+    assert snapshot(project) == cached_snapshot
+    cached_part.rename(part_file)
+
+    # An invalid item must still fail indexing even when the external pool is unavailable
+    original_part = part_file.read_bytes()
+    part_file.write_text("{")
+    result = run("export", "bom", prj, "-o", "invalid-part.csv", "--quiet", status=1)
+    assert "couldn't index the project pool" in result.stderr
+    assert not (root / "invalid-part.csv").exists()
+    part_file.write_bytes(original_part)
 
     # Now deliberately change the fixture to test model loading failures
     # A missing model should fail STEP export, but exporting with models disabled should still work

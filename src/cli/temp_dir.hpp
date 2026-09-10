@@ -4,7 +4,7 @@
 namespace horizon::cli {
 class TempDir {
 public:
-    // Create a temporary directory for the pool index or export files
+    // Create a temporary directory for the export files
     TempDir();
     // Clean up the temporary files without hiding an error that already caused the export to fail
     ~TempDir();

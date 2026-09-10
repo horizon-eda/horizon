@@ -63,7 +63,7 @@ void PoolDependencyGraph::dump(const std::string &filename) const
     ofs << "}";
 }
 
-PoolUpdater::PoolUpdater(const std::string &bp, pool_update_cb_t cb, bool temporary) : status_cb(cb)
+PoolUpdater::PoolUpdater(const std::string &bp, pool_update_cb_t cb) : status_cb(cb)
 {
     auto pool_db_path = Glib::build_filename(bp, "pool.db");
     status_cb(PoolUpdateStatus::INFO, "", "start");
@@ -83,7 +83,7 @@ PoolUpdater::PoolUpdater(const std::string &bp, pool_update_cb_t cb, bool tempor
     pool.emplace(bp, false);
     {
         SQLite::Query q(pool->db, "UPDATE installation_uuid SET uuid=?");
-        q.bind(1, temporary ? UUID() : InstallationUUID::get());
+        q.bind(1, InstallationUUID::get());
         q.step();
     }
     q_exists.emplace(pool->db, "SELECT pool_uuid, last_pool_uuid FROM all_items_view WHERE uuid = ? AND type = ?");

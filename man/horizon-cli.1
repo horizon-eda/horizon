@@ -1,0 +1,248 @@
+.TH HORIZON-CLI 1 "2026-09-10"
+.SH NAME
+horizon-cli \- command-line exports for Horizon EDA projects
+.SH SYNOPSIS
+.B horizon-cli export
+.I COMMAND PROJECT
+.RI [ OPTIONS ]
+.br
+.B horizon-cli \-\-version
+.br
+.B horizon-cli export
+.RI [ COMMAND ]
+.B \-\-help
+.SH DESCRIPTION
+A command line tool to export Horizon-EDA project documentation, fabrication files and assembly data and similar, without starting a GUI or connecting to a display server
+.SH COMMANDS
+.TP
+.B export schematic PROJECT \-o FILE
+Export all schematic sheets to PDF
+.TP
+.B export board PROJECT \-o FILE
+Export board layers to PDF
+.TP
+.B export gerber PROJECT \-\-output-dir DIRECTORY
+Export enabled Gerber layers and Excellon drills, including ZIP output when configured
+.TP
+.B export bom PROJECT \-o FILE
+Export a CSV bill of materials
+.TP
+.B export pnp PROJECT \-\-output-dir DIRECTORY
+Export pick-and-place files
+.TP
+.B export step PROJECT \-o FILE
+Export a STEP assembly with locally available models
+.TP
+.B export odb PROJECT \-\-output-dir DIRECTORY
+Export an ODB++ directory or archive
+.SH OPTIONS
+.TP
+.B \-o, \-\-output FILE
+Output filename for schematic, board, BOM and STEP exports
+.br
+Schematic and board exports require a .pdf extension
+.TP
+.B \-\-output-dir DIRECTORY
+Output directory for Gerber, pick-and-place and ODB++ exports
+.TP
+.B \-\-settings FILE
+Apply JSON overrides to saved export settings
+.TP
+.B \-\-prefix PREFIX
+Override the saved prefix for Gerber and STEP exports
+.TP
+.B \-\-overwrite
+Overwrite existing output files
+.TP
+.B \-\-quiet
+Suppress progress messages
+.TP
+.B \-h, \-\-help
+Show help for the selected command
+.TP
+.B \-\-version
+Show the application version
+.SH EXPORT BEHAVIOR
+Exports use the exporter-specific settings as they are stored in the project (e.g. the minimum-line width of a schematic PDF). These settings can be overridden using the --settings option (see SETTINGS below). Relative command-line paths resolve from the working directory.
+.PP
+The existing project pool is indexed before loading the design and the pool database may be created or updated, so the pool directory must be writable. The design files are not modified in any way by the exporter.
+.br
+horizon-cli uses the Horizon-EDA (UI) configuration and cache directories as needed.
+.PP
+On export the artifacts are created and moved to the output path or directory as they are finished, meaning if there is a error preventing full completion it is the callers responsibility to clean up the artifacts and/or check the return status.
+.PP
+Progress and diagnostics go to stderr. Exit codes are 0 for success, 1 for loading or export failures, and 2 for invalid arguments or settings.
+.SH SETTINGS
+Exports use the settings as they were set in the GUI. If differing output formats are needed, a JSON file can be supplied with
+.BR \-\-settings " FILE"
+to override those settings for this export. The overrides are not saved back to the project.
+.PP
+Fields not included in the file keep their saved values. Nested objects are merged, while arrays such as
+.B columns
+replace the saved array. An explicit output path is still required using
+.B \-o
+or
+.BR \-\-output-dir .
+.SS Schematic PDF
+Save this as schematic.json to set the minimum line width to 0.1 mm. Dimensions use nanometers, so 1000000 corresponds to 1 mm.
+.BR
+.RS
+.nf
+{
+    "min_line_width": 100000
+}
+.fi
+.RE
+.BR
+Then run using:
+.BR
+.RS
+.nf
+horizon-cli export schematic project.hprj \-o schematic.pdf \-\-settings schematic.json
+.fi
+.RE
+.SS Bill of materials
+Save this as bom.json to exclude no-populate components, select the columns and sort by MPN:
+.RS
+.nf
+{
+    "include_nopopulate": false,
+    "csv_settings": {
+        "columns": ["QTY", "MPN", "manufacturer", "refdes"],
+        "sort_column": "MPN",
+        "order": "asc"
+    }
+}
+
+horizon-cli export bom project.hprj \e
+    \-o bom.csv \-\-settings bom.json
+.fi
+.RE
+.PP
+Set
+.B include_nopopulate
+to true to include unpopulated components. The sort order can be asc or desc.
+.SS Gerber
+Save this as gerber.json to add a ZIP archive alongside the layer and drill files, with separate files for plated and non-plated drills:
+.RS
+.nf
+{
+    "prefix": "controller",
+    "zip_output": true,
+    "drill_mode": "individual"
+}
+
+horizon-cli export gerber project.hprj \e
+    \-\-output-dir gerbers \-\-settings gerber.json
+.fi
+.RE
+.PP
+The drill_mode can be merged or individual. Layer selection and filenames retain their saved settings. The
+.B \-\-prefix
+option overrides the prefix in the settings file. Gerber filenames must be plain filenames within the output directory.
+.SS Board PDF
+Save this as board.json to enable top copper and the board outline, disable bottom copper and use a fixed hole diameter of 0.3 mm:
+.RS
+.nf
+{
+    "min_line_width": 100000,
+    "mirror": false,
+    "set_holes_size": true,
+    "holes_diameter": 300000,
+    "layers": {
+        "0": {
+            "enabled": true,
+            "mode": "fill",
+            "color": {"r": 0.8, "g": 0.2, "b": 0.1}
+        },
+        "-100": {"enabled": false},
+        "100": {
+            "enabled": true,
+            "mode": "outline",
+            "color": {"r": 0, "g": 0, "b": 0}
+        }
+    }
+}
+
+horizon-cli export board project.hprj \e
+    \-o board.pdf \-\-settings board.json
+.fi
+.RE
+.PP
+Layer IDs 0, -100 and 100 refer to top copper, bottom copper and the board outline. Other layers retain their saved settings; disable them explicitly if they should not appear. At least one layer must remain enabled.
+.PP
+The mode can be fill or outline, while color components range from 0.0 to 1.0. Dimensions use nanometers. Set mirror to true to mirror the output, or reverse_layers to true to reverse the drawing order.
+.SS Pick-and-place
+Save this as pnp.json to export a single file with custom column names, side labels and coordinates in millimeters with three decimal places:
+.RS
+.nf
+{
+    "mode": "merged",
+    "filename_merged": "placement.csv",
+    "include_nopopulate": false,
+    "customize": true,
+    "columns": ["refdes", "x", "y", "angle", "side"],
+    "column_names": {
+        "refdes": "Designator",
+        "x": "X (mm)",
+        "y": "Y (mm)",
+        "angle": "Rotation",
+        "side": "Layer"
+    },
+    "top_side": "Top",
+    "bottom_side": "Bottom",
+    "position_format": "%.3m"
+}
+
+horizon-cli export pnp project.hprj \e
+    \-\-output-dir assembly \-\-settings pnp.json
+.fi
+.RE
+.PP
+For separate side files, set mode to individual and provide distinct filename_top and filename_bottom values. Filenames must be plain filenames within the output directory. Set customize to false to use standard column names, side labels and position formatting.
+.PP
+Supported columns are refdes, MPN, value, manufacturer, package, x, y, angle and side. Select and reorder them as needed.
+.PP
+Possible position formats include %.3m for millimeters, %.0u for micrometers, %.4i for inches and %.1t for mils. The digit sets the number of decimal places and can range from 0 to 9. Custom column labels should match the selected unit.
+.SS STEP assembly
+Save this as step.json to include component models, prefix assembly and component names and omit holes smaller than 0.3 mm:
+.RS
+.nf
+{
+    "include_3d_models": true,
+    "prefix": "controller_",
+    "min_diameter": 300000
+}
+
+horizon-cli export step project.hprj \e
+    \-o board.step \-\-settings step.json
+.fi
+.RE
+.PP
+Set include_3d_models to false to export only the board, or min_diameter to 0 to include holes of all sizes. The diameter uses nanometers. An empty prefix removes the prefix; the
+.B \-\-prefix
+option overrides the value in the settings file.
+.SS ODB++
+Save this as odb.json to export a ZIP archive named controller.zip:
+.RS
+.nf
+{
+    "format": "zip",
+    "job_name": "controller",
+    "output_filename": "controller.zip"
+}
+
+horizon-cli export odb project.hprj \e
+    \-\-output-dir odb \-\-settings odb.json
+.fi
+.RE
+.PP
+The format can be directory, zip or tgz. For a gzip-compressed tar archive, use tgz and a filename ending in .tgz. The format field selects the archive type, so choose a matching filename extension.
+.PP
+Only the basename of output_filename is used, keeping the archive inside the output directory. Set it to an empty string to derive the archive name from the job name and format. Omitting the field retains the saved filename. With format set to directory, the job is written to a subdirectory named after the job_name.
+.SH SEE ALSO
+.BR horizon-eda (1),
+.BR horizon-imp (1)
+.SH AUTHORS
+This manual page was initially written by
+David Huss <dh@atoav.com>

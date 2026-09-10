@@ -1,15 +1,15 @@
 # Command-line export
 
-The `export` command allows exporting project artifacts from the command line without starting the Horizon-EDA GUI (headless export). This allows users to automate exporting or to export project from the command line as follows: 
+The standalone `horizon-cli export` command allows exporting project artifacts from the command line without starting the Horizon-EDA GUI or depending on GTK (headless export). This allows users to automate exporting or to export project from the command line as follows:
 
 ```sh
-horizon-eda export schematic project.hprj -o schematic.pdf
-horizon-eda export gerber project.hprj --output-dir gerbers
-horizon-eda export bom project.hprj -o bom.csv
-horizon-eda export board project.hprj -o board.pdf
-horizon-eda export pnp project.hprj --output-dir assembly
-horizon-eda export step project.hprj -o board.step
-horizon-eda export odb project.hprj --output-dir odb
+horizon-cli export schematic project.hprj -o schematic.pdf
+horizon-cli export gerber project.hprj --output-dir gerbers
+horizon-cli export bom project.hprj -o bom.csv
+horizon-cli export board project.hprj -o board.pdf
+horizon-cli export pnp project.hprj --output-dir assembly
+horizon-cli export step project.hprj -o board.step
+horizon-cli export odb project.hprj --output-dir odb
 ```
 
 Generally all of these exporters rely on the stored project settings.
@@ -22,7 +22,7 @@ Generally all of these exporters rely on the stored project settings.
 - `step` exports the board and enabled component models as a STEP assembly
 - `odb` exports an ODB++ directory, ZIP archive or gzip-compressed tar archive
 
-Run `horizon-eda export --help` to list commands or for example `horizon-eda export gerber --help` for command options
+Run `horizon-cli export --help` to list commands or for example `horizon-cli export gerber --help` for command options
 
 ## Settings
 
@@ -46,7 +46,7 @@ These settings can then be used like this:
 
 ```sh
 
-horizon-eda export bom project.hprj --settings bom.json -o bom.csv
+horizon-cli export bom project.hprj --settings bom.json -o bom.csv
 ```
 
 Supported override fields:
@@ -67,7 +67,7 @@ These fields use the same units and values as the saved export settings. For exa
 The Gerber and STEP commands also accept `--prefix PREFIX`:
 
 ```sh
-horizon-eda export gerber project.hprj --output-dir gerbers --prefix controller
+horizon-cli export gerber project.hprj --output-dir gerbers --prefix controller
 ```
 
 Gerber filenames must be plain filenames within the output directory.  The setting`zip_output` adds a ZIP archive alongside the generated layers and drills.
@@ -108,7 +108,7 @@ Save as `board.json` to set layer colors and rendering modes, with a minimum lin
 ```
 
 ```sh
-horizon-eda export board project.hprj -o board.pdf --settings board.json
+horizon-cli export board project.hprj -o board.pdf --settings board.json
 ```
 
 The `layers` object uses the following IDs as JSON keys, for example `"0"` for top copper:
@@ -183,7 +183,7 @@ Save as `pnp.json` to export a single file with custom column names, side labels
 ```
 
 ```sh
-horizon-eda export pnp project.hprj --output-dir assembly --settings pnp.json
+horizon-cli export pnp project.hprj --output-dir assembly --settings pnp.json
 ```
 
 The `columns` array above shows all supported columns; select and reorder them as needed. `column_names`, `top_side` and `bottom_side` accept custom text. Set `customize` to `false` to use the standard names, side labels and position formatting, or `include_nopopulate` to `true` to include unpopulated components.
@@ -227,7 +227,7 @@ Save as `step.json` to include component models, prefix assembly and component n
 ```
 
 ```sh
-horizon-eda export step project.hprj -o board.step --settings step.json
+horizon-cli export step project.hprj -o board.step --settings step.json
 ```
 
 Set `include_3d_models` to `false` to export only the board, or `min_diameter` to `0` to include holes of all sizes. The diameter is in nanometers. `prefix` accepts a string, including an empty string for no prefix; `--prefix PREFIX` overrides it on the command line.
@@ -266,7 +266,7 @@ A gzip-compressed tar archive:
 ```
 
 ```sh
-horizon-eda export odb project.hprj --output-dir odb --settings odb.json
+horizon-cli export odb project.hprj --output-dir odb --settings odb.json
 ```
 
 These are all three supported `format` values. The examples produce `odb/controller/`, `odb/controller.zip` or `odb/controller.tgz`, respectively. Archive format is selected by `format`, so choose a matching filename extension. Only the basename of `output_filename` is used, keeping the archive inside `--output-dir`.
@@ -276,9 +276,11 @@ Set `output_filename` to an empty string to derive the archive name from the nor
 ## CI behavior
 
 - No display server, GUI preferences, or configured external pools are required
-- All referenced pool items must be present in the project's local pool or its committed cache directories
-- A temporary pool index is built for each invocation, so `pool.db` need not be committed
-- Project files and the source pool are not modified
+- For CI, include all referenced pool items in the project's local pool or its committed cache directories
+- The normal pool updater refreshes the project pool index before each export, so `pool.db` need not be committed
+- The pool directory must be writable because its database and cache directories may be created or updated
+- Design files and pool item JSON files are not modified
+- The normal Horizon configuration and cache directories are initialized as needed
 - Copper planes are recalculated in memory before Gerber, board PDF, and ODB++ generation
 - Loading warnings fail the export to avoid publishing incomplete data
 - Output parent directories are created as needed
@@ -298,3 +300,14 @@ Exit codes:
 | 2 | Invalid arguments or export settings |
 
 
+## Development
+
+`horizon-cli` has its own entry point in `src/cli/main.cpp`. Argument parsing uses GLib's option parser, following the existing editor entry point. The GUI entry point remains separate.
+
+The CLI uses the existing `ProjectPool` with caching disabled after updating its index through `pool_update`. It does not copy the pool or provide its own pool implementation. Missing external pools are allowed when the project contains all required items; errors in item files still fail the export. Configured pools can supply items too, so CI should include the required items and models in the project itself.
+
+The executable links the common project code and the canvas rendering used by the exporters, without the GTK canvas or UI library. The common library uses GLib/GIO instead of GTK; GUI targets add GTK through their own dependencies.
+
+Shared export preparation and writer error checks are covered by the separate helper and exporter-fix PRs. The CLI continues to use those changes while the PRs are being reviewed.
+
+Run the integration checks with `meson test -C build cli tests --print-errorlogs`.
