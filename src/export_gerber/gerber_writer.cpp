@@ -36,6 +36,8 @@ void GerberWriter::close()
 {
     write_line("M02*");
     ofs.close();
+    if (ofs.fail())
+        throw std::runtime_error("couldn't write Gerber file " + out_filename);
 }
 
 void GerberWriter::comment(const std::string &s)

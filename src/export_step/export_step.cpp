@@ -559,7 +559,7 @@ void export_step(const std::string &filename, const Board &brd, class IPool &poo
         hdr.SetOriginatingSystem(new TCollection_HAsciiString("horizon EDA"));
         hdr.SetDescriptionValue(1, new TCollection_HAsciiString("Electronic assembly"));
 
-        if (Standard_False == writer.Write(filename.c_str()))
+        if (writer.Write(filename.c_str()) != IFSelect_RetDone)
             throw std::runtime_error("write error");
 
         progress_cb("Done");
