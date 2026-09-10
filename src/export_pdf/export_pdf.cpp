@@ -88,17 +88,29 @@ public:
             auto &page = document.GetPages().GetPageAt(number);
             auto &annot = page.GetAnnotations().CreateAnnot<PoDoFo::PdfAnnotationLink>(rect);
             annot.SetBorderStyle(0, 0, 0);
+#if PODOFO_VERSION_MAJOR >= 1
+            annot.SetDestination(*first_pages.at(path));
+#else
             annot.SetDestination(first_pages.at(path));
+#endif
         }
         for (auto &[url, number, rect] : datasheet_annotations) {
             auto &page = document.GetPages().GetPageAt(number);
             auto &annot = page.GetAnnotations().CreateAnnot<PoDoFo::PdfAnnotationLink>(rect);
             annot.SetBorderStyle(0, 0, 0);
 
+#if PODOFO_VERSION_MAJOR >= 1
+            auto action = document.CreateAction(PoDoFo::PdfActionType::URI);
+            auto &uri_action = dynamic_cast<PoDoFo::PdfActionURI &>(*action);
+            uri_action.SetURI(PoDoFo::PdfString(url));
+
+            annot.SetAction(*action);
+#else
             auto action = std::make_shared<PoDoFo::PdfAction>(document, PoDoFo::PdfActionType::URI);
 
             action->SetURI(PoDoFo::PdfString(url));
             annot.SetAction(action);
+#endif
         }
 
         document.Save(filename);
@@ -138,7 +150,11 @@ private:
             painter.SetCanvas(page);
 
             painter.GraphicsState.SetLineCapStyle(PoDoFo::PdfLineCapStyle::Round);
+#if PODOFO_VERSION_MAJOR >= 1
+            painter.GraphicsState.SetNonStrokingColor(PoDoFo::PdfColor(0, 0, 0));
+#else
             painter.GraphicsState.SetFillColor(PoDoFo::PdfColor(0, 0, 0));
+#endif
             painter.TextState.SetFont(font, 10);
             painter.TextState.SetRenderingMode(PoDoFo::PdfTextRenderingMode::Invisible);
 
@@ -167,7 +183,11 @@ private:
                 }
             }
 
+#if PODOFO_VERSION_MAJOR >= 1
+            std::shared_ptr<PoDoFo::PdfDestination> dest = document.CreateDestination();
+#else
             auto dest = std::make_shared<PoDoFo::PdfDestination>(page);
+#endif
             if (first) {
                 first_pages.emplace(path, dest);
                 first = false;
@@ -215,6 +235,22 @@ private:
             painter.FinishDrawing();
 
             PoDoFo::PdfOutlineItem *sheet_node;
+#if PODOFO_VERSION_MAJOR >= 1
+            if (parent) {
+                sheet_node = &parent->CreateChild(PoDoFo::PdfString(sheet->name));
+            }
+            else {
+                sheet_node = &outlines->CreateRoot(PoDoFo::PdfString(sheet->name));
+            }
+            sheet_node->SetDestination(*dest);
+
+            for (auto sym : sheet->get_block_symbols_sorted()) {
+                auto &sym_node = sheet_node->CreateChild(PoDoFo::PdfString(sym->block_instance->refdes));
+                sym_node.SetDestination(*dest);
+                sym_node.SetTextFormat(PoDoFo::PdfOutlineFormat::Italic);
+                export_schematic(*sym->schematic, uuid_vec_append(path, sym->block_instance->uuid), prv, &sym_node);
+            }
+#else
             if (parent) {
                 sheet_node = parent->CreateChild(PoDoFo::PdfString(sheet->name), dest);
             }
@@ -228,6 +264,7 @@ private:
                 sym_node->SetTextFormat(PoDoFo::PdfOutlineFormat::Italic);
                 export_schematic(*sym->schematic, uuid_vec_append(path, sym->block_instance->uuid), prv, sym_node);
             }
+#endif
         }
     }
 };

@@ -153,11 +153,39 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
-      run: zypper in -y -t pattern devel_python3 && zypper in -y --allow-downgrade git make gcc gcc-c++ pkgconf-pkg-config cppzmq-devel occt-devel gtkmm3-devel libgit2-devel libuuid-devel sqlite3-devel librsvg-devel cairomm-devel glm-devel boost-devel libcurl-devel libpodofo-0_10-devel binutils libarchive-devel libspnav-devel meson cmake
+      run: zypper in -y -t pattern devel_python3 && zypper in -y --allow-downgrade git make gcc gcc-c++ pkgconf-pkg-config cppzmq-devel occt-devel gtkmm3-devel libgit2-devel libuuid-devel sqlite3-devel librsvg-devel cairomm-devel glm-devel boost-devel libcurl-devel libpodofo-devel binutils libarchive-devel libspnav-devel meson cmake
 
     - name: Install python dependencies
       if: ${{ matrix.target == 'horizon.so' }}
       run: zypper in -y Mesa-devel python3-pycairo-devel python3-PyYAML
+    - name: Build
+      run: |
+        mkdir ../build
+        CXX=${{ matrix.os.cxx }} CC=${{ matrix.os.cc }} meson setup ../build
+        ninja -C ../build ${{ matrix.target }}
+    - name: Check version
+      run: python3 check_version.py
+    - name: Test python module
+      if: ${{ matrix.target == 'horizon.so' }}
+      run: python3 -c 'import sys; sys.path.append("../build"); import horizon'
+
+  build-fedora:
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - all
+          - horizon.so
+    runs-on: ubuntu-latest
+    container: fedora:latest
+    needs: stylecheck
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install dependencies
+      run: dnf install -y git make gcc gcc-c++ pkg-config cppzmq-devel opencascade-devel gtkmm30-devel libgit2-devel libuuid-devel sqlite-devel librsvg2-devel cairomm-devel glm-devel boost-devel libcurl-devel podofo-devel libarchive-devel libspnav-devel meson cmake
+    - name: Install python dependencies
+      if: ${{ matrix.target == 'horizon.so' }}
+      run: dnf install -y mesa-libGL-devel python3-cairo-devel python3-pyyaml
     - name: Build
       run: |
         mkdir ../build
