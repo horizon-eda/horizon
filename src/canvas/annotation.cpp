@@ -47,9 +47,10 @@ void CanvasAnnotation::set_display(const LayerDisplay &ld)
 
 void CanvasAnnotation::clear()
 {
-    if (ca->triangles.count(layer))
+    if (ca->triangles.count(layer) && ca->triangles[layer].size()) {
         ca->triangles[layer].clear();
-    ca->request_push();
+        ca->request_push();
+    }
 }
 
 void CanvasAnnotation::draw_line(const Coordf &from, const Coordf &to, ColorP color, uint64_t width, bool highlight,
