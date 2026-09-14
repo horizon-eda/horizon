@@ -1,4 +1,5 @@
 #include "schematic.hpp"
+#include "project/export_util.hpp"
 #include "project/project.hpp"
 #include "block/block.hpp"
 #include "schematic/schematic.hpp"
@@ -11,21 +12,7 @@
 SchematicWrapper::SchematicWrapper(const horizon::Project &prj)
     : pool(prj.pool_directory, false), blocks(horizon::BlocksSchematic::new_from_file(prj.blocks_filename, pool))
 {
-    auto &top = blocks.get_top_block_item();
-    top.block.create_instance_mappings();
-    top.schematic.update_sheet_mapping();
-    for (auto &[uu, block] : blocks.blocks) {
-        if (uu == top.uuid)
-            continue;
-
-        top.block.update_non_top(block.block);
-    }
-    for (auto &[uu, block] : blocks.blocks) {
-        block.symbol.expand();
-    }
-    for (auto &[uu, block] : blocks.blocks) {
-        block.schematic.expand();
-    }
+    horizon::expand_schematic_for_export(blocks);
 }
 
 
