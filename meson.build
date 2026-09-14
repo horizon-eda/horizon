@@ -13,6 +13,7 @@ gtk3 = dependency('gtk+-3.0', version: '>=3.22')
 gtkmm = dependency('gtkmm-3.0', version: '>=3.0.0')
 glibmm = dependency('glibmm-2.4')
 giomm = dependency('giomm-2.4')
+cairomm = dependency('cairomm-1.0')
 png = dependency('libpng')
 epoxy = dependency('epoxy')
 sqlite3 = dependency('sqlite3')
@@ -103,7 +104,7 @@ if is_libstdcpp
 endif
 
 
-build_dependencies_libhorizon = [libm, pthread, gtkmm, sqlite3, png] + stdlibs
+build_dependencies_libhorizon = [libm, pthread, giomm, cairomm, sqlite3, png] + stdlibs
 build_dependencies_horizonmodule = [libm, gtkmm, sqlite3, png, py3cairo, podofo, libpython, epoxy, opencascade, libarchive]
 if not is_windows
 	uuid = dependency('uuid')
@@ -113,7 +114,7 @@ else
 	build_dependencies_libhorizon += [cxx.find_library('rpcrt4')]
 endif
 
-build_dependencies_libhorizonui = build_dependencies_libhorizon + [epoxy, zeromq, cppzmq, curl, glm]
+build_dependencies_libhorizonui = build_dependencies_libhorizon + [gtkmm, epoxy, zeromq, cppzmq, curl, glm]
 build_dependencies_gen_pkg =    build_dependencies_libhorizon
 build_dependencies_pr_review = build_dependencies_libhorizon + [podofo, epoxy, opencascade, libgit2]
 
@@ -223,6 +224,7 @@ src_common = files(
     'src/pool/symbol.cpp',
     'src/pool/unit.cpp',
     'src/project/project.cpp',
+    'src/project/export_util.cpp',
     'src/rules/rule.cpp',
     'src/rules/rule_descr.cpp',
     'src/rules/rule_match.cpp',
@@ -962,14 +964,39 @@ libhorizonui = static_library('libhorizonui',
 )
 
 
+src_cli = files(
+    'src/cli/main.cpp',
+    'src/canvas/canvas_patch.cpp',
+    'src/export_step/export_step.cpp',
+    'src/cli/board_export.cpp',
+    'src/board/plane_update.cpp',
+    'src/canvas/canvas_pads.cpp',
+    'src/util/csv_util.cpp',
+    'src/cli/cli.cpp',
+    'src/cli/options.cpp',
+    'src/cli/settings.cpp',
+    'src/cli/export.cpp',
+    'src/cli/output.cpp',
+    'src/cli/temp_dir.cpp',
+)
+
 horizon_eda = executable('horizon-eda',
-    [src_pool_prj_mgr, src_pool_update,resources, rc_compiled],
+    [src_pool_prj_mgr, src_pool_update, resources, rc_compiled],
     dependencies: build_dependencies_pool_prj_mgr,
     link_with: [clipper_nopic, delaunator_nopic, polypartition_nopic, poly2tri_nopic, sexpr, libhorizon, libhorizonui],
     include_directories: include_directories,
     cpp_args: cpp_args,
     gui_app: true,
     install: true
+)
+
+horizon_cli = executable('horizon-cli',
+    [src_cli, src_pool_update, src_export, src_canvas, resources],
+    dependencies: build_dependencies_libhorizon + [podofo, libarchive, opencascade, glm],
+    link_with: [clipper_nopic, delaunator_nopic, polypartition_nopic, poly2tri_nopic, libhorizon],
+    include_directories: include_directories,
+    cpp_args: cpp_args,
+    install: true,
 )
 
 horizon_imp = executable('horizon-imp',
@@ -982,7 +1009,7 @@ horizon_imp = executable('horizon-imp',
     install: true
 )
 
-install_man('man/horizon-eda.1', 'man/horizon-imp.1')
+install_man('man/horizon-eda.1', 'man/horizon-imp.1', 'man/horizon-cli.1')
 
 datadir = get_option('datadir')
 install_data('org.horizon_eda.HorizonEDA.desktop', install_dir:datadir / 'applications')
@@ -1031,10 +1058,24 @@ horizon_gen_pkg = executable('horizon-gen-pkg',
 
 horizon_tests = executable('horizon-tests',
     [src_tests, resources],
-    dependencies: build_dependencies_libhorizon,
+    dependencies: build_dependencies_libhorizon + [gtkmm],
     link_with: [clipper_nopic, libhorizon],
     include_directories: include_directories,
     build_by_default: false,
 )
 
 test('tests', horizon_tests)
+
+cli_fixture = executable('horizon-cli-fixture',
+    'src/tests/cli_fixture.cpp',
+    dependencies: build_dependencies_libhorizon,
+    link_with: [clipper_nopic, delaunator_nopic, libhorizon, libhorizonui],
+    include_directories: include_directories,
+    cpp_args: cpp_args,
+    build_by_default: false,
+)
+
+test('cli', prog_python,
+    args: [files('src/tests/cli.py'), horizon_cli, cli_fixture],
+    timeout: 120,
+)
