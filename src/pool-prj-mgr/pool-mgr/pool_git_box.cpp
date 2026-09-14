@@ -242,8 +242,8 @@ void PoolGitBox::refresh()
         info_label->set_markup("on <tt>" + Glib::Markup::escape_text(std::string(branch_name)) + "</tt>");
 
         autofree_ptr<git_object> treeish_master(git_object_free);
-        if (git_revparse_single(&treeish_master.ptr, repo, "master") != 0) {
-            throw std::runtime_error("error finding master branch");
+        if (git_revparse_single(&treeish_master.ptr, repo, "master") != 0 && git_revparse_single(&treeish_master.ptr, repo, "main") != 0) {
+            throw std::runtime_error("error finding master or main branch");
         }
 
         autofree_ptr<git_object> otree_master(git_object_free);
