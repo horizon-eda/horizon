@@ -18,6 +18,11 @@
 
 namespace horizon {
 
+static bool found_main_branch(autofree_ptr<git_object> &out, const autofree_ptr<git_repository> &repo)
+{
+    return git_revparse_single(&out.ptr, repo, "master") == 0 || git_revparse_single(&out.ptr, repo, "main") == 0;
+}
+
 void PoolGitBox::make_treeview(Gtk::TreeView *treeview)
 {
     {
@@ -242,8 +247,8 @@ void PoolGitBox::refresh()
         info_label->set_markup("on <tt>" + Glib::Markup::escape_text(std::string(branch_name)) + "</tt>");
 
         autofree_ptr<git_object> treeish_master(git_object_free);
-        if (git_revparse_single(&treeish_master.ptr, repo, "master") != 0) {
-            throw std::runtime_error("error finding master branch");
+        if (!found_main_branch(treeish_master, repo)) {
+            throw std::runtime_error("error finding master or main branch");
         }
 
         autofree_ptr<git_object> otree_master(git_object_free);
@@ -546,7 +551,7 @@ void PoolGitBox::handle_pr()
 
 
         autofree_ptr<git_object> obj(git_object_free);
-        if (git_revparse_single(&obj.ptr, repo, "master") != 0) {
+        if (!found_main_branch(obj, repo)) {
             throw std::runtime_error("revparse");
         }
         auto oid = git_object_id(obj);
@@ -682,7 +687,9 @@ void PoolGitBox::handle_back_to_master(bool delete_pr)
     }
 
     autofree_ptr<git_object> treeish(git_object_free);
-    git_revparse_single(&treeish.ptr, repo, "master");
+    if (!found_main_branch(treeish, repo)) {
+        throw std::runtime_error("revparse");
+    }
 
     git_checkout_options checkout_opts = GIT_CHECKOUT_OPTIONS_INIT;
     checkout_opts.checkout_strategy = GIT_CHECKOUT_SAFE;
