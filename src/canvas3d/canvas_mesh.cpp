@@ -6,6 +6,7 @@
 #include "util/geom_util.hpp"
 #include "util/min_max_accumulator.hpp"
 #include "util/polygon_arc_removal_proxy.hpp"
+#include <algorithm>
 #include <future>
 #include <thread>
 #include <atomic>
@@ -84,7 +85,13 @@ void CanvasMesh::prepare_worker(std::atomic_size_t &layer_counter, std::function
                     ClipperLib::Paths res;
                     ofs.Execute(res, -.001_mm);
                     for (const auto &path : res) {
-                        add_path(layer, path);
+                        ClipperLib::Paths clipped;
+                        if (clip_path_to_board_outline(path, clipped)) {
+                            add_barrel(layer, path);
+                        }
+                        else {
+                            add_path(layer, path);
+                        }
                     }
                 }
             }
@@ -260,6 +267,18 @@ void CanvasMesh::prepare(const Board &brd)
         layers_to_prepare.push_back(layer);
         layer++;
     }
+
+    board_outline.clear();
+    const auto it = ca.get_patches().find({PatchType::OTHER, BoardLayers::L_OUTLINE, UUID()});
+    if (it != ca.get_patches().end()) {
+        ClipperLib::Clipper cl;
+        cl.AddPaths(it->second, ClipperLib::ptSubject, true);
+        cl.Execute(ClipperLib::ctUnion, board_outline, ClipperLib::pftEvenOdd);
+        if (!board_outline.empty()) {
+            board_outline_bbox = cl.GetBounds();
+            std::swap(board_outline_bbox.top, board_outline_bbox.bottom);
+        }
+    }
 }
 
 void CanvasMesh::prepare_work(std::function<void()> cb)
@@ -415,7 +434,23 @@ void CanvasMesh::prepare_layer(int layer)
         for (const auto &it : ca.get_patches()) {
             const auto l = layer_is_substrate(layer) ? BoardLayers::L_OUTLINE : layer;
             if (it.first.layer == l) {
-                cl.AddPaths(it.second, ClipperLib::ptSubject, true);
+                const bool clip_copper = BoardLayers::is_copper(layer)
+                                         && (it.first.type == PatchType::PAD_TH || it.first.type == PatchType::VIA
+                                             || it.first.type == PatchType::HOLE_PTH);
+                if (clip_copper) {
+                    for (const auto &path : it.second) {
+                        ClipperLib::Paths clipped;
+                        if (clip_path_to_board_outline(path, clipped)) {
+                            cl.AddPaths(clipped, ClipperLib::ptSubject, true);
+                        }
+                        else {
+                            cl.AddPath(path, ClipperLib::ptSubject, true);
+                        }
+                    }
+                }
+                else {
+                    cl.AddPaths(it.second, ClipperLib::ptSubject, true);
+                }
             }
         }
 
@@ -449,6 +484,77 @@ void CanvasMesh::prepare_layer(int layer)
     }
 }
 
+static ClipperLib::IntRect get_path_bbox(const ClipperLib::Path &path)
+{
+    ClipperLib::IntRect bbox{path.front().X, path.front().Y, path.front().X, path.front().Y};
+    for (const auto &point : path) {
+        bbox.left = std::min(bbox.left, point.X);
+        bbox.right = std::max(bbox.right, point.X);
+        bbox.bottom = std::min(bbox.bottom, point.Y);
+        bbox.top = std::max(bbox.top, point.Y);
+    }
+    return bbox;
+}
+
+bool CanvasMesh::clip_path_to_board_outline(const ClipperLib::Path &path, ClipperLib::Paths &clipped) const
+{
+    clipped.clear();
+    if (path.size() < 3 || board_outline.empty()) {
+        return false;
+    }
+
+    const auto bbox = get_path_bbox(path);
+    if (bbox.right < board_outline_bbox.left || bbox.left > board_outline_bbox.right
+        || bbox.top < board_outline_bbox.bottom || bbox.bottom > board_outline_bbox.top) {
+        return false;
+    }
+
+    ClipperLib::Clipper cl;
+    cl.AddPath(path, ClipperLib::ptSubject, true);
+    cl.AddPaths(board_outline, ClipperLib::ptClip, true);
+    cl.Execute(ClipperLib::ctIntersection, clipped, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+    if (clipped.empty()) {
+        return false;
+    }
+
+    double clipped_area = 0;
+    for (const auto &clipped_path : clipped) {
+        clipped_area += ClipperLib::Area(clipped_path);
+    }
+    return std::abs(clipped_area) < std::abs(ClipperLib::Area(path));
+}
+
+void CanvasMesh::add_barrel(int layer, const ClipperLib::Path &path)
+{
+    if (path.size() < 3) {
+        return;
+    }
+
+    ClipperLib::Path open_path = path;
+    open_path.push_back(path.front());
+    ClipperLib::Clipper cl;
+    ClipperLib::PolyTree tree;
+    ClipperLib::Paths arcs;
+    cl.AddPath(open_path, ClipperLib::ptSubject, false);
+    cl.AddPaths(board_outline, ClipperLib::ptClip, true);
+    cl.Execute(ClipperLib::ctIntersection, tree, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+    ClipperLib::OpenPathsFromPolyTree(tree, arcs);
+    auto &walls = layers.at(layer).walls;
+    for (const auto &arc : arcs) {
+        if (arc.size() < 2) {
+            continue;
+        }
+        walls.emplace_back(2 * arc.front().X - arc[1].X, 2 * arc.front().Y - arc[1].Y);
+        for (const auto &pt : arc) {
+            walls.emplace_back(pt.X, pt.Y);
+        }
+        walls.emplace_back(2 * arc.back().X - arc[arc.size() - 2].X, 2 * arc.back().Y - arc[arc.size() - 2].Y);
+        while ((walls.size() + 1) % 4 != 0) {
+            walls.emplace_back(walls.back().x, walls.back().y);
+        }
+        walls.emplace_back(NAN, NAN);
+    }
+}
 
 void CanvasMesh::add_path(int layer, const ClipperLib::Path &path)
 {
@@ -459,7 +565,11 @@ void CanvasMesh::add_path(int layer, const ClipperLib::Path &path)
         }
         layers.at(layer).walls.emplace_back(path[0].X, path[0].Y);
         layers.at(layer).walls.emplace_back(path[1].X, path[1].Y);
-        layers.at(layer).walls.emplace_back(NAN, NAN);
+        auto &walls = layers.at(layer).walls;
+        while ((walls.size() + 1) % 4 != 0) {
+            walls.emplace_back(walls.back().x, walls.back().y);
+        }
+        walls.emplace_back(NAN, NAN);
     }
 }
 

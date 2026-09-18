@@ -79,5 +79,10 @@ private:
     void prepare_silkscreen(int layer);
     void prepare_height_restriction(int layer);
     void add_path(int layer, const ClipperLib::Path &path);
+
+    ClipperLib::Paths board_outline;
+    ClipperLib::IntRect board_outline_bbox;
+    void add_barrel(int layer, const ClipperLib::Path &path);
+    bool clip_path_to_board_outline(const ClipperLib::Path &path, ClipperLib::Paths &clipped) const;
 };
 } // namespace horizon
