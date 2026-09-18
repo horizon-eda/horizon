@@ -3,6 +3,7 @@
 #include "common/common.hpp"
 #include "clipper/clipper.hpp"
 #include <atomic>
+#include <utility>
 
 namespace horizon {
 class CanvasMesh {
@@ -81,7 +82,7 @@ private:
     void add_path(int layer, const ClipperLib::Path &path);
 
     ClipperLib::Paths board_outline;
-    ClipperLib::IntRect board_outline_bbox;
+    std::pair<Coordi, Coordi> board_outline_bbox; // Rect: bottom-left, top-right
     void add_barrel(int layer, const ClipperLib::Path &path);
     bool clip_path_to_board_outline(const ClipperLib::Path &path, ClipperLib::Paths &clipped) const;
 };

@@ -3,10 +3,10 @@
 #include "board/board_layers.hpp"
 #include "poly2tri/poly2tri.h"
 #include "logger/logger.hpp"
+#include "util/bbox_accumulator.hpp"
 #include "util/geom_util.hpp"
 #include "util/min_max_accumulator.hpp"
 #include "util/polygon_arc_removal_proxy.hpp"
-#include <algorithm>
 #include <future>
 #include <thread>
 #include <atomic>
@@ -268,15 +268,22 @@ void CanvasMesh::prepare(const Board &brd)
         layer++;
     }
 
-    board_outline.clear();
-    const auto it = ca.get_patches().find({PatchType::OTHER, BoardLayers::L_OUTLINE, UUID()});
-    if (it != ca.get_patches().end()) {
-        ClipperLib::Clipper cl;
-        cl.AddPaths(it->second, ClipperLib::ptSubject, true);
-        cl.Execute(ClipperLib::ctUnion, board_outline, ClipperLib::pftEvenOdd);
-        if (!board_outline.empty()) {
-            board_outline_bbox = cl.GetBounds();
-            std::swap(board_outline_bbox.top, board_outline_bbox.bottom);
+    {
+        board_outline.clear();
+        board_outline_bbox = {};
+        const auto it = ca.get_patches().find({PatchType::OTHER, BoardLayers::L_OUTLINE, UUID()});
+        if (it != ca.get_patches().end()) {
+            ClipperLib::Clipper cl;
+            cl.AddPaths(it->second, ClipperLib::ptSubject, true);
+            cl.Execute(ClipperLib::ctUnion, board_outline, ClipperLib::pftEvenOdd);
+
+            BBoxAccumulator<int64_t> bba;
+            for (const auto &path : board_outline) {
+                for (const auto &pt : path) {
+                    bba.accumulate(Coordi(pt.X, pt.Y));
+                }
+            }
+            board_outline_bbox = bba.get_or_0();
         }
     }
 }
@@ -484,18 +491,6 @@ void CanvasMesh::prepare_layer(int layer)
     }
 }
 
-static ClipperLib::IntRect get_path_bbox(const ClipperLib::Path &path)
-{
-    ClipperLib::IntRect bbox{path.front().X, path.front().Y, path.front().X, path.front().Y};
-    for (const auto &point : path) {
-        bbox.left = std::min(bbox.left, point.X);
-        bbox.right = std::max(bbox.right, point.X);
-        bbox.bottom = std::min(bbox.bottom, point.Y);
-        bbox.top = std::max(bbox.top, point.Y);
-    }
-    return bbox;
-}
-
 bool CanvasMesh::clip_path_to_board_outline(const ClipperLib::Path &path, ClipperLib::Paths &clipped) const
 {
     clipped.clear();
@@ -503,9 +498,14 @@ bool CanvasMesh::clip_path_to_board_outline(const ClipperLib::Path &path, Clippe
         return false;
     }
 
-    const auto bbox = get_path_bbox(path);
-    if (bbox.right < board_outline_bbox.left || bbox.left > board_outline_bbox.right
-        || bbox.top < board_outline_bbox.bottom || bbox.bottom > board_outline_bbox.top) {
+    BBoxAccumulator<int64_t> bba;
+    for (const auto &pt : path) {
+        bba.accumulate(Coordi(pt.X, pt.Y));
+    }
+    const auto [path_min, path_max] = bba.get_or_0();
+    const auto &[outline_min, outline_max] = board_outline_bbox;
+    if (path_max.x < outline_min.x || path_min.x > outline_max.x || path_max.y < outline_min.y
+        || path_min.y > outline_max.y) {
         return false;
     }
 
@@ -549,9 +549,6 @@ void CanvasMesh::add_barrel(int layer, const ClipperLib::Path &path)
             walls.emplace_back(pt.X, pt.Y);
         }
         walls.emplace_back(2 * arc.back().X - arc[arc.size() - 2].X, 2 * arc.back().Y - arc[arc.size() - 2].Y);
-        while ((walls.size() + 1) % 4 != 0) {
-            walls.emplace_back(walls.back().x, walls.back().y);
-        }
         walls.emplace_back(NAN, NAN);
     }
 }
