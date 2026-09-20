@@ -117,35 +117,37 @@ namespace doj
 	    }
 	  else // mode==NUMBER
 	    {
-	      const char *l_start = l;
-	      while(*l && alphanum_isdigit(*l))
-		++l;
-	      const char *r_start = r;
-	      while(*r && alphanum_isdigit(*r))
-		++r;
+        // Find the end of each numeric run without integer conversion.
+        const char *l_end = l;
+        while (*l_end && alphanum_isdigit(*l_end))
+          ++l_end;
+        const char *r_end = r;
+        while (*r_end && alphanum_isdigit(*r_end))
+          ++r_end;
 
-	      // Compare digit runs without converting them to an integer. Numeric
-	      // conversion overflows for long values and breaks transitivity,
-	      // which is invalid for a SQLite index collation.
-	      const char *l_significant = l_start;
-	      while (l_significant + 1 < l && *l_significant == '0')
-		++l_significant;
-	      const char *r_significant = r_start;
-	      while (r_significant + 1 < r && *r_significant == '0')
-		++r_significant;
-	      const auto l_digits = l - l_significant;
-	      const auto r_digits = r - r_significant;
-	      if (l_digits != r_digits)
-		return l_digits < r_digits ? -1 : +1;
-	      for (const char *lp = l_significant, *rp = r_significant; lp < l && rp < r; ++lp, ++rp)
-		{
-		  if (*lp != *rp)
-		    return *lp < *rp ? -1 : +1;
-		}
+        // Ignore leading zeroes when measuring the numeric values.
+        const char *l_significant = l;
+        while (l_significant + 1 < l_end && *l_significant == '0')
+          ++l_significant;
+        const char *r_significant = r;
+        while (r_significant + 1 < r_end && *r_significant == '0')
+          ++r_significant;
 
-	      // otherwise we process the next substring in STRING mode
-	      mode=STRING;
-	    }
+        const auto l_digits = l_end - l_significant;
+        const auto r_digits = r_end - r_significant;
+        if (l_digits != r_digits)
+          return l_digits < r_digits ? -1 : +1;
+
+        // Equal-length digit runs compare lexicographically.
+        const int diff = std::char_traits<char>::compare(l_significant, r_significant, l_digits);
+        if (diff != 0)
+          return diff;
+
+        l = l_end;
+        r = r_end;
+
+        mode = STRING;
+      }
 	}
 
       if(*r) return -1;
