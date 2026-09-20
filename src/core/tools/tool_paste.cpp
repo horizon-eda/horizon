@@ -696,12 +696,8 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
                               .emplace(std::piecewise_construct, std::forward_as_tuple(u),
                                        std::forward_as_tuple(u, it.value(), nullptr, doc.r->get_pool_caching()))
                               .first->second;
-            if (net_xlat.count(x->net.uuid)) {
-                x->net = &brd->block->nets.at(net_xlat.at(x->net.uuid));
-            }
-            else {
-                x->net = nullptr;
-            }
+
+            x->net = translate_board_net(*brd, board_net_xlat, x->net.uuid);
             x->padstack.apply_parameter_set(x->parameter_set);
             transform(x->placement, ObjectType::BOARD_HOLE);
             selection.emplace(u, ObjectType::BOARD_HOLE);
