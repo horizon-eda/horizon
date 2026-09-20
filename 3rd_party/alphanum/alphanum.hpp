@@ -117,39 +117,31 @@ namespace doj
 	    }
 	  else // mode==NUMBER
 	    {
-#ifdef ALPHANUM_LOCALE
-	      // get the left number
-	      char *end;
-	      unsigned long l_int=strtoul(l, &end, 0);
-	      l=end;
-
-	      // get the right number
-	      unsigned long r_int=strtoul(r, &end, 0);
-	      r=end;
-#else
-	      // get the left number
-	      unsigned long l_int=0;
+	      const char *l_start = l;
 	      while(*l && alphanum_isdigit(*l))
-		{
-		  // TODO: this can overflow
-		  l_int=l_int*10 + *l-'0';
-		  ++l;
-		}
-
-	      // get the right number
-	      unsigned long r_int=0;
+		++l;
+	      const char *r_start = r;
 	      while(*r && alphanum_isdigit(*r))
-		{
-		  // TODO: this can overflow
-		  r_int=r_int*10 + *r-'0';
-		  ++r;
-		}
-#endif
+		++r;
 
-	      // if the difference is not equal to zero, we have a comparison result
-	      const long diff=l_int-r_int;
-	      if(diff != 0)
-		return diff;
+	      // Compare digit runs without converting them to an integer. Numeric
+	      // conversion overflows for long values and breaks transitivity,
+	      // which is invalid for a SQLite index collation.
+	      const char *l_significant = l_start;
+	      while (l_significant + 1 < l && *l_significant == '0')
+		++l_significant;
+	      const char *r_significant = r_start;
+	      while (r_significant + 1 < r && *r_significant == '0')
+		++r_significant;
+	      const auto l_digits = l - l_significant;
+	      const auto r_digits = r - r_significant;
+	      if (l_digits != r_digits)
+		return l_digits < r_digits ? -1 : +1;
+	      for (const char *lp = l_significant, *rp = r_significant; lp < l && rp < r; ++lp, ++rp)
+		{
+		  if (*lp != *rp)
+		    return *lp < *rp ? -1 : +1;
+		}
 
 	      // otherwise we process the next substring in STRING mode
 	      mode=STRING;
