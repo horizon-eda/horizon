@@ -24,6 +24,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
 
+#include <algorithm>
 #include <limits.h>          // for INT_MAX
 #include <math.h>            // for hypot
 #include <map>
@@ -40,6 +41,17 @@
 #include <trigo.h>  // for RAD2DECIDEG, CalcArcAngle
 
 class SHAPE;
+
+namespace
+{
+// Compact bounding-box record used inside SHAPE_LINE_CHAIN::Intersect.
+// Hoisted to file scope so thread_local scratch vectors can reference the type.
+struct SEG_EXTENT
+{
+    int minX, maxX, minY, maxY;
+    int segIdx;
+};
+}
 
 const ssize_t                     SHAPE_LINE_CHAIN::SHAPE_IS_PT = -1;
 const std::pair<ssize_t, ssize_t> SHAPE_LINE_CHAIN::SHAPES_ARE_PT = { SHAPE_IS_PT, SHAPE_IS_PT };
@@ -1399,40 +1411,93 @@ static inline void addIntersection( SHAPE_LINE_CHAIN::INTERSECTIONS& aIps, int a
 
 
 int SHAPE_LINE_CHAIN::Intersect( const SHAPE_LINE_CHAIN& aChain, INTERSECTIONS& aIp,
-                                 bool aExcludeColinearAndTouching ) const
+                                 bool aExcludeColinearAndTouching) const
 {
-    BOX2I bb_other = aChain.BBox();
+    const int ourSegCount = SegmentCount();
+    const int theirSegCount = aChain.SegmentCount();
 
-    for( int s1 = 0; s1 < SegmentCount(); s1++ )
+    if( ourSegCount == 0 || theirSegCount == 0 )
+        return 0;
+
+    const BOX2I                  bbOther( aChain.BBox() );
+    const int                    ourPtCount = static_cast<int>( m_points.size() );
+    const int                    theirPtCount = static_cast<int>( aChain.CPoints().size() );
+    const std::vector<VECTOR2I>& theirPts = aChain.CPoints();
+
+    thread_local std::vector<SEG>        theirSegs;
+    thread_local std::vector<SEG_EXTENT> sorted;
+
+    theirSegs.resize( theirSegCount );
+    sorted.resize( theirSegCount );
+
+    // Pre-build SEGs for the other chain so each is constructed exactly once
+    for( int i = 0; i < theirSegCount; i++ )
     {
-        const SEG& a = CSegment( s1 );
-        const BOX2I bb_cur( a.A, a.B - a.A );
+        const VECTOR2I& pa = theirPts[i];
+        const VECTOR2I& pb = theirPts[i + 1 < theirPtCount ? i + 1 : 0];
+        theirSegs[i] = SEG( pa, pb, i );
+    }
 
-        if( !bb_other.Intersects( bb_cur ) )
-            continue;
+    // Compact extent array for cache-friendly scanning, sorted by minX
+    for( int i = 0; i < theirSegCount; i++ )
+    {
+        const SEG& s = theirSegs[i];
+        sorted[i] = { std::min( s.A.x, s.B.x ), std::max( s.A.x, s.B.x ),
+                       std::min( s.A.y, s.B.y ), std::max( s.A.y, s.B.y ), i };
+    }
 
-        for( int s2 = 0; s2 < aChain.SegmentCount(); s2++ )
+    std::sort( sorted.begin(), sorted.end(),
+               []( const SEG_EXTENT& a, const SEG_EXTENT& b ) { return a.minX < b.minX; } );
+
+    for( int s1 = 0; s1 < ourSegCount; s1++ )
+    {
+        const VECTOR2I& a1 = m_points[s1];
+        const VECTOR2I& b1 = m_points[s1 + 1 < ourPtCount ? s1 + 1 : 0];
+
+        const int ourMinX = std::min( a1.x, b1.x );
+        const int ourMaxX = std::max( a1.x, b1.x );
+        const int ourMinY = std::min( a1.y, b1.y );
+        const int ourMaxY = std::max( a1.y, b1.y );
+
+        if( ourMaxX < bbOther.GetLeft() || ourMinX > bbOther.GetRight()
+            || ourMaxY < bbOther.GetTop() || ourMinY > bbOther.GetBottom() )
         {
-            const SEG& b = aChain.CSegment( s2 );
-            INTERSECTION is;
+            continue;
+        }
 
+        const SEG a( a1, b1, s1 );
+
+        // Find the right boundary in the sorted extents: first entry where minX > ourMaxX.
+        // Everything past this point is too far right to overlap.
+        auto rightEnd = std::upper_bound( sorted.begin(), sorted.end(), ourMaxX,
+                                          []( int val, const SEG_EXTENT& e )
+                                          {
+                                              return val < e.minX;
+                                          } );
+
+        for( auto jt = sorted.begin(); jt != rightEnd; ++jt )
+        {
+            if( jt->maxX < ourMinX || jt->maxY < ourMinY || jt->minY > ourMaxY )
+                continue;
+
+            const SEG& b = theirSegs[jt->segIdx];
+
+            INTERSECTION is;
             is.index_our = s1;
-            is.index_their = s2;
+            is.index_their = jt->segIdx;
             is.is_corner_our = false;
             is.is_corner_their = false;
             is.valid = true;
 
             OPT_VECTOR2I p = a.Intersect( b );
 
-            bool coll = a.Collinear( b );
-
-            if( coll && ! aExcludeColinearAndTouching )
+            if( !aExcludeColinearAndTouching && a.Collinear( b ) )
             {
                 if( a.Contains( b.A ) )
                 {
                     is.p = b.A;
                     is.is_corner_their = true;
-                    addIntersection(aIp, PointCount(), is);
+                    aIp.push_back( is );
                 }
 
                 if( a.Contains( b.B ) )
@@ -1440,14 +1505,14 @@ int SHAPE_LINE_CHAIN::Intersect( const SHAPE_LINE_CHAIN& aChain, INTERSECTIONS& 
                     is.p = b.B;
                     is.index_their++;
                     is.is_corner_their = true;
-                    addIntersection( aIp, PointCount(), is );
+                    aIp.push_back( is );
                 }
 
                 if( b.Contains( a.A ) )
                 {
                     is.p = a.A;
                     is.is_corner_our = true;
-                    addIntersection( aIp, PointCount(), is );
+                    aIp.push_back( is );
                 }
 
                 if( b.Contains( a.B ) )
@@ -1455,7 +1520,7 @@ int SHAPE_LINE_CHAIN::Intersect( const SHAPE_LINE_CHAIN& aChain, INTERSECTIONS& 
                     is.p = a.B;
                     is.index_our++;
                     is.is_corner_our = true;
-                    addIntersection( aIp, PointCount(), is );
+                    aIp.push_back( is );
                 }
             }
             else if( p )
@@ -1463,9 +1528,6 @@ int SHAPE_LINE_CHAIN::Intersect( const SHAPE_LINE_CHAIN& aChain, INTERSECTIONS& 
                 is.p = *p;
                 is.is_corner_our = false;
                 is.is_corner_their = false;
-
-                int distA = ( b.A - *p ).EuclideanNorm();
-                int distB = ( b.B - *p ).EuclideanNorm();
 
                 if( p == a.A )
                 {
@@ -1489,13 +1551,14 @@ int SHAPE_LINE_CHAIN::Intersect( const SHAPE_LINE_CHAIN& aChain, INTERSECTIONS& 
                     is.index_their++;
                 }
 
-                addIntersection( aIp, PointCount(), is );
+                aIp.push_back( is );
             }
         }
     }
 
     return aIp.size();
 }
+
 
 
 int SHAPE_LINE_CHAIN::PathLength( const VECTOR2I& aP, int aIndex ) const
