@@ -185,6 +185,16 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
     }
 }
 
+static Net *translate_board_net(Board &brd, const std::map<UUID, Net *> &board_net_xlat, const UUID &net)
+{
+    if (brd.block->nets.count(net))
+        return &brd.block->nets.at(net);
+    else if (board_net_xlat.count(net))
+        return board_net_xlat.at(net);
+    else
+        return nullptr;
+}
+
 ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_pos_canvas)
 {
     Coordi cursor_pos = j.at("cursor_pos").get<std::vector<int64_t>>();
@@ -619,15 +629,7 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
                                        std::forward_as_tuple(u, it.value(), doc.b->get_pool_caching(), nullptr))
                               .first->second;
             x->expand(*brd);
-            if (brd->block->nets.count(x->net_set.uuid)) {
-                x->net_set = &brd->block->nets.at(x->net_set.uuid);
-            }
-            else if (board_net_xlat.count(x->net_set.uuid)) {
-                x->net_set = board_net_xlat.at(x->net_set.uuid);
-            }
-            else {
-                x->net_set = nullptr;
-            }
+            x->net_set = translate_board_net(*brd, board_net_xlat, x->net_set.uuid);
             if (x->net_set)
                 nets.insert(x->net_set->uuid);
             x->junction = &brd->junctions.at(junction_xlat.at(x->junction.uuid));
