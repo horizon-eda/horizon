@@ -14,11 +14,10 @@ CLANG_FORMAT=${CLANG_FORMAT:-$(command -v clang-format-190)}
 CLANG_FORMAT=${CLANG_FORMAT:-$(command -v clang-format)}
 
 if [ ! -z $CLANG_FORMAT ]; then
-    CLANG_FORMAT_VERSION="$(${CLANG_FORMAT} -version | cut -d " " -f 4 | cut -d "." -f 1)"
+    CLANG_FORMAT_VERSION="$(${CLANG_FORMAT} -version | sed -nE 's/.*clang-format version ([0-9]+).*/\1/p')"
 
     # Check version
     if [ "$CLANG_FORMAT_VERSION" = "19" ]; then
-    # clang-format major version is 15.0
 	CLANG_BIN=$CLANG_FORMAT
     else
         echo "clang-format version 19 required. The following was found:"
@@ -35,4 +34,3 @@ echo "Using clang-format command: ${CLANG_BIN}"
 # Search using the binary found
 find ./src \( -iname *.h -o -iname *.cpp -o -iname *.hpp -o -iname *.cc -o -iname *.c \) ! -iname bitmap_font_*.c ! -iname hershey_fonts.cpp | xargs $CLANG_BIN -style=file -i
 exit $?
-

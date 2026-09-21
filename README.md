@@ -21,6 +21,7 @@ Wanna chat about the project? Join #horizon-eda on libera.chat
 - Undo/redo
 - Copy/paste for some objects
 - Builds and runs on Linux and Windows
+- [Command-line exports](doc/cli.md) for Schematic, Board view, Gerbers, BOMs, placement files, STEP assemblies, and ODB++ jobs
 
 # Features for developers
 - Written in modern C++, legacy-free codebase!
