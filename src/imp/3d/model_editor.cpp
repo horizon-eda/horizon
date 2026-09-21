@@ -83,16 +83,21 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu)
 
         auto browse_button = Gtk::manage(new Gtk::Button("Browse…"));
         browse_button->signal_clicked().connect([this, entry] {
-            Package::Model *model2 = nullptr;
-            if (imp.core_package.models.count(uu)) {
-                model2 = &imp.core_package.models.at(uu);
+            std::string mfn = imp.ask_replace_3d_model_filename(imp.core_package.models.at(uu).filename);
+            if (mfn.empty()) {
+                return;
             }
-            auto mfn = imp.ask_3d_model_filename(model2 ? model2->filename : "");
-            if (mfn.size()) {
-                entry->set_text(mfn);
-                imp.view_3d_window->set_needs_update();
-                imp.view_3d_window->update(true);
+            if (std::find_if(imp.core_package.models.cbegin(), imp.core_package.models.cend(),
+                             [mfn](auto &it) { return mfn == it.second.filename; })
+                != imp.core_package.models.end()) {
+                Gtk::MessageDialog md(*imp.view_3d_window, "Model is already used in package", false /* use_markup */,
+                                      Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+                md.run();
+                return;
             }
+            entry->set_text(mfn);
+            imp.view_3d_window->set_needs_update();
+            imp.view_3d_window->update(/* clear = */ true);
         });
         box->pack_end(*browse_button, false, false, 0);
 
