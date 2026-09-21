@@ -1,4 +1,5 @@
 #pragma once
+#include <set>
 #include "common/common.hpp"
 #include "common/lut.hpp"
 #include "nlohmann/json_fwd.hpp"
@@ -19,5 +20,6 @@ public:
     std::string prefix;
     bool include_3d_models = true;
     uint64_t min_diameter;
+    std::set<UUID> pkgs_excluded;
 };
 } // namespace horizon
