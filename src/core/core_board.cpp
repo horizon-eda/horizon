@@ -177,6 +177,10 @@ bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID
             dynamic_cast<PropertyValueBool &>(value).value = pkg->omit_outline;
             return true;
 
+        case ObjectProperty::ID::OMIT_PASTE:
+            dynamic_cast<PropertyValueBool &>(value).value = pkg->omit_paste;
+            return true;
+
         default:
             return false;
         }
@@ -486,6 +490,10 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
 
         case ObjectProperty::ID::OMIT_OUTLINE:
             pkg->omit_outline = dynamic_cast<const PropertyValueBool &>(value).value;
+            break;
+
+        case ObjectProperty::ID::OMIT_PASTE:
+            pkg->omit_paste = dynamic_cast<const PropertyValueBool &>(value).value;
             break;
 
         default:
