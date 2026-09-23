@@ -1216,7 +1216,7 @@ void Canvas::render(const Hole &hole, bool interactive)
     transform_restore();
 }
 
-void Canvas::render(const Pad &pad)
+void Canvas::render(const Pad &pad, bool omit_paste)
 {
     transform_save();
     transform.accumulate(pad.placement);
@@ -1229,7 +1229,7 @@ void Canvas::render(const Pad &pad)
     else
         img_patch_type(PatchType::PAD);
     triangle_type_current = TriangleInfo::Type::PAD;
-    render(pad.padstack, false);
+    render(pad.padstack, false, omit_paste);
     triangle_type_current = TriangleInfo::Type::NONE;
     img_patch_type(PatchType::OTHER);
     img_net(nullptr);
@@ -1331,14 +1331,18 @@ void Canvas::render(const Sheet &sheet)
     }
 }
 
-void Canvas::render(const Padstack &padstack, bool interactive)
+void Canvas::render(const Padstack &padstack, bool interactive, bool omit_paste)
 {
     img_padstack(padstack);
     img_set_padstack(true);
     for (const auto &it : padstack.polygons) {
+        if (BoardLayers::is_paste(it.second.layer) && omit_paste)
+            continue;
         render(it.second, interactive);
     }
     for (const auto &it : padstack.shapes) {
+        if (BoardLayers::is_paste(it.second.layer) && omit_paste)
+            continue;
         render(it.second, interactive);
     }
     img_set_padstack(false);
@@ -1430,7 +1434,7 @@ static LayerRange get_layer_for_padstack_type(Padstack::Type type)
 }
 
 void Canvas::render(const Package &pkg, bool interactive, bool smashed, bool omit_silkscreen, bool omit_outline,
-                    bool on_panel)
+                    bool on_panel, bool omit_paste)
 {
     if (interactive) {
         for (const auto &it : pkg.junctions) {
@@ -1463,21 +1467,21 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed, bool omi
         for (const auto &it : pkg.pads) {
             object_ref_push(ObjectType::PAD, it.second.uuid, pkg_uuid);
             render_pad_overlay(it.second, interactive);
-            render(it.second);
+            render(it.second, omit_paste);
             object_ref_pop();
         }
     }
     else if (on_panel) {
         for (const auto &it : pkg.pads) {
             render_pad_overlay(it.second, interactive);
-            render(it.second);
+            render(it.second, omit_paste);
         }
     }
     else {
         for (const auto &it : pkg.pads) {
             object_ref_push(ObjectType::PAD, it.second.uuid);
             render_pad_overlay(it.second, interactive);
-            render(it.second);
+            render(it.second, omit_paste);
             object_ref_pop();
         }
     }
@@ -1543,7 +1547,7 @@ void Canvas::render(const BoardPackage &pkg, bool interactive)
     if (interactive)
         object_ref_push(ObjectType::BOARD_PACKAGE, pkg.uuid);
 
-    render(pkg.package, false, pkg.smashed, pkg.omit_silkscreen, pkg.omit_outline, !interactive);
+    render(pkg.package, false, pkg.smashed, pkg.omit_silkscreen, pkg.omit_outline, !interactive, pkg.omit_paste);
 
     if (interactive)
         object_ref_pop();
