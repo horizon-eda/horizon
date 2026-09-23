@@ -778,6 +778,7 @@ src_gen_pkg = files(
 
 src_tests = files(
     '3rd_party/catch2/catch_amalgamated.cpp',
+    'src/tests/alphanum.cpp',
     'src/tests/tool_lut.cpp',
     'src/tests/layer_display_default.cpp',
     'src/imp/action_catalog.cpp',

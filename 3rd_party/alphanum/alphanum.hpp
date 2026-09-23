@@ -117,43 +117,37 @@ namespace doj
 	    }
 	  else // mode==NUMBER
 	    {
-#ifdef ALPHANUM_LOCALE
-	      // get the left number
-	      char *end;
-	      unsigned long l_int=strtoul(l, &end, 0);
-	      l=end;
+        // Find the end of each numeric run without integer conversion.
+        const char *l_end = l;
+        while (*l_end && alphanum_isdigit(*l_end))
+          ++l_end;
+        const char *r_end = r;
+        while (*r_end && alphanum_isdigit(*r_end))
+          ++r_end;
 
-	      // get the right number
-	      unsigned long r_int=strtoul(r, &end, 0);
-	      r=end;
-#else
-	      // get the left number
-	      unsigned long l_int=0;
-	      while(*l && alphanum_isdigit(*l))
-		{
-		  // TODO: this can overflow
-		  l_int=l_int*10 + *l-'0';
-		  ++l;
-		}
+        // Ignore leading zeroes when measuring the numeric values.
+        const char *l_significant = l;
+        while (l_significant + 1 < l_end && *l_significant == '0')
+          ++l_significant;
+        const char *r_significant = r;
+        while (r_significant + 1 < r_end && *r_significant == '0')
+          ++r_significant;
 
-	      // get the right number
-	      unsigned long r_int=0;
-	      while(*r && alphanum_isdigit(*r))
-		{
-		  // TODO: this can overflow
-		  r_int=r_int*10 + *r-'0';
-		  ++r;
-		}
-#endif
+        const auto l_digits = l_end - l_significant;
+        const auto r_digits = r_end - r_significant;
+        if (l_digits != r_digits)
+          return l_digits < r_digits ? -1 : +1;
 
-	      // if the difference is not equal to zero, we have a comparison result
-	      const long diff=l_int-r_int;
-	      if(diff != 0)
-		return diff;
+        // Equal-length digit runs compare lexicographically.
+        const int diff = std::char_traits<char>::compare(l_significant, r_significant, l_digits);
+        if (diff != 0)
+          return diff;
 
-	      // otherwise we process the next substring in STRING mode
-	      mode=STRING;
-	    }
+        l = l_end;
+        r = r_end;
+
+        mode = STRING;
+      }
 	}
 
       if(*r) return -1;
