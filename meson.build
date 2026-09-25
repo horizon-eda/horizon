@@ -782,6 +782,7 @@ src_tests = files(
     'src/tests/layer_display_default.cpp',
     'src/imp/action_catalog.cpp',
     'src/imp/action.cpp',
+    'src/tests/alphanum.cpp',
 )
 
 prog_python = find_program('python3')
