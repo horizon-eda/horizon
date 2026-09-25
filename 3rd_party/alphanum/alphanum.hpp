@@ -26,6 +26,7 @@
 /* $Header: /code/doj/alphanum.hpp,v 1.3 2008/01/28 23:06:47 doj Exp $ */
 
 #include <cassert>
+#include <cstring>
 #include <functional>
 #include <string>
 #include <sstream>
@@ -116,37 +117,35 @@ int alphanum_impl(const char *l, const char *r)
         }
         else // mode==NUMBER
         {
-#ifdef ALPHANUM_LOCALE
-            // get the left number
-            char *end;
-            unsigned long l_int = strtoul(l, &end, 0);
-            l = end;
-
-            // get the right number
-            unsigned long r_int = strtoul(r, &end, 0);
-            r = end;
-#else
-            // get the left number
-            unsigned long l_int = 0;
-            while (*l && alphanum_isdigit(*l)) {
-                // TODO: this can overflow
-                l_int = l_int * 10 + *l - '0';
+            // strip off leading zeros
+            while(*l == '0')
+              ++l;
+          
+            const char *lbegin = l;
+            while (*l && alphanum_isdigit(*l))
                 ++l;
-            }
 
-            // get the right number
-            unsigned long r_int = 0;
-            while (*r && alphanum_isdigit(*r)) {
-                // TODO: this can overflow
-                r_int = r_int * 10 + *r - '0';
+            // strip off leading zeros
+            while(*r == '0')
+              ++r;
+            const char *rbegin = r;
+            while (*r && alphanum_isdigit(*r))
                 ++r;
-            }
-#endif
 
-            // if the difference is not equal to zero, we have a comparison result
-            const long diff = l_int - r_int;
-            if (diff != 0)
-                return diff;
+            const auto llen = l - lbegin;
+            const auto rlen = r - rbegin;
+            if (llen > rlen) {
+              return 1;  
+            }
+            else if (rlen > llen) {
+              return -1;  
+            }
+            else {
+              // equal length, so we can just use memcmp
+              auto r = memcmp(lbegin, rbegin, llen);
+              if(r)
+                return r;
+            }
 
             // otherwise we process the next substring in STRING mode
             mode = STRING;
