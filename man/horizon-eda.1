@@ -5,7 +5,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH HORIZON-EDA 1 "2021-05-12"
+.TH HORIZON-EDA 1 "2026-09-09"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -27,8 +27,19 @@ horizon-eda \- EDA layout and schematic application
 \-\-help\-all |
 \-\-help\-gapplication |
 \-\-help\-gtk |
-\-\-diplay=<DISPLAY>
+\-\-display=<DISPLAY>
 .br
+.B horizon-eda export
+.I COMMAND PROJECT
+.RI [ OPTIONS ]
+.br
+.B horizon-eda \-\-version
+.br
+.B horizon-eda export \-\-help
+.br
+.B horizon-eda export
+.I COMMAND
+.B \-\-help
 
 .SH DESCRIPTION
 This manual page documents the
@@ -62,6 +73,87 @@ Show GTK+ options.
 .TP
 .B \-\-display=<DISPLAY>
 X display to use.
+
+.SH GENERAL OPTIONS
+.TP
+.B \-\-version
+Show application version
+
+.SH EXPORTS
+Export commands run headless and use the project's saved export settings
+.TP
+.B export schematic PROJECT \-o FILE
+Export schematic to PDF
+.TP
+.B export gerber PROJECT \-\-output-dir DIRECTORY
+Export Gerber files
+.TP
+.B export bom PROJECT \-o FILE
+Export a bill of materials
+.TP
+.B export board PROJECT \-o FILE
+Export board layers to PDF
+.TP
+.B export pnp PROJECT \-\-output-dir DIRECTORY
+Export pick-and-place files
+.TP
+.B export step PROJECT \-o FILE
+Export a STEP assembly
+.TP
+.B export odb PROJECT \-\-output-dir DIRECTORY
+Export an ODB++ job
+.PP
+Run \fBhorizon-eda export \-\-help\fP to show help for export commands
+.br
+Use \fBhorizon-eda export COMMAND \-\-help\fP for export options
+.SS Export options
+.TP
+.B \-o, \-\-output FILE
+Output filename for schematic, board, BOM, and STEP exports
+.br
+For schematic and board exports, the output format is selected by filename extension; currently only .pdf is supported
+.TP
+.B \-\-output-dir DIRECTORY
+Output directory for generated Gerber, pick-and-place, and ODB++ files
+.TP
+.B \-\-prefix PREFIX
+Override the saved export prefix for Gerber and STEP exports
+.TP
+.B \-\-settings FILE
+Apply JSON overrides to saved export settings
+.TP
+.B \-\-overwrite
+Overwrite existing output files
+.TP
+.B \-\-quiet
+Suppress progress messages
+.TP
+.B \-h, \-\-help
+Show help for the selected exporter, or list export commands when no command is given
+.SS Export behavior
+Schematic export includes all sheets
+.br
+Gerber export includes enabled layers and Excellon drill files with freshly calculated copper planes
+.br
+Board PDF export uses saved layer visibility and colors
+.br
+BOM and pick-and-place exports produce CSV files, with pick-and-place files merged or separate according to the saved settings
+.br
+STEP export uses locally available component models
+.br
+ODB++ export produces a directory or archive using the saved format
+.PP
+Command-line paths are relative to the working directory
+.br
+Project files are not modified, and the local pool is indexed in a temporary directory
+.br
+Referenced pool items must be present in the project pool or its committed caches
+.br
+Loading warnings fail the export
+.PP
+Export exit codes are 0 for success, 1 for loading or export failures, and 2 for invalid arguments or settings
+.br
+Progress and diagnostics are written to stderr
 
 .SH AUTHORS
 This manual page was initially written by

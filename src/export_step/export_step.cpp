@@ -407,7 +407,7 @@ static bool getModelLabel(const std::string &aFileName, TDF_Label &aLabel, Handl
 
 void export_step(const std::string &filename, const Board &brd, class IPool &pool, bool include_models,
                  std::function<void(const std::string &)> progress_cb, const BoardColors *colors,
-                 const std::string &prefix, uint64_t min_diameter)
+                 const std::string &prefix, uint64_t min_diameter, bool strict)
 {
     try {
         auto app = XCAFApp_Application::GetApplication();
@@ -491,6 +491,8 @@ void export_step(const std::string &filename, const Board &brd, class IPool &poo
             }
         }
         else {
+            if (strict)
+                throw std::runtime_error("invalid board outline");
             progress_cb("Invalid outline");
         }
 
@@ -536,6 +538,8 @@ void export_step(const std::string &filename, const Board &brd, class IPool &poo
                     }
                 }
                 catch (const std::exception &e) {
+                    if (strict)
+                        throw;
                     progress_cb("Error processing package " + it->component->refdes + ": " + e.what());
                 }
                 i++;
@@ -559,7 +563,7 @@ void export_step(const std::string &filename, const Board &brd, class IPool &poo
         hdr.SetOriginatingSystem(new TCollection_HAsciiString("horizon EDA"));
         hdr.SetDescriptionValue(1, new TCollection_HAsciiString("Electronic assembly"));
 
-        if (Standard_False == writer.Write(filename.c_str()))
+        if (writer.Write(filename.c_str()) != IFSelect_RetDone)
             throw std::runtime_error("write error");
 
         progress_cb("Done");

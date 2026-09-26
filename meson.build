@@ -223,6 +223,7 @@ src_common = files(
     'src/pool/symbol.cpp',
     'src/pool/unit.cpp',
     'src/project/project.cpp',
+    'src/project/export_util.cpp',
     'src/rules/rule.cpp',
     'src/rules/rule_descr.cpp',
     'src/rules/rule_match.cpp',
@@ -962,9 +963,24 @@ libhorizonui = static_library('libhorizonui',
 )
 
 
+src_cli = files(
+    'src/export_step/export_step.cpp',
+    'src/cli/board_export.cpp',
+    'src/board/plane_update.cpp',
+    'src/canvas/canvas_pads.cpp',
+    'src/util/csv_util.cpp',
+    'src/cli/cli.cpp',
+    'src/cli/options.cpp',
+    'src/cli/settings.cpp',
+    'src/cli/export.cpp',
+    'src/cli/output.cpp',
+    'src/cli/project_pool.cpp',
+    'src/cli/temp_dir.cpp',
+)
+
 horizon_eda = executable('horizon-eda',
-    [src_pool_prj_mgr, src_pool_update,resources, rc_compiled],
-    dependencies: build_dependencies_pool_prj_mgr,
+    [src_pool_prj_mgr, src_pool_update, src_cli, src_export, resources, rc_compiled],
+    dependencies: build_dependencies_pool_prj_mgr + [podofo, libarchive, opencascade],
     link_with: [clipper_nopic, delaunator_nopic, polypartition_nopic, poly2tri_nopic, sexpr, libhorizon, libhorizonui],
     include_directories: include_directories,
     cpp_args: cpp_args,
@@ -1038,3 +1054,17 @@ horizon_tests = executable('horizon-tests',
 )
 
 test('tests', horizon_tests)
+
+cli_fixture = executable('horizon-cli-fixture',
+    'src/tests/cli_fixture.cpp',
+    dependencies: build_dependencies_libhorizon,
+    link_with: [clipper_nopic, delaunator_nopic, libhorizon, libhorizonui],
+    include_directories: include_directories,
+    cpp_args: cpp_args,
+    build_by_default: false,
+)
+
+test('cli', prog_python,
+    args: [files('src/tests/cli.py'), horizon_eda, cli_fixture],
+    timeout: 120,
+)

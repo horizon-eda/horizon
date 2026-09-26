@@ -15,9 +15,9 @@ public:
 
 class PoolManager {
 public:
-    PoolManager();
+    explicit PoolManager(bool load_config = true);
     static PoolManager &get();
-    static void init();
+    static void init(bool load_config = true);
     std::string get_pool_base_path(const UUID &uu);
     void set_pool_enabled(const std::string &base_path, bool enabled);
     bool get_pool_enabled(const std::string &base_path) const;
