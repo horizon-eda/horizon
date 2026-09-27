@@ -52,14 +52,14 @@ void CanvasODB::img_polygon(const Polygon &ipoly, bool tr)
         if (auto feats = get_layer_features(ipoly.layer)) {
             ODB::EDAData::Subnet *subnet = nullptr;
             if (plane->fragments.size()) {
+                const auto net_uu = plane->net ? plane->net->uuid : UUID();
                 using SP = ODB::EDAData::SubnetPlane;
-                subnet = &eda_data->get_net(plane->net->uuid)
-                                  .add_subnet<SP>(SP::FillType::SOLID, SP::CutoutType::CIRCLE, 0);
+                subnet = &(eda_data->get_net(net_uu)).add_subnet<SP>(SP::FillType::SOLID, SP::CutoutType::CIRCLE, 0);
             }
             for (const auto &frag : plane->fragments) {
                 auto &surf = feats->add_surface();
                 eda_data->add_feature_id(*subnet, ODB::EDAData::FeatureID::Type::COPPER,
-                                         ODB::get_layer_name(plane->polygon->layer, brd), surf.index);
+                                         ODB::get_layer_name(ipoly.layer, brd), surf.index);
 
                 Once is_outline;
                 for (const auto &path : frag.paths) {
@@ -72,6 +72,25 @@ void CanvasODB::img_polygon(const Polygon &ipoly, bool tr)
                     for (auto it = path.crbegin(); it != path.crend(); it++) {
                         p.emplace_back(transform.transform(Coordi(it->X, it->Y)));
                     }
+                }
+            }
+        }
+    }
+    else if (auto thief = dynamic_cast<const CopperThief *>(ipoly.usage.ptr)) {
+        if (auto feats = get_layer_features(ipoly.layer)) {
+            auto &net = eda_data->get_net(UUID());
+            auto &subnet = net.add_subnet<ODB::EDAData::SubnetPlane>(ODB::EDAData::SubnetPlane::FillType::SOLID,
+                                                                     ODB::EDAData::SubnetPlane::CutoutType::CIRCLE, 0);
+            for (const auto &frag : thief->fragments) {
+                auto &surf = feats->add_surface();
+                eda_data->add_feature_id(subnet, ODB::EDAData::FeatureID::Type::COPPER,
+                                         ODB::get_layer_name(ipoly.layer, brd), surf.index);
+                Once is_outline;
+                for (const auto &path : frag.paths) {
+                    surf.data.lines.emplace_back();
+                    auto &p = surf.data.lines.back();
+                    for (auto it = path.crbegin(); it != path.crend(); it++)
+                        p.emplace_back(transform.transform(Coordi(it->X, it->Y)));
                 }
             }
         }

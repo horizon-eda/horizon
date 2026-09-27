@@ -7,6 +7,7 @@ namespace horizon {
 class FragmentCache {
 public:
     const std::vector<std::array<Coordf, 3>> &get_triangles(const class Plane &plane);
+    const std::vector<std::array<Coordf, 3>> &get_triangles(const class CopperThief &thief);
 
 private:
     class CacheItem {

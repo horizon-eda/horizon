@@ -548,7 +548,7 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Update plane", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::UPDATE_ALL_PLANES},
-         {"Update all planes", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+         {"Update all copper fills", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::EDIT_STACKUP},
@@ -1169,6 +1169,26 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::TOOL, ToolID::DELETE_HEIGHT_RESTRICTION},
          {"Delete height restriction", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::ADD_COPPER_THIEF},
+         {"Assign copper thieving", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::EDIT_COPPER_THIEF},
+         {"Edit copper thieving", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::UPDATE_COPPER_THIEF},
+         {"Update copper thieving", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::CLEAR_COPPER_THIEF},
+         {"Clear copper thieving", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::UPDATE_ALL_COPPER_THIEVES},
+         {"Update all copper thieving", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1195,7 +1215,10 @@ const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
 
 };
 
-#define ACTION_LUT_ITEM(x) {#x, ActionID::x}
+#define ACTION_LUT_ITEM(x)                                                                                             \
+    {                                                                                                                  \
+#x, ActionID::x                                                                                                \
+    }
 
 const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(NONE),
@@ -1333,7 +1356,10 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(SELECT_PLANE),
 };
 
-#define TOOL_LUT_ITEM(x) {#x, ToolID::x}
+#define TOOL_LUT_ITEM(x)                                                                                               \
+    {                                                                                                                  \
+#x, ToolID::x                                                                                                  \
+    }
 
 const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(EDIT_SCHEMATIC_PROPERTIES),
@@ -1508,5 +1534,10 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(ADD_HEIGHT_RESTRICTION),
         TOOL_LUT_ITEM(DRAW_HEIGHT_RESTRICTION),
         TOOL_LUT_ITEM(DELETE_HEIGHT_RESTRICTION),
+        TOOL_LUT_ITEM(ADD_COPPER_THIEF),
+        TOOL_LUT_ITEM(EDIT_COPPER_THIEF),
+        TOOL_LUT_ITEM(UPDATE_COPPER_THIEF),
+        TOOL_LUT_ITEM(CLEAR_COPPER_THIEF),
+        TOOL_LUT_ITEM(UPDATE_ALL_COPPER_THIEVES),
 };
 } // namespace horizon

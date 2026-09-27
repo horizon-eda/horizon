@@ -7,11 +7,12 @@
 namespace horizon {
 
 PlaneUpdateDialog::PlaneUpdateDialog(Gtk::Window &parent, Board &brd, Plane *plane)
-    : Gtk::Dialog("Plane update", parent, Gtk::DIALOG_MODAL)
+    : Gtk::Dialog(plane ? "Plane update" : "Copper fill update", parent, Gtk::DIALOG_MODAL)
 {
+    const auto title = plane ? "Plane update" : "Copper fill update";
     auto hb = Gtk::manage(new Gtk::HeaderBar);
     hb->set_show_close_button(false);
-    hb->set_title("Plane update");
+    hb->set_title(title);
     set_titlebar(*hb);
     hb->show_all();
     auto cancel_button = Gtk::manage(new Gtk::Button("Cancel"));
@@ -103,8 +104,13 @@ PlaneUpdateDialog::PlaneUpdateDialog(Gtk::Window &parent, Board &brd, Plane *pla
                     if (st == "Done")
                         n_done++;
                 }
-                if (!cancel)
-                    status_label->set_text("Updating planes… " + format_m_of_n(n_done, plane_status.size()) + " done");
+                if (!cancel) {
+                    if (updating_copper_thieves)
+                        status_label->set_text("Updating copper thieving…");
+                    else
+                        status_label->set_text("Updating planes… " + format_m_of_n(n_done, plane_status.size())
+                                               + " done");
+                }
             }
             else {
                 if (!cancel)
@@ -131,6 +137,11 @@ void PlaneUpdateDialog::plane_update_thread(Board &brd, Plane *plane)
         }
         else {
             brd.update_planes(cb, cancel);
+            if (!cancel) {
+                updating_copper_thieves = true;
+                dispatcher.emit();
+                brd.update_copper_thieves(cancel);
+            }
         }
     }
     catch (const std::exception &e) {

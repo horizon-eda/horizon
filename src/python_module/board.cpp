@@ -107,6 +107,7 @@ BoardWrapper::BoardWrapper(const horizon::Project &prj, PlaneMode plane_mode)
     }
     else {
         board.update_planes();
+        board.update_copper_thieves();
     }
 }
 

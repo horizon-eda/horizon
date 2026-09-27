@@ -52,6 +52,7 @@ void ClipboardBoard::serialize(json &j)
     j["board_panels"] = json::object();
     j["decals"] = json::object();
     j["planes"] = json::object();
+    j["copper_thieves"] = json::object();
 
 
     const auto &brd = *doc.get_board();
@@ -115,6 +116,9 @@ void ClipboardBoard::serialize(json &j)
             const auto &poly = brd.polygons.at(it.uuid);
             if (auto plane = dynamic_cast<const Plane *>(poly.usage.ptr)) {
                 j["planes"][(std::string)plane->uuid] = plane->serialize();
+            }
+            else if (auto thief = dynamic_cast<const CopperThief *>(poly.usage.ptr)) {
+                j["copper_thieves"][(std::string)thief->uuid] = thief->serialize();
             }
         } break;
 

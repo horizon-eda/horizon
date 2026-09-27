@@ -38,6 +38,7 @@ private:
     std::mutex mutex;
     std::map<UUID, std::string> plane_status;
     std::atomic_bool done = false;
+    std::atomic_bool updating_copper_thieves = false;
 
     class ListColumns : public Gtk::TreeModelColumnRecord {
     public:
