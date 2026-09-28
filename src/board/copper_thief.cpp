@@ -16,7 +16,7 @@ static const LutEnumStr<CopperThiefSettings::Shape> SHAPE_LUT = {
 };
 
 
-CopperThief::Fragment::Fragment(const json &j) : orphan(j.value("orphan", false))
+CopperThief::Fragment::Fragment(const json &j)
 {
     for (const auto &j_path : j.at("paths")) {
         paths.emplace_back();
@@ -29,7 +29,6 @@ CopperThief::Fragment::Fragment(const json &j) : orphan(j.value("orphan", false)
 json CopperThief::Fragment::serialize() const
 {
     json j;
-    j["orphan"] = orphan;
     j["paths"] = json::array();
     for (const auto &path : paths) {
         auto j_path = json::array();

@@ -29,7 +29,6 @@ public:
     public:
         Fragment() = default;
         Fragment(const json &j);
-        bool orphan = false;
         ClipperLib::Paths paths;
         json serialize() const;
     };
