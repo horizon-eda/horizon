@@ -155,8 +155,8 @@ void CanvasPDF::img_polygon(const Polygon &ipoly, bool tr)
             painter.Stroke();
     }
     else if (auto plane = dynamic_cast<const Plane *>(ipoly.usage.ptr)) {
-        const auto &fill = plane->fragments;
-        for (const auto &frag : fill) {
+        const auto &fragments = plane->fragments;
+        for (const auto &frag : fragments) {
             for (const auto &path : frag.paths) {
                 bool first = true;
                 for (const auto &it : path) {
