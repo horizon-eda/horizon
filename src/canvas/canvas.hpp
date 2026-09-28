@@ -130,14 +130,15 @@ protected:
     void render(const class BusRipper &ripper);
     void render(const class Text &text, bool interactive = true, ColorP co = ColorP::FROM_LAYER);
     void render(const class Table &table, bool interactive = true, ColorP co = ColorP::FROM_LAYER);
-    void render(const class Padstack &padstack, bool interactive = true);
+    void render(const class Padstack &padstack, bool interactive = true, bool omit_paste = false);
     void render(const class Polygon &polygon, bool interactive = true, ColorP co = ColorP::FROM_LAYER);
     void render(const class Shape &shape, bool interactive = true);
     void render(const class Hole &hole, bool interactive = true);
     void render(const class Package &package, bool interactive = true, bool smashed = false,
-                bool omit_silkscreen = false, bool omit_outline = false, bool on_panel = false);
+                bool omit_silkscreen = false, bool omit_outline = false, bool on_panel = false,
+                bool omit_paste = false);
     void render_pad_overlay(const class Pad &pad, bool interactive);
-    void render(const class Pad &pad);
+    void render(const class Pad &pad, bool omit_paste);
     enum class OutlineMode { INCLUDE, OMIT };
     void render(const class Board &brd, bool interactive = true, PanelMode mode = PanelMode::INCLUDE,
                 OutlineMode outline_mode = OutlineMode::INCLUDE);

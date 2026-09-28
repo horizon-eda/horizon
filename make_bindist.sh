@@ -112,25 +112,25 @@ LIBS=(
 )
 for LIB in "${LIBS[@]}"
 do
-   cp /mingw64/bin/$LIB $BINDIR
+   cp /ucrt64/bin/$LIB $BINDIR
 done
 
 mkdir -p $DISTDIR/share/icons
-cp -r /mingw64/share/icons/Adwaita $DISTDIR/share/icons
-cp -r /mingw64/share/icons/hicolor $DISTDIR/share/icons
+cp -r /ucrt64/share/icons/Adwaita $DISTDIR/share/icons
+cp -r /ucrt64/share/icons/hicolor $DISTDIR/share/icons
 rm -rf $DISTDIR/share/icons/Adwaita/cursors
 
 mkdir -p $DISTDIR/lib
-cp -r /mingw64/lib/gdk-pixbuf-2.0 $DISTDIR/lib
+cp -r /ucrt64/lib/gdk-pixbuf-2.0 $DISTDIR/lib
 gdk-pixbuf-query-loaders > $DISTDIR/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
 rm $DISTDIR/lib/gdk-pixbuf-*/*/loaders/*.a
 
 mkdir -p $DISTDIR/share/glib-2.0/schemas
-cp /mingw64/share/glib-2.0/schemas/gschemas.compiled $DISTDIR/share/glib-2.0/schemas
+cp /ucrt64/share/glib-2.0/schemas/gschemas.compiled $DISTDIR/share/glib-2.0/schemas
 
 mkdir -p $DISTDIR/lib
-cp -r /mingw64/lib/engines-3 $DISTDIR/lib
-cp -r /mingw64/lib/ossl-modules $DISTDIR/lib
+cp -r /ucrt64/lib/engines-3 $DISTDIR/lib
+cp -r /ucrt64/lib/ossl-modules $DISTDIR/lib
 
 git log -10 | unix2dos > dist/log.txt
 if [ "$1" != "-n" ]; then

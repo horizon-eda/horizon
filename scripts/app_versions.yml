@@ -23,6 +23,7 @@ versions:
     21: add user layers
     22: add height restrictions
     23: add tables
+    24: add omit paste
   schematic:
     1: add custom values on symbols
     2: add hierarchy
