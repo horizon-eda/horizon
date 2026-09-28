@@ -57,8 +57,8 @@ ToolResponse ToolAddHeightRestriction::begin(const ToolArgs &args)
     auto poly = get_poly();
     auto &brd = *doc.b->get_board();
 
-    if (tool_id == ToolID::DELETE_KEEPOUT) {
-        brd.keepouts.erase(poly->usage->get_uuid());
+    if (tool_id == ToolID::DELETE_HEIGHT_RESTRICTION) {
+        brd.height_restrictions.erase(poly->usage->get_uuid());
         poly->usage = nullptr;
     }
     else {

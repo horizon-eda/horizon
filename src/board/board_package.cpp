@@ -14,7 +14,7 @@ BoardPackage::BoardPackage(const UUID &uu, const json &j, Block &block, IPool &p
       pool_package(component->part->package), package(*pool_package), placement(j.at("placement")),
       flip(j.at("flip").get<bool>()), smashed(j.value("smashed", false)),
       omit_silkscreen(j.value("omit_silkscreen", false)), fixed(j.value("fixed", false)),
-      omit_outline(j.value("omit_outline", false))
+      omit_outline(j.value("omit_outline", false)), omit_paste(j.value("omit_paste", false))
 {
     if (j.count("texts")) {
         const json &o = j.at("texts");
@@ -45,6 +45,8 @@ json BoardPackage::serialize() const
     j["omit_silkscreen"] = omit_silkscreen;
     if (omit_outline)
         j["omit_outline"] = true;
+    if (omit_paste)
+        j["omit_paste"] = true;
     j["fixed"] = fixed;
     j["texts"] = json::array();
     for (const auto &it : texts) {

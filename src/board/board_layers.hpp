@@ -69,6 +69,11 @@ public:
         return l == TOP_SILKSCREEN || l == BOTTOM_SILKSCREEN;
     }
 
+    static bool is_paste(int l)
+    {
+        return l == TOP_PASTE || l == BOTTOM_PASTE;
+    }
+
     static bool is_user(int l)
     {
         return l <= LAST_USER_LAYER && l >= FIRST_USER_LAYER;
