@@ -98,12 +98,30 @@ ClipperLib::Paths get_thieving_pads(const CopperThiefSettings &settings, const C
     const int64_t x0 = first_center(bb.first.X, bb.second.X, n_x);
     const int64_t y0 = first_center(bb.first.Y, bb.second.Y, n_y);
 
-    ClipperLib::Paths grid;
-    grid.reserve(n_x * n_y);
+    ClipperLib::Paths center_area;
+    {
+        ClipperLib::ClipperOffset co;
+        co.ArcTolerance = 2e3; // From `Board::update_plane`
+        co.AddPaths(area, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
+        co.Execute(center_area, -size / 2.0);
+    }
+    if (center_area.empty()) {
+        return pads;
+    }
+
+    pads.reserve(n_x * n_y);
     for (int64_t i = 0; i < n_x; i++) {
         for (int64_t j = 0; j < n_y; j++) {
             const int64_t x = x0 + i * pitch;
             const int64_t y = y0 + j * pitch;
+            const ClipperLib::IntPoint center{x, y};
+            int winding = 0;
+            for (const auto &path : center_area) {
+                winding += ClipperLib::PointInPolygon(center, path);
+            }
+            if (winding == 0) {
+                continue;
+            }
             ClipperLib::Path pad;
             if (settings.shape == CopperThiefSettings::Shape::ROUND) {
                 const unsigned int segments = 64;
@@ -117,21 +135,7 @@ ClipperLib::Paths get_thieving_pads(const CopperThiefSettings &settings, const C
                 const int64_t h = size / 2;
                 pad = {{x - h, y - h}, {x + h, y - h}, {x + h, y + h}, {x - h, y + h}};
             }
-            grid.push_back(pad);
-        }
-    }
-
-    ClipperLib::Paths isect;
-    {
-        ClipperLib::Clipper cl;
-        cl.AddPaths(grid, ClipperLib::ptSubject, true);
-        cl.AddPaths(area, ClipperLib::ptClip, true);
-        cl.Execute(ClipperLib::ctIntersection, isect, ClipperLib::pftNonZero);
-    }
-    const auto pad_area = std::abs(ClipperLib::Area(grid.front()));
-    for (const auto &pad : isect) {
-        if (std::abs(ClipperLib::Area(pad)) == pad_area) {
-            pads.push_back(pad);
+            pads.push_back(std::move(pad));
         }
     }
     return pads;

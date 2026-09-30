@@ -4,8 +4,9 @@
 #include "util/util.hpp"
 
 namespace horizon {
+namespace {
 
-class MyCanvasPatch : public CanvasPatch {
+class ThiefCanvasPatch : public CanvasPatch {
 public:
     using CanvasPatch::CanvasPatch;
 
@@ -48,16 +49,18 @@ static bool bb_isect(const std::pair<ClipperLib::IntPoint, ClipperLib::IntPoint>
     return a.second.X >= b.first.X && b.second.X >= a.first.X && a.second.Y >= b.first.Y && b.second.Y >= a.first.Y;
 }
 
+} // namespace
+
 bool Board::update_copper_thief(CopperThief *thief, const CanvasPatch *ca_ext, const std::atomic_bool &cancel)
 {
     // clear before building the canvas, otherwise the thief's own fragments would become cutouts
     thief->clear();
 
-    MyCanvasPatch ca_my;
+    ThiefCanvasPatch tcp;
     const CanvasPatch *ca = ca_ext;
     if (!ca_ext) {
-        ca_my.update(*this, Canvas::PanelMode::SKIP);
-        ca = &ca_my;
+        tcp.update(*this, Canvas::PanelMode::SKIP);
+        ca = &tcp;
     }
 
     auto poly = thief->polygon->remove_arcs();
@@ -204,7 +207,7 @@ void Board::update_copper_thieves(const std::atomic_bool &cancel)
     for (auto &[uu, thief] : copper_thieves) {
         thief.clear();
     }
-    MyCanvasPatch ca;
+    ThiefCanvasPatch ca;
     ca.update(*this, Canvas::PanelMode::SKIP);
 
     for (auto &[uu, thief] : copper_thieves) {
