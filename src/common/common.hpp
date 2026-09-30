@@ -72,8 +72,23 @@ enum class ObjectType {
     BOARD_NET_TIE,
     HEIGHT_RESTRICTION,
     TABLE,
+    COPPER_THIEF,
 };
-enum class PatchType { OTHER, TRACK, PAD, PAD_TH, VIA, PLANE, HOLE_PTH, HOLE_NPTH, BOARD_EDGE, TEXT, NET_TIE, N_TYPES };
+enum class PatchType {
+    OTHER,
+    TRACK,
+    PAD,
+    PAD_TH,
+    VIA,
+    PLANE,
+    HOLE_PTH,
+    HOLE_NPTH,
+    BOARD_EDGE,
+    TEXT,
+    NET_TIE,
+    COPPER_THIEF,
+    N_TYPES,
+};
 
 extern const LutEnumStr<PatchType> patch_type_lut;
 extern const LutEnumStr<ObjectType> object_type_lut;

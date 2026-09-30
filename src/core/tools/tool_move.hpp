@@ -63,5 +63,6 @@ private:
     void move_extra_junctions(const Coordi &delta);
 
     std::set<class Plane *> planes;
+    std::set<class CopperThief *> copper_thieves;
 };
 } // namespace horizon

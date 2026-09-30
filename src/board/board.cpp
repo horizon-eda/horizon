@@ -186,6 +186,14 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool, const st
                          Logger::Domain::BOARD);
         }
     }
+    if (j.count("copper_thieves")) {
+        const json &o = j["copper_thieves"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            load_and_log(copper_thieves, ObjectType::COPPER_THIEF, std::forward_as_tuple(u, it.value(), this),
+                         Logger::Domain::BOARD);
+        }
+    }
     if (j.count("dimensions")) {
         const json &o = j["dimensions"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -385,15 +393,16 @@ const std::map<int, Layer> &Board::get_layers() const
 Board::Board(const Board &brd, CopyMode copy_mode)
     : layers(brd.layers), uuid(brd.uuid), block(brd.block), name(brd.name), polygons(brd.polygons), holes(brd.holes),
       junctions(brd.junctions), tracks(brd.tracks), texts(brd.texts), tables(brd.tables), lines(brd.lines),
-      arcs(brd.arcs), planes(brd.planes), keepouts(brd.keepouts), dimensions(brd.dimensions),
-      connection_lines(brd.connection_lines), included_boards(brd.included_boards), board_panels(brd.board_panels),
-      pictures(brd.pictures), decals(brd.decals), net_ties(brd.net_ties), height_restrictions(brd.height_restrictions),
-      warnings(brd.warnings), output_format(brd.output_format), rules(brd.rules),
-      gerber_output_settings(brd.gerber_output_settings), odb_output_settings(brd.odb_output_settings),
-      grid_settings(brd.grid_settings), airwires(brd.airwires), stackup(brd.stackup), colors(brd.colors),
-      pdf_export_settings(brd.pdf_export_settings), step_export_settings(brd.step_export_settings),
-      pnp_export_settings(brd.pnp_export_settings), version(brd.version), board_directory(brd.board_directory),
-      n_inner_layers(brd.n_inner_layers), user_layers(brd.user_layers)
+      arcs(brd.arcs), planes(brd.planes), keepouts(brd.keepouts), copper_thieves(brd.copper_thieves),
+      dimensions(brd.dimensions), connection_lines(brd.connection_lines), included_boards(brd.included_boards),
+      board_panels(brd.board_panels), pictures(brd.pictures), decals(brd.decals), net_ties(brd.net_ties),
+      height_restrictions(brd.height_restrictions), warnings(brd.warnings), output_format(brd.output_format),
+      rules(brd.rules), gerber_output_settings(brd.gerber_output_settings),
+      odb_output_settings(brd.odb_output_settings), grid_settings(brd.grid_settings), airwires(brd.airwires),
+      stackup(brd.stackup), colors(brd.colors), pdf_export_settings(brd.pdf_export_settings),
+      step_export_settings(brd.step_export_settings), pnp_export_settings(brd.pnp_export_settings),
+      version(brd.version), board_directory(brd.board_directory), n_inner_layers(brd.n_inner_layers),
+      user_layers(brd.user_layers)
 {
     if (copy_mode == CopyMode::DEEP) {
         packages = brd.packages;
@@ -466,6 +475,10 @@ void Board::update_refs()
         it.second.polygon->usage = &it.second;
     }
     for (auto &it : keepouts) {
+        it.second.polygon.update(polygons);
+        it.second.polygon->usage = &it.second;
+    }
+    for (auto &it : copper_thieves) {
         it.second.polygon.update(polygons);
         it.second.polygon->usage = &it.second;
     }
@@ -937,6 +950,9 @@ void Board::expand_some()
     for (auto &it : keepouts) {
         it.second.polygon->usage = &it.second;
     }
+    for (auto &it : copper_thieves) {
+        it.second.polygon->usage = &it.second;
+    }
     for (auto &it : height_restrictions) {
         it.second.polygon->usage = &it.second;
     }
@@ -1188,6 +1204,7 @@ void Board::delete_dependants()
     });
     map_erase_if(planes, [this](auto &it) { return polygons.count(it.second.polygon.uuid) == 0; });
     map_erase_if(keepouts, [this](auto &it) { return polygons.count(it.second.polygon.uuid) == 0; });
+    map_erase_if(copper_thieves, [this](auto &it) { return polygons.count(it.second.polygon.uuid) == 0; });
     map_erase_if(height_restrictions, [this](auto &it) { return polygons.count(it.second.polygon.uuid) == 0; });
 }
 
@@ -1343,6 +1360,10 @@ json Board::serialize() const
     for (const auto &it : keepouts) {
         j["keepouts"][(std::string)it.first] = it.second.serialize();
     }
+    j["copper_thieves"] = json::object();
+    for (const auto &it : copper_thieves) {
+        j["copper_thieves"][(std::string)it.first] = it.second.serialize();
+    }
     j["height_restrictions"] = json::object();
     for (const auto &it : height_restrictions) {
         j["height_restrictions"][(std::string)it.first] = it.second.serialize();
@@ -1398,6 +1419,10 @@ json Board::serialize_planes() const
     for (const auto &it : planes) {
         j["planes"][(std::string)it.first] = it.second.serialize_fragments();
     }
+    j["copper_thieves"] = json::object();
+    for (const auto &it : copper_thieves) {
+        j["copper_thieves"][(std::string)it.first] = it.second.serialize_fragments();
+    }
     return j;
 }
 
@@ -1408,6 +1433,14 @@ void Board::load_planes(const json &j)
             if (planes.count(uu)) {
                 auto &plane = planes.at(uu);
                 plane.load_fragments(it);
+            }
+        }
+    }
+    if (j.count("copper_thieves")) {
+        for (const auto &[uu, it] : j.at("copper_thieves").items()) {
+            if (copper_thieves.count(uu)) {
+                auto &thief = copper_thieves.at(uu);
+                thief.load_fragments(it);
             }
         }
     }

@@ -28,6 +28,9 @@ ToolResponse ToolUpdateAllPlanes::begin(const ToolArgs &args)
         }
         brd.update_airwires(false, nets);
     }
+    else if (tool_id == ToolID::UPDATE_ALL_COPPER_THIEVES) {
+        brd.update_copper_thieves();
+    }
     return ToolResponse::commit();
 }
 ToolResponse ToolUpdateAllPlanes::update(const ToolArgs &args)

@@ -376,11 +376,19 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
                 if (plane->fragments.size())
                     planes.insert(plane);
             }
+            else if (auto thief = dynamic_cast<CopperThief *>(poly->usage.ptr)) {
+                if (thief->fragments.size()) {
+                    copper_thieves.insert(thief);
+                }
+            }
         }
     }
 
     for (auto plane : planes) {
         plane->clear();
+    }
+    for (auto thief : copper_thieves) {
+        thief->clear();
     }
 
     InToolActionID action = InToolActionID::NONE;
@@ -491,6 +499,9 @@ bool ToolMove::finish()
         for (auto plane : planes) {
             if (!imp->dialogs.update_plane(*brd, plane))
                 return false;
+        }
+        for (auto thief : copper_thieves) {
+            brd->update_copper_thief(thief);
         }
         brd->update_airwires(false, nets);
     }

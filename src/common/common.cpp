@@ -7,7 +7,7 @@ const LutEnumStr<PatchType> patch_type_lut = {
         {"track", PatchType::TRACK},           {"via", PatchType::VIA},
         {"hole_pth", PatchType::HOLE_PTH},     {"hole_npth", PatchType::HOLE_NPTH},
         {"board_edge", PatchType::BOARD_EDGE}, {"text", PatchType::TEXT},
-        {"net_tie", PatchType::NET_TIE},
+        {"net_tie", PatchType::NET_TIE},       {"copper_thief", PatchType::COPPER_THIEF},
 };
 
 const LutEnumStr<ObjectType> object_type_lut = {
@@ -26,6 +26,7 @@ const LutEnumStr<ObjectType> object_type_lut = {
         {"blocks", ObjectType::BLOCKS},
         {"pool", ObjectType::POOL},
         {"height_restriction", ObjectType::HEIGHT_RESTRICTION},
+        {"copper_thief", ObjectType::COPPER_THIEF},
 };
 
 const LutEnumStr<Orientation> orientation_lut = {

@@ -13,5 +13,6 @@ std::map<PatchType, std::string> patch_type_names = {
         {PatchType::BOARD_EDGE, "Board edge"},
         {PatchType::TEXT, "Text"},
         {PatchType::NET_TIE, "Net tie"},
+        {PatchType::COPPER_THIEF, "Copper thieving"},
 };
 }

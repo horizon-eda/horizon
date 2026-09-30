@@ -70,6 +70,7 @@ src_tools = files(
     'tool_set_nc_all.cpp',
     'tool_set_nc.cpp',
     'tool_add_keepout.cpp',
+    'tool_copper_thief.cpp',
     'tool_helper_draw_net_setting.cpp',
     'tool_helper_get_symbol.cpp',
     'tool_change_symbol.cpp',

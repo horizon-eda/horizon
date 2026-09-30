@@ -6,6 +6,7 @@
 #include "shape.hpp"
 #include "pool/symbol.hpp"
 #include "board/via.hpp"
+#include "board/copper_thief.hpp"
 
 namespace horizon {
 
@@ -433,6 +434,21 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                   {ObjectProperty::ID::SIZE, {ObjectProperty::Type::LENGTH, "Text Size", 5}},
                   {ObjectProperty::ID::WIDTH, {ObjectProperty::Type::LENGTH, "Line Width", 6}},
                   {ObjectProperty::ID::PADDING, {ObjectProperty::Type::LENGTH, "Cell Padding", 7}},
+          }}},
+        {ObjectType::COPPER_THIEF,
+         {"Copper thieving",
+          "Copper thieving",
+          {
+                  {ObjectProperty::ID::SHAPE,
+                   {ObjectProperty::Type::ENUM,
+                    "Shape",
+                    0,
+                    {
+                            {static_cast<int>(CopperThiefSettings::Shape::ROUND), "Round"},
+                            {static_cast<int>(CopperThiefSettings::Shape::SQUARE), "Square"},
+                    }}},
+                  {ObjectProperty::ID::SIZE, {ObjectProperty::Type::LENGTH, "Size", 1}},
+                  {ObjectProperty::ID::GAP, {ObjectProperty::Type::LENGTH, "Gap", 2}},
           }}},
 };
 } // namespace horizon

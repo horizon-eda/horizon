@@ -2,6 +2,7 @@
 #include "gerber_export.hpp"
 #include "common/keepout.hpp"
 #include "board/plane.hpp"
+#include "board/copper_thief.hpp"
 #include "board/board_layers.hpp"
 #include "util/clipper_util.hpp"
 #include "util/geom_util.hpp"
@@ -55,6 +56,12 @@ void CanvasGerber::img_polygon(const Polygon &ipoly, bool tr)
             for (const auto &frag : plane->fragments) {
                 wr->draw_fragments(transform_paths(transform, frag.paths));
             }
+        }
+    }
+    else if (auto thief = dynamic_cast<const CopperThief *>(ipoly.usage.ptr)) {
+        if (GerberWriter *wr = exporter.get_writer_for_layer(ipoly.layer)) {
+            for (const auto &frag : thief->fragments)
+                wr->draw_fragments(transform_paths(transform, frag.paths));
         }
     }
     else if (dynamic_cast<const Keepout *>(ipoly.usage.ptr)) {

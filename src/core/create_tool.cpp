@@ -105,6 +105,7 @@
 #include "tools/tool_add_height_restriction.hpp"
 #include "tools/tool_edit_table.hpp"
 #include "tools/tool_place_table.hpp"
+#include "tools/tool_copper_thief.hpp"
 
 namespace horizon {
 
@@ -291,6 +292,7 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::CLEAR_ALL_PLANES:
     case ToolID::UPDATE_ALL_PLANES:
+    case ToolID::UPDATE_ALL_COPPER_THIEVES:
         return std::make_unique<ToolUpdateAllPlanes>(this, tool_id);
 
     case ToolID::DRAW_DIMENSION:
@@ -489,6 +491,13 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     case ToolID::ADD_HEIGHT_RESTRICTION:
     case ToolID::DELETE_HEIGHT_RESTRICTION:
         return std::make_unique<ToolAddHeightRestriction>(this, tool_id);
+
+    case ToolID::ADD_COPPER_THIEF:
+    case ToolID::EDIT_COPPER_THIEF:
+    case ToolID::UPDATE_COPPER_THIEF:
+    case ToolID::CLEAR_COPPER_THIEF:
+        return std::make_unique<ToolCopperThief>(this, tool_id);
+
 
     default:
         return nullptr;

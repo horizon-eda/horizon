@@ -378,6 +378,16 @@ ToolResponse ToolPaste::really_begin_paste(const json &j, const Coordi &cursor_p
             }
         }
     }
+    if (j.count("copper_thieves") && doc.b) {
+        for (const auto &[uu, it] : j.at("copper_thieves").items()) {
+            CopperThief thief{UUID::random(), it, nullptr};
+            if (polygon_xlat.count(thief.polygon.uuid)) {
+                thief.polygon = polygon_xlat.at(thief.polygon.uuid);
+                auto &x = doc.b->get_board()->copper_thieves.emplace(thief.uuid, thief).first->second;
+                x.polygon->usage = &x;
+            }
+        }
+    }
     std::map<UUID, const UUID> net_xlat;
     std::set<Net *> new_nets;
     if (j.count("nets") && doc.c && doc.c->get_current_block()) {

@@ -527,8 +527,11 @@ void ImpBoard::construct()
     hamburger_menu->append("Stackup", "win.edit_stackup");
     add_tool_action(ToolID::EDIT_STACKUP, "edit_stackup");
 
-    hamburger_menu->append("Update all planes", "win.update_all_planes");
+    hamburger_menu->append("Update all copper fills", "win.update_all_planes");
     add_tool_action(ToolID::UPDATE_ALL_PLANES, "update_all_planes");
+
+    hamburger_menu->append("Update all copper thieving", "win.update_all_copper_thieves");
+    add_tool_action(ToolID::UPDATE_ALL_COPPER_THIEVES, "update_all_copper_thieves");
 
     hamburger_menu->append("Part list", "win.part_list");
     main_window->add_action("part_list", [this] { trigger_action(ActionID::PARTS_WINDOW); });
@@ -1153,6 +1156,11 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
                 s += "\n\n<b>Height restriction</b>\n";
                 s += "Height: " + dim_to_string_nlz(hr->height, false) + "\n";
             }
+            else if (dynamic_cast<const CopperThief *>(poly->usage.ptr)) {
+                s += "\n\n<b>Copper thieving</b>\n";
+                s += "Layer: ";
+                s += core_board.get_layer_provider().get_layers().at(poly->layer).name + "\n";
+            }
         }
     }
     trim(s);
@@ -1348,6 +1356,8 @@ ActionToolID ImpBoard::get_doubleclick_action(ObjectType type, const UUID &uu)
             return ToolID::EDIT_PLANE;
         else if (poly->usage->is_type<Keepout>())
             return ToolID::EDIT_KEEPOUT;
+        else if (poly->usage->is_type<CopperThief>())
+            return ToolID::EDIT_COPPER_THIEF;
         else
             return {ActionID::NONE, ToolID::NONE};
     } break;

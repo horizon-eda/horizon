@@ -1,5 +1,6 @@
 #include "fragment_cache.hpp"
 #include "board/plane.hpp"
+#include "board/copper_thief.hpp"
 #include "poly2tri/poly2tri.h"
 
 namespace horizon {
@@ -54,5 +55,49 @@ const std::vector<std::array<Coordf, 3>> &FragmentCache::get_triangles(const Pla
     }
 
     return planes.at(plane.uuid).triangles;
+}
+
+const std::vector<std::array<Coordf, 3>> &FragmentCache::get_triangles(const CopperThief &thief)
+{
+    if (planes.count(thief.uuid) == 0 || planes.at(thief.uuid).revision != thief.get_revision()) {
+        auto &item = planes[thief.uuid];
+        item.revision = thief.get_revision();
+        item.triangles.clear();
+        for (const auto &frag : thief.fragments) {
+            std::vector<p2t::Point> point_store;
+            size_t pts_total = 0;
+            for (const auto &path : frag.paths) {
+                pts_total += path.size();
+            }
+            point_store.reserve(pts_total);
+            std::vector<p2t::Point *> contour;
+            contour.reserve(frag.paths.front().size());
+            for (const auto &p : frag.paths.front()) {
+                point_store.emplace_back(p.X, p.Y);
+                contour.push_back(&point_store.back());
+            }
+            p2t::CDT cdt(contour);
+            for (size_t i = 1; i < frag.paths.size(); i++) {
+                std::vector<p2t::Point *> hole;
+                auto &path = frag.paths.at(i);
+                hole.reserve(path.size());
+                for (const auto &p : path) {
+                    point_store.emplace_back(p.X, p.Y);
+                    hole.push_back(&point_store.back());
+                }
+                cdt.AddHole(hole);
+            }
+            cdt.Triangulate();
+            auto tris = cdt.GetTriangles();
+            auto &tris_out = planes[thief.uuid].triangles;
+            for (const auto tri : tris) {
+                tris_out.emplace_back();
+                for (int i = 0; i < 3; i++) {
+                    tris_out.back()[i] = coordf_from_pt(tri->GetPoint(i));
+                }
+            }
+        }
+    }
+    return planes.at(thief.uuid).triangles;
 }
 } // namespace horizon
