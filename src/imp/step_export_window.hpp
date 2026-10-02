@@ -2,6 +2,7 @@
 #include <gtkmm.h>
 #include <array>
 #include <set>
+#include "util/uuid.hpp"
 #include "util/export_file_chooser.hpp"
 #include "util/changeable.hpp"
 
@@ -27,6 +28,28 @@ private:
     Gtk::Box *min_dia_box = nullptr;
     class SpinButtonDim *min_dia_spin_button = nullptr;
     Gtk::Entry *prefix_entry = nullptr;
+    Gtk::Button *pkg_incl_button = nullptr;
+    Gtk::Button *pkg_excl_button = nullptr;
+    Gtk::TreeView *pkgs_included_tv = nullptr;
+    Gtk::TreeView *pkgs_excluded_tv = nullptr;
+
+    class ListColumns : public Gtk::TreeModelColumnRecord {
+    public:
+        ListColumns()
+        {
+            Gtk::TreeModelColumnRecord::add(pkg_name);
+            Gtk::TreeModelColumnRecord::add(pkg_count);
+            Gtk::TreeModelColumnRecord::add(uuid);
+        }
+        Gtk::TreeModelColumn<Glib::ustring> pkg_name;
+        Gtk::TreeModelColumn<unsigned int> pkg_count;
+        Gtk::TreeModelColumn<UUID> uuid;
+    };
+    ListColumns list_columns;
+
+    Glib::RefPtr<Gtk::ListStore> pkgs_store;
+    Glib::RefPtr<Gtk::TreeModelFilter> pkgs_included;
+    Glib::RefPtr<Gtk::TreeModelFilter> pkgs_excluded;
 
     Gtk::TextView *log_textview = nullptr;
     Gtk::Spinner *spinner = nullptr;
@@ -45,6 +68,10 @@ private:
     std::mutex msg_queue_mutex;
     std::deque<std::string> msg_queue;
     bool export_running = false;
+
+    void pkgs_fill();
+    void update_pkg_incl_excl_sensitivity();
+    void pkg_incl_excl(bool incl);
 
     void set_is_busy(bool v);
 
