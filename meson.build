@@ -223,6 +223,7 @@ src_common = files(
     'src/pool/symbol.cpp',
     'src/pool/unit.cpp',
     'src/project/project.cpp',
+    'src/project/export_util.cpp',
     'src/rules/rule.cpp',
     'src/rules/rule_descr.cpp',
     'src/rules/rule_match.cpp',
