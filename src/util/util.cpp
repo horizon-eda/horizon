@@ -13,7 +13,6 @@
 #include <iomanip>
 #include "nlohmann/json.hpp"
 #include "alphanum/alphanum.hpp"
-#include <gdk/gdkkeysyms.h>
 #include "imp/in_tool_action.hpp"
 #include "str_util.hpp"
 #include "placement.hpp"

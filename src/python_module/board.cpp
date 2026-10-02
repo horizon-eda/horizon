@@ -1,4 +1,5 @@
 #include "board.hpp"
+#include "project/export_util.hpp"
 #include "nlohmann/json.hpp"
 #include "util.hpp"
 #include "export_gerber/gerber_export.hpp"
@@ -88,14 +89,8 @@ class BoardWrapper *create_board_wrapper(const horizon::Project &prj, PlaneMode 
 }
 
 
-static horizon::Block get_flattend_block(const std::string &blocks_filename, horizon::IPool &pool)
-{
-    auto blocks = horizon::Blocks::new_from_file(blocks_filename, pool);
-    return blocks.get_top_block_item().block.flatten();
-}
-
 BoardWrapper::BoardWrapper(const horizon::Project &prj, PlaneMode plane_mode)
-    : pool(prj.pool_directory, false), block(get_flattend_block(prj.blocks_filename, pool)),
+    : pool(prj.pool_directory, false), block(horizon::load_flattened_block(prj.blocks_filename, pool)),
       board(horizon::Board::new_from_file(prj.board_filename, block, pool))
 {
     namespace fs = std::filesystem;

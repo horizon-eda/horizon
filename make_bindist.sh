@@ -3,7 +3,7 @@ DISTDIR=dist/horizon
 BINDIR=dist/horizon/bin
 rm -rf dist
 mkdir -p $BINDIR
-cp build/horizon-{eda,imp}.exe $BINDIR
+cp build/horizon-{eda,imp,cli}.exe $BINDIR
 strip $BINDIR/horizon-*
 LIBS=(
 	libstdc++-6.dll\
