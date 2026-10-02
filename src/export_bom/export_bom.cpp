@@ -61,5 +61,8 @@ void export_BOM(const std::string &filename, const class Block &block, const cla
         }
         ofs << "\r\n";
     }
+    ofs.close();
+    if (ofs.fail())
+        throw std::runtime_error("couldn't write BOM file " + filename);
 }
 } // namespace horizon

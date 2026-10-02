@@ -34,6 +34,8 @@ void ExcellonWriter::close()
 {
     write_line("M30");
     ofs.close();
+    if (ofs.fail())
+        throw std::runtime_error("couldn't write Excellon file " + out_filename);
 }
 
 void ExcellonWriter::write_format()
