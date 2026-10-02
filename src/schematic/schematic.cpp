@@ -4,6 +4,9 @@
 #include <set>
 #include <forward_list>
 #include <iostream>
+#include <charconv>
+#include <limits>
+#include <optional>
 #include "nlohmann/json.hpp"
 #include "util/util.hpp"
 #include "logger/logger.hpp"
@@ -1161,33 +1164,96 @@ void Schematic::expand_frames(const class IInstanceMappingProvider *inst_map)
     }
 }
 
+// Share occupied numbers across all sheets and block instances during both annotation passes
 struct AnnotationContext {
     Schematic &top;
-    std::map<std::string, std::vector<unsigned int>> refdes;
+    std::map<std::string, std::set<unsigned int>> refdes;
 };
 
+// Read the number from a regular reference such as U12 or return no number for a custom name
+// The whole name must match the component prefix followed by a positive number
+// Custom names such as "INPUT_LEFT" or "R_TEMP" should be left alone when Ignore unknown is enabled
+static std::optional<unsigned int> get_annotation_number(const std::string &refdes, const std::string &prefix)
+{
+    if (refdes.compare(0, prefix.size(), prefix) != 0 || refdes.size() <= prefix.size())
+        return {};
+    unsigned int number = 0;
+    const auto end = refdes.data() + refdes.size();
+    const auto result = std::from_chars(refdes.data() + prefix.size(), end, number);
+    if (result.ec != std::errc() || result.ptr != end || number == 0)
+        return {};
+    return number;
+}
+
+// Decide which names to keep before assigning any new ones, including names on later sheets and in child blocks
+// Visit components, since several gates can belong to the same physical chip
+static void prepare_annotation(AnnotationContext &ctx)
+{
+    const auto &annotation = ctx.top.annotation;
+    // Apply the options to each component in this instance, keeping its number or marking it for annotation
+    auto prepare_block = [&](Block &block, const UUIDVec &instance_path) {
+        for (auto &[uuid, component] : block.components) {
+            const auto prefix = component.get_prefix();
+            const auto refdes = ctx.top.block->get_refdes(component, instance_path);
+            const auto number = get_annotation_number(refdes, prefix);
+            // J? and ? are placeholders, but a question mark inside a custom name is just part of that name
+            const bool placeholder = refdes.empty() || refdes == "?" || refdes == prefix + "?";
+            // Keep existing controls numbered references, while Ignore unknown controls custom names
+            // Check them independently so renumbering the board does not discard names such as "INPUT_LEFT"
+            if (placeholder || (number ? !annotation.keep : !annotation.ignore_unknown))
+                ctx.top.block->set_refdes(component, instance_path, "?");
+            else if (number)
+                ctx.refdes[prefix].insert(*number);
+        }
+    };
+    // Each instance can have its own reference names even when it uses the same child block
+    prepare_block(*ctx.top.block, {});
+    for (auto &[block, instance_path] : ctx.top.block->get_instantiated_blocks()) {
+        prepare_block(block, instance_path);
+    }
+}
+
+// Find a free number in the current sheet range, or across the project in sequential mode
+// The set contains each occupied number once, therefore repeated gates cannot look like a gap
+static unsigned int next_annotation_number(const std::set<unsigned int> &used, unsigned int offset,
+                                           unsigned int increment, bool fill_gaps)
+{
+    // The upper limit is excluded, meaning a sheet starting at 100 gets numbers 101 through 199
+    // Use a wider type here so checking past the largest reference number cannot wrap around to zero
+    const uint64_t limit =
+            increment ? uint64_t(offset) + increment : uint64_t(std::numeric_limits<unsigned int>::max()) + 1;
+    uint64_t number = uint64_t(offset) + 1;
+    // With Fill gaps enabled we start at the bottom, otherwise continue after the highest number in this range
+    if (!fill_gaps) {
+        auto end = increment ? used.lower_bound(static_cast<unsigned int>(limit)) : used.end();
+        if (end != used.begin()) {
+            const auto last = *std::prev(end);
+            if (last > offset)
+                number = uint64_t(last) + 1;
+        }
+        // A sheet range may be full at the end but still have a free number further down
+        if (number >= limit)
+            number = uint64_t(offset) + 1;
+    }
+    // Always check the shared set, including numbers kept on other sheets
+    while (number < limit && used.count(static_cast<unsigned int>(number)))
+        number++;
+    if (number >= limit)
+        throw std::runtime_error("no free reference numbers in the annotation range");
+    return static_cast<unsigned int>(number);
+}
+
+// Assign new references in the selected sheet and position order, then visit child block instances
+// Existing names have been reserved in the first pass so collisions in later sheets are ruled out
 static void visit_schematic_for_annotation(Schematic &sch, const UUIDVec &instance_path, AnnotationContext &ctx)
 {
-    auto &annotation = ctx.top.annotation;
+    const auto &annotation = ctx.top.annotation;
     using Annotation = Schematic::Annotation;
-    if (!ctx.top.annotation.keep) {
-        for (auto &[uu, comp] : sch.block->components) {
-            ctx.top.block->set_refdes(comp, instance_path, "?");
-        }
-    }
-
-    for (const auto &[uu, comp] : sch.block->components) {
-        ctx.refdes[comp.get_prefix()];
-    }
-
     for (auto sheet : sch.get_sheets_sorted()) {
         const auto sheet_index = ctx.top.sheet_mapping.sheet_numbers.at(uuid_vec_append(instance_path, sheet->uuid));
         unsigned int sheet_offset = 0;
         unsigned int sheet_incr = 0;
         if (annotation.mode != Annotation::Mode::SEQUENTIAL) {
-            for (auto &it : ctx.refdes) {
-                it.second.clear();
-            }
             if (annotation.mode == Annotation::Mode::SHEET_100) {
                 sheet_offset = 100 * sheet_index;
                 sheet_incr = 100;
@@ -1218,56 +1284,16 @@ static void visit_schematic_for_annotation(Schematic &sch, const UUIDVec &instan
         }
 
         for (const auto sym : symbols) {
-            auto &v = ctx.refdes[sym->component->get_prefix()];
             const auto rd = ctx.top.block->get_refdes(*sym->component, instance_path);
-            if (rd.find('?') == std::string::npos) { // already annotated
-                auto ss = rd.substr(sym->component->get_prefix().size());
-                int si = -1;
-                try {
-                    si = std::stoi(ss);
-                }
-                catch (const std::invalid_argument &e) {
-                    if (!annotation.ignore_unknown)
-                        ctx.top.block->set_refdes(*sym->component, instance_path, "?");
-                }
-                if (si > 0) {
-                    v.push_back(si);
-                    std::sort(v.begin(), v.end());
-                }
+            // Only the first gate needs a new number, since later gates read back the same component reference
+            // Names kept during preparation, including custom names, are left alone
+            if (rd == "?") {
+                const auto prefix = sym->component->get_prefix();
+                auto &used = ctx.refdes[prefix];
+                const auto number = next_annotation_number(used, sheet_offset, sheet_incr, annotation.fill_gaps);
+                used.insert(number);
+                ctx.top.block->set_refdes(*sym->component, instance_path, prefix + std::to_string(number));
             }
-        }
-
-        for (const auto sym : symbols) {
-            auto &v = ctx.refdes[sym->component->get_prefix()];
-            const auto rd = ctx.top.block->get_refdes(*sym->component, instance_path);
-            if (rd.find('?') != std::string::npos) { // needs annotatation
-                unsigned int n = 1 + sheet_offset;
-                if (v.size() != 0) {
-                    if (annotation.fill_gaps && v.size() >= 2) {
-                        bool hole = false;
-                        for (auto it = v.begin(); it < v.end() - 1; it++) {
-                            if (*it > sheet_offset && *(it + 1) != (*it) + 1) {
-                                n = (*it) + 1;
-                                hole = true;
-                                break;
-                            }
-                        }
-                        if (!hole) {
-                            n = v.back() + 1;
-                        }
-                    }
-                    else {
-                        n = v.back() + 1;
-                    }
-                }
-                if (sheet_incr && n / sheet_incr != sheet_index) {
-                    n = sheet_offset + 1;
-                }
-                v.push_back(n);
-                ctx.top.block->set_refdes(*sym->component, instance_path,
-                                          sym->component->get_prefix() + std::to_string(n));
-            }
-            std::sort(v.begin(), v.end());
         }
 
         for (auto sym : sheet->get_block_symbols_sorted()) {
@@ -1277,9 +1303,12 @@ static void visit_schematic_for_annotation(Schematic &sch, const UUIDVec &instan
     }
 }
 
+// Annotate the whole schematic hierarchy in two passes
+// First decide which names to keep and reserve their numbers, then assign the remaining references
 void Schematic::annotate()
 {
     AnnotationContext ctx{*this, {}};
+    prepare_annotation(ctx);
     visit_schematic_for_annotation(*this, {}, ctx);
 }
 
