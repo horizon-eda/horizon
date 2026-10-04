@@ -175,11 +175,11 @@ void ImpPackage::project_model(const Package::Model &model, ProjectionMode proj)
             transform.PreMultiply(reverse);
         }
 
-        HLRAlgo_Projector projector(transform, Standard_False, 0);
+        HLRAlgo_Projector projector(transform, false, 0);
         /* reverse above can result in a scale factor of -1, which is ignored
          * by default...  but the rest of the matrix is still applied...
          */
-        projector.Scaled(Standard_True);
+        projector.Scaled(true);
 
         brep_hlr->Projector(projector);
         brep_hlr->Update();
