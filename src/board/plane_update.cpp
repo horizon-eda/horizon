@@ -172,7 +172,9 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
                     return;
                 int64_t clearance = 0;
                 if (patch.first.type != PatchType::HOLE_NPTH) { // copper
-                    auto patch_net = patch.first.net ? &block->nets.at(patch.first.net) : nullptr;
+                    auto patch_net = patch.first.net && patch.first.type != PatchType::COPPER_THIEF
+                                             ? &block->nets.at(patch.first.net)
+                                             : nullptr;
                     const auto &rule_clearance = rules.get_clearance_copper(plane->net, patch_net, poly.layer);
                     clearance = rule_clearance.get_clearance(patch.first.type, PatchType::PLANE);
                 }

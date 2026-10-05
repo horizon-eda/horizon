@@ -3,6 +3,7 @@
 #include "board_hole.hpp"
 #include "board_package.hpp"
 #include "board_rules.hpp"
+#include "copper_thief.hpp"
 #include "clipper/clipper.hpp"
 #include "common/dimension.hpp"
 #include "common/hole.hpp"
@@ -89,6 +90,9 @@ public:
             const std::atomic_bool &cancel = std::atomic_bool(false)); // when ca is given, patches will be read from it
     void update_planes(plane_update_status_cb_t status_cb = nullptr,
                        const std::atomic_bool &cancel = std::atomic_bool(false));
+    bool update_copper_thief(CopperThief *thief, const class CanvasPatch *ca = nullptr,
+                             const std::atomic_bool &cancel = std::atomic_bool(false));
+    void update_copper_thieves(const std::atomic_bool &cancel = std::atomic_bool(false));
     std::vector<KeepoutContour> get_keepout_contours() const;
     std::pair<Coordi, Coordi> get_bbox() const;
     void update_pdf_export_settings(PDFExportSettings &settings);
@@ -110,6 +114,7 @@ public:
     std::map<UUID, Arc> arcs;
     std::map<UUID, Plane> planes;
     std::map<UUID, Keepout> keepouts;
+    std::map<UUID, CopperThief> copper_thieves;
     std::map<UUID, Dimension> dimensions;
     std::map<UUID, ConnectionLine> connection_lines;
     std::map<UUID, IncludedBoard> included_boards;

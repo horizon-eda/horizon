@@ -49,6 +49,7 @@ public:
                          class Block &block);
     bool annotate(class Schematic &s);
     bool edit_keepout(class Keepout &keepout, class IDocument &c, bool add_mode);
+    bool edit_copper_thief(class CopperThief &thief, bool add_mode, bool &delete_requested);
     bool edit_stackup(class IDocumentBoard &brd);
     bool edit_schematic_properties(class IDocumentSchematicBlockSymbol &s, const UUID &block, const UUID &sheet);
     bool edit_project_properties(class Block &b);

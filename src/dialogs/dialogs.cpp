@@ -26,6 +26,7 @@
 #include "edit_board_hole.hpp"
 #include "edit_frame.hpp"
 #include "edit_keepout.hpp"
+#include "edit_copper_thief.hpp"
 #include "select_group_tag.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "widgets/spin_button_angle.hpp"
@@ -461,6 +462,14 @@ bool Dialogs::edit_keepout(class Keepout &keepout, class IDocument &c, bool add_
 {
     EditKeepoutDialog dia(parent, keepout, c, add_mode);
     return dia.run() == Gtk::RESPONSE_OK;
+}
+
+bool Dialogs::edit_copper_thief(CopperThief &thief, bool add_mode, bool &delete_requested)
+{
+    EditCopperThiefDialog dia(parent, thief, add_mode);
+    const bool ok = dia.run() == Gtk::RESPONSE_OK;
+    delete_requested = dia.delete_requested;
+    return ok;
 }
 
 bool Dialogs::edit_stackup(class IDocumentBoard &doc)

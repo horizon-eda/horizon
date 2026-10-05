@@ -6,6 +6,7 @@
 #include "common/hole.hpp"
 #include "canvas/appearance.hpp"
 #include "board/plane.hpp"
+#include "board/copper_thief.hpp"
 
 namespace horizon {
 
@@ -154,7 +155,8 @@ void CanvasPDF::img_polygon(const Polygon &ipoly, bool tr)
             painter.Stroke();
     }
     else if (auto plane = dynamic_cast<const Plane *>(ipoly.usage.ptr)) {
-        for (const auto &frag : plane->fragments) {
+        const auto &fragments = plane->fragments;
+        for (const auto &frag : fragments) {
             for (const auto &path : frag.paths) {
                 bool first = true;
                 for (const auto &it : path) {
@@ -169,6 +171,27 @@ void CanvasPDF::img_polygon(const Polygon &ipoly, bool tr)
                 }
                 painter.ClosePath();
             }
+        }
+        if (fill)
+            painter.Fill(true);
+        else
+            painter.Stroke();
+    }
+    else if (auto thief = dynamic_cast<const CopperThief *>(ipoly.usage.ptr)) {
+        for (const auto &center : thief->pad_centers) {
+            auto path = get_thieving_pad_path(thief->settings, center);
+            bool first = true;
+            for (const auto &it : path) {
+                Coordi p = tr ? transform.transform(Coordi(it.X, it.Y)) : Coordi(it.X, it.Y);
+                if (first)
+                    painter.MoveTo(to_pt(p.x), to_pt(p.y));
+
+                else
+                    painter.LineTo(to_pt(p.x), to_pt(p.y));
+
+                first = false;
+            }
+            painter.ClosePath();
         }
         if (fill)
             painter.Fill(true);

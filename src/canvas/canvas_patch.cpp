@@ -1,4 +1,5 @@
 #include "canvas_patch.hpp"
+#include "board/copper_thief.hpp"
 #include "board/plane.hpp"
 #include "common/hole.hpp"
 #include "board/board_layers.hpp"
@@ -115,6 +116,18 @@ void CanvasPatch::img_polygon(const Polygon &ipoly, bool tr, const LayerRange &l
         }
         if (ClipperLib::Orientation(t)) {
             std::reverse(t.begin(), t.end());
+        }
+    }
+    else if (dynamic_cast<CopperThief *>(poly.usage.ptr)) {
+        auto thief = dynamic_cast<CopperThief *>(poly.usage.ptr);
+        PatchKey patch_key{PatchType::COPPER_THIEF, layer, thief->uuid};
+        patches[patch_key];
+        for (const auto &center : thief->pad_centers) {
+            auto contour = transform_path(transform, get_thieving_pad_path(thief->settings, center));
+            if (ClipperLib::Orientation(contour)) {
+                std::reverse(contour.begin(), contour.end());
+            }
+            patches[patch_key].push_back(std::move(contour));
         }
     }
     else if (auto plane = dynamic_cast<Plane *>(poly.usage.ptr)) {

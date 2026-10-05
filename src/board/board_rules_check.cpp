@@ -320,14 +320,15 @@ RulesCheckResult BoardRules::check_preflight(const Board &brd) const
     for (const auto &it : brd.polygons) {
         bool is_keepout = dynamic_cast<const Keepout *>(it.second.usage.ptr);
         bool is_plane = dynamic_cast<Plane *>(it.second.usage.ptr);
-        if (BoardLayers::is_copper(it.second.layer) && !(is_plane || is_keepout)) {
+        bool is_thief = dynamic_cast<CopperThief *>(it.second.usage.ptr);
+        if (BoardLayers::is_copper(it.second.layer) && !(is_plane || is_keepout || is_thief)) {
             r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
             auto &e = r.errors.back();
             e.has_location = it.second.vertices.size();
             if (e.has_location)
                 e.location = it.second.vertices.front().position;
-            e.comment =
-                    "Polygon on layer " + brd.get_layers().at(it.second.layer).name + " is not a keepout or a plane";
+            e.comment = "Polygon on layer " + brd.get_layers().at(it.second.layer).name
+                        + " is not a keepout, a plane or a copper thieving";
         }
     }
 

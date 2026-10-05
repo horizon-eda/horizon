@@ -1065,6 +1065,27 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
         end_group();
         object_ref_pop();
     }
+    else if (auto thief = dynamic_cast<CopperThief *>(poly.usage.ptr)) {
+        const bool transform_is_identity = transform.is_identity();
+        object_ref_push(ObjectType::COPPER_THIEF, thief->uuid);
+        begin_group(poly.layer);
+        for (const auto &center : thief->pad_centers) {
+            const auto h = thief->settings.size / 2.;
+            const Coordf c(center.x, center.y);
+            const Coordf p0 = transform.transform(c + Coordf(-h, -h));
+            const Coordf p1 = transform.transform(c + Coordf(h, -h));
+            const Coordf p2 = transform.transform(c + Coordf(h, h));
+            const Coordf p3 = transform.transform(c + Coordf(-h, h));
+            add_triangle(poly.layer, p0, p1, p2, co);
+            add_triangle(poly.layer, p0, p2, p3, co);
+        }
+        for (size_t i = 0; i < poly.vertices.size(); i++) {
+            draw_line(poly.vertices[i].position, poly.vertices[(i + 1) % poly.vertices.size()].position, co, poly.layer,
+                      !transform_is_identity);
+        }
+        end_group();
+        object_ref_pop();
+    }
     else { // normal polygon
         const bool is_keepout = dynamic_cast<Keepout *>(poly.usage.ptr);
         begin_group(poly.layer);

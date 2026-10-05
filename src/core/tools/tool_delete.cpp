@@ -376,6 +376,12 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
                         return ToolResponse::revert();
                 }
             }
+            else if (auto thief = dynamic_cast<CopperThief *>(it->usage.ptr)) {
+                if (thief->pad_centers.size()) {
+                    imp->tool_bar_set_tip("updating copper thief…");
+                    doc.b->get_board()->update_copper_thief(thief);
+                }
+            }
         }
     }
     if (doc.b) {

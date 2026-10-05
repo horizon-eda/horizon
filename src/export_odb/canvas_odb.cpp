@@ -9,6 +9,7 @@
 #include "db.hpp"
 #include "util/once.hpp"
 #include "common/arc.hpp"
+#include "common/shape.hpp"
 #include "board/board.hpp"
 #include "odb_util.hpp"
 
@@ -52,14 +53,14 @@ void CanvasODB::img_polygon(const Polygon &ipoly, bool tr)
         if (auto feats = get_layer_features(ipoly.layer)) {
             ODB::EDAData::Subnet *subnet = nullptr;
             if (plane->fragments.size()) {
+                const auto net_uu = plane->net ? plane->net->uuid : UUID();
                 using SP = ODB::EDAData::SubnetPlane;
-                subnet = &eda_data->get_net(plane->net->uuid)
-                                  .add_subnet<SP>(SP::FillType::SOLID, SP::CutoutType::CIRCLE, 0);
+                subnet = &(eda_data->get_net(net_uu)).add_subnet<SP>(SP::FillType::SOLID, SP::CutoutType::CIRCLE, 0);
             }
             for (const auto &frag : plane->fragments) {
                 auto &surf = feats->add_surface();
                 eda_data->add_feature_id(*subnet, ODB::EDAData::FeatureID::Type::COPPER,
-                                         ODB::get_layer_name(plane->polygon->layer, brd), surf.index);
+                                         ODB::get_layer_name(ipoly.layer, brd), surf.index);
 
                 Once is_outline;
                 for (const auto &path : frag.paths) {
@@ -73,6 +74,22 @@ void CanvasODB::img_polygon(const Polygon &ipoly, bool tr)
                         p.emplace_back(transform.transform(Coordi(it->X, it->Y)));
                     }
                 }
+            }
+        }
+    }
+    else if (auto thief = dynamic_cast<const CopperThief *>(ipoly.usage.ptr)) {
+        if (auto feats = get_layer_features(ipoly.layer)) {
+            auto &net = eda_data->get_net(UUID());
+            auto &subnet = net.add_subnet<ODB::EDAData::SubnetPlane>(ODB::EDAData::SubnetPlane::FillType::SOLID,
+                                                                     ODB::EDAData::SubnetPlane::CutoutType::CIRCLE, 0);
+            for (const auto &center : thief->pad_centers) {
+                Shape shape{UUID()};
+                shape.form = Shape::Form::RECTANGLE;
+                shape.params = {static_cast<int64_t>(thief->settings.size), static_cast<int64_t>(thief->settings.size)};
+                shape.placement.shift = transform.transform(center);
+                auto &pad = feats->draw_shape(shape);
+                eda_data->add_feature_id(subnet, ODB::EDAData::FeatureID::Type::COPPER,
+                                         ODB::get_layer_name(ipoly.layer, brd), pad.index);
             }
         }
     }

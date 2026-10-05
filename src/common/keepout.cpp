@@ -24,6 +24,7 @@ Keepout::Keepout(const UUID &uu) : uuid(uu)
     patch_types_cu.insert(PatchType::VIA);
     patch_types_cu.insert(PatchType::PLANE);
     patch_types_cu.insert(PatchType::HOLE_PTH);
+    patch_types_cu.insert(PatchType::COPPER_THIEF);
 }
 
 ObjectType Keepout::get_type() const

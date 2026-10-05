@@ -110,6 +110,9 @@ std::string DocumentBoard::get_display_name(ObjectType type, const UUID &uu)
         if (auto plane = dynamic_cast<const Plane *>(poly.usage.ptr)) {
             return "Plane: " + plane->net->name;
         }
+        else if (dynamic_cast<const CopperThief *>(poly.usage.ptr)) {
+            return "Copper thieving";
+        }
         else {
             return Document::get_display_name(type, uu);
         }

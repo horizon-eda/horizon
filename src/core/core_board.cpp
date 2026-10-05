@@ -339,6 +339,22 @@ bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID
         }
     } break;
 
+    case ObjectType::COPPER_THIEF: {
+        const auto &thief = brd->copper_thieves.at(uu);
+        switch (property) {
+        case ObjectProperty::ID::SIZE:
+            dynamic_cast<PropertyValueInt &>(value).value = thief.settings.size;
+            return true;
+
+        case ObjectProperty::ID::GAP:
+            dynamic_cast<PropertyValueInt &>(value).value = thief.settings.gap;
+            return true;
+
+        default:
+            return false;
+        }
+    } break;
+
     case ObjectType::BOARD_HOLE: {
         auto hole = &brd->holes.at(uu);
         switch (property) {
@@ -623,6 +639,23 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
         }
     } break;
 
+    case ObjectType::COPPER_THIEF: {
+        auto thief = &brd->copper_thieves.at(uu);
+        switch (property) {
+        case ObjectProperty::ID::SIZE:
+            thief->settings.size = dynamic_cast<const PropertyValueInt &>(value).value;
+            break;
+
+        case ObjectProperty::ID::GAP:
+            thief->settings.gap = dynamic_cast<const PropertyValueInt &>(value).value;
+            break;
+
+        default:
+            return false;
+        }
+        brd->update_copper_thief(thief); // refill, otherwise the change wouldn't show
+    } break;
+
     case ObjectType::BOARD_HOLE: {
         auto hole = &brd->holes.at(uu);
         switch (property) {
@@ -754,6 +787,10 @@ bool CoreBoard::get_property_meta(ObjectType type, const UUID &uu, ObjectPropert
         default:
             return false;
         }
+    } break;
+
+    case ObjectType::COPPER_THIEF: {
+        return property == ObjectProperty::ID::SIZE || property == ObjectProperty::ID::GAP;
     } break;
 
     case ObjectType::VIA: {

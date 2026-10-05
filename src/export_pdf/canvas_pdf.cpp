@@ -6,6 +6,7 @@
 #include "common/hole.hpp"
 #include "canvas/appearance.hpp"
 #include "board/plane.hpp"
+#include "board/copper_thief.hpp"
 #include <sstream>
 
 namespace horizon {
@@ -185,7 +186,8 @@ void CanvasPDF::img_polygon(const Polygon &ipoly, bool tr)
             painter.DrawPath(path, PoDoFo::PdfPathDrawMode::Stroke);
     }
     else if (auto plane = dynamic_cast<const Plane *>(ipoly.usage.ptr)) {
-        for (const auto &frag : plane->fragments) {
+        const auto &fragments = plane->fragments;
+        for (const auto &frag : fragments) {
             for (const auto &dpath : frag.paths) {
                 bool first = true;
                 for (const auto &it : dpath) {
@@ -200,6 +202,25 @@ void CanvasPDF::img_polygon(const Polygon &ipoly, bool tr)
                 }
                 path.Close();
             }
+        }
+        if (fill)
+            painter.DrawPath(path, PoDoFo::PdfPathDrawMode::Fill);
+        else
+            painter.DrawPath(path, PoDoFo::PdfPathDrawMode::Stroke);
+    }
+    else if (auto thief = dynamic_cast<const CopperThief *>(ipoly.usage.ptr)) {
+        for (const auto &center : thief->pad_centers) {
+            auto dpath = get_thieving_pad_path(thief->settings, center);
+            bool first = true;
+            for (const auto &it : dpath) {
+                Coordi p = tr ? transform.transform(Coordi(it.X, it.Y)) : Coordi(it.X, it.Y);
+                if (first)
+                    path.MoveTo(to_pt(p.x), to_pt(p.y));
+                else
+                    path.AddLineTo(to_pt(p.x), to_pt(p.y));
+                first = false;
+            }
+            path.Close();
         }
         if (fill)
             painter.DrawPath(path, PoDoFo::PdfPathDrawMode::Fill);

@@ -55,4 +55,5 @@ const std::vector<std::array<Coordf, 3>> &FragmentCache::get_triangles(const Pla
 
     return planes.at(plane.uuid).triangles;
 }
+
 } // namespace horizon
