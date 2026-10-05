@@ -9,6 +9,7 @@
 #include "db.hpp"
 #include "util/once.hpp"
 #include "common/arc.hpp"
+#include "common/shape.hpp"
 #include "board/board.hpp"
 #include "odb_util.hpp"
 
@@ -81,17 +82,14 @@ void CanvasODB::img_polygon(const Polygon &ipoly, bool tr)
             auto &net = eda_data->get_net(UUID());
             auto &subnet = net.add_subnet<ODB::EDAData::SubnetPlane>(ODB::EDAData::SubnetPlane::FillType::SOLID,
                                                                      ODB::EDAData::SubnetPlane::CutoutType::CIRCLE, 0);
-            for (const auto &frag : thief->fragments) {
-                auto &surf = feats->add_surface();
+            for (const auto &center : thief->pad_centers) {
+                Shape shape{UUID()};
+                shape.form = Shape::Form::RECTANGLE;
+                shape.params = {static_cast<int64_t>(thief->settings.size), static_cast<int64_t>(thief->settings.size)};
+                shape.placement.shift = transform.transform(center);
+                auto &pad = feats->draw_shape(shape);
                 eda_data->add_feature_id(subnet, ODB::EDAData::FeatureID::Type::COPPER,
-                                         ODB::get_layer_name(ipoly.layer, brd), surf.index);
-                Once is_outline;
-                for (const auto &path : frag.paths) {
-                    surf.data.lines.emplace_back();
-                    auto &p = surf.data.lines.back();
-                    for (auto it = path.crbegin(); it != path.crend(); it++)
-                        p.emplace_back(transform.transform(Coordi(it->X, it->Y)));
-                }
+                                         ODB::get_layer_name(ipoly.layer, brd), pad.index);
             }
         }
     }

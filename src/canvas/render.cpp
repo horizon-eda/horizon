@@ -1067,12 +1067,17 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
     }
     else if (auto thief = dynamic_cast<CopperThief *>(poly.usage.ptr)) {
         const bool transform_is_identity = transform.is_identity();
-        const auto &tris = fragment_cache.get_triangles(*thief);
         object_ref_push(ObjectType::COPPER_THIEF, thief->uuid);
         begin_group(poly.layer);
-        for (const auto &tri : tris) {
-            add_triangle(poly.layer, transform.transform(tri[0]), transform.transform(tri[1]),
-                         transform.transform(tri[2]), co);
+        for (const auto &center : thief->pad_centers) {
+            const auto h = thief->settings.size / 2.;
+            const Coordf c(center.x, center.y);
+            const Coordf p0 = transform.transform(c + Coordf(-h, -h));
+            const Coordf p1 = transform.transform(c + Coordf(h, -h));
+            const Coordf p2 = transform.transform(c + Coordf(h, h));
+            const Coordf p3 = transform.transform(c + Coordf(-h, h));
+            add_triangle(poly.layer, p0, p1, p2, co);
+            add_triangle(poly.layer, p0, p2, p3, co);
         }
         for (size_t i = 0; i < poly.vertices.size(); i++) {
             draw_line(poly.vertices[i].position, poly.vertices[(i + 1) % poly.vertices.size()].position, co, poly.layer,

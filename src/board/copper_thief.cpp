@@ -1,56 +1,20 @@
-#include <cmath>
 #include <stdexcept>
 
 #include <nlohmann/json.hpp>
 
-#include "common/lut.hpp"
 #include "common/object_provider.hpp"
 
 #include "copper_thief.hpp"
 
 namespace horizon {
 
-static const LutEnumStr<CopperThiefSettings::Shape> SHAPE_LUT = {
-        {"round", CopperThiefSettings::Shape::ROUND},
-        {"square", CopperThiefSettings::Shape::SQUARE},
-};
-
-
-CopperThief::Fragment::Fragment(const json &j)
-{
-    for (const auto &j_path : j.at("paths")) {
-        paths.emplace_back();
-        for (const auto &point : j_path) {
-            paths.back().emplace_back(point.at(0).get<int64_t>(), point.at(1).get<int64_t>());
-        }
-    }
-}
-
-json CopperThief::Fragment::serialize() const
-{
-    json j;
-    j["paths"] = json::array();
-    for (const auto &path : paths) {
-        auto j_path = json::array();
-        for (const auto &point : path) {
-            j_path.push_back({point.X, point.Y});
-        }
-        j["paths"].push_back(j_path);
-    }
-    return j;
-}
-
 CopperThiefSettings::CopperThiefSettings(const json &j) : size(j.value("size", 2.5_mm)), gap(j.value("gap", 0.5_mm))
 {
-    if (j.count("shape")) {
-        shape = SHAPE_LUT.lookup(j.at("shape"));
-    }
 }
 
 json CopperThiefSettings::serialize() const
 {
     json j;
-    j["shape"] = SHAPE_LUT.lookup_reverse(shape);
     j["size"] = size;
     j["gap"] = gap;
     return j;
@@ -70,12 +34,12 @@ static std::pair<ClipperLib::IntPoint, ClipperLib::IntPoint> get_paths_bb(const 
     return bb;
 }
 
-ClipperLib::Paths get_thieving_pads(const CopperThiefSettings &settings, const ClipperLib::Paths &area)
+std::vector<Coordi> get_thieving_pad_centers(const CopperThiefSettings &settings, const ClipperLib::Paths &area)
 {
-    ClipperLib::Paths pads;
+    std::vector<Coordi> centers;
     const int64_t size = settings.size;
     if (size <= 0 || area.empty()) {
-        return pads;
+        return centers;
     }
     const int64_t pitch = size + settings.gap;
 
@@ -92,7 +56,7 @@ ClipperLib::Paths get_thieving_pads(const CopperThiefSettings &settings, const C
     const int64_t n_x = count(bb.second.X - bb.first.X);
     const int64_t n_y = count(bb.second.Y - bb.first.Y);
     if (n_x < 1 || n_y < 1) {
-        return pads;
+        return centers;
     }
 
     const int64_t x0 = first_center(bb.first.X, bb.second.X, n_x);
@@ -106,10 +70,10 @@ ClipperLib::Paths get_thieving_pads(const CopperThiefSettings &settings, const C
         co.Execute(center_area, -size / 2.0);
     }
     if (center_area.empty()) {
-        return pads;
+        return centers;
     }
 
-    pads.reserve(n_x * n_y);
+    centers.reserve(n_x * n_y);
     for (int64_t i = 0; i < n_x; i++) {
         for (int64_t j = 0; j < n_y; j++) {
             const int64_t x = x0 + i * pitch;
@@ -122,23 +86,21 @@ ClipperLib::Paths get_thieving_pads(const CopperThiefSettings &settings, const C
             if (winding == 0) {
                 continue;
             }
-            ClipperLib::Path pad;
-            if (settings.shape == CopperThiefSettings::Shape::ROUND) {
-                const unsigned int segments = 64;
-                pad.reserve(segments);
-                for (unsigned int k = 0; k < segments; k++) {
-                    const auto p = Coordd::euler(size / 2., (2 * M_PI * k) / segments).to_coordi();
-                    pad.emplace_back(x + p.x, y + p.y);
-                }
-            }
-            else {
-                const int64_t h = size / 2;
-                pad = {{x - h, y - h}, {x + h, y - h}, {x + h, y + h}, {x - h, y + h}};
-            }
-            pads.push_back(std::move(pad));
+            centers.emplace_back(x, y);
         }
     }
-    return pads;
+    return centers;
+}
+
+ClipperLib::Path get_thieving_pad_path(const CopperThiefSettings &settings, const Coordi &center)
+{
+    ClipperLib::Path pad;
+    const int64_t h = settings.size / 2;
+    pad = {{center.x - h, center.y - h},
+           {center.x + h, center.y - h},
+           {center.x + h, center.y + h},
+           {center.x - h, center.y + h}};
+    return pad;
 }
 
 CopperThief::CopperThief(const UUID &uu, const json &j, ObjectProvider *prv)
@@ -154,11 +116,6 @@ CopperThief::CopperThief(const UUID &uu, const json &j, ObjectProvider *prv)
     if (j.count("settings")) {
         settings = CopperThiefSettings(j.at("settings"));
     }
-    if (j.count("fragments")) {
-        for (const auto &it : j.at("fragments")) {
-            fragments.emplace_back(it);
-        }
-    }
 }
 
 CopperThief::CopperThief(const UUID &uu) : uuid(uu)
@@ -168,12 +125,7 @@ CopperThief::CopperThief(const UUID &uu) : uuid(uu)
 void CopperThief::regenerate(const ClipperLib::Paths &area)
 {
     clear();
-    const auto pads = get_thieving_pads(settings, area);
-    ClipperLib::Clipper cl;
-    cl.AddPaths(pads, ClipperLib::ptSubject, true);
-    ClipperLib::PolyTree tree;
-    cl.Execute(ClipperLib::ctUnion, tree, ClipperLib::pftNonZero);
-    set_fragments(tree);
+    pad_centers = get_thieving_pad_centers(settings, area);
 }
 
 ObjectType CopperThief::get_type() const
@@ -181,12 +133,12 @@ ObjectType CopperThief::get_type() const
     return ObjectType::COPPER_THIEF;
 }
 
-json CopperThief::serialize_fragments() const
+json CopperThief::serialize_pads() const
 {
     json j;
-    j["fragments"] = json::array();
-    for (const auto &fragment : fragments) {
-        j["fragments"].push_back(fragment.serialize());
+    j["pad_centers"] = json::array();
+    for (const auto &center : pad_centers) {
+        j["pad_centers"].push_back({center.x, center.y});
     }
     return j;
 }
@@ -194,30 +146,16 @@ json CopperThief::serialize_fragments() const
 void CopperThief::clear()
 {
 
-    fragments.clear();
+    pad_centers.clear();
     revision++;
 }
 
-void CopperThief::set_fragments(const ClipperLib::PolyTree &tree)
+void CopperThief::load_pads(const json &j)
 {
-    fragments.clear();
-    for (const auto *node : tree.Childs) {
-        fragments.emplace_back();
-        auto &fragment = fragments.back();
-        fragment.paths.push_back(node->Contour);
-        for (const auto *hole : node->Childs) {
-            fragment.paths.push_back(hole->Contour);
-        }
-    }
-    revision++;
-}
-
-void CopperThief::load_fragments(const json &j)
-{
-    if (j.count("fragments")) {
-        fragments.clear();
-        for (const auto &fragment : j.at("fragments")) {
-            fragments.emplace_back(fragment);
+    if (j.count("pad_centers")) {
+        pad_centers.clear();
+        for (const auto &point : j.at("pad_centers")) {
+            pad_centers.emplace_back(point.at(0).get<int64_t>(), point.at(1).get<int64_t>());
         }
     }
     revision++;

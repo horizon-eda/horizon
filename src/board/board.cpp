@@ -1421,7 +1421,7 @@ json Board::serialize_planes() const
     }
     j["copper_thieves"] = json::object();
     for (const auto &it : copper_thieves) {
-        j["copper_thieves"][(std::string)it.first] = it.second.serialize_fragments();
+        j["copper_thieves"][(std::string)it.first] = it.second.serialize_pads();
     }
     return j;
 }
@@ -1440,7 +1440,7 @@ void Board::load_planes(const json &j)
         for (const auto &[uu, it] : j.at("copper_thieves").items()) {
             if (copper_thieves.count(uu)) {
                 auto &thief = copper_thieves.at(uu);
-                thief.load_fragments(it);
+                thief.load_pads(it);
             }
         }
     }

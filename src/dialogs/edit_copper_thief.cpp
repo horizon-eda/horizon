@@ -26,26 +26,6 @@ EditCopperThiefDialog::EditCopperThiefDialog(Gtk::Window *parent, CopperThief &t
     grid->set_column_spacing(10);
     int top = 0;
     {
-        auto shape_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
-        shape_box->get_style_context()->add_class("linked");
-        auto b1 = Gtk::manage(new Gtk::RadioButton("Round"));
-        b1->set_mode(false);
-        shape_box->pack_start(*b1, true, true, 0);
-
-        auto b2 = Gtk::manage(new Gtk::RadioButton("Square"));
-        b2->set_mode(false);
-        b2->join_group(*b1);
-        shape_box->pack_start(*b2, true, true, 0);
-
-        std::map<CopperThiefSettings::Shape, Gtk::RadioButton *> shape_widgets = {
-                {CopperThiefSettings::Shape::ROUND, b1},
-                {CopperThiefSettings::Shape::SQUARE, b2},
-        };
-        bind_widget<CopperThiefSettings::Shape>(shape_widgets, thief.settings.shape);
-
-        grid_attach_label_and_widget(grid, "Shape", shape_box, top);
-    }
-    {
         auto sp = Gtk::manage(new SpinButtonDim());
         sp->set_range(.01_mm, 10_mm);
         bind_widget(sp, thief.settings.size);

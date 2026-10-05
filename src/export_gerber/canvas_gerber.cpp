@@ -60,8 +60,10 @@ void CanvasGerber::img_polygon(const Polygon &ipoly, bool tr)
     }
     else if (auto thief = dynamic_cast<const CopperThief *>(ipoly.usage.ptr)) {
         if (GerberWriter *wr = exporter.get_writer_for_layer(ipoly.layer)) {
-            for (const auto &frag : thief->fragments)
-                wr->draw_fragments(transform_paths(transform, frag.paths));
+            for (const auto &center : thief->pad_centers) {
+                auto paths = transform_paths(transform, {get_thieving_pad_path(thief->settings, center)});
+                wr->draw_polygon(paths.front());
+            }
         }
     }
     else if (dynamic_cast<const Keepout *>(ipoly.usage.ptr)) {

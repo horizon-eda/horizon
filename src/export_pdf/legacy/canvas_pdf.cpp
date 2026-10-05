@@ -178,21 +178,20 @@ void CanvasPDF::img_polygon(const Polygon &ipoly, bool tr)
             painter.Stroke();
     }
     else if (auto thief = dynamic_cast<const CopperThief *>(ipoly.usage.ptr)) {
-        for (const auto &frag : thief->fragments) {
-            for (const auto &path : frag.paths) {
-                bool first = true;
-                for (const auto &it : path) {
-                    Coordi p(it.X, it.Y);
-                    if (tr)
-                        p = transform.transform(p);
-                    if (first)
-                        painter.MoveTo(to_pt(p.x), to_pt(p.y));
-                    else
-                        painter.LineTo(to_pt(p.x), to_pt(p.y));
-                    first = false;
-                }
-                painter.ClosePath();
+        for (const auto &center : thief->pad_centers) {
+            auto path = get_thieving_pad_path(thief->settings, center);
+            bool first = true;
+            for (const auto &it : path) {
+                Coordi p = tr ? transform.transform(Coordi(it.X, it.Y)) : Coordi(it.X, it.Y);
+                if (first)
+                    painter.MoveTo(to_pt(p.x), to_pt(p.y));
+
+                else
+                    painter.LineTo(to_pt(p.x), to_pt(p.y));
+
+                first = false;
             }
+            painter.ClosePath();
         }
         if (fill)
             painter.Fill(true);

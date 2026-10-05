@@ -342,10 +342,6 @@ bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID
     case ObjectType::COPPER_THIEF: {
         const auto &thief = brd->copper_thieves.at(uu);
         switch (property) {
-        case ObjectProperty::ID::SHAPE:
-            dynamic_cast<PropertyValueInt &>(value).value = static_cast<int>(thief.settings.shape);
-            return true;
-
         case ObjectProperty::ID::SIZE:
             dynamic_cast<PropertyValueInt &>(value).value = thief.settings.size;
             return true;
@@ -646,11 +642,6 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
     case ObjectType::COPPER_THIEF: {
         auto thief = &brd->copper_thieves.at(uu);
         switch (property) {
-        case ObjectProperty::ID::SHAPE:
-            thief->settings.shape =
-                    static_cast<CopperThiefSettings::Shape>(dynamic_cast<const PropertyValueInt &>(value).value);
-            break;
-
         case ObjectProperty::ID::SIZE:
             thief->settings.size = dynamic_cast<const PropertyValueInt &>(value).value;
             break;
@@ -799,7 +790,7 @@ bool CoreBoard::get_property_meta(ObjectType type, const UUID &uu, ObjectPropert
     } break;
 
     case ObjectType::COPPER_THIEF: {
-        return property == ObjectProperty::ID::SHAPE;
+        return property == ObjectProperty::ID::SIZE || property == ObjectProperty::ID::GAP;
     } break;
 
     case ObjectType::VIA: {

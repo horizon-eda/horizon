@@ -377,7 +377,7 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
                     planes.insert(plane);
             }
             else if (auto thief = dynamic_cast<CopperThief *>(poly->usage.ptr)) {
-                if (thief->fragments.size()) {
+                if (thief->pad_centers.size()) {
                     copper_thieves.insert(thief);
                 }
             }

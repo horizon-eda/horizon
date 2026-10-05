@@ -439,14 +439,6 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
          {"Copper thieving",
           "Copper thieving",
           {
-                  {ObjectProperty::ID::SHAPE,
-                   {ObjectProperty::Type::ENUM,
-                    "Shape",
-                    0,
-                    {
-                            {static_cast<int>(CopperThiefSettings::Shape::ROUND), "Round"},
-                            {static_cast<int>(CopperThiefSettings::Shape::SQUARE), "Square"},
-                    }}},
                   {ObjectProperty::ID::SIZE, {ObjectProperty::Type::LENGTH, "Size", 1}},
                   {ObjectProperty::ID::GAP, {ObjectProperty::Type::LENGTH, "Gap", 2}},
           }}},
