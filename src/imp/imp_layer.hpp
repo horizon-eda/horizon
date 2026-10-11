@@ -40,6 +40,8 @@ protected:
     void set_view_angle(int angle);
     Gtk::Label *view_angle_label = nullptr;
     Gtk::Button *view_angle_button = nullptr;
+    Glib::RefPtr<Gtk::GestureRotate> gesture_rotate;
+    int gesture_rotate_angle_orig = 1;
 
     class ViewAngleWindow *view_angle_window = nullptr;
     sigc::connection view_angle_window_conn;

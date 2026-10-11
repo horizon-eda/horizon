@@ -145,6 +145,20 @@ void ImpLayer::add_view_angle_actions()
             false);
     box->pack_start(*view_angle_button, true, true, 0);
 
+    gesture_rotate = Gtk::GestureRotate::create(*canvas);
+    gesture_rotate->signal_begin().connect([this](GdkEventSequence *seq) { gesture_rotate_angle_orig = view_angle; });
+    gesture_rotate->signal_update().connect([this](GdkEventSequence *seq) {
+        auto angle = gesture_rotate_angle_orig - angle_from_rad(gesture_rotate->get_angle_delta());
+        constexpr int snap_points[] = {0, 16384, 32768, 49152, 65536};
+        for (int p : snap_points) {
+            if (std::abs(angle - p) < (preferences.zoom.touchpad_rotate_snap_threshold * 65536) / 360) {
+                angle = p;
+                break;
+            }
+        }
+        set_view_angle(angle);
+    });
+
     auto right_button = Gtk::manage(new Gtk::Button);
     right_button->set_image_from_icon_name("object-rotate-right-symbolic");
     right_button->signal_clicked().connect([this] { trigger_action(ActionID::ROTATE_VIEW_RIGHT); });
