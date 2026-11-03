@@ -162,7 +162,17 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
 
         if (status_cb)
             status_cb(*plane, "Adding cutouts…");
+
+        std::set<UUID> tied_nets; // primary nets of net ties connecting to the plane's net
+        for (const auto &[uu, tie] : block->net_ties) {
+            if (tie.net_secondary == plane->net)
+                tied_nets.insert(tie.net_primary->uuid);
+        }
+
         for (const auto &patch : ca->get_patches()) { // add cutouts
+            if (patch.first.type == PatchType::NET_TIE
+                && tied_nets.count(patch.first.net)) // exclude net ties of plane net
+                continue;
             if ((patch.first.layer == poly.layer && patch.first.net != plane->net->uuid && patch.second.size()
                  && patch.first.type != PatchType::OTHER && patch.first.type != PatchType::TEXT)
                 || ((patch.first.layer.overlaps(poly.layer))
