@@ -44,6 +44,11 @@ void main() {
 		n1 = n0;
 	}
 	
+	if(isnan(n0.x) && !isnan(n1.x))
+		n0 = n1;
+	else if(isnan(n1.x) && !isnan(n0.x))
+		n1 = n0;
+
 	normal_to_fragment = n0;
 	gl_Position = proj*view*vec4(position_to_geom[i0], layer_offset, 1);
 	EmitVertex();
