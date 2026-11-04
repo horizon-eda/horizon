@@ -179,7 +179,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
-      run: dnf install -y git make gcc gcc-c++ pkg-config cppzmq-devel opencascade-devel gtkmm30-devel libgit2-devel libuuid-devel sqlite-devel librsvg2-devel cairomm-devel glm-devel boost-devel libcurl-devel podofo-devel libarchive-devel libspnav-devel meson cmake
+      run: dnf install -y git make gcc gcc-c++ pkg-config cppzmq-devel opencascade-devel gtkmm30-devel libgit2_1.9-devel libuuid-devel sqlite-devel librsvg2-devel cairomm-devel glm-devel boost-devel libcurl-devel podofo-devel libarchive-devel libspnav-devel meson cmake
     - name: Install python dependencies
       if: ${{ matrix.target == 'horizon.so' }}
       run: dnf install -y mesa-libGL-devel python3-cairo-devel python3-pyyaml
