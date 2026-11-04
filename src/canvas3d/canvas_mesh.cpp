@@ -524,6 +524,32 @@ bool CanvasMesh::clip_path_to_board_outline(const ClipperLib::Path &path, Clippe
     return std::abs(clipped_area) < std::abs(ClipperLib::Area(path));
 }
 
+// Minimum wall segment length in nm. Must be well above the float resolution
+// (~8 nm at 100 mm), otherwise neighbouring points collapse on the GPU.
+static constexpr double min_wall_segment = 1000; // 1 µm
+
+static bool points_too_close(const ClipperLib::IntPoint &a, const ClipperLib::IntPoint &b)
+{
+    const double dx = a.X - b.X;
+    const double dy = a.Y - b.Y;
+    return dx * dx + dy * dy < min_wall_segment * min_wall_segment;
+}
+
+static ClipperLib::Path remove_close_points(const ClipperLib::Path &in, bool closed)
+{
+    ClipperLib::Path out;
+    out.reserve(in.size());
+    for (const auto &p : in) {
+        if (out.empty() || !points_too_close(out.back(), p))
+            out.push_back(p);
+    }
+    if (closed) {
+        while (out.size() > 1 && points_too_close(out.back(), out.front()))
+            out.pop_back();
+    }
+    return out;
+}
+
 void CanvasMesh::add_barrel(int layer, const ClipperLib::Path &path)
 {
     if (path.size() < 3) {
@@ -540,7 +566,8 @@ void CanvasMesh::add_barrel(int layer, const ClipperLib::Path &path)
     cl.Execute(ClipperLib::ctIntersection, tree, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
     ClipperLib::OpenPathsFromPolyTree(tree, arcs);
     auto &walls = layers.at(layer).walls;
-    for (const auto &arc : arcs) {
+    for (const auto &arc_raw : arcs) {
+        const auto arc = remove_close_points(arc_raw, false);
         if (arc.size() < 2) {
             continue;
         }
@@ -553,21 +580,20 @@ void CanvasMesh::add_barrel(int layer, const ClipperLib::Path &path)
     }
 }
 
-void CanvasMesh::add_path(int layer, const ClipperLib::Path &path)
+void CanvasMesh::add_path(int layer, const ClipperLib::Path &path_in)
 {
-    if (path.size() >= 3) {
-        layers.at(layer).walls.emplace_back(path.back().X, path.back().Y);
-        for (size_t i = 0; i < path.size(); i++) {
-            layers.at(layer).walls.emplace_back(path[i].X, path[i].Y);
-        }
-        layers.at(layer).walls.emplace_back(path[0].X, path[0].Y);
-        layers.at(layer).walls.emplace_back(path[1].X, path[1].Y);
-        auto &walls = layers.at(layer).walls;
-        while ((walls.size() + 1) % 4 != 0) {
-            walls.emplace_back(walls.back().x, walls.back().y);
-        }
-        walls.emplace_back(NAN, NAN);
+    const auto path = remove_close_points(path_in, true);
+    if (path.size() < 3) {
+        return;
     }
+    auto &walls = layers.at(layer).walls;
+    walls.emplace_back(path.back().X, path.back().Y); // adjacency: point before first
+    for (const auto &pt : path) {
+        walls.emplace_back(pt.X, pt.Y);
+    }
+    walls.emplace_back(path[0].X, path[0].Y); // closes the loop
+    walls.emplace_back(path[1].X, path[1].Y); // adjacency: point after closing segment
+    walls.emplace_back(NAN, NAN);             // separator
 }
 
 static void append_path(std::vector<p2t::Point> &store, std::vector<p2t::Point *> &out,
