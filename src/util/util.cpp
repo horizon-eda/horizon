@@ -409,7 +409,9 @@ double parse_si(const std::string &inps)
         }
         else if (prefix.size()) {
             int prefix_exp = 0;
-            if (prefix == "p")
+            if (prefix == "f")
+                prefix_exp = -15;
+            else if (prefix == "p")
                 prefix_exp = -12;
             else if (prefix == "n" || prefix == "N")
                 prefix_exp = -9;
