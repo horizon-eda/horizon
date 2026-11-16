@@ -608,6 +608,9 @@ void PartEditor::load()
     }
     update_parametric_editor();
 
+    for (auto child : w_orderable_MPNs_box->get_children()) {
+        w_orderable_MPNs_box->remove(*child);
+    }
     for (const auto &it : part.orderable_MPNs) {
         create_orderable_MPN_editor(it.first);
     }
