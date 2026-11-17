@@ -48,7 +48,6 @@ LIBS=(
 	libgraphite2.dll\
 	libjpeg-8.dll\
 	librsvg-2-2.dll\
-	libxml2-2.dll\
 	libxml2-16.dll\
 	liblzma-5.dll\
 	libtiff-6.dll\
@@ -94,9 +93,7 @@ LIBS=(
 	libpsl-5.dll\
 	libthai-0.dll\
 	libdatrie-1.dll\
-	libcrypto-3-x64.dll\
 	libpodofo.dll\
-	libidn-12.dll\
 	libarchive-13.dll\
 	libzstd.dll\
 	liblz4.dll\
@@ -106,7 +103,9 @@ LIBS=(
 	libjbig-0.dll\
 	libLerc.dll\
 	libsharpyuv-0.dll\
-	libssl-3-x64.dll\
+	libz-1.dll\
+	libcrypto-4-x64.dll\
+	libssl-4-x64.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
 )
