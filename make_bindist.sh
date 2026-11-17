@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -euo pipefail
+
 DISTDIR=dist/horizon
 BINDIR=dist/horizon/bin
 rm -rf dist
@@ -132,11 +134,10 @@ mkdir -p $DISTDIR/share/glib-2.0/schemas
 cp /ucrt64/share/glib-2.0/schemas/gschemas.compiled $DISTDIR/share/glib-2.0/schemas
 
 mkdir -p $DISTDIR/lib
-cp -r /ucrt64/lib/engines-3 $DISTDIR/lib
 cp -r /ucrt64/lib/ossl-modules $DISTDIR/lib
 
 git log -10 | unix2dos > dist/log.txt
-if [ "$1" != "-n" ]; then
+if [ "${1:-}" != "-n" ]; then
 	cd dist
 	zip -r horizon-$(date +%Y-%m-%d-%H%M).zip horizon log.txt
 fi
